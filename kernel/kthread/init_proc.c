@@ -1,0 +1,76 @@
+/*
+ * Kernel Thread Instance (init task) Interface
+ *
+ * File Name:   init_proc.c
+ * Author:      Yang Yujun
+ * E-mail:      <yujiantianhu@163.com>
+ * Created on:  2024.04.01
+ *
+ * Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
+ *
+ */
+
+/*!< The globals */
+#include <kernel/kernel.h>
+#include <kernel/sched.h>
+#include <kernel/thread.h>
+#include <kernel/sleep.h>
+#include <kernel/instance.h>
+
+/*!< The defines */
+#define INIT_THREAD_STACK_SIZE                          KEL_THREAD_STACK_HALF(1)    /*!< 1/2 page (2 kbytes) */
+
+/*!< The globals */
+static srt_kel_thread_attr_t sgrt_init_proc_attr;
+static kuint32_t g_init_proc_stack[INIT_THREAD_STACK_SIZE];
+
+/*!< API functions */
+/*!
+ * @brief	init thread entry
+ * @param  	args: NULL normally
+ * @retval 	none
+ * @note   	create all user thread
+ */
+static void *init_proc_entry(void *args)
+{
+    init_real_thread_table();
+
+    for (;;)
+    {
+        struct kel_thread *sprt_tid = mrt_current;
+        print_info("%s: tid = %d\n", __FUNCTION__, sprt_tid->tid);
+
+        schedule_delay_ms(200);
+    }
+
+    return args;
+}
+
+/*!
+ * @brief	create init thread
+ * @param  	none
+ * @retval 	error code
+ * @note   	none
+ */
+ksint32_t init_proc_init(void)
+{
+    srt_kel_thread_attr_t *sprt_attr = &sgrt_init_proc_attr;
+    ksint32_t retval;
+
+	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
+	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;
+	sprt_attr->schedpolicy = KEL_THREAD_SCHED_FIFO;
+
+    /*!< thread stack */
+	real_thread_set_stack(sprt_attr, mrt_nullptr, g_init_proc_stack, sizeof(g_init_proc_stack));
+    /*!< lowest priority */
+	real_thread_set_priority(sprt_attr, KEL_THREAD_PROTY_INIT);
+    /*!< default time slice */
+    real_thread_set_time_slice(sprt_attr, KEL_THREAD_TIME_DEFUALT);
+
+    /*!< register thread */
+    retval = kernel_thread_init_create(sprt_attr, init_proc_entry, mrt_nullptr);
+    return mrt_isErr(retval) ? retval : 0;
+}
+
+/*!< end of file */

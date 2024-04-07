@@ -1,0 +1,9 @@
+/* ConfigTarget */
+void ConfigTargetSettings(void)
+{
+    Report("Config JTAG Speed to 4000kHz");
+    JTAG_Speed = 4000;
+    CORESIGHT_AddAP(0, CORESIGHT_AHB_AP);
+    CORESIGHT_AddAP(1, CORESIGHT_APB_AP);
+    CORESIGHT_IndexAPBAPToUse = 1;
+}
