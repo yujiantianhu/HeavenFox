@@ -60,11 +60,11 @@ CMakeFiles/real-kernel.elf.dir/example/display_app.c.o: \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/malloc.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/error_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/io_stream.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_fcntl.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_basic.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_fcntl.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_basic.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/list_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/kmem_pool.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_mempool.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/mem_manage.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/kernel.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/configs/configs.h \
@@ -82,18 +82,18 @@ CMakeFiles/real-kernel.elf.dir/example/display_app.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/board/board_common.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/implicit_call.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/boot_text.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_fs.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_inode.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_cdev.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_kobj.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_uaccess.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/hal_fbmem.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_platform.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/hal_of.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/hal_of_prop.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/hal_irq_types.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/hal_irq_domain.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/hal_rgbmap.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_fs.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_inode.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_cdev.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_kobj.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_uaccess.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/fwk_fbmem.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_platform.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of_prop.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_domain.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/fwk_rgbmap.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/sched.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/context.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/thread.h \

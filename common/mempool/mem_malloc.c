@@ -76,14 +76,14 @@ kbool_t malloc_block_initial(void)
 
 	if (mrt_isValid(sprt_info->sprt_mem))
 	{
-		return Ert_false;
+		return false;
 	}
 
 	memory_simple_block_create(sprt_info, 
 							   MEMORY_HEAP_START, 
 							   MEMORY_HEAP_END - MEMORY_HEAP_START);
 
-	return Ert_true;
+	return true;
 }
 
 /*!
@@ -100,12 +100,12 @@ kbool_t malloc_block_self_defines(kuaddr_t base, kusize_t size)
 
 	if (mrt_isValid(sprt_info->sprt_mem))
 	{
-		return Ert_false;
+		return false;
 	}
 
 	memory_simple_block_create(sprt_info, base, size);
 
-	return Ert_true;
+	return true;
 }
 
 /*!

@@ -26,22 +26,22 @@
 enum __ENUM_RFS_DISK_FILE_MODE
 {
 	/*!< if file has exsisted, "open" function will break directelly */
-	Ert_RFS_DISK_OpenExsiting = mrt_bit(1U),
+	NR_RFS_DISK_OpenExsiting = mrt_bit(1U),
 
 	/*!< if file is not exsisted, create new */
-	Ert_RFS_DISK_OpenCreate = mrt_bit(2U),
+	NR_RFS_DISK_OpenCreate = mrt_bit(2U),
 
 	/*!< promit writting to file */
-	Ert_RFS_DISK_OpenWrite = mrt_bit(3U),
+	NR_RFS_DISK_OpenWrite = mrt_bit(3U),
 
 	/*!< promit reading from file */
-	Ert_RFS_DISK_OpenRead = mrt_bit(4U),
+	NR_RFS_DISK_OpenRead = mrt_bit(4U),
 
 	/*!< append content to file, like: lseek(f_size(sprt_file)) */
-	Ert_RFS_DISK_AppendEnd = mrt_bit(5U),
+	NR_RFS_DISK_AppendEnd = mrt_bit(5U),
 
 	/*!< clear content of file after openning it */
-	Ert_RFS_DISK_OpenClear = mrt_bit(6U),
+	NR_RFS_DISK_OpenClear = mrt_bit(6U),
 };
 
 /*!< for the whole disk */

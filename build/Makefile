@@ -1086,653 +1086,653 @@ kernel/thread.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/thread.c.s
 .PHONY : kernel/thread.c.s
 
-platform/bus_type/hal_platdev.o: platform/bus_type/hal_platdev.c.o
-.PHONY : platform/bus_type/hal_platdev.o
+platform/bus_type/fwk_platdev.o: platform/bus_type/fwk_platdev.c.o
+.PHONY : platform/bus_type/fwk_platdev.o
 
 # target to build an object file
-platform/bus_type/hal_platdev.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/hal_platdev.c.o
-.PHONY : platform/bus_type/hal_platdev.c.o
+platform/bus_type/fwk_platdev.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdev.c.o
+.PHONY : platform/bus_type/fwk_platdev.c.o
 
-platform/bus_type/hal_platdev.i: platform/bus_type/hal_platdev.c.i
-.PHONY : platform/bus_type/hal_platdev.i
+platform/bus_type/fwk_platdev.i: platform/bus_type/fwk_platdev.c.i
+.PHONY : platform/bus_type/fwk_platdev.i
 
 # target to preprocess a source file
-platform/bus_type/hal_platdev.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/hal_platdev.c.i
-.PHONY : platform/bus_type/hal_platdev.c.i
+platform/bus_type/fwk_platdev.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdev.c.i
+.PHONY : platform/bus_type/fwk_platdev.c.i
 
-platform/bus_type/hal_platdev.s: platform/bus_type/hal_platdev.c.s
-.PHONY : platform/bus_type/hal_platdev.s
+platform/bus_type/fwk_platdev.s: platform/bus_type/fwk_platdev.c.s
+.PHONY : platform/bus_type/fwk_platdev.s
 
 # target to generate assembly for a file
-platform/bus_type/hal_platdev.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/hal_platdev.c.s
-.PHONY : platform/bus_type/hal_platdev.c.s
+platform/bus_type/fwk_platdev.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdev.c.s
+.PHONY : platform/bus_type/fwk_platdev.c.s
 
-platform/bus_type/hal_platdrv.o: platform/bus_type/hal_platdrv.c.o
-.PHONY : platform/bus_type/hal_platdrv.o
+platform/bus_type/fwk_platdrv.o: platform/bus_type/fwk_platdrv.c.o
+.PHONY : platform/bus_type/fwk_platdrv.o
 
 # target to build an object file
-platform/bus_type/hal_platdrv.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/hal_platdrv.c.o
-.PHONY : platform/bus_type/hal_platdrv.c.o
+platform/bus_type/fwk_platdrv.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdrv.c.o
+.PHONY : platform/bus_type/fwk_platdrv.c.o
 
-platform/bus_type/hal_platdrv.i: platform/bus_type/hal_platdrv.c.i
-.PHONY : platform/bus_type/hal_platdrv.i
+platform/bus_type/fwk_platdrv.i: platform/bus_type/fwk_platdrv.c.i
+.PHONY : platform/bus_type/fwk_platdrv.i
 
 # target to preprocess a source file
-platform/bus_type/hal_platdrv.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/hal_platdrv.c.i
-.PHONY : platform/bus_type/hal_platdrv.c.i
+platform/bus_type/fwk_platdrv.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdrv.c.i
+.PHONY : platform/bus_type/fwk_platdrv.c.i
 
-platform/bus_type/hal_platdrv.s: platform/bus_type/hal_platdrv.c.s
-.PHONY : platform/bus_type/hal_platdrv.s
+platform/bus_type/fwk_platdrv.s: platform/bus_type/fwk_platdrv.c.s
+.PHONY : platform/bus_type/fwk_platdrv.s
 
 # target to generate assembly for a file
-platform/bus_type/hal_platdrv.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/hal_platdrv.c.s
-.PHONY : platform/bus_type/hal_platdrv.c.s
+platform/bus_type/fwk_platdrv.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdrv.c.s
+.PHONY : platform/bus_type/fwk_platdrv.c.s
 
-platform/bus_type/hal_platform.o: platform/bus_type/hal_platform.c.o
-.PHONY : platform/bus_type/hal_platform.o
+platform/bus_type/fwk_platform.o: platform/bus_type/fwk_platform.c.o
+.PHONY : platform/bus_type/fwk_platform.o
 
 # target to build an object file
-platform/bus_type/hal_platform.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/hal_platform.c.o
-.PHONY : platform/bus_type/hal_platform.c.o
+platform/bus_type/fwk_platform.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platform.c.o
+.PHONY : platform/bus_type/fwk_platform.c.o
 
-platform/bus_type/hal_platform.i: platform/bus_type/hal_platform.c.i
-.PHONY : platform/bus_type/hal_platform.i
+platform/bus_type/fwk_platform.i: platform/bus_type/fwk_platform.c.i
+.PHONY : platform/bus_type/fwk_platform.i
 
 # target to preprocess a source file
-platform/bus_type/hal_platform.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/hal_platform.c.i
-.PHONY : platform/bus_type/hal_platform.c.i
+platform/bus_type/fwk_platform.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platform.c.i
+.PHONY : platform/bus_type/fwk_platform.c.i
 
-platform/bus_type/hal_platform.s: platform/bus_type/hal_platform.c.s
-.PHONY : platform/bus_type/hal_platform.s
+platform/bus_type/fwk_platform.s: platform/bus_type/fwk_platform.c.s
+.PHONY : platform/bus_type/fwk_platform.s
 
 # target to generate assembly for a file
-platform/bus_type/hal_platform.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/hal_platform.c.s
-.PHONY : platform/bus_type/hal_platform.c.s
+platform/bus_type/fwk_platform.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platform.c.s
+.PHONY : platform/bus_type/fwk_platform.c.s
 
-platform/chardev/hal_cdev.o: platform/chardev/hal_cdev.c.o
-.PHONY : platform/chardev/hal_cdev.o
+platform/chardev/fwk_cdev.o: platform/chardev/fwk_cdev.c.o
+.PHONY : platform/chardev/fwk_cdev.o
 
 # target to build an object file
-platform/chardev/hal_cdev.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/hal_cdev.c.o
-.PHONY : platform/chardev/hal_cdev.c.o
+platform/chardev/fwk_cdev.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_cdev.c.o
+.PHONY : platform/chardev/fwk_cdev.c.o
 
-platform/chardev/hal_cdev.i: platform/chardev/hal_cdev.c.i
-.PHONY : platform/chardev/hal_cdev.i
+platform/chardev/fwk_cdev.i: platform/chardev/fwk_cdev.c.i
+.PHONY : platform/chardev/fwk_cdev.i
 
 # target to preprocess a source file
-platform/chardev/hal_cdev.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/hal_cdev.c.i
-.PHONY : platform/chardev/hal_cdev.c.i
+platform/chardev/fwk_cdev.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_cdev.c.i
+.PHONY : platform/chardev/fwk_cdev.c.i
 
-platform/chardev/hal_cdev.s: platform/chardev/hal_cdev.c.s
-.PHONY : platform/chardev/hal_cdev.s
+platform/chardev/fwk_cdev.s: platform/chardev/fwk_cdev.c.s
+.PHONY : platform/chardev/fwk_cdev.s
 
 # target to generate assembly for a file
-platform/chardev/hal_cdev.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/hal_cdev.c.s
-.PHONY : platform/chardev/hal_cdev.c.s
+platform/chardev/fwk_cdev.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_cdev.c.s
+.PHONY : platform/chardev/fwk_cdev.c.s
 
-platform/chardev/hal_chrdev.o: platform/chardev/hal_chrdev.c.o
-.PHONY : platform/chardev/hal_chrdev.o
+platform/chardev/fwk_chrdev.o: platform/chardev/fwk_chrdev.c.o
+.PHONY : platform/chardev/fwk_chrdev.o
 
 # target to build an object file
-platform/chardev/hal_chrdev.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/hal_chrdev.c.o
-.PHONY : platform/chardev/hal_chrdev.c.o
+platform/chardev/fwk_chrdev.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_chrdev.c.o
+.PHONY : platform/chardev/fwk_chrdev.c.o
 
-platform/chardev/hal_chrdev.i: platform/chardev/hal_chrdev.c.i
-.PHONY : platform/chardev/hal_chrdev.i
+platform/chardev/fwk_chrdev.i: platform/chardev/fwk_chrdev.c.i
+.PHONY : platform/chardev/fwk_chrdev.i
 
 # target to preprocess a source file
-platform/chardev/hal_chrdev.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/hal_chrdev.c.i
-.PHONY : platform/chardev/hal_chrdev.c.i
+platform/chardev/fwk_chrdev.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_chrdev.c.i
+.PHONY : platform/chardev/fwk_chrdev.c.i
 
-platform/chardev/hal_chrdev.s: platform/chardev/hal_chrdev.c.s
-.PHONY : platform/chardev/hal_chrdev.s
+platform/chardev/fwk_chrdev.s: platform/chardev/fwk_chrdev.c.s
+.PHONY : platform/chardev/fwk_chrdev.s
 
 # target to generate assembly for a file
-platform/chardev/hal_chrdev.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/hal_chrdev.c.s
-.PHONY : platform/chardev/hal_chrdev.c.s
+platform/chardev/fwk_chrdev.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_chrdev.c.s
+.PHONY : platform/chardev/fwk_chrdev.c.s
 
-platform/framebuffer/hal_ascii.o: platform/framebuffer/hal_ascii.c.o
-.PHONY : platform/framebuffer/hal_ascii.o
+platform/framebuffer/fwk_ascii.o: platform/framebuffer/fwk_ascii.c.o
+.PHONY : platform/framebuffer/fwk_ascii.o
 
 # target to build an object file
-platform/framebuffer/hal_ascii.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/hal_ascii.c.o
-.PHONY : platform/framebuffer/hal_ascii.c.o
+platform/framebuffer/fwk_ascii.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_ascii.c.o
+.PHONY : platform/framebuffer/fwk_ascii.c.o
 
-platform/framebuffer/hal_ascii.i: platform/framebuffer/hal_ascii.c.i
-.PHONY : platform/framebuffer/hal_ascii.i
+platform/framebuffer/fwk_ascii.i: platform/framebuffer/fwk_ascii.c.i
+.PHONY : platform/framebuffer/fwk_ascii.i
 
 # target to preprocess a source file
-platform/framebuffer/hal_ascii.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/hal_ascii.c.i
-.PHONY : platform/framebuffer/hal_ascii.c.i
+platform/framebuffer/fwk_ascii.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_ascii.c.i
+.PHONY : platform/framebuffer/fwk_ascii.c.i
 
-platform/framebuffer/hal_ascii.s: platform/framebuffer/hal_ascii.c.s
-.PHONY : platform/framebuffer/hal_ascii.s
+platform/framebuffer/fwk_ascii.s: platform/framebuffer/fwk_ascii.c.s
+.PHONY : platform/framebuffer/fwk_ascii.s
 
 # target to generate assembly for a file
-platform/framebuffer/hal_ascii.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/hal_ascii.c.s
-.PHONY : platform/framebuffer/hal_ascii.c.s
+platform/framebuffer/fwk_ascii.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_ascii.c.s
+.PHONY : platform/framebuffer/fwk_ascii.c.s
 
-platform/framebuffer/hal_bitmap.o: platform/framebuffer/hal_bitmap.c.o
-.PHONY : platform/framebuffer/hal_bitmap.o
+platform/framebuffer/fwk_bitmap.o: platform/framebuffer/fwk_bitmap.c.o
+.PHONY : platform/framebuffer/fwk_bitmap.o
 
 # target to build an object file
-platform/framebuffer/hal_bitmap.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/hal_bitmap.c.o
-.PHONY : platform/framebuffer/hal_bitmap.c.o
+platform/framebuffer/fwk_bitmap.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.o
+.PHONY : platform/framebuffer/fwk_bitmap.c.o
 
-platform/framebuffer/hal_bitmap.i: platform/framebuffer/hal_bitmap.c.i
-.PHONY : platform/framebuffer/hal_bitmap.i
+platform/framebuffer/fwk_bitmap.i: platform/framebuffer/fwk_bitmap.c.i
+.PHONY : platform/framebuffer/fwk_bitmap.i
 
 # target to preprocess a source file
-platform/framebuffer/hal_bitmap.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/hal_bitmap.c.i
-.PHONY : platform/framebuffer/hal_bitmap.c.i
+platform/framebuffer/fwk_bitmap.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.i
+.PHONY : platform/framebuffer/fwk_bitmap.c.i
 
-platform/framebuffer/hal_bitmap.s: platform/framebuffer/hal_bitmap.c.s
-.PHONY : platform/framebuffer/hal_bitmap.s
+platform/framebuffer/fwk_bitmap.s: platform/framebuffer/fwk_bitmap.c.s
+.PHONY : platform/framebuffer/fwk_bitmap.s
 
 # target to generate assembly for a file
-platform/framebuffer/hal_bitmap.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/hal_bitmap.c.s
-.PHONY : platform/framebuffer/hal_bitmap.c.s
+platform/framebuffer/fwk_bitmap.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.s
+.PHONY : platform/framebuffer/fwk_bitmap.c.s
 
-platform/framebuffer/hal_fbmem.o: platform/framebuffer/hal_fbmem.c.o
-.PHONY : platform/framebuffer/hal_fbmem.o
+platform/framebuffer/fwk_fbmem.o: platform/framebuffer/fwk_fbmem.c.o
+.PHONY : platform/framebuffer/fwk_fbmem.o
 
 # target to build an object file
-platform/framebuffer/hal_fbmem.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/hal_fbmem.c.o
-.PHONY : platform/framebuffer/hal_fbmem.c.o
+platform/framebuffer/fwk_fbmem.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o
+.PHONY : platform/framebuffer/fwk_fbmem.c.o
 
-platform/framebuffer/hal_fbmem.i: platform/framebuffer/hal_fbmem.c.i
-.PHONY : platform/framebuffer/hal_fbmem.i
+platform/framebuffer/fwk_fbmem.i: platform/framebuffer/fwk_fbmem.c.i
+.PHONY : platform/framebuffer/fwk_fbmem.i
 
 # target to preprocess a source file
-platform/framebuffer/hal_fbmem.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/hal_fbmem.c.i
-.PHONY : platform/framebuffer/hal_fbmem.c.i
+platform/framebuffer/fwk_fbmem.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.i
+.PHONY : platform/framebuffer/fwk_fbmem.c.i
 
-platform/framebuffer/hal_fbmem.s: platform/framebuffer/hal_fbmem.c.s
-.PHONY : platform/framebuffer/hal_fbmem.s
+platform/framebuffer/fwk_fbmem.s: platform/framebuffer/fwk_fbmem.c.s
+.PHONY : platform/framebuffer/fwk_fbmem.s
 
 # target to generate assembly for a file
-platform/framebuffer/hal_fbmem.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/hal_fbmem.c.s
-.PHONY : platform/framebuffer/hal_fbmem.c.s
+platform/framebuffer/fwk_fbmem.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.s
+.PHONY : platform/framebuffer/fwk_fbmem.c.s
 
-platform/gpio_desc/hal_gpiodesc.o: platform/gpio_desc/hal_gpiodesc.c.o
-.PHONY : platform/gpio_desc/hal_gpiodesc.o
+platform/fwk_fcntl.o: platform/fwk_fcntl.c.o
+.PHONY : platform/fwk_fcntl.o
 
 # target to build an object file
-platform/gpio_desc/hal_gpiodesc.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/gpio_desc/hal_gpiodesc.c.o
-.PHONY : platform/gpio_desc/hal_gpiodesc.c.o
+platform/fwk_fcntl.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fcntl.c.o
+.PHONY : platform/fwk_fcntl.c.o
 
-platform/gpio_desc/hal_gpiodesc.i: platform/gpio_desc/hal_gpiodesc.c.i
-.PHONY : platform/gpio_desc/hal_gpiodesc.i
+platform/fwk_fcntl.i: platform/fwk_fcntl.c.i
+.PHONY : platform/fwk_fcntl.i
 
 # target to preprocess a source file
-platform/gpio_desc/hal_gpiodesc.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/gpio_desc/hal_gpiodesc.c.i
-.PHONY : platform/gpio_desc/hal_gpiodesc.c.i
+platform/fwk_fcntl.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fcntl.c.i
+.PHONY : platform/fwk_fcntl.c.i
 
-platform/gpio_desc/hal_gpiodesc.s: platform/gpio_desc/hal_gpiodesc.c.s
-.PHONY : platform/gpio_desc/hal_gpiodesc.s
+platform/fwk_fcntl.s: platform/fwk_fcntl.c.s
+.PHONY : platform/fwk_fcntl.s
 
 # target to generate assembly for a file
-platform/gpio_desc/hal_gpiodesc.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/gpio_desc/hal_gpiodesc.c.s
-.PHONY : platform/gpio_desc/hal_gpiodesc.c.s
+platform/fwk_fcntl.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fcntl.c.s
+.PHONY : platform/fwk_fcntl.c.s
 
-platform/hal_fcntl.o: platform/hal_fcntl.c.o
-.PHONY : platform/hal_fcntl.o
+platform/fwk_fs.o: platform/fwk_fs.c.o
+.PHONY : platform/fwk_fs.o
 
 # target to build an object file
-platform/hal_fcntl.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_fcntl.c.o
-.PHONY : platform/hal_fcntl.c.o
+platform/fwk_fs.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fs.c.o
+.PHONY : platform/fwk_fs.c.o
 
-platform/hal_fcntl.i: platform/hal_fcntl.c.i
-.PHONY : platform/hal_fcntl.i
+platform/fwk_fs.i: platform/fwk_fs.c.i
+.PHONY : platform/fwk_fs.i
 
 # target to preprocess a source file
-platform/hal_fcntl.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_fcntl.c.i
-.PHONY : platform/hal_fcntl.c.i
+platform/fwk_fs.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fs.c.i
+.PHONY : platform/fwk_fs.c.i
 
-platform/hal_fcntl.s: platform/hal_fcntl.c.s
-.PHONY : platform/hal_fcntl.s
+platform/fwk_fs.s: platform/fwk_fs.c.s
+.PHONY : platform/fwk_fs.s
 
 # target to generate assembly for a file
-platform/hal_fcntl.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_fcntl.c.s
-.PHONY : platform/hal_fcntl.c.s
+platform/fwk_fs.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fs.c.s
+.PHONY : platform/fwk_fs.c.s
 
-platform/hal_fs.o: platform/hal_fs.c.o
-.PHONY : platform/hal_fs.o
+platform/fwk_inode.o: platform/fwk_inode.c.o
+.PHONY : platform/fwk_inode.o
 
 # target to build an object file
-platform/hal_fs.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_fs.c.o
-.PHONY : platform/hal_fs.c.o
+platform/fwk_inode.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_inode.c.o
+.PHONY : platform/fwk_inode.c.o
 
-platform/hal_fs.i: platform/hal_fs.c.i
-.PHONY : platform/hal_fs.i
+platform/fwk_inode.i: platform/fwk_inode.c.i
+.PHONY : platform/fwk_inode.i
 
 # target to preprocess a source file
-platform/hal_fs.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_fs.c.i
-.PHONY : platform/hal_fs.c.i
+platform/fwk_inode.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_inode.c.i
+.PHONY : platform/fwk_inode.c.i
 
-platform/hal_fs.s: platform/hal_fs.c.s
-.PHONY : platform/hal_fs.s
+platform/fwk_inode.s: platform/fwk_inode.c.s
+.PHONY : platform/fwk_inode.s
 
 # target to generate assembly for a file
-platform/hal_fs.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_fs.c.s
-.PHONY : platform/hal_fs.c.s
+platform/fwk_inode.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_inode.c.s
+.PHONY : platform/fwk_inode.c.s
 
-platform/hal_inode.o: platform/hal_inode.c.o
-.PHONY : platform/hal_inode.o
+platform/fwk_kobj.o: platform/fwk_kobj.c.o
+.PHONY : platform/fwk_kobj.o
 
 # target to build an object file
-platform/hal_inode.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_inode.c.o
-.PHONY : platform/hal_inode.c.o
+platform/fwk_kobj.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_kobj.c.o
+.PHONY : platform/fwk_kobj.c.o
 
-platform/hal_inode.i: platform/hal_inode.c.i
-.PHONY : platform/hal_inode.i
+platform/fwk_kobj.i: platform/fwk_kobj.c.i
+.PHONY : platform/fwk_kobj.i
 
 # target to preprocess a source file
-platform/hal_inode.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_inode.c.i
-.PHONY : platform/hal_inode.c.i
+platform/fwk_kobj.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_kobj.c.i
+.PHONY : platform/fwk_kobj.c.i
 
-platform/hal_inode.s: platform/hal_inode.c.s
-.PHONY : platform/hal_inode.s
+platform/fwk_kobj.s: platform/fwk_kobj.c.s
+.PHONY : platform/fwk_kobj.s
 
 # target to generate assembly for a file
-platform/hal_inode.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_inode.c.s
-.PHONY : platform/hal_inode.c.s
+platform/fwk_kobj.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_kobj.c.s
+.PHONY : platform/fwk_kobj.c.s
 
-platform/hal_kobj.o: platform/hal_kobj.c.o
-.PHONY : platform/hal_kobj.o
+platform/fwk_uaccess.o: platform/fwk_uaccess.c.o
+.PHONY : platform/fwk_uaccess.o
 
 # target to build an object file
-platform/hal_kobj.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_kobj.c.o
-.PHONY : platform/hal_kobj.c.o
+platform/fwk_uaccess.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_uaccess.c.o
+.PHONY : platform/fwk_uaccess.c.o
 
-platform/hal_kobj.i: platform/hal_kobj.c.i
-.PHONY : platform/hal_kobj.i
+platform/fwk_uaccess.i: platform/fwk_uaccess.c.i
+.PHONY : platform/fwk_uaccess.i
 
 # target to preprocess a source file
-platform/hal_kobj.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_kobj.c.i
-.PHONY : platform/hal_kobj.c.i
+platform/fwk_uaccess.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_uaccess.c.i
+.PHONY : platform/fwk_uaccess.c.i
 
-platform/hal_kobj.s: platform/hal_kobj.c.s
-.PHONY : platform/hal_kobj.s
+platform/fwk_uaccess.s: platform/fwk_uaccess.c.s
+.PHONY : platform/fwk_uaccess.s
 
 # target to generate assembly for a file
-platform/hal_kobj.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_kobj.c.s
-.PHONY : platform/hal_kobj.c.s
+platform/fwk_uaccess.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_uaccess.c.s
+.PHONY : platform/fwk_uaccess.c.s
 
-platform/hal_uaccess.o: platform/hal_uaccess.c.o
-.PHONY : platform/hal_uaccess.o
+platform/gpio_desc/fwk_gpiodesc.o: platform/gpio_desc/fwk_gpiodesc.c.o
+.PHONY : platform/gpio_desc/fwk_gpiodesc.o
 
 # target to build an object file
-platform/hal_uaccess.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_uaccess.c.o
-.PHONY : platform/hal_uaccess.c.o
+platform/gpio_desc/fwk_gpiodesc.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/gpio_desc/fwk_gpiodesc.c.o
+.PHONY : platform/gpio_desc/fwk_gpiodesc.c.o
 
-platform/hal_uaccess.i: platform/hal_uaccess.c.i
-.PHONY : platform/hal_uaccess.i
+platform/gpio_desc/fwk_gpiodesc.i: platform/gpio_desc/fwk_gpiodesc.c.i
+.PHONY : platform/gpio_desc/fwk_gpiodesc.i
 
 # target to preprocess a source file
-platform/hal_uaccess.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_uaccess.c.i
-.PHONY : platform/hal_uaccess.c.i
+platform/gpio_desc/fwk_gpiodesc.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/gpio_desc/fwk_gpiodesc.c.i
+.PHONY : platform/gpio_desc/fwk_gpiodesc.c.i
 
-platform/hal_uaccess.s: platform/hal_uaccess.c.s
-.PHONY : platform/hal_uaccess.s
+platform/gpio_desc/fwk_gpiodesc.s: platform/gpio_desc/fwk_gpiodesc.c.s
+.PHONY : platform/gpio_desc/fwk_gpiodesc.s
 
 # target to generate assembly for a file
-platform/hal_uaccess.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/hal_uaccess.c.s
-.PHONY : platform/hal_uaccess.c.s
+platform/gpio_desc/fwk_gpiodesc.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/gpio_desc/fwk_gpiodesc.c.s
+.PHONY : platform/gpio_desc/fwk_gpiodesc.c.s
 
-platform/irq/hal_irq.o: platform/irq/hal_irq.c.o
-.PHONY : platform/irq/hal_irq.o
+platform/irq/fwk_irq.o: platform/irq/fwk_irq.c.o
+.PHONY : platform/irq/fwk_irq.o
 
 # target to build an object file
-platform/irq/hal_irq.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq.c.o
-.PHONY : platform/irq/hal_irq.c.o
+platform/irq/fwk_irq.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq.c.o
+.PHONY : platform/irq/fwk_irq.c.o
 
-platform/irq/hal_irq.i: platform/irq/hal_irq.c.i
-.PHONY : platform/irq/hal_irq.i
+platform/irq/fwk_irq.i: platform/irq/fwk_irq.c.i
+.PHONY : platform/irq/fwk_irq.i
 
 # target to preprocess a source file
-platform/irq/hal_irq.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq.c.i
-.PHONY : platform/irq/hal_irq.c.i
+platform/irq/fwk_irq.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq.c.i
+.PHONY : platform/irq/fwk_irq.c.i
 
-platform/irq/hal_irq.s: platform/irq/hal_irq.c.s
-.PHONY : platform/irq/hal_irq.s
+platform/irq/fwk_irq.s: platform/irq/fwk_irq.c.s
+.PHONY : platform/irq/fwk_irq.s
 
 # target to generate assembly for a file
-platform/irq/hal_irq.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq.c.s
-.PHONY : platform/irq/hal_irq.c.s
+platform/irq/fwk_irq.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq.c.s
+.PHONY : platform/irq/fwk_irq.c.s
 
-platform/irq/hal_irq_desc.o: platform/irq/hal_irq_desc.c.o
-.PHONY : platform/irq/hal_irq_desc.o
+platform/irq/fwk_irq_desc.o: platform/irq/fwk_irq_desc.c.o
+.PHONY : platform/irq/fwk_irq_desc.o
 
 # target to build an object file
-platform/irq/hal_irq_desc.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq_desc.c.o
-.PHONY : platform/irq/hal_irq_desc.c.o
+platform/irq/fwk_irq_desc.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_desc.c.o
+.PHONY : platform/irq/fwk_irq_desc.c.o
 
-platform/irq/hal_irq_desc.i: platform/irq/hal_irq_desc.c.i
-.PHONY : platform/irq/hal_irq_desc.i
+platform/irq/fwk_irq_desc.i: platform/irq/fwk_irq_desc.c.i
+.PHONY : platform/irq/fwk_irq_desc.i
 
 # target to preprocess a source file
-platform/irq/hal_irq_desc.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq_desc.c.i
-.PHONY : platform/irq/hal_irq_desc.c.i
+platform/irq/fwk_irq_desc.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_desc.c.i
+.PHONY : platform/irq/fwk_irq_desc.c.i
 
-platform/irq/hal_irq_desc.s: platform/irq/hal_irq_desc.c.s
-.PHONY : platform/irq/hal_irq_desc.s
+platform/irq/fwk_irq_desc.s: platform/irq/fwk_irq_desc.c.s
+.PHONY : platform/irq/fwk_irq_desc.s
 
 # target to generate assembly for a file
-platform/irq/hal_irq_desc.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq_desc.c.s
-.PHONY : platform/irq/hal_irq_desc.c.s
+platform/irq/fwk_irq_desc.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_desc.c.s
+.PHONY : platform/irq/fwk_irq_desc.c.s
 
-platform/irq/hal_irq_domain.o: platform/irq/hal_irq_domain.c.o
-.PHONY : platform/irq/hal_irq_domain.o
+platform/irq/fwk_irq_domain.o: platform/irq/fwk_irq_domain.c.o
+.PHONY : platform/irq/fwk_irq_domain.o
 
 # target to build an object file
-platform/irq/hal_irq_domain.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq_domain.c.o
-.PHONY : platform/irq/hal_irq_domain.c.o
+platform/irq/fwk_irq_domain.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_domain.c.o
+.PHONY : platform/irq/fwk_irq_domain.c.o
 
-platform/irq/hal_irq_domain.i: platform/irq/hal_irq_domain.c.i
-.PHONY : platform/irq/hal_irq_domain.i
+platform/irq/fwk_irq_domain.i: platform/irq/fwk_irq_domain.c.i
+.PHONY : platform/irq/fwk_irq_domain.i
 
 # target to preprocess a source file
-platform/irq/hal_irq_domain.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq_domain.c.i
-.PHONY : platform/irq/hal_irq_domain.c.i
+platform/irq/fwk_irq_domain.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_domain.c.i
+.PHONY : platform/irq/fwk_irq_domain.c.i
 
-platform/irq/hal_irq_domain.s: platform/irq/hal_irq_domain.c.s
-.PHONY : platform/irq/hal_irq_domain.s
+platform/irq/fwk_irq_domain.s: platform/irq/fwk_irq_domain.c.s
+.PHONY : platform/irq/fwk_irq_domain.s
 
 # target to generate assembly for a file
-platform/irq/hal_irq_domain.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq_domain.c.s
-.PHONY : platform/irq/hal_irq_domain.c.s
+platform/irq/fwk_irq_domain.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_domain.c.s
+.PHONY : platform/irq/fwk_irq_domain.c.s
 
-platform/irq/hal_irq_types.o: platform/irq/hal_irq_types.c.o
-.PHONY : platform/irq/hal_irq_types.o
+platform/irq/fwk_irq_types.o: platform/irq/fwk_irq_types.c.o
+.PHONY : platform/irq/fwk_irq_types.o
 
 # target to build an object file
-platform/irq/hal_irq_types.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq_types.c.o
-.PHONY : platform/irq/hal_irq_types.c.o
+platform/irq/fwk_irq_types.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_types.c.o
+.PHONY : platform/irq/fwk_irq_types.c.o
 
-platform/irq/hal_irq_types.i: platform/irq/hal_irq_types.c.i
-.PHONY : platform/irq/hal_irq_types.i
+platform/irq/fwk_irq_types.i: platform/irq/fwk_irq_types.c.i
+.PHONY : platform/irq/fwk_irq_types.i
 
 # target to preprocess a source file
-platform/irq/hal_irq_types.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq_types.c.i
-.PHONY : platform/irq/hal_irq_types.c.i
+platform/irq/fwk_irq_types.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_types.c.i
+.PHONY : platform/irq/fwk_irq_types.c.i
 
-platform/irq/hal_irq_types.s: platform/irq/hal_irq_types.c.s
-.PHONY : platform/irq/hal_irq_types.s
+platform/irq/fwk_irq_types.s: platform/irq/fwk_irq_types.c.s
+.PHONY : platform/irq/fwk_irq_types.s
 
 # target to generate assembly for a file
-platform/irq/hal_irq_types.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/hal_irq_types.c.s
-.PHONY : platform/irq/hal_irq_types.c.s
+platform/irq/fwk_irq_types.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_types.c.s
+.PHONY : platform/irq/fwk_irq_types.c.s
 
-platform/mem/kmem_pool.o: platform/mem/kmem_pool.c.o
-.PHONY : platform/mem/kmem_pool.o
+platform/mem/fwk_mempool.o: platform/mem/fwk_mempool.c.o
+.PHONY : platform/mem/fwk_mempool.o
 
 # target to build an object file
-platform/mem/kmem_pool.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mem/kmem_pool.c.o
-.PHONY : platform/mem/kmem_pool.c.o
+platform/mem/fwk_mempool.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mem/fwk_mempool.c.o
+.PHONY : platform/mem/fwk_mempool.c.o
 
-platform/mem/kmem_pool.i: platform/mem/kmem_pool.c.i
-.PHONY : platform/mem/kmem_pool.i
+platform/mem/fwk_mempool.i: platform/mem/fwk_mempool.c.i
+.PHONY : platform/mem/fwk_mempool.i
 
 # target to preprocess a source file
-platform/mem/kmem_pool.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mem/kmem_pool.c.i
-.PHONY : platform/mem/kmem_pool.c.i
+platform/mem/fwk_mempool.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mem/fwk_mempool.c.i
+.PHONY : platform/mem/fwk_mempool.c.i
 
-platform/mem/kmem_pool.s: platform/mem/kmem_pool.c.s
-.PHONY : platform/mem/kmem_pool.s
+platform/mem/fwk_mempool.s: platform/mem/fwk_mempool.c.s
+.PHONY : platform/mem/fwk_mempool.s
 
 # target to generate assembly for a file
-platform/mem/kmem_pool.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mem/kmem_pool.c.s
-.PHONY : platform/mem/kmem_pool.c.s
+platform/mem/fwk_mempool.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mem/fwk_mempool.c.s
+.PHONY : platform/mem/fwk_mempool.c.s
 
-platform/mmc/hal_sdcard.o: platform/mmc/hal_sdcard.c.o
-.PHONY : platform/mmc/hal_sdcard.o
+platform/mmc/fwk_sdcard.o: platform/mmc/fwk_sdcard.c.o
+.PHONY : platform/mmc/fwk_sdcard.o
 
 # target to build an object file
-platform/mmc/hal_sdcard.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/hal_sdcard.c.o
-.PHONY : platform/mmc/hal_sdcard.c.o
+platform/mmc/fwk_sdcard.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdcard.c.o
+.PHONY : platform/mmc/fwk_sdcard.c.o
 
-platform/mmc/hal_sdcard.i: platform/mmc/hal_sdcard.c.i
-.PHONY : platform/mmc/hal_sdcard.i
+platform/mmc/fwk_sdcard.i: platform/mmc/fwk_sdcard.c.i
+.PHONY : platform/mmc/fwk_sdcard.i
 
 # target to preprocess a source file
-platform/mmc/hal_sdcard.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/hal_sdcard.c.i
-.PHONY : platform/mmc/hal_sdcard.c.i
+platform/mmc/fwk_sdcard.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdcard.c.i
+.PHONY : platform/mmc/fwk_sdcard.c.i
 
-platform/mmc/hal_sdcard.s: platform/mmc/hal_sdcard.c.s
-.PHONY : platform/mmc/hal_sdcard.s
+platform/mmc/fwk_sdcard.s: platform/mmc/fwk_sdcard.c.s
+.PHONY : platform/mmc/fwk_sdcard.s
 
 # target to generate assembly for a file
-platform/mmc/hal_sdcard.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/hal_sdcard.c.s
-.PHONY : platform/mmc/hal_sdcard.c.s
+platform/mmc/fwk_sdcard.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdcard.c.s
+.PHONY : platform/mmc/fwk_sdcard.c.s
 
-platform/mmc/hal_sdfatfs.o: platform/mmc/hal_sdfatfs.c.o
-.PHONY : platform/mmc/hal_sdfatfs.o
+platform/mmc/fwk_sdfatfs.o: platform/mmc/fwk_sdfatfs.c.o
+.PHONY : platform/mmc/fwk_sdfatfs.o
 
 # target to build an object file
-platform/mmc/hal_sdfatfs.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/hal_sdfatfs.c.o
-.PHONY : platform/mmc/hal_sdfatfs.c.o
+platform/mmc/fwk_sdfatfs.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdfatfs.c.o
+.PHONY : platform/mmc/fwk_sdfatfs.c.o
 
-platform/mmc/hal_sdfatfs.i: platform/mmc/hal_sdfatfs.c.i
-.PHONY : platform/mmc/hal_sdfatfs.i
+platform/mmc/fwk_sdfatfs.i: platform/mmc/fwk_sdfatfs.c.i
+.PHONY : platform/mmc/fwk_sdfatfs.i
 
 # target to preprocess a source file
-platform/mmc/hal_sdfatfs.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/hal_sdfatfs.c.i
-.PHONY : platform/mmc/hal_sdfatfs.c.i
+platform/mmc/fwk_sdfatfs.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdfatfs.c.i
+.PHONY : platform/mmc/fwk_sdfatfs.c.i
 
-platform/mmc/hal_sdfatfs.s: platform/mmc/hal_sdfatfs.c.s
-.PHONY : platform/mmc/hal_sdfatfs.s
+platform/mmc/fwk_sdfatfs.s: platform/mmc/fwk_sdfatfs.c.s
+.PHONY : platform/mmc/fwk_sdfatfs.s
 
 # target to generate assembly for a file
-platform/mmc/hal_sdfatfs.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/hal_sdfatfs.c.s
-.PHONY : platform/mmc/hal_sdfatfs.c.s
+platform/mmc/fwk_sdfatfs.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdfatfs.c.s
+.PHONY : platform/mmc/fwk_sdfatfs.c.s
 
-platform/net_device/hal_netdev.o: platform/net_device/hal_netdev.c.o
-.PHONY : platform/net_device/hal_netdev.o
+platform/net_device/fwk_netdev.o: platform/net_device/fwk_netdev.c.o
+.PHONY : platform/net_device/fwk_netdev.o
 
 # target to build an object file
-platform/net_device/hal_netdev.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/net_device/hal_netdev.c.o
-.PHONY : platform/net_device/hal_netdev.c.o
+platform/net_device/fwk_netdev.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/net_device/fwk_netdev.c.o
+.PHONY : platform/net_device/fwk_netdev.c.o
 
-platform/net_device/hal_netdev.i: platform/net_device/hal_netdev.c.i
-.PHONY : platform/net_device/hal_netdev.i
+platform/net_device/fwk_netdev.i: platform/net_device/fwk_netdev.c.i
+.PHONY : platform/net_device/fwk_netdev.i
 
 # target to preprocess a source file
-platform/net_device/hal_netdev.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/net_device/hal_netdev.c.i
-.PHONY : platform/net_device/hal_netdev.c.i
+platform/net_device/fwk_netdev.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/net_device/fwk_netdev.c.i
+.PHONY : platform/net_device/fwk_netdev.c.i
 
-platform/net_device/hal_netdev.s: platform/net_device/hal_netdev.c.s
-.PHONY : platform/net_device/hal_netdev.s
+platform/net_device/fwk_netdev.s: platform/net_device/fwk_netdev.c.s
+.PHONY : platform/net_device/fwk_netdev.s
 
 # target to generate assembly for a file
-platform/net_device/hal_netdev.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/net_device/hal_netdev.c.s
-.PHONY : platform/net_device/hal_netdev.c.s
+platform/net_device/fwk_netdev.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/net_device/fwk_netdev.c.s
+.PHONY : platform/net_device/fwk_netdev.c.s
 
-platform/of/hal_of.o: platform/of/hal_of.c.o
-.PHONY : platform/of/hal_of.o
+platform/of/fwk_of.o: platform/of/fwk_of.c.o
+.PHONY : platform/of/fwk_of.o
 
 # target to build an object file
-platform/of/hal_of.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/hal_of.c.o
-.PHONY : platform/of/hal_of.c.o
+platform/of/fwk_of.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of.c.o
+.PHONY : platform/of/fwk_of.c.o
 
-platform/of/hal_of.i: platform/of/hal_of.c.i
-.PHONY : platform/of/hal_of.i
+platform/of/fwk_of.i: platform/of/fwk_of.c.i
+.PHONY : platform/of/fwk_of.i
 
 # target to preprocess a source file
-platform/of/hal_of.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/hal_of.c.i
-.PHONY : platform/of/hal_of.c.i
+platform/of/fwk_of.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of.c.i
+.PHONY : platform/of/fwk_of.c.i
 
-platform/of/hal_of.s: platform/of/hal_of.c.s
-.PHONY : platform/of/hal_of.s
+platform/of/fwk_of.s: platform/of/fwk_of.c.s
+.PHONY : platform/of/fwk_of.s
 
 # target to generate assembly for a file
-platform/of/hal_of.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/hal_of.c.s
-.PHONY : platform/of/hal_of.c.s
+platform/of/fwk_of.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of.c.s
+.PHONY : platform/of/fwk_of.c.s
 
-platform/of/hal_of_device.o: platform/of/hal_of_device.c.o
-.PHONY : platform/of/hal_of_device.o
+platform/of/fwk_of_device.o: platform/of/fwk_of_device.c.o
+.PHONY : platform/of/fwk_of_device.o
 
 # target to build an object file
-platform/of/hal_of_device.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/hal_of_device.c.o
-.PHONY : platform/of/hal_of_device.c.o
+platform/of/fwk_of_device.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_device.c.o
+.PHONY : platform/of/fwk_of_device.c.o
 
-platform/of/hal_of_device.i: platform/of/hal_of_device.c.i
-.PHONY : platform/of/hal_of_device.i
+platform/of/fwk_of_device.i: platform/of/fwk_of_device.c.i
+.PHONY : platform/of/fwk_of_device.i
 
 # target to preprocess a source file
-platform/of/hal_of_device.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/hal_of_device.c.i
-.PHONY : platform/of/hal_of_device.c.i
+platform/of/fwk_of_device.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_device.c.i
+.PHONY : platform/of/fwk_of_device.c.i
 
-platform/of/hal_of_device.s: platform/of/hal_of_device.c.s
-.PHONY : platform/of/hal_of_device.s
+platform/of/fwk_of_device.s: platform/of/fwk_of_device.c.s
+.PHONY : platform/of/fwk_of_device.s
 
 # target to generate assembly for a file
-platform/of/hal_of_device.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/hal_of_device.c.s
-.PHONY : platform/of/hal_of_device.c.s
+platform/of/fwk_of_device.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_device.c.s
+.PHONY : platform/of/fwk_of_device.c.s
 
-platform/of/hal_of_prop.o: platform/of/hal_of_prop.c.o
-.PHONY : platform/of/hal_of_prop.o
+platform/of/fwk_of_prop.o: platform/of/fwk_of_prop.c.o
+.PHONY : platform/of/fwk_of_prop.o
 
 # target to build an object file
-platform/of/hal_of_prop.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/hal_of_prop.c.o
-.PHONY : platform/of/hal_of_prop.c.o
+platform/of/fwk_of_prop.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_prop.c.o
+.PHONY : platform/of/fwk_of_prop.c.o
 
-platform/of/hal_of_prop.i: platform/of/hal_of_prop.c.i
-.PHONY : platform/of/hal_of_prop.i
+platform/of/fwk_of_prop.i: platform/of/fwk_of_prop.c.i
+.PHONY : platform/of/fwk_of_prop.i
 
 # target to preprocess a source file
-platform/of/hal_of_prop.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/hal_of_prop.c.i
-.PHONY : platform/of/hal_of_prop.c.i
+platform/of/fwk_of_prop.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_prop.c.i
+.PHONY : platform/of/fwk_of_prop.c.i
 
-platform/of/hal_of_prop.s: platform/of/hal_of_prop.c.s
-.PHONY : platform/of/hal_of_prop.s
+platform/of/fwk_of_prop.s: platform/of/fwk_of_prop.c.s
+.PHONY : platform/of/fwk_of_prop.s
 
 # target to generate assembly for a file
-platform/of/hal_of_prop.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/hal_of_prop.c.s
-.PHONY : platform/of/hal_of_prop.c.s
+platform/of/fwk_of_prop.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_prop.c.s
+.PHONY : platform/of/fwk_of_prop.c.s
 
-platform/usb/hal_usb.o: platform/usb/hal_usb.c.o
-.PHONY : platform/usb/hal_usb.o
+platform/usb/fwk_usb.o: platform/usb/fwk_usb.c.o
+.PHONY : platform/usb/fwk_usb.o
 
 # target to build an object file
-platform/usb/hal_usb.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/hal_usb.c.o
-.PHONY : platform/usb/hal_usb.c.o
+platform/usb/fwk_usb.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o
+.PHONY : platform/usb/fwk_usb.c.o
 
-platform/usb/hal_usb.i: platform/usb/hal_usb.c.i
-.PHONY : platform/usb/hal_usb.i
+platform/usb/fwk_usb.i: platform/usb/fwk_usb.c.i
+.PHONY : platform/usb/fwk_usb.i
 
 # target to preprocess a source file
-platform/usb/hal_usb.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/hal_usb.c.i
-.PHONY : platform/usb/hal_usb.c.i
+platform/usb/fwk_usb.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.i
+.PHONY : platform/usb/fwk_usb.c.i
 
-platform/usb/hal_usb.s: platform/usb/hal_usb.c.s
-.PHONY : platform/usb/hal_usb.s
+platform/usb/fwk_usb.s: platform/usb/fwk_usb.c.s
+.PHONY : platform/usb/fwk_usb.s
 
 # target to generate assembly for a file
-platform/usb/hal_usb.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/hal_usb.c.s
-.PHONY : platform/usb/hal_usb.c.s
+platform/usb/fwk_usb.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.s
+.PHONY : platform/usb/fwk_usb.c.s
 
-platform/usb/host/hal_usb_ehci.o: platform/usb/host/hal_usb_ehci.c.o
-.PHONY : platform/usb/host/hal_usb_ehci.o
+platform/usb/host/fwk_usb_ehci.o: platform/usb/host/fwk_usb_ehci.c.o
+.PHONY : platform/usb/host/fwk_usb_ehci.o
 
 # target to build an object file
-platform/usb/host/hal_usb_ehci.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/host/hal_usb_ehci.c.o
-.PHONY : platform/usb/host/hal_usb_ehci.c.o
+platform/usb/host/fwk_usb_ehci.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o
+.PHONY : platform/usb/host/fwk_usb_ehci.c.o
 
-platform/usb/host/hal_usb_ehci.i: platform/usb/host/hal_usb_ehci.c.i
-.PHONY : platform/usb/host/hal_usb_ehci.i
+platform/usb/host/fwk_usb_ehci.i: platform/usb/host/fwk_usb_ehci.c.i
+.PHONY : platform/usb/host/fwk_usb_ehci.i
 
 # target to preprocess a source file
-platform/usb/host/hal_usb_ehci.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/host/hal_usb_ehci.c.i
-.PHONY : platform/usb/host/hal_usb_ehci.c.i
+platform/usb/host/fwk_usb_ehci.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.i
+.PHONY : platform/usb/host/fwk_usb_ehci.c.i
 
-platform/usb/host/hal_usb_ehci.s: platform/usb/host/hal_usb_ehci.c.s
-.PHONY : platform/usb/host/hal_usb_ehci.s
+platform/usb/host/fwk_usb_ehci.s: platform/usb/host/fwk_usb_ehci.c.s
+.PHONY : platform/usb/host/fwk_usb_ehci.s
 
 # target to generate assembly for a file
-platform/usb/host/hal_usb_ehci.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/host/hal_usb_ehci.c.s
-.PHONY : platform/usb/host/hal_usb_ehci.c.s
+platform/usb/host/fwk_usb_ehci.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.s
+.PHONY : platform/usb/host/fwk_usb_ehci.c.s
 
 rootfs/fatfs/diskio.o: rootfs/fatfs/diskio.c.o
 .PHONY : rootfs/fatfs/diskio.o
@@ -1933,87 +1933,87 @@ help:
 	@echo "... kernel/thread.o"
 	@echo "... kernel/thread.i"
 	@echo "... kernel/thread.s"
-	@echo "... platform/bus_type/hal_platdev.o"
-	@echo "... platform/bus_type/hal_platdev.i"
-	@echo "... platform/bus_type/hal_platdev.s"
-	@echo "... platform/bus_type/hal_platdrv.o"
-	@echo "... platform/bus_type/hal_platdrv.i"
-	@echo "... platform/bus_type/hal_platdrv.s"
-	@echo "... platform/bus_type/hal_platform.o"
-	@echo "... platform/bus_type/hal_platform.i"
-	@echo "... platform/bus_type/hal_platform.s"
-	@echo "... platform/chardev/hal_cdev.o"
-	@echo "... platform/chardev/hal_cdev.i"
-	@echo "... platform/chardev/hal_cdev.s"
-	@echo "... platform/chardev/hal_chrdev.o"
-	@echo "... platform/chardev/hal_chrdev.i"
-	@echo "... platform/chardev/hal_chrdev.s"
-	@echo "... platform/framebuffer/hal_ascii.o"
-	@echo "... platform/framebuffer/hal_ascii.i"
-	@echo "... platform/framebuffer/hal_ascii.s"
-	@echo "... platform/framebuffer/hal_bitmap.o"
-	@echo "... platform/framebuffer/hal_bitmap.i"
-	@echo "... platform/framebuffer/hal_bitmap.s"
-	@echo "... platform/framebuffer/hal_fbmem.o"
-	@echo "... platform/framebuffer/hal_fbmem.i"
-	@echo "... platform/framebuffer/hal_fbmem.s"
-	@echo "... platform/gpio_desc/hal_gpiodesc.o"
-	@echo "... platform/gpio_desc/hal_gpiodesc.i"
-	@echo "... platform/gpio_desc/hal_gpiodesc.s"
-	@echo "... platform/hal_fcntl.o"
-	@echo "... platform/hal_fcntl.i"
-	@echo "... platform/hal_fcntl.s"
-	@echo "... platform/hal_fs.o"
-	@echo "... platform/hal_fs.i"
-	@echo "... platform/hal_fs.s"
-	@echo "... platform/hal_inode.o"
-	@echo "... platform/hal_inode.i"
-	@echo "... platform/hal_inode.s"
-	@echo "... platform/hal_kobj.o"
-	@echo "... platform/hal_kobj.i"
-	@echo "... platform/hal_kobj.s"
-	@echo "... platform/hal_uaccess.o"
-	@echo "... platform/hal_uaccess.i"
-	@echo "... platform/hal_uaccess.s"
-	@echo "... platform/irq/hal_irq.o"
-	@echo "... platform/irq/hal_irq.i"
-	@echo "... platform/irq/hal_irq.s"
-	@echo "... platform/irq/hal_irq_desc.o"
-	@echo "... platform/irq/hal_irq_desc.i"
-	@echo "... platform/irq/hal_irq_desc.s"
-	@echo "... platform/irq/hal_irq_domain.o"
-	@echo "... platform/irq/hal_irq_domain.i"
-	@echo "... platform/irq/hal_irq_domain.s"
-	@echo "... platform/irq/hal_irq_types.o"
-	@echo "... platform/irq/hal_irq_types.i"
-	@echo "... platform/irq/hal_irq_types.s"
-	@echo "... platform/mem/kmem_pool.o"
-	@echo "... platform/mem/kmem_pool.i"
-	@echo "... platform/mem/kmem_pool.s"
-	@echo "... platform/mmc/hal_sdcard.o"
-	@echo "... platform/mmc/hal_sdcard.i"
-	@echo "... platform/mmc/hal_sdcard.s"
-	@echo "... platform/mmc/hal_sdfatfs.o"
-	@echo "... platform/mmc/hal_sdfatfs.i"
-	@echo "... platform/mmc/hal_sdfatfs.s"
-	@echo "... platform/net_device/hal_netdev.o"
-	@echo "... platform/net_device/hal_netdev.i"
-	@echo "... platform/net_device/hal_netdev.s"
-	@echo "... platform/of/hal_of.o"
-	@echo "... platform/of/hal_of.i"
-	@echo "... platform/of/hal_of.s"
-	@echo "... platform/of/hal_of_device.o"
-	@echo "... platform/of/hal_of_device.i"
-	@echo "... platform/of/hal_of_device.s"
-	@echo "... platform/of/hal_of_prop.o"
-	@echo "... platform/of/hal_of_prop.i"
-	@echo "... platform/of/hal_of_prop.s"
-	@echo "... platform/usb/hal_usb.o"
-	@echo "... platform/usb/hal_usb.i"
-	@echo "... platform/usb/hal_usb.s"
-	@echo "... platform/usb/host/hal_usb_ehci.o"
-	@echo "... platform/usb/host/hal_usb_ehci.i"
-	@echo "... platform/usb/host/hal_usb_ehci.s"
+	@echo "... platform/bus_type/fwk_platdev.o"
+	@echo "... platform/bus_type/fwk_platdev.i"
+	@echo "... platform/bus_type/fwk_platdev.s"
+	@echo "... platform/bus_type/fwk_platdrv.o"
+	@echo "... platform/bus_type/fwk_platdrv.i"
+	@echo "... platform/bus_type/fwk_platdrv.s"
+	@echo "... platform/bus_type/fwk_platform.o"
+	@echo "... platform/bus_type/fwk_platform.i"
+	@echo "... platform/bus_type/fwk_platform.s"
+	@echo "... platform/chardev/fwk_cdev.o"
+	@echo "... platform/chardev/fwk_cdev.i"
+	@echo "... platform/chardev/fwk_cdev.s"
+	@echo "... platform/chardev/fwk_chrdev.o"
+	@echo "... platform/chardev/fwk_chrdev.i"
+	@echo "... platform/chardev/fwk_chrdev.s"
+	@echo "... platform/framebuffer/fwk_ascii.o"
+	@echo "... platform/framebuffer/fwk_ascii.i"
+	@echo "... platform/framebuffer/fwk_ascii.s"
+	@echo "... platform/framebuffer/fwk_bitmap.o"
+	@echo "... platform/framebuffer/fwk_bitmap.i"
+	@echo "... platform/framebuffer/fwk_bitmap.s"
+	@echo "... platform/framebuffer/fwk_fbmem.o"
+	@echo "... platform/framebuffer/fwk_fbmem.i"
+	@echo "... platform/framebuffer/fwk_fbmem.s"
+	@echo "... platform/fwk_fcntl.o"
+	@echo "... platform/fwk_fcntl.i"
+	@echo "... platform/fwk_fcntl.s"
+	@echo "... platform/fwk_fs.o"
+	@echo "... platform/fwk_fs.i"
+	@echo "... platform/fwk_fs.s"
+	@echo "... platform/fwk_inode.o"
+	@echo "... platform/fwk_inode.i"
+	@echo "... platform/fwk_inode.s"
+	@echo "... platform/fwk_kobj.o"
+	@echo "... platform/fwk_kobj.i"
+	@echo "... platform/fwk_kobj.s"
+	@echo "... platform/fwk_uaccess.o"
+	@echo "... platform/fwk_uaccess.i"
+	@echo "... platform/fwk_uaccess.s"
+	@echo "... platform/gpio_desc/fwk_gpiodesc.o"
+	@echo "... platform/gpio_desc/fwk_gpiodesc.i"
+	@echo "... platform/gpio_desc/fwk_gpiodesc.s"
+	@echo "... platform/irq/fwk_irq.o"
+	@echo "... platform/irq/fwk_irq.i"
+	@echo "... platform/irq/fwk_irq.s"
+	@echo "... platform/irq/fwk_irq_desc.o"
+	@echo "... platform/irq/fwk_irq_desc.i"
+	@echo "... platform/irq/fwk_irq_desc.s"
+	@echo "... platform/irq/fwk_irq_domain.o"
+	@echo "... platform/irq/fwk_irq_domain.i"
+	@echo "... platform/irq/fwk_irq_domain.s"
+	@echo "... platform/irq/fwk_irq_types.o"
+	@echo "... platform/irq/fwk_irq_types.i"
+	@echo "... platform/irq/fwk_irq_types.s"
+	@echo "... platform/mem/fwk_mempool.o"
+	@echo "... platform/mem/fwk_mempool.i"
+	@echo "... platform/mem/fwk_mempool.s"
+	@echo "... platform/mmc/fwk_sdcard.o"
+	@echo "... platform/mmc/fwk_sdcard.i"
+	@echo "... platform/mmc/fwk_sdcard.s"
+	@echo "... platform/mmc/fwk_sdfatfs.o"
+	@echo "... platform/mmc/fwk_sdfatfs.i"
+	@echo "... platform/mmc/fwk_sdfatfs.s"
+	@echo "... platform/net_device/fwk_netdev.o"
+	@echo "... platform/net_device/fwk_netdev.i"
+	@echo "... platform/net_device/fwk_netdev.s"
+	@echo "... platform/of/fwk_of.o"
+	@echo "... platform/of/fwk_of.i"
+	@echo "... platform/of/fwk_of.s"
+	@echo "... platform/of/fwk_of_device.o"
+	@echo "... platform/of/fwk_of_device.i"
+	@echo "... platform/of/fwk_of_device.s"
+	@echo "... platform/of/fwk_of_prop.o"
+	@echo "... platform/of/fwk_of_prop.i"
+	@echo "... platform/of/fwk_of_prop.s"
+	@echo "... platform/usb/fwk_usb.o"
+	@echo "... platform/usb/fwk_usb.i"
+	@echo "... platform/usb/fwk_usb.s"
+	@echo "... platform/usb/host/fwk_usb_ehci.o"
+	@echo "... platform/usb/host/fwk_usb_ehci.i"
+	@echo "... platform/usb/host/fwk_usb_ehci.s"
 	@echo "... rootfs/fatfs/diskio.o"
 	@echo "... rootfs/fatfs/diskio.i"
 	@echo "... rootfs/fatfs/diskio.s"

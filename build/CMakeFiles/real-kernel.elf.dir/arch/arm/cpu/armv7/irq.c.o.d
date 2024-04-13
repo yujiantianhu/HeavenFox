@@ -70,10 +70,10 @@ CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/irq.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/io_stream.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/boot_text.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/include/asm/armv7/ca7_gic.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_basic.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_basic.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/list_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/kmem_pool.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_mempool.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/mem_manage.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/kernel.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/api_string.h \
@@ -82,9 +82,9 @@ CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/irq.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/board/board_common.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/implicit_call.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/boot_text.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/hal_irq_domain.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/hal_of.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/hal_of_prop.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/hal_irq.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/hal_irq_types.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/hal_irq_domain.h
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_domain.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of_prop.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_domain.h

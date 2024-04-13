@@ -15,9 +15,9 @@
 #include <common/error_types.h>
 #include <common/generic.h>
 #include <common/io_stream.h>
-#include <platform/hal_fcntl.h>
-#include <platform/video/hal_fbmem.h>
-#include <platform/video/hal_rgbmap.h>
+#include <platform/fwk_fcntl.h>
+#include <platform/video/fwk_fbmem.h>
+#include <platform/video/fwk_rgbmap.h>
 #include <kernel/kernel.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>
@@ -83,8 +83,8 @@ static void display_fill_one_screen(kuint32_t *pbuffer, kuint32_t width, kuint32
 static void *display_app_entry(void *args)
 {
     ksint32_t fd;
-    struct hal_fb_fix_screen_info sgrt_fix;
-	struct hal_fb_var_screen_info sgrt_var;
+    struct fwk_fb_fix_screen_info sgrt_fix;
+	struct fwk_fb_var_screen_info sgrt_var;
     kuint32_t *fbuffer;
 
     mutex_init(&sgrt_display_app_lock);
@@ -94,8 +94,8 @@ static void *display_app_entry(void *args)
         fd = virt_open("/dev/fb0", 0);
         if (!mrt_isErr(fd))
         {
-            virt_ioctl(fd, Ert_HAL_FB_IOGetVScreenInfo, &sgrt_var);
-            virt_ioctl(fd, Ert_HAL_FB_IOGetFScreenInfo, &sgrt_fix);
+            virt_ioctl(fd, NR_FB_IOGetVScreenInfo, &sgrt_var);
+            virt_ioctl(fd, NR_FB_IOGetFScreenInfo, &sgrt_fix);
 
             fbuffer = (kuint32_t *)virt_mmap(mrt_nullptr, sgrt_fix.smem_len, 0, 0, fd, 0);
             if (!mrt_isValid(fbuffer))

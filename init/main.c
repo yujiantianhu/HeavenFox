@@ -19,9 +19,9 @@
 #include <common/time.h>
 #include <boot/implicit_call.h>
 #include <boot/board_init.h>
-#include <platform/of/hal_of.h>
-#include <platform/hal_fcntl.h>
-#include <platform/irq/hal_irq.h>
+#include <platform/of/fwk_of.h>
+#include <platform/fwk_fcntl.h>
+#include <platform/irq/fwk_irq.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 #include <kernel/instance.h>
@@ -41,7 +41,7 @@ void start_kernel(void)
     mrt_disable_global_irq();
 
     /*!< initial memory pool */
-    kernel_memblock_initial();
+    fwk_mempool_initial();
 
     /*!< build device-tree */
     setup_machine_fdt((void *)CONFIG_DEVICE_TREE_BASE);

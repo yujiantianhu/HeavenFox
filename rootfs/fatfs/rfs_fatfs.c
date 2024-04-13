@@ -1,7 +1,7 @@
 /*
  * General SD Card FatFs Interface
  *
- * File Name:   hal_sdfatfs.c
+ * File Name:   fwk_sdfatfs.c
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2023.11.11
@@ -10,7 +10,7 @@
  *
  */
 
-#include <platform/kmem_pool.h>
+#include <platform/fwk_mempool.h>
 #include <rootfs/rfs_disk.h>
 #include "ff.h"
 #include "diskio.h"
@@ -33,7 +33,7 @@ static ksint32_t rfs_fatfs_disk_mount(struct rfs_disk *sprt_disk)
 	/*!< Multiple mounts are not allowed */
 	if (sprt_disk->mnt_status)
 	{
-		return mrt_retval(Ert_isWell);
+		return NR_isWell;
 	}
 
 	/*!< FRESULT f_mount (FATFS* fs, const TCHAR* path, BYTE opt) */
@@ -50,12 +50,12 @@ static ksint32_t rfs_fatfs_disk_mount(struct rfs_disk *sprt_disk)
     }
 #endif
 
-	sprt_disk->mnt_status = Ert_true;
+	sprt_disk->mnt_status = true;
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 
 fail:
-	return mrt_retval(Ert_isUnvalid);
+	return -NR_isUnvalid;
 }
 
 /*!
@@ -79,12 +79,12 @@ static ksint32_t rfs_fatfs_disk_unmount(struct rfs_disk *sprt_disk)
 	}
 
 	memset(sprt_disk->sprt_fs, 0, sizeof(FATFS));
-	sprt_disk->mnt_status = Ert_false;
+	sprt_disk->mnt_status = false;
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 
 fail:
-	return mrt_retval(Ert_isUnvalid);
+	return -NR_isUnvalid;
 }
 
 /*!
@@ -108,10 +108,10 @@ static ksint32_t rfs_fatfs_disk_mkfs(struct rfs_disk *sprt_disk)
 		goto fail;
 	}
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 
 fail:
-	return mrt_retval(Ert_isUnvalid);
+	return -NR_isUnvalid;
 }
 
 /*!
@@ -138,18 +138,18 @@ static ksint32_t rfs_fatfs_disk_file_start(struct rfs_disk_file *sprt_this,
 
 	if (!mrt_isValid(sprt_this))
 	{
-		return mrt_retval(Ert_isNullPtr);
+		return -NR_isNullPtr;
 	}
 
 	/*!< check if disk is mounted */
 	if (!sprt_this->is_mounted(sprt_this))
 	{
-		return mrt_retval(Ert_isNotReady);
+		return -NR_isNotReady;
 	}
 
 	if (!mrt_isValid(ptrName))
 	{
-        return mrt_retval(Ert_isArgFault);
+        return -NR_isArgFault;
     }
 
     sprt_this->set_fileName(sprt_this, ptrName);
@@ -158,7 +158,7 @@ static ksint32_t rfs_fatfs_disk_file_start(struct rfs_disk_file *sprt_this,
     retval = sprt_this->open(sprt_this, flags);
     if (mrt_isErr(retval))
     {
-        return mrt_retval(Ert_isNotSuccess);
+        return -NR_isNotSuccess;
     }
 
     /*!< read file directely after openning file */
@@ -168,12 +168,12 @@ static ksint32_t rfs_fatfs_disk_file_start(struct rfs_disk_file *sprt_this,
         if (mrt_isValid(bufferAddr) && (sprt_this->fileSize < size))
         {
             sprt_this->recvBuffer = (kuint8_t *)bufferAddr;
-            sprt_this->isBufferDync	= Ert_false;
+            sprt_this->isBufferDync	= false;
         }
         else
         {
             sprt_this->recvBuffer = (kuint8_t *)kzalloc((sprt_this->fileSize + 4) * sizeof(kuint8_t), GFP_KERNEL);
-            sprt_this->isBufferDync	= Ert_true;
+            sprt_this->isBufferDync	= true;
         }
     }
 
@@ -183,13 +183,13 @@ static ksint32_t rfs_fatfs_disk_file_start(struct rfs_disk_file *sprt_this,
         if (retval <= 0)
         {
             sprt_this->exit(sprt_this);
-            return mrt_retval(Ert_isNotSuccess);
+            return -NR_isNotSuccess;
         }
     }
 
     sprt_this->close(sprt_this);
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 }
 
 /*!
@@ -216,7 +216,7 @@ static void rfs_fatfs_disk_file_release(struct rfs_disk_file *sprt_this)
 		sprt_this->recvBuffer = mrt_nullptr;
 	}
 
-	sprt_this->isBufferDync	= Ert_false;
+	sprt_this->isBufferDync	= false;
 }
 
 /*!
@@ -298,7 +298,7 @@ static void rfs_fatfs_disk_set_filepath(struct rfs_disk_file *sprt_this, const k
  */
 static kbool_t rfs_fatfs_disk_is_mounted(struct rfs_disk_file *sprt_this)
 {
-	return (mrt_isValid(sprt_this->sprt_disk) ? sprt_this->sprt_disk->mnt_status : Ert_false);
+	return (mrt_isValid(sprt_this->sprt_disk) ? sprt_this->sprt_disk->mnt_status : false);
 }
 
 /*!
@@ -325,10 +325,10 @@ static ksint32_t rfs_fatfs_disk_mkdir(const kstring_t *ptrDirName)
     retval = f_mkdir((const TCHAR *)ptrDirName);
     if (retval && (retval != FR_EXIST))
     {
-        return mrt_retval(Ert_isNotSupport);
+        return -NR_isNotSupport;
     }
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 }
 
 /*!
@@ -345,7 +345,7 @@ static ksint32_t rfs_fatfs_disk_open(struct rfs_disk_file *sprt_this, kuint8_t f
 	/*!< disk is not mounted */
 	if (!sprt_this->is_mounted(sprt_this))
 	{
-		return mrt_retval(Ert_isNullPtr);
+		return -NR_isNullPtr;
 	}
 
 	if (!mrt_isValid(sprt_this->ptrFileName) || mrt_isValid(sprt_this->sprt_file))
@@ -364,12 +364,12 @@ static ksint32_t rfs_fatfs_disk_open(struct rfs_disk_file *sprt_this, kuint8_t f
 	 * FA_OPEN_ALWAYS(0x10) has a bug: if file has exsited, it will clear all content
 	 * FA_OPEN_APPEND(0x30) include FA_OPEN_APPEND, it's bug is as same to FA_OPEN_ALWAYS
 	 */
-	mode |= (Ert_RFS_DISK_OpenExsiting  & flags) ? FA_OPEN_EXISTING : 0;
-	mode |= (Ert_RFS_DISK_OpenCreate 	& flags) ? FA_CREATE_NEW 	: 0;
-	mode |= (Ert_RFS_DISK_OpenWrite  	& flags) ? FA_WRITE 		: 0;
-	mode |= (Ert_RFS_DISK_OpenRead  	& flags) ? FA_READ 			: 0;
-	mode |= (Ert_RFS_DISK_AppendEnd  	& flags) ? FA_OPEN_APPEND 	: 0;
-	mode |= (Ert_RFS_DISK_OpenClear  	& flags) ? FA_OPEN_ALWAYS 	: 0;
+	mode |= (NR_RFS_DISK_OpenExsiting  & flags) ? FA_OPEN_EXISTING : 0;
+	mode |= (NR_RFS_DISK_OpenCreate 	& flags) ? FA_CREATE_NEW 	: 0;
+	mode |= (NR_RFS_DISK_OpenWrite  	& flags) ? FA_WRITE 		: 0;
+	mode |= (NR_RFS_DISK_OpenRead  	& flags) ? FA_READ 			: 0;
+	mode |= (NR_RFS_DISK_AppendEnd  	& flags) ? FA_OPEN_APPEND 	: 0;
+	mode |= (NR_RFS_DISK_OpenClear  	& flags) ? FA_OPEN_ALWAYS 	: 0;
 
 	/*!< FRESULT f_open (FIL* fp, const TCHAR* path, BYTE mode); */
 	if (f_open(sprt_file, (const TCHAR *)sprt_this->ptrFileName, mode))
@@ -377,17 +377,17 @@ static ksint32_t rfs_fatfs_disk_open(struct rfs_disk_file *sprt_this, kuint8_t f
 		goto fail2;
 	}
 
-	sprt_this->opened = Ert_true;
+	sprt_this->opened = true;
 	sprt_this->mode	= flags;
 	sprt_this->sprt_file = sprt_file;
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 
 fail2:
 	kfree(sprt_file);
 
 fail1:
-	return mrt_retval(Ert_isUnvalid);
+	return -NR_isUnvalid;
 }
 
 /*!
@@ -400,16 +400,16 @@ static ksint32_t rfs_fatfs_disk_lseek(struct rfs_disk_file *sprt_this, kuint32_t
 {
 	if (!mrt_isValid(sprt_this->sprt_file))
 	{
-		return mrt_retval(Ert_isNullPtr);
+		return -NR_isNullPtr;
 	}
 
 	/*!< FRESULT f_lseek (FIL* fp, FSIZE_t ofs); */
 	if (f_lseek((FIL *)sprt_this->sprt_file, (FSIZE_t)offset))
 	{
-		return mrt_retval(Ert_isNotSuccess);
+		return -NR_isNotSuccess;
 	}
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 }
 
 /*!
@@ -427,7 +427,7 @@ static kusize_t rfs_fatfs_disk_write(struct rfs_disk_file *sprt_this, const void
 		goto fail;
 	}
 
-	if (mrt_isBitResetb(Ert_RFS_DISK_OpenWrite, &sprt_this->mode))
+	if (mrt_isBitResetb(NR_RFS_DISK_OpenWrite, &sprt_this->mode))
 	{
 		goto fail;
 	}
@@ -464,7 +464,7 @@ static kusize_t rfs_fatfs_disk_read(struct rfs_disk_file *sprt_this, void *ptrBu
 		goto fail;
 	}
 
-	if (mrt_isBitResetb(Ert_RFS_DISK_OpenRead, &sprt_this->mode))
+	if (mrt_isBitResetb(NR_RFS_DISK_OpenRead, &sprt_this->mode))
 	{
 		goto fail;
 	}
@@ -512,27 +512,27 @@ static ksint32_t rfs_fatfs_disk_close(struct rfs_disk_file *sprt_this)
 	/*!< no file is opened */
 	if (!sprt_this->is_opened(sprt_this))
 	{
-		return mrt_retval(Ert_isNotReady);
+		return -NR_isNotReady;
 	}
 
 	if (!mrt_isValid(sprt_this->sprt_file))
 	{
-		return mrt_retval(Ert_isNullPtr);
+		return -NR_isNullPtr;
 	}
 
 	/* FRESULT f_close (FIL* fp); */
 	if (f_close((FIL *)sprt_this->sprt_file))
 	{
-		return mrt_retval(Ert_isNotSuccess);
+		return -NR_isNotSuccess;
 	}
 
-	sprt_this->opened = Ert_false;
+	sprt_this->opened = false;
 	sprt_this->mode	= 0;
 
 	kfree(sprt_this->sprt_file);
 	sprt_this->sprt_file = mrt_nullptr;
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 }
 
 /*!< important property, directelly accessing is not allowed */
@@ -546,7 +546,7 @@ static struct rfs_disk sgrt_rfs_fatfs_disk =
 
 	.sprt_fs		= &sgrt_rfs_fatfs,
 	.diskPath		= {0},
-	.mnt_status		= Ert_false,
+	.mnt_status		= false,
 };
 
 /*!< sdcard disk interface */
@@ -573,9 +573,9 @@ static struct rfs_disk_file sgrt_rfs_fatfs_file =
 	.recvBuffer		= mrt_nullptr,
 	.sprt_file		= mrt_nullptr,
 	.mode			= 0,
-	.opened			= Ert_false,
-    .isBufferDync   = Ert_false,
-    .isSelfDync     = Ert_false,
+	.opened			= false,
+    .isBufferDync   = false,
+    .isSelfDync     = false,
 };
 
 /*!
@@ -606,7 +606,7 @@ void *rfs_fatfs_file_allocate(void)
 	if (mrt_isValid(sprt_file))
 	{
 		rfs_fatfs_file_initial(sprt_file);
-        sprt_file->isSelfDync = Ert_true;
+        sprt_file->isSelfDync = true;
 	}
 
     return sprt_file;
@@ -636,7 +636,7 @@ ksint32_t rfs_fatfs_disk_create(struct rfs_disk *sprt_disk, kuint16_t drvNumber)
 {
 	if (!mrt_isValid(sprt_disk->mount))
 	{
-		return mrt_retval(Ert_isUnvalid);
+		return -NR_isUnvalid;
 	}
 
 	/*!< register disk drive number before mountint disk */

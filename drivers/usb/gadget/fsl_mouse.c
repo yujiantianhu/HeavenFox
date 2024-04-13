@@ -11,18 +11,18 @@
  */
 
 /*!< The includes */
-#include <platform/hal_basic.h>
-#include <platform/hal_cdev.h>
-#include <platform/hal_chrdev.h>
-#include <platform/hal_inode.h>
-#include <platform/hal_fs.h>
-#include <platform/of/hal_of.h>
-#include <platform/hal_platdrv.h>
-#include <platform/hal_uaccess.h>
-#include <platform/usb/hal_ch9.h>
-#include <platform/usb/hal_urb.h>
-#include <platform/usb/hal_hid.h>
-#include <platform/usb/hal_usb.h>
+#include <platform/fwk_basic.h>
+#include <platform/fwk_cdev.h>
+#include <platform/fwk_chrdev.h>
+#include <platform/fwk_inode.h>
+#include <platform/fwk_fs.h>
+#include <platform/of/fwk_of.h>
+#include <platform/fwk_platdrv.h>
+#include <platform/fwk_uaccess.h>
+#include <platform/usb/fwk_ch9.h>
+#include <platform/usb/fwk_urb.h>
+#include <platform/usb/fwk_hid.h>
+#include <platform/usb/fwk_usb.h>
 
 /*!< The defines */
 struct fsl_mouse_drv
@@ -31,7 +31,7 @@ struct fsl_mouse_drv
 	kuint32_t major;
 	kuint32_t minor;
 
-	struct hal_cdev *sprt_cdev;
+	struct fwk_cdev *sprt_cdev;
 
 	void *ptrData;
 };
@@ -50,73 +50,73 @@ struct fsl_mouse_drv
 
 typedef struct fsl_mouse_desc
 {
-    const srt_hal_usb_endpoint_desc_t *sprt_ep_dt;
-    const srt_hal_usb_interface_desc_t *sprt_if_dt;
-    const srt_hal_usb_config_desc_t *sprt_config_dt;
-    const srt_hal_usb_device_desc_t *sprt_device_dt;
-    const srt_hal_usb_hid_desc_t *sprt_hid_dt;
+    const srt_fwk_usb_endpoint_desc_t *sprt_ep_dt;
+    const srt_fwk_usb_interface_desc_t *sprt_if_dt;
+    const srt_fwk_usb_config_desc_t *sprt_config_dt;
+    const srt_fwk_usb_device_desc_t *sprt_device_dt;
+    const srt_fwk_usb_hid_desc_t *sprt_hid_dt;
 
 } srt_fsl_mouse_desc_t;
 
 /*!< The globals */
 /*!< Hid mouse endpoint descriptor */
-static const srt_hal_usb_endpoint_desc_t sgrt_fsl_mouse_ep_dt[] =
+static const srt_fwk_usb_endpoint_desc_t sgrt_fsl_mouse_ep_dt[] =
 {
     {
-        .bLength = HAL_USB_DT_ENDPOINT_SIZE,
-        .bDescriptorType = HAL_USB_DT_ENDPOINT,
+        .bLength = FWK_USB_DT_ENDPOINT_SIZE,
+        .bDescriptorType = FWK_USB_DT_ENDPOINT,
 
-        .bEndpointAddress = HAL_USB_ENDPOINT_ADDRESS(Ert_HAL_USB_EndpointAddrDirIn, FSL_MOUSE_ENDPOINT_ADDR),
-        .bmAttributes = Ert_HAL_USB_EndPointDescXferInterrupt,
+        .bEndpointAddress = FWK_USB_ENDPOINT_ADDRESS(NR_USB_EndpointAddrDirIn, FSL_MOUSE_ENDPOINT_ADDR),
+        .bmAttributes = NR_USB_EndPointDescXferInterrupt,
         .wMaxPacketSize = FSL_FS_HID_MOUSE_INTR_IN_PACKET_SIZE,
         .bInterval = FSL_FS_HID_MOUSE_INTR_IN_INTERVAL,
     }
 };
 
 /*!< Hid mouse interface descriptor */
-static const srt_hal_usb_interface_desc_t sgrt_fsl_mouse_if_dt[] =
+static const srt_fwk_usb_interface_desc_t sgrt_fsl_mouse_if_dt[] =
 {
     {
-        .bLength = HAL_USB_DT_INTERFACE_SIZE,
-        .bDescriptorType = HAL_USB_DT_INTERFACE,
+        .bLength = FWK_USB_DT_INTERFACE_SIZE,
+        .bDescriptorType = FWK_USB_DT_INTERFACE,
 
         .bInterfaceNumber = 0U,
         .bAlternateSetting = 0U,
         .bNumEndpoints = ARRAY_SIZE(sgrt_fsl_mouse_ep_dt),
-        .bInterfaceClass = HAL_USB_HID_CLASS,
-        .bInterfaceSubClass = HAL_USB_HID_SUBCLASS_GRUB,
-        .bInterfaceProtocol = HAL_USB_HID_PROTOCOL_MOUSE,
+        .bInterfaceClass = FWK_USB_HID_CLASS,
+        .bInterfaceSubClass = FWK_USB_HID_SUBCLASS_GRUB,
+        .bInterfaceProtocol = FWK_USB_HID_PROTOCOL_MOUSE,
         .iInterface = 0U,
     }
 };
 
 /*!< Hid mouse configuration descriptor */
-static const srt_hal_usb_config_desc_t sgrt_fsl_mouse_config_dt[] =
+static const srt_fwk_usb_config_desc_t sgrt_fsl_mouse_config_dt[] =
 {
     {
-        .bLength = HAL_USB_DT_CONFIG_SIZE,
-        .bDescriptorType = HAL_USB_DT_CONFIG,
+        .bLength = FWK_USB_DT_CONFIG_SIZE,
+        .bDescriptorType = FWK_USB_DT_CONFIG,
 
         .wTotalLength = 1U,
         .bNumInterfaces = ARRAY_SIZE(sgrt_fsl_mouse_if_dt),
         .bConfigurationValue = 0U,
         .iConfiguration = 0U,
-        .bmAttributes = Ert_HAL_USB_ConfigDescAttrSelfPower | Ert_HAL_USB_ConfigDescAttrWakeUp,
-        .bMaxPower = HAL_USB_DT_CONFIG_MAX_CURRENT(9),
+        .bmAttributes = NR_USB_ConfigDescAttrSelfPower | NR_USB_ConfigDescAttrWakeUp,
+        .bMaxPower = FWK_USB_DT_CONFIG_MAX_CURRENT(9),
     }
 };
 
 /*!< Hid mouse device descriptor */
-static const srt_hal_usb_device_desc_t sgrt_fsl_mouse_device_dt =
+static const srt_fwk_usb_device_desc_t sgrt_fsl_mouse_device_dt =
 {
-    .bLength = HAL_USB_DT_DEVICE_SIZE,
-    .bDescriptorType = HAL_USB_DT_DEVICE,
+    .bLength = FWK_USB_DT_DEVICE_SIZE,
+    .bDescriptorType = FWK_USB_DT_DEVICE,
 
     .bcdUSB = 0x0200,
     .bDeviceClass = 0,
     .bDeviceSubClass = 0,
     .bDeviceProtocol = 0,
-    .bMaxPacketSize0 = HAL_USB_INTR_FS_MAX_PACKET_SIZE,
+    .bMaxPacketSize0 = FWK_USB_INTR_FS_MAX_PACKET_SIZE,
     .idVendor = 0x1234,
     .idProduct = 0x0100,
     .bcdDevice = 65535,
@@ -127,15 +127,15 @@ static const srt_hal_usb_device_desc_t sgrt_fsl_mouse_device_dt =
 };
 
 /*!< Hid mouse hid descriptor */
-static const srt_hal_usb_hid_desc_t sgrt_fsl_mouse_hid_dt =
+static const srt_fwk_usb_hid_desc_t sgrt_fsl_mouse_hid_dt =
 {
-    .bLenth = HAL_USB_DT_HID_SIZE,
-    .bDescriptorType = HAL_USB_DT_HID,
+    .bLenth = FWK_USB_DT_HID_SIZE,
+    .bDescriptorType = FWK_USB_DT_HID,
 
     .bcdHID = 0x0200,
     .bCountryCode = 156,
     .bNumDescriptor = 0U,
-    .bSubDescriptorType = HAL_USB_DT_HID_REPORT,
+    .bSubDescriptorType = FWK_USB_DT_HID_REPORT,
     .wDescriptorLength = 0U,
 };
 
@@ -160,10 +160,10 @@ irq_return_t fsl_mouse_driver_handler(void *ptrDev)
 {
     if (!mrt_isValid(ptrDev))
     {
-        return mrt_retval(Ert_isNullPtr);
+        return -NR_isNullPtr;
     }
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 }
 
 /*!
@@ -172,7 +172,7 @@ irq_return_t fsl_mouse_driver_handler(void *ptrDev)
  * @retval  errno
  * @note    none
  */
-static ksint32_t fsl_mouse_driver_open(struct hal_inode *sprt_inode, struct hal_file *sprt_file)
+static ksint32_t fsl_mouse_driver_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	struct fsl_mouse_drv *sprt_privdata;
 
@@ -188,7 +188,7 @@ static ksint32_t fsl_mouse_driver_open(struct hal_inode *sprt_inode, struct hal_
  * @retval  errno
  * @note    none
  */
-static ksint32_t fsl_mouse_driver_close(struct hal_inode *sprt_inode, struct hal_file *sprt_file)
+static ksint32_t fsl_mouse_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	sprt_file->private_data = mrt_nullptr;
 
@@ -201,7 +201,7 @@ static ksint32_t fsl_mouse_driver_close(struct hal_inode *sprt_inode, struct hal
  * @retval  errno
  * @note    none
  */
-static kssize_t fsl_mouse_driver_write(struct hal_file *sprt_file, const ksbuffer_t *ptrBuffer, kssize_t size)
+static kssize_t fsl_mouse_driver_write(struct fwk_file *sprt_file, const ksbuffer_t *ptrBuffer, kssize_t size)
 {
     return 0;
 }
@@ -212,13 +212,13 @@ static kssize_t fsl_mouse_driver_write(struct hal_file *sprt_file, const ksbuffe
  * @retval  errno
  * @note    none
  */
-static kssize_t fsl_mouse_driver_read(struct hal_file *sprt_file, ksbuffer_t *ptrBuffer, kssize_t size)
+static kssize_t fsl_mouse_driver_read(struct fwk_file *sprt_file, ksbuffer_t *ptrBuffer, kssize_t size)
 {
 	return 0;
 }
 
 /*!< led-template driver operation */
-const struct hal_file_oprts sgrt_fsl_mouse_driver_oprts =
+const struct fwk_file_oprts sgrt_fsl_mouse_driver_oprts =
 {
 	.open	= fsl_mouse_driver_open,
 	.close	= fsl_mouse_driver_close,
@@ -233,18 +233,18 @@ const struct hal_file_oprts sgrt_fsl_mouse_driver_oprts =
  * @retval  errno
  * @note    none
  */
-static ksint32_t fsl_mouse_driver_probe(struct hal_platdev *sprt_dev)
+static ksint32_t fsl_mouse_driver_probe(struct fwk_platdev *sprt_dev)
 {
 	ksint32_t retval;
 
     /*!< Register interrupt handler */
-	retval = hal_request_irq(75, fsl_mouse_driver_handler, 0, FSL_MOUSE_DRIVER_NAME, mrt_nullptr);
+	retval = fwk_request_irq(75, fsl_mouse_driver_handler, 0, FSL_MOUSE_DRIVER_NAME, mrt_nullptr);
 	if (mrt_isErr(retval))
 	{
-        return mrt_retval(Ert_isNotSuccess);
+        return -NR_isNotSuccess;
     }
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 }
 
 /*!
@@ -253,14 +253,14 @@ static ksint32_t fsl_mouse_driver_probe(struct hal_platdev *sprt_dev)
  * @retval  errno
  * @note    none
  */
-static ksint32_t fsl_mouse_driver_remove(struct hal_platdev *sprt_dev)
+static ksint32_t fsl_mouse_driver_remove(struct fwk_platdev *sprt_dev)
 {
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 }
 
 /*!< platform instance */
-static struct hal_platdrv sgrt_fsl_mouse_platdriver =
+static struct fwk_platdrv sgrt_fsl_mouse_platdriver =
 {
 	.probe	= fsl_mouse_driver_probe,
 	.remove	= fsl_mouse_driver_remove,
@@ -279,9 +279,9 @@ static struct hal_platdrv sgrt_fsl_mouse_platdriver =
  * @retval  errno
  * @note    none
  */
-ksint32_t __hal_init fsl_mouse_driver_init(void)
+ksint32_t __fwk_init fsl_mouse_driver_init(void)
 {
-	return hal_register_platdriver(&sgrt_fsl_mouse_platdriver);
+	return fwk_register_platdriver(&sgrt_fsl_mouse_platdriver);
 }
 
 /*!
@@ -290,9 +290,9 @@ ksint32_t __hal_init fsl_mouse_driver_init(void)
  * @retval  none
  * @note    none
  */
-void __hal_exit fsl_mouse_driver_exit(void)
+void __fwk_exit fsl_mouse_driver_exit(void)
 {
-	hal_unregister_platdriver(&sgrt_fsl_mouse_platdriver);
+	fwk_unregister_platdriver(&sgrt_fsl_mouse_platdriver);
 }
 
 // IMPORT_DRIVER_INIT(fsl_mouse_driver_init);

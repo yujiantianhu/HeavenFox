@@ -203,14 +203,14 @@ void imx6ull_console_init(void)
 						IMX6UL_IO_CTL_PAD_PUS_BIT(IMX6UL_IO_CTL_PAD_PUS_100K_UP) |
 						IMX6UL_IO_CTL_PAD_SPEED_BIT(IMX6UL_IO_CTL_PAD_SPEED_100MHZ) |
 						IMX6UL_IO_CTL_PAD_DSE_BIT(IMX6UL_IO_CTL_PAD_DSE_RDIV(6)));
-	imx_pin_attr_register(&sgrt_txPort, 0, IMX_CONSOLE_MUX_SELECT_TX, mrt_trans_urt_data(&ugrt_ioPad));
-	imx_pin_attr_register(&sgrt_rxPort, 0, IMX_CONSOLE_MUX_SELECT_RX, mrt_trans_urt_data(&ugrt_ioPad));
+	hal_imx_pin_attribute_init(&sgrt_txPort, 0, IMX_CONSOLE_MUX_SELECT_TX, mrt_trans_urt_data(&ugrt_ioPad));
+	hal_imx_pin_attribute_init(&sgrt_rxPort, 0, IMX_CONSOLE_MUX_SELECT_RX, mrt_trans_urt_data(&ugrt_ioPad));
 
-    imx_pin_mux_configure(&sgrt_txPort);
-    imx_pin_mux_configure(&sgrt_rxPort);
+    hal_imx_pin_mux_configure(&sgrt_txPort);
+    hal_imx_pin_mux_configure(&sgrt_rxPort);
     
-	imx_pin_pad_configure(&sgrt_txPort);
-	imx_pin_pad_configure(&sgrt_rxPort);
+	hal_imx_pin_pad_configure(&sgrt_txPort);
+	hal_imx_pin_pad_configure(&sgrt_rxPort);
 	
 	/*!< Disable Uart, and clear all settings (including automatic baud rate detection) */
     mrt_writel(0, &sprt_Uart->UCR1);

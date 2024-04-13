@@ -1,7 +1,7 @@
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/rfs_fatfs.c \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdc-predef.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/kmem_pool.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_mempool.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdio.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/features.h \

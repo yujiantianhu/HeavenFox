@@ -13,8 +13,8 @@
 /*!< The includes */
 #include <configs/configs.h>
 #include <common/time.h>
-#include <platform/of/hal_of.h>
-#include <platform/irq/hal_irq_types.h>
+#include <platform/of/fwk_of.h>
+#include <platform/irq/fwk_irq_types.h>
 #include "imx6_common.h"
 
 /*!< The defines */
@@ -26,7 +26,7 @@
 #define IMX_SYSTICK_PORT_ENTRY()                        	IMX6UL_GPT_PROPERTY_ENTRY(1)
 
 /* The globals */
-static const struct hal_of_device_id sgrt_imx_systick_ids[] =
+static const struct fwk_of_device_id sgrt_imx_systick_ids[] =
 {
 	{ .compatible = "fsl,imx6ul-gpt" },
 	{},
@@ -44,18 +44,18 @@ irq_return_t imx6_systick_handler(void *ptrDev);
  */
 void imx6ull_systick_init(void)
 {
-	struct hal_device_node *sprt_node;
+	struct fwk_device_node *sprt_node;
 	srt_imx_gptimer_t *sprt_tick;
 	ksint32_t irq;
 	ksint32_t retval;
 
-	sprt_node = hal_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_systick_ids, mrt_nullptr);
+	sprt_node = fwk_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_systick_ids, mrt_nullptr);
 	if (!mrt_isValid(sprt_node))
 	{
 		return;
 	}
 
-	irq = hal_of_irq_get(sprt_node, 0);
+	irq = fwk_of_irq_get(sprt_node, 0);
 	if (irq < 0)
 	{
 		return;
@@ -98,7 +98,7 @@ void imx6ull_systick_init(void)
 	 */
 	mrt_resetl(&sprt_tick->IR);
 
-	retval = hal_request_irq(irq, imx6_systick_handler, 0, "imx6-systick", sprt_tick);
+	retval = fwk_request_irq(irq, imx6_systick_handler, 0, "imx6-systick", sprt_tick);
 	if (!mrt_isErr(retval))
 	{
 		mrt_setbitl(mrt_bit(0U), &sprt_tick->IR);
@@ -184,7 +184,7 @@ irq_return_t imx6_systick_handler(void *ptrDev)
 		mrt_setbitl(mrt_bit(0), &sprt_tick->SR);
 	}
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 }
 
 /* end of file*/

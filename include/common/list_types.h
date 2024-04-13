@@ -15,7 +15,7 @@
 
 /*!< The includes */
 #include "generic.h"
-#include <platform/kmem_pool.h>
+#include <platform/fwk_mempool.h>
 
 /*!< The defines */
 /*!< Singly List */
@@ -177,7 +177,7 @@ static inline ksint32_t list_head_for_each(struct list_head *head, struct list_h
 	{
 		if ((ptr_left == list) || (ptr_right == list))
 		{
-			return mrt_retval(Ert_isWell);
+			return NR_isWell;
 		}
 
 		if (ptr_left == ptr_right)
@@ -186,7 +186,7 @@ static inline ksint32_t list_head_for_each(struct list_head *head, struct list_h
 		}
 	}
 
-	return mrt_retval(Ert_isAnyErr);
+	return -NR_isAnyErr;
 }
 
 /*!< insert a new member behind list head */

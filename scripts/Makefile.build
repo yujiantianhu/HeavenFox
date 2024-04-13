@@ -1,0 +1,71 @@
+#
+# Kernel Top Makefile
+#
+# File Name:   Makefile
+# Author:      Yang Yujun
+# E-mail:      <yujiantianhu@163.com>
+# Created on:  2024.04.12
+#
+# Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
+#
+
+build:
+
+obj-y		:=
+
+include Makefile
+
+# get current path
+cur_path	:= 	$(shell pwd)
+obj_path	:=	$(patsubst $(PROJECT_DIR)%, $(OBJECT_PATH)%, $(cur_path))
+
+# get built-in.o in subdirectory
+dir-y		:=	$(patsubst %/, %, $(filter %/, $(obj-y)))
+
+ifeq ($(dir-y),)
+build-obj	:=
+
+else
+build-obj	:=	$(addsuffix /built-in.o, $(dir-y))
+build-obj	:=	$(addprefix $(cur_path)/, $(build-obj))
+build-obj	:=	$(patsubst $(PROJECT_DIR)%, $(OBJECT_PATH)%, $(build-obj))
+endif
+
+# get xxx.o in current directory
+ouput-obj	:=	$(filter-out %/, $(obj-y))
+
+ifneq ($(ouput-obj),)
+ouput-obj	:=	$(addprefix $(cur_path)/, $(ouput-obj))
+ouput-obj	:=	$(patsubst $(PROJECT_DIR)%, $(OBJECT_PATH)%, $(ouput-obj))
+endif
+
+VPATH		:=	$(cur_path)
+.PHONY		+=	build debug
+
+build : $(obj_path)/built-in.o
+
+$(obj_path)/built-in.o : $(build-obj) $(ouput-obj)
+	$(LD) -T$(LINK_SCRIPT) -r -o $@ $^ $(LIBS_PATH) $(LIBS)
+
+$(build-obj):
+	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(PROJECT_DIR)/scripts/Makefile.build; done
+
+$(obj_path)/%.o : %.c
+	if [ ! -d $(obj_path) ]; then mkdir -p $(obj_path); fi
+	$(CC) -c $(BUILD_CFLAGS) $(MACROS) $(INCLUDE_DIRS) $(OUTPUT_FLAGS) -o $@ $<
+
+$(obj_path)/%.o : %.S
+	if [ ! -d $(obj_path) ]; then mkdir -p $(obj_path); fi
+	$(CC) -c $(BUILD_CFLAGS) $(MACROS) $(INCLUDE_DIRS) $(OUTPUT_FLAGS) -o $@ $<
+
+clean:
+	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(PROJECT_DIR)/scripts/Makefile.build clean; done
+	rm -rf $(ouput-obj) $(build-obj)
+	rm -rf $(obj_path)
+
+debug:
+	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(PROJECT_DIR)/scripts/Makefile.build debug; done
+
+	@echo '==========>' $(build-obj)
+
+# end of file

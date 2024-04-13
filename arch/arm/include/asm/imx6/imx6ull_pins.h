@@ -140,24 +140,23 @@ UNION_SRT_FORMAT_DECLARE(urt_imx_io_ctl_pad, srt_imx_io_ctl_pad_t)
 #define IMX6UL_IO_CTL_PAD_SRE_BIT(x)                mrt_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_SRE_MASK, IMX6UL_IO_CTL_PAD_SRE_OFFSET)
 
 /*!
- * @brief   imx_pin_attr_register
+ * @brief   hal_imx_pin_attribute_init
  * @param   none
  * @retval  none
  * @note    initial pin configuration
  */
-static inline void imx_pin_attr_register(srt_imx_pin_t *sprt_Config,
-                                         kuaddr_t  base,
-                                         kuint32_t mux_offset, 
-                                         kuint32_t pad_offset,
-                                         kuint32_t input_offset,
-                                         kuint32_t mux_data,
-                                         kuint32_t input_data,
-                                         kuint32_t pad_data)
+static inline void hal_imx_pin_attribute_init(srt_imx_pin_t *sprt_cfg, kuaddr_t base,
+                                                kuint32_t mux_offset, 
+                                                kuint32_t pad_offset,
+                                                kuint32_t input_offset,
+                                                kuint32_t mux_data,
+                                                kuint32_t input_data,
+                                                kuint32_t pad_data)
 {
     kuaddr_t start = base ? base : IMX6UL_PIN_ADDR_BASE;
 
     /*!< clear all */
-    /* memory_reset(sprt_Config, sizeof(srt_imx_pin_t)); */
+    /* memory_reset(sprt_cfg, sizeof(srt_imx_pin_t)); */
 
     /*!<
      * SW_MUX
@@ -167,97 +166,103 @@ static inline void imx_pin_attr_register(srt_imx_pin_t *sprt_Config,
      *               0, DISABLE, Determined by functionly. Suggest 0.
      *  bit[3 : 0]:  Function; ALT5 (0101 <0x5>) is generally used to configure GPIO. Refer to "imx6ul_pinfunc.h"
      */
-    sprt_Config->mux_base   = start + mux_offset;
-    sprt_Config->mux_data   = mrt_mask(mux_data, 0xfU) | mrt_bit_nr(0U, 4U);
+    sprt_cfg->mux_base   = start + mux_offset;
+    sprt_cfg->mux_data   = mrt_mask(mux_data, 0xfU) | mrt_bit_nr(0U, 4U);
 
     /*!<
      * SW_PAD
      * sometimes it will be set "0x10b0" ===>
      *                Hyst = 0, 100k pull down, keeper = 1, OD = 0, 100MHz, R0/6, slow slew rate
      */
-    sprt_Config->pad_base   = start + pad_offset;
-    sprt_Config->pad_data   = pad_data;
+    sprt_cfg->pad_base   = start + pad_offset;
+    sprt_cfg->pad_data   = pad_data;
 
     /*!<
      * INPUT
      */
-    sprt_Config->input_base = input_offset ? (start + input_offset) : 0;
-    sprt_Config->input_data = input_data;
+    sprt_cfg->input_base = input_offset ? (start + input_offset) : 0;
+    sprt_cfg->input_data = input_data;
 }
 
 /*!
- * @brief   imx_pin_attr_auto_register
+ * @brief   hal_imx_pin_auto_init
  * @param   none
  * @retval  none
  * @note    initial pin configuration
  */
-static inline void imx_pin_attr_auto_register(srt_imx_pin_t *sprt_Config, kuaddr_t base, kuint32_t *ptr_value, kusize_t size)
+static inline void hal_imx_pin_auto_init(srt_imx_pin_t *sprt_cfg, kuaddr_t base, kuint32_t *ptr_value, kusize_t size)
 {
     if (size == IMX6UL_MUX_CONF_SIZE)
-        imx_pin_attr_register(sprt_Config, base, ptr_value[0], ptr_value[1], ptr_value[2], ptr_value[3], ptr_value[4], ptr_value[5]);
+        hal_imx_pin_attribute_init(sprt_cfg, base, ptr_value[0], ptr_value[1], ptr_value[2], ptr_value[3], ptr_value[4], ptr_value[5]);
 }
 
 /*!
- * @brief   imx_pin_mux_configure
+ * @brief   hal_imx_pin_mux_configure
  * @param   none
  * @retval  none
  * @note    configure pin multiplex
  */
-static inline void imx_pin_mux_configure(srt_imx_pin_t *sprt_Config)
+static inline void hal_imx_pin_mux_configure(srt_imx_pin_t *sprt_cfg)
 {
-    if (mrt_isValid(sprt_Config->mux_base))
+    if (mrt_isValid(sprt_cfg->mux_base))
     {
-        mrt_writel(sprt_Config->mux_data, sprt_Config->mux_base);
+        mrt_writel(sprt_cfg->mux_data, sprt_cfg->mux_base);
     }
 }
 
 /*!
- * @brief   imx_pin_pad_configure
+ * @brief   hal_imx_pin_pad_configure
  * @param   none
  * @retval  none
  * @note    configure pin property
  */
-static inline void imx_pin_pad_configure(srt_imx_pin_t *sprt_Config)
+static inline void hal_imx_pin_pad_configure(srt_imx_pin_t *sprt_cfg)
 {
-    if (mrt_isValid(sprt_Config->pad_base))
+    if (mrt_isValid(sprt_cfg->pad_base))
     {
-        mrt_writel(sprt_Config->pad_data, sprt_Config->pad_base);
-    }
-}
-
-static inline void imx_pin_configure(srt_imx_pin_t *sprt_Config)
-{
-    mrt_writel(sprt_Config->mux_data, sprt_Config->mux_base);
-    mrt_writel(sprt_Config->pad_data, sprt_Config->pad_base);
-
-    if (sprt_Config->input_base)
-    {
-        mrt_writel(sprt_Config->input_data, sprt_Config->input_base);
+        mrt_writel(sprt_cfg->pad_data, sprt_cfg->pad_base);
     }
 }
 
 /*!
- * @brief   imx_set_pin_mux
+ * @brief   configure all
+ * @param   none
+ * @retval  none
+ * @note    configure pin property
+ */
+static inline void hal_imx_pin_configure(srt_imx_pin_t *sprt_cfg)
+{
+    mrt_writel(sprt_cfg->mux_data, sprt_cfg->mux_base);
+    mrt_writel(sprt_cfg->pad_data, sprt_cfg->pad_base);
+
+    if (sprt_cfg->input_base)
+    {
+        mrt_writel(sprt_cfg->input_data, sprt_cfg->input_base);
+    }
+}
+
+/*!
+ * @brief   hal_imx_set_pin_mux
  * @param   none
  * @retval  none
  * @note    configure pin multiplex
  */
-static inline void imx_set_pin_mux(srt_imx_pin_t *sprt_Config, kuint32_t data)
+static inline void hal_imx_set_pin_mux(srt_imx_pin_t *sprt_cfg, kuint32_t data)
 {
-    sprt_Config->mux_data = data;
-    imx_pin_mux_configure(sprt_Config);
+    sprt_cfg->mux_data = data;
+    hal_imx_pin_mux_configure(sprt_cfg);
 }
 
 /*!
- * @brief   imx_set_pin_pad
+ * @brief   hal_imx_set_pin_pad
  * @param   none
  * @retval  none
  * @note    configure pin property
  */
-static inline void imx_set_pin_pad(srt_imx_pin_t *sprt_Config, kuint32_t data)
+static inline void hal_imx_set_pin_pad(srt_imx_pin_t *sprt_cfg, kuint32_t data)
 {
-    sprt_Config->pad_data = data;
-    imx_pin_pad_configure(sprt_Config);
+    sprt_cfg->pad_data = data;
+    hal_imx_pin_pad_configure(sprt_cfg);
 }
 
 #endif /* __IMX6UL_PINS_H */

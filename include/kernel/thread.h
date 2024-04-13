@@ -22,7 +22,7 @@
 #include <board/board_common.h>
 #include <boot/boot_text.h>
 #include <boot/implicit_call.h>
-#include <platform/kmem_pool.h>
+#include <platform/fwk_mempool.h>
 #include <kernel/kernel.h>
 #include <kernel/context.h>
 #include <kernel/sleep.h>

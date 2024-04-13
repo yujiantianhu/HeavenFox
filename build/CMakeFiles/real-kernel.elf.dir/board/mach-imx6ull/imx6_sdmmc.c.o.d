@@ -62,7 +62,7 @@ CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_sdmmc.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/error_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/list_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/kmem_pool.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_mempool.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/mem_manage.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/kernel.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/configs/configs.h \
@@ -77,7 +77,7 @@ CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_sdmmc.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/io_stream.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/boot_text.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/board/board_common.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/mmc/hal_sdcard.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/mmc/fwk_sdcard.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/board/mach-imx6ull/imx6_common.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/include/asm/imx6/imx6ull_clocks.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/include/asm/imx6/imx6ul_pinfunc.h \

@@ -23,15 +23,15 @@
 
 enum __ERT_IMX6UL_CCM_CCGRx
 {
-    Ert_IMX6UL_CCM_CCGR0 = 0,
-    Ert_IMX6UL_CCM_CCGR1,
-    Ert_IMX6UL_CCM_CCGR2,
-    Ert_IMX6UL_CCM_CCGR3,
-    Ert_IMX6UL_CCM_CCGR4,
-    Ert_IMX6UL_CCM_CCGR5,
-    Ert_IMX6UL_CCM_CCGR6,
+    NR_IMX6UL_CCM_CCGR0 = 0,
+    NR_IMX6UL_CCM_CCGR1,
+    NR_IMX6UL_CCM_CCGR2,
+    NR_IMX6UL_CCM_CCGR3,
+    NR_IMX6UL_CCM_CCGR4,
+    NR_IMX6UL_CCM_CCGR5,
+    NR_IMX6UL_CCM_CCGR6,
 
-	Ert_IMX6UL_CCM_CCGR_NUM
+	NR_IMX6UL_CCM_CCGR_NUM
 };
 
 /*!<
@@ -322,15 +322,15 @@ static void imx6ull_periph_freq_configure(void)
  */
 static void imx6ull_clk_initial(void)
 {
-	kuaddr_t g_iCCM_CGRx[Ert_IMX6UL_CCM_CCGR_NUM] =
+	kuaddr_t g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR_NUM] =
 	{
-		[Ert_IMX6UL_CCM_CCGR0] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(0),
-		[Ert_IMX6UL_CCM_CCGR1] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(1),
-		[Ert_IMX6UL_CCM_CCGR2] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(2),
-		[Ert_IMX6UL_CCM_CCGR3] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(3),
-		[Ert_IMX6UL_CCM_CCGR4] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(4),
-		[Ert_IMX6UL_CCM_CCGR5] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(5),
-		[Ert_IMX6UL_CCM_CCGR6] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(6),
+		[NR_IMX6UL_CCM_CCGR0] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(0),
+		[NR_IMX6UL_CCM_CCGR1] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(1),
+		[NR_IMX6UL_CCM_CCGR2] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(2),
+		[NR_IMX6UL_CCM_CCGR3] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(3),
+		[NR_IMX6UL_CCM_CCGR4] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(4),
+		[NR_IMX6UL_CCM_CCGR5] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(5),
+		[NR_IMX6UL_CCM_CCGR6] = IMX6UL_CCM_CCGR_CLOCK_ENTRY(6),
 	};
 
 	/*!< Main Freq */
@@ -346,39 +346,39 @@ static void imx6ull_clk_initial(void)
 	/*!< CCM_CCGR0 */
 	mrt_writel(IMX6UL_CCM_CCGR_BIT(0)  | IMX6UL_CCM_CCGR_BIT(1)  | 		/*!< aips_tz1 and aips_tz2 */
 			   IMX6UL_CCM_CCGR_BIT(11), 								/*!< cpu debug */
-			   g_iCCM_CGRx[Ert_IMX6UL_CCM_CCGR0]);
+			   g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR0]);
 
 	/*!< CCM_CCGR1 */
 	mrt_writel(IMX6UL_CCM_CCGR_BIT(9) | IMX6UL_CCM_CCGR_BIT(14), 		/*!< sim_s and csu */
-			   g_iCCM_CGRx[Ert_IMX6UL_CCM_CCGR1]);
+			   g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR1]);
 
 	/*!< CCM_CCGR2 */
 	mrt_writel(IMX6UL_CCM_CCGR_BIT(2)  | IMX6UL_CCM_CCGR_BIT(8) | 		/*!< iomuxc_snvs and ipmux1 */
 			   IMX6UL_CCM_CCGR_BIT(9) | IMX6UL_CCM_CCGR_BIT(10), 		/*!< ipmux2 and ipmux3 */
-			   g_iCCM_CGRx[Ert_IMX6UL_CCM_CCGR2]);
+			   g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR2]);
 
 	/*!< CCM_CCGR3 */
 	mrt_writel(IMX6UL_CCM_CCGR_BIT(4)  | IMX6UL_CCM_CCGR_BIT(7) |		/*!< CA7 CCM DAP and iomux_ipt_clk_io */
 			   IMX6UL_CCM_CCGR_BIT(9) | IMX6UL_CCM_CCGR_BIT(10) |		/*!< a7 clkdiv patch and mmdc_core_aclk_fast_core_p0 */
 			   IMX6UL_CCM_CCGR_BIT(13) | IMX6UL_CCM_CCGR_BIT(14) |		/*!< mmdc_core_ipg_clk_p1 and ocram */
 			   IMX6UL_CCM_CCGR_BIT(15), 								/*!< iomuxc_snvs_gpr */
-			   g_iCCM_CGRx[Ert_IMX6UL_CCM_CCGR3]);
+			   g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR3]);
 
 	/*!< CCM_CCGR4 */
 	mrt_writel(IMX6UL_CCM_CCGR_BIT(1)  | IMX6UL_CCM_CCGR_BIT(2)  |		/*!< iomuxc and iomuxc gpr */
 			   IMX6UL_CCM_CCGR_BIT(3)  | IMX6UL_CCM_CCGR_BIT(4)  |		/*!< sim_cpu and cxapbsyncbridge slave */
 			   IMX6UL_CCM_CCGR_BIT(6) | IMX6UL_CCM_CCGR_BIT(7), 		/*!< pl301_mx6qper1_bch and pl301_mx6qper2_mainclk */
-			   g_iCCM_CGRx[Ert_IMX6UL_CCM_CCGR4]);
+			   g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR4]);
 
 	/*!< CCM_CCGR5 */
 	mrt_writel(IMX6UL_CCM_CCGR_BIT(0)  | IMX6UL_CCM_CCGR_BIT(2)  |		/*!< rom and snvs dryice */
 			   IMX6UL_CCM_CCGR_BIT(8) | IMX6UL_CCM_CCGR_BIT(10), 		/*!< sim_main and snvs_lp */
-			   g_iCCM_CGRx[Ert_IMX6UL_CCM_CCGR5]);
+			   g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR5]);
 
 	/*!< CCM_CCGR6 */
 	mrt_writel(IMX6UL_CCM_CCGR_BIT(4)  | IMX6UL_CCM_CCGR_BIT(9) |		/*!< ipmux4 and aips_tz3 */
 			   IMX6UL_CCM_CCGR_BIT(11) | IMX6UL_CCM_CCGR_BIT(14), 		/*!< anadig and csu */
-			   g_iCCM_CGRx[Ert_IMX6UL_CCM_CCGR6]);
+			   g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR6]);
 }
 
 /*!

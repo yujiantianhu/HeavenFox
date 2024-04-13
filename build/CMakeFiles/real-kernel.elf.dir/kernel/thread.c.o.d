@@ -60,7 +60,7 @@ CMakeFiles/real-kernel.elf.dir/kernel/thread.c.o: \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/assert.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/list_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/kmem_pool.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_mempool.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/mem_manage.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/kernel.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/configs/configs.h \

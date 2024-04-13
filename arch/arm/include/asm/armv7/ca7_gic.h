@@ -130,9 +130,9 @@ typedef struct ca7_gic_cpu
     (((gic) && ((gic)->cpu_base))  ? (srt_ca7_gic_cpu_t *)((gic)->cpu_base)  : __mrt_get_gic_interface())
 
 /* The functions */
-TARGET_EXT srt_ca7_gic_t *hal_get_gic_data(kuint32_t gic_nr);
-TARGET_EXT ksint32_t hal_gic_to_gpc_irq(ksint32_t hwirq);
-TARGET_EXT ksint32_t hal_gpc_to_gic_irq(ksint32_t virq);
+TARGET_EXT srt_ca7_gic_t *fwk_get_gic_data(kuint32_t gic_nr);
+TARGET_EXT ksint32_t fwk_gic_to_gpc_irq(ksint32_t hwirq);
+TARGET_EXT ksint32_t fwk_gpc_to_gic_irq(ksint32_t virq);
 
 /*!
  * @brief   gic enbale irq
@@ -142,11 +142,11 @@ TARGET_EXT ksint32_t hal_gpc_to_gic_irq(ksint32_t virq);
  */
 static inline void local_irq_enable(ksint32_t irq_number)
 {
-    srt_ca7_gic_t *sprt_gic = hal_get_gic_data(0);
+    srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_des_t *sprt_dest;
     ksint32_t hwirq;
 
-    hwirq = hal_gpc_to_gic_irq(irq_number);
+    hwirq = fwk_gpc_to_gic_irq(irq_number);
     if (hwirq < 0)
     {
         return;
@@ -164,11 +164,11 @@ static inline void local_irq_enable(ksint32_t irq_number)
  */
 static inline void local_irq_disable(ksint32_t irq_number)
 {
-    srt_ca7_gic_t *sprt_gic = hal_get_gic_data(0);
+    srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_des_t *sprt_dest;
     ksint32_t hwirq;
 
-    hwirq = hal_gpc_to_gic_irq(irq_number);
+    hwirq = fwk_gpc_to_gic_irq(irq_number);
     if (hwirq < 0)
     {
         return;
@@ -186,7 +186,7 @@ static inline void local_irq_disable(ksint32_t irq_number)
  */
 static inline ksint32_t local_irq_acknowledge(void)
 {
-    srt_ca7_gic_t *sprt_gic = hal_get_gic_data(0);
+    srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_cpu_t *sprt_cpu;
 
     sprt_cpu = mrt_get_gic_interface(sprt_gic);
@@ -201,7 +201,7 @@ static inline ksint32_t local_irq_acknowledge(void)
  */
 static inline void local_irq_deactivate(kuint32_t value)
 {
-    srt_ca7_gic_t *sprt_gic = hal_get_gic_data(0);
+    srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_cpu_t *sprt_cpu;
 
     sprt_cpu = mrt_get_gic_interface(sprt_gic);
@@ -216,7 +216,7 @@ static inline void local_irq_deactivate(kuint32_t value)
  */
 static inline kuint32_t local_irq_getRunningPriority(void)
 {
-    srt_ca7_gic_t *sprt_gic = hal_get_gic_data(0);
+    srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_cpu_t *sprt_cpu;
 
     sprt_cpu = mrt_get_gic_interface(sprt_gic);
@@ -231,7 +231,7 @@ static inline kuint32_t local_irq_getRunningPriority(void)
  */
 static inline void local_irq_setPriorityGrouping(kuint32_t priorityGroup)
 {
-    srt_ca7_gic_t *sprt_gic = hal_get_gic_data(0);
+    srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_cpu_t *sprt_cpu;
 
     sprt_cpu = mrt_get_gic_interface(sprt_gic);
@@ -246,7 +246,7 @@ static inline void local_irq_setPriorityGrouping(kuint32_t priorityGroup)
  */
 static inline kuint32_t local_irq_getPriorityGrouping(void)
 {
-    srt_ca7_gic_t *sprt_gic = hal_get_gic_data(0);
+    srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_cpu_t *sprt_cpu;
 
     sprt_cpu = mrt_get_gic_interface(sprt_gic);
@@ -261,11 +261,11 @@ static inline kuint32_t local_irq_getPriorityGrouping(void)
  */
 static inline void local_irq_setPriority(kuint32_t irq_number, kuint32_t priority)
 {
-    srt_ca7_gic_t *sprt_gic = hal_get_gic_data(0);
+    srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_des_t *sprt_dest;
     ksint32_t hwirq;
 
-    hwirq = hal_gpc_to_gic_irq(irq_number);
+    hwirq = fwk_gpc_to_gic_irq(irq_number);
     if (hwirq < 0)
     {
         return;
@@ -283,11 +283,11 @@ static inline void local_irq_setPriority(kuint32_t irq_number, kuint32_t priorit
  */
 static inline kuint32_t local_irq_getPriority(kuint32_t irq_number)
 {
-    srt_ca7_gic_t *sprt_gic = hal_get_gic_data(0);
+    srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_des_t *sprt_dest;
     ksint32_t hwirq;
 
-    hwirq = hal_gpc_to_gic_irq(irq_number);
+    hwirq = fwk_gpc_to_gic_irq(irq_number);
     if (hwirq < 0)
     {
         return 0;

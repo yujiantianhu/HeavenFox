@@ -62,7 +62,7 @@ CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx_common.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/error_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/list_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/kmem_pool.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_mempool.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/mem_manage.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/kernel.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/configs/configs.h \

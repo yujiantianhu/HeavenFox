@@ -25,21 +25,21 @@
 
 enum __ERT_DYNC_SECTION_DEF
 {
-	Ert_Dync_Sec_Static		= 0,					/*!< save persistent params */
-	Ert_Dync_Sec_Early		= 1,					/*!< board early initial */
-	Ert_Dync_Sec_Late		= 2,					/*!< board late initial */
-	Ert_Dync_Sec_Kernel		= 3,					/*!< kernel initial */
-	Ert_Dync_Sec_Rootfs		= 4,					/*!< root filesystem initial */
-	Ert_Dync_Sec_Platform	= 5,					/*!< platform(global or general) initial */
-	Ert_Dync_Sec_Pattern	= 6,					/*!< make platform reality */
-	Ert_Dync_Sec_Device		= 7,					/*!< platform device */
-	Ert_Dync_Sec_Driver		= 8,					/*!< platform driver */
-	Ert_Dync_Sec_Others		= 9,					/*!< others, like temprory varibles, functions, and so on */
-	Ert_Dync_Sec_Blk_End,
+	NR_DYNC_SEC_STATIC		= 0,					/*!< save persistent params */
+	NR_DYNC_SEC_EARLY		= 1,					/*!< board early initial */
+	NR_DYNC_SEC_LATE		= 2,					/*!< board late initial */
+	NR_DYNC_SEC_KERNEL		= 3,					/*!< kernel initial */
+	NR_DYNC_SEC_ROOTFS		= 4,					/*!< root filesystem initial */
+	NR_DYNC_SEC_PLATFORM	= 5,					/*!< platform(global or general) initial */
+	NR_DYNC_SEC_PATTERN		= 6,					/*!< make platform reality */
+	NR_DYNC_SEC_DEVICE		= 7,					/*!< platform device */
+	NR_DYNC_SEC_DRIVER		= 8,					/*!< platform driver */
+	NR_DYNC_SEC_OTHERS		= 9,					/*!< others, like temprory varibles, functions, and so on */
+	NR_DYNC_SEC_BLK_END,
 
 	/*!< real start and end address */
-	Ert_Dync_Sec_Start,
-	Ert_Dync_Sec_End,
+	NR_DYNC_SEC_START,
+	NR_DYNC_SEC_END,
 };
 
 /*!< *(.dync_init.0), *(.dync_exit.0) */
@@ -87,8 +87,8 @@ enum __ERT_DYNC_SECTION_DEF
 #define __plat_init									__init
 #define __plat_exit									__exit
 
-#define __hal_init									__init
-#define __hal_exit									__exit
+#define __fwk_init									__init
+#define __fwk_exit									__exit
 
 /*!< sections list*/
 TARGET_EXT const dync_init_t *dync_init_sections[];
@@ -111,26 +111,26 @@ TARGET_EXT const dync_exit_t *dync_exit_sections[];
 
 /* for recycle */
 /* init */
-#define mrt_foreach_init(ptr)						FOREACH_DYNC_SEC_INIT(ptr, Ert_Dync_Sec_Start)
-#define mrt_foreach_early_init(ptr)					FOREACH_DYNC_SEC_INIT(ptr, Ert_Dync_Sec_Early)
-#define mrt_foreach_late_init(ptr)					FOREACH_DYNC_SEC_INIT(ptr, Ert_Dync_Sec_Late)
-#define mrt_foreach_kernel_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, Ert_Dync_Sec_Kernel)
-#define mrt_foreach_rootfs_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, Ert_Dync_Sec_Rootfs)
-#define mrt_foreach_platform_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, Ert_Dync_Sec_Platform)
-#define mrt_foreach_pattern_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, Ert_Dync_Sec_Pattern)
-#define mrt_foreach_device_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, Ert_Dync_Sec_Device)
-#define mrt_foreach_driver_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, Ert_Dync_Sec_Driver)
+#define mrt_foreach_init(ptr)						FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_START)
+#define mrt_foreach_early_init(ptr)					FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_EARLY)
+#define mrt_foreach_late_init(ptr)					FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_LATE)
+#define mrt_foreach_kernel_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_KERNEL)
+#define mrt_foreach_rootfs_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_ROOTFS)
+#define mrt_foreach_platform_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_PLATFORM)
+#define mrt_foreach_pattern_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_PATTERN)
+#define mrt_foreach_device_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_DEVICE)
+#define mrt_foreach_driver_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_DRIVER)
 
 /* exit */
-#define mrt_foreach_exit(ptr)						FOREACH_DYNC_SEC_EXIT(ptr, Ert_Dync_Sec_Start)
-#define mrt_foreach_early_exit(ptr)					FOREACH_DYNC_SEC_EXIT(ptr, Ert_Dync_Sec_Early)
-#define mrt_foreach_late_exit(ptr)					FOREACH_DYNC_SEC_EXIT(ptr, Ert_Dync_Sec_Late)
-#define mrt_foreach_kernel_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, Ert_Dync_Sec_Kernel)
-#define mrt_foreach_rootfs_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, Ert_Dync_Sec_Rootfs)
-#define mrt_foreach_platform_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, Ert_Dync_Sec_Platform)
-#define mrt_foreach_pattern_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, Ert_Dync_Sec_Pattern)
-#define mrt_foreach_device_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, Ert_Dync_Sec_Device)
-#define mrt_foreach_driver_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, Ert_Dync_Sec_Driver)
+#define mrt_foreach_exit(ptr)						FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_START)
+#define mrt_foreach_early_exit(ptr)					FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_EARLY)
+#define mrt_foreach_late_exit(ptr)					FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_LATE)
+#define mrt_foreach_kernel_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_KERNEL)
+#define mrt_foreach_rootfs_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_ROOTFS)
+#define mrt_foreach_platform_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_PLATFORM)
+#define mrt_foreach_pattern_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_PATTERN)
+#define mrt_foreach_device_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_DEVICE)
+#define mrt_foreach_driver_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_DRIVER)
 
 /* import */
 /* init */

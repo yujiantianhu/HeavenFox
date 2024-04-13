@@ -1,0 +1,82 @@
+/*
+ * Platform Bus Interface of Hardware Abstraction Layer
+ *
+ * File Name:   fwk_platdev.h
+ * Author:      Yang Yujun
+ * E-mail:      <yujiantianhu@163.com>
+ * Created on:  2023.05.23
+ *
+ * Copyright (c) 2023   Yang Yujun <yujiantianhu@163.com>
+ *
+ */
+
+#ifndef __FWK_PLATDEV_H_
+#define __FWK_PLATDEV_H_
+
+/*!< The includes */
+#include <platform/fwk_basic.h>
+#include <platform/fwk_platform.h>
+
+/*!< The defines */
+enum __ERT_DEVICE_RESOURCE_TYPE
+{
+	NR_DEVICE_RESOURCE_IO  = 0x00000100U,
+	NR_DEVICE_RESOURCE_MEM = 0x00000200U,
+	NR_DEVICE_RESOURCE_REG = 0x00000300U,
+	NR_DEVICE_RESOURCE_IRQ = 0x00000400U,
+	NR_DEVICE_RESOURCE_DMA = 0x00000800U,
+	NR_DEVICE_RESOURCE_BUS = 0x00001000U,
+};
+
+/*!< Hardware Information Table 1: Obtain hardware by address */
+struct fwk_resources
+{
+	kstring_t *name;
+	kuaddr_t start;
+	kuaddr_t end;
+	kuint32_t type;
+};
+
+/*!< Hardware Information Table 2: Obtain hardware by enum */
+struct fwk_enums
+{
+	ksint32_t pinEnum;
+	ksint32_t irqNum;
+
+	void *data;
+};
+
+struct fwk_platdev
+{
+	kstring_t *name;
+	ksint32_t id;
+
+	struct fwk_resources *sprt_resources;
+	kusize_t num_resources;
+
+	struct fwk_enums *sprt_enums;
+	kusize_t num_enums;
+
+	kstring_t *driver_override;
+	struct fwk_device sgrt_device;
+};
+
+#define RESOURCE_SIZE(sprt_res)						(sprt_res ? (sprt_res->end - sprt_res->start + 1) : 0)
+
+/*!< The functions */
+TARGET_EXT ksint32_t fwk_device_register(struct fwk_device *sprt_device);
+TARGET_EXT ksint32_t fwk_device_unregister(struct fwk_device *sprt_device);
+TARGET_EXT ksint32_t fwk_register_platdevice(struct fwk_platdev *sprt_platdev);
+TARGET_EXT ksint32_t fwk_unregister_platdevice(struct fwk_platdev *sprt_platdev);
+
+static inline kusize_t fwk_resource_size(struct fwk_resources *sprt_res)
+{
+	return sprt_res ? (sprt_res->end - sprt_res->start + 1) : 0;
+}
+
+static inline kuaddr_t fwk_address_map(struct fwk_resources *sprt_res)
+{
+	return sprt_res ? sprt_res->start : 0;
+}
+
+#endif /*!< __FWK_PLATDEV_H_ */

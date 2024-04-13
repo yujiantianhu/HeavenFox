@@ -386,7 +386,7 @@ typedef struct
 #define IMX6UL_SYSCLK_DIVID_FAC2                    (((srt_imx_ccm_pll_t   *)IMX6UL_CCM_ANALOG_BASE)->PLL_ARM & 0x7f)
 
 /*!< Define Sys_Clk by Inline function */
-static inline kuint64_t imx_sysclk_freq_counter(void)
+static inline kuint64_t hal_imx_sysclk_freq_counter(void)
 {
     return (kuint64_t)(((CONFIG_XTAL_FREQ_CLK * IMX6UL_SYSCLK_DIVID_FAC2) / IMX6UL_SYSCLK_DIVID_FAC1) >> 1);
 }

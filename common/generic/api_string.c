@@ -140,12 +140,12 @@ kbool_t do_string_compare(const void *ptr_dst, const void *ptr_src)
 	{
 		if (*(ptr_buf++) != *(ptr_ch++))
 		{
-			return Ert_true;
+			return true;
 		}
 
 	} while ('\0' != *ptr_ch);
 
-	return Ert_false;	
+	return false;	
 }
 
 /*!
@@ -164,19 +164,19 @@ kbool_t do_string_n_compare(const void *ptr_dst, const void *ptr_src, kuint32_t 
 
 	if (!size)
 	{
-		return Ert_true;
+		return true;
 	}
 
 	do
 	{
 		if (*(ptr_buf++) != *(ptr_ch++))
 		{
-			return Ert_true;
+			return true;
 		}
 
 	} while (('\0' != *ptr_ch) && (--size));
 
-	return Ert_false;	
+	return false;	
 }
 
 /*!
@@ -443,7 +443,7 @@ ksint32_t sprintk(void *ptr_buf, const kstring_t *ptr_fmt, ...)
 }
 
 /*!< -------------------------------------------------------------------- */
-#if (IT_FALSE)
+#if (0)
 /*!
  * @brief   strlen
  * @param   none

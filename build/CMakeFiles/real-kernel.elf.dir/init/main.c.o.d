@@ -73,7 +73,7 @@ CMakeFiles/real-kernel.elf.dir/init/main.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/time.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/list_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/kmem_pool.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_mempool.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/mem_manage.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/kernel.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/implicit_call.h \
@@ -81,18 +81,18 @@ CMakeFiles/real-kernel.elf.dir/init/main.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/board_init.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/api_string.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/board/board_common.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/mmc/hal_sdcard.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/mmc/fwk_sdcard.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/configs/mach_configs.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/hal_of.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_basic.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/hal_of_prop.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_fcntl.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_fs.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_inode.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_cdev.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_kobj.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/hal_uaccess.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/hal_irq.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_basic.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of_prop.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_fcntl.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_fs.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_inode.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_cdev.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_kobj.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_uaccess.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/sched.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/context.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/thread.h \

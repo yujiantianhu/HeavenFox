@@ -13,7 +13,7 @@
 /*!< The includes */
 #include <configs/configs.h>
 #include <asm/interrupt.h>
-#include <platform/irq/hal_irq_types.h>
+#include <platform/irq/fwk_irq_types.h>
 
 /*!< API function */
 /*!
@@ -41,8 +41,8 @@ void exec_irq_handler(void)
     hardirq = local_irq_acknowledge();
 
     /*!< find system soft IRQn, and excute IRQ handler */
-    softIrq = hal_gic_to_gpc_irq(hardirq);
-    hal_do_irq_handler(softIrq);
+    softIrq = fwk_gic_to_gpc_irq(hardirq);
+    fwk_do_irq_handler(softIrq);
 
     /*!< write IAR, disable IRQ */
     local_irq_deactivate(hardirq);
@@ -66,7 +66,7 @@ void exec_software_irq_handler(void)
 
     /*!< read IAR, enable IRQ */
     hardirq = local_irq_acknowledge();
-//  hal_handle_softirq(hardirq, event);
+//  fwk_handle_softirq(hardirq, event);
 
     /*!< write IAR, disable IRQ */
     local_irq_deactivate(hardirq);

@@ -13,7 +13,7 @@
 /*!< The includes*/
 #include <boot/board_init.h>
 #include <rootfs/rfs_disk.h>
-#include <platform/mmc/hal_sdfatfs.h>
+#include <platform/mmc/fwk_sdfatfs.h>
 
 /*!< API function */
 /*!
@@ -70,7 +70,7 @@ ksint32_t fdt_boot_initial(void)
     }
 
     iRetval = sgrt_file.init(&sgrt_file, "firmware.dtb", 
-                                Ert_RFS_DISK_OpenExsiting | Ert_RFS_DISK_OpenRead, CONFIG_DEVICE_TREE_BASE, CONFIG_FDT_MAX_SIZE);
+                                NR_RFS_DISK_OpenExsiting | NR_RFS_DISK_OpenRead, CONFIG_DEVICE_TREE_BASE, CONFIG_FDT_MAX_SIZE);
     if (mrt_isErr(iRetval))
     {
         printk(PRINT_LEVEL_DEBUG "read device-tree failed!\n");

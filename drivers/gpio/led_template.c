@@ -11,14 +11,14 @@
  */
 
 /*!< The includes */
-#include <platform/hal_basic.h>
-#include <platform/hal_cdev.h>
-#include <platform/hal_chrdev.h>
-#include <platform/hal_inode.h>
-#include <platform/hal_fs.h>
-#include <platform/of/hal_of.h>
-#include <platform/hal_platdrv.h>
-#include <platform/hal_uaccess.h>
+#include <platform/fwk_basic.h>
+#include <platform/fwk_cdev.h>
+#include <platform/fwk_chrdev.h>
+#include <platform/fwk_inode.h>
+#include <platform/fwk_fs.h>
+#include <platform/of/fwk_of.h>
+#include <platform/fwk_platdrv.h>
+#include <platform/fwk_uaccess.h>
 
 /*!< The defines */
 struct led_template_drv
@@ -28,7 +28,7 @@ struct led_template_drv
 	kuint32_t minor;
 	kuint32_t value[3];
 
-	struct hal_cdev *sprt_cdev;
+	struct fwk_cdev *sprt_cdev;
 	kuaddr_t output_address;
 
 	void *ptrData;
@@ -44,7 +44,7 @@ struct led_template_drv
  * @retval  errno
  * @note    none
  */
-static ksint32_t led_template_driver_open(struct hal_inode *sprt_inode, struct hal_file *sprt_file)
+static ksint32_t led_template_driver_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	struct led_template_drv *sprt_privdata;
 
@@ -60,7 +60,7 @@ static ksint32_t led_template_driver_open(struct hal_inode *sprt_inode, struct h
  * @retval  errno
  * @note    none
  */
-static ksint32_t led_template_driver_close(struct hal_inode *sprt_inode, struct hal_file *sprt_file)
+static ksint32_t led_template_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	sprt_file->private_data = mrt_nullptr;
 
@@ -73,14 +73,14 @@ static ksint32_t led_template_driver_close(struct hal_inode *sprt_inode, struct 
  * @retval  errno
  * @note    none
  */
-static kssize_t led_template_driver_write(struct hal_file *sprt_file, const ksbuffer_t *ptrBuffer, kssize_t size)
+static kssize_t led_template_driver_write(struct fwk_file *sprt_file, const ksbuffer_t *ptrBuffer, kssize_t size)
 {
 	struct led_template_drv *sprt_privdata;
 	kuint8_t value;
 
 	sprt_privdata = (struct led_template_drv *)sprt_file->private_data;
 
-	hal_copy_from_user(&value, ptrBuffer, 1);
+	fwk_copy_from_user(&value, ptrBuffer, 1);
 	if (value)
 	{
 		mrt_setbitl(mrt_bit(sprt_privdata->value[1]), sprt_privdata->output_address);
@@ -99,13 +99,13 @@ static kssize_t led_template_driver_write(struct hal_file *sprt_file, const ksbu
  * @retval  errno
  * @note    none
  */
-static kssize_t led_template_driver_read(struct hal_file *sprt_file, ksbuffer_t *ptrBuffer, kssize_t size)
+static kssize_t led_template_driver_read(struct fwk_file *sprt_file, ksbuffer_t *ptrBuffer, kssize_t size)
 {
 	return 0;
 }
 
 /*!< led-template driver operation */
-const struct hal_file_oprts sgrt_led_template_driver_oprts =
+const struct fwk_file_oprts sgrt_led_template_driver_oprts =
 {
 	.open	= led_template_driver_open,
 	.close	= led_template_driver_close,
@@ -120,31 +120,31 @@ const struct hal_file_oprts sgrt_led_template_driver_oprts =
  * @retval  errno
  * @note    none
  */
-static ksint32_t led_template_driver_probe(struct hal_platdev *sprt_dev)
+static ksint32_t led_template_driver_probe(struct fwk_platdev *sprt_dev)
 {
 	struct led_template_drv *sprt_privdata;
-	struct hal_device_node *sprt_node, *sprt_root, *sprt_muxc, *sprt_pins;
-	struct hal_cdev *sprt_cdev;
+	struct fwk_device_node *sprt_node, *sprt_root, *sprt_muxc, *sprt_pins;
+	struct fwk_cdev *sprt_cdev;
 	kuint32_t pin_handle, gpio_reg[2], pin_muxc[6];
 	kuint32_t led_value[3], devnum, i;
 	ksint32_t retval;
 
-	sprt_root = hal_of_find_node_by_path("/");
+	sprt_root = fwk_of_find_node_by_path("/");
 	sprt_node = sprt_dev->sgrt_device.sprt_node;
 
 	for (i = 0; i < ARRAY_SIZE(led_value); i++)
 	{
-		hal_of_property_read_u32_index(sprt_node, "led1-gpios", i, &led_value[i]);
+		fwk_of_property_read_u32_index(sprt_node, "led1-gpios", i, &led_value[i]);
 	}
 
 	/*!< -------------------------------------------------------------------- */
 	/*!< pinctrl */
-	sprt_muxc = hal_of_find_node_by_name(sprt_root, "iomuxc");
-	hal_of_property_read_u32_array(sprt_muxc, "reg", gpio_reg, ARRAY_SIZE(gpio_reg));
+	sprt_muxc = fwk_of_find_node_by_name(sprt_root, "iomuxc");
+	fwk_of_property_read_u32_array(sprt_muxc, "reg", gpio_reg, ARRAY_SIZE(gpio_reg));
 
-	hal_of_property_read_u32(sprt_node, "pinctrl-0", &pin_handle);
-	sprt_pins = hal_of_find_node_by_phandle(sprt_muxc, pin_handle);
-	hal_of_property_read_u32_array(sprt_pins, "fsl,pins", pin_muxc, ARRAY_SIZE(pin_muxc));
+	fwk_of_property_read_u32(sprt_node, "pinctrl-0", &pin_handle);
+	sprt_pins = fwk_of_find_node_by_phandle(sprt_muxc, pin_handle);
+	fwk_of_property_read_u32_array(sprt_pins, "fsl,pins", pin_muxc, ARRAY_SIZE(pin_muxc));
 
 	/*!< enbale gpio clock */
 	mrt_setbitl(mrt_bit(26) | mrt_bit(27), 0x20C4000u + 0x6C);
@@ -158,8 +158,8 @@ static ksint32_t led_template_driver_probe(struct hal_platdev *sprt_dev)
 	mrt_writel(pin_muxc[4], gpio_reg[0] + pin_muxc[2]);
 
 	/*!< gpio */
-	sprt_pins = hal_of_find_node_by_phandle(sprt_root, led_value[0]);
-	hal_of_property_read_u32_array(sprt_pins, "reg", gpio_reg, ARRAY_SIZE(gpio_reg));
+	sprt_pins = fwk_of_find_node_by_phandle(sprt_root, led_value[0]);
+	fwk_of_property_read_u32_array(sprt_pins, "reg", gpio_reg, ARRAY_SIZE(gpio_reg));
 
 	/*!< set Gpio Pin Direction Output */
 	mrt_setbitl(mrt_bit(led_value[1]), gpio_reg[0] + 0x4);
@@ -168,25 +168,25 @@ static ksint32_t led_template_driver_probe(struct hal_platdev *sprt_dev)
 
 	/*!< -------------------------------------------------------------------- */
 	devnum = MKE_DEV_NUM(LED_TEMPLATE_DRIVER_MAJOR, 0);
-	retval = hal_register_chrdev(devnum, 1, "led-template");
+	retval = fwk_register_chrdev(devnum, 1, "led-template");
 	if (mrt_isErr(retval))
 	{
 		goto fail1;
 	}
 
-	sprt_cdev = hal_cdev_alloc(&sgrt_led_template_driver_oprts);
+	sprt_cdev = fwk_cdev_alloc(&sgrt_led_template_driver_oprts);
 	if (!mrt_isValid(sprt_cdev))
 	{
 		goto fail2;
 	}
 
-	retval = hal_cdev_add(sprt_cdev, devnum, 1);
+	retval = fwk_cdev_add(sprt_cdev, devnum, 1);
 	if (mrt_isErr(retval))
 	{
 		goto fail3;
 	}
 
-	retval = hal_device_create(Ert_HAL_TYPE_CHRDEV, devnum, LED_TEMPLATE_DRIVER_NAME);
+	retval = fwk_device_create(NR_TYPE_CHRDEV, devnum, LED_TEMPLATE_DRIVER_NAME);
 	if (mrt_isErr(retval))
 	{
 		goto fail4;
@@ -206,20 +206,20 @@ static ksint32_t led_template_driver_probe(struct hal_platdev *sprt_dev)
 	memcpy(sprt_privdata->value, led_value, sizeof(sprt_privdata->value));
 
 	sprt_cdev->privData = sprt_privdata;
-	hal_platform_set_drvdata(sprt_dev, sprt_privdata);
+	fwk_platform_set_drvdata(sprt_dev, sprt_privdata);
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 
 fail5:
-	hal_device_destroy(LED_TEMPLATE_DRIVER_NAME);
+	fwk_device_destroy(LED_TEMPLATE_DRIVER_NAME);
 fail4:
-	hal_cdev_del(sprt_cdev);
+	fwk_cdev_del(sprt_cdev);
 fail3:
 	kfree(sprt_cdev);
 fail2:
-	hal_unregister_chrdev(devnum, 1);
+	fwk_unregister_chrdev(devnum, 1);
 fail1:
-	return mrt_retval(Ert_isNotSuccess);
+	return -NR_isNotSuccess;
 }
 
 /*!
@@ -228,39 +228,39 @@ fail1:
  * @retval  errno
  * @note    none
  */
-static ksint32_t led_template_driver_remove(struct hal_platdev *sprt_dev)
+static ksint32_t led_template_driver_remove(struct fwk_platdev *sprt_dev)
 {
 	struct led_template_drv *sprt_privdata;
 	kuint32_t devnum;
 
-	sprt_privdata = (struct led_template_drv *)hal_platform_get_drvdata(sprt_dev);
+	sprt_privdata = (struct led_template_drv *)fwk_platform_get_drvdata(sprt_dev);
 	if (!mrt_isValid(sprt_privdata))
 	{
-		return mrt_retval(Ert_isNullPtr);
+		return -NR_isNullPtr;
 	}
 
 	devnum = MKE_DEV_NUM(sprt_privdata->major, sprt_privdata->minor);
 
-	hal_device_destroy(sprt_privdata->ptrName);
-	hal_cdev_del(sprt_privdata->sprt_cdev);
+	fwk_device_destroy(sprt_privdata->ptrName);
+	fwk_cdev_del(sprt_privdata->sprt_cdev);
 	kfree(sprt_privdata->sprt_cdev);
-	hal_unregister_chrdev(devnum, 1);
+	fwk_unregister_chrdev(devnum, 1);
 
 	kfree(sprt_privdata);
-	hal_platform_set_drvdata(sprt_dev, mrt_nullptr);
+	fwk_platform_set_drvdata(sprt_dev, mrt_nullptr);
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 }
 
 /*!< device id for device-tree */
-static struct hal_of_device_id sgrt_led_template_driver_id[] =
+static struct fwk_of_device_id sgrt_led_template_driver_id[] =
 {
 	{ .compatible = "fsl, topeet, ledgpio", },
 	{},
 };
 
 /*!< platform instance */
-static struct hal_platdrv sgrt_led_template_platdriver =
+static struct fwk_platdrv sgrt_led_template_platdriver =
 {
 	.probe	= led_template_driver_probe,
 	.remove	= led_template_driver_remove,
@@ -280,9 +280,9 @@ static struct hal_platdrv sgrt_led_template_platdriver =
  * @retval  errno
  * @note    none
  */
-ksint32_t __hal_init led_template_driver_init(void)
+ksint32_t __fwk_init led_template_driver_init(void)
 {
-	return hal_register_platdriver(&sgrt_led_template_platdriver);
+	return fwk_register_platdriver(&sgrt_led_template_platdriver);
 }
 
 /*!
@@ -291,9 +291,9 @@ ksint32_t __hal_init led_template_driver_init(void)
  * @retval  none
  * @note    none
  */
-void __hal_exit led_template_driver_exit(void)
+void __fwk_exit led_template_driver_exit(void)
 {
-	hal_unregister_platdriver(&sgrt_led_template_platdriver);
+	fwk_unregister_platdriver(&sgrt_led_template_platdriver);
 }
 
 IMPORT_DRIVER_INIT(led_template_driver_init);

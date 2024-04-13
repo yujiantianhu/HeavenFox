@@ -362,23 +362,23 @@ typedef struct
 #define IMX6UL_USBOTG2_ADDR_BASE                                    (0x2184200u)
 #define IMX6UL_USBOTG_PROPERTY_ENTRY(x)                             (srt_imx_usbotg_t *)IMX6UL_USBOTG##x##_ADDR_BASE
 
-typedef enum __Ert_IMX_USBOTG_INTR_BIT
+typedef enum __ERT_IMX_USBOTG_INTR_BIT
 {
-    Ert_ImxUsbOtgIntr_UsbIntBit = mrt_bit(0U),
-    Ert_ImxUsbOtgIntr_UsbErrIntBit = mrt_bit(1U),
-    Ert_ImxUsbOtgIntr_PortChangeDetectIntBit = mrt_bit(2U),
-    Ert_ImxUsbOtgIntr_FrameRolloverIntBit = mrt_bit(3U),
-    Ert_ImxUsbOtgIntr_SystemErrIntBit = mrt_bit(4U),
-    Ert_ImxUsbOtgIntr_AsyncAdvanceIntBit = mrt_bit(5U),
-    Ert_ImxUsbOtgIntr_UsbResetIntBit = mrt_bit(6U),
-    Ert_ImxUsbOtgIntr_SofRecvIntBit = mrt_bit(7U),
-    Ert_ImxUsbOtgIntr_SleepIntBit = mrt_bit(8U),
-    Ert_ImxUsbOtgIntr_UlpiIntBit = mrt_bit(10U),
-    Ert_ImxUsbOtgIntr_NakIntBit = mrt_bit(16U),
-    Ert_ImxUsbOtgIntr_UsbHostAsyncIntBit = mrt_bit(18U),
-    Ert_ImxUsbOtgIntr_UsbHostPeriodicIntBit = mrt_bit(19U),
-    Ert_ImxUsbOtgIntr_GpTimer0IntBit = mrt_bit(24U),
-    Ert_ImxUsbOtgIntr_GpTimer1IntBit = mrt_bit(25U),
+    NR_ImxUsbOtgIntr_UsbIntBit = mrt_bit(0U),
+    NR_ImxUsbOtgIntr_UsbErrIntBit = mrt_bit(1U),
+    NR_ImxUsbOtgIntr_PortChangeDetectIntBit = mrt_bit(2U),
+    NR_ImxUsbOtgIntr_FrameRolloverIntBit = mrt_bit(3U),
+    NR_ImxUsbOtgIntr_SystemErrIntBit = mrt_bit(4U),
+    NR_ImxUsbOtgIntr_AsyncAdvanceIntBit = mrt_bit(5U),
+    NR_ImxUsbOtgIntr_UsbResetIntBit = mrt_bit(6U),
+    NR_ImxUsbOtgIntr_SofRecvIntBit = mrt_bit(7U),
+    NR_ImxUsbOtgIntr_SleepIntBit = mrt_bit(8U),
+    NR_ImxUsbOtgIntr_UlpiIntBit = mrt_bit(10U),
+    NR_ImxUsbOtgIntr_NakIntBit = mrt_bit(16U),
+    NR_ImxUsbOtgIntr_UsbHostAsyncIntBit = mrt_bit(18U),
+    NR_ImxUsbOtgIntr_UsbHostPeriodicIntBit = mrt_bit(19U),
+    NR_ImxUsbOtgIntr_GpTimer0IntBit = mrt_bit(24U),
+    NR_ImxUsbOtgIntr_GpTimer1IntBit = mrt_bit(25U),
 
 } ert_imx_usb_intr_t;
 
@@ -570,42 +570,42 @@ typedef struct
 /*!< for Registers: INT_SIGNAL_EN, INT_STATUS_EN, INT_STATUS */
 enum __ERT_IMX_USDHC_INTERRUPT_BIT
 {
-    Ert_ImxUsdhc_IntCmdComplete_Bit = mrt_bit(0U),                 /*!< Command Complete Status Enable */
-    Ert_ImxUsdhc_IntDataComplete_Bit = mrt_bit(1U),                /*!< Transfer Complete Status Enable */
-    Ert_ImxUsdhc_IntBlockGapEvent_Bit = mrt_bit(2U),               /*!< Block Gap Event Status Enable */
-    Ert_ImxUsdhc_IntDmaInterrupt_Bit = mrt_bit(3U),                /*!< DMA Interrupt Status Enable */
-    Ert_ImxUsdhc_IntBufferWriteReady_Bit = mrt_bit(4U),            /*!< Buffer Write Ready Status Enable */
-    Ert_ImxUsdhc_IntBufferReadReady_Bit = mrt_bit(5U),             /*!< Buffer Read Ready Status Enable */
-    Ert_ImxUsdhc_IntCardInsertion_Bit = mrt_bit(6U),               /*!< Card Insertion Status Enable */
-    Ert_ImxUsdhc_IntCardRemoval_Bit = mrt_bit(7U),                 /*!< Card Removal Status Enable */
-    Ert_ImxUsdhc_IntCardInterrupt_Bit = mrt_bit(8U),               /*!< Card Interrupt Status Enable */
-    Ert_ImxUsdhc_IntReTuningEvent_Bit = mrt_bit(12U),              /*!< Re-Tuning Event Status Enable */
-    Ert_ImxUsdhc_IntTuningPass_Bit = mrt_bit(14U),                 /*!< Tuning Pass Status Enable */
-    Ert_ImxUsdhc_IntCmdTimeOutErr_Bit = mrt_bit(16U),              /*!< Command Timeout Error Status Enable */
-    Ert_ImxUsdhc_IntCmdCrcErr_Bit = mrt_bit(17U),                  /*!< Command CRC Error Status Enable */
-    Ert_ImxUsdhc_IntCmdEndBitErr_Bit = mrt_bit(18U),               /*!< Command End Bit Error Status Enable */
-    Ert_ImxUsdhc_IntCmdIndexErr_Bit = mrt_bit(19U),                /*!< Command Index Error Status Enable */
-    Ert_ImxUsdhc_IntDataTimeOutErr_Bit = mrt_bit(20U),             /*!< Data Timeout Error Status Enable */
-    Ert_ImxUsdhc_IntDataCrcErr_Bit = mrt_bit(21U),                 /*!< Data CRC Error Status Enable */
-    Ert_ImxUsdhc_IntDataEndBitErr_Bit = mrt_bit(22U),              /*!< Data End Bit Error Status Enable */
-    Ert_ImxUsdhc_IntACmd12Err_Bit = mrt_bit(24U),                  /*!< Auto CMD12 Error Status Enable */
-    Ert_ImxUsdhc_IntTuningErr_Bit = mrt_bit(26U),                  /*!< Tuning Error Status Enable */
-    Ert_ImxUsdhc_IntDmaErr_Bit = mrt_bit(28U),                     /*!< DMA Error Status Enable */
+    NR_ImxUsdhc_IntCmdComplete_Bit = mrt_bit(0U),                   /*!< Command Complete Status Enable */
+    NR_ImxUsdhc_IntDataComplete_Bit = mrt_bit(1U),                  /*!< Transfer Complete Status Enable */
+    NR_ImxUsdhc_IntBlockGapEvent_Bit = mrt_bit(2U),                 /*!< Block Gap Event Status Enable */
+    NR_ImxUsdhc_IntDmaInterrupt_Bit = mrt_bit(3U),                  /*!< DMA Interrupt Status Enable */
+    NR_ImxUsdhc_IntBufferWriteReady_Bit = mrt_bit(4U),              /*!< Buffer Write Ready Status Enable */
+    NR_ImxUsdhc_IntBufferReadReady_Bit = mrt_bit(5U),               /*!< Buffer Read Ready Status Enable */
+    NR_ImxUsdhc_IntCardInsertion_Bit = mrt_bit(6U),                 /*!< Card Insertion Status Enable */
+    NR_ImxUsdhc_IntCardRemoval_Bit = mrt_bit(7U),                   /*!< Card Removal Status Enable */
+    NR_ImxUsdhc_IntCardInterrupt_Bit = mrt_bit(8U),                 /*!< Card Interrupt Status Enable */
+    NR_ImxUsdhc_IntReTuningEvent_Bit = mrt_bit(12U),                /*!< Re-Tuning Event Status Enable */
+    NR_ImxUsdhc_IntTuningPass_Bit = mrt_bit(14U),                   /*!< Tuning Pass Status Enable */
+    NR_ImxUsdhc_IntCmdTimeOutErr_Bit = mrt_bit(16U),                /*!< Command Timeout Error Status Enable */
+    NR_ImxUsdhc_IntCmdCrcErr_Bit = mrt_bit(17U),                    /*!< Command CRC Error Status Enable */
+    NR_ImxUsdhc_IntCmdEndBitErr_Bit = mrt_bit(18U),                 /*!< Command End Bit Error Status Enable */
+    NR_ImxUsdhc_IntCmdIndexErr_Bit = mrt_bit(19U),                  /*!< Command Index Error Status Enable */
+    NR_ImxUsdhc_IntDataTimeOutErr_Bit = mrt_bit(20U),               /*!< Data Timeout Error Status Enable */
+    NR_ImxUsdhc_IntDataCrcErr_Bit = mrt_bit(21U),                   /*!< Data CRC Error Status Enable */
+    NR_ImxUsdhc_IntDataEndBitErr_Bit = mrt_bit(22U),                /*!< Data End Bit Error Status Enable */
+    NR_ImxUsdhc_IntACmd12Err_Bit = mrt_bit(24U),                    /*!< Auto CMD12 Error Status Enable */
+    NR_ImxUsdhc_IntTuningErr_Bit = mrt_bit(26U),                    /*!< Tuning Error Status Enable */
+    NR_ImxUsdhc_IntDmaErr_Bit = mrt_bit(28U),                       /*!< DMA Error Status Enable */
 
-    Ert_ImxUsdhc_IntCmdErr_Bit = (Ert_ImxUsdhc_IntCmdIndexErr_Bit | Ert_ImxUsdhc_IntCmdEndBitErr_Bit |
-                                Ert_ImxUsdhc_IntCmdCrcErr_Bit | Ert_ImxUsdhc_IntCmdTimeOutErr_Bit),
-    Ert_ImxUsdhc_IntDataErr_Bit = (Ert_ImxUsdhc_IntDataTimeOutErr_Bit | Ert_ImxUsdhc_IntDataCrcErr_Bit |
-                                Ert_ImxUsdhc_IntDataEndBitErr_Bit | Ert_ImxUsdhc_IntACmd12Err_Bit),
-    Ert_ImxUsdhc_IntAllErr_Bit = (Ert_ImxUsdhc_IntCmdErr_Bit | Ert_ImxUsdhc_IntDataErr_Bit | Ert_ImxUsdhc_IntDmaErr_Bit),
-    Ert_ImxUsdhc_IntAllCmd_Bit = (Ert_ImxUsdhc_IntCmdErr_Bit | Ert_ImxUsdhc_IntCmdComplete_Bit),
-    Ert_ImxUsdhc_IntAllData_Bit = (Ert_ImxUsdhc_IntDataErr_Bit | Ert_ImxUsdhc_IntDataComplete_Bit),
-    Ert_ImxUsdhc_IntAllTuning_Bit = (Ert_ImxUsdhc_IntReTuningEvent_Bit | Ert_ImxUsdhc_IntTuningPass_Bit |
-                                Ert_ImxUsdhc_IntTuningErr_Bit),
-    Ert_ImxUsdhc_IntCardDetect_Bit = (Ert_ImxUsdhc_IntCardInsertion_Bit | Ert_ImxUsdhc_IntCardRemoval_Bit),
+    NR_ImxUsdhc_IntCmdErr_Bit = (NR_ImxUsdhc_IntCmdIndexErr_Bit | NR_ImxUsdhc_IntCmdEndBitErr_Bit |
+                                NR_ImxUsdhc_IntCmdCrcErr_Bit | NR_ImxUsdhc_IntCmdTimeOutErr_Bit),
+    NR_ImxUsdhc_IntDataErr_Bit = (NR_ImxUsdhc_IntDataTimeOutErr_Bit | NR_ImxUsdhc_IntDataCrcErr_Bit |
+                                NR_ImxUsdhc_IntDataEndBitErr_Bit | NR_ImxUsdhc_IntACmd12Err_Bit),
+    NR_ImxUsdhc_IntAllErr_Bit = (NR_ImxUsdhc_IntCmdErr_Bit | NR_ImxUsdhc_IntDataErr_Bit | NR_ImxUsdhc_IntDmaErr_Bit),
+    NR_ImxUsdhc_IntAllCmd_Bit = (NR_ImxUsdhc_IntCmdErr_Bit | NR_ImxUsdhc_IntCmdComplete_Bit),
+    NR_ImxUsdhc_IntAllData_Bit = (NR_ImxUsdhc_IntDataErr_Bit | NR_ImxUsdhc_IntDataComplete_Bit),
+    NR_ImxUsdhc_IntAllTuning_Bit = (NR_ImxUsdhc_IntReTuningEvent_Bit | NR_ImxUsdhc_IntTuningPass_Bit |
+                                NR_ImxUsdhc_IntTuningErr_Bit),
+    NR_ImxUsdhc_IntCardDetect_Bit = (NR_ImxUsdhc_IntCardInsertion_Bit | NR_ImxUsdhc_IntCardRemoval_Bit),
 
-    Ert_ImxUsdhc_IntAllInterrupt_Bit = (Ert_ImxUsdhc_IntBlockGapEvent_Bit | Ert_ImxUsdhc_IntCardInterrupt_Bit |
-                                Ert_ImxUsdhc_IntAllErr_Bit | Ert_ImxUsdhc_IntAllCmd_Bit | Ert_ImxUsdhc_IntAllData_Bit | 
-                                Ert_ImxUsdhc_IntAllTuning_Bit),
+    NR_ImxUsdhc_IntAllInterrupt_Bit = (NR_ImxUsdhc_IntBlockGapEvent_Bit | NR_ImxUsdhc_IntCardInterrupt_Bit |
+                                NR_ImxUsdhc_IntAllErr_Bit | NR_ImxUsdhc_IntAllCmd_Bit | NR_ImxUsdhc_IntAllData_Bit | 
+                                NR_ImxUsdhc_IntAllTuning_Bit),
 
 /*!< write 1 to clear */
 #define mrt_imx_clear_interrupt_flags(flagBit, usdhc)                mrt_writel(flagBit, usdhc->INT_STATUS)
@@ -645,9 +645,9 @@ enum __ERT_IMX_USDHC_SYS_CTRL_BIT
 #define IMX_USDHC_SYS_CTRL_DTOCV_BIT(x)                             mrt_bit_mask((x), IMX_USDHC_SYS_CTRL_DTOCV_MASK, IMX_USDHC_SYS_CTRL_DTOCV_OFFSET)
 #define IMX_USDHC_SYS_CTRL_DTOCV_U32(x)                             IMX_USDHC_SYS_CTRL_DTOCV_BIT(x)
 
-    Ert_ImxUsdhc_SysCtrl_SoftResetAll = mrt_bit(24U),              /*!< RSTA: Software Reset For ALL. 1: Reset; 0: No Reset */   
-    Ert_ImxUsdhc_SysCtrl_SoftResetCmdLine = mrt_bit(25U),          /*!< RSTC: Software Reset For CMD Line. 1: Reset; 0: No Reset */
-    Ert_ImxUsdhc_SysCtrl_SoftResetDataLine = mrt_bit(26U),         /*!< RSTD: Software Reset For DATA Line. 1: Reset; 0: No Reset */
+    NR_ImxUsdhc_SysCtrl_SoftResetAll = mrt_bit(24U),                /*!< RSTA: Software Reset For ALL. 1: Reset; 0: No Reset */   
+    NR_ImxUsdhc_SysCtrl_SoftResetCmdLine = mrt_bit(25U),            /*!< RSTC: Software Reset For CMD Line. 1: Reset; 0: No Reset */
+    NR_ImxUsdhc_SysCtrl_SoftResetDataLine = mrt_bit(26U),           /*!< RSTD: Software Reset For DATA Line. 1: Reset; 0: No Reset */
 
     /*!< 
      * INITA: Initialization Active.
@@ -661,16 +661,16 @@ enum __ERT_IMX_USDHC_SYS_CTRL_BIT
      * when this command ends, the driver can make sure the 80 clock cycles are sent out. This is very useful
      * when the driver needs send 80 cycles to the card and does not want to wait till this bit is self cleared
      */
-    Ert_ImxUsdhc_SysCtrl_InitialActive = mrt_bit(27U),
+    NR_ImxUsdhc_SysCtrl_InitialActive = mrt_bit(27U),
 
     /*!< 
      * RSTT: Reset Tuning. 
      * When set this bit to 1, it will reset tuning circuit. After tuning circuits are reset, bit value is 0 
      */
-    Ert_ImxUsdhc_SysCtrl_ResetTuning = mrt_bit(28U),
+    NR_ImxUsdhc_SysCtrl_ResetTuning = mrt_bit(28U),
 
-    Ert_ImxUsdhc_SysCtrl_ResetMask = ((Ert_ImxUsdhc_SysCtrl_SoftResetAll | Ert_ImxUsdhc_SysCtrl_SoftResetCmdLine |
-                                      Ert_ImxUsdhc_SysCtrl_SoftResetDataLine | Ert_ImxUsdhc_SysCtrl_ResetTuning) & 0x17000000U),
+    NR_ImxUsdhc_SysCtrl_ResetMask = ((NR_ImxUsdhc_SysCtrl_SoftResetAll | NR_ImxUsdhc_SysCtrl_SoftResetCmdLine |
+                                      NR_ImxUsdhc_SysCtrl_SoftResetDataLine | NR_ImxUsdhc_SysCtrl_ResetTuning) & 0x17000000U),
 };
 
 /*
@@ -685,24 +685,24 @@ enum __ERT_IMX_USDHC_MIX_CTRL_BIT
      * sets the DPSEL bit of this register. Whether the Simple DMA or the Advanced DMA is active depends on
      * the DMA Select field of the Protocol Control register
      */
-    Ert_ImxUsdhc_MixCtrl_DmaEnable = mrt_bit(0U),
+    NR_ImxUsdhc_MixCtrl_DmaEnable = mrt_bit(0U),
 
     /*!< 
      * BCEN: Block Count Enable
      * This bit is used to enable the Block Count register, which is only relevant for multiple block transfers.
      * When this bit is 0, the internal counter for block is disabled, which is useful in executing an infinite transfer
      */
-    Ert_ImxUsdhc_MixCtrl_BlockCountEnable = mrt_bit(1U),
+    NR_ImxUsdhc_MixCtrl_BlockCountEnable = mrt_bit(1U),
 
-    Ert_ImxUsdhc_MixCtrl_AutoCmd12Enable = mrt_bit(2U),            /*!< Auto CMD12 Enable */
-    Ert_ImxUsdhc_MixCtrl_DualDataRateMode = mrt_bit(3U),           /*!< DDR_EN: Dual Data Rate mode selection */
+    NR_ImxUsdhc_MixCtrl_AutoCmd12Enable = mrt_bit(2U),              /*!< Auto CMD12 Enable */
+    NR_ImxUsdhc_MixCtrl_DualDataRateMode = mrt_bit(3U),             /*!< DDR_EN: Dual Data Rate mode selection */
 
     /*!< 
      * DTDSEL: Data Transfer Direction Select
      *  1, Read (Card to Host)
      *  0, Write (Host to Card)
      */
-    Ert_ImxUsdhc_MixCtrl_DataTransferDirection = mrt_bit(4U),
+    NR_ImxUsdhc_MixCtrl_DataTransferDirection = mrt_bit(4U),
 
     /*!<
      * MSBSEL: Multi/Single Block Select
@@ -711,14 +711,14 @@ enum __ERT_IMX_USDHC_MIX_CTRL_BIT
      *  1, Multiple Blocks
      *  0, Single Block
      */
-    Ert_ImxUsdhc_MixCtrl_MultiSingleBlockSelect = mrt_bit(5U),
+    NR_ImxUsdhc_MixCtrl_MultiSingleBlockSelect = mrt_bit(5U),
 
     /*!<
      * AC23EN
      * When this bit is set to 1, the Host Controller issues a CMD23 automatically before issuing a command
      * specified in the Command Register
      */
-    Ert_ImxUsdhc_MixCtrl_AutoCmd23Enable = mrt_bit(7U),
+    NR_ImxUsdhc_MixCtrl_AutoCmd23Enable = mrt_bit(7U),
 
     /*!<
      * EXE_TUNE: Execute Tuning: (Only used for SD3.0, SDR104 mode)
@@ -727,7 +727,7 @@ enum __ERT_IMX_USDHC_MIX_CTRL_BIT
      *  1, Execute Tuning
      *  0, Not Tuned or Tuning Completed
      */
-    Ert_ImxUsdhc_MixCtrl_ExecuteTuning = mrt_bit(22U),
+    NR_ImxUsdhc_MixCtrl_ExecuteTuning = mrt_bit(22U),
 
     /*!<
      * SMP_CLK_SEL: When STD_TUNING_EN is 0, this bit is used to select Tuned clock or Fixed clock to sample data / cmd
@@ -735,27 +735,27 @@ enum __ERT_IMX_USDHC_MIX_CTRL_BIT
      *  1, Tuned clock is used to sample data/cmd
      *  0, Fixed clock is used to sample data/cmd
      */
-    Ert_ImxUsdhc_MixCtrl_SampleClkSelect = mrt_bit(23U),
+    NR_ImxUsdhc_MixCtrl_SampleClkSelect = mrt_bit(23U),
 
     /*!<
      * AUTO_TUNE_EN: Auto Tuning Enable (Only used for SD3.0, SDR104 mode)
      *  1, Enable auto tuning
      *  0, Disable auto tuning
      */
-    Ert_ImxUsdhc_MixCtrl_AutoTuning = mrt_bit(24U),
+    NR_ImxUsdhc_MixCtrl_AutoTuning = mrt_bit(24U),
 
     /*!<
      * FBCLK_SEL: Feedback Clock Source Selection (Only used for SD3.0, SDR104 mode)
      *  1, Feedback clock comes from the ipp_card_clk_out
      *  0, Feedback clock comes from the loopback CLK
      */
-    Ert_ImxUsdhc_MixCtrl_FeedbackClkSelect = mrt_bit(25U),
+    NR_ImxUsdhc_MixCtrl_FeedbackClkSelect = mrt_bit(25U),
 };
 
 /*!< for Register: PROT_CTRL */
 enum __ERT_IMX_USDHC_PROT_CTRL_BIT
 {
-    Ert_ImxUsdhc_ProtCtrl_LedControl = mrt_bit(0U),                /*!< LCTL. 1: LED on; 0: LED off */
+    NR_ImxUsdhc_ProtCtrl_LedControl = mrt_bit(0U),                  /*!< LCTL. 1: LED on; 0: LED off */
 
 /*!<
  * DTW: Data Transfer Width
@@ -766,20 +766,20 @@ enum __ERT_IMX_USDHC_PROT_CTRL_BIT
 #define IMX_USDHC_PROT_CTRL_DTW_MASK                                (0x6U)
 #define IMX_USDHC_PROT_CTRL_DTW_BIT(x)                              mrt_bit_mask((x), IMX_USDHC_PROT_CTRL_DTW_MASK, IMX_USDHC_PROT_CTRL_DTW_OFFSET)
 
-    Ert_ImxUsdhc_ProtCtrl_DataWidth1Bits = IMX_USDHC_PROT_CTRL_DTW_BIT(0U),
-    Ert_ImxUsdhc_ProtCtrl_DataWidth4Bits = IMX_USDHC_PROT_CTRL_DTW_BIT(1U),
-    Ert_ImxUsdhc_ProtCtrl_DataWidth8Bits = IMX_USDHC_PROT_CTRL_DTW_BIT(2U),
+    NR_ImxUsdhc_ProtCtrl_DataWidth1Bits = IMX_USDHC_PROT_CTRL_DTW_BIT(0U),
+    NR_ImxUsdhc_ProtCtrl_DataWidth4Bits = IMX_USDHC_PROT_CTRL_DTW_BIT(1U),
+    NR_ImxUsdhc_ProtCtrl_DataWidth8Bits = IMX_USDHC_PROT_CTRL_DTW_BIT(2U),
 
-    Ert_ImxUsdhc_ProtCtrl_Data3AsCardDetect = mrt_bit(3U),         /*!< D3CD. 1: DATA3 as Card Detection Pin; 0 DATA3 does not monitor Card Insertion */
+    NR_ImxUsdhc_ProtCtrl_Data3AsCardDetect = mrt_bit(3U),           /*!< D3CD. 1: DATA3 as Card Detection Pin; 0 DATA3 does not monitor Card Insertion */
 
 /*!< EMODE: Endian Mode */
 #define IMX_USDHC_PROT_CTRL_EMODE_OFFSET                            (4U)
 #define IMX_USDHC_PROT_CTRL_EMODE_MASK                              (0x30U)
 #define IMX_USDHC_PROT_CTRL_EMODE_BIT(x)                            mrt_bit_mask((x), IMX_USDHC_PROT_CTRL_EMODE_MASK, IMX_USDHC_PROT_CTRL_EMODE_OFFSET)
 
-    Ert_ImxUsdhc_ProtCtrl_BigEndian = IMX_USDHC_PROT_CTRL_EMODE_BIT(0U),
-    Ert_ImxUsdhc_ProtCtrl_HalfWordEndian = IMX_USDHC_PROT_CTRL_EMODE_BIT(1U),
-    Ert_ImxUsdhc_ProtCtrl_LittleEndian = IMX_USDHC_PROT_CTRL_EMODE_BIT(2U),
+    NR_ImxUsdhc_ProtCtrl_BigEndian = IMX_USDHC_PROT_CTRL_EMODE_BIT(0U),
+    NR_ImxUsdhc_ProtCtrl_HalfWordEndian = IMX_USDHC_PROT_CTRL_EMODE_BIT(1U),
+    NR_ImxUsdhc_ProtCtrl_LittleEndian = IMX_USDHC_PROT_CTRL_EMODE_BIT(2U),
 
     /*!<
      * CDTL: Card Detect Test Level
@@ -787,7 +787,7 @@ enum __ERT_IMX_USDHC_PROT_CTRL_BIT
      *  1, Card Detect Test Level is 1, card inserted
      *  0, Card Detect Test Level is 0, no card inserted
      */
-    Ert_ImxUsdhc_ProtCtrl_CardDetectTestLevel = mrt_bit(6U),
+    NR_ImxUsdhc_ProtCtrl_CardDetectTestLevel = mrt_bit(6U),
 
     /*!<
      * CDSS: Card Detect Signal Selection
@@ -795,21 +795,21 @@ enum __ERT_IMX_USDHC_PROT_CTRL_BIT
      *  1, Card Detection Test Level is selected (for test purpose).
      *  0, Card Detection Level is selected (for normal purpose).
      */
-    Ert_ImxUsdhc_ProtCtrl_CardDetectLevelSelect = mrt_bit(7U),
+    NR_ImxUsdhc_ProtCtrl_CardDetectLevelSelect = mrt_bit(7U),
 
 /*!< DMA Select */
 #define IMX_USDHC_PROT_CTRL_DMASEL_OFFSET                           (8U)
 #define IMX_USDHC_PROT_CTRL_DMASEL_MASK                             (0x300U)
 #define IMX_USDHC_PROT_CTRL_DMASEL_BIT(x)                           mrt_bit_mask((x), IMX_USDHC_PROT_CTRL_DMASEL_MASK, IMX_USDHC_PROT_CTRL_DMASEL_OFFSET)
 
-    Ert_ImxUsdhc_ProtCtrl_SDmaSelect = IMX_USDHC_PROT_CTRL_DMASEL_BIT(0U),
-    Ert_ImxUsdhc_ProtCtrl_ADma1Select = IMX_USDHC_PROT_CTRL_DMASEL_BIT(1U),
-    Ert_ImxUsdhc_ProtCtrl_ADma2Select = IMX_USDHC_PROT_CTRL_DMASEL_BIT(2U),
+    NR_ImxUsdhc_ProtCtrl_SDmaSelect = IMX_USDHC_PROT_CTRL_DMASEL_BIT(0U),
+    NR_ImxUsdhc_ProtCtrl_ADma1Select = IMX_USDHC_PROT_CTRL_DMASEL_BIT(1U),
+    NR_ImxUsdhc_ProtCtrl_ADma2Select = IMX_USDHC_PROT_CTRL_DMASEL_BIT(2U),
 
-    Ert_ImxUsdhc_ProtCtrl_StopBlockkGapRequest = mrt_bit(16U),     /*!< SABGREQ. Stop At Block Gap Request. */
-    Ert_ImxUsdhc_ProtCtrl_ContinueRequest = mrt_bit(17U),          /*!< CREQ. Continue Request */
-    Ert_ImxUsdhc_ProtCtrl_ReadWaitControl = mrt_bit(18U),          /*!< RWCTL. Read Wait Control */
-    Ert_ImxUsdhc_ProtCtrl_InterruptBlockGap = mrt_bit(19U),        /*!< IABG. Interrupt At Block Gap */
+    NR_ImxUsdhc_ProtCtrl_StopBlockkGapRequest = mrt_bit(16U),       /*!< SABGREQ. Stop At Block Gap Request. */
+    NR_ImxUsdhc_ProtCtrl_ContinueRequest = mrt_bit(17U),            /*!< CREQ. Continue Request */
+    NR_ImxUsdhc_ProtCtrl_ReadWaitControl = mrt_bit(18U),            /*!< RWCTL. Read Wait Control */
+    NR_ImxUsdhc_ProtCtrl_InterruptBlockGap = mrt_bit(19U),          /*!< IABG. Interrupt At Block Gap */
 
     /*!<
      * RD_DONE_NO_8CLK: Read done no 8 clock
@@ -823,36 +823,36 @@ enum __ERT_IMX_USDHC_PROT_CTRL_BIT
      * In a summary, this bit should be set only if the use case needs to use stop at block gap feature while the
      * device can't support the read wait feature
      */
-    Ert_ImxUsdhc_ProtCtrl_ReadDoneNo8Clock = mrt_bit(20U),
+    NR_ImxUsdhc_ProtCtrl_ReadDoneNo8Clock = mrt_bit(20U),
 
-    Ert_ImxUsdhc_ProtCtrl_WakeEventOnCardInt = mrt_bit(24U),       /*!< WECINT. Wakeup Event Enable On Card Interrupt */
-    Ert_ImxUsdhc_ProtCtrl_WakeEventOnCardInsert = mrt_bit(25U),    /*!< WECINS. Wakeup Event Enable On SD Card Insertion */
-    Ert_ImxUsdhc_ProtCtrl_WakeEventOnCardRemoval = mrt_bit(26U),   /*!< WECRM. Wakeup Event Enable On SD Card Removal */
+    NR_ImxUsdhc_ProtCtrl_WakeEventOnCardInt = mrt_bit(24U),         /*!< WECINT. Wakeup Event Enable On Card Interrupt */
+    NR_ImxUsdhc_ProtCtrl_WakeEventOnCardInsert = mrt_bit(25U),      /*!< WECINS. Wakeup Event Enable On SD Card Insertion */
+    NR_ImxUsdhc_ProtCtrl_WakeEventOnCardRemoval = mrt_bit(26U),     /*!< WECRM. Wakeup Event Enable On SD Card Removal */
 };
 
 /*!< for Register: PRES_STATE */
 enum __ERT_IMX_USDHC_PRES_STATE_BIT
 {
-    Ert_ImxUsdhc_PresState_CmdInhibitCmdLine = mrt_bit(0U),        /*!< CIHB. 1: Cannot issue command; 0: Can issue command using only CMD line */
-    Ert_ImxUsdhc_PresState_CmdInhibitDataLine = mrt_bit(1U),       /*!< CDIHB. 1: Cannot issue command which uses the DATA line; 0: Can issue command which uses the DATA line */
-    Ert_ImxUsdhc_PresState_DataLineActive = mrt_bit(2U),           /*!< DLA. Data Line Active */
-    Ert_ImxUsdhc_PresState_SDClockStable = mrt_bit(3U),            /*!< SDSTB. SD Clock Stable. */
-    Ert_ImxUsdhc_PresState_WriteTransferActive = mrt_bit(8U),      /*!< WTA. Write Transfer Active */
+    NR_ImxUsdhc_PresState_CmdInhibitCmdLine = mrt_bit(0U),          /*!< CIHB. 1: Cannot issue command; 0: Can issue command using only CMD line */
+    NR_ImxUsdhc_PresState_CmdInhibitDataLine = mrt_bit(1U),         /*!< CDIHB. 1: Cannot issue command which uses the DATA line; 0: Can issue command which uses the DATA line */
+    NR_ImxUsdhc_PresState_DataLineActive = mrt_bit(2U),             /*!< DLA. Data Line Active */
+    NR_ImxUsdhc_PresState_SDClockStable = mrt_bit(3U),              /*!< SDSTB. SD Clock Stable. */
+    NR_ImxUsdhc_PresState_WriteTransferActive = mrt_bit(8U),        /*!< WTA. Write Transfer Active */
 
-    Ert_ImxUsdhc_PresState_ReadTransferActive = mrt_bit(9U),       /*!< RTA. Read Transfer Active */
-    Ert_ImxUsdhc_PresState_BufferWriteEnable = mrt_bit(10U),       /*!< BWEN. Buffer Write Enable */
-    Ert_ImxUsdhc_PresState_BufferReadEnable = mrt_bit(11U),        /*!< BREN. Buffer Read Enable */
-    Ert_ImxUsdhc_PresState_CardInserted = mrt_bit(16U),            /*!< CINST. Card Inserted */
-    Ert_ImxUsdhc_PresState_CommandLineLevel = mrt_bit(23U),        /*!< CLSL. CMD Line Signal Level */
+    NR_ImxUsdhc_PresState_ReadTransferActive = mrt_bit(9U),         /*!< RTA. Read Transfer Active */
+    NR_ImxUsdhc_PresState_BufferWriteEnable = mrt_bit(10U),         /*!< BWEN. Buffer Write Enable */
+    NR_ImxUsdhc_PresState_BufferReadEnable = mrt_bit(11U),          /*!< BREN. Buffer Read Enable */
+    NR_ImxUsdhc_PresState_CardInserted = mrt_bit(16U),              /*!< CINST. Card Inserted */
+    NR_ImxUsdhc_PresState_CommandLineLevel = mrt_bit(23U),          /*!< CLSL. CMD Line Signal Level */
 
-    Ert_ImxUsdhc_PresState_Data0LineLevel = mrt_bit(24U),          /*!< DLSL. Data 0 line signal level */
-    Ert_ImxUsdhc_PresState_Data1LineLevel = mrt_bit(25U),          /*!< DLSL. Data 1 line signal level */
-    Ert_ImxUsdhc_PresState_Data2LineLevel = mrt_bit(26U),          /*!< DLSL. Data 2 line signal level */
-    Ert_ImxUsdhc_PresState_Data3LineLevel = mrt_bit(27U),          /*!< DLSL. Data 3 line signal level */
-    Ert_ImxUsdhc_PresState_Data4LineLevel = mrt_bit(28U),          /*!< DLSL. Data 4 line signal level */
-    Ert_ImxUsdhc_PresState_Data5LineLevel = mrt_bit(29U),          /*!< DLSL. Data 5 line signal level */
-    Ert_ImxUsdhc_PresState_Data6LineLevel = mrt_bit(30U),          /*!< DLSL. Data 6 line signal level */
-    Ert_ImxUsdhc_PresState_Data7LineLevel = mrt_bit(31U),          /*!< DLSL. Data 7 line signal level */
+    NR_ImxUsdhc_PresState_Data0LineLevel = mrt_bit(24U),            /*!< DLSL. Data 0 line signal level */
+    NR_ImxUsdhc_PresState_Data1LineLevel = mrt_bit(25U),            /*!< DLSL. Data 1 line signal level */
+    NR_ImxUsdhc_PresState_Data2LineLevel = mrt_bit(26U),            /*!< DLSL. Data 2 line signal level */
+    NR_ImxUsdhc_PresState_Data3LineLevel = mrt_bit(27U),            /*!< DLSL. Data 3 line signal level */
+    NR_ImxUsdhc_PresState_Data4LineLevel = mrt_bit(28U),            /*!< DLSL. Data 4 line signal level */
+    NR_ImxUsdhc_PresState_Data5LineLevel = mrt_bit(29U),            /*!< DLSL. Data 5 line signal level */
+    NR_ImxUsdhc_PresState_Data6LineLevel = mrt_bit(30U),            /*!< DLSL. Data 6 line signal level */
+    NR_ImxUsdhc_PresState_Data7LineLevel = mrt_bit(31U),            /*!< DLSL. Data 7 line signal level */
 };
 
 /*!< for Register: CMD_XFR_TYP */
@@ -863,14 +863,14 @@ enum __ERT_IMX_USDHC_CMD_XFR_TYP_BIT
 #define IMX_USDHC_CMD_XFR_TYP_RSPTYP_MASK                           (0x30000U)
 #define IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(x)                         mrt_bit_mask((x), IMX_USDHC_CMD_XFR_TYP_RSPTYP_MASK, IMX_USDHC_CMD_XFR_TYP_RSPTYP_OFFSET)
 
-    Ert_ImxUsdhc_CmdXfrTyp_NoResponse = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(0U),
-    Ert_ImxUsdhc_CmdXfrTyp_Response136 = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(1U),
-    Ert_ImxUsdhc_CmdXfrTyp_Response48 = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(2U),
-    Ert_ImxUsdhc_CmdXfrTyp_ResponseBusy48 = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(3U),
+    NR_ImxUsdhc_CmdXfrTyp_NoResponse = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(0U),
+    NR_ImxUsdhc_CmdXfrTyp_Response136 = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(1U),
+    NR_ImxUsdhc_CmdXfrTyp_Response48 = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(2U),
+    NR_ImxUsdhc_CmdXfrTyp_ResponseBusy48 = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(3U),
 
-    Ert_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable = mrt_bit(19U),
-    Ert_ImxUsdhc_CmdXfrTyp_CmdIndexCheckEnable = mrt_bit(20U),
-    Ert_ImxUsdhc_CmdXfrTyp_DataPresentSelect = mrt_bit(21U),
+    NR_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable = mrt_bit(19U),
+    NR_ImxUsdhc_CmdXfrTyp_CmdIndexCheckEnable = mrt_bit(20U),
+    NR_ImxUsdhc_CmdXfrTyp_DataPresentSelect = mrt_bit(21U),
 
 #define IMX_USDHC_CMD_XFR_TYP_CMDTYP_OFFSET                         (22U)
 #define IMX_USDHC_CMD_XFR_TYP_CMDTYP_MASK                           (0xc00000U)
@@ -883,9 +883,9 @@ enum __ERT_IMX_USDHC_CMD_XFR_TYP_BIT
      *  01, Suspend CMD52 for writing Bus Suspend in CCCR
      *  00, Normal Other commands
      */
-    Ert_ImxUsdhc_CmdXfrTyp_SuspendCommand = IMX_USDHC_CMD_XFR_TYP_CMDTYP_BIT(1U),
-    Ert_ImxUsdhc_CmdXfrTyp_ResumeCommand = IMX_USDHC_CMD_XFR_TYP_CMDTYP_BIT(2U),
-    Ert_ImxUsdhc_CmdXfrTyp_AbortCommand = IMX_USDHC_CMD_XFR_TYP_CMDTYP_BIT(3U),
+    NR_ImxUsdhc_CmdXfrTyp_SuspendCommand = IMX_USDHC_CMD_XFR_TYP_CMDTYP_BIT(1U),
+    NR_ImxUsdhc_CmdXfrTyp_ResumeCommand = IMX_USDHC_CMD_XFR_TYP_CMDTYP_BIT(2U),
+    NR_ImxUsdhc_CmdXfrTyp_AbortCommand = IMX_USDHC_CMD_XFR_TYP_CMDTYP_BIT(3U),
 
 #define IMX_USDHC_CMD_XFR_TYP_CMDINX_OFFSET                         (24U)
 #define IMX_USDHC_CMD_XFR_TYP_CMDINX_MASK                           (0x3f000000U)
@@ -896,40 +896,40 @@ enum __ERT_IMX_USDHC_CMD_XFR_TYP_BIT
 /*!< for Register: HOST_CTRL_CAP */
 enum __ERT_IMX_USDHC_HOST_CTRL_CAP_BIT
 {
-    Ert_ImxUsdhc_HostCtrlCap_Sdr50Support = mrt_bit(0U),           /*!< This bit indicates support of SDR50 mode */
-    Ert_ImxUsdhc_HostCtrlCap_Sdr104Support = mrt_bit(1U),          /*!< This bit indicates support of SDR104 mode */
-    Ert_ImxUsdhc_HostCtrlCap_Ddr50Support = mrt_bit(2U),           /*!< This bit indicates support of DDR50 mode */
+    NR_ImxUsdhc_HostCtrlCap_Sdr50Support = mrt_bit(0U),             /*!< This bit indicates support of SDR50 mode */
+    NR_ImxUsdhc_HostCtrlCap_Sdr104Support = mrt_bit(1U),            /*!< This bit indicates support of SDR104 mode */
+    NR_ImxUsdhc_HostCtrlCap_Ddr50Support = mrt_bit(2U),             /*!< This bit indicates support of DDR50 mode */
 
 #define IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_OFFSET              (8U)
 #define IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_MASK                (0xf00U)
 #define IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_BIT(x)              mrt_bit_mask((x), IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_MASK, IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_OFFSET)
 
-    Ert_ImxUsdhc_HostCtrlCap_UseTuningSdr50 = mrt_bit(13U),        /*!< This bit is set to 1. Host controller requires tuning to operate SDR50 */
+    NR_ImxUsdhc_HostCtrlCap_UseTuningSdr50 = mrt_bit(13U),          /*!< This bit is set to 1. Host controller requires tuning to operate SDR50 */
 
 #define IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_OFFSET                (14U)
 #define IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_MASK                  (0xc000U)
 #define IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_BIT(x)                mrt_bit_mask((x), IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_MASK, IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_OFFSET)
 
-    Ert_ImxUsdhc_HostCtrlCap_RetuningMode1 = IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_BIT(0U),
-    Ert_ImxUsdhc_HostCtrlCap_RetuningMode2 = IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_BIT(1U),
-    Ert_ImxUsdhc_HostCtrlCap_RetuningMode3 = IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_BIT(3U),
+    NR_ImxUsdhc_HostCtrlCap_RetuningMode1 = IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_BIT(0U),
+    NR_ImxUsdhc_HostCtrlCap_RetuningMode2 = IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_BIT(1U),
+    NR_ImxUsdhc_HostCtrlCap_RetuningMode3 = IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_BIT(3U),
 
 #define IMX_USDHC_HOST_CTRL_CAP_MBL_OFFSET                          (16U)
 #define IMX_USDHC_HOST_CTRL_CAP_MBL_MASK                            (0x70000U)
 #define IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(x)                          mrt_bit_mask((x), IMX_USDHC_HOST_CTRL_CAP_MBL_MASK, IMX_USDHC_HOST_CTRL_CAP_MBL_OFFSET)
 
-    Ert_ImxUsdhc_HostCtrlCap_MaxBlockLenth512Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(0U),
-    Ert_ImxUsdhc_HostCtrlCap_MaxBlockLenth1024Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(1U),
-    Ert_ImxUsdhc_HostCtrlCap_MaxBlockLenth2048Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(2U),
-    Ert_ImxUsdhc_HostCtrlCap_MaxBlockLenth4096Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(3U),
+    NR_ImxUsdhc_HostCtrlCap_MaxBlockLenth512Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(0U),
+    NR_ImxUsdhc_HostCtrlCap_MaxBlockLenth1024Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(1U),
+    NR_ImxUsdhc_HostCtrlCap_MaxBlockLenth2048Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(2U),
+    NR_ImxUsdhc_HostCtrlCap_MaxBlockLenth4096Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(3U),
 
-    Ert_ImxUsdhc_HostCtrlCap_AdmaSupport = mrt_bit(20U),           /*!< This bit indicates whether the uSDHC supports the ADMA feature */
-    Ert_ImxUsdhc_HostCtrlCap_HighSpeedSupport = mrt_bit(21U),      /*!< High Speed Supported (Host System maybe supply a SD Clock frequency from 25 MHz to 50 MHz) */
-    Ert_ImxUsdhc_HostCtrlCap_DmaSupport = mrt_bit(22U),            /*!< DMA Support */
-    Ert_ImxUsdhc_HostCtrlCap_SuspendResumeSupport = mrt_bit(23U),  /*!< Suspend / Resume Support */
-    Ert_ImxUsdhc_HostCtrlCap_Voltage33VSupport = mrt_bit(24U),     /*!< Voltage Support 3.3V */
-    Ert_ImxUsdhc_HostCtrlCap_Voltage30VSupport = mrt_bit(25U),     /*!< Voltage Support 3.0V */
-    Ert_ImxUsdhc_HostCtrlCap_Voltage18VSupport = mrt_bit(26U),     /*!< Voltage Support 1.8V */
+    NR_ImxUsdhc_HostCtrlCap_AdmaSupport = mrt_bit(20U),             /*!< This bit indicates whether the uSDHC supports the ADMA feature */
+    NR_ImxUsdhc_HostCtrlCap_HighSpeedSupport = mrt_bit(21U),        /*!< High Speed Supported (Host System maybe supply a SD Clock frequency from 25 MHz to 50 MHz) */
+    NR_ImxUsdhc_HostCtrlCap_DmaSupport = mrt_bit(22U),              /*!< DMA Support */
+    NR_ImxUsdhc_HostCtrlCap_SuspendResumeSupport = mrt_bit(23U),    /*!< Suspend / Resume Support */
+    NR_ImxUsdhc_HostCtrlCap_Voltage33VSupport = mrt_bit(24U),       /*!< Voltage Support 3.3V */
+    NR_ImxUsdhc_HostCtrlCap_Voltage30VSupport = mrt_bit(25U),       /*!< Voltage Support 3.0V */
+    NR_ImxUsdhc_HostCtrlCap_Voltage18VSupport = mrt_bit(26U),       /*!< Voltage Support 1.8V */
 };
 
 /*!< for Register: WTMK_LVL */
@@ -979,22 +979,22 @@ enum __ERT_IMX_USDHC_HOST_CTRL_CAP_BIT
 /*!< for Register: VEND_SPEC */
 enum  __ERT_IMX_USDHC_VEND_SPEC_BIT
 {
-    Ert_ImxUsdhc_VendSpec_ExtDmaRequestEnable = mrt_bit(0U),       /*!< External DMA Request Enable */
-    Ert_ImxUsdhc_VendSpec_VoltageSelect = mrt_bit(1U),             /*!< Voltage Selection */
-    Ert_ImxUsdhc_VendSpec_ConflictCheckEnable = mrt_bit(2U),       /*!< Conflict check enable. */
-    Ert_ImxUsdhc_VendSpec_CheckBusyAfterAC12WR = mrt_bit(3U),      /*!< Check busy enable after auto CMD12 for write data packet */
-    Ert_ImxUsdhc_VendSpec_Data3DetectPolarity = mrt_bit(4U),       /*!< Polarity of DATA3 pin when it is used as card detection. Only for debug */
-    Ert_ImxUsdhc_VendSpec_CD_B_Polarity = mrt_bit(5U),             /*!< Polarity of the CD_B pin. Only for debug */
-    Ert_ImxUsdhc_VendSpec_WriteProtectPolarity = mrt_bit(6U),      /*!< Polarity of the WP pin. Only for debug */
-    Ert_ImxUsdhc_VendSpec_ActiveClkInAbortSend = mrt_bit(7U),      /*!< Force CLK output active when sending Abort command. Only for debug */
-    Ert_ImxUsdhc_VendSpec_ActiveClk = mrt_bit(8U),                 /*!< Force CLK output active */
-    Ert_ImxUsdhc_VendSpec_IpgClkSoftEnable = mrt_bit(11U),         /*!< IPG_CLK Software Enable */
-    Ert_ImxUsdhc_VendSpec_AhbClkSoftEnable = mrt_bit(12U),         /*!< AHB Clock Software Enable */
-    Ert_ImxUsdhc_VendSpec_IpgPerClkSoftEnable = mrt_bit(13U),      /*!< IPG_PERCLK Software Enable */
-    Ert_ImxUsdhc_VendSpec_CardClkSoftEnable = mrt_bit(14U),        /*!< Card Clock Software Enable */
-    Ert_ImxUsdhc_VendSpec_CrcCheckDisable = mrt_bit(15U),          /*!< CRC Check Disable */
+    NR_ImxUsdhc_VendSpec_ExtDmaRequestEnable = mrt_bit(0U),         /*!< External DMA Request Enable */
+    NR_ImxUsdhc_VendSpec_VoltageSelect = mrt_bit(1U),               /*!< Voltage Selection */
+    NR_ImxUsdhc_VendSpec_ConflictCheckEnable = mrt_bit(2U),         /*!< Conflict check enable. */
+    NR_ImxUsdhc_VendSpec_CheckBusyAfterAC12WR = mrt_bit(3U),        /*!< Check busy enable after auto CMD12 for write data packet */
+    NR_ImxUsdhc_VendSpec_Data3DetectPolarity = mrt_bit(4U),         /*!< Polarity of DATA3 pin when it is used as card detection. Only for debug */
+    NR_ImxUsdhc_VendSpec_CD_B_Polarity = mrt_bit(5U),               /*!< Polarity of the CD_B pin. Only for debug */
+    NR_ImxUsdhc_VendSpec_WriteProtectPolarity = mrt_bit(6U),        /*!< Polarity of the WP pin. Only for debug */
+    NR_ImxUsdhc_VendSpec_ActiveClkInAbortSend = mrt_bit(7U),        /*!< Force CLK output active when sending Abort command. Only for debug */
+    NR_ImxUsdhc_VendSpec_ActiveClk = mrt_bit(8U),                   /*!< Force CLK output active */
+    NR_ImxUsdhc_VendSpec_IpgClkSoftEnable = mrt_bit(11U),           /*!< IPG_CLK Software Enable */
+    NR_ImxUsdhc_VendSpec_AhbClkSoftEnable = mrt_bit(12U),           /*!< AHB Clock Software Enable */
+    NR_ImxUsdhc_VendSpec_IpgPerClkSoftEnable = mrt_bit(13U),        /*!< IPG_PERCLK Software Enable */
+    NR_ImxUsdhc_VendSpec_CardClkSoftEnable = mrt_bit(14U),          /*!< Card Clock Software Enable */
+    NR_ImxUsdhc_VendSpec_CrcCheckDisable = mrt_bit(15U),            /*!< CRC Check Disable */
 
-    Ert_ImxUsdhc_VendSpec_CmdByteAccess = mrt_bit(31U),            /*!< Byte access */
+    NR_ImxUsdhc_VendSpec_CmdByteAccess = mrt_bit(31U),              /*!< Byte access */
 };
 
 /*!< ------------------------------------------------------------------------- */

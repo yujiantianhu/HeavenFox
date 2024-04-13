@@ -35,7 +35,7 @@ struct kel_thread
 
 	/*!< thread entry */
 	void *(*start_routine) (void *);
-	srt_kel_thread_attr_t *sprt_attr;
+	struct kel_thread_attr *sprt_attr;
 	void *ptr_args;
 
 	/*!< thread list (to ready/suspend/sleep list) */

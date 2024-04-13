@@ -11,13 +11,13 @@
  */
 
 /*!< The includes */
-#include <platform/hal_basic.h>
-#include <platform/hal_inode.h>
-#include <platform/hal_fs.h>
-#include <platform/of/hal_of.h>
-#include <platform/of/hal_of_device.h>
-#include <platform/hal_platdrv.h>
-#include <platform/hal_uaccess.h>
+#include <platform/fwk_basic.h>
+#include <platform/fwk_inode.h>
+#include <platform/fwk_fs.h>
+#include <platform/of/fwk_of.h>
+#include <platform/of/fwk_of_device.h>
+#include <platform/fwk_platdrv.h>
+#include <platform/fwk_uaccess.h>
 
 #include <asm/imx6/imx6ull_clocks.h>
 
@@ -26,8 +26,8 @@ struct imx_clks_data
 {
     srt_imx_ccm_t *sprt_ccm;
     srt_imx_ccm_pll_t *sprt_pll;
-    struct hal_device_node *sprt_clks;
-    struct hal_device_node *sprt_anatop;
+    struct fwk_device_node *sprt_clks;
+    struct fwk_device_node *sprt_anatop;
 };
 
 struct clk_desc
@@ -41,13 +41,13 @@ struct clk_desc
 
 /*!< --------------------------------------------------------------------- */
 /*!< device id for device-tree */
-static struct hal_of_device_id sgrt_imx_antop_driver_ids[] =
+static struct fwk_of_device_id sgrt_imx_antop_driver_ids[] =
 {
 	{ .compatible = "fsl,imx6ul-anatop", },
 	{},
 };
 
-static struct hal_of_device_id sgrt_imx_ccm_driver_ids[] =
+static struct fwk_of_device_id sgrt_imx_ccm_driver_ids[] =
 {
 	{ .compatible = "fsl,imx6ul-ccm", },
 	{},
@@ -166,25 +166,25 @@ static void imx_clks_video_init(struct imx_clks_data *sprt_data)
  * @retval  errno
  * @note    none
  */
-ksint32_t __hal_init imx_clks_driver_init(void)
+ksint32_t __fwk_init imx_clks_driver_init(void)
 {
 	srt_imx_ccm_t *sprt_ccm;
 	srt_imx_ccm_pll_t *sprt_pll;
-	struct hal_device_node *sprt_clks, *sprt_anatop;
+	struct fwk_device_node *sprt_clks, *sprt_anatop;
     struct imx_clks_data sgrt_data;
 
-	sprt_anatop = hal_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_antop_driver_ids, mrt_nullptr);
-    sprt_clks = hal_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_ccm_driver_ids, mrt_nullptr);
+	sprt_anatop = fwk_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_antop_driver_ids, mrt_nullptr);
+    sprt_clks = fwk_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_ccm_driver_ids, mrt_nullptr);
 	if (!mrt_isValid(sprt_anatop) || !mrt_isValid(sprt_clks))
 	{
-		return Ert_isNone;
+		return NR_isNone;
 	}
 
-	sprt_pll = (srt_imx_ccm_pll_t *)hal_of_iomap(sprt_anatop, 0);
-    sprt_ccm = (srt_imx_ccm_t *)hal_of_iomap(sprt_clks, 0);
+	sprt_pll = (srt_imx_ccm_pll_t *)fwk_of_iomap(sprt_anatop, 0);
+    sprt_ccm = (srt_imx_ccm_t *)fwk_of_iomap(sprt_clks, 0);
     if (!mrt_isValid(sprt_pll) || !mrt_isValid(sprt_ccm))
     {
-        return -Ert_isUnvalid;
+        return -NR_isUnvalid;
     }
 
     sgrt_data.sprt_ccm = sprt_ccm;
@@ -202,7 +202,7 @@ ksint32_t __hal_init imx_clks_driver_init(void)
     /*!< 2. lcdif */
     imx_clks_video_init(&sgrt_data);
 
-    return Ert_isWell;
+    return NR_isWell;
 }
 
 /*!
@@ -211,7 +211,7 @@ ksint32_t __hal_init imx_clks_driver_init(void)
  * @retval  none
  * @note    none
  */
-void __hal_exit imx_clks_driver_exit(void)
+void __fwk_exit imx_clks_driver_exit(void)
 {
 
 }

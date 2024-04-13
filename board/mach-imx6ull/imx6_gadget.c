@@ -13,11 +13,11 @@
 /*!< The includes */
 #include <common/generic.h>
 #include <common/time.h>
-#include <platform/irq/hal_irq_types.h>
-#include <platform/usb/hal_ch9.h>
-#include <platform/usb/hal_hid.h>
-#include <platform/usb/hal_urb.h>
-#include <platform/usb/host/hal_usb_host.h>
+#include <platform/irq/fwk_irq_types.h>
+#include <platform/usb/fwk_ch9.h>
+#include <platform/usb/fwk_hid.h>
+#include <platform/usb/fwk_urb.h>
+#include <platform/usb/host/fwk_usb_host.h>
 #include "imx6_common.h"
 
 /*!< The defines */
@@ -102,7 +102,7 @@ static ksint32_t imx6_gadget_clk_initial(srt_imx_usbotg_t *sprt_otg, srt_imx_usb
 {
     if ((!mrt_isValid(sprt_otg)) || (!mrt_isValid(sprt_phy)))
     {
-        return mrt_retval(Ert_isNullPtr);
+        return -NR_isNullPtr;
     }
 
     /*!< PWD register provides overall control of the PHY power state */
@@ -136,7 +136,7 @@ static ksint32_t imx6_gadget_clk_initial(srt_imx_usbotg_t *sprt_otg, srt_imx_usb
     mrt_setbitl(mrt_bit(1U), &sprt_otg->USBCMD);
     while (!mrt_isBitResetl(mrt_bit(1U), &sprt_otg->USBCMD));
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 }
 
 /*!
@@ -149,7 +149,7 @@ static ksint32_t imx6_gadget_ehci_phy_initial(srt_imx_usbphy_t *sprt_phy)
 {
     if (!mrt_isValid(sprt_phy))
     {
-        return mrt_retval(Ert_isNullPtr);
+        return -NR_isNullPtr;
     }
 
     /*!< Enables UTMI+ Level2. This should be enabled if needs to support LS device */
@@ -168,7 +168,7 @@ static ksint32_t imx6_gadget_ehci_phy_initial(srt_imx_usbphy_t *sprt_phy)
     /*!< Decode to select a 45-Ohm resistance to the USB_DN output pin */
     mrt_setbitl(IMX_GADGET_PHY_TXCAL45DN, &sprt_phy->TX);
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 }
 
 /*!
@@ -181,7 +181,7 @@ static ksint32_t imx6_gadget_ehci_otg_initial(srt_imx_usbotg_t *sprt_otg)
 {
     if (!mrt_isValid(sprt_otg))
     {
-        return mrt_retval(Ert_isNullPtr);
+        return -NR_isNullPtr;
     }
 
     /*!< 
@@ -237,7 +237,7 @@ static ksint32_t imx6_gadget_ehci_otg_initial(srt_imx_usbotg_t *sprt_otg)
      */
     mrt_writel(g_iImx_gadget_queue_head, &sprt_otg->ENDPTLISTADDR);
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 }
 
 /*!
@@ -307,11 +307,11 @@ void imx6_usb_gadget_initial(void)
      * URE: bit6, USB Reset Interrupt Enable
      * SLE: bit8, Sleep Interrupt Enable
      */
-    mrt_writel(Ert_ImxUsbOtgIntr_UsbIntBit | Ert_ImxUsbOtgIntr_UsbErrIntBit | 
-            Ert_ImxUsbOtgIntr_PortChangeDetectIntBit | Ert_ImxUsbOtgIntr_UsbResetIntBit | 
-            Ert_ImxUsbOtgIntr_SleepIntBit, &sprt_otg->USBINTR);
+    mrt_writel(NR_ImxUsbOtgIntr_UsbIntBit | NR_ImxUsbOtgIntr_UsbErrIntBit | 
+            NR_ImxUsbOtgIntr_PortChangeDetectIntBit | NR_ImxUsbOtgIntr_UsbResetIntBit | 
+            NR_ImxUsbOtgIntr_SleepIntBit, &sprt_otg->USBINTR);
     
-    mrt_enable_irq(Ert_IMX_USB_OTG1_IRQn);
+    mrt_enable_irq(NR_IMX_USB_OTG1_IRQn);
 
     /*!< 
      * Start USB
@@ -363,25 +363,25 @@ irq_return_t imx6_gadget_handler(void *ptrDev)
 {
     if (!mrt_isValid(ptrDev))
     {
-        return mrt_retval(Ert_isNullPtr);
+        return -NR_isNullPtr;
     }
 
     /*!< USB Interrupt Status */
-    __imx6_gadget_handler(Ert_ImxUsbOtgIntr_UsbIntBit, imx6_gadget_ehci_token_handler, ptrDev);
+    __imx6_gadget_handler(NR_ImxUsbOtgIntr_UsbIntBit, imx6_gadget_ehci_token_handler, ptrDev);
 
     /*!< USB Error Interrupt Status */
-    __imx6_gadget_handler(Ert_ImxUsbOtgIntr_UsbErrIntBit, mrt_nullptr, ptrDev);
+    __imx6_gadget_handler(NR_ImxUsbOtgIntr_UsbErrIntBit, mrt_nullptr, ptrDev);
 
     /*!< Port Change Detect Interrupt Status */
-    __imx6_gadget_handler(Ert_ImxUsbOtgIntr_PortChangeDetectIntBit, imx6_gadget_ehci_detect_handler, ptrDev);
+    __imx6_gadget_handler(NR_ImxUsbOtgIntr_PortChangeDetectIntBit, imx6_gadget_ehci_detect_handler, ptrDev);
 
     /*!< USB Reset Interrupt Status */
-    __imx6_gadget_handler(Ert_ImxUsbOtgIntr_UsbResetIntBit, imx6_gadget_ehci_reset_handler, ptrDev); 
+    __imx6_gadget_handler(NR_ImxUsbOtgIntr_UsbResetIntBit, imx6_gadget_ehci_reset_handler, ptrDev); 
 
     /*!< Sleep Interrupt Status */
-    __imx6_gadget_handler(Ert_ImxUsbOtgIntr_SleepIntBit, imx6_gadget_ehci_sleep_handler, ptrDev);
+    __imx6_gadget_handler(NR_ImxUsbOtgIntr_SleepIntBit, imx6_gadget_ehci_sleep_handler, ptrDev);
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 }
 
 /*!

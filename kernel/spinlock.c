@@ -69,7 +69,7 @@ void spin_unlock(struct spin_lock *sprt_lock)
 ksint32_t spin_trylock(struct spin_lock *sprt_lock)
 {
     if (mrt_spin_is_locked(sprt_lock))
-        return -Ert_isExisted;
+        return -NR_isExisted;
 
     mrt_preempt_disable();
     COUNT_INC(sprt_lock->count);

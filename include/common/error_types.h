@@ -22,63 +22,63 @@ TARGET_EXT "C" {
 #endif
 
 /*!< The defines */
-typedef ksint32_t 	err_return_t;
+typedef ksint32_t 	kstatus_t;
 
 /*!< error code */
 enum __ERT_ERROR_CODE
 {
 	/*!< --------------------------------------------------------- */
 	/*!< 0 ~ 31: use with positive */
-	Ert_isNone = 0U,
-	Ert_isWell,
-	Ert_isRetry,
-	Ert_isPermit,
+	NR_isNone = 0U,
+	NR_isWell,
+	NR_isRetry,
+	NR_isPermit,
 
-	Ert_isPosMax = 31U,
+	NR_isPosMax = 31U,
 
 	/*!< --------------------------------------------------------- */
 	/*!< 32 ~ ?: use with negative */
-	Ert_isAnyErr = 32U,
-	Ert_isMemErr,
-	Ert_isUnvalid,
-	Ert_isNullPtr,
-	Ert_isWildPtr,
-	Ert_isArgFault,
-	Ert_isArrayOver,
-	Ert_isNotAlign,
-	Ert_isExisted,
-	Ert_isNotFound,
+	NR_isAnyErr = 32U,
+	NR_isMemErr,
+	NR_isUnvalid,
+	NR_isNullPtr,
+	NR_isWildPtr,
+	NR_isArgFault,
+	NR_isArrayOver,
+	NR_isNotAlign,
+	NR_isExisted,
+	NR_isNotFound,
 
 	/*!< hardware */
-	Ert_isIOErr,
-	Ert_isNotSupport,
-	Ert_isNotReady,
-	Ert_isNotSuccess,
-	Ert_isTimeOut,
+	NR_isIOErr,
+	NR_isNotSupport,
+	NR_isNotReady,
+	NR_isNotSuccess,
+	NR_isTimeOut,
 
 	/*!< comunication */
-	Ert_isSendFail,
-	Ert_isRecvFail,
-	Ert_isSendCmdFail,
-	Ert_isRecvCmdFail,
-	Ert_isSendDataFail,
-	Ert_isRecvDataFail,
-	Ert_isTransErr,
-	Ert_isTransRequst,
-	Ert_isTransBusy,
-	Ert_isCheckErr,
-	Ert_isTransStopFail,
+	NR_isSendFail,
+	NR_isRecvFail,
+	NR_isSendCmdFail,
+	NR_isRecvCmdFail,
+	NR_isSendDataFail,
+	NR_isRecvDataFail,
+	NR_isTransErr,
+	NR_isTransRequst,
+	NR_isTransBusy,
+	NR_isCheckErr,
+	NR_isTransStopFail,
 	
-#define mrt_retval(code)							(((code) > Ert_isPosMax) ? (-(code)) : (code))
+#define mrt_retval(code)							(((code) > NR_isPosMax) ? (-(code)) : (code))
 #define mrt_isErr(code)								((code) < 0)
-#define mrt_ecode_to_kbool(code)					(((code) < 0) ? Ert_false : Ert_true)
+#define mrt_ecode_to_kbool(code)					(((code) < 0) ? false : true)
 #define mrt_kbool_to_ecode(flag, code1, code2)		((flag) ? mrt_retval(code1) : mrt_retval(code2))							
 };
 
 /*!< The functions */
 TARGET_EXT void deal_assert_fail(const kstring_t *__assertion, const kstring_t *__file,
 			   					kuint32_t __line, const kstring_t *__function)
-							__THROW __attribute__ ((__noreturn__));
+								__THROW __attribute__ ((__noreturn__));
 /*!< The defines */
 #define mrt_void()									((void)(0))
 

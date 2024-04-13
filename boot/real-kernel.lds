@@ -64,6 +64,7 @@ SECTIONS
         *(.vfp11_veneer)
         *(.ARM.extab)
         *(.gnu.linkonce.armextab.*)
+        *(.note.gnu.build-id)
     } > ram_ddr_0
 
     .dync_init : 

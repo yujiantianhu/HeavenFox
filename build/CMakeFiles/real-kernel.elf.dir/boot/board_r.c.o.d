@@ -76,13 +76,13 @@ CMakeFiles/real-kernel.elf.dir/boot/board_r.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/include/asm/armv7/ca7_gic.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/boot_text.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/board/board_common.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/kmem_pool.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/mmc/hal_sdcard.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_mempool.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/mmc/fwk_sdcard.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/implicit_call.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/boot_text.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/configs/mach_configs.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/rootfs/rfs_disk.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/mmc/hal_sdfatfs.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/mmc/fwk_sdfatfs.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/ff.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/integer.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/ffconf.h \

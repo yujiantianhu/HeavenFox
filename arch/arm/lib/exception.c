@@ -26,7 +26,7 @@ kuaddr_t data_abort_addr;
  */
 void exec_undefined_handler(void)
 {
-    while (Ert_true);
+    while (true);
 }
 
 /*!
@@ -37,7 +37,7 @@ void exec_undefined_handler(void)
  */
 void exec_prefetch_abort_handler(void)
 {
-    while (Ert_true);
+    while (true);
 }
 
 /*!
@@ -48,7 +48,7 @@ void exec_prefetch_abort_handler(void)
  */
 void exec_data_abort_handler(void)
 {
-    while (Ert_true);
+    while (true);
 }
 
 /*!
@@ -59,7 +59,7 @@ void exec_data_abort_handler(void)
  */
 void exec_unused_handler(void)
 {
-    while (Ert_true);
+    while (true);
 }
 
 /* end of file*/

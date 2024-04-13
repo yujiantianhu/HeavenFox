@@ -21,36 +21,36 @@
 /*!< The globals */
 const dync_init_t *dync_init_sections[] =
 {
-    [Ert_Dync_Sec_Static]   = &__dync_init_0_start,
-    [Ert_Dync_Sec_Early]    = &__dync_init_1_start,
-    [Ert_Dync_Sec_Late]     = &__dync_init_2_start,
-    [Ert_Dync_Sec_Kernel]   = &__dync_init_3_start,
-    [Ert_Dync_Sec_Rootfs]   = &__dync_init_4_start,
-    [Ert_Dync_Sec_Platform] = &__dync_init_5_start,
-    [Ert_Dync_Sec_Pattern]  = &__dync_init_6_start,
-    [Ert_Dync_Sec_Device]   = &__dync_init_7_start,
-    [Ert_Dync_Sec_Driver]   = &__dync_init_8_start,
-    [Ert_Dync_Sec_Others]   = &__dync_init_9_start,
+    [NR_DYNC_SEC_STATIC]   = &__dync_init_0_start,
+    [NR_DYNC_SEC_EARLY]    = &__dync_init_1_start,
+    [NR_DYNC_SEC_LATE]     = &__dync_init_2_start,
+    [NR_DYNC_SEC_KERNEL]   = &__dync_init_3_start,
+    [NR_DYNC_SEC_ROOTFS]   = &__dync_init_4_start,
+    [NR_DYNC_SEC_PLATFORM] = &__dync_init_5_start,
+    [NR_DYNC_SEC_PATTERN]  = &__dync_init_6_start,
+    [NR_DYNC_SEC_DEVICE]   = &__dync_init_7_start,
+    [NR_DYNC_SEC_DRIVER]   = &__dync_init_8_start,
+    [NR_DYNC_SEC_OTHERS]   = &__dync_init_9_start,
 
-    [Ert_Dync_Sec_Start]    = &__dync_init_start,
-    [Ert_Dync_Sec_End]      = &__dync_init_end,
+    [NR_DYNC_SEC_START]    = &__dync_init_start,
+    [NR_DYNC_SEC_END]      = &__dync_init_end,
 };
 
 const dync_exit_t *dync_exit_sections[] =
 {
-    [Ert_Dync_Sec_Static]   = &__dync_exit_0_start,
-    [Ert_Dync_Sec_Early]    = &__dync_exit_1_start,
-    [Ert_Dync_Sec_Late]     = &__dync_exit_2_start,
-    [Ert_Dync_Sec_Kernel]   = &__dync_exit_3_start,
-    [Ert_Dync_Sec_Rootfs]   = &__dync_exit_4_start,
-    [Ert_Dync_Sec_Platform] = &__dync_exit_5_start,
-    [Ert_Dync_Sec_Pattern]  = &__dync_exit_6_start,
-    [Ert_Dync_Sec_Device]   = &__dync_exit_7_start,
-    [Ert_Dync_Sec_Driver]   = &__dync_exit_8_start,
-    [Ert_Dync_Sec_Others]   = &__dync_exit_9_start,
+    [NR_DYNC_SEC_STATIC]   = &__dync_exit_0_start,
+    [NR_DYNC_SEC_EARLY]    = &__dync_exit_1_start,
+    [NR_DYNC_SEC_LATE]     = &__dync_exit_2_start,
+    [NR_DYNC_SEC_KERNEL]   = &__dync_exit_3_start,
+    [NR_DYNC_SEC_ROOTFS]   = &__dync_exit_4_start,
+    [NR_DYNC_SEC_PLATFORM] = &__dync_exit_5_start,
+    [NR_DYNC_SEC_PATTERN]  = &__dync_exit_6_start,
+    [NR_DYNC_SEC_DEVICE]   = &__dync_exit_7_start,
+    [NR_DYNC_SEC_DRIVER]   = &__dync_exit_8_start,
+    [NR_DYNC_SEC_OTHERS]   = &__dync_exit_9_start,
 
-    [Ert_Dync_Sec_Start]    = &__dync_exit_start,
-    [Ert_Dync_Sec_End]      = &__dync_exit_end,
+    [NR_DYNC_SEC_START]    = &__dync_exit_start,
+    [NR_DYNC_SEC_END]      = &__dync_exit_end,
 };
 
 /* API functions */
@@ -64,20 +64,20 @@ ksint32_t dync_initcall_run_list(const kuint32_t section)
 {
 	const dync_init_t *pFunc_init;
 
-    if (section >= Ert_Dync_Sec_End)
+    if (section >= NR_DYNC_SEC_END)
     {
-        return mrt_retval(Ert_isMemErr);
+        return -NR_isMemErr;
     }
 
 	for (pFunc_init = dync_init_sections[section]; (*pFunc_init) && (pFunc_init < dync_init_sections[section + 1]); pFunc_init++)
 	{
 		if (mrt_isErr((*pFunc_init)()))
 		{
-			return mrt_retval(Ert_isAnyErr);
+			return -NR_isAnyErr;
 		}
 	}
 
-	return mrt_retval(Ert_isWell);
+	return NR_isWell;
 }
 
 /*!
@@ -90,7 +90,7 @@ void dync_exitcall_run_list(const kuint32_t section)
 {
 	const dync_exit_t *pFunc_exit;
 
-    if (section >= Ert_Dync_Sec_End)
+    if (section >= NR_DYNC_SEC_END)
     {
         return;
     }
@@ -110,7 +110,7 @@ void dync_exitcall_run_list(const kuint32_t section)
 ksint32_t board_early_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    return dync_initcall_run_list(Ert_Dync_Sec_Early);
+    return dync_initcall_run_list(NR_DYNC_SEC_EARLY);
 
 #else
 	dync_init_t *pFunc_init;
@@ -119,11 +119,11 @@ ksint32_t board_early_initcall(void)
 	{
 		if (mrt_isErr((*pFunc_init)()))
 		{
-			return mrt_retval(Ert_isAnyErr);
+			return -NR_isAnyErr;
 		}
 	}
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 
 #endif
 }
@@ -137,7 +137,7 @@ ksint32_t board_early_initcall(void)
 void board_early_exitcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    dync_exitcall_run_list(Ert_Dync_Sec_Early);
+    dync_exitcall_run_list(NR_DYNC_SEC_EARLY);
 
 #else
 	dync_exit_t *pFunc_exit;
@@ -159,7 +159,7 @@ void board_early_exitcall(void)
 ksint32_t board_late_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    return dync_initcall_run_list(Ert_Dync_Sec_Late);
+    return dync_initcall_run_list(NR_DYNC_SEC_LATE);
 
 #else
 	dync_init_t *pFunc_init;
@@ -168,11 +168,11 @@ ksint32_t board_late_initcall(void)
 	{
 		if (mrt_isErr((*pFunc_init)()))
 		{
-			return mrt_retval(Ert_isAnyErr);
+			return -NR_isAnyErr;
 		}
 	}
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 
 #endif
 }
@@ -186,7 +186,7 @@ ksint32_t board_late_initcall(void)
 void board_late_exitcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    dync_exitcall_run_list(Ert_Dync_Sec_Late);
+    dync_exitcall_run_list(NR_DYNC_SEC_LATE);
 
 #else
 	dync_exit_t *pFunc_exit;
@@ -208,7 +208,7 @@ void board_late_exitcall(void)
 ksint32_t system_kernel_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    return dync_initcall_run_list(Ert_Dync_Sec_Kernel);
+    return dync_initcall_run_list(NR_DYNC_SEC_KERNEL);
 
 #else
 	dync_init_t *pFunc_init;
@@ -217,11 +217,11 @@ ksint32_t system_kernel_initcall(void)
 	{
 		if (mrt_isErr((*pFunc_init)()))
 		{
-			return mrt_retval(Ert_isAnyErr);
+			return -NR_isAnyErr;
 		}
 	}
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 
 #endif
 }
@@ -235,7 +235,7 @@ ksint32_t system_kernel_initcall(void)
 void system_kernel_exitcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    dync_exitcall_run_list(Ert_Dync_Sec_Kernel);
+    dync_exitcall_run_list(NR_DYNC_SEC_KERNEL);
 
 #else
 	dync_exit_t *pFunc_exit;
@@ -258,7 +258,7 @@ void system_kernel_exitcall(void)
 ksint32_t root_filesystem_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    return dync_initcall_run_list(Ert_Dync_Sec_Rootfs);
+    return dync_initcall_run_list(NR_DYNC_SEC_ROOTFS);
 
 #else
 	dync_init_t *pFunc_init;
@@ -267,11 +267,11 @@ ksint32_t root_filesystem_initcall(void)
 	{
 		if (mrt_isErr((*pFunc_init)()))
 		{
-			return mrt_retval(Ert_isAnyErr);
+			return -NR_isAnyErr;
 		}
 	}
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 
 #endif
 }
@@ -285,7 +285,7 @@ ksint32_t root_filesystem_initcall(void)
 void root_filesystem_exitcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    dync_exitcall_run_list(Ert_Dync_Sec_Rootfs);
+    dync_exitcall_run_list(NR_DYNC_SEC_ROOTFS);
 
 #else
 	dync_exit_t *pFunc_exit;
@@ -307,7 +307,7 @@ void root_filesystem_exitcall(void)
 ksint32_t platform_built_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    return dync_initcall_run_list(Ert_Dync_Sec_Platform);
+    return dync_initcall_run_list(NR_DYNC_SEC_PLATFORM);
 
 #else
 	dync_init_t *pFunc_init;
@@ -316,11 +316,11 @@ ksint32_t platform_built_initcall(void)
 	{
 		if (mrt_isErr((*pFunc_init)()))
 		{
-			return mrt_retval(Ert_isAnyErr);
+			return -NR_isAnyErr;
 		}
 	}
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 
 #endif
 }
@@ -334,7 +334,7 @@ ksint32_t platform_built_initcall(void)
 void platform_built_exitcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    dync_exitcall_run_list(Ert_Dync_Sec_Platform);
+    dync_exitcall_run_list(NR_DYNC_SEC_PLATFORM);
 
 #else
 	dync_exit_t *pFunc_exit;
@@ -356,7 +356,7 @@ void platform_built_exitcall(void)
 ksint32_t platform_reality_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    return dync_initcall_run_list(Ert_Dync_Sec_Pattern);
+    return dync_initcall_run_list(NR_DYNC_SEC_PATTERN);
 
 #else
 	dync_init_t *pFunc_init;
@@ -365,11 +365,11 @@ ksint32_t platform_reality_initcall(void)
 	{
 		if (mrt_isErr((*pFunc_init)()))
 		{
-			return mrt_retval(Ert_isAnyErr);
+			return -NR_isAnyErr;
 		}
 	}
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 
 #endif
 }
@@ -383,7 +383,7 @@ ksint32_t platform_reality_initcall(void)
 void platform_reality_exitcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    dync_exitcall_run_list(Ert_Dync_Sec_Pattern);
+    dync_exitcall_run_list(NR_DYNC_SEC_PATTERN);
 
 #else
 	dync_exit_t *pFunc_exit;
@@ -405,7 +405,7 @@ void platform_reality_exitcall(void)
 ksint32_t hardware_device_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    return dync_initcall_run_list(Ert_Dync_Sec_Device);
+    return dync_initcall_run_list(NR_DYNC_SEC_DEVICE);
 
 #else
 	dync_init_t *pFunc_init;
@@ -414,11 +414,11 @@ ksint32_t hardware_device_initcall(void)
 	{
 		if (mrt_isErr((*pFunc_init)()))
 		{
-			return mrt_retval(Ert_isAnyErr);
+			return -NR_isAnyErr;
 		}
 	}
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 
 #endif
 }
@@ -432,7 +432,7 @@ ksint32_t hardware_device_initcall(void)
 void hardware_device_exitcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    dync_exitcall_run_list(Ert_Dync_Sec_Device);
+    dync_exitcall_run_list(NR_DYNC_SEC_DEVICE);
 
 #else
 	dync_exit_t *pFunc_exit;
@@ -454,7 +454,7 @@ void hardware_device_exitcall(void)
 ksint32_t abstract_driver_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    return dync_initcall_run_list(Ert_Dync_Sec_Driver);
+    return dync_initcall_run_list(NR_DYNC_SEC_DRIVER);
 
 #else
 	dync_init_t *pFunc_init;
@@ -463,11 +463,11 @@ ksint32_t abstract_driver_initcall(void)
 	{
 		if (mrt_isErr((*pFunc_init)()))
 		{
-			return mrt_retval(Ert_isAnyErr);
+			return -NR_isAnyErr;
 		}
 	}
 
-    return mrt_retval(Ert_isWell);
+    return NR_isWell;
 
 #endif
 }
@@ -481,7 +481,7 @@ ksint32_t abstract_driver_initcall(void)
 void abstract_driver_exitcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
-    dync_exitcall_run_list(Ert_Dync_Sec_Driver);
+    dync_exitcall_run_list(NR_DYNC_SEC_DRIVER);
 
 #else
 	dync_exit_t *pFunc_exit;

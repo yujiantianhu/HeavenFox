@@ -52,8 +52,8 @@
 
 typedef enum ert_bool
 {
-    Ert_false = IT_FALSE,
-    Ert_true  = IT_TRUE
+    NR_FALSE = false,
+    NR_TRUE  = true
 
 } ert_bool_t;
 
@@ -63,9 +63,10 @@ typedef bool                    kbool_t;
 typedef ert_bool_t              kbool_t;
 #endif
 
-#define mrt_to_kbool(x)         ((x) ? Ert_true : Ert_false)
+#define mrt_to_kbool(x)         ((x) ? NR_TRUE : NR_FALSE)
 
 /*!< basic types */
+typedef                 char    ksint8_t;
 typedef                 char    ksint8_t;
 typedef unsigned        char    kuint8_t;
 typedef                 short   ksint16_t;
@@ -84,8 +85,8 @@ typedef	unsigned 	    char	kubuffer_t;
 typedef				    int		kssize_t;
 typedef	unsigned 	    int		kusize_t;
 typedef unsigned        long    kuaddr_t;
-typedef unsigned        long    kuarch_t;
-typedef                 long    ksarch_t;
+typedef unsigned        long    kutype_t;
+typedef                 long    kstype_t;
 
 #define __used		            __attribute__((used))
 #define __weak                  __attribute__((weak))

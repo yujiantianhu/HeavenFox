@@ -15,7 +15,7 @@
 #include <common/error_types.h>
 #include <common/generic.h>
 #include <common/io_stream.h>
-#include <platform/hal_fcntl.h>
+#include <platform/fwk_fcntl.h>
 #include <kernel/kernel.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>

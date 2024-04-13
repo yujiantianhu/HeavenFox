@@ -10,8 +10,9 @@
 #
 
 TARGET			:=	real-kernel
-OBJECT_MANAGE	:=	"true"
 
+MAKE			:=	make
+Q				:=	
 ARCH			:= 	arm
 TYPE			:=	armv7
 VENDOR			:=	imx6ull
@@ -22,6 +23,7 @@ COMPILER		:= 	$(COMPILER_BIN)arm-linux-gnueabihf-
 CC				:= 	$(COMPILER)gcc
 CXX				:=  $(COMPILER)g++
 LD				:= 	$(COMPILER)ld
+AR				:=	$(COMPILER)ar
 OBJDUMP			:= 	$(COMPILER)objdump
 OBJCOPY			:= 	$(COMPILER)objcopy
 READELF			:= 	$(COMPILER)readelf
@@ -35,28 +37,27 @@ LIBS_PATH		:=  -L $(COMPILER_LIBC)/usr/lib	\
 LIBS			:=	--static -lgcc -lm -lc
 OUTPUT_FLAGS	:=  -fexec-charset=GB2312
 
-BUILD_CFLAGS   	:=  -Wundef -Wstrict-prototypes -Wno-trigraphs \
-                    -fno-strict-aliasing -fno-common \
+BUILD_CFLAGS   	:=  -g3 -O0 -Wall -nostdlib	\
+					-Wundef	\
+					-Wstrict-prototypes	\
+					-Wno-trigraphs \
+                    -fno-strict-aliasing	\
+					-fno-common \
                     -Werror-implicit-function-declaration \
                     -fno-tree-scev-cprop
 
 MACROS			:=	-DCONFIG_DEBUG_JTAG	\
 					-DCONFIG_MACH_IMX6ULL_TOPPET
 
-PROJECT_DIR		:=	.
+PROJECT_DIR		:=	$(shell pwd)
+OBJECT_PATH		:=	$(PROJECT_DIR)/objects
+
 OUTPUT_PATH		:=	$(PROJECT_DIR)/boot
+LINK_SCRIPT		:=	$(OUTPUT_PATH)/$(TARGET).lds
 
-ifneq ($(OBJECT_MANAGE),)
-OBJECT_PATH		:=	$(PROJECT_DIR)/objects/
-else
-OBJECT_PATH		:=	
-endif
-
-TARGET_EXEC		:=	$(PROJECT_DIR)/boot/$(TARGET).elf
-TARGET_IMGE		:=	$(PROJECT_DIR)/boot/$(TARGET).img
-TARGET_NASM		:=	$(PROJECT_DIR)/boot/$(TARGET).dis
-
-LINK_SCRIPT		:=	$(PROJECT_DIR)/boot/$(TARGET).lds
+TARGET_EXEC		:=	$(OUTPUT_PATH)/$(TARGET).elf
+TARGET_IMGE		:=	$(OUTPUT_PATH)/$(TARGET).img
+TARGET_NASM		:=	$(OUTPUT_PATH)/$(TARGET).dis
 
 INCLUDE_DIRS	:= 	$(PROJECT_DIR)/	\
 					$(PROJECT_DIR)/arch/$(ARCH)/include	\
@@ -65,77 +66,44 @@ INCLUDE_DIRS	:= 	$(PROJECT_DIR)/	\
 					$(PROJECT_DIR)/rootfs	\
 					$(PROJECT_DIR)/rootfs/fatfs
 
-ASSEMBLY_DIRS	:=	$(PROJECT_DIR)/arch/$(ARCH)/lib	\
-					$(PROJECT_DIR)/arch/$(ARCH)/cpu/$(TYPE) \
-					$(PROJECT_DIR)/arch/$(ARCH)/kernel
-					
-COMMON_DIRS     :=  $(PROJECT_DIR)/common/generic	\
-					$(PROJECT_DIR)/common/mempool
-ARCH_DIRS       :=  $(PROJECT_DIR)/arch/$(ARCH)/lib	\
-					$(PROJECT_DIR)/arch/$(ARCH)/cpu/$(TYPE) \
-					$(PROJECT_DIR)/arch/$(ARCH)/cpu/$(TYPE)/$(VENDOR)
-BOOT_DIRS       :=  $(PROJECT_DIR)/boot	\
-					$(PROJECT_DIR)/boot/dynamic
-BOARD_DIRS      :=  $(PROJECT_DIR)/board/mach-$(VENDOR)
-PLATFORM_DIRS   :=  $(PROJECT_DIR)/platform	\
-					$(PROJECT_DIR)/platform/mem	\
-					$(PROJECT_DIR)/platform/mmc	\
-					$(PROJECT_DIR)/platform/irq	\
-					$(PROJECT_DIR)/platform/of	\
-					$(PROJECT_DIR)/platform/bus_type	\
-					$(PROJECT_DIR)/platform/chardev	\
-					$(PROJECT_DIR)/platform/block_device	\
-					$(PROJECT_DIR)/platform/net_device	\
-					$(PROJECT_DIR)/platform/gpio_desc	\
-					$(PROJECT_DIR)/platform/framebuffer	\
-					$(PROJECT_DIR)/platform/usb	\
-					$(PROJECT_DIR)/platform/usb/host
-KERNEL_DIRS     :=  $(PROJECT_DIR)/kernel	\
-					$(PROJECT_DIR)/kernel/kthread
-ROOTFS_DIRS     :=  $(PROJECT_DIR)/rootfs	\
-					$(PROJECT_DIR)/rootfs/fatfs	\
-					$(PROJECT_DIR)/rootfs/option
-DRIVER_DIRS     :=  $(PROJECT_DIR)/drivers/clk	\
-					$(PROJECT_DIR)/drivers/gpio	\
-					$(PROJECT_DIR)/drivers/video	\
-					$(PROJECT_DIR)/drivers/usb/gadget
-INIT_DIRS       :=  $(PROJECT_DIR)/example	\
-					$(PROJECT_DIR)/init
+ARCH_DIRS       :=  arch/$(ARCH)/
+COMMON_DIRS     :=  common/
+BOOT_DIRS       :=  boot/
+BOARD_DIRS      :=  board/
+PLATFORM_DIRS   :=  platform/
+KERNEL_DIRS     :=  kernel/
+ROOTFS_DIRS     :=  rootfs/
+DRIVER_DIRS     :=  drivers/
+INIT_DIRS       :=  example/ init/
 
-SOURCE_DIRS		:=	$(COMMON_DIRS) $(ARCH_DIRS) $(BOOT_DIRS) $(BOARD_DIRS)  \
-                    $(PLATFORM_DIRS) $(KERNEL_DIRS) $(ROOTFS_DIRS) $(DRIVER_DIRS) $(INIT_DIRS)
-
+OBJECT_EXEC		:=	$(OBJECT_PATH)/built-in.o
+SOURCE_DIRS		:=	$(ARCH_DIRS) $(COMMON_DIRS) $(BOOT_DIRS) $(BOARD_DIRS) $(PLATFORM_DIRS)	\
+					$(KERNEL_DIRS) $(ROOTFS_DIRS) $(DRIVER_DIRS) $(INIT_DIRS)
 INCLUDE_DIRS	:= 	$(patsubst %, -I %, $(INCLUDE_DIRS))
-SOURCES_ABS		:= 	$(foreach dir, $(SOURCE_DIRS), $(wildcard $(dir)/*.c))
-SOURCES		    := 	$(notdir $(SOURCES_ABS))
-SRC_OBJECTS		:=	$(patsubst %, $(OBJECT_PATH)%, $(SOURCES:.c=.o))
-ASSEMBLY_ABS	:=	$(foreach dir, $(ASSEMBLY_DIRS), $(wildcard $(dir)/*.S))
-ASSEMBLIES		:=	$(notdir $(ASSEMBLY_ABS))
-ASM_OBJECTS		:=	$(patsubst %, $(OBJECT_PATH)%, $(ASSEMBLIES:.S=.o))
-OBJECTS		    :=	$(ASM_OBJECTS) $(SRC_OBJECTS)
 
-VPATH			:= 	$(ASSEMBLY_DIRS) $(SOURCE_DIRS)
+export ARCH TYPE VENDOR CC CXX LD AR OBJDUMP OBJCOPY READELF
+export LIBS_PATH LIBS OUTPUT_FLAGS BUILD_CFLAGS MACROS
+export PROJECT_DIR LINK_SCRIPT OBJECT_PATH INCLUDE_DIRS
+export OBJECT_EXEC TARGET_EXEC TARGET_IMGE TARGET_NASM
+
+obj-y			+=	$(SOURCE_DIRS)
+
+VPATH			:= 	$(SOURCE_DIRS)
 .PHONY:			all clean debug
 
-all: $(TARGET_IMGE)
-$(TARGET_IMGE) : $(TARGET_EXEC)
-	$(OBJCOPY) -O binary -S $(TARGET_EXEC) $@
-	$(OBJDUMP) -D -m $(ARCH) $(TARGET_EXEC) > $(TARGET_NASM)
+obj: $(OBJECT_EXEC)
 
-$(TARGET_EXEC): $(OBJECTS)
-	$(LD) -T$(LINK_SCRIPT) -o $(TARGET_EXEC) $(OBJECTS) $(LIBS_PATH) $(LIBS)
+all : $(OBJECT_EXEC)
+	$(Q)$(MAKE) -C $(ARCH_DIRS)
 
-$(ASM_OBJECTS): $(OBJECT_PATH)%.o : %.S
-	$(CC) -g3 -O0 -Wall -nostdlib -c $(BUILD_CFLAGS) $(MACROS) $(INCLUDE_DIRS) $(OUTPUT_FLAGS) -o $@ $<
-
-$(SRC_OBJECTS): $(OBJECT_PATH)%.o : %.c
-	$(CC) -g3 -O0 -Wall -nostdlib -c $(BUILD_CFLAGS) $(MACROS) $(INCLUDE_DIRS) $(OUTPUT_FLAGS) -o $@ $<
+$(OBJECT_EXEC):
+	$(Q)$(MAKE) -C $(PROJECT_DIR) -f $(PROJECT_DIR)/scripts/Makefile.build
 
 clean:
-	rm -rf $(TARGET_EXEC) $(TARGET_IMGE) $(TARGET_NASM)
-	rm -rf $(OBJECTS)
+	$(Q)$(MAKE) -C $(ARCH_DIRS) clean
+	$(Q)$(MAKE) -f $(PROJECT_DIR)/scripts/Makefile.build clean
 
 debug:
-	@echo $(INCLUDE_DIRS)
+	$(Q)$(MAKE) -f $(PROJECT_DIR)/scripts/Makefile.build debug
 
 # end of file

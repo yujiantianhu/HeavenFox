@@ -20,8 +20,8 @@
 #include <common/list_types.h>
 
 /*!< The globals */
-typedef kuarch_t 	kutime_t;
-typedef ksarch_t 	kstime_t;
+typedef kutype_t 	kutime_t;
+typedef kstype_t 	kstime_t;
 
 TARGET_EXT kutime_t jiffies;
 TARGET_EXT kutime_t *ptrSysTickCounter;

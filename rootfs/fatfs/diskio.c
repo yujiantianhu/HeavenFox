@@ -36,7 +36,7 @@
 #include "diskio.h"     /* FatFs lower layer API */
 
 #ifdef SD_DISK_ENABLE
-#include <platform/mmc/hal_sdfatfs.h>
+#include <platform/mmc/fwk_sdfatfs.h>
 #endif
 
 /*-----------------------------------------------------------------------*/
@@ -62,7 +62,7 @@ DSTATUS disk_status (
 #endif
 #ifdef SD_DISK_ENABLE
         case SDDISK:
-            stat = hal_sdfatfs_status(pdrv);
+            stat = fwk_sdfatfs_status(pdrv);
             return stat;
 #endif
 #ifdef MMC_DISK_ENABLE
@@ -106,7 +106,7 @@ DSTATUS disk_initialize (
 #endif
 #ifdef SD_DISK_ENABLE
         case SDDISK:
-            stat = hal_sdfatfs_initial(pdrv);
+            stat = fwk_sdfatfs_initial(pdrv);
             return stat;
 #endif
 #ifdef MMC_DISK_ENABLE
@@ -142,7 +142,7 @@ DSTATUS disk_release (
 #endif
 #ifdef SD_DISK_ENABLE
         case SDDISK:
-            stat = hal_sdfatfs_release(pdrv);
+            stat = fwk_sdfatfs_release(pdrv);
             return stat;
 #endif
 #ifdef MMC_DISK_ENABLE
@@ -187,7 +187,7 @@ DRESULT disk_read (
 #endif
 #ifdef SD_DISK_ENABLE
         case SDDISK:
-            res = hal_sdfatfs_read(pdrv, buff, sector, count);
+            res = fwk_sdfatfs_read(pdrv, buff, sector, count);
             return res;
 #endif
 #ifdef MMC_DISK_ENABLE
@@ -235,7 +235,7 @@ DRESULT disk_write (
 #endif
 #ifdef SD_DISK_ENABLE
         case SDDISK:
-            res = hal_sdfatfs_write(pdrv, buff, sector, count);
+            res = fwk_sdfatfs_write(pdrv, buff, sector, count);
             return res;
 #endif
 #ifdef MMC_DISK_ENABLE
@@ -280,7 +280,7 @@ DRESULT disk_ioctl (
 #endif
 #ifdef SD_DISK_ENABLE
         case SDDISK:
-            res = hal_sdfatfs_ioctl(pdrv, cmd, buff);
+            res = fwk_sdfatfs_ioctl(pdrv, cmd, buff);
             return res;
 #endif
 #ifdef MMC_DISK_ENABLE

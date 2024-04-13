@@ -4,7 +4,7 @@ CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/ffconf.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/diskio.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/integer.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/mmc/hal_sdfatfs.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/mmc/fwk_sdfatfs.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdio.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/features.h \

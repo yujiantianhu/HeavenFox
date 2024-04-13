@@ -19,8 +19,8 @@
 #include <common/io_stream.h>
 #include <common/mem_manage.h>
 #include <board/board_common.h>
-#include <platform/kmem_pool.h>
-#include <platform/mmc/hal_sdcard.h>
+#include <platform/fwk_mempool.h>
+#include <platform/mmc/fwk_sdcard.h>
 #include <boot/boot_text.h>
 #include <boot/implicit_call.h>
 #include <configs/mach_configs.h>

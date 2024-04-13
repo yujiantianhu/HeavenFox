@@ -101,7 +101,7 @@ static ksint32_t __real_thread_create(real_thread_t *ptr_id, ksint32_t base, srt
     if (mrt_isValid(ptr_id))
         *ptr_id = tid;
     
-	return Ert_isWell;
+	return NR_isWell;
 
 fail4:
 	kfree(sprt_thread);
@@ -111,7 +111,7 @@ fail2:
 	if (!mrt_isValid(sprt_attr))
 		kfree(sprt_it_attr);
 fail:
-	return -Ert_isArgFault;
+	return -NR_isArgFault;
 }
 
 /*!

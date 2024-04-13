@@ -7,7 +7,7 @@
 
 
 #if !_USE_LFN || _CODE_PAGE != 936
-#error This file is not needed in current configuration. Remove from the project.
+// #error This file is not needed in current configuration. Remove from the project.
 #endif
 
 static

@@ -49,10 +49,10 @@ void imx6ull_led_init(void)
 						IMX6UL_IO_CTL_PAD_PUS_BIT(IMX6UL_IO_CTL_PAD_PUS_100K_UP) |
 						IMX6UL_IO_CTL_PAD_SPEED_BIT(IMX6UL_IO_CTL_PAD_SPEED_100MHZ) |
 						IMX6UL_IO_CTL_PAD_DSE_BIT(IMX6UL_IO_CTL_PAD_DSE_RDIV(6)));
-	imx_pin_attr_register(&sgrt_Port, 0, IMX_LIGHT_MUX_SELECT, mrt_trans_urt_data(&ugrt_ioPad));
+	hal_imx_pin_attribute_init(&sgrt_Port, 0, IMX_LIGHT_MUX_SELECT, mrt_trans_urt_data(&ugrt_ioPad));
 
-	imx_pin_mux_configure(&sgrt_Port);
-	imx_pin_pad_configure(&sgrt_Port);
+	hal_imx_pin_mux_configure(&sgrt_Port);
+	hal_imx_pin_pad_configure(&sgrt_Port);
 
 	/*!< set Gpio Pin Direction Output */
 	mrt_setbitl(IMX_LIGHT_PIN_BIT, &sprt_Light->GDIR);

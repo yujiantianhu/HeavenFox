@@ -1,0 +1,115 @@
+make -f /home/ubuntu/ProgramWorks/MyDesign/real-kernel/scripts/Makefile.build debug
+make[1]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel”
+make[2]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/cpu”
+make[4]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/cpu/armv7”
+make[5]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/cpu/armv7/imx6ull”
+==========>
+make[5]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/cpu/armv7/imx6ull”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/arch/arm/cpu/armv7/imx6ull/built-in.o
+make[4]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/cpu/armv7”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/arch/arm/cpu/armv7/built-in.o
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/cpu”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/kernel”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/kernel”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/lib”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/lib”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/arch/arm/cpu/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/arch/arm/kernel/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/arch/arm/lib/built-in.o
+make[2]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm”
+make[2]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/common”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/common/generic”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/common/generic”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/common/mempool”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/common/mempool”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/common/generic/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/common/mempool/built-in.o
+make[2]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/common”
+make[2]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/boot”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/boot/dynamic”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/boot/dynamic”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/boot/dynamic/built-in.o
+make[2]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/boot”
+make[2]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/board”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/board/mach-imx6ull”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/board/mach-imx6ull”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/board/mach-imx6ull/built-in.o
+make[2]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/board”
+make[2]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/mem”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/mem”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/bus_type”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/bus_type”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/of”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/of”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/irq”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/irq”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/chardev”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/chardev”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/net_device”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/net_device”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/gpio_desc”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/gpio_desc”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/framebuffer”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/framebuffer”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/usb”
+make[4]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/usb/host”
+==========>
+make[4]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/usb/host”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/platform/usb/host/built-in.o
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/usb”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/platform/mem/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/platform/bus_type/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/platform/of/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/platform/irq/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/platform/chardev/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/platform/net_device/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/platform/gpio_desc/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/platform/framebuffer/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/platform/usb/built-in.o
+make[2]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform”
+make[2]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel/kthread”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel/kthread”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/kernel/kthread/built-in.o
+make[2]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel”
+make[2]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs”
+make[4]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/option”
+==========>
+make[4]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/option”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/rootfs/fatfs/option/built-in.o
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/rootfs/fatfs/built-in.o
+make[2]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs”
+make[2]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/clk”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/clk”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/gpio”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/gpio”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/usb”
+make[4]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/usb/gadget”
+==========>
+make[4]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/usb/gadget”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/drivers/usb/gadget/built-in.o
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/usb”
+make[3]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/video”
+==========>
+make[3]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/video”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/drivers/clk/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/drivers/gpio/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/drivers/usb/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/drivers/video/built-in.o
+make[2]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers”
+make[2]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/example”
+==========>
+make[2]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/example”
+make[2]: 进入目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/init”
+==========>
+make[2]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel/init”
+==========> /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/arch/arm/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/common/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/boot/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/board/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/platform/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/kernel/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/rootfs/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/drivers/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/example/built-in.o /home/ubuntu/ProgramWorks/MyDesign/real-kernel/objects/init/built-in.o
+make[1]: 离开目录“/home/ubuntu/ProgramWorks/MyDesign/real-kernel”
