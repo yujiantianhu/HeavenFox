@@ -33,10 +33,19 @@ endif
 
 # get xxx.o in current directory
 ouput-obj	:=	$(filter-out %/, $(obj-y))
+depend-obj	:=	$(foreach file, $(ouput-obj), $(addsuffix .d, $(file)))
+depend-obj	:=	$(wildcard $(depend-obj))
 
 ifneq ($(ouput-obj),)
 ouput-obj	:=	$(addprefix $(cur_path)/, $(ouput-obj))
 ouput-obj	:=	$(patsubst $(PROJECT_DIR)%, $(OBJECT_PATH)%, $(ouput-obj))
+endif
+
+ifneq ($(depend-obj),)
+depend-obj	:=	$(addprefix $(cur_path)/, $(depend-obj))
+depend-obj	:=	$(patsubst $(PROJECT_DIR)%, $(OBJECT_PATH)%, $(depend-obj))
+
+include $(depend-obj)
 endif
 
 VPATH		:=	$(cur_path)
@@ -45,27 +54,27 @@ VPATH		:=	$(cur_path)
 build : $(obj_path)/built-in.o
 
 $(obj_path)/built-in.o : $(build-obj) $(ouput-obj)
-	$(LD) -T$(LINK_SCRIPT) -r -o $@ $^ $(LIBS_PATH) $(LIBS)
+	$(LD) -EL -r -o $@ $^
 
 $(build-obj):
 	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(PROJECT_DIR)/scripts/Makefile.build; done
 
 $(obj_path)/%.o : %.c
 	if [ ! -d $(obj_path) ]; then mkdir -p $(obj_path); fi
-	$(CC) -c $(BUILD_CFLAGS) $(MACROS) $(INCLUDE_DIRS) $(OUTPUT_FLAGS) -o $@ $<
+	$(CC) -Wp,-MD,$@.d -c $(BUILD_CFLAGS) $(MACROS) $(INCLUDE_DIRS) $(OUTPUT_FLAGS) -o $@ $<
 
 $(obj_path)/%.o : %.S
 	if [ ! -d $(obj_path) ]; then mkdir -p $(obj_path); fi
-	$(CC) -c $(BUILD_CFLAGS) $(MACROS) $(INCLUDE_DIRS) $(OUTPUT_FLAGS) -o $@ $<
+	$(CC) -Wp,-MD,$@.d -c $(BUILD_CFLAGS) $(MACROS) $(INCLUDE_DIRS) $(OUTPUT_FLAGS) -o $@ $<
 
 clean:
 	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(PROJECT_DIR)/scripts/Makefile.build clean; done
-	rm -rf $(ouput-obj) $(build-obj)
+	rm -rf $(ouput-obj) $(build-obj) $(depend-obj)
 	rm -rf $(obj_path)
 
 debug:
 	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(PROJECT_DIR)/scripts/Makefile.build debug; done
 
-	@echo '==========>' $(build-obj)
+	@echo '==========>' $(depend-obj)
 
 # end of file

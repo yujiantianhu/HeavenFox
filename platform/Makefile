@@ -18,6 +18,7 @@ obj-y	+=	chardev/
 obj-y	+=	net_device/
 obj-y	+=	gpio_desc/
 obj-y	+=	framebuffer/
+obj-y	+=	mmc/
 obj-y	+=	usb/
 
 obj-y	+=	fwk_uaccess.o

@@ -91,8 +91,6 @@ obj-y			+=	$(SOURCE_DIRS)
 VPATH			:= 	$(SOURCE_DIRS)
 .PHONY:			all clean debug
 
-obj: $(OBJECT_EXEC)
-
 all : $(OBJECT_EXEC)
 	$(Q)$(MAKE) -C $(ARCH_DIRS)
 
