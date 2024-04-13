@@ -16,3 +16,5 @@
 # obj-y	+=	ccsbcs.o
 
 obj-y	+=	unicode.o
+
+# end of file

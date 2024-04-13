@@ -12,3 +12,5 @@
 obj-y	+=	host/
 
 obj-y	+=	fwk_usb.o
+
+# end of file

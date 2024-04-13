@@ -12,3 +12,5 @@
 obj-y	+=	fwk_of.o
 obj-y	+=	fwk_of_prop.o
 obj-y	+=	fwk_of_device.o
+
+# end of file

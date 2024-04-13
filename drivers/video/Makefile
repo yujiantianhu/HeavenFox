@@ -10,3 +10,5 @@
 #
 
 obj-y	+=	fbdev-imx.o
+
+# end of file

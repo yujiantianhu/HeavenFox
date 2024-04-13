@@ -12,3 +12,5 @@
 obj-y	+=	fwk_platform.o
 obj-y	+=	fwk_platdev.o
 obj-y	+=	fwk_platdrv.o
+
+# end of file

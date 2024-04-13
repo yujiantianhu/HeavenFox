@@ -13,3 +13,5 @@ obj-y	+=	dynamic/
 
 obj-y	+=	board_f.o
 obj-y	+=	board_r.o
+
+# end of file

@@ -9,8 +9,9 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-# obj-y	+=	vectors.o
 obj-y	+=	crt0.o
 obj-y	+=	lib1funcs.o
 obj-y	+=	interrupt.o
 obj-y	+=	exception.o
+
+# end of file

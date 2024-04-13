@@ -10,3 +10,5 @@
 #
 
 obj-y	+=	imx-clks.o
+
+# end of file

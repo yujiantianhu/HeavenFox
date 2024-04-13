@@ -31,10 +31,9 @@ build-obj	:=	$(addprefix $(cur_path)/, $(build-obj))
 build-obj	:=	$(patsubst $(PROJECT_DIR)%, $(OBJECT_PATH)%, $(build-obj))
 endif
 
-# get xxx.o in current directory
+# get xxx.o and xxx.o.d in current directory
 ouput-obj	:=	$(filter-out %/, $(obj-y))
 depend-obj	:=	$(foreach file, $(ouput-obj), $(addsuffix .d, $(file)))
-depend-obj	:=	$(wildcard $(depend-obj))
 
 ifneq ($(ouput-obj),)
 ouput-obj	:=	$(addprefix $(cur_path)/, $(ouput-obj))
@@ -44,6 +43,7 @@ endif
 ifneq ($(depend-obj),)
 depend-obj	:=	$(addprefix $(cur_path)/, $(depend-obj))
 depend-obj	:=	$(patsubst $(PROJECT_DIR)%, $(OBJECT_PATH)%, $(depend-obj))
+depend-obj	:=	$(wildcard $(depend-obj))
 
 include $(depend-obj)
 endif
@@ -57,7 +57,7 @@ $(obj_path)/built-in.o : $(build-obj) $(ouput-obj)
 	$(LD) -EL -r -o $@ $^
 
 $(build-obj):
-	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(PROJECT_DIR)/scripts/Makefile.build; done
+	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(BUILD_SCRIPT); done
 
 $(obj_path)/%.o : %.c
 	if [ ! -d $(obj_path) ]; then mkdir -p $(obj_path); fi
@@ -68,13 +68,16 @@ $(obj_path)/%.o : %.S
 	$(CC) -Wp,-MD,$@.d -c $(BUILD_CFLAGS) $(MACROS) $(INCLUDE_DIRS) $(OUTPUT_FLAGS) -o $@ $<
 
 clean:
-	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(PROJECT_DIR)/scripts/Makefile.build clean; done
+	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(BUILD_SCRIPT) clean; done
+	rm -rf $(ouput-obj) $(build-obj) $(depend-obj)
+
+distclean:
+	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(BUILD_SCRIPT) distclean; done
 	rm -rf $(ouput-obj) $(build-obj) $(depend-obj)
 	rm -rf $(obj_path)
 
 debug:
-	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(PROJECT_DIR)/scripts/Makefile.build debug; done
-
-	@echo '==========>' $(depend-obj)
+	@for dir in $(dir-y); do $(Q)$(MAKE) -C $$dir -f $(BUILD_SCRIPT) debug; done
+	@echo '==========>' $(obj-y)
 
 # end of file

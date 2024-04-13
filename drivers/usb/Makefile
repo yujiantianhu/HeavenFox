@@ -10,3 +10,5 @@
 #
 
 obj-y	+=	gadget/
+
+# end of file

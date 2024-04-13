@@ -9,6 +9,7 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-# obj-y	+=	head.o
 obj-y	+=	head-common.o
 obj-y	+=	context.o
+
+# end of file

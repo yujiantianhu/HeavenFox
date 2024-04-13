@@ -9,6 +9,8 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-obj-y	+=	main.o
+build:
+
+dtb-y   += imx6ul/
 
 # end of file

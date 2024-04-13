@@ -54,6 +54,8 @@ OBJECT_PATH		:=	$(PROJECT_DIR)/objects
 
 OUTPUT_PATH		:=	$(PROJECT_DIR)/boot
 LINK_SCRIPT		:=	$(OUTPUT_PATH)/$(TARGET).lds
+DTC				:=	$(PROJECT_DIR)/scripts/dtc/dtc
+BUILD_SCRIPT	:=	$(PROJECT_DIR)/scripts/Makefile.build
 
 TARGET_EXEC		:=	$(OUTPUT_PATH)/$(TARGET).elf
 TARGET_IMGE		:=	$(OUTPUT_PATH)/$(TARGET).img
@@ -83,25 +85,34 @@ INCLUDE_DIRS	:= 	$(patsubst %, -I %, $(INCLUDE_DIRS))
 
 export ARCH TYPE VENDOR CC CXX LD AR OBJDUMP OBJCOPY READELF
 export LIBS_PATH LIBS OUTPUT_FLAGS BUILD_CFLAGS MACROS
-export PROJECT_DIR LINK_SCRIPT OBJECT_PATH INCLUDE_DIRS
-export OBJECT_EXEC TARGET_EXEC TARGET_IMGE TARGET_NASM
+export PROJECT_DIR LINK_SCRIPT DTC BUILD_SCRIPT INCLUDE_DIRS
+export OBJECT_PATH OBJECT_EXEC TARGET_EXEC TARGET_IMGE TARGET_NASM
 
 obj-y			+=	$(SOURCE_DIRS)
 
 VPATH			:= 	$(SOURCE_DIRS)
-.PHONY:			all clean debug
+.PHONY:			all clean distclean dtbs debug
 
 all : $(OBJECT_EXEC)
 	$(Q)$(MAKE) -C $(ARCH_DIRS)
 
 $(OBJECT_EXEC):
-	$(Q)$(MAKE) -C $(PROJECT_DIR) -f $(PROJECT_DIR)/scripts/Makefile.build
+	$(Q)$(MAKE) -C $(PROJECT_DIR) -f $(BUILD_SCRIPT)
 
 clean:
 	$(Q)$(MAKE) -C $(ARCH_DIRS) clean
-	$(Q)$(MAKE) -f $(PROJECT_DIR)/scripts/Makefile.build clean
+	$(Q)$(MAKE) -f $(BUILD_SCRIPT) clean
+	rm -rf $(OBJECT_EXEC)
+
+distclean:
+#	$(Q)$(MAKE) -C $(OUTPUT_PATH)/device-tree distclean
+	$(Q)$(MAKE) -C $(ARCH_DIRS) distclean
+	$(Q)$(MAKE) -f $(BUILD_SCRIPT) distclean
+
+dtbs:
+	$(Q)$(MAKE) -C $(OUTPUT_PATH)/device-tree
 
 debug:
-	$(Q)$(MAKE) -f $(PROJECT_DIR)/scripts/Makefile.build debug
+	$(Q)$(MAKE) -f $(BUILD_SCRIPT) debug
 
 # end of file

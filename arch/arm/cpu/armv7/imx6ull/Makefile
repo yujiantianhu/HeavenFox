@@ -10,3 +10,5 @@
 #
 
 obj-y	+=	board.o
+
+# end of file

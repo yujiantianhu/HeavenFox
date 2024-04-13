@@ -10,3 +10,5 @@
 #
 
 obj-y	+=	fwk_usb_ehci.o
+
+# end of file

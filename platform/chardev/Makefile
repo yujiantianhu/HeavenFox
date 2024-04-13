@@ -11,3 +11,5 @@
 
 obj-y	+=	fwk_chrdev.o
 obj-y	+=	fwk_cdev.o
+
+# end of file

@@ -10,3 +10,5 @@
 #
 
 obj-y	+=	fwk_netdev.o
+
+# end of file

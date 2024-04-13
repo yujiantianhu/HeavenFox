@@ -26,3 +26,5 @@ obj-y	+=	fwk_fcntl.o
 obj-y	+=	fwk_fs.o
 obj-y	+=	fwk_kobj.o
 obj-y	+=	fwk_inode.o
+
+# end of file

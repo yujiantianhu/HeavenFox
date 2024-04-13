@@ -10,3 +10,5 @@
 #
 
 obj-y	+=	fsl_mouse.o
+
+# end of file

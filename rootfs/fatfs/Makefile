@@ -14,3 +14,5 @@ obj-y	+=	option/
 obj-y	+=	diskio.o
 obj-y	+=	ff.o
 obj-y	+=	rfs_fatfs.o
+
+# end of file

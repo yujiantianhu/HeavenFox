@@ -11,6 +11,7 @@
 
 obj-y	+=	imx6ull/
 
-# obj-y	+=	start.o
 obj-y	+=	lowlevel_init.o
 obj-y	+=	irq.o
+
+# end of file

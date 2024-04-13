@@ -13,3 +13,5 @@ obj-y	+=	clk/
 obj-y	+=	gpio/
 obj-y	+=	usb/
 obj-y	+=	video/
+
+# end of file

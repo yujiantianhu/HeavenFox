@@ -10,3 +10,5 @@
 #
 
 obj-y	+=	fwk_gpiodesc.o
+
+# end of file

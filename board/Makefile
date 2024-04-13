@@ -10,3 +10,5 @@
 #
 
 obj-y	+=	mach-$(VENDOR)/
+
+# end of file
