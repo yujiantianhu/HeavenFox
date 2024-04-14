@@ -86,12 +86,12 @@ clean: CMakeFiles/distclean.dir/clean
 CMakeFiles/real-kernel.elf.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76 "Built target real-kernel.elf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77 "Built target real-kernel.elf"
 .PHONY : CMakeFiles/real-kernel.elf.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/real-kernel.elf.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles 75
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles 76
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/real-kernel.elf.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles 0
 .PHONY : CMakeFiles/real-kernel.elf.dir/rule
@@ -112,7 +112,7 @@ CMakeFiles/real-kernel.elf.dir/clean:
 CMakeFiles/self-clean.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/self-clean.dir/build.make CMakeFiles/self-clean.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/self-clean.dir/build.make CMakeFiles/self-clean.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=77 "Built target self-clean"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=78 "Built target self-clean"
 .PHONY : CMakeFiles/self-clean.dir/all
 
 # Build rule for subdir invocation for target.

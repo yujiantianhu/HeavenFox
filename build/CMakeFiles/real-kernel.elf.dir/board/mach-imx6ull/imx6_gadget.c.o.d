@@ -60,11 +60,6 @@ CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_gadget.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/time.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/basic_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/error_types.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/list_types.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_mempool.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/mem_manage.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/kernel.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/configs/configs.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/configs/mach_configs.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/configs/mach/imx6ull_toppet_config.h \
@@ -76,6 +71,11 @@ CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_gadget.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/include/asm/armv7/ca7_gic.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/io_stream.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/boot_text.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/list_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_mempool.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/mem_manage.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/kernel.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_domain.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of.h \

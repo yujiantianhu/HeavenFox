@@ -1,7 +1,7 @@
 CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_types.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/irq/fwk_irq_types.c \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdc-predef.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_basic.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdio.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/features.h \
@@ -75,14 +75,14 @@ CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_types.c.o: \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/include/asm/armv7/ca7_gic.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/io_stream.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/boot_text.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_domain.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_basic.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/api_string.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/error_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/time.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/board/board_common.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/implicit_call.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/boot_text.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_domain.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of_prop.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_domain.h

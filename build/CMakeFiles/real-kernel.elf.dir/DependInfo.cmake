@@ -80,6 +80,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/chardev/fwk_chrdev.c" "CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_chrdev.c.o" "gcc" "CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_chrdev.c.o.d"
   "/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/framebuffer/fwk_ascii.c" "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_ascii.c.o" "gcc" "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_ascii.c.o.d"
   "/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/framebuffer/fwk_bitmap.c" "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.o" "gcc" "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.o.d"
+  "/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/framebuffer/fwk_disp.c" "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o" "gcc" "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o.d"
   "/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/framebuffer/fwk_fbmem.c" "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o" "gcc" "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o.d"
   "/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/fwk_fcntl.c" "CMakeFiles/real-kernel.elf.dir/platform/fwk_fcntl.c.o" "gcc" "CMakeFiles/real-kernel.elf.dir/platform/fwk_fcntl.c.o.d"
   "/home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/fwk_fs.c" "CMakeFiles/real-kernel.elf.dir/platform/fwk_fs.c.o" "gcc" "CMakeFiles/real-kernel.elf.dir/platform/fwk_fs.c.o.d"

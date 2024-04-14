@@ -95,6 +95,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_ascii.c.o.d"
   "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.o"
   "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.o.d"
+  "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o"
+  "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o.d"
   "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o"
   "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o.d"
   "CMakeFiles/real-kernel.elf.dir/platform/fwk_fcntl.c.o"

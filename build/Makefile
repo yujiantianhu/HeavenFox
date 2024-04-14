@@ -1254,6 +1254,30 @@ platform/framebuffer/fwk_bitmap.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.s
 .PHONY : platform/framebuffer/fwk_bitmap.c.s
 
+platform/framebuffer/fwk_disp.o: platform/framebuffer/fwk_disp.c.o
+.PHONY : platform/framebuffer/fwk_disp.o
+
+# target to build an object file
+platform/framebuffer/fwk_disp.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o
+.PHONY : platform/framebuffer/fwk_disp.c.o
+
+platform/framebuffer/fwk_disp.i: platform/framebuffer/fwk_disp.c.i
+.PHONY : platform/framebuffer/fwk_disp.i
+
+# target to preprocess a source file
+platform/framebuffer/fwk_disp.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.i
+.PHONY : platform/framebuffer/fwk_disp.c.i
+
+platform/framebuffer/fwk_disp.s: platform/framebuffer/fwk_disp.c.s
+.PHONY : platform/framebuffer/fwk_disp.s
+
+# target to generate assembly for a file
+platform/framebuffer/fwk_disp.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.s
+.PHONY : platform/framebuffer/fwk_disp.c.s
+
 platform/framebuffer/fwk_fbmem.o: platform/framebuffer/fwk_fbmem.c.o
 .PHONY : platform/framebuffer/fwk_fbmem.o
 
@@ -1954,6 +1978,9 @@ help:
 	@echo "... platform/framebuffer/fwk_bitmap.o"
 	@echo "... platform/framebuffer/fwk_bitmap.i"
 	@echo "... platform/framebuffer/fwk_bitmap.s"
+	@echo "... platform/framebuffer/fwk_disp.o"
+	@echo "... platform/framebuffer/fwk_disp.i"
+	@echo "... platform/framebuffer/fwk_disp.s"
 	@echo "... platform/framebuffer/fwk_fbmem.o"
 	@echo "... platform/framebuffer/fwk_fbmem.i"
 	@echo "... platform/framebuffer/fwk_fbmem.s"

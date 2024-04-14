@@ -59,4 +59,5 @@ CMakeFiles/real-kernel.elf.dir/arch/arm/lib/exception.c.o: \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathdef.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathcalls.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/malloc.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/error_types.h
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/error_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/io_stream.h

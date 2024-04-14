@@ -688,10 +688,24 @@ CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.s"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/framebuffer/fwk_bitmap.c -o CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.s
 
+CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
+CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o: ../platform/framebuffer/fwk_disp.c
+CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_45) "Building C object CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o"
+	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o -MF CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o.d -o CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/framebuffer/fwk_disp.c
+
+CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.i"
+	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/framebuffer/fwk_disp.c > CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.i
+
+CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.s"
+	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/framebuffer/fwk_disp.c -o CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.s
+
 CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o: ../platform/framebuffer/fwk_fbmem.c
 CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_45) "Building C object CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Building C object CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o -MF CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o.d -o CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/framebuffer/fwk_fbmem.c
 
 CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.i: cmake_force
@@ -705,7 +719,7 @@ CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o: ../platform/usb/fwk_usb.c
 CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Building C object CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_47) "Building C object CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o -MF CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o.d -o CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/usb/fwk_usb.c
 
 CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.i: cmake_force
@@ -719,7 +733,7 @@ CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o: ../platform/usb/host/fwk_usb_ehci.c
 CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_47) "Building C object CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_48) "Building C object CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o -MF CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o.d -o CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/platform/usb/host/fwk_usb_ehci.c
 
 CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.i: cmake_force
@@ -733,7 +747,7 @@ CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.o: ../kernel/mutex.c
 CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_48) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_49) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.o -MF CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.o.d -o CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel/mutex.c
 
 CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.i: cmake_force
@@ -747,7 +761,7 @@ CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/kernel/sched.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/kernel/sched.c.o: ../kernel/sched.c
 CMakeFiles/real-kernel.elf.dir/kernel/sched.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_49) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/sched.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_50) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/sched.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/kernel/sched.c.o -MF CMakeFiles/real-kernel.elf.dir/kernel/sched.c.o.d -o CMakeFiles/real-kernel.elf.dir/kernel/sched.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel/sched.c
 
 CMakeFiles/real-kernel.elf.dir/kernel/sched.c.i: cmake_force
@@ -761,7 +775,7 @@ CMakeFiles/real-kernel.elf.dir/kernel/sched.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.o: ../kernel/sleep.c
 CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_50) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_51) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.o -MF CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.o.d -o CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel/sleep.c
 
 CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.i: cmake_force
@@ -775,7 +789,7 @@ CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.o: ../kernel/spinlock.c
 CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_51) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_52) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.o -MF CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.o.d -o CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel/spinlock.c
 
 CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.i: cmake_force
@@ -789,7 +803,7 @@ CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/kernel/thread.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/kernel/thread.c.o: ../kernel/thread.c
 CMakeFiles/real-kernel.elf.dir/kernel/thread.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_52) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/thread.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_53) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/thread.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/kernel/thread.c.o -MF CMakeFiles/real-kernel.elf.dir/kernel/thread.c.o.d -o CMakeFiles/real-kernel.elf.dir/kernel/thread.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel/thread.c
 
 CMakeFiles/real-kernel.elf.dir/kernel/thread.c.i: cmake_force
@@ -803,7 +817,7 @@ CMakeFiles/real-kernel.elf.dir/kernel/thread.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.o: ../kernel/kthread/idle.c
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_53) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_54) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.o -MF CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.o.d -o CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel/kthread/idle.c
 
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.i: cmake_force
@@ -817,7 +831,7 @@ CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.o: ../kernel/kthread/init_proc.c
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_54) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_55) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.o -MF CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.o.d -o CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel/kthread/init_proc.c
 
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.i: cmake_force
@@ -831,7 +845,7 @@ CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.o: ../kernel/kthread/kthread.c
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_55) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_56) "Building C object CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.o -MF CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.o.d -o CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/kernel/kthread/kthread.c
 
 CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.i: cmake_force
@@ -845,7 +859,7 @@ CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.o: ../rootfs/fatfs/diskio.c
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_56) "Building C object CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_57) "Building C object CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.o -MF CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.o.d -o CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/diskio.c
 
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.i: cmake_force
@@ -859,7 +873,7 @@ CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.o: ../rootfs/fatfs/ff.c
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_57) "Building C object CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_58) "Building C object CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.o -MF CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.o.d -o CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/ff.c
 
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.i: cmake_force
@@ -873,7 +887,7 @@ CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.o: ../rootfs/fatfs/rfs_fatfs.c
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_58) "Building C object CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_59) "Building C object CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.o -MF CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.o.d -o CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/rfs_fatfs.c
 
 CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.i: cmake_force
@@ -887,7 +901,7 @@ CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.o: ../drivers/clk/imx-clks.c
 CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_59) "Building C object CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_60) "Building C object CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.o -MF CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.o.d -o CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/clk/imx-clks.c
 
 CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.i: cmake_force
@@ -901,7 +915,7 @@ CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.o: ../drivers/gpio/led_template.c
 CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_60) "Building C object CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_61) "Building C object CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.o -MF CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.o.d -o CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/gpio/led_template.c
 
 CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.i: cmake_force
@@ -915,7 +929,7 @@ CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.o: ../drivers/video/fbdev-imx.c
 CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_61) "Building C object CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_62) "Building C object CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.o -MF CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.o.d -o CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/video/fbdev-imx.c
 
 CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.i: cmake_force
@@ -929,7 +943,7 @@ CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.o: ../drivers/usb/gadget/fsl_mouse.c
 CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_62) "Building C object CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_63) "Building C object CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.o -MF CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.o.d -o CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/drivers/usb/gadget/fsl_mouse.c
 
 CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.i: cmake_force
@@ -943,7 +957,7 @@ CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/example/display_app.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/example/display_app.c.o: ../example/display_app.c
 CMakeFiles/real-kernel.elf.dir/example/display_app.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_63) "Building C object CMakeFiles/real-kernel.elf.dir/example/display_app.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_64) "Building C object CMakeFiles/real-kernel.elf.dir/example/display_app.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/example/display_app.c.o -MF CMakeFiles/real-kernel.elf.dir/example/display_app.c.o.d -o CMakeFiles/real-kernel.elf.dir/example/display_app.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/example/display_app.c
 
 CMakeFiles/real-kernel.elf.dir/example/display_app.c.i: cmake_force
@@ -957,7 +971,7 @@ CMakeFiles/real-kernel.elf.dir/example/display_app.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/example/light_app.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/example/light_app.c.o: ../example/light_app.c
 CMakeFiles/real-kernel.elf.dir/example/light_app.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_64) "Building C object CMakeFiles/real-kernel.elf.dir/example/light_app.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_65) "Building C object CMakeFiles/real-kernel.elf.dir/example/light_app.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/example/light_app.c.o -MF CMakeFiles/real-kernel.elf.dir/example/light_app.c.o.d -o CMakeFiles/real-kernel.elf.dir/example/light_app.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/example/light_app.c
 
 CMakeFiles/real-kernel.elf.dir/example/light_app.c.i: cmake_force
@@ -971,7 +985,7 @@ CMakeFiles/real-kernel.elf.dir/example/light_app.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/example/thread_table.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/example/thread_table.c.o: ../example/thread_table.c
 CMakeFiles/real-kernel.elf.dir/example/thread_table.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_65) "Building C object CMakeFiles/real-kernel.elf.dir/example/thread_table.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_66) "Building C object CMakeFiles/real-kernel.elf.dir/example/thread_table.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/example/thread_table.c.o -MF CMakeFiles/real-kernel.elf.dir/example/thread_table.c.o.d -o CMakeFiles/real-kernel.elf.dir/example/thread_table.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/example/thread_table.c
 
 CMakeFiles/real-kernel.elf.dir/example/thread_table.c.i: cmake_force
@@ -985,7 +999,7 @@ CMakeFiles/real-kernel.elf.dir/example/thread_table.c.s: cmake_force
 CMakeFiles/real-kernel.elf.dir/init/main.c.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/init/main.c.o: ../init/main.c
 CMakeFiles/real-kernel.elf.dir/init/main.c.o: CMakeFiles/real-kernel.elf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_66) "Building C object CMakeFiles/real-kernel.elf.dir/init/main.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_67) "Building C object CMakeFiles/real-kernel.elf.dir/init/main.c.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/real-kernel.elf.dir/init/main.c.o -MF CMakeFiles/real-kernel.elf.dir/init/main.c.o.d -o CMakeFiles/real-kernel.elf.dir/init/main.c.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/init/main.c
 
 CMakeFiles/real-kernel.elf.dir/init/main.c.i: cmake_force
@@ -998,7 +1012,7 @@ CMakeFiles/real-kernel.elf.dir/init/main.c.s: cmake_force
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/lib/crt0.S.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/arch/arm/lib/crt0.S.o: ../arch/arm/lib/crt0.S
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_67) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/lib/crt0.S.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_68) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/lib/crt0.S.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/real-kernel.elf.dir/arch/arm/lib/crt0.S.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/lib/crt0.S
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/lib/crt0.S.i: cmake_force
@@ -1011,7 +1025,7 @@ CMakeFiles/real-kernel.elf.dir/arch/arm/lib/crt0.S.s: cmake_force
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/lib/lib1funcs.S.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/arch/arm/lib/lib1funcs.S.o: ../arch/arm/lib/lib1funcs.S
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_68) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/lib/lib1funcs.S.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_69) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/lib/lib1funcs.S.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/real-kernel.elf.dir/arch/arm/lib/lib1funcs.S.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/lib/lib1funcs.S
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/lib/lib1funcs.S.i: cmake_force
@@ -1024,7 +1038,7 @@ CMakeFiles/real-kernel.elf.dir/arch/arm/lib/lib1funcs.S.s: cmake_force
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/lib/vectors.S.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/arch/arm/lib/vectors.S.o: ../arch/arm/lib/vectors.S
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_69) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/lib/vectors.S.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_70) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/lib/vectors.S.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/real-kernel.elf.dir/arch/arm/lib/vectors.S.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/lib/vectors.S
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/lib/vectors.S.i: cmake_force
@@ -1037,7 +1051,7 @@ CMakeFiles/real-kernel.elf.dir/arch/arm/lib/vectors.S.s: cmake_force
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/lowlevel_init.S.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/lowlevel_init.S.o: ../arch/arm/cpu/armv7/lowlevel_init.S
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_70) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/lowlevel_init.S.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_71) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/lowlevel_init.S.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/lowlevel_init.S.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/cpu/armv7/lowlevel_init.S
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/lowlevel_init.S.i: cmake_force
@@ -1050,7 +1064,7 @@ CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/lowlevel_init.S.s: cmake_force
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/start.S.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/start.S.o: ../arch/arm/cpu/armv7/start.S
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_71) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/start.S.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_72) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/start.S.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/start.S.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/cpu/armv7/start.S
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/start.S.i: cmake_force
@@ -1063,7 +1077,7 @@ CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/start.S.s: cmake_force
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/context.S.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/context.S.o: ../arch/arm/kernel/context.S
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_72) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/context.S.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_73) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/context.S.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/context.S.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/kernel/context.S
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/context.S.i: cmake_force
@@ -1076,7 +1090,7 @@ CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/context.S.s: cmake_force
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head-common.S.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head-common.S.o: ../arch/arm/kernel/head-common.S
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_73) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head-common.S.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_74) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head-common.S.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head-common.S.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/kernel/head-common.S
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head-common.S.i: cmake_force
@@ -1089,7 +1103,7 @@ CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head-common.S.s: cmake_force
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head.S.o: CMakeFiles/real-kernel.elf.dir/flags.make
 CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head.S.o: ../arch/arm/kernel/head.S
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_74) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head.S.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_75) "Building ASM object CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head.S.o"
 	/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head.S.o -c /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/kernel/head.S
 
 CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head.S.i: cmake_force
@@ -1146,6 +1160,7 @@ real__kernel_elf_OBJECTS = \
 "CMakeFiles/real-kernel.elf.dir/platform/gpio_desc/fwk_gpiodesc.c.o" \
 "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_ascii.c.o" \
 "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.o" \
+"CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o" \
 "CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o" \
 "CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o" \
 "CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o" \
@@ -1224,6 +1239,7 @@ real__kernel_elf_EXTERNAL_OBJECTS =
 ../boot/real-kernel.elf: CMakeFiles/real-kernel.elf.dir/platform/gpio_desc/fwk_gpiodesc.c.o
 ../boot/real-kernel.elf: CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_ascii.c.o
 ../boot/real-kernel.elf: CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.o
+../boot/real-kernel.elf: CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o
 ../boot/real-kernel.elf: CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o
 ../boot/real-kernel.elf: CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o
 ../boot/real-kernel.elf: CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o
@@ -1256,7 +1272,7 @@ real__kernel_elf_EXTERNAL_OBJECTS =
 ../boot/real-kernel.elf: CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head.S.o
 ../boot/real-kernel.elf: CMakeFiles/real-kernel.elf.dir/build.make
 ../boot/real-kernel.elf: CMakeFiles/real-kernel.elf.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_75) "Linking C executable ../boot/real-kernel.elf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_76) "Linking C executable ../boot/real-kernel.elf"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/real-kernel.elf.dir/link.txt --verbose=$(VERBOSE)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Output binary file"
 	arm-linux-gnueabihf-objcopy -O binary /home/ubuntu/ProgramWorks/MyDesign/real-kernel/boot/real-kernel.elf /home/ubuntu/ProgramWorks/MyDesign/real-kernel/boot/real-kernel.img
