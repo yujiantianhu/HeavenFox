@@ -21,11 +21,11 @@
 
 /*!< The globals */
 kutime_t jiffies = 86400000 - 1;
-kutime_t *ptrSysTickCounter = mrt_nullptr;
-kutime_t g_iDelayTimerCounter = 0;
+kutime_t *ptr_systick_counter = mrt_nullptr;
+kutime_t g_delay_timer_counter = 0;
 
-static kuint32_t g_iSimpleDelayTimer = 0;
-static kuint32_t g_iSimpleTimeoutCnt = 0;
+static kuint32_t g_simple_delay_timer = 0;
+static kuint32_t g_simple_timeout_cnt = 0;
 
 static DECLARE_LIST_HEAD(sgrt_global_timer_list);
 
@@ -38,10 +38,10 @@ static DECLARE_LIST_HEAD(sgrt_global_timer_list);
  */
 void simple_delay_timer_initial(void)
 {
-	g_iSimpleDelayTimer = TIMER_DELAY_COUNTER_INIT;
-	g_iSimpleTimeoutCnt = TIMER_DELAY_COUNTER_INIT;
+	g_simple_delay_timer = TIMER_DELAY_COUNTER_INIT;
+	g_simple_timeout_cnt = TIMER_DELAY_COUNTER_INIT;
 
-	g_iDelayTimerCounter = TIMER_DELAY_COUNTER_INIT;
+	g_delay_timer_counter = TIMER_DELAY_COUNTER_INIT;
 }
 
 /*!
@@ -52,13 +52,13 @@ void simple_delay_timer_initial(void)
  */
 void simple_delay_timer_runs(void)
 {
-    if ((g_iSimpleDelayTimer++) >= TIMER_DELAY_COUNTER_MAX)
+    if ((g_simple_delay_timer++) >= TIMER_DELAY_COUNTER_MAX)
     {
-        g_iSimpleDelayTimer = TIMER_DELAY_COUNTER_INIT;
-        g_iSimpleTimeoutCnt = (g_iSimpleTimeoutCnt >= 255) ? TIMER_DELAY_COUNTER_INIT : (g_iSimpleTimeoutCnt + 1);
+        g_simple_delay_timer = TIMER_DELAY_COUNTER_INIT;
+        g_simple_timeout_cnt = (g_simple_timeout_cnt >= 255) ? TIMER_DELAY_COUNTER_INIT : (g_simple_timeout_cnt + 1);
     }
 
-	g_iDelayTimerCounter = mrt_bit_mask(g_iSimpleTimeoutCnt, ~TIMER_DELAY_COUNTER_MAX, 24U) + g_iSimpleDelayTimer;
+	g_delay_timer_counter = mrt_bit_mask(g_simple_timeout_cnt, ~TIMER_DELAY_COUNTER_MAX, 24U) + g_simple_delay_timer;
 }
 
 /*!
@@ -70,9 +70,7 @@ void simple_delay_timer_runs(void)
 void delay_cnt(kuint32_t n)
 {
 	while (n--)
-	{
 		mrt_delay_nop();
-	}
 }
 
 /*!
@@ -84,9 +82,7 @@ void delay_cnt(kuint32_t n)
 __weak void delay_s(kuint32_t n_s)
 {
 	while (n_s--)
-	{
 		delay_cnt(DELAY_SIMPLE_COUNTER_PER_S);
-	}
 }
 
 /*!
@@ -98,9 +94,7 @@ __weak void delay_s(kuint32_t n_s)
 __weak void delay_ms(kuint32_t n_ms)
 {
 	while (n_ms--)
-	{
 		delay_cnt(DELAY_SIMPLE_COUNTER_PER_MS);
-	}
 }
 
 /*!
@@ -112,9 +106,7 @@ __weak void delay_ms(kuint32_t n_ms)
 __weak void delay_us(kuint32_t n_us)
 {
 	while (n_us--)
-	{
 		delay_cnt(DELAY_SIMPLE_COUNTER_PER_US);
-	}
 }
 
 /*!
@@ -166,7 +158,7 @@ void wait_usecs(kuint32_t useconds)
  */
 void setup_timer(struct timer_list *sprt_timer, void (*entry)(kuint32_t), kuint32_t data)
 {
-	if (!mrt_isValid(sprt_timer))
+	if (!isValid(sprt_timer))
 		return;
 
 	mrt_setup_timer(sprt_timer, entry, data);
@@ -180,7 +172,7 @@ void setup_timer(struct timer_list *sprt_timer, void (*entry)(kuint32_t), kuint3
  */
 void add_timer(struct timer_list *sprt_timer)
 {
-	if (!mrt_isValid(sprt_timer))
+	if (!isValid(sprt_timer))
 		return;
 
 	list_head_add_tail(&sgrt_global_timer_list, &sprt_timer->sgrt_link);
@@ -194,7 +186,7 @@ void add_timer(struct timer_list *sprt_timer)
  */
 void del_timer(struct timer_list *sprt_timer)
 {
-	if (!mrt_isValid(sprt_timer))
+	if (!isValid(sprt_timer))
 		return;
 
 	list_head_del_anyone(&sgrt_global_timer_list, &sprt_timer->sgrt_link);
@@ -228,7 +220,7 @@ kbool_t find_timer(struct timer_list *sprt_timer)
  */
 void mod_timer(struct timer_list *sprt_timer, kutime_t expires)
 {
-	if (!mrt_isValid(sprt_timer))
+	if (!isValid(sprt_timer))
 		return;
 
 	sprt_timer->expires = expires;

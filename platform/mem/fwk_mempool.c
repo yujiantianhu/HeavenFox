@@ -36,10 +36,8 @@ kbool_t fwk_mempool_initial(void)
 
 	sprt_info = &sgrt_memInfo_Kernel;
 
-	if (mrt_isValid(sprt_info->sprt_mem))
-	{
+	if (isValid(sprt_info->sprt_mem))
 		return false;
-	}
 
 	memory_simple_block_create(sprt_info, 
 							   MEMORY_POOL_BASE, 
@@ -60,10 +58,8 @@ kbool_t memory_block_self_defines(kuaddr_t base, kusize_t size)
 
 	sprt_info = &sgrt_memInfo_Kernel;
 
-	if (mrt_isValid(sprt_info->sprt_mem))
-	{
+	if (isValid(sprt_info->sprt_mem))
 		return false;
-	}
 
 	memory_simple_block_create(sprt_info, base, size);
 
@@ -92,19 +88,13 @@ __weak void *kmalloc(size_t __size, ert_fwk_mempool_t flags)
 	void *p = mrt_nullptr;
 	
 	if (flags & GFP_KERNEL)
-	{
 		p = alloc_spare_simple_memory(sgrt_memInfo_Kernel.sprt_mem, __size);
-	}
 
-	if (!mrt_isValid(p))
-	{
+	if (!isValid(p))
 		return mrt_nullptr;
-	}
 
 	if (flags & GFP_ZERO)
-	{
 		memory_reset(p, __size);
-	}
 
 	return p;
 }

@@ -29,9 +29,7 @@
 void delay_s(kuint32_t n_s)
 {
 	while (n_s--)
-	{
 		delay_cnt(SYSTEM_CLK_FREQ_CNT_PER_S);
-	}
 }
 
 /*!
@@ -43,9 +41,7 @@ void delay_s(kuint32_t n_s)
 void delay_ms(kuint32_t n_ms)
 {
 	while (n_ms--)
-	{
 		delay_cnt(SYSTEM_CLK_FREQ_CNT_PER_MS);
-	}
 }
 
 /*!
@@ -57,9 +53,7 @@ void delay_ms(kuint32_t n_ms)
 void delay_us(kuint32_t n_us)
 {
 	while (n_us--)
-	{
 		delay_cnt(SYSTEM_CLK_FREQ_CNT_PER_US);
-	}
 }
 
 

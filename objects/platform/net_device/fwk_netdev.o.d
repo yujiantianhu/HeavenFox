@@ -1,7 +1,5 @@
 fwk_netdev.o: fwk_netdev.c \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdc-predef.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/net/fwk_netdev.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/net/fwk_if.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_basic.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdio.h \
@@ -82,6 +80,8 @@ fwk_netdev.o: fwk_netdev.c \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/board/board_common.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/implicit_call.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/boot_text.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/net/fwk_netdev.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/net/fwk_if.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/net/fwk_skbuff.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/fwk_platform.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of.h \

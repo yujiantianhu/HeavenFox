@@ -19,6 +19,7 @@
 #define CONFIG_PRINT_LEVEL                      "7"
 
 #define CONFIG_OF                               (1)
+#define CONFIG_HZ                               (100UL)                        /*!< timer interrupt per 10ms*/
 
 /*!< The includes */
 /*!< Board Configuration */

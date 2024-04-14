@@ -17,6 +17,7 @@
 #include <common/basic_types.h>
 #include <common/error_types.h>
 #include <common/generic.h>
+#include <configs/configs.h>
 #include <common/list_types.h>
 
 /*!< The globals */
@@ -24,14 +25,14 @@ typedef kutype_t 	kutime_t;
 typedef kstype_t 	kstime_t;
 
 TARGET_EXT kutime_t jiffies;
-TARGET_EXT kutime_t *ptrSysTickCounter;
-TARGET_EXT kutime_t g_iDelayTimerCounter;
+TARGET_EXT kutime_t *ptr_systick_counter;
+TARGET_EXT kutime_t g_delay_timer_counter;
 
 /*!< The defines */
-#define CONFIG_HZ                                           (1000UL)                        /*!< timer interrupt per 1ms*/
-#define mrt_jiffies                                         (*ptrSysTickCounter)
+#define TICK_HZ                                             CONFIG_HZ
+#define mrt_jiffies                                         (*ptr_systick_counter)
 
-#define TIMER_DELAY_COUNTER                                 (g_iDelayTimerCounter)
+#define TIMER_DELAY_COUNTER                                 (g_delay_timer_counter)
 #define TIMER_DELAY_COUNTER_INIT                            (0U)
 #define TIMER_DELAY_COUNTER_MAX                             (0x00ffffffU)                   /*!< = 16777215 */
 #define TIMER_DELAY_COUNTER_MAJOR                           ((kuint32_t)(((TIMER_DELAY_COUNTER) >> 24U) & 0x000000ffU))
@@ -123,42 +124,42 @@ static inline void get_time_counter(void)
 
 static inline kuint32_t jiffies_to_secs(const kutime_t j)
 {
-    return (j / CONFIG_HZ);
+    return (j / TICK_HZ);
 }
 
 static inline kuint32_t jiffies_to_msecs(const kutime_t j)
 {
-    return ((j / CONFIG_HZ) * 1000);
+    return ((j / TICK_HZ) * 1000);
 }
 
 static inline kuint32_t jiffies_to_usecs(const kutime_t j)
 {
-    return ((j / CONFIG_HZ) * 1000 * 1000);
+    return ((j / TICK_HZ) * 1000 * 1000);
 }
 
 static inline kuint64_t jiffies_to_nsecs(const kutime_t j)
 {
-    return ((j / CONFIG_HZ) * 1000 * 1000 * 1000);
+    return ((j / TICK_HZ) * 1000 * 1000 * 1000);
 }
 
 static inline kutime_t secs_to_jiffies(const kuint32_t s)
 {
-    return (s * CONFIG_HZ);
+    return (s * TICK_HZ);
 }
 
 static inline kutime_t msecs_to_jiffies(const kuint32_t m)
 {
-    return ((m * CONFIG_HZ) / 1000);
+    return ((m * TICK_HZ) / 1000);
 }
 
 static inline kutime_t usecs_to_jiffies(const kuint32_t u)
 {
-    return ((u * CONFIG_HZ) / 1000 / 1000);
+    return ((u * TICK_HZ) / 1000 / 1000);
 }
 
 static inline kutime_t nsecs_to_jiffies(kuint64_t n)
 {
-    return ((n * CONFIG_HZ) / 1000 / 1000 / 1000);
+    return ((n * TICK_HZ) / 1000 / 1000 / 1000);
 }
 
 static inline kutime_t time_spec_to_msecs(struct time_spec *sprt_tm)

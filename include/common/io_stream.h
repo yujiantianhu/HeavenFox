@@ -36,25 +36,25 @@ typedef union urt_name  \
 #define mrt_write_urt_bits(urt, member, data)  			((urt)->bit.member = (data))
 
 /*!< for a word */
-#define mrt_writel(data, addr)                          { *((volatile kuint32_t *)(addr)) = (kuint32_t)(data); }
+#define mrt_writel(data, addr)                          do { *((volatile kuint32_t *)(addr)) = (kuint32_t)(data); } while (0)
 #define mrt_readl(addr)                                 ( (*((kuint32_t *)(addr))))
-#define mrt_resetl(addr)                                { *((volatile kuint32_t *)(addr)) = 0U; }
-#define mrt_setbitl(bit, addr)                          { *((volatile kuint32_t *)(addr)) |= (kuint32_t)(bit); }
-#define mrt_clrbitl(bit, addr)                          { *((volatile kuint32_t *)(addr)) &= ~((kuint32_t)(bit)); }
+#define mrt_resetl(addr)                                do { *((volatile kuint32_t *)(addr)) = 0U; } while (0)
+#define mrt_setbitl(bit, addr)                          do { *((volatile kuint32_t *)(addr)) |= (kuint32_t)(bit); } while (0)
+#define mrt_clrbitl(bit, addr)                          do { *((volatile kuint32_t *)(addr)) &= ~((kuint32_t)(bit)); } while (0)
 #define mrt_getbitl(bit, addr)                          ( (*((kuint32_t *)(addr)) & ((kuint32_t)(bit))))
 #define mrt_getbit_u32(mask, nr, addr)                  ( (mrt_getbitl(mask, addr) >> (nr)))
 #define mrt_setfieldl(bit, mask, addr)  \
-{   \
+do {   \
     mrt_clrbitl(mask, addr);    \
     mrt_setbitl(bit, addr); \
-}
+} while (0)
 
 /*!< for a half word */
-#define mrt_writew(data, addr)                          { *((volatile kuint16_t *)(addr)) = (kuint16_t)(data); }
+#define mrt_writew(data, addr)                          do { *((volatile kuint16_t *)(addr)) = (kuint16_t)(data); } while (0)
 #define mrt_readw(addr)                                 ( (*((kuint16_t *)(addr))))
-#define mrt_resetw(addr)                                { *((volatile kuint16_t *)(addr)) = 0U; }
-#define mrt_setbitw(bit, addr)                          { *((volatile kuint16_t *)(addr)) |= (kuint16_t)(bit); }
-#define mrt_clrbitw(bit, addr)                          { *((volatile kuint16_t *)(addr)) &= ~((kuint16_t)(bit)); }
+#define mrt_resetw(addr)                                do { *((volatile kuint16_t *)(addr)) = 0U; } while (0)
+#define mrt_setbitw(bit, addr)                          do { *((volatile kuint16_t *)(addr)) |= (kuint16_t)(bit); } while (0)
+#define mrt_clrbitw(bit, addr)                          do { *((volatile kuint16_t *)(addr)) &= ~((kuint16_t)(bit)); } while (0)
 #define mrt_getbitw(bit, addr)                          ( (*((kuint16_t *)(addr)) & ((kuint16_t)(bit))))
 #define mrt_getbit_u16(mask, nr, addr)                  ( (mrt_getbitw(mask, addr) >> (nr)))
 #define mrt_setfieldw(bit, mask, addr)  \
@@ -64,11 +64,11 @@ typedef union urt_name  \
 }
 
 /*!< for a byte */
-#define mrt_writeb(data, addr)                          { *((volatile kuint8_t *)(addr)) = (kuint8_t)(data); }
+#define mrt_writeb(data, addr)                          do { *((volatile kuint8_t *)(addr)) = (kuint8_t)(data); } while (0)
 #define mrt_readb(addr)                                 ( (*((kuint8_t *)(addr))))
-#define mrt_resetb(addr)                                { *((volatile kuint8_t *)(addr)) = 0U; }
-#define mrt_setbitb(bit, addr)                          { *((volatile kuint8_t *)(addr)) |= (kuint8_t)(bit); }
-#define mrt_clrbitb(bit, addr)                          { *((volatile kuint8_t *)(addr)) &= ~((kuint8_t)(bit)); }
+#define mrt_resetb(addr)                                do { *((volatile kuint8_t *)(addr)) = 0U; } while (0)
+#define mrt_setbitb(bit, addr)                          do { *((volatile kuint8_t *)(addr)) |= (kuint8_t)(bit); } while (0)
+#define mrt_clrbitb(bit, addr)                          do { *((volatile kuint8_t *)(addr)) &= ~((kuint8_t)(bit)); } while (0)
 #define mrt_getbitb(bit, addr)                          ( (*((kuint8_t *)(addr)) & ((kuint8_t)(bit))))
 #define mrt_getbit_u8(mask, nr, addr)                   ( (mrt_getbitb(mask, addr) >> (nr)))
 #define mrt_setfieldb(bit, mask, addr)  \
@@ -90,21 +90,21 @@ typedef union urt_name  \
 
 /*!< set bit to 32-bit array */
 #define mrt_setbit_towords(integer, addr)	\
-{   \
+do {   \
     *((volatile kuint32_t *)(addr) + mrt_word_offset(integer)) |= mrt_bit(mrt_bit_offset(integer)); \
-}
+} while (0)
 
 /*!< clear bit to 32-bit array */
 #define mrt_clrbit_towords(integer, addr)	\
-{   \
+do {   \
     *((volatile kuint32_t *)(addr) + mrt_word_offset(integer)) &= ~mrt_bit(mrt_bit_offset(integer));    \
-}
+} while (0)
 
 /*!< git bit from 32-bit array */
 #define mrt_getbit_fromwords(integer, addr)	\
-{   \
+do {   \
     *((kuint32_t *)(addr) + mrt_word_offset(integer)) & mrt_bit(mrt_bit_offset(integer));   \
-}
+} while (0)
 
 #define mrt_isBitSetWords(integer, addr)                ( mrt_bit(mrt_bit_offset(integer)) == mrt_getbit_fromwords(bit, addr))
 #define mrt_isBitResetWords(integer, addr)              ( 0U == mrt_getbit_fromwords(bit, addr))
@@ -128,12 +128,12 @@ TARGET_EXT void printk(const kstring_t *ptr_fmt, ...);
 #define print_info(fmt, ...)                            printk(PRINT_LEVEL_INFO fmt, ##__VA_ARGS__)
 #define print_debug(fmt, ...)                           printk(PRINT_LEVEL_DEBUG fmt, ##__VA_ARGS__)
 
-ksint32_t bitmap_find_first_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits);
-ksint32_t bitmap_find_first_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits);
-ksint32_t bitmap_find_nr_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr);
-ksint32_t bitmap_find_nr_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr);
-void bitmap_set_nr_bit_zero(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr);
-void bitmap_set_nr_bit_valid(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr);
+TARGET_EXT ksint32_t bitmap_find_first_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits);
+TARGET_EXT ksint32_t bitmap_find_first_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits);
+TARGET_EXT ksint32_t bitmap_find_nr_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr);
+TARGET_EXT ksint32_t bitmap_find_nr_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr);
+TARGET_EXT void bitmap_set_nr_bit_zero(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr);
+TARGET_EXT void bitmap_set_nr_bit_valid(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr);
 
 /*!< API function */
 /*!
@@ -231,10 +231,8 @@ static inline void io_writel(kuaddr_t addr, kuint32_t val)
  */
 static inline kuint32_t io_readl(kuaddr_t addr, kuint32_t *val)
 {
-    if (mrt_isValid(val))
-    {
+    if (val)
         *val = *((kuaddr_t *)addr);
-    }
 
     return *((kuaddr_t *)addr);
 }

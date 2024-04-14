@@ -158,10 +158,8 @@ static srt_fsl_mouse_desc_t sgrt_fsl_mouse_dt =
  */
 irq_return_t fsl_mouse_driver_handler(void *ptrDev)
 {
-    if (!mrt_isValid(ptrDev))
-    {
+    if (!ptrDev)
         return -NR_isNullPtr;
-    }
 
     return NR_isWell;
 }
@@ -239,10 +237,8 @@ static ksint32_t fsl_mouse_driver_probe(struct fwk_platdev *sprt_dev)
 
     /*!< Register interrupt handler */
 	retval = fwk_request_irq(75, fsl_mouse_driver_handler, 0, FSL_MOUSE_DRIVER_NAME, mrt_nullptr);
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
         return -NR_isNotSuccess;
-    }
 
 	return NR_isWell;
 }

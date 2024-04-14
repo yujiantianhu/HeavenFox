@@ -104,4 +104,27 @@ enum __ERT_DEVICE_TYPE
 #define FWK_IOC_TYPE(nr)   							(((nr) >> FWK_IOC_TYPESHIFT) & FWK_IOC_TYPEMASK)
 #define FWK_IOC_NR(nr)   							(((nr) >> FWK_IOC_NRSHIFT) & FWK_IOC_NRMASK)
 
+/*!< API functions */
+/*!
+ * @brief   get mapped address
+ * @param   none
+ * @retval  none
+ * @note    reserved interface (phy_addr ---> virt_addr)
+ */
+static inline void *fwk_io_remap(void *phy_addr)
+{
+	return phy_addr ? phy_addr : mrt_nullptr;
+}
+
+/*!
+ * @brief   put mapped address
+ * @param   none
+ * @retval  none
+ * @note    reserved interface (release virt_addr)
+ */
+static inline void fwk_io_unmap(void *virt_addr)
+{
+
+}
+
 #endif /*!< __FWK_BASIC_H_ */

@@ -73,6 +73,15 @@
 #define mrt_ret_max2(a, b)								mrt_cmp_gt(a, b, a, b)
 #define mrt_ret_min2(a, b)								mrt_cmp_lt(a, b, a, b)
 
+#define mrt_abs(a)										(typeof(a))((a) < 0 ? -(a) : (a))
+#define mrt_usub(a, b)	\
+({	\
+	const typeof(a) _a = (a);	\
+	const typeof(b) _b = (b);	\
+	(void)(&_a == &_b);	\
+	((_a) > (_b)) ? ((_a) - (_b)) : ((_b) - (_a));	\
+})
+
 /*!<
  * Byte Alignment: for data that has already been aligned, the data remains unchanged after alignment.
  * Take 4 bytes as an example: 00, 04, 08, what they have in common is that the lower 2 bits must be zero. (0b11 = 0x03 = (4 - 1));
@@ -163,6 +172,17 @@
 }
 
 /*!< API function */
+/*!
+ * @brief   judge if ptr is valid
+ * @param   ptr
+ * @retval  yes or not
+ * @note    none
+ */
+__force_inline static inline kbool_t isValid(const void *ptr)
+{
+	return !!((kuaddr_t)ptr);
+}
+
 /*!
  * @brief   api_reverse_byte32
  * @param   val

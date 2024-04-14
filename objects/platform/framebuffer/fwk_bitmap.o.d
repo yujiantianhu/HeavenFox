@@ -80,5 +80,9 @@ fwk_bitmap.o: fwk_bitmap.c \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/board/board_common.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/implicit_call.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/boot/boot_text.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/fwk_disp.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/spinlock.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/fwk_font.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/fwk_bitmap.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/fwk_rgbmap.h
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/fwk_rgbmap.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/mutex.h

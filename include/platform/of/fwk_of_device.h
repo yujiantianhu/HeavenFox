@@ -28,6 +28,6 @@ TARGET_EXT ksint32_t fwk_of_irq_to_resource_table(struct fwk_device_node *sprt_n
 TARGET_EXT struct fwk_resources *fwk_platform_get_resources(struct fwk_platdev *sprt_pdev, kuint32_t index, kuint32_t type);
 TARGET_EXT kuaddr_t fwk_platform_get_address(struct fwk_platdev *sprt_pdev, kuint32_t index);
 TARGET_EXT ksint32_t fwk_platform_get_irq(struct fwk_platdev *sprt_pdev, kuint32_t index);
-TARGET_EXT kuaddr_t fwk_of_iomap(struct fwk_device_node *sprt_node, kuint32_t index);
+TARGET_EXT void *fwk_of_iomap(struct fwk_device_node *sprt_node, kuint32_t index);
 
 #endif /*!< __FWK_OF_DEVICE_H_ */

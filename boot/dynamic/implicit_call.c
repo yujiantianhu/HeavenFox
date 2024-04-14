@@ -65,16 +65,12 @@ ksint32_t dync_initcall_run_list(const kuint32_t section)
 	const dync_init_t *pFunc_init;
 
     if (section >= NR_DYNC_SEC_END)
-    {
         return -NR_isMemErr;
-    }
 
 	for (pFunc_init = dync_init_sections[section]; (*pFunc_init) && (pFunc_init < dync_init_sections[section + 1]); pFunc_init++)
 	{
-		if (mrt_isErr((*pFunc_init)()))
-		{
+		if (0 > ((*pFunc_init)()))
 			return -NR_isAnyErr;
-		}
 	}
 
 	return NR_isWell;
@@ -91,9 +87,7 @@ void dync_exitcall_run_list(const kuint32_t section)
 	const dync_exit_t *pFunc_exit;
 
     if (section >= NR_DYNC_SEC_END)
-    {
         return;
-    }
 
 	for (pFunc_exit = dync_exit_sections[section]; (*pFunc_exit) && (pFunc_exit < dync_exit_sections[section + 1]); pFunc_exit++)
 	{
@@ -117,10 +111,8 @@ ksint32_t board_early_initcall(void)
 
 	mrt_foreach_early_init(pFunc_init)
 	{
-		if (mrt_isErr((*pFunc_init)()))
-		{
+		if (0 > ((*pFunc_init)()))
 			return -NR_isAnyErr;
-		}
 	}
 
     return NR_isWell;
@@ -166,10 +158,8 @@ ksint32_t board_late_initcall(void)
 
 	mrt_foreach_early_init(pFunc_init)
 	{
-		if (mrt_isErr((*pFunc_init)()))
-		{
+		if (0 > ((*pFunc_init)()))
 			return -NR_isAnyErr;
-		}
 	}
 
     return NR_isWell;
@@ -215,10 +205,8 @@ ksint32_t system_kernel_initcall(void)
 
 	mrt_foreach_early_init(pFunc_init)
 	{
-		if (mrt_isErr((*pFunc_init)()))
-		{
+		if (0 > ((*pFunc_init)()))
 			return -NR_isAnyErr;
-		}
 	}
 
     return NR_isWell;
@@ -265,10 +253,8 @@ ksint32_t root_filesystem_initcall(void)
 
 	mrt_foreach_early_init(pFunc_init)
 	{
-		if (mrt_isErr((*pFunc_init)()))
-		{
+		if (0 > ((*pFunc_init)()))
 			return -NR_isAnyErr;
-		}
 	}
 
     return NR_isWell;
@@ -314,10 +300,8 @@ ksint32_t platform_built_initcall(void)
 
 	mrt_foreach_early_init(pFunc_init)
 	{
-		if (mrt_isErr((*pFunc_init)()))
-		{
+		if (0 > ((*pFunc_init)()))
 			return -NR_isAnyErr;
-		}
 	}
 
     return NR_isWell;
@@ -363,10 +347,8 @@ ksint32_t platform_reality_initcall(void)
 
 	mrt_foreach_early_init(pFunc_init)
 	{
-		if (mrt_isErr((*pFunc_init)()))
-		{
+		if (0 > ((*pFunc_init)()))
 			return -NR_isAnyErr;
-		}
 	}
 
     return NR_isWell;
@@ -412,10 +394,8 @@ ksint32_t hardware_device_initcall(void)
 
 	mrt_foreach_early_init(pFunc_init)
 	{
-		if (mrt_isErr((*pFunc_init)()))
-		{
+		if (0 > ((*pFunc_init)()))
 			return -NR_isAnyErr;
-		}
 	}
 
     return NR_isWell;
@@ -461,10 +441,8 @@ ksint32_t abstract_driver_initcall(void)
 
 	mrt_foreach_early_init(pFunc_init)
 	{
-		if (mrt_isErr((*pFunc_init)()))
-		{
+		if (0 > ((*pFunc_init)()))
 			return -NR_isAnyErr;
-		}
 	}
 
     return NR_isWell;
@@ -505,16 +483,12 @@ ksint32_t run_machine_initcall(void)
 	ksint32_t retval;
 
     retval = board_early_initcall();
-    if (mrt_isErr(retval))
-    {
+    if (retval < 0)
         return retval;
-    }
 
     retval = board_late_initcall();
-    if (mrt_isErr(retval))
-    {
+    if (retval < 0)
         return retval;
-    }
 
 	return 0;
 }
@@ -531,28 +505,20 @@ ksint32_t run_platform_initcall(void)
 
     /*!< initcall */
     retval = platform_built_initcall();
-    if (mrt_isErr(retval))
-    {
+    if (retval < 0)
         return retval;
-    }
 
     retval = platform_reality_initcall();
-    if (mrt_isErr(retval))
-    {
+    if (retval < 0)
         return retval;
-    }
 
     retval = hardware_device_initcall();
-    if (mrt_isErr(retval))
-    {
+    if (retval < 0)
         return retval;
-    }
 
     retval = abstract_driver_initcall();
-    if (mrt_isErr(retval))
-    {
+    if (retval < 0)
         return retval;
-    }
 
 	return 0;
 }

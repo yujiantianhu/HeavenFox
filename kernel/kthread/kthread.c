@@ -18,7 +18,7 @@
 #include <kernel/instance.h>
 
 /*!< The defines */
-#define KERL_THREAD_PREEMPT_PERIOD                      (10)                        /*!< 10ms */
+#define KERL_THREAD_PREEMPT_PERIOD                      (20)                        /*!< 20ms */
 #define KERL_THREAD_STACK_SIZE                          KEL_THREAD_STACK_HALF(1)    /*!< 1/2 page (2 kbytes) */
 
 /*!< The globals */
@@ -51,7 +51,7 @@ static void kthread_schedule_timeout(kuint32_t args)
     /*!< --------------------------------------------------------- */
     /*!< check priority */
     sprt_ready = get_first_ready_thread();
-    if (!mrt_isValid(sprt_ready))
+    if (!sprt_ready)
         goto END;
 
     work_prio = real_thread_get_priority(sprt_work->sprt_attr);
@@ -90,9 +90,7 @@ static void *kthread_entry(void *args)
         
         /*!< start timer */
         if (!sprt_tim->expires)
-        {
             mod_timer(sprt_tim, jiffies + msecs_to_jiffies(KERL_THREAD_PREEMPT_PERIOD));
-        }
 
         schedule_delay_ms(200);
     }
@@ -109,7 +107,6 @@ static void *kthread_entry(void *args)
 ksint32_t kthread_init(void)
 {
     srt_kel_thread_attr_t *sprt_attr = &sgrt_kthread_attr;
-    ksint32_t retval;
 
 	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
 	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;
@@ -123,8 +120,7 @@ ksint32_t kthread_init(void)
     real_thread_set_time_slice(sprt_attr, KEL_THREAD_TIME_DEFUALT);
 
     /*!< register thread */
-    retval = kernel_thread_base_create(sprt_attr, kthread_entry, mrt_nullptr);
-    return mrt_isErr(retval) ? retval : 0;
+    return kernel_thread_base_create(sprt_attr, kthread_entry, mrt_nullptr);
 }
 
 /*!< end of file */

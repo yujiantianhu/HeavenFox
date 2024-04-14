@@ -56,24 +56,22 @@ ksint32_t fdt_boot_initial(void)
     ksint32_t iRetval;
 
     if ((PROGRAM_RAM_START <= (CONFIG_DEVICE_TREE_BASE + CONFIG_FDT_MAX_SIZE - 1)))
-    {
         return RET_BOOT_ERR;
-    }
 
     rfs_fatfs_file_initial(&sgrt_file);
 
     iRetval = rfs_fatfs_disk_create(sgrt_file.sprt_disk, SDDISK);
-    if (mrt_isErr(iRetval))
+    if (iRetval < 0)
     {
-        printk(PRINT_LEVEL_DEBUG "create disk failed!\n");
+        print_debug("create disk failed!\n");
         return RET_BOOT_ERR;
     }
 
     iRetval = sgrt_file.init(&sgrt_file, "firmware.dtb", 
                                 NR_RFS_DISK_OpenExsiting | NR_RFS_DISK_OpenRead, CONFIG_DEVICE_TREE_BASE, CONFIG_FDT_MAX_SIZE);
-    if (mrt_isErr(iRetval))
+    if (iRetval < 0)
     {
-        printk(PRINT_LEVEL_DEBUG "read device-tree failed!\n");
+        print_debug("read device-tree failed!\n");
         goto END;
     }
 
@@ -82,7 +80,7 @@ ksint32_t fdt_boot_initial(void)
 END:
     rfs_fatfs_disk_destroy(sgrt_file.sprt_disk);
 
-    return (mrt_isErr(iRetval)) ? RET_BOOT_ERR : RET_BOOT_PASS;
+    return (iRetval < 0) ? RET_BOOT_ERR : RET_BOOT_PASS;
 }
 
 /*!
@@ -158,9 +156,7 @@ void board_init_r(void)
 
     /*!< initial */
     if (board_initcall_run_list(board_init_sequence_r))
-    {
         for (;;);
-    }
 
     /*!< if initialize finished, start kernel */
     jump_to_kernel(sprt_gd);

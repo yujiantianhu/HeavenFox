@@ -92,6 +92,10 @@ display_app.o: display_app.c \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/of/fwk_of_prop.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_types.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/irq/fwk_irq_domain.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/fwk_font.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/fwk_disp.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/spinlock.h \
+ /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/fwk_font.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/video/fwk_rgbmap.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/sched.h \
  /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/kernel/context.h \

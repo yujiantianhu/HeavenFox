@@ -52,39 +52,29 @@ static ksint32_t __real_thread_create(real_thread_t *ptr_id, ksint32_t base, srt
 	/*!< find a free tid */
 	tid = kel_sched_get_unused_tid(i_start, count);
 	if (tid < 0)
-	{
 		goto fail;
-	}
 
 	sprt_it_attr = sprt_attr;
 
-	if (!mrt_isValid(sprt_attr))
+	if (!sprt_attr)
 	{
 		sprt_it_attr = (srt_kel_thread_attr_t *)kzalloc(sizeof(srt_kel_thread_attr_t), GFP_KERNEL);
-		if (!mrt_isValid(sprt_it_attr))
-		{
+		if (!isValid(sprt_it_attr))
 			goto fail;
-		}
 
 		/*!< initialize attr */
 		if (!real_thread_attr_init(sprt_it_attr))
-		{
 			goto fail2;
-		}
 	}
 
 	/*!< check if attr valid */
 	if (!real_thread_attr_revise(sprt_it_attr))
-	{
 		goto fail3;
-	}
 
 	/*!< create new dynamic thread */
 	sprt_thread = (struct kel_thread *)kzalloc(sizeof(struct kel_thread), GFP_KERNEL);
-	if (!mrt_isValid(sprt_thread))
-	{
+	if (!isValid(sprt_thread))
 		goto fail3;
-	}
 
 	sprt_thread->tid 			= tid;
 	sprt_thread->sprt_attr 		= sprt_it_attr;
@@ -93,12 +83,10 @@ static ksint32_t __real_thread_create(real_thread_t *ptr_id, ksint32_t base, srt
 
 	/*!< add to ready list */
 	retval = register_kel_sched_thread(sprt_thread, tid);
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		goto fail4;
-	}
 
-    if (mrt_isValid(ptr_id))
+    if (ptr_id)
         *ptr_id = tid;
     
 	return NR_isWell;
@@ -108,7 +96,7 @@ fail4:
 fail3:
 	real_thread_attr_destroy(sprt_it_attr);
 fail2:
-	if (!mrt_isValid(sprt_attr))
+	if (!isValid(sprt_attr))
 		kfree(sprt_it_attr);
 fail:
 	return -NR_isArgFault;
@@ -224,10 +212,8 @@ void *real_thread_attr_init(srt_kel_thread_attr_t *sprt_attr)
 
 	/*!< stack: 128bytes */
 	ptr_stack = kzalloc(KEL_THREAD_STACK_DEFAULT, GFP_KERNEL);
-	if (!mrt_isValid(ptr_stack))
-	{
+	if (!isValid(ptr_stack))
 		return mrt_nullptr;
-	}
 
 	real_thread_set_stack(sprt_attr, ptr_stack, ptr_stack, KEL_THREAD_STACK_DEFAULT);
 	real_thread_set_priority(sprt_attr, KEL_THREAD_PROTY_DEFAULT);
@@ -246,10 +232,8 @@ void *real_thread_attr_revise(srt_kel_thread_attr_t *sprt_attr)
 {
 	void *ptr_stack;
 
-	if (!mrt_isValid(sprt_attr))
-	{
+	if (!sprt_attr)
 		return mrt_nullptr;
-	}
 
 	if (!sprt_attr->sgrt_param.sched_priority)
 		real_thread_set_priority(sprt_attr, KEL_THREAD_PROTY_DEFAULT);
@@ -261,10 +245,8 @@ void *real_thread_attr_revise(srt_kel_thread_attr_t *sprt_attr)
 	{
 		/*!< stack: 128bytes */
 		ptr_stack = kzalloc(KEL_THREAD_STACK_DEFAULT, GFP_KERNEL);
-		if (!mrt_isValid(ptr_stack))
-		{
-			return mrt_nullptr;
-		}
+		if (!isValid(ptr_stack))
+			return mrt_nullptr;		
 
 		real_thread_set_stack(sprt_attr, ptr_stack, ptr_stack, KEL_THREAD_STACK_DEFAULT);
 	}
@@ -280,13 +262,11 @@ void *real_thread_attr_revise(srt_kel_thread_attr_t *sprt_attr)
  */
 void real_thread_attr_destroy(srt_kel_thread_attr_t *sprt_attr)
 {
-	if (!mrt_isValid(sprt_attr))
+	if (!sprt_attr)
 		return;
 
 	if (sprt_attr->ptr_stack_start)
-	{
 		kfree(sprt_attr->ptr_stack_start);
-	}
 	
 	memset(sprt_attr, 0, sizeof(srt_kel_thread_attr_t));
 }

@@ -97,9 +97,7 @@ void board_init_f(void)
 {
     /*!< initial */
     if (board_initcall_run_list(board_init_sequence_f))
-    {
         for (;;);
-    }
 }
 
 /* end of file */

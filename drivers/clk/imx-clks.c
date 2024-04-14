@@ -172,20 +172,21 @@ ksint32_t __fwk_init imx_clks_driver_init(void)
 	srt_imx_ccm_pll_t *sprt_pll;
 	struct fwk_device_node *sprt_clks, *sprt_anatop;
     struct imx_clks_data sgrt_data;
+    void *reg;
 
 	sprt_anatop = fwk_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_antop_driver_ids, mrt_nullptr);
     sprt_clks = fwk_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_ccm_driver_ids, mrt_nullptr);
-	if (!mrt_isValid(sprt_anatop) || !mrt_isValid(sprt_clks))
-	{
-		return NR_isNone;
-	}
+	if (!isValid(sprt_anatop) || !isValid(sprt_clks))
+		return NR_isNormal;
 
-	sprt_pll = (srt_imx_ccm_pll_t *)fwk_of_iomap(sprt_anatop, 0);
-    sprt_ccm = (srt_imx_ccm_t *)fwk_of_iomap(sprt_clks, 0);
-    if (!mrt_isValid(sprt_pll) || !mrt_isValid(sprt_ccm))
-    {
+    reg = fwk_of_iomap(sprt_anatop, 0);
+    sprt_pll = (srt_imx_ccm_pll_t *)fwk_io_remap(reg);
+
+	reg = fwk_of_iomap(sprt_clks, 0);
+    sprt_ccm = (srt_imx_ccm_t *)fwk_io_remap(reg);
+
+    if (!isValid(sprt_pll) || !isValid(sprt_ccm))
         return -NR_isUnvalid;
-    }
 
     sgrt_data.sprt_ccm = sprt_ccm;
     sgrt_data.sprt_pll = sprt_pll;

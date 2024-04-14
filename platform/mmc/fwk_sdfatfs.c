@@ -27,14 +27,10 @@ static srt_fwk_sdcard_t sgrt_sdFatfsDisk;
 DRESULT fwk_sdfatfs_write(kuint8_t physicalDrive, const kuint8_t *buffer, kuint32_t sector, kuint8_t count)
 {
     if (physicalDrive != SDDISK)
-    {
         return RES_PARERR;
-    }
 
     if (!fwk_sdcard_rw_blocks(&sgrt_sdFatfsDisk, (void *)buffer, sector, count, NR_SdCard_WriteToCard))
-    {
         return RES_ERROR;
-    }
 
     return RES_OK;
 }
@@ -48,14 +44,10 @@ DRESULT fwk_sdfatfs_write(kuint8_t physicalDrive, const kuint8_t *buffer, kuint3
 DRESULT fwk_sdfatfs_read(kuint8_t physicalDrive, kuint8_t *buffer, kuint32_t sector, kuint8_t count)
 {
     if (physicalDrive != SDDISK)
-    {
         return RES_PARERR;
-    }
 
     if (!fwk_sdcard_rw_blocks(&sgrt_sdFatfsDisk, buffer, sector, count, NR_SdCard_ReadToHost))
-    {
         return RES_ERROR;
-    }
 
     return RES_OK;
 }
@@ -71,42 +63,31 @@ DRESULT fwk_sdfatfs_ioctl(kuint8_t physicalDrive, kuint8_t command, void *buffer
     DRESULT result = RES_OK;
 
     if (physicalDrive != SDDISK)
-    {
         return RES_PARERR;
-    }
 
     switch (command)
     {
         case GET_SECTOR_COUNT:
             if (buffer)
-            {
                 *(kuint32_t *)buffer = sgrt_sdFatfsDisk.blockCount;
-            }
             else
-            {
                 result = RES_PARERR;
-            }
             break;
+
         case GET_SECTOR_SIZE:
             if (buffer)
-            {
                 *(kuint32_t *)buffer = sgrt_sdFatfsDisk.blockSize;
-            }
             else
-            {
                 result = RES_PARERR;
-            }
             break;
+
         case GET_BLOCK_SIZE:
             if (buffer)
-            {
                 *(kuint32_t *)buffer = sgrt_sdFatfsDisk.sgrt_csd.eraseSectorSize;
-            }
             else
-            {
                 result = RES_PARERR;
-            }
             break;
+
         case CTRL_SYNC:
             result = RES_OK;
             break;
@@ -127,14 +108,10 @@ DRESULT fwk_sdfatfs_ioctl(kuint8_t physicalDrive, kuint8_t command, void *buffer
 DSTATUS fwk_sdfatfs_status(kuint8_t physicalDrive)
 {
     if (physicalDrive != SDDISK)
-    {
         return STA_NOINIT;
-    }
 
 	if (mrt_isBitResetl(NR_SdCard_Transfer_State, &sgrt_sdFatfsDisk.mode))
-	{
 		return STA_NOINIT;
-	}
 
     return 0;
 }
@@ -151,20 +128,16 @@ DSTATUS fwk_sdfatfs_initial(kuint8_t physicalDrive)
     ksint32_t iRetval;
 
     if (physicalDrive != SDDISK)
-    {
         return STA_NOINIT;
-    }
 
     /*!< allocate sdcard structure or get host */
     sprt_card = fwk_sdcard_allocate_device(&sgrt_sdFatfsDisk);
-    if (!mrt_isValid(sprt_card))
-    {
+    if (!isValid(sprt_card))
         return STA_NOINIT;
-    }
 
     /*!< detect and initial */
     iRetval = fwk_sdcard_initial_device(sprt_card);
-    if (mrt_isErr(iRetval))
+    if (iRetval)
     {
        fwk_sdcard_free_device(sprt_card);
        return STA_NOINIT;
@@ -182,9 +155,7 @@ DSTATUS fwk_sdfatfs_initial(kuint8_t physicalDrive)
 DSTATUS fwk_sdfatfs_release(kuint8_t physicalDrive)
 {
     if (physicalDrive != SDDISK)
-    {
         return STA_NOINIT;
-    }
 
 	fwk_sdcard_inactive_device(&sgrt_sdFatfsDisk);
 

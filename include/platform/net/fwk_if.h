@@ -54,7 +54,7 @@ struct fwk_ifreq
 #define IFHWADDRLEN	6
 	union
 	{
-		kstring_t	ifrn_name[NET_IFNAME_SIZE];										/*!< if name, e.g. "en0" */
+		ksint8_t ifrn_name[NET_IFNAME_SIZE];										/*!< if name, e.g. "en0" */
 
 	} urt_fwk_ifr_ifrn;
 
@@ -69,8 +69,8 @@ struct fwk_ifreq
 		ksint32_t ifru_ivalue;
 		ksint32_t ifru_mtu;
 		struct fwk_ifmap ifru_map;
-		kstring_t	ifru_slave[NET_IFNAME_SIZE];									/*!< Just fits the size */
-		kstring_t	ifru_newname[NET_IFNAME_SIZE];
+		ksint8_t ifru_slave[NET_IFNAME_SIZE];									/*!< Just fits the size */
+		ksint8_t ifru_newname[NET_IFNAME_SIZE];
 		void *ifru_data;
 //		struct if_settings ifru_settings;
 

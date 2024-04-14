@@ -29,25 +29,19 @@ static ksint32_t fwk_chrdev_open(struct fwk_inode *sprt_inode, struct fwk_file *
 	devNum = sprt_inode->r_dev;
 /*
 	if (devNum < DEVICE_MAJOR_BASE)
-	{
 		goto fail;
-	}
 */
 
 	sprt_cdev = (struct fwk_cdev *)fwk_kobj_lookUp(sprt_fwk_chrdev_map, devNum);
-	if (!mrt_isValid(sprt_cdev))
-	{
+	if (!isValid(sprt_cdev))
 		goto fail;
-	}
 
 	sprt_inode->sprt_cdev = sprt_cdev;
 
 	/*!< Replace the device operate function */
 	sprt_file->sprt_foprts = sprt_cdev->sprt_oprts;
-	if (mrt_isValid(sprt_file->sprt_foprts->open))
-	{
+	if (sprt_file->sprt_foprts->open)
 		return sprt_file->sprt_foprts->open(sprt_inode, sprt_file);
-	}
 
 	return NR_isWell;
 
@@ -158,10 +152,8 @@ ksint32_t fwk_mk_inode(kstring_t *name, kuint32_t type, kuint32_t devNum)
 	struct fwk_inode *sprt_tail;
 	struct fwk_inode *sprt_inode;
 
-	if (!mrt_isValid(name))
-	{
+	if (!name)
 		return -NR_isAnyErr;
-	}
 
 	sprt_head = &sgrt_fwk_inode;
 
@@ -170,19 +162,15 @@ ksint32_t fwk_mk_inode(kstring_t *name, kuint32_t type, kuint32_t devNum)
 	{
 		/*!< Heavy name */
 		if (!strcmp(name, sprt_inode->fileName))
-		{
 			return -NR_isAnyErr;
-		}
 
 		/*!< Get the last inode */
 		sprt_tail = sprt_inode;
 	}
 
 	sprt_inode = (struct fwk_inode *)kzalloc(sizeof(struct fwk_inode), GFP_KERNEL);
-	if (!mrt_isValid(sprt_inode))
-	{
+	if (!isValid(sprt_inode))
 		return -NR_isMemErr;
-	}
 
 	sprt_inode->r_dev = devNum;
 	sprt_inode->sprt_next = mrt_nullptr;
@@ -224,10 +212,8 @@ ksint32_t fwk_rm_inode(kstring_t *name)
 	struct fwk_inode *sprt_prev;
 	struct fwk_inode *sprt_inode;
 
-	if (!mrt_isValid(name))
-	{
+	if (!name)
 		return -NR_isAnyErr;
-	}
 
 	sprt_head = &sgrt_fwk_inode;
 	sprt_prev = mrt_nullptr;
@@ -237,18 +223,14 @@ ksint32_t fwk_rm_inode(kstring_t *name)
 	{
 		/*!< The name matches successfully (the device name cannot be the same) */
 		if (!strcmp(name, sprt_inode->fileName))
-		{
 			break;
-		}
 
 		sprt_prev = sprt_inode;
 	}
 
 	/*!< Not found */
-	if (!mrt_isValid(sprt_inode))
-	{
+	if (!isValid(sprt_inode))
 		return -NR_isArrayOver;
-	}
 
 	/*!< Deletes the current node */
 	mrt_list_del_any(sprt_prev, sprt_inode);
@@ -270,10 +252,8 @@ struct fwk_inode *fwk_inode_find(kstring_t *name)
 	struct fwk_inode *sprt_head;
 	struct fwk_inode *sprt_inode;
 
-	if (!mrt_isValid(name))
-	{
+	if (!name)
 		return mrt_nullptr;
-	}
 
 	sprt_head = &sgrt_fwk_inode;
 
@@ -282,12 +262,10 @@ struct fwk_inode *fwk_inode_find(kstring_t *name)
 	{
 		/*!< The name matches successfully */
 		if (!strcmp(name, sprt_inode->fileName))
-		{
 			break;
-		}
 	}
 
-	return !mrt_isValid(sprt_inode) ? mrt_nullptr : sprt_inode;
+	return !isValid(sprt_inode) ? mrt_nullptr : sprt_inode;
 }
 
 /*!
@@ -301,15 +279,13 @@ ksint32_t fwk_device_create(kuint32_t type, kuint32_t devNum, kstring_t *name, .
 	kstring_t node[INODE_ADD_PREX_LEN];
 	va_list ptr_list;
 
-	if (!mrt_isValid(name))
-	{
+	if (!name)
 		return -NR_isAnyErr;
-	}
 
 	sprintk(node, "/dev/");
 
 	va_start(ptr_list, name);
-	do_fmt_convert(node + 5, mrt_nullptr, name, ptr_list);
+	do_fmt_convert(node + 5, mrt_nullptr, name, ptr_list, INODE_ADD_PREX_LEN - 5);
 	va_end(ptr_list);
 
 	return fwk_mk_inode(node, type, devNum);
@@ -326,15 +302,13 @@ ksint32_t fwk_device_destroy(kstring_t *name, ...)
 	kstring_t node[INODE_ADD_PREX_LEN];
 	va_list ptr_list;
 
-	if (!mrt_isValid(name))
-	{
+	if (!name)
 		return -NR_isAnyErr;
-	}
 
 	sprintk(node, "/dev/");
 
 	va_start(ptr_list, name);
-	do_fmt_convert(node + 5, mrt_nullptr, name, ptr_list);
+	do_fmt_convert(node + 5, mrt_nullptr, name, ptr_list, INODE_ADD_PREX_LEN - 5);
 	va_end(ptr_list);
 
 	return fwk_rm_inode(node);

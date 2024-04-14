@@ -19,7 +19,7 @@
 #include <kernel/spinlock.h>
 
 /*!< The globals */
-static kubyte_t g_byStreamBuffer[1024] = {0};
+static kubyte_t g_iostream_buffer[1024] = {0};
 static DECLARE_SPIN_LOCK(sgrt_stream_lock);
 
 /*!< API function */
@@ -48,13 +48,13 @@ void printk(const kstring_t *ptr_fmt, ...)
 	kusize_t i, size;
 
 	/*!< pointer to global resource */
-	ptr_buf = &g_byStreamBuffer[0];
+	ptr_buf = &g_iostream_buffer[0];
 
 	va_start(ptr_list, ptr_fmt);
 
 	spin_lock(&sgrt_stream_lock);
-	size = do_fmt_convert(ptr_buf, level, ptr_fmt, ptr_list);
-	if (size > 1024)
+	size = do_fmt_convert(ptr_buf, level, ptr_fmt, ptr_list, sizeof(g_iostream_buffer));
+	if (size < strlen(ptr_fmt))
 	{
 		/*!< if size greater than sizeof(buf), allocate new memory block for it. */
 
@@ -65,19 +65,13 @@ void printk(const kstring_t *ptr_fmt, ...)
 
 	/*!< if level is not set, default PRINT_LEVEL_WARNING */
 	if (*(PRINT_LEVEL_SOH) != *level)
-	{
 		memcpy(level, PRINT_LEVEL_WARNING, sizeof(level));
-	}
 
 	if (*(level + 1) > *((kubyte_t *)(CONFIG_PRINT_LEVEL)))
-	{
 		return;
-	}
 
 	for (i = 0; i < size; i++)
-	{
 		io_putc(*(ptr_buf + i));
-	}
 #endif
 }
 
@@ -101,9 +95,7 @@ static ksint32_t bitmap_find_first_bit(kuint8_t *bitmap, kuint32_t start, kusize
 		temp = index % (sizeof(*bitmap) << 3);
 
 		if ((!!(*(bitmap) & (1 << temp))) == value)
-		{
 			break;
-		}
 	}
 
 	return (index >= total_bits) ? -1 : index;
@@ -125,9 +117,7 @@ static ksint32_t bitmap_find_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t 
 	ksint32_t index;
 
 	if (end >= total_bits)
-	{
 		return -1;
-	}
 	
 	/*!<
 	 * found (!value), return current index (the first bit that does not meet the condition)
@@ -149,9 +139,7 @@ static void bitmap_set_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_
 	kuint32_t index, temp;
 
 	if (end >= total_bits)
-	{
 		return;
-	}
 
 	for (index = start; index < end; index++)
 	{
@@ -159,13 +147,9 @@ static void bitmap_set_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_
 		temp = index % (sizeof(*bitmap) << 3);
 
 		if (value)
-		{
 			*(bitmap) |= (1 << temp);
-		}
 		else
-		{
 			*(bitmap) &= ~(1 << temp);
-		}
 	}
 }
 

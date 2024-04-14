@@ -17,6 +17,8 @@
 #include <common/io_stream.h>
 #include <platform/fwk_fcntl.h>
 #include <platform/video/fwk_fbmem.h>
+#include <platform/video/fwk_font.h>
+#include <platform/video/fwk_disp.h>
 #include <platform/video/fwk_rgbmap.h>
 #include <kernel/kernel.h>
 #include <kernel/sched.h>
@@ -27,7 +29,7 @@
 #include "thread_table.h"
 
 /*!< The defines */
-#define DISPLAY_APP_THREAD_STACK_SIZE                       KEL_THREAD_STACK_HALF(1)    /*!< 1/2 page (1kbytes) */
+#define DISPLAY_APP_THREAD_STACK_SIZE                       KEL_THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
 
 /*!< The globals */
 static real_thread_t g_display_app_tid;
@@ -35,42 +37,82 @@ static srt_kel_thread_attr_t sgrt_display_app_attr;
 static kuint32_t g_display_app_stack[DISPLAY_APP_THREAD_STACK_SIZE];
 static struct mutex_lock sgrt_display_app_lock;
 
-static const kuint32_t g_rgb_color_table[] = { 
-    RGB_BLUE, 
-    RGB_LIME, 
-    RGB_CYAN, 
-    RGB_RED,
-    RGB_MAGENTA, 
-    RGB_YELLOW, 
-    RGB_WHITE
-};
-
 /*!< API functions */
 /*!
- * @brief  display one color on full screen
+ * @brief  initial display common settings
  * @param  none
  * @retval none
  * @note   do display
  */
-static void display_fill_one_screen(kuint32_t *pbuffer, kuint32_t width, kuint32_t height)
+static void display_initial_settings(srt_fwk_font_setting_t *sprt_settings)
 {
-    static kuint32_t *ptr_color = (kuint32_t *)&g_rgb_color_table[0];
-    kuint32_t i, j;
+    sprt_settings->color = RGB_BLACK;
+    sprt_settings->background = RGB_WHITE;
+    sprt_settings->font = NR_FWK_FONT_SONG;
+    sprt_settings->line_spacing = 2;
+    sprt_settings->ptr_ascii = (void *)g_font_ascii_song16;
+    sprt_settings->ptr_hz = mrt_nullptr;
+    sprt_settings->size = FWK_FONT_16;
+}
 
-    mutex_lock(&sgrt_display_app_lock);
+/*!
+ * @brief  clear display
+ * @param  none
+ * @retval none
+ * @note   do display
+ */
+static void display_clear(srt_fwk_disp_info_t *sprt_disp)
+{
+    srt_fwk_font_setting_t sgrt_settings;
+
+    display_initial_settings(&sgrt_settings);
+
+    if (sprt_disp->sprt_ops->clear)
+        sprt_disp->sprt_ops->clear(sprt_disp, sgrt_settings.background);
+}
+
+/*!
+ * @brief  display task
+ * @param  none
+ * @retval none
+ * @note   do display
+ */
+static void display_word(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end, const kstring_t *fmt, ...)
+{
+    srt_fwk_font_setting_t sgrt_settings;
+
+    display_initial_settings(&sgrt_settings);
+    sgrt_settings.color = RGB_RED;
+
+    if (sprt_disp->sprt_ops->fill_rectangle)
+        sprt_disp->sprt_ops->fill_rectangle(sprt_disp, x_start, y_start, x_end, y_end, sgrt_settings.background);
+
+    if (sprt_disp->sprt_ops->write_word)
+        sprt_disp->sprt_ops->write_word(sprt_disp, &sgrt_settings, x_start, y_start, x_end, y_end, fmt);
+}
+
+/*!
+ * @brief  display pattern
+ * @param  none
+ * @retval none
+ * @note   do display
+ */
+static void display_graphic(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end)
+{
+    srt_fwk_font_setting_t sgrt_settings;
+
+    display_initial_settings(&sgrt_settings);
     
-    for (i = 0; i < height; i++)
+    if (sprt_disp->sprt_ops->write_line)
     {
-        for (j = 0; j < width; j++)
-        {
-            *(pbuffer++) = *ptr_color;
-        }
+        sgrt_settings.color = RGB_BLUE;
+        sprt_disp->sprt_ops->write_line(sprt_disp, x_start, y_start, x_end, y_end, sgrt_settings.color);
     }
-    mutex_unlock(&sgrt_display_app_lock);
 
-    if (((++ptr_color) - (&g_rgb_color_table[0])) >= sizeof(g_rgb_color_table))
+    if (sprt_disp->sprt_ops->write_rectangle)
     {
-        ptr_color = (kuint32_t *)&g_rgb_color_table[0];
+        sgrt_settings.color = RGB_PURPLE;
+        sprt_disp->sprt_ops->write_rectangle(sprt_disp, x_start, y_start, x_end, y_end, sgrt_settings.color);
     }
 }
 
@@ -86,29 +128,57 @@ static void *display_app_entry(void *args)
     struct fwk_fb_fix_screen_info sgrt_fix;
 	struct fwk_fb_var_screen_info sgrt_var;
     kuint32_t *fbuffer;
+    srt_fwk_disp_info_t sgrt_disp;
 
     mutex_init(&sgrt_display_app_lock);
+
+    do {
+        fd = virt_open("/dev/fb0", 0);
+        if (fd < 0)
+            continue;
+
+        virt_ioctl(fd, NR_FB_IOGetVScreenInfo, &sgrt_var);
+        virt_ioctl(fd, NR_FB_IOGetFScreenInfo, &sgrt_fix);
+
+        fbuffer = (kuint32_t *)virt_mmap(mrt_nullptr, sgrt_fix.smem_len, 0, 0, fd, 0);
+        if (!isValid(fbuffer))
+        {
+            virt_close(fd);
+            continue;
+        }
+    
+    } while (!isValid(fbuffer));
+
+    fwk_display_initial_info(&sgrt_disp, fbuffer, sgrt_fix.smem_len, sgrt_var.xres, sgrt_var.yres, FWK_RGB_PIXEL32);
+    display_clear(&sgrt_disp);
+    display_graphic(&sgrt_disp, sgrt_disp.width / 4, (sgrt_disp.height * 3) / 8, (sgrt_disp.width * 3) / 4, (sgrt_disp.height * 7) / 8);
+
+    virt_munmap(fbuffer, sgrt_fix.smem_len);
+    virt_close(fd);
 
     for (;;)
     {
         fd = virt_open("/dev/fb0", 0);
-        if (!mrt_isErr(fd))
+        if (fd < 0)
+            goto END;
+
+        fbuffer = (kuint32_t *)virt_mmap(mrt_nullptr, sgrt_fix.smem_len, 0, 0, fd, 0);
+        if (!isValid(fbuffer))
         {
-            virt_ioctl(fd, NR_FB_IOGetVScreenInfo, &sgrt_var);
-            virt_ioctl(fd, NR_FB_IOGetFScreenInfo, &sgrt_fix);
-
-            fbuffer = (kuint32_t *)virt_mmap(mrt_nullptr, sgrt_fix.smem_len, 0, 0, fd, 0);
-            if (!mrt_isValid(fbuffer))
-            {
-                virt_close(fd);
-            }
-
-            display_fill_one_screen(fbuffer, sgrt_var.xres, sgrt_var.yres);
-            
-            virt_munmap(fbuffer, sgrt_fix.smem_len);
             virt_close(fd);
+            goto END;
         }
 
+        display_word(&sgrt_disp, 140, 80, 
+                                 sgrt_disp.width, 80 + 16, "welcome to use!");
+        schedule_delay_ms(500);
+        display_word(&sgrt_disp, 140, 80, 
+                                 sgrt_disp.width, 80 + 16, "happly every day!");
+    
+        virt_munmap(fbuffer, sgrt_fix.smem_len);
+        virt_close(fd);
+
+END:
         schedule_delay_ms(500);
     }
 
@@ -139,7 +209,7 @@ ksint32_t display_app_init(void)
 
     /*!< register thread */
     retval = real_thread_create(&g_display_app_tid, sprt_attr, display_app_entry, mrt_nullptr);
-    return mrt_isErr(retval) ? retval : 0;
+    return (retval < 0) ? retval : 0;
 }
 
 /*!< end of file */

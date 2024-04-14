@@ -55,7 +55,6 @@ static void *init_proc_entry(void *args)
 ksint32_t init_proc_init(void)
 {
     srt_kel_thread_attr_t *sprt_attr = &sgrt_init_proc_attr;
-    ksint32_t retval;
 
 	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
 	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;
@@ -69,8 +68,7 @@ ksint32_t init_proc_init(void)
     real_thread_set_time_slice(sprt_attr, KEL_THREAD_TIME_DEFUALT);
 
     /*!< register thread */
-    retval = kernel_thread_init_create(sprt_attr, init_proc_entry, mrt_nullptr);
-    return mrt_isErr(retval) ? retval : 0;
+    return kernel_thread_init_create(sprt_attr, init_proc_entry, mrt_nullptr);
 }
 
 /*!< end of file */

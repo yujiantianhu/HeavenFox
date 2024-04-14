@@ -79,6 +79,4 @@ TARGET_EXT kuint32_t g_sched_preempt_cnt;
 #define mrt_preempt_is_locked()						(!!g_sched_preempt_cnt)
 #endif
 
-
-
 #endif /* __KERNEL_H */

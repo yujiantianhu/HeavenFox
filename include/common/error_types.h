@@ -28,17 +28,15 @@ typedef ksint32_t 	kstatus_t;
 enum __ERT_ERROR_CODE
 {
 	/*!< --------------------------------------------------------- */
-	/*!< 0 ~ 31: use with positive */
-	NR_isNone = 0U,
-	NR_isWell,
-	NR_isRetry,
-	NR_isPermit,
-
-	NR_isPosMax = 31U,
+	/*!< 0: well */
+	NR_isNormal = 0,
+	NR_isWell 	= NR_isNormal,
 
 	/*!< --------------------------------------------------------- */
-	/*!< 32 ~ ?: use with negative */
-	NR_isAnyErr = 32U,
+	/*!< use with negative */
+	NR_isAnyErr,
+	NR_isRetry,
+	NR_isPermit,
 	NR_isMemErr,
 	NR_isUnvalid,
 	NR_isNullPtr,
@@ -67,12 +65,7 @@ enum __ERT_ERROR_CODE
 	NR_isTransRequst,
 	NR_isTransBusy,
 	NR_isCheckErr,
-	NR_isTransStopFail,
-	
-#define mrt_retval(code)							(((code) > NR_isPosMax) ? (-(code)) : (code))
-#define mrt_isErr(code)								((code) < 0)
-#define mrt_ecode_to_kbool(code)					(((code) < 0) ? false : true)
-#define mrt_kbool_to_ecode(flag, code1, code2)		((flag) ? mrt_retval(code1) : mrt_retval(code2))							
+	NR_isTransStopFail,					
 };
 
 /*!< The functions */

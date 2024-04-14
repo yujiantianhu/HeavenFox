@@ -72,9 +72,7 @@ void do_string_split(void *ptr_dst, kuint32_t offset, const void *ptr_src)
 	ptr_buf	= (kuint8_t *)ptr_dst + offset;
 
 	while ('\0' != *ptr_ch)
-	{
 		*(ptr_buf++) = *(ptr_ch++);
-	}
 }
 
 /*!
@@ -115,9 +113,7 @@ ksint8_t *do_string_n_copy(void *ptr_dst, const void *ptr_src, kuint32_t size)
 	ptr_buf	= (kuint8_t *)ptr_dst;
 
 	while ('\0' != *ptr_ch && (size--))
-	{
 		*(ptr_buf++) = *(ptr_ch++);
-	}
 
 	return (ksint8_t *)ptr_dst;
 }
@@ -139,9 +135,7 @@ kbool_t do_string_compare(const void *ptr_dst, const void *ptr_src)
 	do
 	{
 		if (*(ptr_buf++) != *(ptr_ch++))
-		{
 			return true;
-		}
 
 	} while ('\0' != *ptr_ch);
 
@@ -163,16 +157,12 @@ kbool_t do_string_n_compare(const void *ptr_dst, const void *ptr_src, kuint32_t 
 	ptr_buf	= (kuint8_t *)ptr_dst;
 
 	if (!size)
-	{
 		return true;
-	}
 
 	do
 	{
 		if (*(ptr_buf++) != *(ptr_ch++))
-		{
 			return true;
-		}
 
 	} while (('\0' != *ptr_ch) && (--size));
 
@@ -196,9 +186,7 @@ void do_string_reverse(void *ptr_src, kuint32_t size)
 
 	/*!< if the number of characters is lower than 2, it's not necessary to reverse */
 	if ((kuint32_t)(ptr_tail - ptr_head) <= 1)
-	{
 		return;
-	}
 
 	ptr_tail--;
 
@@ -232,7 +220,7 @@ kusize_t convert_number_to_string(void *ptr_dst, kuint64_t value)
 		num = num / 10;
 		lenth++;
 
-		if (mrt_isValid(ptr_dst))
+		if (isValid(ptr_dst))
 		{
 			*(ptr_buf++) = (value - ((num << 1) + (num << 3))) + '0';
 			value = value / 10;
@@ -241,10 +229,8 @@ kusize_t convert_number_to_string(void *ptr_dst, kuint64_t value)
 	} while (num);
 
 	/*!< reverse string */
-	if (mrt_isValid(ptr_dst))
-	{
+	if (isValid(ptr_dst))
 		do_string_reverse(ptr_dst, lenth);
-	}
 
 	return lenth;
 }
@@ -266,17 +252,13 @@ kuint32_t seek_char_in_string(const void *ptr_src, kuint8_t ch)
 	while (ptr_head != ptr_tail)
 	{
 		if (ch == *(ptr_tail--))
-		{
 			return iChPosition;
-		}
 
 		iChPosition++;
 	}
 
 	if (ch == *ptr_tail)
-	{
 		return iChPosition;
-	}
 
 	return 0;
 }
@@ -287,15 +269,20 @@ kuint32_t seek_char_in_string(const void *ptr_src, kuint8_t ch)
  * @retval  none
  * @note    string format conversion
  */
-kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr_fmt, va_list ptr_list)
+kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr_fmt, va_list ptr_list, kusize_t size)
 {
 	kstring_t *ptr_data, *ptr_args;
 	kubyte_t ch;
 	kusize_t lenth, count;
 	kuint64_t i, num;
 
-	ptr_data 	= (kstring_t *)ptr_buf;
-	lenth 		= 0;
+	ptr_data = (kstring_t *)ptr_buf;
+	lenth = 0;
+	
+	if (size < 1)
+		return 0;
+
+	size -= 1;
 
 	/*!< calculate numbers first */
 	for (i = 0; *(ptr_fmt + i) != '\0'; i++)
@@ -311,7 +298,7 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr
 		{
 			i++;
 
-			if (mrt_isValid(ptr_level))
+			if (ptr_level)
 			{
 				*ptr_level = *(PRINT_LEVEL_SOH);
 				*(ptr_level + 1) = *(ptr_fmt + i);
@@ -324,10 +311,11 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr
 		/*!< Aim to '%' */
 		if (ch != '%')
 		{
-			if (mrt_isValid(ptr_buf))
-			{
+			if ((lenth + 1) > size)
+				break;
+
+			if (isValid(ptr_buf))
 				*(ptr_data++) = ch;
-			}
 
 			lenth++;
 
@@ -341,25 +329,28 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr
 		switch (ch)
 		{
 			case 'c':
-				num 	= (kuint8_t)va_arg(ptr_list, kuint32_t);
-				count 	= convert_number_to_string(ptr_data, num);
+				num = (kuint8_t)va_arg(ptr_list, kuint32_t);
 
-				if (mrt_isValid(ptr_buf))
-				{
-					ptr_data += count;
-				}
+				if ((lenth + 1) > size)
+					break;
 
-				lenth += count;
+				if (isValid(ptr_buf))
+					*(ptr_data++) = num + ' ';
+
+				lenth += 1;
 				break;
 
 			case 'd':
-				num 	= (kuint32_t)va_arg(ptr_list, kuint32_t);
-				count 	= convert_number_to_string(ptr_data, num);
+				num = (kuint32_t)va_arg(ptr_list, kuint32_t);
+				count = convert_number_to_string(mrt_nullptr, num);
 
-				if (mrt_isValid(ptr_buf))
-				{
+				if ((lenth + count) > size)
+					break;
+
+				convert_number_to_string(ptr_data, num);
+
+				if (isValid(ptr_buf))
 					ptr_data += count;
-				}
 
 				lenth += count;
 				break;
@@ -367,12 +358,15 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr
 			case 'l':
 				if (*(ptr_fmt + i + 1) == 'd')
 				{
-					num 	= (kuint64_t)va_arg(ptr_list, kuint64_t);
-					count	= 0;
+					num = (kuint64_t)va_arg(ptr_list, kuint64_t);
+					count = convert_number_to_string(mrt_nullptr, num);
 
-					if (mrt_isValid(ptr_buf))
+					if ((lenth + count) > size)
+						break;
+
+					if (isValid(ptr_buf))
 					{
-						count 	= convert_number_to_string(ptr_data, num);
+						convert_number_to_string(ptr_data, num);
 						ptr_data += count;
 					}
 
@@ -381,10 +375,11 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr
 				}
 				else
 				{
-					if (mrt_isValid(ptr_buf))
-					{
+					if ((lenth + 1) > size)
+						break;
+
+					if (isValid(ptr_buf))
 						*(ptr_data++) = '%';
-					}
 
 					i--;
 					lenth++;
@@ -395,20 +390,25 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr
 				ptr_args = (kstring_t *)va_arg(ptr_list, kstring_t *);
 				count	 = get_string_lenth(ptr_args);
 
-				if (mrt_isValid(ptr_buf))
+				if ((lenth + count) > size)
+					break;
+
+				if (isValid(ptr_buf))
 				{
 					do_string_split(ptr_data, 0, ptr_args);
 					ptr_data += count;
 				}
 
 				lenth += count;
+
 				break;
 
 			default:
-				if (mrt_isValid(ptr_buf))
-				{
+				if ((lenth + 1) > size)
+					break;
+
+				if (isValid(ptr_buf))
 					*(ptr_data++) = '%';
-				}
 
 				i--;
 				lenth++;
@@ -416,10 +416,8 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr
 		}
 	}
 
-	if (mrt_isValid(ptr_buf))
-	{
+	if (isValid(ptr_buf))
 		*ptr_data = '\0';
-	}
 
 	return lenth;
 }
@@ -436,7 +434,7 @@ ksint32_t sprintk(void *ptr_buf, const kstring_t *ptr_fmt, ...)
 	kusize_t size;
 
 	va_start(ptr_list, ptr_fmt);
-	size = do_fmt_convert(ptr_buf, mrt_nullptr, ptr_fmt, ptr_list);
+	size = do_fmt_convert(ptr_buf, mrt_nullptr, ptr_fmt, ptr_list, (~0) - 1);
 	va_end(ptr_list);
 
 	return size;

@@ -75,19 +75,17 @@ static ksint32_t fwk_of_platform_populate(struct fwk_device_node *sprt_node, con
 	struct fwk_device_node *sprt_list = mrt_nullptr;
 	ksint32_t retval;
 
-	sprt_head = mrt_isValid(sprt_node) ? sprt_node : fwk_of_find_node_by_path("/");
+	sprt_head = isValid(sprt_node) ? sprt_node : fwk_of_find_node_by_path("/");
 	retval = -NR_isAnyErr;
 
-	if (!mrt_isValid(sprt_head))
-	{
+	if (!isValid(sprt_head))
 		return -NR_isMemErr;
-	}
 
 	/*!< Take out each node */
 	FOREACH_CHILD_OF_DT_NODE(sprt_head, sprt_list)
 	{
 		retval = fwk_of_platform_bus_create(sprt_list, sprt_matches, true);
-		if (!mrt_isErr(retval))
+		if (!retval)
 		{
 			/*!< do nothing */
 		}
@@ -110,10 +108,8 @@ static ksint32_t fwk_of_platform_bus_create(struct fwk_device_node *sprt_node, c
 	ksint32_t retval;
 
 	/*!< Don't have "compatible" property? The current node does not convert */
-	if (strict && (!mrt_isValid(fwk_of_get_property(sprt_node, "compatible", mrt_nullptr))))
-	{
+	if (strict && (!isValid(fwk_of_get_property(sprt_node, "compatible", mrt_nullptr))))
 		return -NR_isArgFault;
-	}
 
 	/*!< 
 	 * Check: If this node is a grandson of the root node;
@@ -121,16 +117,12 @@ static ksint32_t fwk_of_platform_bus_create(struct fwk_device_node *sprt_node, c
 	 */
 	/*!< This flag is only used for recursion */
 	if (fwk_of_node_check_flag(sprt_node, NR_OfNodePopulatedBus))
-	{
 		return -NR_isArgFault;
-	}
 
 	/*!< Convert this node */
 	sprt_platdev = fwk_of_platform_device_create_pdata(sprt_node);
-	if (!mrt_isValid(sprt_platdev))
-	{
+	if (!isValid(sprt_platdev))
 		return -NR_isMemErr;
-	}
 
 	/*!< 
 	 * Check: Whether you need to convert the child nodes under this node
@@ -138,9 +130,7 @@ static ksint32_t fwk_of_platform_bus_create(struct fwk_device_node *sprt_node, c
 	 * all the children under this node must also be converted to platform device
 	 */
 	if (!fwk_of_match_node(sprt_matches, sprt_node))
-	{
 		return NR_isWell;
-	}
 
 	/*!< All child nodes are converted to platform_device */
 	sprt_head = sprt_node;
@@ -149,7 +139,7 @@ static ksint32_t fwk_of_platform_bus_create(struct fwk_device_node *sprt_node, c
 	FOREACH_CHILD_OF_DT_NODE(sprt_head, sprt_list)
 	{
 		retval = fwk_of_platform_bus_create(sprt_list, sprt_matches, strict);
-		if (!mrt_isErr(retval))
+		if (!retval)
 		{
 			/*!< do nothing */
 		}
@@ -175,10 +165,8 @@ static struct fwk_platdev *fwk_of_platform_device_create_pdata(struct fwk_device
 	ksint32_t retval;
 	kuint32_t i, num_res = 0, num_irq = 0;
 
-	if (!mrt_isValid(sprt_node))
-	{
+	if (!isValid(sprt_node))
 		return mrt_nullptr;
-	}
 
 	/*!< Check the status attribute of this node, and do not convert the attribute if the attribute value is disabled */
 	/*!< 
@@ -191,16 +179,12 @@ static struct fwk_platdev *fwk_of_platform_device_create_pdata(struct fwk_device
 	}
 
 	sprt_platdev = (struct fwk_platdev *)kzalloc(sizeof(struct fwk_platdev), GFP_KERNEL);
-	if (!mrt_isValid(sprt_platdev))
-	{
+	if (!isValid(sprt_platdev))
 		return mrt_nullptr;
-	}
 
 	/*!< Determine the size of sprt_resources to be allocated */
-	while (!mrt_isErr(fwk_of_address_to_resource(sprt_node, num_res, &sgrt_resources)))
-	{
+	while (!fwk_of_address_to_resource(sprt_node, num_res, &sgrt_resources))
 		num_res++;
-	}
 
 	num_irq = fwk_of_irq_count(sprt_node);
 
@@ -212,25 +196,20 @@ static struct fwk_platdev *fwk_of_platform_device_create_pdata(struct fwk_device
 
 		/*!< Fill sprt_resources */
 		for (i = 0; i < num_res; i++)
-		{
 			fwk_of_address_to_resource(sprt_node, i, (sprt_resources + i));
-		}
 
 		fwk_of_irq_to_resource_table(sprt_node, sprt_resources + num_res, num_irq);
 	}
 
 	/*!< Register to the device bus */
 	retval = fwk_of_register_platdevice(sprt_node, sprt_platdev);
-	if (mrt_isErr(retval))
+	if (retval)
 	{
 		/*!< Hook failed */
-		if (mrt_isValid(sprt_resources))
-		{
+		if (isValid(sprt_resources))
 			kfree(sprt_resources);
-		}
 
 		kfree(sprt_platdev);
-
 		return mrt_nullptr;
 	}
 
@@ -250,10 +229,8 @@ static struct fwk_platdev *fwk_of_platform_device_create_pdata(struct fwk_device
  */
 ksint32_t fwk_of_register_platdevice(struct fwk_device_node *sprt_node, struct fwk_platdev *sprt_platdev)
 {
-	if (!mrt_isValid(sprt_platdev))
-	{
+	if (!isValid(sprt_platdev))
 		return -NR_isArgFault;
-	}
 
 	/*!< Fill platform_device */
 	sprt_platdev->name = sprt_node->full_name;
@@ -278,18 +255,14 @@ void fwk_of_unregister_platdevice(struct fwk_device_node *sprt_node)
 {
 	struct fwk_platdev *sprt_platdev = (struct fwk_platdev *)sprt_node->data;
 
-	if (!mrt_isValid(sprt_platdev))
-	{
+	if (!isValid(sprt_platdev))
 		return;
-	}
 
 	/*!< Log out the device from the bus */
 	fwk_device_unregister(&sprt_platdev->sgrt_device);
 
-	if (mrt_isValid(sprt_platdev->sprt_resources))
-	{
+	if (isValid(sprt_platdev->sprt_resources))
 		kfree(sprt_platdev->sprt_resources);
-	}
 
 	kfree(sprt_platdev);
 	sprt_node->data	= mrt_nullptr;
@@ -315,30 +288,22 @@ ksint32_t fwk_of_address_to_resource(struct fwk_device_node *sprt_node, kuint32_
 	cells_of_size = fwk_of_n_size_cells(sprt_node);
 
 	if ((1 < cells_of_addr) || (1 < cells_of_size))
-	{
 		return -NR_isUnvalid;
-	}
 
 	/*!< Search for the reg address */
 	retval = fwk_of_property_read_u32_index(sprt_node, "reg", index << 1, &address);
-	if (mrt_isErr(retval))
-	{
+	if (retval)
 		return -NR_isArgFault;
-	}
 
 	/*!< Search for the reg length */
 	retval = fwk_of_property_read_u32_index(sprt_node, "reg", (index << 1) + 1, &size);
-	if (mrt_isErr(retval))
-	{
+	if (retval)
 		return -NR_isArgFault;
-	}
 
 	/*!< reg-names are not necessarily defined by the device tree */
 	retval = fwk_of_property_read_string_index(sprt_node, "reg-names", index, &regName);
-	if (mrt_isErr(retval))
-	{
+	if (retval)
 		regName	= sprt_node->full_name;
-	}
 
 	sprt_res->name	 = regName;
 	sprt_res->start	 = address;
@@ -364,15 +329,11 @@ ksint32_t fwk_of_irq_to_resource_table(struct fwk_device_node *sprt_node, struct
 	{
 		virq = fwk_irq_of_parse_and_map(sprt_node, index);
 		if (virq < 0)
-		{
 			return -NR_isNotSuccess;
-		}
 
 		/*!< reg-names are not necessarily defined by the device tree */
-		if (mrt_isErr(fwk_of_property_read_string_index(sprt_node, "interrupt-names", index, &regName)))
-		{
+		if (fwk_of_property_read_string_index(sprt_node, "interrupt-names", index, &regName))
 			regName	= sprt_node->full_name;
-		}
 
 		sprt_res->name	 = regName;
 		sprt_res->start	 = virq;
@@ -383,15 +344,19 @@ ksint32_t fwk_of_irq_to_resource_table(struct fwk_device_node *sprt_node, struct
 	return NR_isWell;
 }
 
+/*!
+ * @brief   get resources from device_node
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 struct fwk_resources *fwk_platform_get_resources(struct fwk_platdev *sprt_pdev, kuint32_t index, kuint32_t type)
 {
 	struct fwk_resources *sprt_res, *sprt_max;
 	kuint32_t cnt = 0;
 
-	if (!mrt_isValid(sprt_pdev) || (index > sprt_pdev->num_resources))
-	{
+	if (!isValid(sprt_pdev) || (index > sprt_pdev->num_resources))
 		return mrt_nullptr;
-	}
 
 	sprt_max = sprt_pdev->sprt_resources + sprt_pdev->num_resources;
 
@@ -400,14 +365,18 @@ struct fwk_resources *fwk_platform_get_resources(struct fwk_platdev *sprt_pdev, 
 		cnt += (!!(type & sprt_res->type)) ? 1 : 0;
 
 		if (cnt > index)
-		{
 			return sprt_res;
-		}
 	}
 
 	return mrt_nullptr;
 }
 
+/*!
+ * @brief   get reg address resources from device_node
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 kuaddr_t fwk_platform_get_address(struct fwk_platdev *sprt_pdev, kuint32_t index)
 {
 	struct fwk_resources *sprt_res;
@@ -416,6 +385,12 @@ kuaddr_t fwk_platform_get_address(struct fwk_platdev *sprt_pdev, kuint32_t index
 	return sprt_res ? sprt_res->start : 0;
 }
 
+/*!
+ * @brief   get irq resources from device_node
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 ksint32_t fwk_platform_get_irq(struct fwk_platdev *sprt_pdev, kuint32_t index)
 {
 	struct fwk_resources *sprt_res;
@@ -424,16 +399,20 @@ ksint32_t fwk_platform_get_irq(struct fwk_platdev *sprt_pdev, kuint32_t index)
 	return sprt_res ? sprt_res->start : -1;
 }
 
-kuaddr_t fwk_of_iomap(struct fwk_device_node *sprt_node, kuint32_t index)
+/*!
+ * @brief   get address from device_node
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void *fwk_of_iomap(struct fwk_device_node *sprt_node, kuint32_t index)
 {
 	struct fwk_resources sgrt_res;
 
-	if (mrt_isErr(fwk_of_address_to_resource(sprt_node, index, &sgrt_res)))
-	{
-		return 0;
-	}
+	if (fwk_of_address_to_resource(sprt_node, index, &sgrt_res))
+		return mrt_nullptr;
 
-	return fwk_address_map(&sgrt_res);
+	return (void *)fwk_address_map(&sgrt_res);
 }
 
 /*!< end of file */

@@ -69,11 +69,24 @@ TARGET_EXT ksint32_t fwk_device_unregister(struct fwk_device *sprt_device);
 TARGET_EXT ksint32_t fwk_register_platdevice(struct fwk_platdev *sprt_platdev);
 TARGET_EXT ksint32_t fwk_unregister_platdevice(struct fwk_platdev *sprt_platdev);
 
+/*!< API functions */
+/*!
+ * @brief   caculate address/IRQ size
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 static inline kusize_t fwk_resource_size(struct fwk_resources *sprt_res)
 {
 	return sprt_res ? (sprt_res->end - sprt_res->start + 1) : 0;
 }
 
+/*!
+ * @brief   return address
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 static inline kuaddr_t fwk_address_map(struct fwk_resources *sprt_res)
 {
 	return sprt_res ? sprt_res->start : 0;

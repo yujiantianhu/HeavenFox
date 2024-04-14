@@ -30,7 +30,7 @@
  */
 void spin_lock_init(struct spin_lock *sprt_lock)
 {
-    if (mrt_isValid(sprt_lock))
+    if (isValid(sprt_lock))
         sprt_lock->count = 0;
 }
 

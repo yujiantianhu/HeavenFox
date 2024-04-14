@@ -33,8 +33,7 @@ TARGET_EXT kbool_t do_string_n_compare(const void *ptr_dst, const void *ptr_src,
 TARGET_EXT void do_string_reverse(void *ptr_src, kuint32_t size);
 TARGET_EXT kusize_t convert_number_to_string(void *ptr_dst, kuint64_t value);
 TARGET_EXT kuint32_t seek_char_in_string(const void *ptr_src, kuint8_t ch);
-TARGET_EXT kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr_fmt, va_list ptr_list);
+TARGET_EXT kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr_fmt, va_list ptr_list, kusize_t size);
 TARGET_EXT ksint32_t sprintk(void *ptr_buf, const kstring_t *ptr_fmt, ...);
-
 
 #endif /* __API_STRING_H */

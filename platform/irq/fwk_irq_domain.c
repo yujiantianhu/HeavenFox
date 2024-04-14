@@ -48,41 +48,31 @@ ksint32_t fwk_of_irq_parse_one(struct fwk_device_node *sprt_node, kuint32_t inde
 	kuint32_t lenth, *ptr_value;
 	ksint32_t retval;
 
-	if ((!mrt_isValid(sprt_node)) || (!mrt_isValid(sprt_irq)))
-	{
+	if ((!isValid(sprt_node)) || (!sprt_irq))
 		return -NR_isNullPtr;
-	}
 
 	ptr_value = (kuint32_t *)fwk_of_get_property(sprt_node, "interrupts", &lenth);
 	lenth /= sizeof(kuint32_t);
 
 	/* how many value per group */
 	cells = fwk_of_n_irq_cells(sprt_node);
-	if (!mrt_isValid(cells) || (cells >= FWK_OF_MAX_PHANDLE_ARGS))
-	{
+	if ((!cells) || (cells >= FWK_OF_MAX_PHANDLE_ARGS))
 		return -NR_isArgFault;
-	}
 
-	if (!mrt_isValid(ptr_value) || (((index + 1) * cells) > lenth))
-	{
+	if ((!ptr_value) || (((index + 1) * cells) > lenth))
 		return -NR_isArgFault;
-	}
 
 	for (i = 0; i < cells; i++)
 	{
 		retval = fwk_of_property_read_u32_index(sprt_node, "interrupts", (index * cells) + i, &sprt_irq->args[i]);
-		if (mrt_isErr(retval))
-		{
+		if (retval < 0)
 			return -NR_isArgFault;
-		}
 	}
 
 	/* for intc, parent == null; but it should not to be translated */
 	sprt_parent = fwk_of_irq_parent(sprt_node);
-	if (!mrt_isValid(sprt_parent))
-	{
+	if (!isValid(sprt_parent))
 		return -NR_isArgFault;
-	}
 
 	sprt_irq->args_count = i;
 	sprt_irq->sprt_node = sprt_parent;
@@ -114,36 +104,28 @@ ksint32_t fwk_irq_create_of_mapping(struct fwk_of_phandle_args *sprt_irq)
 	kuint32_t hwirq, type;
 	ksint32_t retval;
 
-	if (!mrt_isValid(sprt_irq) || !mrt_isValid(sprt_irq->sprt_node))
-	{
+	if ((!sprt_irq) || !isValid(sprt_irq->sprt_node))
 		return -NR_isMemErr;
-	}
-
+	
 	sprt_domain = fwk_of_irq_host(sprt_irq->sprt_node);
-	if (!mrt_isValid(sprt_domain) || !mrt_isValid(sprt_domain->sprt_ops->xlate))
-	{
+	if (!isValid(sprt_domain) || (!sprt_domain->sprt_ops->xlate))
 		return -NR_isNotFound;
-	}
 
 	/* get hwirq/type form sprt_irq->args[] */
 	retval = sprt_domain->sprt_ops->xlate(sprt_domain, sprt_irq->sprt_node, sprt_irq->args, sprt_irq->args_count, &hwirq, &type);
-	if (mrt_isErr(retval))
+	if (retval < 0)
 	{
 		return retval;
 	}
 
 	virq = fwk_irq_find_mapping(sprt_domain, type, hwirq);
 	if (virq >= 0)
-	{
 		return virq;
-	}
 
 	/* map one virtual irq number */
 	virq = fwk_irq_domain_alloc_irqs(sprt_domain, -1, hwirq, 1);
 	if (virq < 0)
-	{
 		return virq;
-	}
 
 	fwk_irq_set_type(virq, type);
 
@@ -162,10 +144,8 @@ ksint32_t fwk_irq_of_parse_and_map(struct fwk_device_node *sprt_node, kuint32_t 
 	ksint32_t retval;
 
 	retval = fwk_of_irq_parse_one(sprt_node, index, &sgrt_old);
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		return -NR_isNotSuccess;
-	}
 
 	return fwk_irq_create_of_mapping(&sgrt_old);
 }
@@ -181,12 +161,10 @@ srt_fwk_irq_domain_t *fwk_irq_domain_add_linear(struct fwk_device_node *sprt_nod
 {
 	srt_fwk_irq_domain_t *sprt_domain;
 
-	/* 多出来的size, 以硬中断号为下标, 软中断号为值 */
+	/*!< extra size, with hard interrupt number as index and soft interrupt number as value */
 	sprt_domain = (srt_fwk_irq_domain_t *)kzalloc(sizeof(srt_fwk_irq_domain_t) + sizeof(ksint32_t) * size, GFP_KERNEL);
-	if (!mrt_isValid(sprt_domain))
-	{
+	if (!isValid(sprt_domain))
 		return mrt_nullptr;
-	}
 
 	sprt_domain->sprt_ops = ops;
 	sprt_domain->sprt_node = sprt_node;
@@ -194,9 +172,7 @@ srt_fwk_irq_domain_t *fwk_irq_domain_add_linear(struct fwk_device_node *sprt_nod
 	sprt_domain->hwirq_max = size;
 
 	for (kuint32_t i = 0; i < size; i++)
-	{
 		sprt_domain->revmap[i] = -1;
-	}
 
 	list_head_add_tail(&sgrt_fwk_irq_domain, &sprt_domain->sgrt_link);
 
@@ -215,7 +191,7 @@ srt_fwk_irq_domain_t *fwk_irq_domain_add_hierarchy(srt_fwk_irq_domain_t *sprt_pa
 	srt_fwk_irq_domain_t *sprt_domain;
 
 	sprt_domain = fwk_irq_domain_add_linear(sprt_node, size, ops, host_data);
-	if (mrt_isValid(sprt_domain))
+	if (isValid(sprt_domain))
 	{
 		sprt_domain->sprt_parent = sprt_parent;
 		sprt_domain->name = sprt_node->name;
@@ -231,11 +207,9 @@ srt_fwk_irq_domain_t *fwk_irq_get_domain_by_name(kstring_t *name, ksint32_t hwir
 
 	foreach_list_next_entry(sprt_domain, &sgrt_fwk_irq_domain, sgrt_link)
 	{
-		retval = mrt_isValid(sprt_domain->name) && (!strcmp(sprt_domain->name, name));
+		retval = sprt_domain->name && (!strcmp(sprt_domain->name, name));
 		if (retval && (hwirq < sprt_domain->hwirq_max))
-		{
 			return sprt_domain;
-		}
 	}
 
 	return mrt_nullptr;

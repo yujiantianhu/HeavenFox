@@ -69,28 +69,24 @@ static ksint32_t fwk_driver_attach(struct fwk_driver *sprt_driver, struct fwk_bu
 	DECLARE_LIST_HEAD_PTR(sprt_parent);
 
 	/*!< First check if the match function is defined */
-	if (!mrt_isValid(sprt_bus_type->match))
-	{
+	if (!sprt_bus_type->match)
 		return -NR_isAnyErr;
-	}
 
 	matches	= 0;
 	FWK_INIT_BUS_DEVICE_LIST(sprt_parent, sprt_list, sprt_bus_type);
 
 	/*!< Take out the devices on the bus in turn */
-	while (mrt_isValid(sprt_device = FWK_NEXT_DEVICE(sprt_parent, sprt_list)))
+	while ((sprt_device = FWK_NEXT_DEVICE(sprt_parent, sprt_list)))
 	{
 		/*!< The device is matched with drivers */
-		if (mrt_isValid(sprt_device->sprt_driver))
-		{
+		if (sprt_device->sprt_driver)
 			continue;
-		}
 
 		/*!< Match one by one */
 		/*!< One driver supports matching multiple devices, and does not exit until the linked list is fully traversed */
 		/*!< However, try not to mount multiple devices with the same driver at the same time to avoid misoperation */
 		retval = (*pFunc_Match)(sprt_device, sprt_bus_type, sprt_driver);
-		if (!mrt_isErr(retval))
+		if (!retval || (retval == -NR_isPermit))
 		{
 			/*!< Record the number of matching devices */
 			matches++;
@@ -99,7 +95,13 @@ static ksint32_t fwk_driver_attach(struct fwk_driver *sprt_driver, struct fwk_bu
 
 	sprt_driver->matches += matches;
 
-	return ((retval == (-NR_isNotFound)) || matches) ? matches : -NR_isAnyErr;
+	/*!<
+	 * NR_isNotFound: no device can be matched
+	 * NR_isPermit: matched already, but probe failed;
+	 * NR_isWell: matched already, and probe successfully;
+	 * other (retval < 0): error
+	 */
+	return ((retval == (-NR_isNotFound)) || matches) ? matches : retval;
 }
 
 /*!
@@ -118,13 +120,11 @@ static ksint32_t fwk_driver_detach(struct fwk_driver *sprt_driver, struct fwk_bu
 	FWK_INIT_BUS_DEVICE_LIST(sprt_parent, sprt_list, sprt_bus_type);
 
 	/*!< Take out the devices on the bus in turn */
-	while (mrt_isValid(sprt_device = FWK_NEXT_DEVICE(sprt_parent, sprt_list)))
+	while ((sprt_device = FWK_NEXT_DEVICE(sprt_parent, sprt_list)))
 	{
 		/*!< All devices that match this drive are separated */
 		if (sprt_device->sprt_driver != sprt_driver)
-		{
 			continue;
-		}
 
 		/*!< Do the preparation before separation */
 		fwk_device_driver_remove(sprt_device);
@@ -134,7 +134,7 @@ static ksint32_t fwk_driver_detach(struct fwk_driver *sprt_driver, struct fwk_bu
 		sprt_driver->matches--;
 	}
 
-	return -NR_isAnyErr;
+	return NR_isWell;
 }
 
 /*!
@@ -160,30 +160,22 @@ static ksint32_t fwk_driver_find(struct fwk_driver *sprt_driver, struct fwk_bus_
 	{
 		/*!< 1. Matching address */
 		if ((ptr_left == sprt_list) || (ptr_right == sprt_list))
-		{
 			return NR_isWell;
-		}
 
 		/*!< 2. Match the device name */
 		sprt_drv = mrt_container_of(ptr_left, struct fwk_driver, sgrt_list);
 		if (!strcmp((char *)sprt_drv->name, (char *)sprt_driver->name))
-		{
 			return NR_isWell;
-		}
 
 		if (ptr_left != ptr_right)
 		{
 			sprt_drv = mrt_container_of(ptr_right, struct fwk_driver, sgrt_list);
 			if (!strcmp((char *)sprt_drv->name, (char *)sprt_driver->name))
-			{
 				return NR_isWell;
-			}
 		}
 		/*!< The search is complete, and there is no same driver */
 		else
-		{
 			break;
-		}
 	}
 
 	return -NR_isAnyErr;
@@ -249,23 +241,17 @@ static ksint32_t fwk_driver_register(struct fwk_driver *sprt_driver)
 	sprt_bus_type = sprt_driver->sprt_bus_type;
 
 	/*!< The bus does not exist and cannot be registered */
-	if (!mrt_isValid(sprt_bus_type))
-	{
+	if (!sprt_bus_type)
 		goto fail;
-	}
 
 	/*!< The bus does not exist and cannot be registered */
-	if (!mrt_isValid(sprt_bus_type->sprt_SysPriv))
-	{
+	if (!sprt_bus_type->sprt_SysPriv)
 		goto fail;
-	}
 
 	/*!< Is the driver registered? No more duplicate registrations */
 	retval = fwk_driver_find(sprt_driver, sprt_bus_type);
-	if (!mrt_isErr(retval))
-	{
+	if (!retval)
 		goto fail;
-	}
 
 	/*!< For the first registration, the number of device matches is initialized to 0 */
 	sprt_driver->matches = 0;
@@ -291,23 +277,17 @@ static ksint32_t fwk_driver_unregister(struct fwk_driver *sprt_driver)
 	sprt_bus_type = sprt_driver->sprt_bus_type;
 
 	/*!< The bus does not exist and cannot be logged out */
-	if (!mrt_isValid(sprt_bus_type))
-	{
+	if (!sprt_bus_type)
 		goto fail;
-	}
 
 	/*!< The bus does not exist and cannot be logged out */
-	if (!mrt_isValid(sprt_bus_type->sprt_SysPriv))
-	{
+	if (!sprt_bus_type->sprt_SysPriv)
 		goto fail;
-	}
 
 	/*!< The driver is not registered? Go straight back */
 	retval = fwk_driver_find(sprt_driver, sprt_bus_type);
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		goto fail;
-	}
 
 	/*!< Remove the driver from the bus */
 	return fwk_bus_del_driver(sprt_driver, sprt_bus_type);

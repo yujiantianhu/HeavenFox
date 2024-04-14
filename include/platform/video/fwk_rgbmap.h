@@ -17,19 +17,19 @@
 #include <platform/fwk_basic.h>
 
 /*!< The defines */
-/*!< ------------------------------------------------------------------------------- */
-#define RGBPIXELBIT08                               ( 8  )              /*!< 8 bit color */
-#define RGBPIXELBIT16                               ( 16 )              /*!< RGB565 */
-#define RGBPIXELBIT24                               ( 24 )              /*!< RGB888 */
-#define RGBPIXELBIT32                               ( 32 )              /*!< RGB888 + diaphaneity */
+/*!< ------------------------------------------------------------------------------- */   
+#define FWK_RGB_PIXEL8                              (8  >> 3)           /*!< 8 bit color */
+#define FWK_RGB_PIXEL16                             (16 >> 3)           /*!< RGB565 */
+#define FWK_RGB_PIXEL24                             (24 >> 3)           /*!< RGB888 */
+#define FWK_RGB_PIXEL32                             (32 >> 3)           /*!< RGB888 + diaphaneity */
 
 /*!< The number of bits of color actually used: 8/16/24 */
-#define RGBPIXELBIT                                 ( RGBPIXELBIT24 )   /*!< RGB888 color chart is used by default */
+#define FWK_RGB_PIXELBIT                            (FWK_RGB_PIXEL24)   /*!< RGB888 color chart is used by default */
 
 /*!< ------------------------------------------------------------------------------- */
 /*!<    English name                                Color pixel         Chinese name */
 /*!< ------------------------------------------------------------------------------- */
-#if (RGBPIXELBIT == RGBPIXELBIT24)
+#if (FWK_RGB_PIXELBIT == FWK_RGB_PIXEL24)
 /*!< RGB888 color chart */
 #define RGB_LIGHTPINK                               ( 0x00FFB6C1 )      /*!< 浅粉红 */
 #define RGB_PINK                                    ( 0x00FFC0CB )      /*!< 粉红 */
@@ -175,7 +175,7 @@
 #define RGB_DIMGRAY                                 ( 0x00696969 )      /*!< 暗淡灰 */
 #define RGB_BLACK                                   ( 0x00000000 )      /*!< 纯色 */
 
-#elif (RGBPIXELBIT == RGBPIXELBIT16)
+#elif (FWK_RGB_PIXELBIT == FWK_RGB_PIXEL16)
 /*!< RGB565 color chart */
 #define RGB_WHITE                                   ( 0x0000FFFF )
 #define RGB_BLACK                                   ( 0x00000000 )

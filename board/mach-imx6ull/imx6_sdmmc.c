@@ -328,9 +328,7 @@ static void imx6ull_sdmmc_reset(srt_imx_usdhc_t *sprt_usdhc, kuint32_t optBit, k
     mrt_run_code_retry(timeout,
 
         if (mrt_isBitResetl(optBit & NR_ImxUsdhc_SysCtrl_ResetMask, &sprt_usdhc->SYS_CTRL))
-        {
             break;
-        }
     )
 
 }
@@ -350,14 +348,10 @@ static void imx6ull_sdmmc_reset_transfer(srt_fwk_sdcard_host_t *sprt_host)
      * CDIHB: bit1, Command Inhibit (DATA). 0: idle; 1 : busy
      */
     if (mrt_isBitSetl(NR_ImxUsdhc_PresState_CmdInhibitCmdLine, &sprt_usdhc->PRES_STATE))
-    {
         imx6ull_sdmmc_reset(sprt_usdhc, NR_ImxUsdhc_SysCtrl_SoftResetCmdLine, 100U);
-    }
 
     if (mrt_isBitSetl(NR_ImxUsdhc_PresState_CmdInhibitDataLine, &sprt_usdhc->PRES_STATE))
-    {
-        imx6ull_sdmmc_reset(sprt_usdhc, NR_ImxUsdhc_SysCtrl_SoftResetDataLine, 100U);
-    }    
+        imx6ull_sdmmc_reset(sprt_usdhc, NR_ImxUsdhc_SysCtrl_SoftResetDataLine, 100U); 
 }
 
 /*!
@@ -385,9 +379,7 @@ static void imx6ull_sdmmc_set_bus_width(srt_fwk_sdcard_host_t *sprt_host, kuint3
     srt_imx_usdhc_t *sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
 
     if (option > NR_SdCard_BusWidth_8Bit)
-    {
         option = NR_SdCard_BusWidth_4Bit;
-    }
 
     /*!< reset command line and data line */
     imx6ull_sdmmc_reset_transfer(sprt_host);
@@ -414,9 +406,7 @@ static void imx6ull_sdmmc_set_clk_freq(srt_fwk_sdcard_host_t *sprt_host, kuint32
     kuint32_t freqTimes2, sys_ctl;
 
     if (option > NR_SdCard_ClkFreq_50MHz)
-    {
         option = NR_SdCard_ClkFreq_25MHz;
-    }
 
     /*!< 
      * Dual Data Rate mode selection
@@ -488,7 +478,7 @@ static kbool_t imx6ull_sdmmc_initial_active(srt_fwk_sdcard_host_t *sprt_host, ku
     /*!< wait for 74 clk at less */
     while (mrt_isBitSetl(NR_ImxUsdhc_SysCtrl_InitialActive, &sprt_usdhc->SYS_CTRL))
     {
-        if (!mrt_isValid(timeout--))
+        if (!(timeout--))
         {
             break;
         }
@@ -514,20 +504,14 @@ static ksint32_t imx6ull_sdmmc_switch_voltage(srt_fwk_sdcard_host_t *sprt_host, 
     blRetval = mrt_isBitResetl(NR_ImxUsdhc_PresState_Data0LineLevel | NR_ImxUsdhc_PresState_Data1LineLevel |
                              NR_ImxUsdhc_PresState_Data2LineLevel | NR_ImxUsdhc_PresState_Data3LineLevel, 
                              &sprt_usdhc->PRES_STATE);
-    if (!mrt_isValid(blRetval))
-    {
+    if (!blRetval)
         return -NR_isNotReady;
-    }
 
     /*!< switch to "voltage" */
     if (NR_SdCard_toVoltage1_8V == voltage)
-    {
         mrt_setbitl(NR_ImxUsdhc_VendSpec_VoltageSelect, &sprt_usdhc->VEND_SPEC);
-    }
     else
-    {
         mrt_clrbitl(NR_ImxUsdhc_VendSpec_VoltageSelect, &sprt_usdhc->VEND_SPEC);
-    }
 
     delay_ms(100U);
 
@@ -543,10 +527,8 @@ static ksint32_t imx6ull_sdmmc_switch_voltage(srt_fwk_sdcard_host_t *sprt_host, 
     blRetval = mrt_isBitResetl(NR_ImxUsdhc_PresState_Data0LineLevel | NR_ImxUsdhc_PresState_Data1LineLevel |
                              NR_ImxUsdhc_PresState_Data2LineLevel | NR_ImxUsdhc_PresState_Data3LineLevel, 
                              &sprt_usdhc->PRES_STATE);
-    if (mrt_isValid(blRetval))
-    {
+    if (blRetval)
         return -NR_isNotSuccess;
-    }
 
     return NR_isWell;
 }
@@ -567,10 +549,8 @@ static ksint32_t imx6ull_sdmmc_send_command(srt_fwk_sdcard_cmd_t *sprt_cmds)
     ksint32_t iRetval;
 
     sprt_host = (srt_fwk_sdcard_host_t *)sprt_cmds->ptrHost;
-    if (!mrt_isValid(sprt_host))
-    {
+    if (!isValid(sprt_host))
         return -NR_isNullPtr;
-    }
 
     sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
 
@@ -665,9 +645,7 @@ static ksint32_t imx6ull_sdmmc_send_command(srt_fwk_sdcard_cmd_t *sprt_cmds)
 
     /*!< reset */
     if ((-NR_isSendCmdFail) == iRetval)
-    {
         imx6ull_sdmmc_reset_transfer(sprt_host);
-    }
 
     return iRetval;
 }
@@ -685,17 +663,13 @@ static void imx6ull_sdmmc_recv_response(srt_fwk_sdcard_cmd_t *sprt_cmds)
     kuint8_t rsp_cnt = 3U;
 
     sprt_host = (srt_fwk_sdcard_host_t *)sprt_cmds->ptrHost;
-    if (!mrt_isValid(sprt_host))
-    {
+    if (!isValid(sprt_host))
         return;
-    }
 
     sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;  
 
     if (NR_SdCard_Response_0 == sprt_cmds->respType)
-    {
         return;
-    }
 
     /*!< for CID/CSD: CMD_RSP0->bit[31:0] is CID/CSD bit[39:8] */
     *(sprt_cmds->resp) = mrt_readl(&sprt_usdhc->CMD_RSP0);
@@ -737,16 +711,12 @@ static ksint32_t imx6ull_sdmmc_transfer_data(srt_fwk_sdcard_data_t *sprt_data)
     srt_fwk_sdcard_host_t *sprt_host;
     ksint32_t iRetval;
 
-    if (!mrt_isValid(sprt_data))
-    {
+    if (!sprt_data)
         return -NR_isNullPtr;
-    }
 
     sprt_host = (srt_fwk_sdcard_host_t *)sprt_data->ptrHost;
-    if (!mrt_isValid(sprt_host))
-    {
+    if (!isValid(sprt_host))
         return -NR_isNullPtr;
-    }
 
     sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
 
@@ -790,21 +760,15 @@ static ksint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_s
     ksint32_t iRetval;
     kbool_t blRetval;
 
-    if (!mrt_isValid(sprt_data) || !mrt_isValid(sprt_usdhc))
-    {
+    if ((!sprt_data) || (!sprt_usdhc))
         return -NR_isNullPtr;
-    }
 
     sprt_host = (srt_fwk_sdcard_host_t *)sprt_data->ptrHost;
-    if (!mrt_isValid(sprt_host))
-    {
+    if (!isValid(sprt_host))
         return -NR_isNullPtr;
-    }
 
     if (!mrt_isBitResetl(NR_ImxUsdhc_MixCtrl_DataTransferDirection, &sprt_usdhc->MIX_CTRL))
-    {
         return -NR_isNotSupport;
-    }
 
     /*!< 4 bytes align. blocksize is per block size (unit: byte) */
     iDataWords = mrt_num_align4(sprt_data->blockSize) >> 2;
@@ -825,12 +789,10 @@ static ksint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_s
             blRetval = mrt_isBitResetl(NR_ImxUsdhc_IntBufferWriteReady_Bit | NR_ImxUsdhc_IntDataErr_Bit | 
                                      NR_ImxUsdhc_IntTuningErr_Bit, &sprt_usdhc->INT_STATUS);
 
-        } while (mrt_isValid(blRetval)); // && (--iRetry));
+        } while (blRetval); // && (--iRetry));
 
-        if (mrt_isValid(blRetval) || (!mrt_isValid(iRetry)))
-        {
+        if (blRetval || (!iRetry))
             return -NR_isTimeOut;
-        }
 
         if (mrt_isBitSetl(NR_ImxUsdhc_IntTuningErr_Bit, &sprt_usdhc->INT_STATUS))
         {
@@ -843,7 +805,7 @@ static ksint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_s
         iRetval = mrt_isBitResetl(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS);
         mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc);
 
-        if (mrt_isValid(iRetval))
+        if (iRetval)
         {
             iDataWords -= iTransWords;
 
@@ -866,9 +828,7 @@ static ksint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_s
     }
 
     if (mrt_isBitSetl(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS))
-    {
         iRetval = -NR_isSendDataFail;
-    }
 
     return iRetval;
 }
@@ -889,21 +849,15 @@ static ksint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sd
     ksint32_t iRetval = NR_isWell;
     kbool_t blRetval;
 
-    if (!mrt_isValid(sprt_data) || !mrt_isValid(sprt_usdhc))
-    {
+    if ((!sprt_data) || (!sprt_usdhc))
         return -NR_isNullPtr;
-    }
 
     sprt_host = (srt_fwk_sdcard_host_t *)sprt_data->ptrHost;
-    if (!mrt_isValid(sprt_host))
-    {
+    if (!isValid(sprt_host))
         return -NR_isNullPtr;
-    }
 
     if (!mrt_isBitSetl(NR_ImxUsdhc_MixCtrl_DataTransferDirection, &sprt_usdhc->MIX_CTRL))
-    {
         return -NR_isNotSupport;
-    }
 
     /*!< 4 bytes align. blocksize is per block size (unit: byte) */
     iDataWords = mrt_num_align4(sprt_data->blockSize) >> 2;
@@ -924,12 +878,10 @@ static ksint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sd
             blRetval = mrt_isBitResetl(NR_ImxUsdhc_IntBufferReadReady_Bit | NR_ImxUsdhc_IntDataErr_Bit | 
                                      NR_ImxUsdhc_IntTuningErr_Bit, &sprt_usdhc->INT_STATUS);
 
-        } while (mrt_isValid(blRetval)); // && (--iRetry));
+        } while (blRetval); // && (--iRetry));
 
-        if (mrt_isValid(blRetval) || (!mrt_isValid(iRetry)))
-        {
+        if (blRetval || (!iRetry))
             return -NR_isTimeOut;
-        }
 
         if (mrt_isBitSetl(NR_ImxUsdhc_IntTuningErr_Bit, &sprt_usdhc->INT_STATUS))
         {
@@ -941,7 +893,7 @@ static ksint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sd
         iRetval = mrt_isBitResetl(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS);
         mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc);
 
-        if (mrt_isValid(iRetval))
+        if (iRetval)
         {
             iDataWords -= iTransWords;
 
@@ -956,9 +908,7 @@ static ksint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sd
             iRetval = NR_isWell;
         }
         else
-        {
             iRetval = -NR_isRecvDataFail;
-        }
     }
 
     return iRetval;
@@ -1002,7 +952,7 @@ static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sd
                NR_ImxUsdhc_MixCtrl_DataTransferDirection | NR_ImxUsdhc_MixCtrl_MultiSingleBlockSelect, &iMixCtrlReg);
 
     /*!< check if data request command */
-    if (!mrt_isValid(sprt_data))
+    if (!sprt_data)
     {
         /*!< Update Register */
         *(kuint32_t *)ptrData = iMixCtrlReg;
@@ -1036,15 +986,11 @@ static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sd
         }
 
         if (mrt_isBitSetw(NR_SdCard_CmdFlagsAuto12Enable, &sprt_data->flags))
-        {
             mrt_setbitl(NR_ImxUsdhc_MixCtrl_AutoCmd12Enable, &iMixCtrlReg);
-        }
     }
 
     if (mrt_isBitSetw(NR_SdCard_CmdFlagsReadEnable, &sprt_data->flags))
-    {
         mrt_setbitl(NR_ImxUsdhc_MixCtrl_DataTransferDirection, &iMixCtrlReg);
-    }
 
     /*!< BLK_ATT (Block Attribute) */
     iBlockAttr = mrt_readl(&sprt_usdhc->BLK_ATT);
@@ -1078,18 +1024,14 @@ void *host_sdmmc_card_initial(srt_fwk_sdcard_t *sprt_card)
     srt_fwk_sdcard_host_t *sprt_host;
     kuint32_t iDoEmpty;
 
-    if (!mrt_isValid(sprt_card))
-    {
+    if (!isValid(sprt_card))
         return mrt_nullptr;
-    }
 
     sprt_if = &sprt_card->sgrt_if;
 
     sprt_host = (srt_fwk_sdcard_host_t *)kzalloc(sizeof(srt_fwk_sdcard_host_t), GFP_KERNEL);
-    if (!mrt_isValid(sprt_host))
-    {
+    if (!isValid(sprt_host))
         return mrt_nullptr;
-    }
 
     sprt_host->iHostIfBase = (kuaddr_t)IMX_SDMMC_IF_PORT_ENTRY();
     sprt_host->iHostCDBase = (kuaddr_t)IMX_SDMMC_CD_PORT_ENTRY();
@@ -1103,9 +1045,7 @@ void *host_sdmmc_card_initial(srt_fwk_sdcard_t *sprt_card)
 
     mrt_resetl(&sprt_host->flagBit);
     if (mrt_isBitSetl(NR_ImxUsdhc_HostCtrlCap_Voltage18VSupport, &sprt_usdhc->HOST_CTRL_CAP))
-    {
         mrt_setbitl(NR_SdCard_SupportVoltage1_8V, &sprt_host->flagBit);
-    }
 
     mrt_setbitl(NR_SdCard_Support4BitWidth, &sprt_host->flagBit);
 

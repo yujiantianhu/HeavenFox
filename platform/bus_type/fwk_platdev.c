@@ -64,31 +64,25 @@ static ksint32_t fwk_device_attach(struct fwk_device *sprt_device, struct fwk_bu
 	DECLARE_LIST_HEAD_PTR(sprt_parent);
 
 	/*!< sprt_driver is not null, maybe this device has been matched to driver */
-	if (mrt_isValid(sprt_device->sprt_driver))
-	{
+	if (sprt_device->sprt_driver)
 		return NR_isWell;
-	}
 
 	/*!< check if "match" function defines in platform-bus */
-	if (!mrt_isValid(sprt_bus_type->match))
-	{
+	if (!sprt_bus_type->match)
 		return -NR_isNotSupport;
-	}
 
 	FWK_INIT_BUS_DRIVER_LIST(sprt_parent, sprt_list, sprt_bus_type);
 
 	/*!< get driver from bus one after another */
-	while (mrt_isValid(sprt_driver = FWK_NEXT_DRIVER(sprt_parent, sprt_list)))
+	while ((sprt_driver = FWK_NEXT_DRIVER(sprt_parent, sprt_list)))
 	{
 		/*!< try to attach this driver */
 		retval = fwk_device_driver_match(sprt_device, sprt_bus_type, sprt_driver);
-		if (!mrt_isErr(retval))
-		{
+		if (!retval || (retval == -NR_isPermit))
 			return NR_isWell;
-		}
 	}
 
-	return NR_isPermit;
+	return -NR_isPermit;
 }
 
 /*!
@@ -102,10 +96,8 @@ static ksint32_t fwk_device_detach(struct fwk_device *sprt_device)
 	struct fwk_driver *sprt_driver;
 
 	/*!< sprt_driver is null, no driver has been mathced */
-	if (!mrt_isValid(sprt_device->sprt_driver))
-	{
+	if (!sprt_device->sprt_driver)
 		return NR_isWell;
-	}
 
 	sprt_driver	= sprt_device->sprt_driver;
 
@@ -145,17 +137,13 @@ static ksint32_t fwk_device_find(struct fwk_device *sprt_device, struct fwk_bus_
 	{
 		/*!< 1. matching with address(list pointer) */
 		if ((ptr_left == sprt_list) || (ptr_right == sprt_list))
-		{
 			return NR_isWell;
-		}
 
 		/*!< 2. matching with device name: left */
 		sprt_dev 		= mrt_container_of(ptr_left, struct fwk_device,  sgrt_list);
 		sprt_platDevAny	= mrt_container_of(sprt_dev, struct fwk_platdev, sgrt_device);
 		if (!strcmp((char *)sprt_platDevAny->name, (char *)sprt_platDevDst->name))
-		{
 			return NR_isWell;
-		}
 
 		/*!< 3. matching with device name: right */
 		if (ptr_left != ptr_right)
@@ -163,15 +151,11 @@ static ksint32_t fwk_device_find(struct fwk_device *sprt_device, struct fwk_bus_
 			sprt_dev 		= mrt_container_of(ptr_right, struct fwk_device, sgrt_list);
 			sprt_platDevAny	= mrt_container_of(sprt_dev, struct fwk_platdev, sgrt_device);
 			if (!strcmp((char *)sprt_platDevAny->name, (char *)sprt_platDevDst->name))
-			{
 				return NR_isWell;
-			}
 		}
 		/*!< search finished, no device can be found */
 		else
-		{
 			break;
-		}
 	}
 
 	return -NR_isAnyErr;
@@ -185,6 +169,8 @@ static ksint32_t fwk_device_find(struct fwk_device *sprt_device, struct fwk_bus_
  */
 static ksint32_t fwk_device_to_bus(struct fwk_device *sprt_device, struct fwk_bus_type *sprt_bus_type)
 {
+	ksint32_t retval;
+
 	DECLARE_LIST_HEAD_PTR(sprt_list);
 	DECLARE_LIST_HEAD_PTR(sprt_parent);
 
@@ -195,7 +181,8 @@ static ksint32_t fwk_device_to_bus(struct fwk_device *sprt_device, struct fwk_bu
 	list_head_add_tail(sprt_parent, sprt_list);
 
 	/*!< do device-driver matching */
-	return fwk_device_attach(sprt_device, sprt_bus_type);
+	retval = fwk_device_attach(sprt_device, sprt_bus_type);
+	return (!retval || (retval == -NR_isPermit)) ? NR_isWell : retval;
 }
 
 /*!
@@ -235,23 +222,17 @@ ksint32_t fwk_device_register(struct fwk_device *sprt_device)
 	sprt_bus_type = sprt_device->sprt_bus_type;
 
 	/*!< platform-bus is not exsisted */
-	if (!mrt_isValid(sprt_bus_type))
-	{
+	if (!sprt_bus_type)
 		goto fail;
-	}
 
 	/*!< device list is not exsisted */
-	if (!mrt_isValid(sprt_bus_type->sprt_SysPriv))
-	{
+	if (!sprt_bus_type->sprt_SysPriv)
 		goto fail;
-	}
 
 	/*!< device is already registered */
 	retval = fwk_device_find(sprt_device, sprt_bus_type);
-	if (!mrt_isErr(retval))
-	{
+	if (!(retval < 0))
 		goto fail;
-	}
 
 	/*!< fisrt register */
 	sprt_device->sprt_driver = mrt_nullptr;
@@ -277,23 +258,17 @@ ksint32_t fwk_device_unregister(struct fwk_device *sprt_device)
 	sprt_bus_type = sprt_device->sprt_bus_type;
 
 	/*!< platform-bus is not exsisted */
-	if (!mrt_isValid(sprt_bus_type))
-	{
+	if (!sprt_bus_type)
 		goto fail;
-	}
 
 	/*!< device list is not exsisted */
-	if (!mrt_isValid(sprt_bus_type->sprt_SysPriv))
-	{
+	if (!sprt_bus_type->sprt_SysPriv)
 		goto fail;
-	}
 
 	/*!< device is not registered */
 	retval = fwk_device_find(sprt_device, sprt_bus_type);
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		goto fail;
-	}
 
 	/*!< delete device on the bus */
 	return fwk_bus_del_device(sprt_device, sprt_bus_type);

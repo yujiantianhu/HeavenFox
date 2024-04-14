@@ -11,6 +11,7 @@
  */
 
 /*!< The includes */
+#include <platform/fwk_basic.h>
 #include <platform/irq/fwk_irq_types.h>
 #include <platform/irq/fwk_irq_domain.h>
 #include <platform/of/fwk_of.h>
@@ -42,22 +43,16 @@ void *fwk_find_irq_action(ksint32_t irq, const kstring_t *name, void *ptrDev)
 	ksint32_t retval = 0;
 
 	sprt_desc = fwk_irq_to_desc(irq);
-	if (!mrt_isValid(sprt_desc))
-	{
+	if (!isValid(sprt_desc))
 		return mrt_nullptr;
-	}
 
 	foreach_list_next_entry(sprt_action, &sprt_desc->sgrt_action, sgrt_link)
 	{
-		if (mrt_isValid(name))
-		{
+		if (name)
 			retval = strncmp(sprt_action->name, name, FWK_IRQ_DESC_NAME_LENTH);
-		}
 
 		if (!retval && (sprt_action->ptrArgs == ptrDev))
-		{
 			return sprt_action;
-		}
 	}
 
 	return mrt_nullptr;
@@ -74,29 +69,21 @@ ksint32_t fwk_request_irq(ksint32_t irq, irq_handler_t handler, kuint32_t flags,
 	srt_fwk_irq_desc_t *sprt_desc;
 	srt_fwk_irq_action_t *sprt_action;
 
-	if (!mrt_isValid(name) || !mrt_isValid(ptrDev))
-	{
+	if ((!name) || (!ptrDev))
 		return -NR_isArgFault;
-	}
 
 	if (fwk_find_irq_action(irq, name, ptrDev))
-	{
 		return -NR_isExisted;
-	}
 
 	sprt_desc = fwk_irq_to_desc(irq);
-	if (!mrt_isValid(sprt_desc))
-	{
+	if (!isValid(sprt_desc))
 		return -NR_isMemErr;
-	}
 
 	sprt_action = (srt_fwk_irq_action_t *)kzalloc(sizeof(*sprt_action), GFP_KERNEL);
-	if (!mrt_isValid(sprt_desc))
-	{
+	if (!isValid(sprt_action))
 		return -NR_isMemErr;
-	}
 
-	sprt_action->handler = mrt_isValid(handler) ? handler : fwk_default_irqhandler;
+	sprt_action->handler = handler ? handler : fwk_default_irqhandler;
 	sprt_action->flags = flags;
 	sprt_action->ptrArgs = ptrDev;
 	strcpy(sprt_action->name, name);
@@ -117,13 +104,11 @@ void fwk_free_irq(ksint32_t irq, void *ptrDev)
 {
 	srt_fwk_irq_action_t *sprt_action;
 
-	if ((irq < 0) || !mrt_isValid(ptrDev))
-	{
+	if ((irq < 0) || (!ptrDev))
 		return;
-	}
 
 	sprt_action = fwk_find_irq_action(irq, mrt_nullptr, ptrDev);
-	if (mrt_isValid(sprt_action))
+	if (isValid(sprt_action))
 	{
 		list_head_del(&sprt_action->sgrt_link);
 		kfree(sprt_action);
@@ -143,16 +128,12 @@ void fwk_do_irq_handler(ksint32_t softIrq)
 	ksint32_t retval;
 
 	if (softIrq < 0)
-	{
 		return;
-	}
 
 	sprt_desc = fwk_irq_to_desc(softIrq);
-	if (!mrt_isValid(sprt_desc))
-	{
+	if (!isValid(sprt_desc))
 		return;
-	}
-
+		
 	foreach_list_next_entry(sprt_action, &sprt_desc->sgrt_action, sgrt_link)
 	{
 		retval = sprt_action->handler ? sprt_action->handler(sprt_action->ptrArgs) : -1;

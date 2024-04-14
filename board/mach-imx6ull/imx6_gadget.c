@@ -100,10 +100,8 @@ static srt_imx_usbotg_t *imx6_gadget_get_otg_entry(void)
  */
 static ksint32_t imx6_gadget_clk_initial(srt_imx_usbotg_t *sprt_otg, srt_imx_usbphy_t *sprt_phy)
 {
-    if ((!mrt_isValid(sprt_otg)) || (!mrt_isValid(sprt_phy)))
-    {
+    if ((!sprt_otg) || (!sprt_phy))
         return -NR_isNullPtr;
-    }
 
     /*!< PWD register provides overall control of the PHY power state */
     mrt_resetl(&sprt_phy->PWD);
@@ -147,10 +145,8 @@ static ksint32_t imx6_gadget_clk_initial(srt_imx_usbotg_t *sprt_otg, srt_imx_usb
  */
 static ksint32_t imx6_gadget_ehci_phy_initial(srt_imx_usbphy_t *sprt_phy)
 {
-    if (!mrt_isValid(sprt_phy))
-    {
+    if (!sprt_phy)
         return -NR_isNullPtr;
-    }
 
     /*!< Enables UTMI+ Level2. This should be enabled if needs to support LS device */
     mrt_setbitl(mrt_bit(14U), &sprt_phy->CTRL);
@@ -179,10 +175,8 @@ static ksint32_t imx6_gadget_ehci_phy_initial(srt_imx_usbphy_t *sprt_phy)
  */
 static ksint32_t imx6_gadget_ehci_otg_initial(srt_imx_usbotg_t *sprt_otg)
 {
-    if (!mrt_isValid(sprt_otg))
-    {
+    if (!sprt_otg)
         return -NR_isNullPtr;
-    }
 
     /*!< 
      * CM: bit[1:0], Controller Mode - R/WO
@@ -262,30 +256,22 @@ void imx6_usb_gadget_initial(void)
 
     /*!< Initial USB Clock */
     retval = imx6_gadget_clk_initial(sprt_otg, sprt_phy);
-    if (mrt_isErr(retval))
-    {
+    if (retval < 0)
         return;
-    }
 
     /*!< Initial USB PHY */
     retval = imx6_gadget_ehci_phy_initial(sprt_phy);
-    if (mrt_isErr(retval))
-    {
+    if (retval < 0)
         return;
-    }
 
     /*!< Initial USB OTG */
     retval = imx6_gadget_ehci_otg_initial(sprt_otg);
-    if (mrt_isErr(retval))
-    {
+    if (retval < 0)
         return;
-    }
 
     sprt_gadget = (srt_imx_gadget_t *)kzalloc(sizeof(srt_imx_gadget_t), GFP_KERNEL);
-    if (!mrt_isValid(sprt_gadget))
-    {
+    if (!isValid(sprt_gadget))
         return;
-    }
 
     sprt_gadget->sprt_otg = sprt_otg;
     sprt_gadget->sprt_phy = sprt_phy;
@@ -341,14 +327,10 @@ static void __imx6_gadget_handler(ert_imx_usb_intr_t type, void (*handler)(void 
     srt_imx_gadget_t *sprt_gadget = (srt_imx_gadget_t *)ptrDev;
 
     if (!IMX6_GADGET_IS_INT_OCCUR(type, sprt_gadget->sprt_otg))
-    {
         return;        
-    }
 
-    if (mrt_isValid(handler))
-    {
+    if (handler)
         handler(sprt_gadget);
-    }
 
     IMX6_GADGET_CLEAR_INT_FLAG(type, sprt_gadget->sprt_otg);
 }
@@ -361,10 +343,8 @@ static void __imx6_gadget_handler(ert_imx_usb_intr_t type, void (*handler)(void 
  */
 irq_return_t imx6_gadget_handler(void *ptrDev)
 {
-    if (!mrt_isValid(ptrDev))
-    {
+    if (!ptrDev)
         return -NR_isNullPtr;
-    }
 
     /*!< USB Interrupt Status */
     __imx6_gadget_handler(NR_ImxUsbOtgIntr_UsbIntBit, imx6_gadget_ehci_token_handler, ptrDev);

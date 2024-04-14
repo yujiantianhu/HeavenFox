@@ -146,6 +146,6 @@ static inline kbool_t fwk_of_node_check_flag(struct fwk_device_node *sprt_node, 
 
 /*!< get each node */
 #define FOREACH_OF_DT_NODE(np, head)	\
-	for (np = (mrt_isValid(head) ? head : mrt_fwk_fdt_node_header()); mrt_isValid(np); np = np->allnext)
+	for (np = (isValid(head) ? head : mrt_fwk_fdt_node_header()); isValid(np); np = np->allnext)
 
 #endif /*!< __FWK_OF_H_ */

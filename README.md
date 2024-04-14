@@ -4,6 +4,13 @@
 # created on: 2023.12.21
 # e-mail: <yujiantianhu@163.com>
 
+2024.04.15:
+    author: Yang Yujun
+    commit: 
+        01) fix the issue that the first thread scheduling register was overwritten;
+        02) add display generic APIs
+        03) optimize code
+
 2024.04.13:
     author: Yang Yujun
     commit: makefile optimization, supporting selective compilation of source files

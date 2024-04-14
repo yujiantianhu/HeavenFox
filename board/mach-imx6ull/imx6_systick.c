@@ -50,16 +50,12 @@ void imx6ull_systick_init(void)
 	ksint32_t retval;
 
 	sprt_node = fwk_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_systick_ids, mrt_nullptr);
-	if (!mrt_isValid(sprt_node))
-	{
+	if (!isValid(sprt_node))
 		return;
-	}
 
 	irq = fwk_of_irq_get(sprt_node, 0);
 	if (irq < 0)
-	{
 		return;
-	}
 
 	sprt_tick = IMX_SYSTICK_PORT_ENTRY();
 
@@ -99,7 +95,7 @@ void imx6ull_systick_init(void)
 	mrt_resetl(&sprt_tick->IR);
 
 	retval = fwk_request_irq(irq, imx6_systick_handler, 0, "imx6-systick", sprt_tick);
-	if (!mrt_isErr(retval))
+	if (!(retval < 0))
 	{
 		mrt_setbitl(mrt_bit(0U), &sprt_tick->IR);
 		mrt_enable_irq(irq);
@@ -136,8 +132,8 @@ void imx6ull_systick_init(void)
 	mrt_clrbitl(0xfffU, &sprt_tick->PR);
 	mrt_setbitl(66 - 1, &sprt_tick->PR);
 
-	/*!< compare value: 1000us = 1ms */
-	mrt_writel(1000U, &sprt_tick->OCR[0]);
+	/*!< compare value: 1000us = 1ms; 1000000us = 1000ms = 1s */
+	mrt_writel(1000000 / TICK_HZ, &sprt_tick->OCR[0]);
 
 	/*!< 
 	 * ROV: bit5, Rollover Flag
@@ -167,7 +163,7 @@ void imx6ull_systick_init(void)
 	/*!< EN: bit0, GPT Enable */
 	mrt_setbitl(mrt_bit(0U), &sprt_tick->CR);
 
-	ptrSysTickCounter = (kutime_t *)&sprt_tick->CNT;
+	ptr_systick_counter = (kutime_t *)&sprt_tick->CNT;
 }
 
 irq_return_t imx6_systick_handler(void *ptrDev)

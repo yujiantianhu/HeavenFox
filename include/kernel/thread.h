@@ -265,16 +265,12 @@ static inline void *real_thread_set_stack(srt_kel_thread_attr_t *sprt_attr, void
 {
 	struct kel_context_regs *sprt_regs;
 
-	if (!mrt_isValid(ptr_stack) || (stacksize < KEL_THREAD_STACK_MIN))
-	{
+	if (!isValid(ptr_stack) || (stacksize < KEL_THREAD_STACK_MIN))
 		return mrt_nullptr;
-	}
 
 	/*!< check: ptr_dync just should be NULL or ptr_stack */
-	if (mrt_isValid(ptr_dync) && (ptr_dync != ptr_stack))
-	{
+	if (ptr_dync && (ptr_dync != ptr_stack))
 		return mrt_nullptr;
-	}
 
 	/*!< if the stack is defined in a static storage area, ptr_dync should be NULL; Otherwise, the address of ptr_stack should be passed in */
 	sprt_attr->ptr_stack_start = ptr_dync;

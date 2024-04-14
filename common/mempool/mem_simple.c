@@ -32,13 +32,11 @@ ksint32_t memory_simple_block_create(struct mem_info *sprt_info, kuaddr_t mem_ad
 	/*!< header size */
 	header_size	= MEM_BLOCK_HEADER_SIZE;
 
-	if ((!mrt_isValid(sprt_info)) || (size <= header_size))
-	{
+	if ((!isValid(sprt_info)) || (size <= header_size))
 		return -NR_isUnvalid;
-	}
 
 	/*!< if sprt_mem is exsited, it is not allow to create again */
-	if (mrt_isValid(sprt_info->sprt_mem))
+	if (isValid(sprt_info->sprt_mem))
 	{
 		return -NR_isUnvalid;
 	}
@@ -70,10 +68,8 @@ ksint32_t memory_simple_block_create(struct mem_info *sprt_info, kuaddr_t mem_ad
  */
 void memory_simple_block_destroy(struct mem_info *sprt_info)
 {
-	if (!mrt_isValid(sprt_info))
-	{
+	if (!isValid(sprt_info))
 		return;
-	}
 
 	/*!< clear all memory blocks */
 	memory_reset((void *)sprt_info->base, sprt_info->lenth);
@@ -94,10 +90,8 @@ void *alloc_spare_simple_memory(void *ptr_head, kusize_t size)
 	kusize_t header_size, lenth, offset;
 	void *ptr_mem = mrt_nullptr;
 
-	if (!mrt_isValid(ptr_head))
-	{
+	if (!isValid(ptr_head))
 		return mrt_nullptr;
-	}
 
 	sprt_start  = (struct mem_block *)ptr_head;
 	header_size	= MEM_BLOCK_HEADER_SIZE;
@@ -116,7 +110,7 @@ void *alloc_spare_simple_memory(void *ptr_head, kusize_t size)
 	 * it takes the first method here.
 	 */
 
-	for (sprt_block = sprt_start; mrt_isValid(sprt_block); sprt_block = sprt_block->sprt_next)
+	for (sprt_block = sprt_start; isValid(sprt_block); sprt_block = sprt_block->sprt_next)
 	{
 		/*!< Remaining memory is unable to be applied, find next avaliable block */
 		if (sprt_block->remain >= lenth)
@@ -166,24 +160,18 @@ static struct mem_block *check_employ_simple_memory(void *ptr_head, void *ptr_me
 
 	/*!< Point to the head of info */
 	sprt_block = (struct mem_block *)((kuint8_t *)ptr_mem - MEM_BLOCK_HEADER_SIZE);
-	if ((!mrt_isValid(sprt_block)) || (!IS_MEMORYPOOL_VALID(sprt_block)))
-	{
+	if ((!isValid(sprt_block)) || (!IS_MEMORYPOOL_VALID(sprt_block)))
 		return mrt_nullptr;
-	}
 
 	/*!< check if ptr_mem was allocated from ptr_head */
-	for (sprt_start = (struct mem_block *)ptr_head; mrt_isValid(sprt_start); sprt_start = sprt_start->sprt_next)
+	for (sprt_start = (struct mem_block *)ptr_head; isValid(sprt_start); sprt_start = sprt_start->sprt_next)
 	{
 		if (sprt_start->base == (kuaddr_t)ptr_mem)
-		{
 			break;
-		}
 	}
 
-	if (mrt_isValid(sprt_start))
-	{
+	if (isValid(sprt_start))
 		return sprt_block;
-	}
 
 	return mrt_nullptr;
 }
@@ -200,17 +188,13 @@ void free_employ_simple_memory(void *ptr_head, void *ptr_mem)
 	struct mem_block *sprt_next;
 	struct mem_block *sprt_block;
 
-	if (!mrt_isValid(ptr_mem))
-	{
+	if (!isValid(ptr_mem))
 		return;
-	}
 
 	/*!< Point to the head of info */
 	sprt_block = check_employ_simple_memory(ptr_head, ptr_mem);
-	if (!mrt_isValid(sprt_block))
-	{
+	if (!isValid(sprt_block))
 		return;
-	}
 
 	sprt_prev = sprt_block->sprt_prev;
 	sprt_next = sprt_block->sprt_next;
@@ -218,7 +202,7 @@ void free_employ_simple_memory(void *ptr_head, void *ptr_mem)
 	/*!< Update memory space */
 	sprt_block->remain = sprt_block->lenth;
 
-	if (mrt_isValid(sprt_prev))
+	if (isValid(sprt_prev))
 	{
 		/*!< Check if the current memory block is idle, if yes, merge into the last neighboring memory block */
 		sprt_prev->lenth += sprt_block->lenth;
@@ -228,7 +212,7 @@ void free_employ_simple_memory(void *ptr_head, void *ptr_mem)
 		sprt_block = sprt_prev;
 	}
 
-	if (mrt_isValid(sprt_next))
+	if (isValid(sprt_next))
 	{
 		/*!< Check if the next neighboring memory block is idle, if yes, the idle memory block should be merged */
 		if (sprt_next->lenth == sprt_next->remain)

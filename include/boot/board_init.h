@@ -98,9 +98,7 @@ static inline ksint32_t board_initcall_run_list(const board_init_t init_sequence
 	for (pFunc_init = init_sequence; (*pFunc_init); pFunc_init++)
 	{
 		if ((*pFunc_init)())
-		{
 			return RET_BOOT_ERR;
-		}
 	}
 
 	return RET_BOOT_PASS;

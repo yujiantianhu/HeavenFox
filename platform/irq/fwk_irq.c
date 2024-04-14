@@ -69,32 +69,24 @@ void fwk_of_irq_init(const struct fwk_of_device_id *sprt_matches)
         sprt_prop = fwk_of_find_property(sprt_np, "interrupt-controller", mrt_nullptr);
         of_status = fwk_of_device_is_avaliable(sprt_np);
 
-        if ((!mrt_isValid(sprt_prop)) || (!mrt_isValid(of_status)))
-        {
+        if ((!isValid(sprt_prop)) || (!of_status))
             continue;
-        }
 
         /*!< if is not matched with "sprt_matches" */
         if (!fwk_of_node_try_matches(sprt_np, sprt_matches, mrt_nullptr))
-        {
             continue;
-        }
 
         /*!< matched sucessfully */
         sprt_desc = (struct fwk_irq_intcs_desc *)kzalloc(sizeof(struct fwk_irq_intcs_desc), GFP_KERNEL);
-        if (!mrt_isValid(sprt_desc))
-        {
+        if (!isValid(sprt_desc))
             goto fail;
-        }
 
         sprt_desc->sprt_np = sprt_np;
 
-        /*!< 对于intc, 它的irq parent为null; 对于gpc, 它的parent为intc */
+        /*!< for intc, it's irq parent is null; for gpc, it's parent is intc */
         sprt_desc->sprt_parent = fwk_of_irq_parent(sprt_np);
         if (sprt_np == sprt_desc->sprt_parent)
-        {
             sprt_desc->sprt_parent = mrt_nullptr;
-        }
 
         list_head_add_tail(&sgrt_intc_desc_list, &sprt_desc->sgrt_link);
     }
@@ -107,13 +99,11 @@ void fwk_of_irq_init(const struct fwk_of_device_id *sprt_matches)
 
             /* if equal, skip it; this way, the list will not be empty for the time being */
             if (parent != sprt_desc->sprt_parent)
-            {
                 continue;
-            }
 
             list_head_del(&sprt_desc->sgrt_link);
 
-            if ((!mrt_isValid(sprt_match)) || (!mrt_isValid(sprt_match->data)))
+            if ((!sprt_match) || (!sprt_match->data))
             {
                 kfree(sprt_desc);
                 continue;
@@ -121,7 +111,7 @@ void fwk_of_irq_init(const struct fwk_of_device_id *sprt_matches)
 
             /*!< do intc initial */
             retval = ((func_fwk_irq_init_cb_t)sprt_match->data)(sprt_desc->sprt_np, sprt_desc->sprt_parent);
-            if (mrt_isErr(retval))
+            if (retval < 0)
             {
                 print_err("Initial IRQ Controller: %s failed!\n", sprt_match->compatible);
                 kfree(sprt_desc);
@@ -132,7 +122,7 @@ void fwk_of_irq_init(const struct fwk_of_device_id *sprt_matches)
         }
 
         sprt_desc = mrt_list_first_valid_entry(&sgrt_intc_parent_list, typeof(*sprt_desc), sgrt_link);
-        if (!mrt_isValid(sprt_desc))
+        if (!isValid(sprt_desc))
         {
             print_err("List is already empty, can not get any desc\n");
             break;

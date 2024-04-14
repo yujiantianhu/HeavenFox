@@ -27,26 +27,20 @@ struct fwk_file *fwk_do_filp_open(kstring_t *name, kuint32_t mode)
 	ksint32_t retval;
 
 	sprt_inode = fwk_inode_find(name);
-	if (!mrt_isValid(sprt_inode))
-	{
+	if (!isValid(sprt_inode))
 		goto fail1;
-	}
-
+	
 	sprt_file = (struct fwk_file *)kzalloc(sizeof(struct fwk_file), GFP_KERNEL);
-	if (!mrt_isValid(sprt_file))
-	{
+	if (!isValid(sprt_file))
 		goto fail1;
-	}
 
 	sprt_file->sprt_inode = sprt_inode;
 	sprt_file->sprt_foprts = sprt_inode->sprt_foprts;
-	if (mrt_isValid(sprt_file->sprt_foprts->open))
+	if (sprt_file->sprt_foprts->open)
 	{
 		retval = sprt_file->sprt_foprts->open(sprt_inode, sprt_file);
-		if (mrt_isErr(retval))
-		{
+		if (retval)
 			goto fail2;
-		}
 	}
 
 	return sprt_file;
@@ -68,28 +62,24 @@ void fwk_do_filp_close(struct fwk_file *sprt_file)
 {
 	struct fwk_inode *sprt_inode;
 
-	if (!mrt_isValid(sprt_file))
-	{
+	if (!isValid(sprt_file))
 		return;
-	}
 
 	sprt_inode = sprt_file->sprt_inode;
 
 	/*!< Close device */
-	if (mrt_isValid(sprt_file->sprt_foprts->close))
-	{
+	if (sprt_file->sprt_foprts->close)
 		sprt_file->sprt_foprts->close(sprt_inode, sprt_file);
-	}
 
 	/*!< 
 	 * Legacy bug: 
 	 * If the file is not closed after opening, and the inode node is suddenly deleted, 
 	 * what should we do with the file? How to release the occupied fd? 
 	 */
-	if (mrt_isValid(sprt_inode->sprt_foprts->close))
-	{
+	if (sprt_inode->sprt_foprts->close)
 		sprt_inode->sprt_foprts->close(sprt_inode, sprt_file);
-	}
 
 	kfree(sprt_file);
 }
+
+/*!< end of file */

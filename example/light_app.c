@@ -47,14 +47,15 @@ static void *light_app_entry(void *args)
     for (;;)
     {
         fd = virt_open("/dev/led-template", 0);
-        if (!mrt_isErr(fd))
-        {
-            virt_write(fd, &iLightStatus, 1);
-            virt_close(fd);
-        }
+        if (fd < 0)
+            goto END;
+
+        virt_write(fd, &iLightStatus, 1);
+        virt_close(fd);
 
         iLightStatus ^= 1;
 
+END:
         schedule_delay_ms(500);
     }
 
@@ -85,7 +86,7 @@ ksint32_t light_app_init(void)
 
     /*!< register thread */
     retval = real_thread_create(&g_light_app_tid, sprt_attr, light_app_entry, mrt_nullptr);
-    return mrt_isErr(retval) ? retval : 0;
+    return (retval < 0) ? retval : 0;
 }
 
 /*!< end of file */

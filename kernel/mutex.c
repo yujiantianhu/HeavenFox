@@ -30,7 +30,7 @@
  */
 void mutex_init(struct mutex_lock *sprt_lock)
 {
-    if (mrt_isValid(sprt_lock))
+    if (sprt_lock)
         sprt_lock->count = 0;
 }
 

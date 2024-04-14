@@ -11,6 +11,7 @@
 
 obj-y	+=	fwk_ascii.o
 obj-y	+=	fwk_bitmap.o
+obj-y	+=	fwk_disp.o
 obj-y	+=	fwk_fbmem.o
 
 # end of file

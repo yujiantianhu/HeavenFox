@@ -124,11 +124,11 @@ _switch_restore:
     ldr r2, [r7]                                    @ if r2 == 0, current thread is scheduled by "start_kernel"
 
 1:
-    push { r1, r2, r7 }                             @ r1: next sp; r2: first; r7: address of [first]
+    push { r0 - r2, r7 }                             @ r1: next sp; r2: first; r7: address of [first]
     ldr r1, =__real_thread_init_before              @ init thread before running
     blx r1
 
-    pop { r1, r2, r7 }
+    pop { r0 - r2, r7 }
     cmp r2, #0                                      @ check if is scheduled for the first time
     beq 4f
 

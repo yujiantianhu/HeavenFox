@@ -60,7 +60,7 @@ typedef struct list srt_list_t;
 #define mrt_list_delete_all(head, prev, list)	\
 {	\
 	list = head;	\
-	while (mrt_isValid(list))	\
+	while (isValid(list))	\
 	{	\
 		prev	= list;	\
 		list	= list->sprt_next;	\
@@ -102,7 +102,7 @@ typedef struct list_head srt_list_head_t;
 #define mrt_list_head_parent(parent, list, type, member)	\
 ({	\
 	mrt_next_list_head(parent, list);	\
-	(mrt_isValid(list)) ? mrt_container_of(list, type, member) : mrt_nullptr;	\
+	(isValid(list)) ? mrt_container_of(list, type, member) : mrt_nullptr;	\
 })
 
 /*!< two-way retrieval */
@@ -176,14 +176,10 @@ static inline ksint32_t list_head_for_each(struct list_head *head, struct list_h
 	foreach_list_head(ptr_left, ptr_right, head)
 	{
 		if ((ptr_left == list) || (ptr_right == list))
-		{
 			return NR_isWell;
-		}
 
 		if (ptr_left == ptr_right)
-		{
 			break;
-		}
 	}
 
 	return -NR_isAnyErr;
@@ -246,7 +242,7 @@ static inline void list_head_del_anyone(struct list_head *head, struct list_head
 	struct list_head *ptr_prev = list->sprt_prev;
 	struct list_head *ptr_next = list->sprt_next;
 
-	if (list_head_for_each(head, list))
+	if (!list_head_for_each(head, list))
 	{
 		ptr_prev->sprt_next	= ptr_next;
 		ptr_next->sprt_prev	= ptr_prev;

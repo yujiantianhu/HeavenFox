@@ -11,6 +11,7 @@
  */
 
 /*!< The includes */
+#include <platform/fwk_basic.h>
 #include <platform/net/fwk_netdev.h>
 
 /*!< API function */
@@ -27,13 +28,11 @@ struct fwk_net_device *fwk_alloc_netdev_mq(ksint32_t sizeof_priv, const kstring_
 	struct fwk_netdev_queue *sprt_tx;
 
 	sprt_netdev = (struct fwk_net_device *)kzalloc(sizeof(struct fwk_net_device), GFP_KERNEL);
-	if (!mrt_isValid(sprt_netdev))
-	{
+	if (!isValid(sprt_netdev))
 		return mrt_nullptr;
-	}
 
 	sprt_tx = (struct fwk_netdev_queue *)kzalloc(queue_count * sizeof(struct fwk_netdev_queue), GFP_KERNEL);
-	if (!mrt_isValid(sprt_tx))
+	if (!isValid(sprt_tx))
 	{
 		kfree(sprt_netdev);
 		return mrt_nullptr;
@@ -47,10 +46,8 @@ struct fwk_net_device *fwk_alloc_netdev_mq(ksint32_t sizeof_priv, const kstring_
 	/*!< initial recieve queue */
 	memset(&sprt_netdev->sgrt_rcu, 0, sizeof(struct fwk_netdev_queue));
 
-	if (mrt_isValid(setup))
-	{
+	if (setup)
 		setup(sprt_netdev);
-	}
 
 	strcpy(sprt_netdev->name, name);
 
@@ -65,16 +62,12 @@ struct fwk_net_device *fwk_alloc_netdev_mq(ksint32_t sizeof_priv, const kstring_
  */
 void fwk_free_netdev(struct fwk_net_device *sprt_dev)
 {
-	if (!mrt_isValid(sprt_dev))
-	{
+	if (!isValid(sprt_dev))
 		return;
-	}
 
 	/*!< release send queue first */
-	if (mrt_isValid(sprt_dev->sprt_tx))
-	{
+	if (isValid(sprt_dev->sprt_tx))
 		kfree(sprt_dev->sprt_tx);
-	}
 
 	kfree(sprt_dev);
 }

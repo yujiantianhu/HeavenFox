@@ -12,6 +12,8 @@
 
 /*!< The includes */
 #include <asm/exception.h>
+#include <common/error_types.h>
+#include <common/io_stream.h>
 
 /*!< The globals*/
 kuaddr_t prefecth_abort_addr;
@@ -26,7 +28,7 @@ kuaddr_t data_abort_addr;
  */
 void exec_undefined_handler(void)
 {
-    while (true);
+    mrt_assert(false);
 }
 
 /*!
@@ -37,7 +39,8 @@ void exec_undefined_handler(void)
  */
 void exec_prefetch_abort_handler(void)
 {
-    while (true);
+    print_err("lr \'%d\' cause fault\n", prefecth_abort_addr);
+    mrt_assert(false);
 }
 
 /*!
@@ -48,7 +51,8 @@ void exec_prefetch_abort_handler(void)
  */
 void exec_data_abort_handler(void)
 {
-    while (true);
+    print_err("lr \'%d\' cause fault\n", data_abort_addr);
+    mrt_assert(false);
 }
 
 /*!
@@ -59,7 +63,7 @@ void exec_data_abort_handler(void)
  */
 void exec_unused_handler(void)
 {
-    while (true);
+    mrt_assert(false);
 }
 
 /* end of file*/

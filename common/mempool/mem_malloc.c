@@ -42,9 +42,7 @@ __weak kuaddr_t _sbrk(kuint32_t incr)
 
 	/*!< heap start */
 	if (ptr_heapHead == mrt_nullptr) 
-	{
 		ptr_heapHead = (kuint8_t *)MEMORY_HEAP_START;
-	}
 	
 	/*!< save memory base address */
 	prev_heap = ptr_heapHead;
@@ -55,9 +53,7 @@ __weak kuaddr_t _sbrk(kuint32_t incr)
 		status = (kuaddr_t)((void *)prev_heap);
 	} 
 	else
-	{
 		status = (kuaddr_t) - 1;
-	}
 
 	return status;
 }
@@ -74,10 +70,8 @@ kbool_t malloc_block_initial(void)
 
 	sprt_info = &sgrt_infoMalloc;
 
-	if (mrt_isValid(sprt_info->sprt_mem))
-	{
+	if (isValid(sprt_info->sprt_mem))
 		return false;
-	}
 
 	memory_simple_block_create(sprt_info, 
 							   MEMORY_HEAP_START, 
@@ -98,10 +92,8 @@ kbool_t malloc_block_self_defines(kuaddr_t base, kusize_t size)
 
 	sprt_info = &sgrt_infoMalloc;
 
-	if (mrt_isValid(sprt_info->sprt_mem))
-	{
+	if (isValid(sprt_info->sprt_mem))
 		return false;
-	}
 
 	memory_simple_block_create(sprt_info, base, size);
 

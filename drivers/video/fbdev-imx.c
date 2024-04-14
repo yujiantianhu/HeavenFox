@@ -39,7 +39,7 @@ struct fbdev_imx_drv
 	kuint32_t minor;
 	kuint32_t value[3];
 
-	kuaddr_t base;
+	void *base;
 	struct fwk_fb_info *sprt_fb;
 	struct fwk_device *sprt_dev;
 
@@ -62,17 +62,15 @@ static kuint8_t g_fbdev_imx_buffer[480 * 272 * 4];
  * @retval  errno
  * @note    none
  */
-static void fbdev_imx_init(kuaddr_t base, struct fbdev_imx_drv *sprt_drv)
+static void fbdev_imx_init(void *base, struct fbdev_imx_drv *sprt_drv)
 {
 	srt_imx_lcdif_t *sprt_lcdif = (srt_imx_lcdif_t *)base;
 	struct fwk_fb_fix_screen_info *sprt_fix;
 	struct fwk_fb_var_screen_info *sprt_var;
 	kuaddr_t reg;
 
-	if (!mrt_isValid(sprt_lcdif) || !mrt_isValid(sprt_drv))
-	{
+	if (!isValid(sprt_lcdif) || !isValid(sprt_drv))
 		return;
-	}
 
 	sprt_fix = &sprt_drv->sprt_fb->sgrt_fix;
 	sprt_var = &sprt_drv->sprt_fb->sgrt_var;
@@ -233,13 +231,13 @@ static const struct fwk_fb_oprts sgrt_fwk_fb_ops =
 };
 
 /*!< --------------------------------------------------------------------- */
-static void fbdev_imx_configure_backlight(kuaddr_t base)
+static void fbdev_imx_configure_backlight(void *base)
 {
 	srt_imx_pin_t sgrt_conf;
 	srt_imx_gpio_t *sprt_gpio;
 
 	/*!< set backlight */
-	hal_imx_pin_attribute_init(&sgrt_conf, base, IMX6UL_MUX_GPIO1_IO08_GPIO1_IO08, 0xb9);
+	hal_imx_pin_attribute_init(&sgrt_conf, (kuaddr_t)base, IMX6UL_MUX_GPIO1_IO08_GPIO1_IO08, 0xb9);
 	hal_imx_pin_configure(&sgrt_conf);
 
 	/*!< output, high level */
@@ -248,7 +246,7 @@ static void fbdev_imx_configure_backlight(kuaddr_t base)
 	mrt_setbitl(mrt_bit(8), &sprt_gpio->DR);
 }
 
-static ksint32_t fbdev_imx_pinctrl_read_and_set(struct fwk_device_node *sprt_node, kuint32_t count, kuaddr_t base)
+static ksint32_t fbdev_imx_pinctrl_read_and_set(struct fwk_device_node *sprt_node, kuint32_t count, void *base)
 {
 	srt_imx_pin_t sgrt_conf;
 	kuint32_t index, value[IMX6UL_MUX_CONF_SIZE];
@@ -257,12 +255,10 @@ static ksint32_t fbdev_imx_pinctrl_read_and_set(struct fwk_device_node *sprt_nod
 	for (index = 0; index < count; index++)
 	{
 		retval = fwk_of_property_read_u32_array_index(sprt_node, "fsl,pins", value, index * ARRAY_SIZE(value), ARRAY_SIZE(value));
-		if (mrt_isErr(retval))
-		{
+		if (retval < 0)
 			goto END;
-		}
 
-		hal_imx_pin_auto_init(&sgrt_conf, base, value, ARRAY_SIZE(value));
+		hal_imx_pin_auto_init(&sgrt_conf, (kuaddr_t)base, value, ARRAY_SIZE(value));
 		hal_imx_pin_configure(&sgrt_conf);
 	}
 
@@ -279,24 +275,18 @@ static ksint32_t fbdev_imx_driver_probe_mux(struct fwk_platdev *sprt_dev)
 
 	sprt_node = sprt_dev->sgrt_device.sprt_node;
 	sprt_drv = (struct fbdev_imx_drv *)fwk_platform_get_drvdata(sprt_dev);
-	if (!mrt_isValid(sprt_node) || !mrt_isValid(sprt_drv))
-	{
+	if (!isValid(sprt_node) || !isValid(sprt_drv))
 		goto fail;
-	}
 
 	retval = fwk_of_property_read_u32_array(sprt_node, "pinctrl-0", phandle, ARRAY_SIZE(phandle));
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		goto fail;
-	}
 
 	sprt_pindat = fwk_of_find_node_by_phandle(mrt_nullptr, phandle[0]);
 	sprt_pinctl = fwk_of_find_node_by_phandle(mrt_nullptr, phandle[1]);
 	sprt_reset  = fwk_of_find_node_by_phandle(mrt_nullptr, phandle[2]);
 	if (!sprt_pindat || !sprt_pinctl || !sprt_reset)
-	{
 		goto fail;
-	}
 
 	/* initial pin mux */
 	fbdev_imx_pinctrl_read_and_set(sprt_pindat, 24, 0);
@@ -322,33 +312,25 @@ static ksint32_t fbdev_imx_driver_probe_timings(struct fwk_platdev *sprt_dev)
 
 	sprt_node = sprt_dev->sgrt_device.sprt_node;
 	sprt_drv = (struct fbdev_imx_drv *)fwk_platform_get_drvdata(sprt_dev);
-	if (!mrt_isValid(sprt_node) || !mrt_isValid(sprt_drv))
-	{
+	if (!isValid(sprt_node) || !isValid(sprt_drv))
 		goto fail;
-	}
 
 	sprt_fb = sprt_drv->sprt_fb;
 	sprt_var = &sprt_fb->sgrt_var;
 	
 	retval = fwk_of_property_read_u32(sprt_node, "display", &phandle);
-	sprt_disp = mrt_isErr(retval) ? mrt_nullptr : fwk_of_find_node_by_phandle(sprt_node, phandle);
-	if (!mrt_isValid(sprt_disp))
-	{
+	sprt_disp = (retval < 0) ? mrt_nullptr : fwk_of_find_node_by_phandle(sprt_node, phandle);
+	if (!isValid(sprt_disp))
 		goto fail;
-	}
 
 	sprt_tim = fwk_of_find_node_by_name(sprt_disp, "display-timings");
-	if (!mrt_isValid(sprt_tim))
-	{
+	if (!isValid(sprt_tim))
 		goto fail;
-	}
 
 	retval = fwk_of_property_read_u32(sprt_tim, "native-mode", &phandle);
-	sprt_tim = mrt_isErr(retval) ? mrt_nullptr : fwk_of_find_node_by_phandle(sprt_tim, phandle);
-	if (!mrt_isValid(sprt_tim))
-	{
+	sprt_tim = (retval < 0) ? mrt_nullptr : fwk_of_find_node_by_phandle(sprt_tim, phandle);
+	if (!isValid(sprt_tim))
 		goto fail;
-	}
 
 	/* get var info */
 	retval = 0;
@@ -370,10 +352,8 @@ static ksint32_t fbdev_imx_driver_probe_timings(struct fwk_platdev *sprt_dev)
 	retval |= fwk_of_property_read_u32(sprt_disp, "bits-per-pixel", &sprt_var->bits_per_pixel);
 	retval |= fwk_of_property_read_u32(sprt_disp, "bus-width", &sprt_drv->sgrt_phase.bus_width);
 
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		goto fail;
-	}
 
 	return NR_isWell;
 
@@ -392,20 +372,17 @@ static ksint32_t fbdev_imx_driver_probe(struct fwk_platdev *sprt_pdev)
 {
 	struct fbdev_imx_drv *sprt_drv;
 	struct fwk_fb_info *sprt_fb;
-	kuaddr_t base;
+	void *base;
 	ksint32_t retval;
 
 	sprt_fb = fwk_framebuffer_alloc(sizeof(*sprt_drv), &sprt_pdev->sgrt_device);
-	if (!mrt_isValid(sprt_fb))
-	{
+	if (!isValid(sprt_fb))
 		return -NR_isMemErr;
-	}
 
-	base = fwk_platform_get_address(sprt_pdev, 0);
-	if (!mrt_isValid(base))
-	{
+	base = (void *)fwk_platform_get_address(sprt_pdev, 0);
+	base = fwk_io_remap(base);
+	if (!isValid(base))
 		goto fail;
-	}
 
 	sprt_drv = (struct fbdev_imx_drv *)fwk_fb_get_drvdata(sprt_fb);
 	sprt_drv->minor = FBDEV_IMX_DRIVER_MINOR;
@@ -415,16 +392,12 @@ static ksint32_t fbdev_imx_driver_probe(struct fwk_platdev *sprt_pdev)
 
 	fwk_platform_set_drvdata(sprt_pdev, sprt_drv);
 	retval = fbdev_imx_driver_probe_timings(sprt_pdev);
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		goto fail1;
-	}
 
 	retval = fbdev_imx_driver_probe_mux(sprt_pdev);
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		goto fail1;
-	}
 
 	sprt_fb->sprt_fbops = &sgrt_fwk_fb_ops;
 	sprt_fb->node = sprt_drv->minor;
@@ -432,10 +405,8 @@ static ksint32_t fbdev_imx_driver_probe(struct fwk_platdev *sprt_pdev)
 	sprt_fb->sgrt_fix.smem_len = sizeof(g_fbdev_imx_buffer);
 
 	retval = fwk_register_framebuffer(sprt_fb);
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		goto fail;
-	}
 
 	fbdev_imx_init(base, sprt_drv);
 
@@ -443,6 +414,7 @@ static ksint32_t fbdev_imx_driver_probe(struct fwk_platdev *sprt_pdev)
 
 fail1:
 	fwk_platform_set_drvdata(sprt_pdev, mrt_nullptr);
+	fwk_io_unmap(base);
 fail:
 	kfree(sprt_fb);
 	return -NR_isNotSuccess;
@@ -463,9 +435,10 @@ static ksint32_t fbdev_imx_driver_remove(struct fwk_platdev *sprt_dev)
 	sprt_fb = sprt_drv->sprt_fb;
 
 	fwk_unregister_framebuffer(sprt_fb);
-	kfree(sprt_fb);
 	fwk_platform_set_drvdata(sprt_dev, mrt_nullptr);
-
+	fwk_io_unmap(sprt_drv->base);
+	kfree(sprt_fb);
+	
 	return NR_isWell;
 }
 

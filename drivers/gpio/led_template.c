@@ -81,14 +81,11 @@ static kssize_t led_template_driver_write(struct fwk_file *sprt_file, const ksbu
 	sprt_privdata = (struct led_template_drv *)sprt_file->private_data;
 
 	fwk_copy_from_user(&value, ptrBuffer, 1);
+
 	if (value)
-	{
 		mrt_setbitl(mrt_bit(sprt_privdata->value[1]), sprt_privdata->output_address);
-	}
 	else
-	{
 		mrt_clrbitl(mrt_bit(sprt_privdata->value[1]), sprt_privdata->output_address);
-	}
 
 	return 0;
 }
@@ -133,9 +130,7 @@ static ksint32_t led_template_driver_probe(struct fwk_platdev *sprt_dev)
 	sprt_node = sprt_dev->sgrt_device.sprt_node;
 
 	for (i = 0; i < ARRAY_SIZE(led_value); i++)
-	{
 		fwk_of_property_read_u32_index(sprt_node, "led1-gpios", i, &led_value[i]);
-	}
 
 	/*!< -------------------------------------------------------------------- */
 	/*!< pinctrl */
@@ -169,34 +164,24 @@ static ksint32_t led_template_driver_probe(struct fwk_platdev *sprt_dev)
 	/*!< -------------------------------------------------------------------- */
 	devnum = MKE_DEV_NUM(LED_TEMPLATE_DRIVER_MAJOR, 0);
 	retval = fwk_register_chrdev(devnum, 1, "led-template");
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		goto fail1;
-	}
 
 	sprt_cdev = fwk_cdev_alloc(&sgrt_led_template_driver_oprts);
-	if (!mrt_isValid(sprt_cdev))
-	{
+	if (!isValid(sprt_cdev))
 		goto fail2;
-	}
 
 	retval = fwk_cdev_add(sprt_cdev, devnum, 1);
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		goto fail3;
-	}
 
 	retval = fwk_device_create(NR_TYPE_CHRDEV, devnum, LED_TEMPLATE_DRIVER_NAME);
-	if (mrt_isErr(retval))
-	{
+	if (retval < 0)
 		goto fail4;
-	}
-
+	
 	sprt_privdata = (struct led_template_drv *)kzalloc(sizeof(struct led_template_drv), GFP_KERNEL);
-	if (!mrt_isValid(sprt_privdata))
-	{
+	if (!isValid(sprt_privdata))
 		goto fail5;
-	}
 
 	sprt_privdata->ptrName = LED_TEMPLATE_DRIVER_NAME;
 	sprt_privdata->major = GET_DEV_MAJOR(devnum);
@@ -234,10 +219,8 @@ static ksint32_t led_template_driver_remove(struct fwk_platdev *sprt_dev)
 	kuint32_t devnum;
 
 	sprt_privdata = (struct led_template_drv *)fwk_platform_get_drvdata(sprt_dev);
-	if (!mrt_isValid(sprt_privdata))
-	{
+	if (!isValid(sprt_privdata))
 		return -NR_isNullPtr;
-	}
 
 	devnum = MKE_DEV_NUM(sprt_privdata->major, sprt_privdata->minor);
 

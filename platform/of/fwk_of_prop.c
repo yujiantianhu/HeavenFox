@@ -22,7 +22,7 @@
  */
 struct fwk_of_property *fwk_of_find_property(struct fwk_device_node *sprt_node, const kstring_t *ptr_name, kusize_t *ptr_lenth)
 {
-	struct fwk_of_property *sprt_head = mrt_isValid(sprt_node) ? sprt_node->properties : mrt_nullptr;
+	struct fwk_of_property *sprt_head = isValid(sprt_node) ? sprt_node->properties : mrt_nullptr;
 	struct fwk_of_property *sprt_list = mrt_nullptr;
 	kusize_t iLenth	= 0;
 
@@ -35,10 +35,8 @@ struct fwk_of_property *fwk_of_find_property(struct fwk_device_node *sprt_node, 
 		}
 	}
 
-	if (mrt_isValid(ptr_lenth))
-	{
+	if (ptr_lenth)
 		*ptr_lenth = iLenth;
-	}
 
 	return sprt_list;
 }
@@ -53,7 +51,7 @@ void *fwk_of_get_property(struct fwk_device_node *sprt_node, const kstring_t *pt
 {
 	struct fwk_of_property *sprt_prop = fwk_of_find_property(sprt_node, ptr_name, ptr_lenth);
 
-	return (mrt_isValid(sprt_prop) ? sprt_prop->value : mrt_nullptr);
+	return isValid(sprt_prop) ? sprt_prop->value : mrt_nullptr;
 }
 
 /*!
@@ -70,24 +68,18 @@ ksint32_t fwk_of_property_read_u8_array_index(struct fwk_device_node *sprt_node,
 
 	/*!< sprt_prop == mrt_nullptr : The property is not available */
 	sprt_prop = fwk_of_find_property(sprt_node, ptr_name, mrt_nullptr);
-	if (!mrt_isValid(sprt_prop))
-	{
+	if (!isValid(sprt_prop))
 		return -NR_isArgFault;
-	}
 
 	lenth = sprt_prop->length;
 	if ((index >= lenth) || (!size))
-	{
 		return -NR_isArgFault;
-	}
 
 	/*!< sprt_prop->length: the number of bytes occupied by sprt_prop->value */
 	size = ((index + size) >= lenth) ? lenth : (index + size);
 
 	for (i = index; i < size; i++, ptr_value++)
-	{
 		*ptr_value = *((kuint8_t *)sprt_prop->value + i);
-	}
 
 	return NR_isWell;
 }
@@ -106,24 +98,18 @@ ksint32_t fwk_of_property_read_u16_array_index(struct fwk_device_node *sprt_node
 
 	/*!< sprt_prop == mrt_nullptr : The property is not available */
 	sprt_prop = fwk_of_find_property(sprt_node, ptr_name, mrt_nullptr);
-	if (!mrt_isValid(sprt_prop))
-	{
+	if (!isValid(sprt_prop))
 		return -NR_isArgFault;
-	}
 
 	lenth = sprt_prop->length >> 1;
 	if ((index >= lenth) || (!size))
-	{
 		return -NR_isArgFault;
-	}
 
 	/*!< sprt_prop->length: the number of bytes occupied by sprt_prop->value */
 	size = ((index + size) >= lenth) ? lenth : (index + size);
 
 	for (i = index; i < size; i++, ptr_value++)
-	{
 		*ptr_value = FDT_TO_ARCH_ENDIAN16(*((kuint16_t *)sprt_prop->value + i));
-	}
 
 	return NR_isWell;
 }
@@ -142,24 +128,18 @@ ksint32_t fwk_of_property_read_u32_array_index(struct fwk_device_node *sprt_node
 
 	/*!< sprt_prop == mrt_nullptr : The property is not available */
 	sprt_prop = fwk_of_find_property(sprt_node, ptr_name, mrt_nullptr);
-	if (!mrt_isValid(sprt_prop))
-	{
+	if (!isValid(sprt_prop))
 		return -NR_isArgFault;
-	}
 
 	lenth = sprt_prop->length >> 2;
 	if ((index >= lenth) || (!size))
-	{
 		return -NR_isArgFault;
-	}
 
 	/*!< sprt_prop->length: the number of bytes occupied by sprt_prop->value */
 	size = ((index + size) >= lenth) ? lenth : (index + size);
 
 	for (i = index; i < size; i++, ptr_value++)
-	{
 		*ptr_value = FDT_TO_ARCH_ENDIAN32(*((kuint32_t *)sprt_prop->value + i));
-	}
 
 	return NR_isWell;
 }
@@ -253,7 +233,7 @@ ksint32_t fwk_of_property_read_string(struct fwk_device_node *sprt_node, const k
 
 	/*!< sprt_prop == mrt_nullptr : The property is not available */
 	sprt_prop = fwk_of_find_property(sprt_node, ptr_name, mrt_nullptr);
-	if (!mrt_isValid(sprt_prop))
+	if (!isValid(sprt_prop))
 	{
 		*ptr_string = mrt_nullptr;
 		return -NR_isArgFault;
@@ -280,7 +260,7 @@ ksint32_t fwk_of_property_read_string_index(struct fwk_device_node *sprt_node,
 
 	/*!< sprt_prop == mrt_nullptr : The property is not available */
 	sprt_prop = fwk_of_find_property(sprt_node, ptr_name, mrt_nullptr);
-	if (!mrt_isValid(sprt_prop))
+	if (!isValid(sprt_prop))
 	{
 		*ptr_string = mrt_nullptr;
 		return -NR_isArgFault;
@@ -288,16 +268,14 @@ ksint32_t fwk_of_property_read_string_index(struct fwk_device_node *sprt_node,
 
 	for (i = 0, iTotalLenth = 0; ((i <= index) && (iTotalLenth < sprt_prop->length)); i++)
 	{
-		iStrLenth = mrt_isValid(ptr_value) ? (strlen(ptr_value) + 1) : 0;
-		ptr_value = mrt_isValid(ptr_value) ? (ptr_value + iStrLenth) : (kstring_t *)sprt_prop->value;
+		iStrLenth = ptr_value ? (strlen(ptr_value) + 1) : 0;
+		ptr_value = ptr_value ? (ptr_value + iStrLenth) : (kstring_t *)sprt_prop->value;
 		iTotalLenth += iStrLenth;
 	}
 
 	/*!< sprt_prop->length: the number of bytes occupied by sprt_prop->value */
 	if (iTotalLenth >= sprt_prop->length)
-	{
 		return -NR_isArrayOver;
-	}
 
 	*ptr_string	= ptr_value;
 
@@ -316,13 +294,11 @@ kuint32_t fwk_of_n_size_cells(struct fwk_device_node *sprt_node)
 	kuint32_t value;
 	ksint32_t retval;
 
-	for (sprt_np = sprt_node; mrt_isValid(sprt_np); sprt_np = sprt_np->parent)
+	for (sprt_np = sprt_node; isValid(sprt_np); sprt_np = sprt_np->parent)
 	{
 		retval = fwk_of_property_read_u32(sprt_np, "#size-cells", &value);
-		if (!mrt_isErr(retval))
-		{
+		if (!retval)
 			return value;
-		}
 	}
 
 	return 0;
@@ -341,13 +317,11 @@ kuint32_t fwk_of_n_addr_cells(struct fwk_device_node *sprt_node)
 	ksint32_t retval;
 
 	/*!< Search "#address-cells", from child to parent */
-	for (sprt_np = sprt_node; mrt_isValid(sprt_np); sprt_np = sprt_np->parent)
+	for (sprt_np = sprt_node; isValid(sprt_np); sprt_np = sprt_np->parent)
 	{
 		retval = fwk_of_property_read_u32(sprt_np, "#address-cells", &value);
-		if (!mrt_isErr(retval))
-		{
+		if (!retval)
 			return value;
-		}
 	}
 
 	return 0;
@@ -364,16 +338,15 @@ kbool_t fwk_of_device_is_compatible(struct fwk_device_node *sprt_node, const kst
 	kstring_t *ptr_info;
 	kuint32_t index	= 0;
 
-	while (!mrt_isErr(fwk_of_property_read_string_index(sprt_node, "compatible", index, &ptr_info)))
+	while (!fwk_of_property_read_string_index(sprt_node, "compatible", index, &ptr_info))
 	{
 		index++;
 
 		if (!strcmp(ptr_info, ptr_compat))
-		{
 			return true;
-		}
 	}
 
 	return false;
 }
 
+/*!< end of file */

@@ -204,10 +204,8 @@ static inline void hal_imx_pin_auto_init(srt_imx_pin_t *sprt_cfg, kuaddr_t base,
  */
 static inline void hal_imx_pin_mux_configure(srt_imx_pin_t *sprt_cfg)
 {
-    if (mrt_isValid(sprt_cfg->mux_base))
-    {
+    if (sprt_cfg->mux_base)
         mrt_writel(sprt_cfg->mux_data, sprt_cfg->mux_base);
-    }
 }
 
 /*!
@@ -218,10 +216,8 @@ static inline void hal_imx_pin_mux_configure(srt_imx_pin_t *sprt_cfg)
  */
 static inline void hal_imx_pin_pad_configure(srt_imx_pin_t *sprt_cfg)
 {
-    if (mrt_isValid(sprt_cfg->pad_base))
-    {
+    if (sprt_cfg->pad_base)
         mrt_writel(sprt_cfg->pad_data, sprt_cfg->pad_base);
-    }
 }
 
 /*!
@@ -236,9 +232,7 @@ static inline void hal_imx_pin_configure(srt_imx_pin_t *sprt_cfg)
     mrt_writel(sprt_cfg->pad_data, sprt_cfg->pad_base);
 
     if (sprt_cfg->input_base)
-    {
         mrt_writel(sprt_cfg->input_data, sprt_cfg->input_base);
-    }
 }
 
 /*!

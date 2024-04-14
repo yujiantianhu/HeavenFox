@@ -37,9 +37,7 @@ ksint32_t __plat_init fwk_chrdev_init(void)
 	chrdevMax 	= ARRAY_SIZE(sgrt_fwk_chrdevs);
 
 	for (i = 0; i < chrdevMax; i++)
-	{
 		*(sprt_chrdev++) = mrt_nullptr;
-	}
 
 	return NR_isWell;
 }
@@ -87,9 +85,7 @@ static struct fwk_char_device *__fwk_register_chrdev(kuint32_t major, kuint32_t 
 	ksint32_t i;
 
 	if (!count)
-	{
 		return mrt_nullptr;
-	}
 
 	chrdevMax = ARRAY_SIZE(sgrt_fwk_chrdevs);
 
@@ -103,33 +99,25 @@ static struct fwk_char_device *__fwk_register_chrdev(kuint32_t major, kuint32_t 
 		 */
 		for (i = (chrdevMax - 1); i >= 0; i--)
 		{
-			if (!mrt_isValid(*(sprt_Dst--)))
-			{
+			if (!(*(sprt_Dst--)))
 				break;
-			}
 		}
 
 		if (i < 0)
-		{
 			return mrt_nullptr;
-		}
 
 		major = i;
 	}
 
 	if (major >= chrdevMax)
-	{
 		return mrt_nullptr;
-	}
 
 	index = major % chrdevMax;
 	sprt_Dst = &sgrt_fwk_chrdevs[index];
 
 	sprt_chrdev = (struct fwk_char_device *)kmalloc(sizeof(struct fwk_char_device), GFP_KERNEL);
-	if (!mrt_isValid(sprt_chrdev))
-	{
+	if (!isValid(sprt_chrdev))
 		return mrt_nullptr;
-	}
 
 	sprt_chrdev->major		= major;
 	sprt_chrdev->baseminor	= baseminor;
@@ -138,7 +126,7 @@ static struct fwk_char_device *__fwk_register_chrdev(kuint32_t major, kuint32_t 
 	do_string_n_copy((char *)sprt_chrdev->name, (const char *)name, sizeof(sprt_chrdev->name));
 
 	/*!< If sprt_Temp[index] is empty, sprt_chrdev can be deposited directly */
-	if (!mrt_isValid(*sprt_Dst))
+	if (!(*sprt_Dst))
 	{
 		*sprt_Dst = sprt_chrdev;
 		goto chrget;
@@ -148,7 +136,7 @@ static struct fwk_char_device *__fwk_register_chrdev(kuint32_t major, kuint32_t 
 	 * If sprt_Temp[index] is not empty, 
 	 * then insert sprt_chrdev into sprt_Temp[index]->next, and arrange them in the order of baseminor from small to large 
 	 */
-	for (sprt_Dst = sprt_Dst; mrt_isValid(*sprt_Dst); sprt_Dst = &(*sprt_Dst)->sprt_next)
+	for (sprt_Dst = sprt_Dst; *sprt_Dst; sprt_Dst = &(*sprt_Dst)->sprt_next)
 	{
 		/*!<
 		 * A new device with a smaller secondary device number than an existing device can take the place of the device, 
@@ -164,7 +152,7 @@ static struct fwk_char_device *__fwk_register_chrdev(kuint32_t major, kuint32_t 
 	}
 
 	/*!< Error verification: The applied baseminor cannot be duplicated with an existing device */
-	if (mrt_isValid(*sprt_Dst))
+	if (*sprt_Dst)
 	{
 		kuint32_t first_minor = (*sprt_Dst)->baseminor;
 		kuint32_t last_minor  = (*sprt_Dst)->baseminor + (*sprt_Dst)->count - 1;
@@ -178,9 +166,7 @@ static struct fwk_char_device *__fwk_register_chrdev(kuint32_t major, kuint32_t 
 		 * 		Then the range of the new device is obviously either partially overlapped with the old device, or even completely covered the old device
 		 */
 		if ((baseminor <= last_minor) && ((baseminor + count - 1) >= first_minor))
-		{
 			goto fail;
-		}
 	}
 
 	/*!< If the device is successfully applied, plug the new device in front of (*sprt_Dst) */
@@ -219,9 +205,7 @@ static struct fwk_char_device *__fwk_unregister_chrdev(kuint32_t major, kuint32_
 
 	chrdevMax = ARRAY_SIZE(sgrt_fwk_chrdevs);
 	if ((major >= chrdevMax) || (!count))
-	{
 		return mrt_nullptr;
-	}
 
 	index = major % chrdevMax;
 	sprt_Dst = &sgrt_fwk_chrdevs[index];
@@ -231,7 +215,7 @@ static struct fwk_char_device *__fwk_unregister_chrdev(kuint32_t major, kuint32_
 	 * If the number of secondary devices and the number of secondary devices can be matched, 
 	 * the device will be separated and the linked list connection will be restored
 	 */
-	for (sprt_Dst = sprt_Dst, sprt_Rlt = mrt_nullptr; mrt_isValid(*sprt_Dst); sprt_Dst = &(*sprt_Dst)->sprt_next)
+	for (sprt_Dst = sprt_Dst, sprt_Rlt = mrt_nullptr; *sprt_Dst; sprt_Dst = &(*sprt_Dst)->sprt_next)
 	{
 		if (((baseminor == (*sprt_Dst)->baseminor) && (count == (*sprt_Dst)->count)))
 		{
@@ -256,10 +240,8 @@ ksint32_t fwk_alloc_chrdev(kuint32_t *devNum, kuint32_t baseminor, kuint32_t cou
 	struct fwk_char_device *sprt_chrdev;
 
 	sprt_chrdev = __fwk_register_chrdev(0, baseminor, count, name);
-	if (!mrt_isValid(sprt_chrdev))
-	{
+	if (!isValid(sprt_chrdev))
 		return -NR_isArgFault;
-	}
 
 	*devNum	= MKE_DEV_NUM(sprt_chrdev->major, sprt_chrdev->baseminor);
 
@@ -286,10 +268,8 @@ ksint32_t fwk_register_chrdev(kuint32_t devNum, kuint32_t count, const kstring_t
 		next = mrt_ret_min2(last, next);
 
 		sprt_chrdev = __fwk_register_chrdev(major, GET_DEV_MINOR(n), next - n, name);
-		if (!mrt_isValid(sprt_chrdev))
-		{
+		if (!isValid(sprt_chrdev))
 			goto fail;
-		}
 	}
 
 	return NR_isWell;
@@ -322,10 +302,8 @@ ksint32_t fwk_unregister_chrdev(kuint32_t devNum, kuint32_t count)
 		next = mrt_ret_min2(last, next);
 
 		sprt_chrdev = __fwk_unregister_chrdev(major, GET_DEV_MINOR(n), next - n);
-		if (mrt_isValid(sprt_chrdev))
-		{
+		if (isValid(sprt_chrdev))
 			kfree(sprt_chrdev);
-		}
 	}
 
 	return NR_isWell;

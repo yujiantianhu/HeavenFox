@@ -47,7 +47,7 @@ const struct fwk_of_device_id sgrt_fwk_irq_intcs_table[] =
  */
 void __plat_init initIRQ(void)
 {
-#if (mrt_isValid(CONFIG_OF))
+#if CONFIG_OF
     fwk_of_irq_init(sgrt_fwk_irq_intcs_table);
 
 #else
@@ -108,28 +108,32 @@ static void fwk_gic_initial(srt_ca7_gic_t *sprt_gic)
     kuint32_t i;
     kuint32_t irqRegs;
 
+    sprt_gic->dest_base = fwk_io_remap(sprt_gic->dest_base);
+    if (!isValid(sprt_gic->dest_base))
+        return;
+
+    sprt_gic->cpu_base = fwk_io_remap(sprt_gic->cpu_base);
+    if (!isValid(sprt_gic->cpu_base))
+        return;
+
     sprt_dest = mrt_get_gic_destributor(sprt_gic);
     sprt_cpu = mrt_get_gic_interface(sprt_gic);
 
     irqRegs = mrt_mask(sprt_dest->D_TYPER, 0x1fU) + 1;
 
-    if (mrt_isValid(sprt_gic))
+    if (isValid(sprt_gic))
     {
         /*!< irq number = ((sprt_dest->D_TYPER & 0x1fU) + 1) * 32 */
         sprt_gic->gic_irqs = irqRegs << 5;
         if (sprt_gic->gic_irqs > __CA7_GIC_MAX_IRQS)
-        {
             sprt_gic->gic_irqs = __CA7_GIC_MAX_IRQS;
-        }
     }
 
     /*!< On POR, all SPI is in group 0, level-sensitive and using 1-N model */
 
     /*!< Disable all PPI, SGI and SPI */
     for (i = 0; i < irqRegs; i++)
-    {
         mrt_writel(0xffffffffU, &sprt_dest->D_ICENABLER[i]);
-    }
 
     /*!< Make all interrupts have higher priority */
     mrt_writel(mrt_bit_mask(0xffU, 0xffU, 8 - __CA7_GIC_PRIO_BITS), &sprt_cpu->C_PMR);
@@ -155,10 +159,8 @@ static void fwk_gic_init_bases(kuint32_t gic_nr, kuint32_t irq_start,
     srt_fwk_irq_domain_t *sprt_domain;
 
     sprt_gic = fwk_get_gic_data(gic_nr);
-    if (!mrt_isValid(sprt_gic))
-    {
+    if (!isValid(sprt_gic))
         return;
-    }
 
     sprt_gic->dest_base = dest_base;
     sprt_gic->cpu_base = cpu_base;
@@ -167,12 +169,10 @@ static void fwk_gic_init_bases(kuint32_t gic_nr, kuint32_t irq_start,
     fwk_gic_initial(sprt_gic);
 
     /*!< sprt_gic->gic_irqs will be get on local_irq_initial */
-    if (!mrt_isValid(sprt_gic->gic_irqs))
-    {
+    if (!sprt_gic->gic_irqs)
         print_err("Get IRQ Controller Number failed!\n");
-    }
 
-    if (mrt_isValid(sprt_node))
+    if (isValid(sprt_node))
     {
         sprt_domain = (void *)fwk_irq_domain_add_hierarchy(mrt_nullptr, sprt_node, 
                                                 sprt_gic->gic_irqs, &sgrt_gic_domain_hierarchy_ops, sprt_gic);
@@ -191,16 +191,14 @@ ksint32_t fwk_gic_of_init(struct fwk_device_node *sprt_node, struct fwk_device_n
 {
     kuint32_t destributor = 0, cpu_interface = 0;
 
-    if (sprt_parent)
+    if (isValid(sprt_parent))
         return -NR_isUnvalid;
 
     fwk_of_property_read_u32_index(sprt_node, "reg", 0, &destributor);
     fwk_of_property_read_u32_index(sprt_node, "reg", 2, &cpu_interface);
 
-    if ((!mrt_isValid(destributor)) || (!mrt_isValid(destributor)))
-    {
+    if ((!destributor) || (!cpu_interface))
         return -NR_isNotFound;
-    }
 
     fwk_gic_init_bases(g_iHal_gic_cnts, -1, (void *)destributor, (void *)cpu_interface, 0, sprt_node);
     g_iHal_gic_cnts++;
@@ -217,9 +215,7 @@ ksint32_t fwk_gic_to_gpc_irq(ksint32_t hwirq)
 {
     hwirq -= 32;
     if (hwirq < 0)
-    {
         return hwirq;
-    }
 
     return fwk_irq_get_by_domain("gpc", hwirq);
 }
@@ -229,7 +225,7 @@ ksint32_t fwk_gpc_to_gic_irq(ksint32_t virq)
     srt_fwk_irq_data_t *sprt_data;
 
     sprt_data = fwk_irq_get_data(virq);
-    return sprt_data ? (sprt_data->hwirq + 32) : -1;
+    return isValid(sprt_data) ? (sprt_data->hwirq + 32) : -1;
 }
 
 /*!
@@ -276,20 +272,16 @@ ksint32_t fwk_gpc_of_init(struct fwk_device_node *sprt_node, struct fwk_device_n
 {
     srt_fwk_irq_domain_t *sprt_domain, *sprt_par;
 
-    if (!sprt_parent || !sprt_node)
+    if (!isValid(sprt_parent) || !isValid(sprt_node))
         return -NR_isUnvalid;
 
     sprt_par = fwk_of_irq_host(sprt_parent);
-    if (!mrt_isValid(sprt_par))
-    {
+    if (!isValid(sprt_par))
         return -NR_isUnvalid;
-    }
 
     sprt_domain = fwk_irq_domain_add_hierarchy(sprt_par, sprt_node, CA7_MAX_GPC_NR, &sgrt_gpc_domain_hierarchy_ops, mrt_nullptr);
-    if (!mrt_isValid(sprt_domain))
-    {
+    if (!isValid(sprt_domain))
         return -NR_isNotSuccess;
-    }
 
     return NR_isWell;
 }
