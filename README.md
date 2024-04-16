@@ -37,25 +37,25 @@
     
     Image path: ./boot/gardens.img
 
-# Reade:
-# 
+# Readme:
+# -----------------------------------------------------------------------
 
-2024.04.16:
+# 2024.04.16:
     author: Yang Yujun
     commit: change project name to "fantasystem", i.e. fantasy system
 
-2024.04.15:
+# 2024.04.15:
     author: Yang Yujun
     commit: 
         01) fix the issue that the first thread scheduling register was overwritten;
         02) add display generic APIs
         03) optimize code
 
-2024.04.13:
+# 2024.04.13:
     author: Yang Yujun
     commit: makefile optimization, supporting selective compilation of source files
 
-2024.04.07:
+# 2024.04.07:
     author: Yang Yujun
     commit:
         01) support multithreading (time slice, priority preemption, and delayed sleep);
@@ -73,5 +73,6 @@
     author: Yang Yujun
     commit: create README.md first
     
+# -----------------------------------------------------------------------
 # end
 
