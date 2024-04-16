@@ -69,7 +69,7 @@
         09) support platform: bus - device - driver framework;
         10) provide APIs such as open/close/read/write, access hardware through “fd” and “file_operations”.
 
-2023.12.21:
+# 2023.12.21:
     author: Yang Yujun
     commit: create README.md first
     
