@@ -127,7 +127,7 @@ static ksint32_t led_template_driver_probe(struct fwk_platdev *sprt_dev)
 	ksint32_t retval;
 
 	sprt_root = fwk_of_find_node_by_path("/");
-	sprt_node = sprt_dev->sgrt_device.sprt_node;
+	sprt_node = sprt_dev->sgrt_dev.sprt_node;
 
 	for (i = 0; i < ARRAY_SIZE(led_value); i++)
 		fwk_of_property_read_u32_index(sprt_node, "led1-gpios", i, &led_value[i]);

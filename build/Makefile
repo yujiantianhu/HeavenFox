@@ -60,10 +60,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ubuntu/ProgramWorks/MyDesign/real-kernel
+CMAKE_SOURCE_DIR = /home/ubuntu/ProgramWorks/MyDesign/Gardens
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build
+CMAKE_BINARY_DIR = /home/ubuntu/ProgramWorks/MyDesign/Gardens/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -90,9 +90,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ubuntu/ProgramWorks/MyDesign/Gardens/build/CMakeFiles /home/ubuntu/ProgramWorks/MyDesign/Gardens/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ubuntu/ProgramWorks/MyDesign/Gardens/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -120,17 +120,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named real-kernel.elf
+# Target rules for targets named gardens.elf
 
 # Build rule for target.
-real-kernel.elf: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 real-kernel.elf
-.PHONY : real-kernel.elf
+gardens.elf: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gardens.elf
+.PHONY : gardens.elf
 
 # fast build rule for target.
-real-kernel.elf/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/build
-.PHONY : real-kernel.elf/fast
+gardens.elf/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/build
+.PHONY : gardens.elf/fast
 
 #=============================================================================
 # Target rules for targets named self-clean
@@ -163,7 +163,7 @@ arch/arm/cpu/armv7/imx6ull/board.o: arch/arm/cpu/armv7/imx6ull/board.c.o
 
 # target to build an object file
 arch/arm/cpu/armv7/imx6ull/board.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/imx6ull/board.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/cpu/armv7/imx6ull/board.c.o
 .PHONY : arch/arm/cpu/armv7/imx6ull/board.c.o
 
 arch/arm/cpu/armv7/imx6ull/board.i: arch/arm/cpu/armv7/imx6ull/board.c.i
@@ -171,7 +171,7 @@ arch/arm/cpu/armv7/imx6ull/board.i: arch/arm/cpu/armv7/imx6ull/board.c.i
 
 # target to preprocess a source file
 arch/arm/cpu/armv7/imx6ull/board.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/imx6ull/board.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/cpu/armv7/imx6ull/board.c.i
 .PHONY : arch/arm/cpu/armv7/imx6ull/board.c.i
 
 arch/arm/cpu/armv7/imx6ull/board.s: arch/arm/cpu/armv7/imx6ull/board.c.s
@@ -179,7 +179,7 @@ arch/arm/cpu/armv7/imx6ull/board.s: arch/arm/cpu/armv7/imx6ull/board.c.s
 
 # target to generate assembly for a file
 arch/arm/cpu/armv7/imx6ull/board.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/imx6ull/board.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/cpu/armv7/imx6ull/board.c.s
 .PHONY : arch/arm/cpu/armv7/imx6ull/board.c.s
 
 arch/arm/cpu/armv7/irq.o: arch/arm/cpu/armv7/irq.c.o
@@ -187,7 +187,7 @@ arch/arm/cpu/armv7/irq.o: arch/arm/cpu/armv7/irq.c.o
 
 # target to build an object file
 arch/arm/cpu/armv7/irq.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/irq.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/cpu/armv7/irq.c.o
 .PHONY : arch/arm/cpu/armv7/irq.c.o
 
 arch/arm/cpu/armv7/irq.i: arch/arm/cpu/armv7/irq.c.i
@@ -195,7 +195,7 @@ arch/arm/cpu/armv7/irq.i: arch/arm/cpu/armv7/irq.c.i
 
 # target to preprocess a source file
 arch/arm/cpu/armv7/irq.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/irq.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/cpu/armv7/irq.c.i
 .PHONY : arch/arm/cpu/armv7/irq.c.i
 
 arch/arm/cpu/armv7/irq.s: arch/arm/cpu/armv7/irq.c.s
@@ -203,7 +203,7 @@ arch/arm/cpu/armv7/irq.s: arch/arm/cpu/armv7/irq.c.s
 
 # target to generate assembly for a file
 arch/arm/cpu/armv7/irq.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/irq.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/cpu/armv7/irq.c.s
 .PHONY : arch/arm/cpu/armv7/irq.c.s
 
 arch/arm/cpu/armv7/lowlevel_init.o: arch/arm/cpu/armv7/lowlevel_init.S.o
@@ -211,7 +211,7 @@ arch/arm/cpu/armv7/lowlevel_init.o: arch/arm/cpu/armv7/lowlevel_init.S.o
 
 # target to build an object file
 arch/arm/cpu/armv7/lowlevel_init.S.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/lowlevel_init.S.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/cpu/armv7/lowlevel_init.S.o
 .PHONY : arch/arm/cpu/armv7/lowlevel_init.S.o
 
 arch/arm/cpu/armv7/start.o: arch/arm/cpu/armv7/start.S.o
@@ -219,7 +219,7 @@ arch/arm/cpu/armv7/start.o: arch/arm/cpu/armv7/start.S.o
 
 # target to build an object file
 arch/arm/cpu/armv7/start.S.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/cpu/armv7/start.S.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/cpu/armv7/start.S.o
 .PHONY : arch/arm/cpu/armv7/start.S.o
 
 arch/arm/kernel/context.o: arch/arm/kernel/context.S.o
@@ -227,7 +227,7 @@ arch/arm/kernel/context.o: arch/arm/kernel/context.S.o
 
 # target to build an object file
 arch/arm/kernel/context.S.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/context.S.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/kernel/context.S.o
 .PHONY : arch/arm/kernel/context.S.o
 
 arch/arm/kernel/head-common.o: arch/arm/kernel/head-common.S.o
@@ -235,7 +235,7 @@ arch/arm/kernel/head-common.o: arch/arm/kernel/head-common.S.o
 
 # target to build an object file
 arch/arm/kernel/head-common.S.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head-common.S.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/kernel/head-common.S.o
 .PHONY : arch/arm/kernel/head-common.S.o
 
 arch/arm/kernel/head.o: arch/arm/kernel/head.S.o
@@ -243,7 +243,7 @@ arch/arm/kernel/head.o: arch/arm/kernel/head.S.o
 
 # target to build an object file
 arch/arm/kernel/head.S.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/kernel/head.S.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/kernel/head.S.o
 .PHONY : arch/arm/kernel/head.S.o
 
 arch/arm/lib/crt0.o: arch/arm/lib/crt0.S.o
@@ -251,7 +251,7 @@ arch/arm/lib/crt0.o: arch/arm/lib/crt0.S.o
 
 # target to build an object file
 arch/arm/lib/crt0.S.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/lib/crt0.S.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/lib/crt0.S.o
 .PHONY : arch/arm/lib/crt0.S.o
 
 arch/arm/lib/exception.o: arch/arm/lib/exception.c.o
@@ -259,7 +259,7 @@ arch/arm/lib/exception.o: arch/arm/lib/exception.c.o
 
 # target to build an object file
 arch/arm/lib/exception.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/lib/exception.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/lib/exception.c.o
 .PHONY : arch/arm/lib/exception.c.o
 
 arch/arm/lib/exception.i: arch/arm/lib/exception.c.i
@@ -267,7 +267,7 @@ arch/arm/lib/exception.i: arch/arm/lib/exception.c.i
 
 # target to preprocess a source file
 arch/arm/lib/exception.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/lib/exception.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/lib/exception.c.i
 .PHONY : arch/arm/lib/exception.c.i
 
 arch/arm/lib/exception.s: arch/arm/lib/exception.c.s
@@ -275,7 +275,7 @@ arch/arm/lib/exception.s: arch/arm/lib/exception.c.s
 
 # target to generate assembly for a file
 arch/arm/lib/exception.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/lib/exception.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/lib/exception.c.s
 .PHONY : arch/arm/lib/exception.c.s
 
 arch/arm/lib/interrupt.o: arch/arm/lib/interrupt.c.o
@@ -283,7 +283,7 @@ arch/arm/lib/interrupt.o: arch/arm/lib/interrupt.c.o
 
 # target to build an object file
 arch/arm/lib/interrupt.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/lib/interrupt.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/lib/interrupt.c.o
 .PHONY : arch/arm/lib/interrupt.c.o
 
 arch/arm/lib/interrupt.i: arch/arm/lib/interrupt.c.i
@@ -291,7 +291,7 @@ arch/arm/lib/interrupt.i: arch/arm/lib/interrupt.c.i
 
 # target to preprocess a source file
 arch/arm/lib/interrupt.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/lib/interrupt.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/lib/interrupt.c.i
 .PHONY : arch/arm/lib/interrupt.c.i
 
 arch/arm/lib/interrupt.s: arch/arm/lib/interrupt.c.s
@@ -299,7 +299,7 @@ arch/arm/lib/interrupt.s: arch/arm/lib/interrupt.c.s
 
 # target to generate assembly for a file
 arch/arm/lib/interrupt.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/lib/interrupt.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/lib/interrupt.c.s
 .PHONY : arch/arm/lib/interrupt.c.s
 
 arch/arm/lib/lib1funcs.o: arch/arm/lib/lib1funcs.S.o
@@ -307,7 +307,7 @@ arch/arm/lib/lib1funcs.o: arch/arm/lib/lib1funcs.S.o
 
 # target to build an object file
 arch/arm/lib/lib1funcs.S.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/lib/lib1funcs.S.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/lib/lib1funcs.S.o
 .PHONY : arch/arm/lib/lib1funcs.S.o
 
 arch/arm/lib/vectors.o: arch/arm/lib/vectors.S.o
@@ -315,7 +315,7 @@ arch/arm/lib/vectors.o: arch/arm/lib/vectors.S.o
 
 # target to build an object file
 arch/arm/lib/vectors.S.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/arch/arm/lib/vectors.S.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/arch/arm/lib/vectors.S.o
 .PHONY : arch/arm/lib/vectors.S.o
 
 board/mach-imx6ull/board_init.o: board/mach-imx6ull/board_init.c.o
@@ -323,7 +323,7 @@ board/mach-imx6ull/board_init.o: board/mach-imx6ull/board_init.c.o
 
 # target to build an object file
 board/mach-imx6ull/board_init.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/board_init.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/board_init.c.o
 .PHONY : board/mach-imx6ull/board_init.c.o
 
 board/mach-imx6ull/board_init.i: board/mach-imx6ull/board_init.c.i
@@ -331,7 +331,7 @@ board/mach-imx6ull/board_init.i: board/mach-imx6ull/board_init.c.i
 
 # target to preprocess a source file
 board/mach-imx6ull/board_init.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/board_init.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/board_init.c.i
 .PHONY : board/mach-imx6ull/board_init.c.i
 
 board/mach-imx6ull/board_init.s: board/mach-imx6ull/board_init.c.s
@@ -339,7 +339,7 @@ board/mach-imx6ull/board_init.s: board/mach-imx6ull/board_init.c.s
 
 # target to generate assembly for a file
 board/mach-imx6ull/board_init.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/board_init.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/board_init.c.s
 .PHONY : board/mach-imx6ull/board_init.c.s
 
 board/mach-imx6ull/imx6_console.o: board/mach-imx6ull/imx6_console.c.o
@@ -347,7 +347,7 @@ board/mach-imx6ull/imx6_console.o: board/mach-imx6ull/imx6_console.c.o
 
 # target to build an object file
 board/mach-imx6ull/imx6_console.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_console.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_console.c.o
 .PHONY : board/mach-imx6ull/imx6_console.c.o
 
 board/mach-imx6ull/imx6_console.i: board/mach-imx6ull/imx6_console.c.i
@@ -355,7 +355,7 @@ board/mach-imx6ull/imx6_console.i: board/mach-imx6ull/imx6_console.c.i
 
 # target to preprocess a source file
 board/mach-imx6ull/imx6_console.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_console.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_console.c.i
 .PHONY : board/mach-imx6ull/imx6_console.c.i
 
 board/mach-imx6ull/imx6_console.s: board/mach-imx6ull/imx6_console.c.s
@@ -363,7 +363,7 @@ board/mach-imx6ull/imx6_console.s: board/mach-imx6ull/imx6_console.c.s
 
 # target to generate assembly for a file
 board/mach-imx6ull/imx6_console.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_console.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_console.c.s
 .PHONY : board/mach-imx6ull/imx6_console.c.s
 
 board/mach-imx6ull/imx6_gadget.o: board/mach-imx6ull/imx6_gadget.c.o
@@ -371,7 +371,7 @@ board/mach-imx6ull/imx6_gadget.o: board/mach-imx6ull/imx6_gadget.c.o
 
 # target to build an object file
 board/mach-imx6ull/imx6_gadget.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_gadget.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_gadget.c.o
 .PHONY : board/mach-imx6ull/imx6_gadget.c.o
 
 board/mach-imx6ull/imx6_gadget.i: board/mach-imx6ull/imx6_gadget.c.i
@@ -379,7 +379,7 @@ board/mach-imx6ull/imx6_gadget.i: board/mach-imx6ull/imx6_gadget.c.i
 
 # target to preprocess a source file
 board/mach-imx6ull/imx6_gadget.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_gadget.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_gadget.c.i
 .PHONY : board/mach-imx6ull/imx6_gadget.c.i
 
 board/mach-imx6ull/imx6_gadget.s: board/mach-imx6ull/imx6_gadget.c.s
@@ -387,7 +387,7 @@ board/mach-imx6ull/imx6_gadget.s: board/mach-imx6ull/imx6_gadget.c.s
 
 # target to generate assembly for a file
 board/mach-imx6ull/imx6_gadget.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_gadget.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_gadget.c.s
 .PHONY : board/mach-imx6ull/imx6_gadget.c.s
 
 board/mach-imx6ull/imx6_led.o: board/mach-imx6ull/imx6_led.c.o
@@ -395,7 +395,7 @@ board/mach-imx6ull/imx6_led.o: board/mach-imx6ull/imx6_led.c.o
 
 # target to build an object file
 board/mach-imx6ull/imx6_led.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_led.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_led.c.o
 .PHONY : board/mach-imx6ull/imx6_led.c.o
 
 board/mach-imx6ull/imx6_led.i: board/mach-imx6ull/imx6_led.c.i
@@ -403,7 +403,7 @@ board/mach-imx6ull/imx6_led.i: board/mach-imx6ull/imx6_led.c.i
 
 # target to preprocess a source file
 board/mach-imx6ull/imx6_led.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_led.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_led.c.i
 .PHONY : board/mach-imx6ull/imx6_led.c.i
 
 board/mach-imx6ull/imx6_led.s: board/mach-imx6ull/imx6_led.c.s
@@ -411,7 +411,7 @@ board/mach-imx6ull/imx6_led.s: board/mach-imx6ull/imx6_led.c.s
 
 # target to generate assembly for a file
 board/mach-imx6ull/imx6_led.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_led.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_led.c.s
 .PHONY : board/mach-imx6ull/imx6_led.c.s
 
 board/mach-imx6ull/imx6_sdmmc.o: board/mach-imx6ull/imx6_sdmmc.c.o
@@ -419,7 +419,7 @@ board/mach-imx6ull/imx6_sdmmc.o: board/mach-imx6ull/imx6_sdmmc.c.o
 
 # target to build an object file
 board/mach-imx6ull/imx6_sdmmc.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_sdmmc.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_sdmmc.c.o
 .PHONY : board/mach-imx6ull/imx6_sdmmc.c.o
 
 board/mach-imx6ull/imx6_sdmmc.i: board/mach-imx6ull/imx6_sdmmc.c.i
@@ -427,7 +427,7 @@ board/mach-imx6ull/imx6_sdmmc.i: board/mach-imx6ull/imx6_sdmmc.c.i
 
 # target to preprocess a source file
 board/mach-imx6ull/imx6_sdmmc.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_sdmmc.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_sdmmc.c.i
 .PHONY : board/mach-imx6ull/imx6_sdmmc.c.i
 
 board/mach-imx6ull/imx6_sdmmc.s: board/mach-imx6ull/imx6_sdmmc.c.s
@@ -435,7 +435,7 @@ board/mach-imx6ull/imx6_sdmmc.s: board/mach-imx6ull/imx6_sdmmc.c.s
 
 # target to generate assembly for a file
 board/mach-imx6ull/imx6_sdmmc.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_sdmmc.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_sdmmc.c.s
 .PHONY : board/mach-imx6ull/imx6_sdmmc.c.s
 
 board/mach-imx6ull/imx6_systick.o: board/mach-imx6ull/imx6_systick.c.o
@@ -443,7 +443,7 @@ board/mach-imx6ull/imx6_systick.o: board/mach-imx6ull/imx6_systick.c.o
 
 # target to build an object file
 board/mach-imx6ull/imx6_systick.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_systick.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_systick.c.o
 .PHONY : board/mach-imx6ull/imx6_systick.c.o
 
 board/mach-imx6ull/imx6_systick.i: board/mach-imx6ull/imx6_systick.c.i
@@ -451,7 +451,7 @@ board/mach-imx6ull/imx6_systick.i: board/mach-imx6ull/imx6_systick.c.i
 
 # target to preprocess a source file
 board/mach-imx6ull/imx6_systick.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_systick.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_systick.c.i
 .PHONY : board/mach-imx6ull/imx6_systick.c.i
 
 board/mach-imx6ull/imx6_systick.s: board/mach-imx6ull/imx6_systick.c.s
@@ -459,7 +459,7 @@ board/mach-imx6ull/imx6_systick.s: board/mach-imx6ull/imx6_systick.c.s
 
 # target to generate assembly for a file
 board/mach-imx6ull/imx6_systick.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx6_systick.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx6_systick.c.s
 .PHONY : board/mach-imx6ull/imx6_systick.c.s
 
 board/mach-imx6ull/imx_common.o: board/mach-imx6ull/imx_common.c.o
@@ -467,7 +467,7 @@ board/mach-imx6ull/imx_common.o: board/mach-imx6ull/imx_common.c.o
 
 # target to build an object file
 board/mach-imx6ull/imx_common.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx_common.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx_common.c.o
 .PHONY : board/mach-imx6ull/imx_common.c.o
 
 board/mach-imx6ull/imx_common.i: board/mach-imx6ull/imx_common.c.i
@@ -475,7 +475,7 @@ board/mach-imx6ull/imx_common.i: board/mach-imx6ull/imx_common.c.i
 
 # target to preprocess a source file
 board/mach-imx6ull/imx_common.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx_common.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx_common.c.i
 .PHONY : board/mach-imx6ull/imx_common.c.i
 
 board/mach-imx6ull/imx_common.s: board/mach-imx6ull/imx_common.c.s
@@ -483,7 +483,7 @@ board/mach-imx6ull/imx_common.s: board/mach-imx6ull/imx_common.c.s
 
 # target to generate assembly for a file
 board/mach-imx6ull/imx_common.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/board/mach-imx6ull/imx_common.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/board/mach-imx6ull/imx_common.c.s
 .PHONY : board/mach-imx6ull/imx_common.c.s
 
 boot/board_f.o: boot/board_f.c.o
@@ -491,7 +491,7 @@ boot/board_f.o: boot/board_f.c.o
 
 # target to build an object file
 boot/board_f.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/boot/board_f.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/boot/board_f.c.o
 .PHONY : boot/board_f.c.o
 
 boot/board_f.i: boot/board_f.c.i
@@ -499,7 +499,7 @@ boot/board_f.i: boot/board_f.c.i
 
 # target to preprocess a source file
 boot/board_f.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/boot/board_f.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/boot/board_f.c.i
 .PHONY : boot/board_f.c.i
 
 boot/board_f.s: boot/board_f.c.s
@@ -507,7 +507,7 @@ boot/board_f.s: boot/board_f.c.s
 
 # target to generate assembly for a file
 boot/board_f.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/boot/board_f.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/boot/board_f.c.s
 .PHONY : boot/board_f.c.s
 
 boot/board_r.o: boot/board_r.c.o
@@ -515,7 +515,7 @@ boot/board_r.o: boot/board_r.c.o
 
 # target to build an object file
 boot/board_r.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/boot/board_r.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/boot/board_r.c.o
 .PHONY : boot/board_r.c.o
 
 boot/board_r.i: boot/board_r.c.i
@@ -523,7 +523,7 @@ boot/board_r.i: boot/board_r.c.i
 
 # target to preprocess a source file
 boot/board_r.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/boot/board_r.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/boot/board_r.c.i
 .PHONY : boot/board_r.c.i
 
 boot/board_r.s: boot/board_r.c.s
@@ -531,7 +531,7 @@ boot/board_r.s: boot/board_r.c.s
 
 # target to generate assembly for a file
 boot/board_r.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/boot/board_r.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/boot/board_r.c.s
 .PHONY : boot/board_r.c.s
 
 boot/dynamic/implicit_call.o: boot/dynamic/implicit_call.c.o
@@ -539,7 +539,7 @@ boot/dynamic/implicit_call.o: boot/dynamic/implicit_call.c.o
 
 # target to build an object file
 boot/dynamic/implicit_call.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/boot/dynamic/implicit_call.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/boot/dynamic/implicit_call.c.o
 .PHONY : boot/dynamic/implicit_call.c.o
 
 boot/dynamic/implicit_call.i: boot/dynamic/implicit_call.c.i
@@ -547,7 +547,7 @@ boot/dynamic/implicit_call.i: boot/dynamic/implicit_call.c.i
 
 # target to preprocess a source file
 boot/dynamic/implicit_call.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/boot/dynamic/implicit_call.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/boot/dynamic/implicit_call.c.i
 .PHONY : boot/dynamic/implicit_call.c.i
 
 boot/dynamic/implicit_call.s: boot/dynamic/implicit_call.c.s
@@ -555,7 +555,7 @@ boot/dynamic/implicit_call.s: boot/dynamic/implicit_call.c.s
 
 # target to generate assembly for a file
 boot/dynamic/implicit_call.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/boot/dynamic/implicit_call.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/boot/dynamic/implicit_call.c.s
 .PHONY : boot/dynamic/implicit_call.c.s
 
 common/generic/api_string.o: common/generic/api_string.c.o
@@ -563,7 +563,7 @@ common/generic/api_string.o: common/generic/api_string.c.o
 
 # target to build an object file
 common/generic/api_string.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/api_string.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/api_string.c.o
 .PHONY : common/generic/api_string.c.o
 
 common/generic/api_string.i: common/generic/api_string.c.i
@@ -571,7 +571,7 @@ common/generic/api_string.i: common/generic/api_string.c.i
 
 # target to preprocess a source file
 common/generic/api_string.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/api_string.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/api_string.c.i
 .PHONY : common/generic/api_string.c.i
 
 common/generic/api_string.s: common/generic/api_string.c.s
@@ -579,7 +579,7 @@ common/generic/api_string.s: common/generic/api_string.c.s
 
 # target to generate assembly for a file
 common/generic/api_string.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/api_string.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/api_string.c.s
 .PHONY : common/generic/api_string.c.s
 
 common/generic/errors.o: common/generic/errors.c.o
@@ -587,7 +587,7 @@ common/generic/errors.o: common/generic/errors.c.o
 
 # target to build an object file
 common/generic/errors.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/errors.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/errors.c.o
 .PHONY : common/generic/errors.c.o
 
 common/generic/errors.i: common/generic/errors.c.i
@@ -595,7 +595,7 @@ common/generic/errors.i: common/generic/errors.c.i
 
 # target to preprocess a source file
 common/generic/errors.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/errors.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/errors.c.i
 .PHONY : common/generic/errors.c.i
 
 common/generic/errors.s: common/generic/errors.c.s
@@ -603,7 +603,7 @@ common/generic/errors.s: common/generic/errors.c.s
 
 # target to generate assembly for a file
 common/generic/errors.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/errors.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/errors.c.s
 .PHONY : common/generic/errors.c.s
 
 common/generic/io_stream.o: common/generic/io_stream.c.o
@@ -611,7 +611,7 @@ common/generic/io_stream.o: common/generic/io_stream.c.o
 
 # target to build an object file
 common/generic/io_stream.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/io_stream.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/io_stream.c.o
 .PHONY : common/generic/io_stream.c.o
 
 common/generic/io_stream.i: common/generic/io_stream.c.i
@@ -619,7 +619,7 @@ common/generic/io_stream.i: common/generic/io_stream.c.i
 
 # target to preprocess a source file
 common/generic/io_stream.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/io_stream.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/io_stream.c.i
 .PHONY : common/generic/io_stream.c.i
 
 common/generic/io_stream.s: common/generic/io_stream.c.s
@@ -627,7 +627,7 @@ common/generic/io_stream.s: common/generic/io_stream.c.s
 
 # target to generate assembly for a file
 common/generic/io_stream.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/io_stream.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/io_stream.c.s
 .PHONY : common/generic/io_stream.c.s
 
 common/generic/time.o: common/generic/time.c.o
@@ -635,7 +635,7 @@ common/generic/time.o: common/generic/time.c.o
 
 # target to build an object file
 common/generic/time.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/time.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/time.c.o
 .PHONY : common/generic/time.c.o
 
 common/generic/time.i: common/generic/time.c.i
@@ -643,7 +643,7 @@ common/generic/time.i: common/generic/time.c.i
 
 # target to preprocess a source file
 common/generic/time.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/time.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/time.c.i
 .PHONY : common/generic/time.c.i
 
 common/generic/time.s: common/generic/time.c.s
@@ -651,7 +651,7 @@ common/generic/time.s: common/generic/time.c.s
 
 # target to generate assembly for a file
 common/generic/time.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/generic/time.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/generic/time.c.s
 .PHONY : common/generic/time.c.s
 
 common/mempool/mem_malloc.o: common/mempool/mem_malloc.c.o
@@ -659,7 +659,7 @@ common/mempool/mem_malloc.o: common/mempool/mem_malloc.c.o
 
 # target to build an object file
 common/mempool/mem_malloc.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/mempool/mem_malloc.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/mempool/mem_malloc.c.o
 .PHONY : common/mempool/mem_malloc.c.o
 
 common/mempool/mem_malloc.i: common/mempool/mem_malloc.c.i
@@ -667,7 +667,7 @@ common/mempool/mem_malloc.i: common/mempool/mem_malloc.c.i
 
 # target to preprocess a source file
 common/mempool/mem_malloc.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/mempool/mem_malloc.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/mempool/mem_malloc.c.i
 .PHONY : common/mempool/mem_malloc.c.i
 
 common/mempool/mem_malloc.s: common/mempool/mem_malloc.c.s
@@ -675,7 +675,7 @@ common/mempool/mem_malloc.s: common/mempool/mem_malloc.c.s
 
 # target to generate assembly for a file
 common/mempool/mem_malloc.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/mempool/mem_malloc.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/mempool/mem_malloc.c.s
 .PHONY : common/mempool/mem_malloc.c.s
 
 common/mempool/mem_simple.o: common/mempool/mem_simple.c.o
@@ -683,7 +683,7 @@ common/mempool/mem_simple.o: common/mempool/mem_simple.c.o
 
 # target to build an object file
 common/mempool/mem_simple.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/mempool/mem_simple.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/mempool/mem_simple.c.o
 .PHONY : common/mempool/mem_simple.c.o
 
 common/mempool/mem_simple.i: common/mempool/mem_simple.c.i
@@ -691,7 +691,7 @@ common/mempool/mem_simple.i: common/mempool/mem_simple.c.i
 
 # target to preprocess a source file
 common/mempool/mem_simple.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/mempool/mem_simple.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/mempool/mem_simple.c.i
 .PHONY : common/mempool/mem_simple.c.i
 
 common/mempool/mem_simple.s: common/mempool/mem_simple.c.s
@@ -699,7 +699,7 @@ common/mempool/mem_simple.s: common/mempool/mem_simple.c.s
 
 # target to generate assembly for a file
 common/mempool/mem_simple.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/common/mempool/mem_simple.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/common/mempool/mem_simple.c.s
 .PHONY : common/mempool/mem_simple.c.s
 
 drivers/clk/imx-clks.o: drivers/clk/imx-clks.c.o
@@ -707,7 +707,7 @@ drivers/clk/imx-clks.o: drivers/clk/imx-clks.c.o
 
 # target to build an object file
 drivers/clk/imx-clks.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/clk/imx-clks.c.o
 .PHONY : drivers/clk/imx-clks.c.o
 
 drivers/clk/imx-clks.i: drivers/clk/imx-clks.c.i
@@ -715,7 +715,7 @@ drivers/clk/imx-clks.i: drivers/clk/imx-clks.c.i
 
 # target to preprocess a source file
 drivers/clk/imx-clks.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/clk/imx-clks.c.i
 .PHONY : drivers/clk/imx-clks.c.i
 
 drivers/clk/imx-clks.s: drivers/clk/imx-clks.c.s
@@ -723,7 +723,7 @@ drivers/clk/imx-clks.s: drivers/clk/imx-clks.c.s
 
 # target to generate assembly for a file
 drivers/clk/imx-clks.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/clk/imx-clks.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/clk/imx-clks.c.s
 .PHONY : drivers/clk/imx-clks.c.s
 
 drivers/gpio/led_template.o: drivers/gpio/led_template.c.o
@@ -731,7 +731,7 @@ drivers/gpio/led_template.o: drivers/gpio/led_template.c.o
 
 # target to build an object file
 drivers/gpio/led_template.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/gpio/led_template.c.o
 .PHONY : drivers/gpio/led_template.c.o
 
 drivers/gpio/led_template.i: drivers/gpio/led_template.c.i
@@ -739,7 +739,7 @@ drivers/gpio/led_template.i: drivers/gpio/led_template.c.i
 
 # target to preprocess a source file
 drivers/gpio/led_template.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/gpio/led_template.c.i
 .PHONY : drivers/gpio/led_template.c.i
 
 drivers/gpio/led_template.s: drivers/gpio/led_template.c.s
@@ -747,7 +747,7 @@ drivers/gpio/led_template.s: drivers/gpio/led_template.c.s
 
 # target to generate assembly for a file
 drivers/gpio/led_template.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/gpio/led_template.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/gpio/led_template.c.s
 .PHONY : drivers/gpio/led_template.c.s
 
 drivers/usb/gadget/fsl_mouse.o: drivers/usb/gadget/fsl_mouse.c.o
@@ -755,7 +755,7 @@ drivers/usb/gadget/fsl_mouse.o: drivers/usb/gadget/fsl_mouse.c.o
 
 # target to build an object file
 drivers/usb/gadget/fsl_mouse.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/usb/gadget/fsl_mouse.c.o
 .PHONY : drivers/usb/gadget/fsl_mouse.c.o
 
 drivers/usb/gadget/fsl_mouse.i: drivers/usb/gadget/fsl_mouse.c.i
@@ -763,7 +763,7 @@ drivers/usb/gadget/fsl_mouse.i: drivers/usb/gadget/fsl_mouse.c.i
 
 # target to preprocess a source file
 drivers/usb/gadget/fsl_mouse.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/usb/gadget/fsl_mouse.c.i
 .PHONY : drivers/usb/gadget/fsl_mouse.c.i
 
 drivers/usb/gadget/fsl_mouse.s: drivers/usb/gadget/fsl_mouse.c.s
@@ -771,7 +771,7 @@ drivers/usb/gadget/fsl_mouse.s: drivers/usb/gadget/fsl_mouse.c.s
 
 # target to generate assembly for a file
 drivers/usb/gadget/fsl_mouse.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/usb/gadget/fsl_mouse.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/usb/gadget/fsl_mouse.c.s
 .PHONY : drivers/usb/gadget/fsl_mouse.c.s
 
 drivers/video/fbdev-imx.o: drivers/video/fbdev-imx.c.o
@@ -779,7 +779,7 @@ drivers/video/fbdev-imx.o: drivers/video/fbdev-imx.c.o
 
 # target to build an object file
 drivers/video/fbdev-imx.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/video/fbdev-imx.c.o
 .PHONY : drivers/video/fbdev-imx.c.o
 
 drivers/video/fbdev-imx.i: drivers/video/fbdev-imx.c.i
@@ -787,7 +787,7 @@ drivers/video/fbdev-imx.i: drivers/video/fbdev-imx.c.i
 
 # target to preprocess a source file
 drivers/video/fbdev-imx.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/video/fbdev-imx.c.i
 .PHONY : drivers/video/fbdev-imx.c.i
 
 drivers/video/fbdev-imx.s: drivers/video/fbdev-imx.c.s
@@ -795,7 +795,7 @@ drivers/video/fbdev-imx.s: drivers/video/fbdev-imx.c.s
 
 # target to generate assembly for a file
 drivers/video/fbdev-imx.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/drivers/video/fbdev-imx.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/drivers/video/fbdev-imx.c.s
 .PHONY : drivers/video/fbdev-imx.c.s
 
 example/display_app.o: example/display_app.c.o
@@ -803,7 +803,7 @@ example/display_app.o: example/display_app.c.o
 
 # target to build an object file
 example/display_app.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/example/display_app.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/example/display_app.c.o
 .PHONY : example/display_app.c.o
 
 example/display_app.i: example/display_app.c.i
@@ -811,7 +811,7 @@ example/display_app.i: example/display_app.c.i
 
 # target to preprocess a source file
 example/display_app.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/example/display_app.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/example/display_app.c.i
 .PHONY : example/display_app.c.i
 
 example/display_app.s: example/display_app.c.s
@@ -819,7 +819,7 @@ example/display_app.s: example/display_app.c.s
 
 # target to generate assembly for a file
 example/display_app.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/example/display_app.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/example/display_app.c.s
 .PHONY : example/display_app.c.s
 
 example/light_app.o: example/light_app.c.o
@@ -827,7 +827,7 @@ example/light_app.o: example/light_app.c.o
 
 # target to build an object file
 example/light_app.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/example/light_app.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/example/light_app.c.o
 .PHONY : example/light_app.c.o
 
 example/light_app.i: example/light_app.c.i
@@ -835,7 +835,7 @@ example/light_app.i: example/light_app.c.i
 
 # target to preprocess a source file
 example/light_app.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/example/light_app.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/example/light_app.c.i
 .PHONY : example/light_app.c.i
 
 example/light_app.s: example/light_app.c.s
@@ -843,7 +843,7 @@ example/light_app.s: example/light_app.c.s
 
 # target to generate assembly for a file
 example/light_app.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/example/light_app.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/example/light_app.c.s
 .PHONY : example/light_app.c.s
 
 example/thread_table.o: example/thread_table.c.o
@@ -851,7 +851,7 @@ example/thread_table.o: example/thread_table.c.o
 
 # target to build an object file
 example/thread_table.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/example/thread_table.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/example/thread_table.c.o
 .PHONY : example/thread_table.c.o
 
 example/thread_table.i: example/thread_table.c.i
@@ -859,7 +859,7 @@ example/thread_table.i: example/thread_table.c.i
 
 # target to preprocess a source file
 example/thread_table.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/example/thread_table.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/example/thread_table.c.i
 .PHONY : example/thread_table.c.i
 
 example/thread_table.s: example/thread_table.c.s
@@ -867,7 +867,7 @@ example/thread_table.s: example/thread_table.c.s
 
 # target to generate assembly for a file
 example/thread_table.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/example/thread_table.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/example/thread_table.c.s
 .PHONY : example/thread_table.c.s
 
 init/main.o: init/main.c.o
@@ -875,7 +875,7 @@ init/main.o: init/main.c.o
 
 # target to build an object file
 init/main.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/init/main.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/init/main.c.o
 .PHONY : init/main.c.o
 
 init/main.i: init/main.c.i
@@ -883,7 +883,7 @@ init/main.i: init/main.c.i
 
 # target to preprocess a source file
 init/main.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/init/main.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/init/main.c.i
 .PHONY : init/main.c.i
 
 init/main.s: init/main.c.s
@@ -891,7 +891,7 @@ init/main.s: init/main.c.s
 
 # target to generate assembly for a file
 init/main.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/init/main.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/init/main.c.s
 .PHONY : init/main.c.s
 
 kernel/kthread/idle.o: kernel/kthread/idle.c.o
@@ -899,7 +899,7 @@ kernel/kthread/idle.o: kernel/kthread/idle.c.o
 
 # target to build an object file
 kernel/kthread/idle.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/kthread/idle.c.o
 .PHONY : kernel/kthread/idle.c.o
 
 kernel/kthread/idle.i: kernel/kthread/idle.c.i
@@ -907,7 +907,7 @@ kernel/kthread/idle.i: kernel/kthread/idle.c.i
 
 # target to preprocess a source file
 kernel/kthread/idle.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/kthread/idle.c.i
 .PHONY : kernel/kthread/idle.c.i
 
 kernel/kthread/idle.s: kernel/kthread/idle.c.s
@@ -915,7 +915,7 @@ kernel/kthread/idle.s: kernel/kthread/idle.c.s
 
 # target to generate assembly for a file
 kernel/kthread/idle.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/kthread/idle.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/kthread/idle.c.s
 .PHONY : kernel/kthread/idle.c.s
 
 kernel/kthread/init_proc.o: kernel/kthread/init_proc.c.o
@@ -923,7 +923,7 @@ kernel/kthread/init_proc.o: kernel/kthread/init_proc.c.o
 
 # target to build an object file
 kernel/kthread/init_proc.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/kthread/init_proc.c.o
 .PHONY : kernel/kthread/init_proc.c.o
 
 kernel/kthread/init_proc.i: kernel/kthread/init_proc.c.i
@@ -931,7 +931,7 @@ kernel/kthread/init_proc.i: kernel/kthread/init_proc.c.i
 
 # target to preprocess a source file
 kernel/kthread/init_proc.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/kthread/init_proc.c.i
 .PHONY : kernel/kthread/init_proc.c.i
 
 kernel/kthread/init_proc.s: kernel/kthread/init_proc.c.s
@@ -939,7 +939,7 @@ kernel/kthread/init_proc.s: kernel/kthread/init_proc.c.s
 
 # target to generate assembly for a file
 kernel/kthread/init_proc.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/kthread/init_proc.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/kthread/init_proc.c.s
 .PHONY : kernel/kthread/init_proc.c.s
 
 kernel/kthread/kthread.o: kernel/kthread/kthread.c.o
@@ -947,7 +947,7 @@ kernel/kthread/kthread.o: kernel/kthread/kthread.c.o
 
 # target to build an object file
 kernel/kthread/kthread.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/kthread/kthread.c.o
 .PHONY : kernel/kthread/kthread.c.o
 
 kernel/kthread/kthread.i: kernel/kthread/kthread.c.i
@@ -955,7 +955,7 @@ kernel/kthread/kthread.i: kernel/kthread/kthread.c.i
 
 # target to preprocess a source file
 kernel/kthread/kthread.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/kthread/kthread.c.i
 .PHONY : kernel/kthread/kthread.c.i
 
 kernel/kthread/kthread.s: kernel/kthread/kthread.c.s
@@ -963,7 +963,7 @@ kernel/kthread/kthread.s: kernel/kthread/kthread.c.s
 
 # target to generate assembly for a file
 kernel/kthread/kthread.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/kthread/kthread.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/kthread/kthread.c.s
 .PHONY : kernel/kthread/kthread.c.s
 
 kernel/mutex.o: kernel/mutex.c.o
@@ -971,7 +971,7 @@ kernel/mutex.o: kernel/mutex.c.o
 
 # target to build an object file
 kernel/mutex.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/mutex.c.o
 .PHONY : kernel/mutex.c.o
 
 kernel/mutex.i: kernel/mutex.c.i
@@ -979,7 +979,7 @@ kernel/mutex.i: kernel/mutex.c.i
 
 # target to preprocess a source file
 kernel/mutex.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/mutex.c.i
 .PHONY : kernel/mutex.c.i
 
 kernel/mutex.s: kernel/mutex.c.s
@@ -987,7 +987,7 @@ kernel/mutex.s: kernel/mutex.c.s
 
 # target to generate assembly for a file
 kernel/mutex.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/mutex.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/mutex.c.s
 .PHONY : kernel/mutex.c.s
 
 kernel/sched.o: kernel/sched.c.o
@@ -995,7 +995,7 @@ kernel/sched.o: kernel/sched.c.o
 
 # target to build an object file
 kernel/sched.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/sched.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/sched.c.o
 .PHONY : kernel/sched.c.o
 
 kernel/sched.i: kernel/sched.c.i
@@ -1003,7 +1003,7 @@ kernel/sched.i: kernel/sched.c.i
 
 # target to preprocess a source file
 kernel/sched.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/sched.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/sched.c.i
 .PHONY : kernel/sched.c.i
 
 kernel/sched.s: kernel/sched.c.s
@@ -1011,7 +1011,7 @@ kernel/sched.s: kernel/sched.c.s
 
 # target to generate assembly for a file
 kernel/sched.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/sched.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/sched.c.s
 .PHONY : kernel/sched.c.s
 
 kernel/sleep.o: kernel/sleep.c.o
@@ -1019,7 +1019,7 @@ kernel/sleep.o: kernel/sleep.c.o
 
 # target to build an object file
 kernel/sleep.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/sleep.c.o
 .PHONY : kernel/sleep.c.o
 
 kernel/sleep.i: kernel/sleep.c.i
@@ -1027,7 +1027,7 @@ kernel/sleep.i: kernel/sleep.c.i
 
 # target to preprocess a source file
 kernel/sleep.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/sleep.c.i
 .PHONY : kernel/sleep.c.i
 
 kernel/sleep.s: kernel/sleep.c.s
@@ -1035,7 +1035,7 @@ kernel/sleep.s: kernel/sleep.c.s
 
 # target to generate assembly for a file
 kernel/sleep.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/sleep.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/sleep.c.s
 .PHONY : kernel/sleep.c.s
 
 kernel/spinlock.o: kernel/spinlock.c.o
@@ -1043,7 +1043,7 @@ kernel/spinlock.o: kernel/spinlock.c.o
 
 # target to build an object file
 kernel/spinlock.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/spinlock.c.o
 .PHONY : kernel/spinlock.c.o
 
 kernel/spinlock.i: kernel/spinlock.c.i
@@ -1051,7 +1051,7 @@ kernel/spinlock.i: kernel/spinlock.c.i
 
 # target to preprocess a source file
 kernel/spinlock.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/spinlock.c.i
 .PHONY : kernel/spinlock.c.i
 
 kernel/spinlock.s: kernel/spinlock.c.s
@@ -1059,7 +1059,7 @@ kernel/spinlock.s: kernel/spinlock.c.s
 
 # target to generate assembly for a file
 kernel/spinlock.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/spinlock.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/spinlock.c.s
 .PHONY : kernel/spinlock.c.s
 
 kernel/thread.o: kernel/thread.c.o
@@ -1067,7 +1067,7 @@ kernel/thread.o: kernel/thread.c.o
 
 # target to build an object file
 kernel/thread.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/thread.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/thread.c.o
 .PHONY : kernel/thread.c.o
 
 kernel/thread.i: kernel/thread.c.i
@@ -1075,7 +1075,7 @@ kernel/thread.i: kernel/thread.c.i
 
 # target to preprocess a source file
 kernel/thread.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/thread.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/thread.c.i
 .PHONY : kernel/thread.c.i
 
 kernel/thread.s: kernel/thread.c.s
@@ -1083,7 +1083,7 @@ kernel/thread.s: kernel/thread.c.s
 
 # target to generate assembly for a file
 kernel/thread.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/kernel/thread.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/kernel/thread.c.s
 .PHONY : kernel/thread.c.s
 
 platform/bus_type/fwk_platdev.o: platform/bus_type/fwk_platdev.c.o
@@ -1091,7 +1091,7 @@ platform/bus_type/fwk_platdev.o: platform/bus_type/fwk_platdev.c.o
 
 # target to build an object file
 platform/bus_type/fwk_platdev.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdev.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/bus_type/fwk_platdev.c.o
 .PHONY : platform/bus_type/fwk_platdev.c.o
 
 platform/bus_type/fwk_platdev.i: platform/bus_type/fwk_platdev.c.i
@@ -1099,7 +1099,7 @@ platform/bus_type/fwk_platdev.i: platform/bus_type/fwk_platdev.c.i
 
 # target to preprocess a source file
 platform/bus_type/fwk_platdev.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdev.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/bus_type/fwk_platdev.c.i
 .PHONY : platform/bus_type/fwk_platdev.c.i
 
 platform/bus_type/fwk_platdev.s: platform/bus_type/fwk_platdev.c.s
@@ -1107,7 +1107,7 @@ platform/bus_type/fwk_platdev.s: platform/bus_type/fwk_platdev.c.s
 
 # target to generate assembly for a file
 platform/bus_type/fwk_platdev.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdev.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/bus_type/fwk_platdev.c.s
 .PHONY : platform/bus_type/fwk_platdev.c.s
 
 platform/bus_type/fwk_platdrv.o: platform/bus_type/fwk_platdrv.c.o
@@ -1115,7 +1115,7 @@ platform/bus_type/fwk_platdrv.o: platform/bus_type/fwk_platdrv.c.o
 
 # target to build an object file
 platform/bus_type/fwk_platdrv.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdrv.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/bus_type/fwk_platdrv.c.o
 .PHONY : platform/bus_type/fwk_platdrv.c.o
 
 platform/bus_type/fwk_platdrv.i: platform/bus_type/fwk_platdrv.c.i
@@ -1123,7 +1123,7 @@ platform/bus_type/fwk_platdrv.i: platform/bus_type/fwk_platdrv.c.i
 
 # target to preprocess a source file
 platform/bus_type/fwk_platdrv.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdrv.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/bus_type/fwk_platdrv.c.i
 .PHONY : platform/bus_type/fwk_platdrv.c.i
 
 platform/bus_type/fwk_platdrv.s: platform/bus_type/fwk_platdrv.c.s
@@ -1131,7 +1131,7 @@ platform/bus_type/fwk_platdrv.s: platform/bus_type/fwk_platdrv.c.s
 
 # target to generate assembly for a file
 platform/bus_type/fwk_platdrv.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platdrv.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/bus_type/fwk_platdrv.c.s
 .PHONY : platform/bus_type/fwk_platdrv.c.s
 
 platform/bus_type/fwk_platform.o: platform/bus_type/fwk_platform.c.o
@@ -1139,7 +1139,7 @@ platform/bus_type/fwk_platform.o: platform/bus_type/fwk_platform.c.o
 
 # target to build an object file
 platform/bus_type/fwk_platform.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platform.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/bus_type/fwk_platform.c.o
 .PHONY : platform/bus_type/fwk_platform.c.o
 
 platform/bus_type/fwk_platform.i: platform/bus_type/fwk_platform.c.i
@@ -1147,7 +1147,7 @@ platform/bus_type/fwk_platform.i: platform/bus_type/fwk_platform.c.i
 
 # target to preprocess a source file
 platform/bus_type/fwk_platform.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platform.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/bus_type/fwk_platform.c.i
 .PHONY : platform/bus_type/fwk_platform.c.i
 
 platform/bus_type/fwk_platform.s: platform/bus_type/fwk_platform.c.s
@@ -1155,7 +1155,7 @@ platform/bus_type/fwk_platform.s: platform/bus_type/fwk_platform.c.s
 
 # target to generate assembly for a file
 platform/bus_type/fwk_platform.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/bus_type/fwk_platform.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/bus_type/fwk_platform.c.s
 .PHONY : platform/bus_type/fwk_platform.c.s
 
 platform/chardev/fwk_cdev.o: platform/chardev/fwk_cdev.c.o
@@ -1163,7 +1163,7 @@ platform/chardev/fwk_cdev.o: platform/chardev/fwk_cdev.c.o
 
 # target to build an object file
 platform/chardev/fwk_cdev.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_cdev.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/chardev/fwk_cdev.c.o
 .PHONY : platform/chardev/fwk_cdev.c.o
 
 platform/chardev/fwk_cdev.i: platform/chardev/fwk_cdev.c.i
@@ -1171,7 +1171,7 @@ platform/chardev/fwk_cdev.i: platform/chardev/fwk_cdev.c.i
 
 # target to preprocess a source file
 platform/chardev/fwk_cdev.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_cdev.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/chardev/fwk_cdev.c.i
 .PHONY : platform/chardev/fwk_cdev.c.i
 
 platform/chardev/fwk_cdev.s: platform/chardev/fwk_cdev.c.s
@@ -1179,7 +1179,7 @@ platform/chardev/fwk_cdev.s: platform/chardev/fwk_cdev.c.s
 
 # target to generate assembly for a file
 platform/chardev/fwk_cdev.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_cdev.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/chardev/fwk_cdev.c.s
 .PHONY : platform/chardev/fwk_cdev.c.s
 
 platform/chardev/fwk_chrdev.o: platform/chardev/fwk_chrdev.c.o
@@ -1187,7 +1187,7 @@ platform/chardev/fwk_chrdev.o: platform/chardev/fwk_chrdev.c.o
 
 # target to build an object file
 platform/chardev/fwk_chrdev.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_chrdev.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/chardev/fwk_chrdev.c.o
 .PHONY : platform/chardev/fwk_chrdev.c.o
 
 platform/chardev/fwk_chrdev.i: platform/chardev/fwk_chrdev.c.i
@@ -1195,7 +1195,7 @@ platform/chardev/fwk_chrdev.i: platform/chardev/fwk_chrdev.c.i
 
 # target to preprocess a source file
 platform/chardev/fwk_chrdev.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_chrdev.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/chardev/fwk_chrdev.c.i
 .PHONY : platform/chardev/fwk_chrdev.c.i
 
 platform/chardev/fwk_chrdev.s: platform/chardev/fwk_chrdev.c.s
@@ -1203,7 +1203,7 @@ platform/chardev/fwk_chrdev.s: platform/chardev/fwk_chrdev.c.s
 
 # target to generate assembly for a file
 platform/chardev/fwk_chrdev.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/chardev/fwk_chrdev.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/chardev/fwk_chrdev.c.s
 .PHONY : platform/chardev/fwk_chrdev.c.s
 
 platform/framebuffer/fwk_ascii.o: platform/framebuffer/fwk_ascii.c.o
@@ -1211,7 +1211,7 @@ platform/framebuffer/fwk_ascii.o: platform/framebuffer/fwk_ascii.c.o
 
 # target to build an object file
 platform/framebuffer/fwk_ascii.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_ascii.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_ascii.c.o
 .PHONY : platform/framebuffer/fwk_ascii.c.o
 
 platform/framebuffer/fwk_ascii.i: platform/framebuffer/fwk_ascii.c.i
@@ -1219,7 +1219,7 @@ platform/framebuffer/fwk_ascii.i: platform/framebuffer/fwk_ascii.c.i
 
 # target to preprocess a source file
 platform/framebuffer/fwk_ascii.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_ascii.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_ascii.c.i
 .PHONY : platform/framebuffer/fwk_ascii.c.i
 
 platform/framebuffer/fwk_ascii.s: platform/framebuffer/fwk_ascii.c.s
@@ -1227,7 +1227,7 @@ platform/framebuffer/fwk_ascii.s: platform/framebuffer/fwk_ascii.c.s
 
 # target to generate assembly for a file
 platform/framebuffer/fwk_ascii.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_ascii.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_ascii.c.s
 .PHONY : platform/framebuffer/fwk_ascii.c.s
 
 platform/framebuffer/fwk_bitmap.o: platform/framebuffer/fwk_bitmap.c.o
@@ -1235,7 +1235,7 @@ platform/framebuffer/fwk_bitmap.o: platform/framebuffer/fwk_bitmap.c.o
 
 # target to build an object file
 platform/framebuffer/fwk_bitmap.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_bitmap.c.o
 .PHONY : platform/framebuffer/fwk_bitmap.c.o
 
 platform/framebuffer/fwk_bitmap.i: platform/framebuffer/fwk_bitmap.c.i
@@ -1243,7 +1243,7 @@ platform/framebuffer/fwk_bitmap.i: platform/framebuffer/fwk_bitmap.c.i
 
 # target to preprocess a source file
 platform/framebuffer/fwk_bitmap.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_bitmap.c.i
 .PHONY : platform/framebuffer/fwk_bitmap.c.i
 
 platform/framebuffer/fwk_bitmap.s: platform/framebuffer/fwk_bitmap.c.s
@@ -1251,7 +1251,7 @@ platform/framebuffer/fwk_bitmap.s: platform/framebuffer/fwk_bitmap.c.s
 
 # target to generate assembly for a file
 platform/framebuffer/fwk_bitmap.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_bitmap.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_bitmap.c.s
 .PHONY : platform/framebuffer/fwk_bitmap.c.s
 
 platform/framebuffer/fwk_disp.o: platform/framebuffer/fwk_disp.c.o
@@ -1259,7 +1259,7 @@ platform/framebuffer/fwk_disp.o: platform/framebuffer/fwk_disp.c.o
 
 # target to build an object file
 platform/framebuffer/fwk_disp.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_disp.c.o
 .PHONY : platform/framebuffer/fwk_disp.c.o
 
 platform/framebuffer/fwk_disp.i: platform/framebuffer/fwk_disp.c.i
@@ -1267,7 +1267,7 @@ platform/framebuffer/fwk_disp.i: platform/framebuffer/fwk_disp.c.i
 
 # target to preprocess a source file
 platform/framebuffer/fwk_disp.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_disp.c.i
 .PHONY : platform/framebuffer/fwk_disp.c.i
 
 platform/framebuffer/fwk_disp.s: platform/framebuffer/fwk_disp.c.s
@@ -1275,7 +1275,7 @@ platform/framebuffer/fwk_disp.s: platform/framebuffer/fwk_disp.c.s
 
 # target to generate assembly for a file
 platform/framebuffer/fwk_disp.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_disp.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_disp.c.s
 .PHONY : platform/framebuffer/fwk_disp.c.s
 
 platform/framebuffer/fwk_fbmem.o: platform/framebuffer/fwk_fbmem.c.o
@@ -1283,7 +1283,7 @@ platform/framebuffer/fwk_fbmem.o: platform/framebuffer/fwk_fbmem.c.o
 
 # target to build an object file
 platform/framebuffer/fwk_fbmem.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_fbmem.c.o
 .PHONY : platform/framebuffer/fwk_fbmem.c.o
 
 platform/framebuffer/fwk_fbmem.i: platform/framebuffer/fwk_fbmem.c.i
@@ -1291,7 +1291,7 @@ platform/framebuffer/fwk_fbmem.i: platform/framebuffer/fwk_fbmem.c.i
 
 # target to preprocess a source file
 platform/framebuffer/fwk_fbmem.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_fbmem.c.i
 .PHONY : platform/framebuffer/fwk_fbmem.c.i
 
 platform/framebuffer/fwk_fbmem.s: platform/framebuffer/fwk_fbmem.c.s
@@ -1299,7 +1299,7 @@ platform/framebuffer/fwk_fbmem.s: platform/framebuffer/fwk_fbmem.c.s
 
 # target to generate assembly for a file
 platform/framebuffer/fwk_fbmem.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/framebuffer/fwk_fbmem.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/framebuffer/fwk_fbmem.c.s
 .PHONY : platform/framebuffer/fwk_fbmem.c.s
 
 platform/fwk_fcntl.o: platform/fwk_fcntl.c.o
@@ -1307,7 +1307,7 @@ platform/fwk_fcntl.o: platform/fwk_fcntl.c.o
 
 # target to build an object file
 platform/fwk_fcntl.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fcntl.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_fcntl.c.o
 .PHONY : platform/fwk_fcntl.c.o
 
 platform/fwk_fcntl.i: platform/fwk_fcntl.c.i
@@ -1315,7 +1315,7 @@ platform/fwk_fcntl.i: platform/fwk_fcntl.c.i
 
 # target to preprocess a source file
 platform/fwk_fcntl.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fcntl.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_fcntl.c.i
 .PHONY : platform/fwk_fcntl.c.i
 
 platform/fwk_fcntl.s: platform/fwk_fcntl.c.s
@@ -1323,7 +1323,7 @@ platform/fwk_fcntl.s: platform/fwk_fcntl.c.s
 
 # target to generate assembly for a file
 platform/fwk_fcntl.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fcntl.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_fcntl.c.s
 .PHONY : platform/fwk_fcntl.c.s
 
 platform/fwk_fs.o: platform/fwk_fs.c.o
@@ -1331,7 +1331,7 @@ platform/fwk_fs.o: platform/fwk_fs.c.o
 
 # target to build an object file
 platform/fwk_fs.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fs.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_fs.c.o
 .PHONY : platform/fwk_fs.c.o
 
 platform/fwk_fs.i: platform/fwk_fs.c.i
@@ -1339,7 +1339,7 @@ platform/fwk_fs.i: platform/fwk_fs.c.i
 
 # target to preprocess a source file
 platform/fwk_fs.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fs.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_fs.c.i
 .PHONY : platform/fwk_fs.c.i
 
 platform/fwk_fs.s: platform/fwk_fs.c.s
@@ -1347,7 +1347,7 @@ platform/fwk_fs.s: platform/fwk_fs.c.s
 
 # target to generate assembly for a file
 platform/fwk_fs.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_fs.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_fs.c.s
 .PHONY : platform/fwk_fs.c.s
 
 platform/fwk_inode.o: platform/fwk_inode.c.o
@@ -1355,7 +1355,7 @@ platform/fwk_inode.o: platform/fwk_inode.c.o
 
 # target to build an object file
 platform/fwk_inode.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_inode.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_inode.c.o
 .PHONY : platform/fwk_inode.c.o
 
 platform/fwk_inode.i: platform/fwk_inode.c.i
@@ -1363,7 +1363,7 @@ platform/fwk_inode.i: platform/fwk_inode.c.i
 
 # target to preprocess a source file
 platform/fwk_inode.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_inode.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_inode.c.i
 .PHONY : platform/fwk_inode.c.i
 
 platform/fwk_inode.s: platform/fwk_inode.c.s
@@ -1371,7 +1371,7 @@ platform/fwk_inode.s: platform/fwk_inode.c.s
 
 # target to generate assembly for a file
 platform/fwk_inode.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_inode.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_inode.c.s
 .PHONY : platform/fwk_inode.c.s
 
 platform/fwk_kobj.o: platform/fwk_kobj.c.o
@@ -1379,7 +1379,7 @@ platform/fwk_kobj.o: platform/fwk_kobj.c.o
 
 # target to build an object file
 platform/fwk_kobj.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_kobj.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_kobj.c.o
 .PHONY : platform/fwk_kobj.c.o
 
 platform/fwk_kobj.i: platform/fwk_kobj.c.i
@@ -1387,7 +1387,7 @@ platform/fwk_kobj.i: platform/fwk_kobj.c.i
 
 # target to preprocess a source file
 platform/fwk_kobj.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_kobj.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_kobj.c.i
 .PHONY : platform/fwk_kobj.c.i
 
 platform/fwk_kobj.s: platform/fwk_kobj.c.s
@@ -1395,7 +1395,7 @@ platform/fwk_kobj.s: platform/fwk_kobj.c.s
 
 # target to generate assembly for a file
 platform/fwk_kobj.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_kobj.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_kobj.c.s
 .PHONY : platform/fwk_kobj.c.s
 
 platform/fwk_uaccess.o: platform/fwk_uaccess.c.o
@@ -1403,7 +1403,7 @@ platform/fwk_uaccess.o: platform/fwk_uaccess.c.o
 
 # target to build an object file
 platform/fwk_uaccess.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_uaccess.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_uaccess.c.o
 .PHONY : platform/fwk_uaccess.c.o
 
 platform/fwk_uaccess.i: platform/fwk_uaccess.c.i
@@ -1411,7 +1411,7 @@ platform/fwk_uaccess.i: platform/fwk_uaccess.c.i
 
 # target to preprocess a source file
 platform/fwk_uaccess.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_uaccess.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_uaccess.c.i
 .PHONY : platform/fwk_uaccess.c.i
 
 platform/fwk_uaccess.s: platform/fwk_uaccess.c.s
@@ -1419,7 +1419,7 @@ platform/fwk_uaccess.s: platform/fwk_uaccess.c.s
 
 # target to generate assembly for a file
 platform/fwk_uaccess.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/fwk_uaccess.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/fwk_uaccess.c.s
 .PHONY : platform/fwk_uaccess.c.s
 
 platform/gpio_desc/fwk_gpiodesc.o: platform/gpio_desc/fwk_gpiodesc.c.o
@@ -1427,7 +1427,7 @@ platform/gpio_desc/fwk_gpiodesc.o: platform/gpio_desc/fwk_gpiodesc.c.o
 
 # target to build an object file
 platform/gpio_desc/fwk_gpiodesc.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/gpio_desc/fwk_gpiodesc.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/gpio_desc/fwk_gpiodesc.c.o
 .PHONY : platform/gpio_desc/fwk_gpiodesc.c.o
 
 platform/gpio_desc/fwk_gpiodesc.i: platform/gpio_desc/fwk_gpiodesc.c.i
@@ -1435,7 +1435,7 @@ platform/gpio_desc/fwk_gpiodesc.i: platform/gpio_desc/fwk_gpiodesc.c.i
 
 # target to preprocess a source file
 platform/gpio_desc/fwk_gpiodesc.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/gpio_desc/fwk_gpiodesc.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/gpio_desc/fwk_gpiodesc.c.i
 .PHONY : platform/gpio_desc/fwk_gpiodesc.c.i
 
 platform/gpio_desc/fwk_gpiodesc.s: platform/gpio_desc/fwk_gpiodesc.c.s
@@ -1443,7 +1443,7 @@ platform/gpio_desc/fwk_gpiodesc.s: platform/gpio_desc/fwk_gpiodesc.c.s
 
 # target to generate assembly for a file
 platform/gpio_desc/fwk_gpiodesc.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/gpio_desc/fwk_gpiodesc.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/gpio_desc/fwk_gpiodesc.c.s
 .PHONY : platform/gpio_desc/fwk_gpiodesc.c.s
 
 platform/irq/fwk_irq.o: platform/irq/fwk_irq.c.o
@@ -1451,7 +1451,7 @@ platform/irq/fwk_irq.o: platform/irq/fwk_irq.c.o
 
 # target to build an object file
 platform/irq/fwk_irq.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq.c.o
 .PHONY : platform/irq/fwk_irq.c.o
 
 platform/irq/fwk_irq.i: platform/irq/fwk_irq.c.i
@@ -1459,7 +1459,7 @@ platform/irq/fwk_irq.i: platform/irq/fwk_irq.c.i
 
 # target to preprocess a source file
 platform/irq/fwk_irq.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq.c.i
 .PHONY : platform/irq/fwk_irq.c.i
 
 platform/irq/fwk_irq.s: platform/irq/fwk_irq.c.s
@@ -1467,7 +1467,7 @@ platform/irq/fwk_irq.s: platform/irq/fwk_irq.c.s
 
 # target to generate assembly for a file
 platform/irq/fwk_irq.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq.c.s
 .PHONY : platform/irq/fwk_irq.c.s
 
 platform/irq/fwk_irq_desc.o: platform/irq/fwk_irq_desc.c.o
@@ -1475,7 +1475,7 @@ platform/irq/fwk_irq_desc.o: platform/irq/fwk_irq_desc.c.o
 
 # target to build an object file
 platform/irq/fwk_irq_desc.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_desc.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq_desc.c.o
 .PHONY : platform/irq/fwk_irq_desc.c.o
 
 platform/irq/fwk_irq_desc.i: platform/irq/fwk_irq_desc.c.i
@@ -1483,7 +1483,7 @@ platform/irq/fwk_irq_desc.i: platform/irq/fwk_irq_desc.c.i
 
 # target to preprocess a source file
 platform/irq/fwk_irq_desc.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_desc.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq_desc.c.i
 .PHONY : platform/irq/fwk_irq_desc.c.i
 
 platform/irq/fwk_irq_desc.s: platform/irq/fwk_irq_desc.c.s
@@ -1491,7 +1491,7 @@ platform/irq/fwk_irq_desc.s: platform/irq/fwk_irq_desc.c.s
 
 # target to generate assembly for a file
 platform/irq/fwk_irq_desc.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_desc.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq_desc.c.s
 .PHONY : platform/irq/fwk_irq_desc.c.s
 
 platform/irq/fwk_irq_domain.o: platform/irq/fwk_irq_domain.c.o
@@ -1499,7 +1499,7 @@ platform/irq/fwk_irq_domain.o: platform/irq/fwk_irq_domain.c.o
 
 # target to build an object file
 platform/irq/fwk_irq_domain.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_domain.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq_domain.c.o
 .PHONY : platform/irq/fwk_irq_domain.c.o
 
 platform/irq/fwk_irq_domain.i: platform/irq/fwk_irq_domain.c.i
@@ -1507,7 +1507,7 @@ platform/irq/fwk_irq_domain.i: platform/irq/fwk_irq_domain.c.i
 
 # target to preprocess a source file
 platform/irq/fwk_irq_domain.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_domain.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq_domain.c.i
 .PHONY : platform/irq/fwk_irq_domain.c.i
 
 platform/irq/fwk_irq_domain.s: platform/irq/fwk_irq_domain.c.s
@@ -1515,7 +1515,7 @@ platform/irq/fwk_irq_domain.s: platform/irq/fwk_irq_domain.c.s
 
 # target to generate assembly for a file
 platform/irq/fwk_irq_domain.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_domain.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq_domain.c.s
 .PHONY : platform/irq/fwk_irq_domain.c.s
 
 platform/irq/fwk_irq_types.o: platform/irq/fwk_irq_types.c.o
@@ -1523,7 +1523,7 @@ platform/irq/fwk_irq_types.o: platform/irq/fwk_irq_types.c.o
 
 # target to build an object file
 platform/irq/fwk_irq_types.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_types.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq_types.c.o
 .PHONY : platform/irq/fwk_irq_types.c.o
 
 platform/irq/fwk_irq_types.i: platform/irq/fwk_irq_types.c.i
@@ -1531,7 +1531,7 @@ platform/irq/fwk_irq_types.i: platform/irq/fwk_irq_types.c.i
 
 # target to preprocess a source file
 platform/irq/fwk_irq_types.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_types.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq_types.c.i
 .PHONY : platform/irq/fwk_irq_types.c.i
 
 platform/irq/fwk_irq_types.s: platform/irq/fwk_irq_types.c.s
@@ -1539,7 +1539,7 @@ platform/irq/fwk_irq_types.s: platform/irq/fwk_irq_types.c.s
 
 # target to generate assembly for a file
 platform/irq/fwk_irq_types.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/irq/fwk_irq_types.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/irq/fwk_irq_types.c.s
 .PHONY : platform/irq/fwk_irq_types.c.s
 
 platform/mem/fwk_mempool.o: platform/mem/fwk_mempool.c.o
@@ -1547,7 +1547,7 @@ platform/mem/fwk_mempool.o: platform/mem/fwk_mempool.c.o
 
 # target to build an object file
 platform/mem/fwk_mempool.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mem/fwk_mempool.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/mem/fwk_mempool.c.o
 .PHONY : platform/mem/fwk_mempool.c.o
 
 platform/mem/fwk_mempool.i: platform/mem/fwk_mempool.c.i
@@ -1555,7 +1555,7 @@ platform/mem/fwk_mempool.i: platform/mem/fwk_mempool.c.i
 
 # target to preprocess a source file
 platform/mem/fwk_mempool.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mem/fwk_mempool.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/mem/fwk_mempool.c.i
 .PHONY : platform/mem/fwk_mempool.c.i
 
 platform/mem/fwk_mempool.s: platform/mem/fwk_mempool.c.s
@@ -1563,7 +1563,7 @@ platform/mem/fwk_mempool.s: platform/mem/fwk_mempool.c.s
 
 # target to generate assembly for a file
 platform/mem/fwk_mempool.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mem/fwk_mempool.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/mem/fwk_mempool.c.s
 .PHONY : platform/mem/fwk_mempool.c.s
 
 platform/mmc/fwk_sdcard.o: platform/mmc/fwk_sdcard.c.o
@@ -1571,7 +1571,7 @@ platform/mmc/fwk_sdcard.o: platform/mmc/fwk_sdcard.c.o
 
 # target to build an object file
 platform/mmc/fwk_sdcard.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdcard.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/mmc/fwk_sdcard.c.o
 .PHONY : platform/mmc/fwk_sdcard.c.o
 
 platform/mmc/fwk_sdcard.i: platform/mmc/fwk_sdcard.c.i
@@ -1579,7 +1579,7 @@ platform/mmc/fwk_sdcard.i: platform/mmc/fwk_sdcard.c.i
 
 # target to preprocess a source file
 platform/mmc/fwk_sdcard.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdcard.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/mmc/fwk_sdcard.c.i
 .PHONY : platform/mmc/fwk_sdcard.c.i
 
 platform/mmc/fwk_sdcard.s: platform/mmc/fwk_sdcard.c.s
@@ -1587,7 +1587,7 @@ platform/mmc/fwk_sdcard.s: platform/mmc/fwk_sdcard.c.s
 
 # target to generate assembly for a file
 platform/mmc/fwk_sdcard.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdcard.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/mmc/fwk_sdcard.c.s
 .PHONY : platform/mmc/fwk_sdcard.c.s
 
 platform/mmc/fwk_sdfatfs.o: platform/mmc/fwk_sdfatfs.c.o
@@ -1595,7 +1595,7 @@ platform/mmc/fwk_sdfatfs.o: platform/mmc/fwk_sdfatfs.c.o
 
 # target to build an object file
 platform/mmc/fwk_sdfatfs.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdfatfs.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/mmc/fwk_sdfatfs.c.o
 .PHONY : platform/mmc/fwk_sdfatfs.c.o
 
 platform/mmc/fwk_sdfatfs.i: platform/mmc/fwk_sdfatfs.c.i
@@ -1603,7 +1603,7 @@ platform/mmc/fwk_sdfatfs.i: platform/mmc/fwk_sdfatfs.c.i
 
 # target to preprocess a source file
 platform/mmc/fwk_sdfatfs.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdfatfs.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/mmc/fwk_sdfatfs.c.i
 .PHONY : platform/mmc/fwk_sdfatfs.c.i
 
 platform/mmc/fwk_sdfatfs.s: platform/mmc/fwk_sdfatfs.c.s
@@ -1611,7 +1611,7 @@ platform/mmc/fwk_sdfatfs.s: platform/mmc/fwk_sdfatfs.c.s
 
 # target to generate assembly for a file
 platform/mmc/fwk_sdfatfs.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/mmc/fwk_sdfatfs.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/mmc/fwk_sdfatfs.c.s
 .PHONY : platform/mmc/fwk_sdfatfs.c.s
 
 platform/net_device/fwk_netdev.o: platform/net_device/fwk_netdev.c.o
@@ -1619,7 +1619,7 @@ platform/net_device/fwk_netdev.o: platform/net_device/fwk_netdev.c.o
 
 # target to build an object file
 platform/net_device/fwk_netdev.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/net_device/fwk_netdev.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/net_device/fwk_netdev.c.o
 .PHONY : platform/net_device/fwk_netdev.c.o
 
 platform/net_device/fwk_netdev.i: platform/net_device/fwk_netdev.c.i
@@ -1627,7 +1627,7 @@ platform/net_device/fwk_netdev.i: platform/net_device/fwk_netdev.c.i
 
 # target to preprocess a source file
 platform/net_device/fwk_netdev.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/net_device/fwk_netdev.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/net_device/fwk_netdev.c.i
 .PHONY : platform/net_device/fwk_netdev.c.i
 
 platform/net_device/fwk_netdev.s: platform/net_device/fwk_netdev.c.s
@@ -1635,7 +1635,7 @@ platform/net_device/fwk_netdev.s: platform/net_device/fwk_netdev.c.s
 
 # target to generate assembly for a file
 platform/net_device/fwk_netdev.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/net_device/fwk_netdev.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/net_device/fwk_netdev.c.s
 .PHONY : platform/net_device/fwk_netdev.c.s
 
 platform/of/fwk_of.o: platform/of/fwk_of.c.o
@@ -1643,7 +1643,7 @@ platform/of/fwk_of.o: platform/of/fwk_of.c.o
 
 # target to build an object file
 platform/of/fwk_of.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/of/fwk_of.c.o
 .PHONY : platform/of/fwk_of.c.o
 
 platform/of/fwk_of.i: platform/of/fwk_of.c.i
@@ -1651,7 +1651,7 @@ platform/of/fwk_of.i: platform/of/fwk_of.c.i
 
 # target to preprocess a source file
 platform/of/fwk_of.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/of/fwk_of.c.i
 .PHONY : platform/of/fwk_of.c.i
 
 platform/of/fwk_of.s: platform/of/fwk_of.c.s
@@ -1659,7 +1659,7 @@ platform/of/fwk_of.s: platform/of/fwk_of.c.s
 
 # target to generate assembly for a file
 platform/of/fwk_of.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/of/fwk_of.c.s
 .PHONY : platform/of/fwk_of.c.s
 
 platform/of/fwk_of_device.o: platform/of/fwk_of_device.c.o
@@ -1667,7 +1667,7 @@ platform/of/fwk_of_device.o: platform/of/fwk_of_device.c.o
 
 # target to build an object file
 platform/of/fwk_of_device.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_device.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/of/fwk_of_device.c.o
 .PHONY : platform/of/fwk_of_device.c.o
 
 platform/of/fwk_of_device.i: platform/of/fwk_of_device.c.i
@@ -1675,7 +1675,7 @@ platform/of/fwk_of_device.i: platform/of/fwk_of_device.c.i
 
 # target to preprocess a source file
 platform/of/fwk_of_device.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_device.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/of/fwk_of_device.c.i
 .PHONY : platform/of/fwk_of_device.c.i
 
 platform/of/fwk_of_device.s: platform/of/fwk_of_device.c.s
@@ -1683,7 +1683,7 @@ platform/of/fwk_of_device.s: platform/of/fwk_of_device.c.s
 
 # target to generate assembly for a file
 platform/of/fwk_of_device.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_device.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/of/fwk_of_device.c.s
 .PHONY : platform/of/fwk_of_device.c.s
 
 platform/of/fwk_of_prop.o: platform/of/fwk_of_prop.c.o
@@ -1691,7 +1691,7 @@ platform/of/fwk_of_prop.o: platform/of/fwk_of_prop.c.o
 
 # target to build an object file
 platform/of/fwk_of_prop.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_prop.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/of/fwk_of_prop.c.o
 .PHONY : platform/of/fwk_of_prop.c.o
 
 platform/of/fwk_of_prop.i: platform/of/fwk_of_prop.c.i
@@ -1699,7 +1699,7 @@ platform/of/fwk_of_prop.i: platform/of/fwk_of_prop.c.i
 
 # target to preprocess a source file
 platform/of/fwk_of_prop.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_prop.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/of/fwk_of_prop.c.i
 .PHONY : platform/of/fwk_of_prop.c.i
 
 platform/of/fwk_of_prop.s: platform/of/fwk_of_prop.c.s
@@ -1707,7 +1707,7 @@ platform/of/fwk_of_prop.s: platform/of/fwk_of_prop.c.s
 
 # target to generate assembly for a file
 platform/of/fwk_of_prop.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/of/fwk_of_prop.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/of/fwk_of_prop.c.s
 .PHONY : platform/of/fwk_of_prop.c.s
 
 platform/usb/fwk_usb.o: platform/usb/fwk_usb.c.o
@@ -1715,7 +1715,7 @@ platform/usb/fwk_usb.o: platform/usb/fwk_usb.c.o
 
 # target to build an object file
 platform/usb/fwk_usb.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/usb/fwk_usb.c.o
 .PHONY : platform/usb/fwk_usb.c.o
 
 platform/usb/fwk_usb.i: platform/usb/fwk_usb.c.i
@@ -1723,7 +1723,7 @@ platform/usb/fwk_usb.i: platform/usb/fwk_usb.c.i
 
 # target to preprocess a source file
 platform/usb/fwk_usb.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/usb/fwk_usb.c.i
 .PHONY : platform/usb/fwk_usb.c.i
 
 platform/usb/fwk_usb.s: platform/usb/fwk_usb.c.s
@@ -1731,7 +1731,7 @@ platform/usb/fwk_usb.s: platform/usb/fwk_usb.c.s
 
 # target to generate assembly for a file
 platform/usb/fwk_usb.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/fwk_usb.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/usb/fwk_usb.c.s
 .PHONY : platform/usb/fwk_usb.c.s
 
 platform/usb/host/fwk_usb_ehci.o: platform/usb/host/fwk_usb_ehci.c.o
@@ -1739,7 +1739,7 @@ platform/usb/host/fwk_usb_ehci.o: platform/usb/host/fwk_usb_ehci.c.o
 
 # target to build an object file
 platform/usb/host/fwk_usb_ehci.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/usb/host/fwk_usb_ehci.c.o
 .PHONY : platform/usb/host/fwk_usb_ehci.c.o
 
 platform/usb/host/fwk_usb_ehci.i: platform/usb/host/fwk_usb_ehci.c.i
@@ -1747,7 +1747,7 @@ platform/usb/host/fwk_usb_ehci.i: platform/usb/host/fwk_usb_ehci.c.i
 
 # target to preprocess a source file
 platform/usb/host/fwk_usb_ehci.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/usb/host/fwk_usb_ehci.c.i
 .PHONY : platform/usb/host/fwk_usb_ehci.c.i
 
 platform/usb/host/fwk_usb_ehci.s: platform/usb/host/fwk_usb_ehci.c.s
@@ -1755,7 +1755,7 @@ platform/usb/host/fwk_usb_ehci.s: platform/usb/host/fwk_usb_ehci.c.s
 
 # target to generate assembly for a file
 platform/usb/host/fwk_usb_ehci.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/platform/usb/host/fwk_usb_ehci.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/platform/usb/host/fwk_usb_ehci.c.s
 .PHONY : platform/usb/host/fwk_usb_ehci.c.s
 
 rootfs/fatfs/diskio.o: rootfs/fatfs/diskio.c.o
@@ -1763,7 +1763,7 @@ rootfs/fatfs/diskio.o: rootfs/fatfs/diskio.c.o
 
 # target to build an object file
 rootfs/fatfs/diskio.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/rootfs/fatfs/diskio.c.o
 .PHONY : rootfs/fatfs/diskio.c.o
 
 rootfs/fatfs/diskio.i: rootfs/fatfs/diskio.c.i
@@ -1771,7 +1771,7 @@ rootfs/fatfs/diskio.i: rootfs/fatfs/diskio.c.i
 
 # target to preprocess a source file
 rootfs/fatfs/diskio.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/rootfs/fatfs/diskio.c.i
 .PHONY : rootfs/fatfs/diskio.c.i
 
 rootfs/fatfs/diskio.s: rootfs/fatfs/diskio.c.s
@@ -1779,7 +1779,7 @@ rootfs/fatfs/diskio.s: rootfs/fatfs/diskio.c.s
 
 # target to generate assembly for a file
 rootfs/fatfs/diskio.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/diskio.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/rootfs/fatfs/diskio.c.s
 .PHONY : rootfs/fatfs/diskio.c.s
 
 rootfs/fatfs/ff.o: rootfs/fatfs/ff.c.o
@@ -1787,7 +1787,7 @@ rootfs/fatfs/ff.o: rootfs/fatfs/ff.c.o
 
 # target to build an object file
 rootfs/fatfs/ff.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/rootfs/fatfs/ff.c.o
 .PHONY : rootfs/fatfs/ff.c.o
 
 rootfs/fatfs/ff.i: rootfs/fatfs/ff.c.i
@@ -1795,7 +1795,7 @@ rootfs/fatfs/ff.i: rootfs/fatfs/ff.c.i
 
 # target to preprocess a source file
 rootfs/fatfs/ff.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/rootfs/fatfs/ff.c.i
 .PHONY : rootfs/fatfs/ff.c.i
 
 rootfs/fatfs/ff.s: rootfs/fatfs/ff.c.s
@@ -1803,7 +1803,7 @@ rootfs/fatfs/ff.s: rootfs/fatfs/ff.c.s
 
 # target to generate assembly for a file
 rootfs/fatfs/ff.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/ff.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/rootfs/fatfs/ff.c.s
 .PHONY : rootfs/fatfs/ff.c.s
 
 rootfs/fatfs/rfs_fatfs.o: rootfs/fatfs/rfs_fatfs.c.o
@@ -1811,7 +1811,7 @@ rootfs/fatfs/rfs_fatfs.o: rootfs/fatfs/rfs_fatfs.c.o
 
 # target to build an object file
 rootfs/fatfs/rfs_fatfs.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/rootfs/fatfs/rfs_fatfs.c.o
 .PHONY : rootfs/fatfs/rfs_fatfs.c.o
 
 rootfs/fatfs/rfs_fatfs.i: rootfs/fatfs/rfs_fatfs.c.i
@@ -1819,7 +1819,7 @@ rootfs/fatfs/rfs_fatfs.i: rootfs/fatfs/rfs_fatfs.c.i
 
 # target to preprocess a source file
 rootfs/fatfs/rfs_fatfs.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/rootfs/fatfs/rfs_fatfs.c.i
 .PHONY : rootfs/fatfs/rfs_fatfs.c.i
 
 rootfs/fatfs/rfs_fatfs.s: rootfs/fatfs/rfs_fatfs.c.s
@@ -1827,7 +1827,7 @@ rootfs/fatfs/rfs_fatfs.s: rootfs/fatfs/rfs_fatfs.c.s
 
 # target to generate assembly for a file
 rootfs/fatfs/rfs_fatfs.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/real-kernel.elf.dir/build.make CMakeFiles/real-kernel.elf.dir/rootfs/fatfs/rfs_fatfs.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gardens.elf.dir/build.make CMakeFiles/gardens.elf.dir/rootfs/fatfs/rfs_fatfs.c.s
 .PHONY : rootfs/fatfs/rfs_fatfs.c.s
 
 # Help Target
@@ -1840,7 +1840,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... distclean"
 	@echo "... self-clean"
-	@echo "... real-kernel.elf"
+	@echo "... gardens.elf"
 	@echo "... arch/arm/cpu/armv7/imx6ull/board.o"
 	@echo "... arch/arm/cpu/armv7/imx6ull/board.i"
 	@echo "... arch/arm/cpu/armv7/imx6ull/board.s"

@@ -13,6 +13,7 @@ obj-y	+=	mem/
 obj-y	+=	bus_type/
 obj-y	+=	of/
 obj-y	+=	irq/
+obj-y	+=	pinctrl/
 obj-y	+=	chardev/
 # obj-y	+=	block_device/
 obj-y	+=	net_device/

@@ -15,11 +15,11 @@
 #include <platform/fwk_platdev.h>
 
 /*!< The functions */
-static ksint32_t fwk_device_attach(struct fwk_device *sprt_device, struct fwk_bus_type *sprt_bus_type);
-static ksint32_t fwk_device_detach(struct fwk_device *sprt_device);
-static ksint32_t fwk_device_find(struct fwk_device *sprt_device, struct fwk_bus_type *sprt_bus_type);
-static ksint32_t fwk_device_to_bus(struct fwk_device *sprt_device, struct fwk_bus_type *sprt_bus_type);
-static ksint32_t fwk_bus_del_device(struct fwk_device *sprt_device, struct fwk_bus_type *sprt_bus_type);
+static ksint32_t fwk_device_attach(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type);
+static ksint32_t fwk_device_detach(struct fwk_device *sprt_dev);
+static ksint32_t fwk_device_find(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type);
+static ksint32_t fwk_device_to_bus(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type);
+static ksint32_t fwk_bus_del_device(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type);
 
 /*!< API function */
 /*!
@@ -30,9 +30,9 @@ static ksint32_t fwk_bus_del_device(struct fwk_device *sprt_device, struct fwk_b
  */
 ksint32_t fwk_register_platdevice(struct fwk_platdev *sprt_platdev)
 {
-	sprt_platdev->sgrt_device.sprt_bus_type	= &sgrt_fwk_platform_bus_type;
+	sprt_platdev->sgrt_dev.sprt_bus_type	= &sgrt_fwk_platform_bus_type;
 
-	return fwk_device_register(&sprt_platdev->sgrt_device);
+	return fwk_device_register(&sprt_platdev->sgrt_dev);
 }
 
 /*!
@@ -43,7 +43,7 @@ ksint32_t fwk_register_platdevice(struct fwk_platdev *sprt_platdev)
  */
 ksint32_t fwk_unregister_platdevice(struct fwk_platdev *sprt_platdev)
 {
-	return fwk_device_unregister(&sprt_platdev->sgrt_device);
+	return fwk_device_unregister(&sprt_platdev->sgrt_dev);
 }
 
 /*!< -------------------------------------------------------------------------- */
@@ -55,7 +55,7 @@ ksint32_t fwk_unregister_platdevice(struct fwk_platdev *sprt_platdev)
  * @retval  errno
  * @note    Device actively matches driver
  */
-static ksint32_t fwk_device_attach(struct fwk_device *sprt_device, struct fwk_bus_type *sprt_bus_type)
+static ksint32_t fwk_device_attach(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type)
 {
 	struct fwk_driver *sprt_driver;
 	ksint32_t retval;
@@ -64,7 +64,7 @@ static ksint32_t fwk_device_attach(struct fwk_device *sprt_device, struct fwk_bu
 	DECLARE_LIST_HEAD_PTR(sprt_parent);
 
 	/*!< sprt_driver is not null, maybe this device has been matched to driver */
-	if (sprt_device->sprt_driver)
+	if (sprt_dev->sprt_driver)
 		return NR_isWell;
 
 	/*!< check if "match" function defines in platform-bus */
@@ -77,7 +77,7 @@ static ksint32_t fwk_device_attach(struct fwk_device *sprt_device, struct fwk_bu
 	while ((sprt_driver = FWK_NEXT_DRIVER(sprt_parent, sprt_list)))
 	{
 		/*!< try to attach this driver */
-		retval = fwk_device_driver_match(sprt_device, sprt_bus_type, sprt_driver);
+		retval = fwk_device_driver_match(sprt_dev, sprt_bus_type, sprt_driver);
 		if (!retval || (retval == -NR_isPermit))
 			return NR_isWell;
 	}
@@ -91,21 +91,21 @@ static ksint32_t fwk_device_attach(struct fwk_device *sprt_device, struct fwk_bu
  * @retval  errno
  * @note    Device actively leaves driver
  */
-static ksint32_t fwk_device_detach(struct fwk_device *sprt_device)
+static ksint32_t fwk_device_detach(struct fwk_device *sprt_dev)
 {
 	struct fwk_driver *sprt_driver;
 
 	/*!< sprt_driver is null, no driver has been mathced */
-	if (!sprt_device->sprt_driver)
+	if (!sprt_dev->sprt_driver)
 		return NR_isWell;
 
-	sprt_driver	= sprt_device->sprt_driver;
+	sprt_driver	= sprt_dev->sprt_driver;
 
 	/*!< prepare to separate */
-	fwk_device_driver_remove(sprt_device);
+	fwk_device_driver_remove(sprt_dev);
 
 	/*!< do separattion */
-	sprt_device->sprt_driver = mrt_nullptr;
+	sprt_dev->sprt_driver = mrt_nullptr;
 	sprt_driver->matches--;
 
 	return NR_isWell;
@@ -117,9 +117,9 @@ static ksint32_t fwk_device_detach(struct fwk_device *sprt_device)
  * @retval  errno
  * @note    Detect if the device that will be registered is already attached to bus: yes(return well), no(return err)
  */
-static ksint32_t fwk_device_find(struct fwk_device *sprt_device, struct fwk_bus_type *sprt_bus_type)
+static ksint32_t fwk_device_find(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type)
 {
-	struct fwk_device  *sprt_dev;
+	struct fwk_device  *sprt_devTemp;
 	struct fwk_platdev *sprt_platDevAny;
 	struct fwk_platdev *sprt_platDevDst;
 
@@ -128,9 +128,9 @@ static ksint32_t fwk_device_find(struct fwk_device *sprt_device, struct fwk_bus_
 	DECLARE_LIST_HEAD_PTR(ptr_left);
 	DECLARE_LIST_HEAD_PTR(ptr_right);
 
-	sprt_list 		= &sprt_device->sgrt_list;
+	sprt_list 		= &sprt_dev->sgrt_list;
 	sprt_parent		= FWK_GET_BUS_DEVICE(sprt_bus_type);
-	sprt_platDevDst	= mrt_container_of(sprt_device, struct fwk_platdev, sgrt_device);
+	sprt_platDevDst	= mrt_container_of(sprt_dev, struct fwk_platdev, sgrt_dev);
 
 	/*!< two-way search */
 	foreach_list_head(ptr_left, ptr_right, sprt_parent)
@@ -140,16 +140,16 @@ static ksint32_t fwk_device_find(struct fwk_device *sprt_device, struct fwk_bus_
 			return NR_isWell;
 
 		/*!< 2. matching with device name: left */
-		sprt_dev 		= mrt_container_of(ptr_left, struct fwk_device,  sgrt_list);
-		sprt_platDevAny	= mrt_container_of(sprt_dev, struct fwk_platdev, sgrt_device);
+		sprt_devTemp 	= mrt_container_of(ptr_left, struct fwk_device,  sgrt_list);
+		sprt_platDevAny	= mrt_container_of(sprt_devTemp, struct fwk_platdev, sgrt_dev);
 		if (!strcmp((char *)sprt_platDevAny->name, (char *)sprt_platDevDst->name))
 			return NR_isWell;
 
 		/*!< 3. matching with device name: right */
 		if (ptr_left != ptr_right)
 		{
-			sprt_dev 		= mrt_container_of(ptr_right, struct fwk_device, sgrt_list);
-			sprt_platDevAny	= mrt_container_of(sprt_dev, struct fwk_platdev, sgrt_device);
+			sprt_devTemp 	= mrt_container_of(ptr_right, struct fwk_device, sgrt_list);
+			sprt_platDevAny	= mrt_container_of(sprt_devTemp, struct fwk_platdev, sgrt_dev);
 			if (!strcmp((char *)sprt_platDevAny->name, (char *)sprt_platDevDst->name))
 				return NR_isWell;
 		}
@@ -167,21 +167,21 @@ static ksint32_t fwk_device_find(struct fwk_device *sprt_device, struct fwk_bus_
  * @retval  errno
  * @note    After adding finished, excute device-driver matching
  */
-static ksint32_t fwk_device_to_bus(struct fwk_device *sprt_device, struct fwk_bus_type *sprt_bus_type)
+static ksint32_t fwk_device_to_bus(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type)
 {
 	ksint32_t retval;
 
 	DECLARE_LIST_HEAD_PTR(sprt_list);
 	DECLARE_LIST_HEAD_PTR(sprt_parent);
 
-	sprt_list 	= &sprt_device->sgrt_list;
+	sprt_list 	= &sprt_dev->sgrt_list;
 	sprt_parent	= FWK_GET_BUS_DEVICE(sprt_bus_type);
 
 	/*!< add to list tail */
 	list_head_add_tail(sprt_parent, sprt_list);
 
 	/*!< do device-driver matching */
-	retval = fwk_device_attach(sprt_device, sprt_bus_type);
+	retval = fwk_device_attach(sprt_dev, sprt_bus_type);
 	return (!retval || (retval == -NR_isPermit)) ? NR_isWell : retval;
 }
 
@@ -191,16 +191,16 @@ static ksint32_t fwk_device_to_bus(struct fwk_device *sprt_device, struct fwk_bu
  * @retval  errno
  * @note    none
  */
-static ksint32_t fwk_bus_del_device(struct fwk_device *sprt_device, struct fwk_bus_type *sprt_bus_type)
+static ksint32_t fwk_bus_del_device(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type)
 {
 	DECLARE_LIST_HEAD_PTR(sprt_list);
 	DECLARE_LIST_HEAD_PTR(sprt_parent);
 
-	sprt_list 	= &sprt_device->sgrt_list;
+	sprt_list 	= &sprt_dev->sgrt_list;
 	sprt_parent	= FWK_GET_BUS_DEVICE(sprt_bus_type);
 
 	/*!< do detaching before deleting */
-	fwk_device_detach(sprt_device);
+	fwk_device_detach(sprt_dev);
 
 	/*!< delete device */
 	list_head_del_anyone(sprt_parent, sprt_list);
@@ -214,12 +214,12 @@ static ksint32_t fwk_bus_del_device(struct fwk_device *sprt_device, struct fwk_b
  * @retval  errno
  * @note    none
  */
-ksint32_t fwk_device_register(struct fwk_device *sprt_device)
+ksint32_t fwk_device_register(struct fwk_device *sprt_dev)
 {
 	struct fwk_bus_type *sprt_bus_type;
 	ksint32_t retval;
 
-	sprt_bus_type = sprt_device->sprt_bus_type;
+	sprt_bus_type = sprt_dev->sprt_bus_type;
 
 	/*!< platform-bus is not exsisted */
 	if (!sprt_bus_type)
@@ -230,15 +230,15 @@ ksint32_t fwk_device_register(struct fwk_device *sprt_device)
 		goto fail;
 
 	/*!< device is already registered */
-	retval = fwk_device_find(sprt_device, sprt_bus_type);
+	retval = fwk_device_find(sprt_dev, sprt_bus_type);
 	if (!(retval < 0))
 		goto fail;
 
 	/*!< fisrt register */
-	sprt_device->sprt_driver = mrt_nullptr;
+	sprt_dev->sprt_driver = mrt_nullptr;
 
 	/*!< add device to device list (platform-bus) */
-	return fwk_device_to_bus(sprt_device, sprt_bus_type);
+	return fwk_device_to_bus(sprt_dev, sprt_bus_type);
 
 fail:
 	return -NR_isAnyErr;
@@ -250,12 +250,12 @@ fail:
  * @retval  errno
  * @note    none
  */
-ksint32_t fwk_device_unregister(struct fwk_device *sprt_device)
+ksint32_t fwk_device_unregister(struct fwk_device *sprt_dev)
 {
 	struct fwk_bus_type *sprt_bus_type;
 	ksint32_t retval;
 
-	sprt_bus_type = sprt_device->sprt_bus_type;
+	sprt_bus_type = sprt_dev->sprt_bus_type;
 
 	/*!< platform-bus is not exsisted */
 	if (!sprt_bus_type)
@@ -266,12 +266,12 @@ ksint32_t fwk_device_unregister(struct fwk_device *sprt_device)
 		goto fail;
 
 	/*!< device is not registered */
-	retval = fwk_device_find(sprt_device, sprt_bus_type);
+	retval = fwk_device_find(sprt_dev, sprt_bus_type);
 	if (retval < 0)
 		goto fail;
 
 	/*!< delete device on the bus */
-	return fwk_bus_del_device(sprt_device, sprt_bus_type);
+	return fwk_bus_del_device(sprt_dev, sprt_bus_type);
 
 fail:
 	return -NR_isAnyErr;

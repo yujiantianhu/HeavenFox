@@ -1,4 +1,4 @@
-# Install script for directory: /home/ubuntu/ProgramWorks/MyDesign/real-kernel
+# Install script for directory: /home/ubuntu/ProgramWorks/MyDesign/Gardens
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/ubuntu/ProgramWorks/MyDesign/Gardens/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

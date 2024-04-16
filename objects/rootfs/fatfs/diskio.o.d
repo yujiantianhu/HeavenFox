@@ -1,8 +1,8 @@
 diskio.o: diskio.c \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdc-predef.h \
  ffconf.h diskio.h integer.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/platform/mmc/fwk_sdfatfs.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/platform/mmc/fwk_sdfatfs.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/generic.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdio.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/features.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/sys/cdefs.h \
@@ -29,7 +29,7 @@ diskio.o: diskio.c \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathdef.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathcalls.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/malloc.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/basic_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/basic_types.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/lib/gcc/arm-linux-gnueabihf/5.3.1/include/stdint.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdint.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/wchar.h \
@@ -56,14 +56,14 @@ diskio.o: diskio.c \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/environments.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/confname.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/getopt.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/error_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/error_types.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/assert.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/api_string.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/basic_types.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/error_types.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/ff.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/integer.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/ffconf.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/rootfs/fatfs/diskio.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/rootfs/rfs_disk.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/io_stream.h
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/api_string.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/basic_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/error_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/rootfs/fatfs/ff.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/rootfs/fatfs/integer.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/rootfs/fatfs/ffconf.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/rootfs/fatfs/diskio.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/rootfs/rfs_disk.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/io_stream.h

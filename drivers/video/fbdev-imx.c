@@ -273,7 +273,7 @@ static ksint32_t fbdev_imx_driver_probe_mux(struct fwk_platdev *sprt_dev)
 	kuint32_t phandle[3];
 	ksint32_t retval = 0;
 
-	sprt_node = sprt_dev->sgrt_device.sprt_node;
+	sprt_node = sprt_dev->sgrt_dev.sprt_node;
 	sprt_drv = (struct fbdev_imx_drv *)fwk_platform_get_drvdata(sprt_dev);
 	if (!isValid(sprt_node) || !isValid(sprt_drv))
 		goto fail;
@@ -310,7 +310,7 @@ static ksint32_t fbdev_imx_driver_probe_timings(struct fwk_platdev *sprt_dev)
 	kuint32_t phandle;
 	ksint32_t retval = 0;
 
-	sprt_node = sprt_dev->sgrt_device.sprt_node;
+	sprt_node = sprt_dev->sgrt_dev.sprt_node;
 	sprt_drv = (struct fbdev_imx_drv *)fwk_platform_get_drvdata(sprt_dev);
 	if (!isValid(sprt_node) || !isValid(sprt_drv))
 		goto fail;
@@ -375,7 +375,7 @@ static ksint32_t fbdev_imx_driver_probe(struct fwk_platdev *sprt_pdev)
 	void *base;
 	ksint32_t retval;
 
-	sprt_fb = fwk_framebuffer_alloc(sizeof(*sprt_drv), &sprt_pdev->sgrt_device);
+	sprt_fb = fwk_framebuffer_alloc(sizeof(*sprt_drv), &sprt_pdev->sgrt_dev);
 	if (!isValid(sprt_fb))
 		return -NR_isMemErr;
 
@@ -388,7 +388,7 @@ static ksint32_t fbdev_imx_driver_probe(struct fwk_platdev *sprt_pdev)
 	sprt_drv->minor = FBDEV_IMX_DRIVER_MINOR;
 	sprt_drv->base = base;
 	sprt_drv->sprt_fb = sprt_fb;
-	sprt_drv->sprt_dev = &sprt_pdev->sgrt_device;
+	sprt_drv->sprt_dev = &sprt_pdev->sgrt_dev;
 
 	fwk_platform_set_drvdata(sprt_pdev, sprt_drv);
 	retval = fbdev_imx_driver_probe_timings(sprt_pdev);

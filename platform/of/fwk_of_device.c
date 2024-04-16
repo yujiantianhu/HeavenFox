@@ -235,14 +235,14 @@ ksint32_t fwk_of_register_platdevice(struct fwk_device_node *sprt_node, struct f
 	/*!< Fill platform_device */
 	sprt_platdev->name = sprt_node->full_name;
 	sprt_platdev->id = -1;
-	sprt_platdev->sgrt_device.sprt_node = sprt_node;
-	sprt_platdev->sgrt_device.release = mrt_nullptr;
-	sprt_platdev->sgrt_device.sprt_parent = mrt_nullptr;
+	sprt_platdev->sgrt_dev.sprt_node = sprt_node;
+	sprt_platdev->sgrt_dev.release = mrt_nullptr;
+	sprt_platdev->sgrt_dev.sprt_parent = mrt_nullptr;
 
 	/*!< Bus hook-up */
-	sprt_platdev->sgrt_device.sprt_bus_type	= &sgrt_fwk_platform_bus_type;
+	sprt_platdev->sgrt_dev.sprt_bus_type	= &sgrt_fwk_platform_bus_type;
 
-	return fwk_device_register(&sprt_platdev->sgrt_device);
+	return fwk_device_register(&sprt_platdev->sgrt_dev);
 }
 
 /*!
@@ -259,7 +259,7 @@ void fwk_of_unregister_platdevice(struct fwk_device_node *sprt_node)
 		return;
 
 	/*!< Log out the device from the bus */
-	fwk_device_unregister(&sprt_platdev->sgrt_device);
+	fwk_device_unregister(&sprt_platdev->sgrt_dev);
 
 	if (isValid(sprt_platdev->sprt_resources))
 		kfree(sprt_platdev->sprt_resources);

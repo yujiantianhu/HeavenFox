@@ -61,7 +61,7 @@ ksint32_t fwk_unregister_platdriver(struct fwk_platdrv *sprt_platdrv)
 static ksint32_t fwk_driver_attach(struct fwk_driver *sprt_driver, struct fwk_bus_type *sprt_bus_type,
 								ksint32_t (*pFunc_Match) (struct fwk_device *, struct fwk_bus_type *, void *))
 {
-	struct fwk_device *sprt_device;
+	struct fwk_device *sprt_dev;
 	ksint32_t matches;
 	ksint32_t retval = 0;
 
@@ -76,16 +76,16 @@ static ksint32_t fwk_driver_attach(struct fwk_driver *sprt_driver, struct fwk_bu
 	FWK_INIT_BUS_DEVICE_LIST(sprt_parent, sprt_list, sprt_bus_type);
 
 	/*!< Take out the devices on the bus in turn */
-	while ((sprt_device = FWK_NEXT_DEVICE(sprt_parent, sprt_list)))
+	while ((sprt_dev = FWK_NEXT_DEVICE(sprt_parent, sprt_list)))
 	{
 		/*!< The device is matched with drivers */
-		if (sprt_device->sprt_driver)
+		if (sprt_dev->sprt_driver)
 			continue;
 
 		/*!< Match one by one */
 		/*!< One driver supports matching multiple devices, and does not exit until the linked list is fully traversed */
 		/*!< However, try not to mount multiple devices with the same driver at the same time to avoid misoperation */
-		retval = (*pFunc_Match)(sprt_device, sprt_bus_type, sprt_driver);
+		retval = (*pFunc_Match)(sprt_dev, sprt_bus_type, sprt_driver);
 		if (!retval || (retval == -NR_isPermit))
 		{
 			/*!< Record the number of matching devices */
@@ -112,7 +112,7 @@ static ksint32_t fwk_driver_attach(struct fwk_driver *sprt_driver, struct fwk_bu
  */
 static ksint32_t fwk_driver_detach(struct fwk_driver *sprt_driver, struct fwk_bus_type *sprt_bus_type)
 {
-	struct fwk_device *sprt_device;
+	struct fwk_device *sprt_dev;
 
 	DECLARE_LIST_HEAD_PTR(sprt_list);
 	DECLARE_LIST_HEAD_PTR(sprt_parent);
@@ -120,17 +120,17 @@ static ksint32_t fwk_driver_detach(struct fwk_driver *sprt_driver, struct fwk_bu
 	FWK_INIT_BUS_DEVICE_LIST(sprt_parent, sprt_list, sprt_bus_type);
 
 	/*!< Take out the devices on the bus in turn */
-	while ((sprt_device = FWK_NEXT_DEVICE(sprt_parent, sprt_list)))
+	while ((sprt_dev = FWK_NEXT_DEVICE(sprt_parent, sprt_list)))
 	{
 		/*!< All devices that match this drive are separated */
-		if (sprt_device->sprt_driver != sprt_driver)
+		if (sprt_dev->sprt_driver != sprt_driver)
 			continue;
 
 		/*!< Do the preparation before separation */
-		fwk_device_driver_remove(sprt_device);
+		fwk_device_driver_remove(sprt_dev);
 
 		/*!< separation */
-		sprt_device->sprt_driver = mrt_nullptr;
+		sprt_dev->sprt_driver = mrt_nullptr;
 		sprt_driver->matches--;
 	}
 

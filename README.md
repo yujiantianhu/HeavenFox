@@ -4,6 +4,10 @@
 # created on: 2023.12.21
 # e-mail: <yujiantianhu@163.com>
 
+2024.04.16:
+    author: Yang Yujun
+    commit: change project name to "fantasystem", i.e. fantasy system
+
 2024.04.15:
     author: Yang Yujun
     commit: 

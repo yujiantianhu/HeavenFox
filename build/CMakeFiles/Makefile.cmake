@@ -125,7 +125,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/real-kernel.elf.dir/DependInfo.cmake"
+  "CMakeFiles/gardens.elf.dir/DependInfo.cmake"
   "CMakeFiles/self-clean.dir/DependInfo.cmake"
   "CMakeFiles/distclean.dir/DependInfo.cmake"
   )

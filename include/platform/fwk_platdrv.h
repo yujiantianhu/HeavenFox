@@ -43,24 +43,24 @@ TARGET_EXT ksint32_t fwk_unregister_platdriver(struct fwk_platdrv *sprt_platdrv)
 /*!< API function */
 /*!
  * @brief   fwk_platform_set_drvdata
- * @param   sprt_device, ptrData
+ * @param   sprt_dev, ptrData
  * @retval  errno
  * @note    none
  */
 static inline void fwk_platform_set_drvdata(struct fwk_platdev *sprt_dev, void *ptrData)
 {
-	sprt_dev->sgrt_device.privData = ptrData;
+	sprt_dev->sgrt_dev.privData = ptrData;
 }
 
 /*!
  * @brief   fwk_platform_get_drvdata
- * @param   sprt_device
+ * @param   sprt_dev
  * @retval  privData
  * @note    none
  */
 static inline void *fwk_platform_get_drvdata(struct fwk_platdev *sprt_dev)
 {
-	return sprt_dev->sgrt_device.privData;
+	return sprt_dev->sgrt_dev.privData;
 }
 
 #endif /*!< __FWK_PLATDRV_H_ */

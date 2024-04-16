@@ -62,7 +62,7 @@ struct fwk_fb_info *fwk_framebuffer_alloc(kusize_t size, struct fwk_device *sprt
 	}
 
 	/*!< Save the parent node of the device */
-	sprt_fb_info->sprt_device = sprt_dev;
+	sprt_fb_info->sprt_dev = sprt_dev;
 
 	return sprt_fb_info;
 

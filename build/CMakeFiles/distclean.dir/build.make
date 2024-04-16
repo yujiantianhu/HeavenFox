@@ -56,10 +56,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ubuntu/ProgramWorks/MyDesign/real-kernel
+CMAKE_SOURCE_DIR = /home/ubuntu/ProgramWorks/MyDesign/Gardens
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build
+CMAKE_BINARY_DIR = /home/ubuntu/ProgramWorks/MyDesign/Gardens/build
 
 # Utility rule file for distclean.
 
@@ -70,8 +70,8 @@ include CMakeFiles/distclean.dir/compiler_depend.make
 include CMakeFiles/distclean.dir/progress.make
 
 CMakeFiles/distclean:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "make clean all output files"
-	rm -rf /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/*
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/Gardens/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "make clean all output files"
+	rm -rf /home/ubuntu/ProgramWorks/MyDesign/Gardens/build/*
 
 distclean: CMakeFiles/distclean
 distclean: CMakeFiles/distclean.dir/build.make
@@ -86,6 +86,6 @@ CMakeFiles/distclean.dir/clean:
 .PHONY : CMakeFiles/distclean.dir/clean
 
 CMakeFiles/distclean.dir/depend:
-	cd /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ubuntu/ProgramWorks/MyDesign/real-kernel /home/ubuntu/ProgramWorks/MyDesign/real-kernel /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles/distclean.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ubuntu/ProgramWorks/MyDesign/Gardens/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ubuntu/ProgramWorks/MyDesign/Gardens /home/ubuntu/ProgramWorks/MyDesign/Gardens /home/ubuntu/ProgramWorks/MyDesign/Gardens/build /home/ubuntu/ProgramWorks/MyDesign/Gardens/build /home/ubuntu/ProgramWorks/MyDesign/Gardens/build/CMakeFiles/distclean.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/distclean.dir/depend
 

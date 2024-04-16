@@ -65,7 +65,7 @@ struct fwk_device
 	struct fwk_driver *sprt_driver;
 
 	struct fwk_device_node *sprt_node;
-	void (*release)	(struct fwk_device *sprt_device);
+	void (*release)	(struct fwk_device *sprt_dev);
 
 	void *privData;
 };
@@ -82,8 +82,8 @@ struct fwk_driver
 	struct fwk_bus_type *sprt_bus_type;
 	struct list_head sgrt_list;
 
-	ksint32_t (*probe)	(struct fwk_device *sprt_device);
-	ksint32_t (*remove)	(struct fwk_device *sprt_device);
+	ksint32_t (*probe)	(struct fwk_device *sprt_dev);
+	ksint32_t (*remove)	(struct fwk_device *sprt_dev);
 
 	struct fwk_device_oprts *sprt_oprts;
 };
@@ -92,9 +92,9 @@ struct fwk_bus_type
 {
 	kstring_t *name;
 
-	ksint32_t (*match)	(struct fwk_device *sprt_device, struct fwk_driver *sprt_driver);
-	ksint32_t (*probe)	(struct fwk_device *sprt_device);
-	ksint32_t (*remove)	(struct fwk_device *sprt_device);
+	ksint32_t (*match)	(struct fwk_device *sprt_dev, struct fwk_driver *sprt_driver);
+	ksint32_t (*probe)	(struct fwk_device *sprt_dev);
+	ksint32_t (*remove)	(struct fwk_device *sprt_dev);
 
 	struct fwk_SysPrivate *sprt_SysPriv;
 };
@@ -121,8 +121,8 @@ TARGET_EXT struct fwk_bus_type sgrt_fwk_spi_bus_type;
 TARGET_EXT struct fwk_bus_type sgrt_fwk_i2c_bus_type;
 
 /*!< The functions */
-TARGET_EXT ksint32_t fwk_device_driver_probe(struct fwk_device *sprt_device);
-TARGET_EXT ksint32_t fwk_device_driver_remove(struct fwk_device *sprt_device);
-TARGET_EXT ksint32_t fwk_device_driver_match(struct fwk_device *sprt_device, struct fwk_bus_type *sprt_bus_type, void *ptr_data);
+TARGET_EXT ksint32_t fwk_device_driver_probe(struct fwk_device *sprt_dev);
+TARGET_EXT ksint32_t fwk_device_driver_remove(struct fwk_device *sprt_dev);
+TARGET_EXT ksint32_t fwk_device_driver_match(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type, void *ptr_data);
 
 #endif /*!< __FWK_BUSTYPE_H_ */

@@ -58,14 +58,14 @@ struct fwk_platdev
 	kusize_t num_enums;
 
 	kstring_t *driver_override;
-	struct fwk_device sgrt_device;
+	struct fwk_device sgrt_dev;
 };
 
 #define RESOURCE_SIZE(sprt_res)						(sprt_res ? (sprt_res->end - sprt_res->start + 1) : 0)
 
 /*!< The functions */
-TARGET_EXT ksint32_t fwk_device_register(struct fwk_device *sprt_device);
-TARGET_EXT ksint32_t fwk_device_unregister(struct fwk_device *sprt_device);
+TARGET_EXT ksint32_t fwk_device_register(struct fwk_device *sprt_dev);
+TARGET_EXT ksint32_t fwk_device_unregister(struct fwk_device *sprt_dev);
 TARGET_EXT ksint32_t fwk_register_platdevice(struct fwk_platdev *sprt_platdev);
 TARGET_EXT ksint32_t fwk_unregister_platdevice(struct fwk_platdev *sprt_platdev);
 

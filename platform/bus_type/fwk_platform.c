@@ -27,7 +27,7 @@
  * @retval  errno
  * @note    none
  */
-static ksint32_t fwk_platform_match(struct fwk_device *sprt_device, struct fwk_driver *sprt_driver)
+static ksint32_t fwk_platform_match(struct fwk_device *sprt_dev, struct fwk_driver *sprt_driver)
 {
 	struct fwk_platdev *sprt_platdev;
 	struct fwk_platdrv *sprt_platdrv;
@@ -35,7 +35,7 @@ static ksint32_t fwk_platform_match(struct fwk_device *sprt_device, struct fwk_d
 	struct fwk_device_node *sprt_np;
 	kuint32_t idTable_cnt;
 
-	sprt_platdev = mrt_container_of(sprt_device, struct fwk_platdev, sgrt_device);
+	sprt_platdev = mrt_container_of(sprt_dev, struct fwk_platdev, sgrt_dev);
 	sprt_platdrv = mrt_container_of(sprt_driver, struct fwk_platdrv, sgrt_driver);
 
 	/*!<
@@ -49,8 +49,8 @@ static ksint32_t fwk_platform_match(struct fwk_device *sprt_device, struct fwk_d
 		return ((!strcmp(sprt_platdev->driver_override, sprt_driver->name)) ? NR_isWell : (-NR_isNotSuccess));
 
 	/*!< Match Priority 2: Device Tree */
-	sprt_np = fwk_of_node_try_matches(sprt_device->sprt_node, sprt_driver->sprt_of_match_table, mrt_nullptr);
-	if (isValid(sprt_np) && (sprt_device->sprt_node == sprt_np))
+	sprt_np = fwk_of_node_try_matches(sprt_dev->sprt_node, sprt_driver->sprt_of_match_table, mrt_nullptr);
+	if (isValid(sprt_np) && (sprt_dev->sprt_node == sprt_np))
 		return NR_isWell;
 
 	/*!< Match Priority 3: idTable */
@@ -78,17 +78,17 @@ static ksint32_t fwk_platform_match(struct fwk_device *sprt_device, struct fwk_d
  * @retval  errno
  * @note    none
  */
-static ksint32_t fwk_platform_probe(struct fwk_device *sprt_device)
+static ksint32_t fwk_platform_probe(struct fwk_device *sprt_dev)
 {
 	struct fwk_driver  *sprt_driver;
 	struct fwk_platdev *sprt_platdev;
 	struct fwk_platdrv *sprt_platdrv;
 
-	sprt_driver	= sprt_device->sprt_driver;
+	sprt_driver	= sprt_dev->sprt_driver;
 	if (!sprt_driver)
 		return -NR_isArgFault;
 
-	sprt_platdev = mrt_container_of(sprt_device, struct fwk_platdev, sgrt_device);
+	sprt_platdev = mrt_container_of(sprt_dev, struct fwk_platdev, sgrt_dev);
 	sprt_platdrv = mrt_container_of(sprt_driver, struct fwk_platdrv, sgrt_driver);
 
 	if ((!sprt_platdrv->probe) || (0 > sprt_platdrv->probe(sprt_platdev)))
@@ -103,17 +103,17 @@ static ksint32_t fwk_platform_probe(struct fwk_device *sprt_device)
  * @retval  errno
  * @note    none
  */
-static ksint32_t fwk_platform_remove(struct fwk_device *sprt_device)
+static ksint32_t fwk_platform_remove(struct fwk_device *sprt_dev)
 {
 	struct fwk_driver  *sprt_driver;
 	struct fwk_platdev *sprt_platdev;
 	struct fwk_platdrv *sprt_platdrv;
 
-	sprt_driver	= sprt_device->sprt_driver;
+	sprt_driver	= sprt_dev->sprt_driver;
 	if (!sprt_driver)
 		return -NR_isArgFault;
 
-	sprt_platdev = mrt_container_of(sprt_device, struct fwk_platdev, sgrt_device);
+	sprt_platdev = mrt_container_of(sprt_dev, struct fwk_platdev, sgrt_dev);
 	sprt_platdrv = mrt_container_of(sprt_driver, struct fwk_platdrv, sgrt_driver);
 
 	if ((!sprt_platdrv->remove) || (0 > sprt_platdrv->remove(sprt_platdev)))
@@ -147,11 +147,11 @@ struct fwk_bus_type sgrt_fwk_platform_bus_type =
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_device_driver_probe(struct fwk_device *sprt_device)
+ksint32_t fwk_device_driver_probe(struct fwk_device *sprt_dev)
 {
-	struct fwk_bus_type *sprt_bus_type = sprt_device->sprt_bus_type;
+	struct fwk_bus_type *sprt_bus_type = sprt_dev->sprt_bus_type;
 
-	return sprt_bus_type->probe ? sprt_bus_type->probe(sprt_device) : (-NR_isNotSupport);
+	return sprt_bus_type->probe ? sprt_bus_type->probe(sprt_dev) : (-NR_isNotSupport);
 }
 
 /*!
@@ -160,11 +160,11 @@ ksint32_t fwk_device_driver_probe(struct fwk_device *sprt_device)
  * @retval  errno
  * @note    none
  */
-ksint32_t fwk_device_driver_remove(struct fwk_device *sprt_device)
+ksint32_t fwk_device_driver_remove(struct fwk_device *sprt_dev)
 {
-	struct fwk_bus_type *sprt_bus_type = sprt_device->sprt_bus_type;
+	struct fwk_bus_type *sprt_bus_type = sprt_dev->sprt_bus_type;
 
-	return sprt_bus_type->remove ? sprt_bus_type->remove(sprt_device) : (-NR_isNotSupport);
+	return sprt_bus_type->remove ? sprt_bus_type->remove(sprt_dev) : (-NR_isNotSupport);
 }
 
 /*!
@@ -173,13 +173,13 @@ ksint32_t fwk_device_driver_remove(struct fwk_device *sprt_device)
  * @retval  errno
  * @note    none
  */
-ksint32_t fwk_device_driver_match(struct fwk_device *sprt_device, struct fwk_bus_type *sprt_bus_type, void *ptr_data)
+ksint32_t fwk_device_driver_match(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type, void *ptr_data)
 {
 	struct fwk_driver *sprt_driver;
 	ksint32_t retval;
 
 	sprt_driver	= (struct fwk_driver *)ptr_data;
-	retval = sprt_bus_type->match(sprt_device, sprt_driver);
+	retval = sprt_bus_type->match(sprt_dev, sprt_driver);
 	if (retval < 0)
 		return retval;
 
@@ -187,8 +187,8 @@ ksint32_t fwk_device_driver_match(struct fwk_device *sprt_device, struct fwk_bus
 	 * Save the device to indicate that the driver has been matched;
 	 * You only need to operate the device to obtain the driver's information 
 	 */
-	sprt_device->sprt_driver = sprt_driver;
+	sprt_dev->sprt_driver = sprt_driver;
 
-	return fwk_device_driver_probe(sprt_device);
+	return fwk_device_driver_probe(sprt_dev);
 }
 

@@ -1,7 +1,7 @@
 exception.o: exception.c \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdc-predef.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/arch/arm/include/asm/exception.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/basic_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/arch/arm/include/asm/exception.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/basic_types.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/lib/gcc/arm-linux-gnueabihf/5.3.1/include/stdint.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdint.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/features.h \
@@ -36,10 +36,10 @@ exception.o: exception.c \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/environments.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/confname.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/getopt.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/error_types.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/basic_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/error_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/basic_types.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/assert.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/generic.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/generic.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdio.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/libio.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/_G_config.h \
@@ -58,5 +58,5 @@ exception.o: exception.c \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathdef.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathcalls.h \
  /usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/malloc.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/error_types.h \
- /home/ubuntu/ProgramWorks/MyDesign/real-kernel/include/common/io_stream.h
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/error_types.h \
+ /home/ubuntu/ProgramWorks/MyDesign/Gardens/include/common/io_stream.h

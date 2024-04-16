@@ -56,10 +56,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ubuntu/ProgramWorks/MyDesign/real-kernel
+CMAKE_SOURCE_DIR = /home/ubuntu/ProgramWorks/MyDesign/Gardens
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build
+CMAKE_BINARY_DIR = /home/ubuntu/ProgramWorks/MyDesign/Gardens/build
 
 # Utility rule file for self-clean.
 
@@ -70,11 +70,11 @@ include CMakeFiles/self-clean.dir/compiler_depend.make
 include CMakeFiles/self-clean.dir/progress.make
 
 CMakeFiles/self-clean:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "make clean self"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ubuntu/ProgramWorks/MyDesign/Gardens/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "make clean self"
 	make clean
-	rm -rf /home/ubuntu/ProgramWorks/MyDesign/real-kernel/boot/real-kernel.elf
-	rm -rf /home/ubuntu/ProgramWorks/MyDesign/real-kernel/boot/real-kernel.img
-	rm -rf /home/ubuntu/ProgramWorks/MyDesign/real-kernel/boot/real-kernel.dis
+	rm -rf /home/ubuntu/ProgramWorks/MyDesign/Gardens/boot/gardens.elf
+	rm -rf /home/ubuntu/ProgramWorks/MyDesign/Gardens/boot/gardens.img
+	rm -rf /home/ubuntu/ProgramWorks/MyDesign/Gardens/boot/gardens.dis
 
 self-clean: CMakeFiles/self-clean
 self-clean: CMakeFiles/self-clean.dir/build.make
@@ -89,6 +89,6 @@ CMakeFiles/self-clean.dir/clean:
 .PHONY : CMakeFiles/self-clean.dir/clean
 
 CMakeFiles/self-clean.dir/depend:
-	cd /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ubuntu/ProgramWorks/MyDesign/real-kernel /home/ubuntu/ProgramWorks/MyDesign/real-kernel /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build /home/ubuntu/ProgramWorks/MyDesign/real-kernel/build/CMakeFiles/self-clean.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ubuntu/ProgramWorks/MyDesign/Gardens/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ubuntu/ProgramWorks/MyDesign/Gardens /home/ubuntu/ProgramWorks/MyDesign/Gardens /home/ubuntu/ProgramWorks/MyDesign/Gardens/build /home/ubuntu/ProgramWorks/MyDesign/Gardens/build /home/ubuntu/ProgramWorks/MyDesign/Gardens/build/CMakeFiles/self-clean.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/self-clean.dir/depend
 

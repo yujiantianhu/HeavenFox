@@ -110,7 +110,7 @@ typedef struct fwk_fb_info
 	struct fwk_fb_var_screen_info sgrt_var;					/*!< variadics */
 
 	const struct fwk_fb_oprts *sprt_fbops;					/*!< operation API */
-	struct fwk_device *sprt_device;							/*!< device */
+	struct fwk_device *sprt_dev;							/*!< device */
 
 	kuint8_t *ptr_screen_base;								/*!< base address of the virtual memory */
 	kuint32_t screen_size;									/*!< virtual memory size */
