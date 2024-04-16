@@ -6,7 +6,7 @@
     the GPL license and is open source for life.
 
 # Information:
-    git commit logs > git@github.com:talented-rain/gardens.git
+    git commit logs > git@github.com:yujiantianhu/gardens.git
     
     author: Yang Yujun
     created on: 2023.12.21
