@@ -1,8 +1,32 @@
-# git commit logs > git@github.com:talented-rain/gardens.git
+# Project Name: Gardens System
 # 
-# author: Yang Yujun
-# created on: 2023.12.21
-# e-mail: <yujiantianhu@163.com>
+# Note:
+    Gardens System aims to simplify the Linux kernel by refering to the kernel mechanism,
+    which is convenient for the developers to research and apply, and the project follows
+    the GPL license and is open source for life.
+
+# Information:
+===> git commit logs > git@github.com:talented-rain/gardens.git
+===> 
+===> author: Yang Yujun
+===> created on: 2023.12.21
+===> e-mail: <yujiantianhu@163.com>
+
+# Function:
+    support multithreading (time slice, priority preemption, and delayed sleep);
+    support initcall implicit initialization;
+    support character device driver framework;
+    support framebuffer driver framework;
+    support IRQ virtual interrupt numbers mapping (GIC_SPI);
+    support timer link list (timer_list);
+    support SD Card (porting fatfs);
+    support Device Tree (support reading .dtb in SD Card, and parsing it to device_node and platform_device);
+    support platform: bus - device - driver framework;
+    provide APIs such as open/close/read/write, access hardware through “fd” and “file_operations”;
+    support flexible selection of source files to be complied through Makefile;
+
+# Readme:
+# ---------------------------------------------------------------------------
 
 2024.04.16:
     author: Yang Yujun
@@ -38,3 +62,4 @@
     commit: create README.md first
     
 # end
+
