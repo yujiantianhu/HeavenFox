@@ -1,4 +1,4 @@
-# git commit logs > git@github.com:talented-rain/real-kernel.git
+# git commit logs > git@github.com:talented-rain/gardens.git
 # 
 # author: Yang Yujun
 # created on: 2023.12.21
