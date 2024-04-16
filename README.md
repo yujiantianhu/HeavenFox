@@ -6,11 +6,11 @@
     the GPL license and is open source for life.
 
 # Information:
-===> git commit logs > git@github.com:talented-rain/gardens.git
-===> 
-===> author: Yang Yujun
-===> created on: 2023.12.21
-===> e-mail: <yujiantianhu@163.com>
+    git commit logs > git@github.com:talented-rain/gardens.git
+    
+    author: Yang Yujun
+    created on: 2023.12.21
+    e-mail: <yujiantianhu@163.com>
 
 # Function:
     support multithreading (time slice, priority preemption, and delayed sleep);
@@ -24,6 +24,18 @@
     support platform: bus - device - driver framework;
     provide APIs such as open/close/read/write, access hardware through “fd” and “file_operations”;
     support flexible selection of source files to be complied through Makefile;
+    
+# Methods:
+    make clean:     delete all the .o and .d;
+    make distclean: delete the ./objects/* and .elf, .dis, .img;
+    
+    or using cmake:
+    cd ./build
+    make distclean
+    cmake -DCMAKE_BUILD_TYPE=Debug ..
+    make
+    
+    Image path: ./boot/gardens.img
 
 # Readme:
 # ---------------------------------------------------------------------------
