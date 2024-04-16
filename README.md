@@ -37,8 +37,8 @@
     
     Image path: ./boot/gardens.img
 
-# Readme:
-# ---------------------------------------------------------------------------
+# Reade:
+# 
 
 2024.04.16:
     author: Yang Yujun
@@ -57,7 +57,7 @@
 
 2024.04.07:
     author: Yang Yujun
-    commit: support --->
+    commit:
         01) support multithreading (time slice, priority preemption, and delayed sleep);
         02) support initcall implicit initialization;
         03) support character device driver framework;
