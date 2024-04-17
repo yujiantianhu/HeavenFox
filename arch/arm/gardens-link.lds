@@ -1,7 +1,7 @@
 /*
  * Link Script
  *
- * File Name:   real-kernel.lds
+ * File Name:   gradens-link.lds
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2023.09.12
