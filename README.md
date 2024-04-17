@@ -42,7 +42,7 @@
 
 # 2024.04.16:
     author: Yang Yujun
-    commit: change project name to "fantasystem", i.e. fantasy system
+    commit: change project name to "gardens"
 
 # 2024.04.15:
     author: Yang Yujun
