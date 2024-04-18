@@ -1,5 +1,0 @@
-/home/ubuntu/ProgramWorks/MyDesign/Gardens/build/CMakeFiles/gardens.elf.dir
-/home/ubuntu/ProgramWorks/MyDesign/Gardens/build/CMakeFiles/self-clean.dir
-/home/ubuntu/ProgramWorks/MyDesign/Gardens/build/CMakeFiles/distclean.dir
-/home/ubuntu/ProgramWorks/MyDesign/Gardens/build/CMakeFiles/edit_cache.dir
-/home/ubuntu/ProgramWorks/MyDesign/Gardens/build/CMakeFiles/rebuild_cache.dir
