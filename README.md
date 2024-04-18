@@ -30,6 +30,7 @@
     make distclean: delete the ./objects/* and .elf, .dis, .img;
     
     or using cmake:
+    mkdir -p ./build
     cd ./build
     make distclean
     cmake -DCMAKE_BUILD_TYPE=Debug ..
