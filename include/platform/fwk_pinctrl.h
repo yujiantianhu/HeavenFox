@@ -135,7 +135,7 @@ typedef struct fwk_pinctrl
 	struct list_head sgrt_link;
 	struct fwk_device *sprt_dev;
 	struct list_head sgrt_states;                       /* 各个pinctrl_state::node的链表头 */
-	struct fwk_pinctrl_state *sprt_state;                   /* 当前使用的state, 比如"default" */
+	struct fwk_pinctrl_state *sprt_state;               /* 当前使用的state, 比如"default" */
 
 } srt_fwk_pinctrl_t;
 
