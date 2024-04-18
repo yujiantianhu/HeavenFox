@@ -41,6 +41,10 @@
 # Readme:
 # -----------------------------------------------------------------------
 
+# 2024.04.18
+    author: Yang Yujun
+    commit: configure .gitignore, ignore vscode and object
+
 # 2024.04.16:
     author: Yang Yujun
     commit: change project name to "gardens"
