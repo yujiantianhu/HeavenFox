@@ -104,11 +104,13 @@ TARGET_EXT srt_fwk_irq_data_t *fwk_irq_domain_get_data(srt_fwk_irq_domain_t *spr
 TARGET_EXT void fwk_irq_set_type(kuint32_t virq, kuint32_t type);
 TARGET_EXT ksint32_t fwk_irq_domain_find_map(srt_fwk_irq_domain_t *sprt_domain, kuint32_t hwirq, kuint32_t type);
 TARGET_EXT ksint32_t fwk_irq_domain_alloc_irqs(srt_fwk_irq_domain_t *sprt_domain, ksint32_t irq_base, kuint32_t hwirq, kuint32_t nr_irqs);
+TARGET_EXT void fwk_irq_domain_free_irqs(srt_fwk_irq_domain_t *sprt_domain, kbool_t option);
 TARGET_EXT ksint32_t fwk_of_irq_get(struct fwk_device_node *sprt_node, kuint32_t index);
 
 TARGET_EXT void *fwk_find_irq_action(ksint32_t irq, const kstring_t *name, void *ptrDev);
 TARGET_EXT ksint32_t fwk_request_irq(ksint32_t irq, irq_handler_t handler, kuint32_t flags, const kstring_t *name, void *ptrDev);
 TARGET_EXT void fwk_free_irq(ksint32_t irq, void *ptrDev);
+TARGET_EXT void fwk_destroy_irq_desc(ksint32_t irq);
 TARGET_EXT void fwk_do_irq_handler(ksint32_t softIrq);
 TARGET_EXT void fwk_handle_softirq(ksint32_t softIrq, kuint32_t event);
 

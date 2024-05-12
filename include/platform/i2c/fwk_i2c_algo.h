@@ -15,13 +15,9 @@
 
 /*!< The includes */
 #include <platform/fwk_basic.h>
-#include <platform/i2c/fwk_i2c_core.h>
 
 /*!< The defines */
-struct fwk_i2c_msg
-{
-	kuint16_t addr;	                     				/*!< slave address */
-	kuint16_t flags;
+struct fwk_i2c_adapter;
 
 #define FWK_I2C_M_TEN						0x0010	    /*!< this is a ten bit chip address */
 #define FWK_I2C_M_RD						0x0001	    /*!< read data, from slave to master */
@@ -30,6 +26,11 @@ struct fwk_i2c_msg
 #define FWK_I2C_M_IGNORE_NAK				0x1000   	/*!< if I2C_FUNC_PROTOCOL_MANGLING */
 #define FWK_I2C_M_NO_RD_ACK					0x0800	 	/*!< if I2C_FUNC_PROTOCOL_MANGLING */
 #define FWK_I2C_M_RECV_LEN					0x0400	 	/*!< length will be first received byte */
+
+struct fwk_i2c_msg
+{
+	kuint16_t addr;	                     				/*!< slave address */
+	kuint16_t flags;
 
 	kuint16_t len;		                 				/*!< msg length */
 	kuint8_t *ptr_buf;		                 			/*!< pointer to msg data */

@@ -49,7 +49,7 @@ ksint32_t fwk_of_irq_parse_one(struct fwk_device_node *sprt_node, kuint32_t inde
 	ksint32_t retval;
 
 	if ((!isValid(sprt_node)) || (!sprt_irq))
-		return -NR_isNullPtr;
+		return -NR_IS_NULLPTR;
 
 	ptr_value = (kuint32_t *)fwk_of_get_property(sprt_node, "interrupts", &lenth);
 	lenth /= sizeof(kuint32_t);
@@ -57,27 +57,27 @@ ksint32_t fwk_of_irq_parse_one(struct fwk_device_node *sprt_node, kuint32_t inde
 	/* how many value per group */
 	cells = fwk_of_n_irq_cells(sprt_node);
 	if ((!cells) || (cells >= FWK_OF_MAX_PHANDLE_ARGS))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	if ((!ptr_value) || (((index + 1) * cells) > lenth))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	for (i = 0; i < cells; i++)
 	{
 		retval = fwk_of_property_read_u32_index(sprt_node, "interrupts", (index * cells) + i, &sprt_irq->args[i]);
 		if (retval < 0)
-			return -NR_isArgFault;
+			return -NR_IS_FAULT;
 	}
 
 	/* for intc, parent == null; but it should not to be translated */
 	sprt_parent = fwk_of_irq_parent(sprt_node);
 	if (!isValid(sprt_parent))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	sprt_irq->args_count = i;
 	sprt_irq->sprt_node = sprt_parent;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -105,18 +105,17 @@ ksint32_t fwk_irq_create_of_mapping(struct fwk_of_phandle_args *sprt_irq)
 	ksint32_t retval;
 
 	if ((!sprt_irq) || !isValid(sprt_irq->sprt_node))
-		return -NR_isMemErr;
+		return -NR_IS_NOMEM;
 	
 	sprt_domain = fwk_of_irq_host(sprt_irq->sprt_node);
 	if (!isValid(sprt_domain) || (!sprt_domain->sprt_ops->xlate))
-		return -NR_isNotFound;
+		return -NR_IS_NOTFOUND;
 
 	/* get hwirq/type form sprt_irq->args[] */
-	retval = sprt_domain->sprt_ops->xlate(sprt_domain, sprt_irq->sprt_node, sprt_irq->args, sprt_irq->args_count, &hwirq, &type);
+	retval = sprt_domain->sprt_ops->xlate(sprt_domain, sprt_irq->sprt_node, 
+										sprt_irq->args, sprt_irq->args_count, &hwirq, &type);
 	if (retval < 0)
-	{
 		return retval;
-	}
 
 	virq = fwk_irq_find_mapping(sprt_domain, type, hwirq);
 	if (virq >= 0)
@@ -145,7 +144,7 @@ ksint32_t fwk_irq_of_parse_and_map(struct fwk_device_node *sprt_node, kuint32_t 
 
 	retval = fwk_of_irq_parse_one(sprt_node, index, &sgrt_old);
 	if (retval < 0)
-		return -NR_isNotSuccess;
+		return -NR_IS_FAILD;
 
 	return fwk_irq_create_of_mapping(&sgrt_old);
 }
@@ -200,6 +199,15 @@ srt_fwk_irq_domain_t *fwk_irq_domain_add_hierarchy(srt_fwk_irq_domain_t *sprt_pa
 	return sprt_domain;
 }
 
+void fwk_irq_domain_del_hierarchy(srt_fwk_irq_domain_t *sprt_domain)
+{
+	if (!sprt_domain)
+		return;
+
+	fwk_irq_domain_free_irqs(sprt_domain, false);
+	list_head_del_tail(&sprt_domain->sgrt_link);
+}
+
 srt_fwk_irq_domain_t *fwk_irq_get_domain_by_name(kstring_t *name, ksint32_t hwirq)
 {
 	srt_fwk_irq_domain_t *sprt_domain;
@@ -215,12 +223,17 @@ srt_fwk_irq_domain_t *fwk_irq_get_domain_by_name(kstring_t *name, ksint32_t hwir
 	return mrt_nullptr;
 }
 
-ksint32_t fwk_irq_get_by_domain(kstring_t *name, ksint32_t hwirq)
+ksint32_t fwk_irq_get_by_domain(srt_fwk_irq_domain_t *sprt_domain, ksint32_t hwirq)
+{
+	return sprt_domain ? sprt_domain->revmap[hwirq] : -1;
+}
+
+ksint32_t fwk_irq_get_by_domain_name(kstring_t *name, ksint32_t hwirq)
 {
 	srt_fwk_irq_domain_t *sprt_domain;
 
 	sprt_domain = fwk_irq_get_domain_by_name(name, hwirq);
-	return sprt_domain ? sprt_domain->revmap[hwirq] : -1;
+	return fwk_irq_get_by_domain(sprt_domain, hwirq);
 }
 
 /* end of file */

@@ -73,6 +73,9 @@
 #define mrt_ret_max2(a, b)								mrt_cmp_gt(a, b, a, b)
 #define mrt_ret_min2(a, b)								mrt_cmp_lt(a, b, a, b)
 
+#define MAX_2(a, b)										mrt_ret_max2(a, b)
+#define MIN_2(a, b)										mrt_ret_min2(a, b)
+
 #define mrt_abs(a)										(typeof(a))((a) < 0 ? -(a) : (a))
 #define mrt_usub(a, b)	\
 ({	\
@@ -81,6 +84,9 @@
 	(void)(&_a == &_b);	\
 	((_a) > (_b)) ? ((_a) - (_b)) : ((_b) - (_a));	\
 })
+
+#define ERT_NUM(x)                              		NR_##x
+#define ERT_DEFINE(x, value)							NR_##x = value
 
 /*!<
  * Byte Alignment: for data that has already been aligned, the data remains unchanged after alignment.
@@ -95,6 +101,8 @@
 #define mrt_ptr_align(p, mask)							((typeof(p))mrt_align((kuaddr_t)(p), (kuaddr_t)(mask)))
 #define mrt_num_align4(x)								mrt_num_align((x), 4)
 #define mrt_ptr_align4(p)								mrt_ptr_align((p), 4)
+
+#define mrt_ralign(x, mask)								((x) & (~((mask) - 1)))
 
 /*!< Position bit offset on 32-bit array */
 #define mrt_word_offset(integer)						((kuint32_t)((integer) >> 5U))
@@ -180,7 +188,7 @@
  */
 __force_inline static inline kbool_t isValid(const void *ptr)
 {
-	return !!((kuaddr_t)ptr);
+	return (!!((kuaddr_t)ptr) && !IS_ERR(ptr));
 }
 
 /*!

@@ -27,7 +27,7 @@
  */
 static irq_return_t fwk_default_irqhandler(void *ptrDev)
 {
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -70,28 +70,27 @@ ksint32_t fwk_request_irq(ksint32_t irq, irq_handler_t handler, kuint32_t flags,
 	srt_fwk_irq_action_t *sprt_action;
 
 	if ((!name) || (!ptrDev))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	if (fwk_find_irq_action(irq, name, ptrDev))
-		return -NR_isExisted;
+		return -NR_IS_EXISTED;
 
 	sprt_desc = fwk_irq_to_desc(irq);
 	if (!isValid(sprt_desc))
-		return -NR_isMemErr;
+		return -NR_IS_NOMEM;
 
 	sprt_action = (srt_fwk_irq_action_t *)kzalloc(sizeof(*sprt_action), GFP_KERNEL);
 	if (!isValid(sprt_action))
-		return -NR_isMemErr;
+		return -NR_IS_NOMEM;
 
 	sprt_action->handler = handler ? handler : fwk_default_irqhandler;
 	sprt_action->flags = flags;
 	sprt_action->ptrArgs = ptrDev;
 	strcpy(sprt_action->name, name);
-	init_list_head(&sprt_action->sgrt_link);
 	
 	list_head_add_tail(&sprt_desc->sgrt_action, &sprt_action->sgrt_link);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -109,6 +108,28 @@ void fwk_free_irq(ksint32_t irq, void *ptrDev)
 
 	sprt_action = fwk_find_irq_action(irq, mrt_nullptr, ptrDev);
 	if (isValid(sprt_action))
+	{
+		list_head_del(&sprt_action->sgrt_link);
+		kfree(sprt_action);
+	}
+}
+
+/*!
+ * @brief   destroy the content of irq_desc
+ * @param   irq
+ * @retval  none
+ * @note    none
+ */
+void fwk_destroy_irq_desc(ksint32_t irq)
+{
+	srt_fwk_irq_desc_t *sprt_desc;
+	srt_fwk_irq_action_t *sprt_action, *sprt_temp;
+
+	sprt_desc = fwk_irq_to_desc(irq);
+	if (!isValid(sprt_desc))
+		return;
+
+	foreach_list_next_entry_safe(sprt_action, sprt_temp, &sprt_desc->sgrt_action, sgrt_link)
 	{
 		list_head_del(&sprt_action->sgrt_link);
 		kfree(sprt_action);

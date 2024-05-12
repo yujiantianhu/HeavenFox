@@ -19,7 +19,7 @@
 #include <common/api_string.h>
 #include <common/io_stream.h>
 #include <common/time.h>
-#include <board/board_common.h>
+#include <board/board.h>
 #include <boot/boot_text.h>
 #include <boot/implicit_call.h>
 #include <platform/fwk_mempool.h>

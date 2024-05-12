@@ -17,7 +17,7 @@
 #include <common/generic.h>
 #include <common/io_stream.h>
 #include <common/mem_manage.h>
-#include <board/board_common.h>
+#include <board/board.h>
 
 /*!< The defines */
 #define FWK_SDCARD_DEFAULT_BLOCKSIZE                            (512U)
@@ -807,7 +807,7 @@ static inline ksint32_t fwk_sdcard_initial_command(srt_fwk_sdcard_cmd_t *sprt_cm
     sprt_cmd->args = mrt_be32_to_cpu(args);
     sprt_cmd->respType = response;
 
-    return NR_isWell;
+    return NR_IS_NORMAL;
 }
 
 #endif /* __FWK_SDCARD_H */

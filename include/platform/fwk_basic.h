@@ -14,36 +14,19 @@
 #define __FWK_BASIC_H_
 
 /*!< The includes */
+#include <configs/configs.h>
 #include <common/generic.h>
 #include <common/list_types.h>
+#include <common/trie_tree.h>
 #include <common/api_string.h>
 #include <common/io_stream.h>
 #include <common/time.h>
-#include <board/board_common.h>
+#include <board/board.h>
 #include <boot/boot_text.h>
 #include <boot/implicit_call.h>
 #include <platform/fwk_mempool.h>
 
 /*!< The defines */
-enum __ERT_PIN_DIRECTION
-{
-	NR_IOPortDirInput = 0,
-	NR_IOPortDirOutput,
-};
-
-/*!< Port Level Defines */
-enum __ERT_PIN_LEVEL
-{
-	NR_IOPortLowLevel = 0,
-	NR_IOPorHighLevel,
-};
-
-enum __ERT_PIN_ACTIVE
-{
-	NR_IOPorActiveLow = 0,
-	NR_IOPorActiveHigh,
-};
-
 enum __ERT_DEVICE_TYPE
 {
 	/*!< character device */

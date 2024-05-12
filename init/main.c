@@ -20,6 +20,7 @@
 #include <boot/implicit_call.h>
 #include <boot/board_init.h>
 #include <platform/of/fwk_of.h>
+#include <platform/of/fwk_of_device.h>
 #include <platform/fwk_fcntl.h>
 #include <platform/irq/fwk_irq.h>
 #include <kernel/sched.h>
@@ -55,6 +56,9 @@ void start_kernel(void)
 
     /*!< systick init */
 	board_init_systick();
+
+    /*!< populate device node after initializing hardware */
+    fwk_of_platform_populate_init();
 
     /* platform initcall */
     if (run_platform_initcall())

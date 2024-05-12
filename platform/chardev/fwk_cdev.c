@@ -23,13 +23,13 @@
 ksint32_t fwk_cdev_init(struct fwk_cdev *sprt_cdev, const struct fwk_file_oprts *sprt_oprts)
 {
 	if (!isValid(sprt_cdev))
-		return -NR_isMemErr;
+		return -NR_IS_NOMEM;
 
 	memset(sprt_cdev, 0, sizeof(struct fwk_cdev));
 	sprt_cdev->sprt_oprts = (struct fwk_file_oprts *)sprt_oprts;
 	sprt_cdev->sprt_next = mrt_nullptr;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -68,7 +68,7 @@ fail2:
 ksint32_t fwk_cdev_add(struct fwk_cdev *sprt_cdev, kuint32_t devNum, kuint32_t count)
 {
 	if (!isValid(sprt_cdev))
-		return -NR_isMemErr;
+		return -NR_IS_NOMEM;
 
 	sprt_cdev->devNum = devNum;
 	sprt_cdev->count = count;
@@ -85,9 +85,9 @@ ksint32_t fwk_cdev_add(struct fwk_cdev *sprt_cdev, kuint32_t devNum, kuint32_t c
 ksint32_t fwk_cdev_del(struct fwk_cdev *sprt_cdev)
 {
 	if (!isValid(sprt_cdev))
-		return -NR_isMemErr;
+		return -NR_IS_NOMEM;
 
 	fwk_kobj_unmap(sprt_fwk_chrdev_map, sprt_cdev->devNum, sprt_cdev->count);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }

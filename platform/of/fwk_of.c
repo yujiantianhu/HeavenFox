@@ -834,7 +834,7 @@ struct fwk_device_node *fwk_of_find_matching_node_and_match(struct fwk_device_no
 {
 	struct fwk_device_node *sprt_node;
 
-	FOREACH_OF_DT_NODE(sprt_node, sprt_from)
+	foreach_fwk_of_dt_node(sprt_node, sprt_from)
 	{
 		if (sprt_node == fwk_of_node_try_matches(sprt_node, sprt_matches, sprt_match))
 			return sprt_node;
@@ -859,17 +859,37 @@ struct fwk_device_node *fwk_of_get_parent(struct fwk_device_node *sprt_node)
 }
 
 /*!
- * @brief   Get each child of the parent node
+ * @brief   Get each child(sibling) of the parent node
  * @param   none
  * @retval  none
  * @note    With the outer loop, all child nodes can be obtained
  */
 struct fwk_device_node *fwk_of_get_next_child(struct fwk_device_node *sprt_node, struct fwk_device_node *ptr_prev)
 {
-	/*!< child holds the first child node */
+	if (!isValid(sprt_node))
+		return mrt_nullptr;
 
-	/*!< The purpose of the function is unknown, and it is not implemented at the moment */
-	return mrt_nullptr;
+	return ptr_prev ? ptr_prev->sibling : sprt_node->child;
+}
+
+/*!
+ * @brief   Get child's count of the parent node
+ * @param   none
+ * @retval  none
+ * @note    With the outer loop, all child nodes can be obtained
+ */
+kuint32_t fwk_of_get_child_count(struct fwk_device_node *sprt_node)
+{
+	struct fwk_device_node *sprt_child;
+	kuint32_t num = 0;
+
+	if (!isValid(sprt_node))
+		return 0;
+
+	foreach_fwk_of_child(sprt_node, sprt_child)
+		num++;
+
+	return num;
 }
 
 /*!
@@ -998,6 +1018,38 @@ kuint32_t fwk_of_irq_count(struct fwk_device_node *sprt_node)
 	}
 
 	return count;
+}
+
+/*!
+ * @brief   Get id
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+ksint32_t fwk_of_get_id(srt_fwk_device_node_t *sprt_node, const kstring_t *id_name)
+{
+	ksint32_t id;
+
+	id = *((ksint8_t *)sprt_node->name + strlen(id_name));
+	if (!id)
+		return -1;
+
+	return (id - 1);
+}
+
+ksint32_t fwk_of_modalias_node(srt_fwk_device_node_t *sprt_node, kstring_t *modalias, kuint32_t len)
+{
+	const kstring_t *compatible, *p;
+	kuint32_t cplen;
+
+	compatible = fwk_of_get_property(sprt_node, "compatible", &cplen);
+	if (!compatible || (strlen(compatible) > cplen))
+		return -NR_IS_CHECKERR;
+	
+	p = strchr(compatible, ',');
+	kstrlcpy(modalias, p ? p + 1 : compatible, len);
+
+	return NR_IS_NORMAL;
 }
 
 /*!< end of file */

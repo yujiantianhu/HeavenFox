@@ -25,7 +25,7 @@ struct fwk_id_table
 	ksint32_t driver_data;
 };
 
-struct fwk_platdrv
+typedef struct fwk_platdrv
 {
 	ksint32_t (*probe) 	(struct fwk_platdev *sprt_dev);
 	ksint32_t (*remove) (struct fwk_platdev *sprt_dev);
@@ -34,9 +34,12 @@ struct fwk_platdrv
 	kusize_t num_idTable;
 
 	struct fwk_driver sgrt_driver;
-};
+	
+} srt_fwk_platdrv_t;
 
 /*!< The functions */
+TARGET_EXT ksint32_t fwk_driver_register(struct fwk_driver *sprt_driver);
+TARGET_EXT ksint32_t fwk_driver_unregister(struct fwk_driver *sprt_driver);
 TARGET_EXT ksint32_t fwk_register_platdriver(struct fwk_platdrv *sprt_platdrv);
 TARGET_EXT ksint32_t fwk_unregister_platdriver(struct fwk_platdrv *sprt_platdrv);
 

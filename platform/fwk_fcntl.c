@@ -70,7 +70,7 @@ static ksint32_t __plat_init fwk_file_system_init(void)
 	num_farray = ARRAY_SIZE(sgrt_fwk_file_stdio);
 
 	if (sprt_table->max_fdarr < num_farray)
-		return -NR_isArrayOver;
+		return -NR_IS_MORE;
 
 	/*!< Occupy the top three */
 	for (fileCnt = 0; fileCnt < num_farray; fileCnt++)
@@ -80,7 +80,7 @@ static ksint32_t __plat_init fwk_file_system_init(void)
 	sprt_table->ref_fdarr	= fileCnt;
 	sprt_table->max_fdset 	= mrt_cmp_gt(num_farray, 0, num_farray - 1, sprt_table->max_fdset);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 IMPORT_PLATFORM_INIT(fwk_file_system_init);
 
@@ -120,7 +120,7 @@ fdget:
 	return index;
 
 fail:
-	return -NR_isAnyErr;
+	return -NR_IS_ERROR;
 }
 
 /*!
@@ -186,7 +186,7 @@ static ksint32_t fwk_get_unused_fd_flags(kuint32_t flags)
 	}
 
 	/*!< Fail: fwk_get_fd_available check failed || RET_MIN_SUPER fail to get || for loop calls the overrun */
-	return -NR_isArrayOver;
+	return -NR_IS_MORE;
 
 fdget:
 	fwk_fdtable_get(sprt_table);
@@ -241,7 +241,7 @@ static ksint32_t fwk_fd_install(ksint32_t fd, struct fwk_file *sprt_file)
 	ksint32_t index;
 
 	if (FILE_DESC_OVER_BASE(fd) || !isValid(sprt_file))
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	sprt_table	= &sgrt_fwk_file_table;
 	sprt_fdt	= sprt_table->fd_array;
@@ -254,11 +254,11 @@ static ksint32_t fwk_fd_install(ksint32_t fd, struct fwk_file *sprt_file)
 	}
 
 	if (sprt_fdt[index])
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	sprt_fdt[index] = sprt_file;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -320,7 +320,7 @@ fail3:
 fail2:
 	fwk_put_used_fd_flags(fd);
 fail1:
-	return -NR_isArgFault;
+	return -NR_IS_FAULT;
 }
 
 /*!
@@ -353,11 +353,11 @@ static kssize_t fwk_do_write(ksint32_t fd, const void *buf, kusize_t size)
 	ksint32_t retval;
 
 	if (fd < 0)
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	sprt_file = fwk_fd_to_file(fd);
 	if (!isValid(sprt_file))
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	if (sprt_file->sprt_foprts->write)
 	{
@@ -366,7 +366,7 @@ static kssize_t fwk_do_write(ksint32_t fd, const void *buf, kusize_t size)
 			return size;
 	}
 
-	return -NR_isAnyErr;
+	return -NR_IS_ERROR;
 }
 
 /*!
@@ -381,11 +381,11 @@ static kssize_t fwk_do_read(ksint32_t fd, void *buf, kusize_t size)
 	ksint32_t retval;
 
 	if (fd < 0)
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	sprt_file = fwk_fd_to_file(fd);
 	if (!isValid(sprt_file))
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	if (sprt_file->sprt_foprts->read)
 	{
@@ -394,7 +394,7 @@ static kssize_t fwk_do_read(ksint32_t fd, void *buf, kusize_t size)
 			return size;
 	}
 
-	return -NR_isAnyErr;
+	return -NR_IS_ERROR;
 }
 
 /*!
@@ -409,20 +409,20 @@ static ksint32_t fwk_do_ioctl(ksint32_t fd, kuint32_t request, kuaddr_t args)
 	ksint32_t retval;
 
 	if (fd < 0)
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	sprt_file = fwk_fd_to_file(fd);
 	if (!isValid(sprt_file))
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	if (sprt_file->sprt_foprts->unlocked_ioctl)
 	{
 		retval = sprt_file->sprt_foprts->unlocked_ioctl(sprt_file, request, args);
 		if (!retval)
-			return NR_isWell;
+			return NR_IS_NORMAL;
 	}
 
-	return -NR_isAnyErr;
+	return -NR_IS_ERROR;
 }
 
 /*!

@@ -128,6 +128,30 @@ TARGET_EXT void printk(const kstring_t *ptr_fmt, ...);
 #define print_info(fmt, ...)                            printk(PRINT_LEVEL_INFO fmt, ##__VA_ARGS__)
 #define print_debug(fmt, ...)                           printk(PRINT_LEVEL_DEBUG fmt, ##__VA_ARGS__)
 
+#define ERR_OUT(flag, fmt, ...)   \
+    do {    \
+        if (!!(flag))    \
+            print_err("%s: %d: " fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__);   \
+    } while (0)
+
+#define WARN_OUT(flag, fmt, ...)    \
+    do {    \
+        if (!!(flag))    \
+            print_warn("%s: %d: " fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__);   \
+    } while (0)
+
+#define INFO_OUT(flag, fmt, ...)    \
+    do {    \
+        if (!!(flag))    \
+            print_info("%s: %d: " fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__);   \
+    } while (0)
+
+#define DEBUG_OUT(flag, fmt, ...)   \
+    do {    \
+        if (!!(flag))    \
+            print_debug("%s: %d: " fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__);   \
+    } while (0)
+
 TARGET_EXT ksint32_t bitmap_find_first_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits);
 TARGET_EXT ksint32_t bitmap_find_first_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits);
 TARGET_EXT ksint32_t bitmap_find_nr_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr);

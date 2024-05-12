@@ -29,43 +29,44 @@ enum __ERT_ERROR_CODE
 {
 	/*!< --------------------------------------------------------- */
 	/*!< 0: well */
-	NR_isNormal = 0,
-	NR_isWell 	= NR_isNormal,
+	NR_IS_NORMAL = 0,
 
 	/*!< --------------------------------------------------------- */
 	/*!< use with negative */
-	NR_isAnyErr,
-	NR_isRetry,
-	NR_isPermit,
-	NR_isMemErr,
-	NR_isUnvalid,
-	NR_isNullPtr,
-	NR_isWildPtr,
-	NR_isArgFault,
-	NR_isArrayOver,
-	NR_isNotAlign,
-	NR_isExisted,
-	NR_isNotFound,
+	NR_IS_ERROR,
+	NR_IS_RETRY,
+	NR_IS_PERMIT,
+	NR_IS_NOMEM,
+	NR_IS_UNVALID,
+	NR_IS_EMPTY,
+	NR_IS_NULLPTR,
+	NR_IS_WILDPTR,
+	NR_IS_FAULT,
+	NR_IS_MORE,
+	NR_IS_NOTALIGN,
+	NR_IS_EXISTED,
+	NR_IS_NOTFOUND,
+	NR_IS_USED,
 
 	/*!< hardware */
-	NR_isIOErr,
-	NR_isNotSupport,
-	NR_isNotReady,
-	NR_isNotSuccess,
-	NR_isTimeOut,
+	NR_IS_IOERR,
+	NR_IS_NSUPPORT,
+	NR_IS_NREADY,
+	NR_IS_FAILD,
+	NR_IS_TIMEOUT,
+	NR_IS_NODEV,
+	NR_IS_BUSY,
+	NR_IS_CHECKERR,
 
 	/*!< comunication */
-	NR_isSendFail,
-	NR_isRecvFail,
-	NR_isSendCmdFail,
-	NR_isRecvCmdFail,
-	NR_isSendDataFail,
-	NR_isRecvDataFail,
-	NR_isTransErr,
-	NR_isTransRequst,
-	NR_isTransBusy,
-	NR_isCheckErr,
-	NR_isTransStopFail,					
+	NR_IS_TRXERR,
+	NR_IS_SEND_FAILD,
+	NR_IS_RECV_FAILD,
+	NR_IS_SCMD_FAILD,
+	NR_IS_RCMD_FAILD,
+	NR_IS_SDATA_FAILD,
+	NR_IS_RDATA_FAILD,
+	NR_IS_STOP_FAILD,					
 };
 
 /*!< The functions */
@@ -85,6 +86,23 @@ TARGET_EXT void deal_assert_fail(const kstring_t *__assertion, const kstring_t *
 {	\
 	run_codes;	\
 	goto label;	\
+}
+
+/*!< API functions */
+__force_inline static inline kbool_t IS_ERR(const void *ptr)
+{
+	/*!< the highest 4KB (0xfffff000 ~ 0xffffffff) is used to deal with exceptions */
+	return (kuaddr_t)ptr >= (kuaddr_t)(-(4UL << 10));
+}
+
+__force_inline static inline void *ERR_PTR(kstype_t code)
+{
+	return (void *)code;
+}
+
+__force_inline static inline kstype_t PTR_ERR(const void *ptr)
+{
+	return (kstype_t)ptr;
 }
 
 #ifdef __cplusplus

@@ -1,7 +1,7 @@
 /*
  * Board Configuration For Assembly
  *
- * File Name:   board_config.h
+ * File Name:   board.h
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2023.09.10
@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef __BOARD_COMMON_H
-#define __BOARD_COMMON_H
+#ifndef __BOARD_H
+#define __BOARD_H
 
 /*!< The includes */
 #include <configs/configs.h>
@@ -34,7 +34,20 @@ static inline kuint32_t be32_to_cpu(kuint32_t val)
 
 #endif
 }
+
+/*!
+ * @brief   be32_to_cpup
+ * @param   ptr
+ * @retval  convert result
+ * @note    return the endian-converted result
+ */
+static inline kuint32_t be32_to_cpup(void *ptr)
+{
+	return be32_to_cpu(*(kuint32_t *)ptr);
+}
+
 #define mrt_be32_to_cpu(val)							be32_to_cpu(val)
+#define mrt_be32_to_cpup(ptr)							be32_to_cpup(ptr)
 
 /*!
  * @brief   le32_to_cpu
@@ -52,7 +65,20 @@ static inline kuint32_t le32_to_cpu(kuint32_t val)
 
 #endif
 }
+
+/*!
+ * @brief   le32_to_cpup
+ * @param   ptr
+ * @retval  convert result
+ * @note    return the endian-converted result
+ */
+static inline kuint32_t le32_to_cpup(void *ptr)
+{
+	return le32_to_cpu(*(kuint32_t *)ptr);
+}
+
 #define mrt_le32_to_cpu(val)							le32_to_cpu(val)
+#define mrt_le32_to_cpup(val)							le32_to_cpup(val)
 
 /*!
  * @brief   be16_to_cpu

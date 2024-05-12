@@ -119,6 +119,36 @@ ksint8_t *do_string_n_copy(void *ptr_dst, const void *ptr_src, kuint32_t size)
 }
 
 /*!
+ * @brief   do_string_n_copy_safe
+ * @param   ptr_dst, offset, ptr_src
+ * @retval  none
+ * @note    copy n char to another string
+ */
+kuint32_t do_string_n_copy_safe(void *ptr_dst, const void *ptr_src, kuint32_t size)
+{
+	kuint8_t *ptr_ch;
+	kuint8_t *ptr_buf;
+	kuint32_t lenth;
+
+	ptr_ch  = (kuint8_t *)ptr_src;
+	ptr_buf	= (kuint8_t *)ptr_dst;
+	lenth = get_string_lenth(ptr_src);
+
+	while (('\0' != *ptr_ch) && size)
+	{
+		if (--size)
+		{
+			*(ptr_buf++) = *(ptr_ch++);
+			continue;
+		}
+
+		*ptr_buf = '\0';
+	}
+
+	return lenth;
+}
+
+/*!
  * @brief   do_string_compare
  * @param   ptr_dst, ptr_src
  * @retval  none
@@ -476,6 +506,17 @@ __weak char *strncpy(char *__dest, const char *__src, size_t __n)
 }
 
 /*!
+ * @brief   strlcpy
+ * @param   none
+ * @retval  none
+ * @note    copy src to dest
+ */
+__weak unsigned int strlcpy(char *__dest, const char *__src, size_t __n)
+{
+	return do_string_n_copy_safe(__dest, __src, __n);
+}
+
+/*!
  * @brief   strcmp
  * @param   none
  * @retval  none
@@ -493,6 +534,73 @@ __weak int strcmp(const char *__s1, const char *__s2)
  * @note    compare s1 and s2
  */
 __weak int strncmp(const char *__s1, const char *__s2, size_t __n)
+{
+	return do_string_n_compare(__s1, __s2, __n);
+}
+
+#else
+/*!
+ * @brief   strlen
+ * @param   none
+ * @retval  none
+ * @note    return string lenth
+ */
+__weak kuint32_t kstrlen(const kstring_t *__s)
+{
+	return (kuint32_t)get_string_lenth(__s);
+}
+
+/*!
+ * @brief   strcpy
+ * @param   none
+ * @retval  none
+ * @note    copy src to dest
+ */
+__weak kstring_t *kstrcpy(kstring_t *__dest, const kstring_t *__src)
+{
+	return do_string_copy(__dest, __src);
+}
+
+/*!
+ * @brief   strncpy
+ * @param   none
+ * @retval  none
+ * @note    copy src to dest
+ */
+__weak kstring_t *kstrncpy(kstring_t *__dest, const kstring_t *__src, kusize_t __n)
+{
+	return do_string_n_copy(__dest, __src, __n);
+}
+
+/*!
+ * @brief   strlcpy
+ * @param   none
+ * @retval  none
+ * @note    copy src to dest
+ */
+__weak kusize_t kstrlcpy(kstring_t *__dest, const kstring_t *__src, kusize_t __n)
+{
+	return do_string_n_copy_safe(__dest, __src, __n);
+}
+
+/*!
+ * @brief   strcmp
+ * @param   none
+ * @retval  none
+ * @note    compare s1 and s2
+ */
+__weak ksint32_t kstrcmp(const kstring_t *__s1, const kstring_t *__s2)
+{
+	return do_string_compare(__s1, __s2);
+}
+
+/*!
+ * @brief   strncmp
+ * @param   none
+ * @retval  none
+ * @note    compare s1 and s2
+ */
+__weak ksint32_t kstrncmp(const kstring_t *__s1, const kstring_t *__s2, kusize_t __n)
 {
 	return do_string_n_compare(__s1, __s2, __n);
 }

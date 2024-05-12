@@ -216,12 +216,12 @@ static void fbdev_imx_init(void *base, struct fbdev_imx_drv *sprt_drv)
  */
 static ksint32_t fbdev_imx_open(struct fwk_fb_info *sprt_info, ksint32_t user)
 {
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 static ksint32_t fbdev_imx_close(struct fwk_fb_info *sprt_info, ksint32_t user)
 {
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 static const struct fwk_fb_oprts sgrt_fwk_fb_ops =
@@ -234,14 +234,14 @@ static const struct fwk_fb_oprts sgrt_fwk_fb_ops =
 static void fbdev_imx_configure_backlight(void *base)
 {
 	srt_imx_pin_t sgrt_conf;
-	srt_imx_gpio_t *sprt_gpio;
+	srt_hal_imx_gpio_t *sprt_gpio;
 
 	/*!< set backlight */
 	hal_imx_pin_attribute_init(&sgrt_conf, (kuaddr_t)base, IMX6UL_MUX_GPIO1_IO08_GPIO1_IO08, 0xb9);
 	hal_imx_pin_configure(&sgrt_conf);
 
 	/*!< output, high level */
-	sprt_gpio = (srt_imx_gpio_t *)IMX6UL_GPIO1_ADDR_BASE;
+	sprt_gpio = (srt_hal_imx_gpio_t *)IMX6UL_GPIO1_ADDR_BASE;
 	mrt_setbitl(mrt_bit(8), &sprt_gpio->GDIR);
 	mrt_setbitl(mrt_bit(8), &sprt_gpio->DR);
 }
@@ -250,7 +250,7 @@ static ksint32_t fbdev_imx_pinctrl_read_and_set(struct fwk_device_node *sprt_nod
 {
 	srt_imx_pin_t sgrt_conf;
 	kuint32_t index, value[IMX6UL_MUX_CONF_SIZE];
-	ksint32_t retval = NR_isWell;
+	ksint32_t retval = NR_IS_NORMAL;
 
 	for (index = 0; index < count; index++)
 	{
@@ -295,10 +295,10 @@ static ksint32_t fbdev_imx_driver_probe_mux(struct fwk_platdev *sprt_dev)
 
 	fbdev_imx_configure_backlight(0);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 
 fail:
-	return -NR_isNotSuccess;
+	return -NR_IS_FAILD;
 }
 
 static ksint32_t fbdev_imx_driver_probe_timings(struct fwk_platdev *sprt_dev)
@@ -355,10 +355,10 @@ static ksint32_t fbdev_imx_driver_probe_timings(struct fwk_platdev *sprt_dev)
 	if (retval < 0)
 		goto fail;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 
 fail:
-	return -NR_isNotSuccess;
+	return -NR_IS_FAILD;
 
 }
 
@@ -377,7 +377,7 @@ static ksint32_t fbdev_imx_driver_probe(struct fwk_platdev *sprt_pdev)
 
 	sprt_fb = fwk_framebuffer_alloc(sizeof(*sprt_drv), &sprt_pdev->sgrt_dev);
 	if (!isValid(sprt_fb))
-		return -NR_isMemErr;
+		return -NR_IS_NOMEM;
 
 	base = (void *)fwk_platform_get_address(sprt_pdev, 0);
 	base = fwk_io_remap(base);
@@ -410,14 +410,14 @@ static ksint32_t fbdev_imx_driver_probe(struct fwk_platdev *sprt_pdev)
 
 	fbdev_imx_init(base, sprt_drv);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 
 fail1:
 	fwk_platform_set_drvdata(sprt_pdev, mrt_nullptr);
 	fwk_io_unmap(base);
 fail:
 	kfree(sprt_fb);
-	return -NR_isNotSuccess;
+	return -NR_IS_FAILD;
 }
 
 /*!
@@ -439,11 +439,11 @@ static ksint32_t fbdev_imx_driver_remove(struct fwk_platdev *sprt_dev)
 	fwk_io_unmap(sprt_drv->base);
 	kfree(sprt_fb);
 	
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!< device id for device-tree */
-static struct fwk_of_device_id sgrt_fbdev_imx_driver_ids[] =
+static const struct fwk_of_device_id sgrt_fbdev_imx_driver_ids[] =
 {
 	{ .compatible = "fsl,imx6ul-lcdif", },
 	{},

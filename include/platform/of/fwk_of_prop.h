@@ -17,10 +17,13 @@
 #include <platform/fwk_basic.h>
 
 /*!< The defines */
+struct fwk_of_phandle_args;
+
 #define FDT_TO_ARCH_ENDIAN32(x)					mrt_be32_to_cpu(x)
 #define FDT_TO_ARCH_ENDIAN16(x)					mrt_be16_to_cpu(x)
+#define FDT_TO_ARCH_PTR32(x)					mrt_be32_to_cpup(x)
 
-struct fwk_of_property
+typedef struct fwk_of_property
 {
 	/*!< Property name: such as name, compatible, #size-cells */
 	kstring_t *name;
@@ -31,9 +34,9 @@ struct fwk_of_property
 	/*!< Next property */
 	struct fwk_of_property *sprt_next;
 
-};
+} srt_fwk_of_property_t;
 
-struct fwk_device_node
+typedef struct fwk_device_node
 {
 	kstring_t *name;
 	kstring_t *type;
@@ -52,7 +55,8 @@ struct fwk_device_node
 
 	kuint32_t flags;
 	void *data;
-};
+
+} srt_fwk_device_node_t;
 
 /*!< The functions */
 TARGET_EXT struct fwk_of_property *fwk_of_find_property(struct fwk_device_node *sprt_node,
@@ -81,5 +85,8 @@ TARGET_EXT ksint32_t fwk_of_property_read_string_index(struct fwk_device_node *s
 TARGET_EXT kuint32_t fwk_of_n_size_cells(struct fwk_device_node *sprt_node);
 TARGET_EXT kuint32_t fwk_of_n_addr_cells(struct fwk_device_node *sprt_node);
 TARGET_EXT kbool_t   fwk_of_device_is_compatible(struct fwk_device_node *sprt_node, const kstring_t *ptr_compat);
+TARGET_EXT ksint32_t fwk_of_parse_phandle_with_args(struct fwk_device_node *sprt_node, const kstring_t *list_name,
+										const kstring_t *cells_name, kuint32_t cell_count, ksint32_t index, struct fwk_of_phandle_args *sprt_args);
+TARGET_EXT ksint32_t fwk_of_property_match_string(struct fwk_device_node *sprt_node, const kstring_t *list_name, const kstring_t *match_name);
 
 #endif /*!< __FWK_OF_PROP_H_ */

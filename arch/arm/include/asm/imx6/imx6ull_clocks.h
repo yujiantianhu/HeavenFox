@@ -33,6 +33,148 @@
 #define IMX6UL_CCM_CCGR_MASK                        (0x3U)
 #define IMX6UL_CCM_CCGR_BIT(offset)                 mrt_bit_nr(IMX6UL_CCM_CCGR_MASK, (offset) << 1)
 
+enum __ERT_IMX6UL_CCM_CCGRx
+{
+    NR_IMX6UL_CCM_CCGR0 = 0,
+    NR_IMX6UL_CCM_CCGR1,
+    NR_IMX6UL_CCM_CCGR2,
+    NR_IMX6UL_CCM_CCGR3,
+    NR_IMX6UL_CCM_CCGR4,
+    NR_IMX6UL_CCM_CCGR5,
+    NR_IMX6UL_CCM_CCGR6,
+
+	NR_IMX6UL_CCM_CCGR_NUM
+};
+
+enum __ERT_IMX_CLOCK_GATE
+{
+    /*!< CCGR0 */
+    NR_IMX_CCGR0_AIPS_TZ1 = 0,
+    NR_IMX_CCGR0_AIPS_TZ2,
+    NR_IMX_CCGR0_APBHDMA,
+    NR_IMX_CCGR0_ASRC_IPG,
+    NR_IMX_CCGR0_ASRC_MEM,
+    NR_IMX_CCGR0_DCP,
+    NR_IMX_CCGR0_ENET,
+    NR_IMX_CCGR0_CAN1_IPG,
+    NR_IMX_CCGR0_CAN1_SERIAL,
+    NR_IMX_CCGR0_CAN2_IPG,
+    NR_IMX_CCGR0_CAN2_SERIAL,
+    NR_IMX_CCGR0_CPU_DBG,
+    NR_IMX_CCGR0_GPT2_IPG,
+    NR_IMX_CCGR0_GPT2_SERIAL,
+    NR_IMX_CCGR0_UART2,
+    NR_IMX_CCGR0_GPIO2,
+
+    /*!< CCGR1 */
+    NR_IMX_CCGR1_ECSPI1 = 0,
+    NR_IMX_CCGR1_ECSPI2,
+    NR_IMX_CCGR1_ESCPI3,
+    NR_IMX_CCGR1_ESCPI4,
+    NR_IMX_CCGR1_ADC2,
+    NR_IMX_CCGR1_UART3,
+    NR_IMX_CCGR1_EPIT1,
+    NR_IMX_CCGR1_EPIT2,
+    NR_IMX_CCGR1_ADC1,
+    NR_IMX_CCGR1_SIM_S,
+    NR_IMX_CCGR1_GPT_BUS,
+    NR_IMX_CCGR1_GPT_SERIAL,
+    NR_IMX_CCGR1_UART4,
+    NR_IMX_CCGR1_GPIO1,
+    NR_IMX_CCGR1_CSU,
+    NR_IMX_CCGR1_GPIO5,
+
+    /*!< CCGR2 */
+    NR_IMX_CCGR2_ESAI = 0,
+    NR_IMX_CCGR2_CSI,
+    NR_IMX_CCGR2_IOMUXC_SNVS,
+    NR_IMX_CCGR2_I2C1_SERIAL,
+    NR_IMX_CCGR2_I2C2_SERIAL,
+    NR_IMX_CCGR2_I2C3_SERIAL,
+    NR_IMX_CCGR2_OCOTP_CTRL,
+    NR_IMX_CCGR2_IOMUXC_IPT,
+    NR_IMX_CCGR2_IPMUX1,
+    NR_IMX_CCGR2_IPMUX2,
+    NR_IMX_CCGR2_IPMUX3,
+    NR_IMX_CCGR2_IPSYNC_IPG,
+    NR_IMX_CCGR2_RSVD1,
+    NR_IMX_CCGR2_GPIO3,
+    NR_IMX_CCGR2_LCD,
+    NR_IMX_CCGR2_PXP,
+
+    /*!< CCGR3 */
+    NR_IMX_CCGR3_RSVD1 = 0,
+    NR_IMX_CCGR3_UART5,
+    NR_IMX_CCGR3_EPDC,
+    NR_IMX_CCGR3_UART6,
+    NR_IMX_CCGR3_CA7_CCM_DAP,
+    NR_IMX_CCGR3_LCDIF1_PIX,
+    NR_IMX_CCGR3_GPIO4,
+    NR_IMX_CCGR3_QSPI,
+    NR_IMX_CCGR3_WDOG1,
+    NR_IMX_CCGR3_A7_CLKDIV_PATCH,
+    NR_IMX_CCGR3_MMDC_FAST,
+    NR_IMX_CCGR3_RSVD2,
+    NR_IMX_CCGR3_MMDC_IPG_P0,
+    NR_IMX_CCGR3_MMDC_IPG_P1,
+    NR_IMX_CCGR3_RAW_GPMI,
+    NR_IMX_CCGR3_IOMUXC_SNVS_GPR,
+
+    /*!< CCGR4 */
+    NR_IMX_CCGR4_RSVD1 = 0,
+    NR_IMX_CCGR4_IOMUXC,
+    NR_IMX_CCGR4_IOMUXC_GPR,
+    NR_IMX_CCGR4_SIM_CPU,
+    NR_IMX_CCGR4_CXAP_SLAVE,
+    NR_IMX_CCGR4_TSC_DIG,
+    NR_IMX_CCGR4_PL301_BCH,
+    NR_IMX_CCGR4_PL301_MAIN,
+    NR_IMX_CCGR4_PWM1,
+    NR_IMX_CCGR4_PWM2,
+    NR_IMX_CCGR4_PWM3,
+    NR_IMX_CCGR4_PWM4,
+    NR_IMX_CCGR4_RAWNAND_BCH_APB,
+    NR_IMX_CCGR4_RAWNAND_GPMI_BCH,
+    NR_IMX_CCGR4_RWNAND_GPMI_IO,
+    NR_IMX_CCGR4_RWNAND_GPMI_APB,
+
+    /*!< CCGR5 */
+    NR_IMX_CCGR5_ROM = 0,
+    NR_IMX_CCGR5_SCTR,
+    NR_IMX_CCGR5_SNVS_DRYICE,
+    NR_IMX_CCGR5_SDMA,
+    NR_IMX_CCGR5_KPP,
+    NR_IMX_CCGR5_WDOG2,
+    NR_IMX_CCGR5_SPDA,
+    NR_IMX_CCGR5_SPDIF_AUDIO,
+    NR_IMX_CCGR5_SIM_MAIN,
+    NR_IMX_CCGR5_SNVS_HP,
+    NR_IMX_CCGR5_SNVS_LP,
+    NR_IMX_CCGR5_SAI3,
+    NR_IMX_CCGR5_UART1,
+    NR_IMX_CCGR5_UART7,
+    NR_IMX_CCGR5_SAI1,
+    NR_IMX_CCGR5_SAI2,
+
+    /*!< CCGR6 */
+    NR_IMX_CCGR6_USBOH3 = 0,
+    NR_IMX_CCGR6_USDHC1,
+    NR_IMX_CCGR6_USDHC2,
+    NR_IMX_CCGR6_RSVD1,
+    NR_IMX_CCGR6_IPMUX4,
+    NR_IMX_CCGR6_EIM_SLOW,
+    NR_IMX_CCGR6_UART_DEBUG,
+    NR_IMX_CCGR6_UART8,
+    NR_IMX_CCGR6_PWM8,
+    NR_IMX_CCGR6_AIPS_TZ3,
+    NR_IMX_CCGR6_WDOG3,
+    NR_IMX_CCGR6_ANADIG,
+    NR_IMX_CCGR6_I2C4_SERIAL,
+    NR_IMX_CCGR6_PWM5,
+    NR_IMX_CCGR6_PWM6,
+    NR_IMX_CCGR6_PWM7
+};
+
 /*!< clock Property */
 typedef struct
 {
@@ -261,6 +403,7 @@ typedef struct
     kuint32_t CIMR;                                                 /*!< CCM Interrupt Mask Register, offset: 0x5C */
     kuint32_t CCOSR;                                                /*!< CCM Clock Output Source Register, offset: 0x60 */
     kuint32_t CGPR;                                                 /*!< CCM General Purpose Register, offset: 0x64 */
+
     kuint32_t CCGR0;                                                /*!< CCM Clock Gating Register 0, offset: 0x68 */
     kuint32_t CCGR1;                                                /*!< CCM Clock Gating Register 1, offset: 0x6C */
     kuint32_t CCGR2;                                                /*!< CCM Clock Gating Register 2, offset: 0x70 */
@@ -268,6 +411,7 @@ typedef struct
     kuint32_t CCGR4;                                                /*!< CCM Clock Gating Register 4, offset: 0x78 */
     kuint32_t CCGR5;                                                /*!< CCM Clock Gating Register 5, offset: 0x7C */
     kuint32_t CCGR6;                                                /*!< CCM Clock Gating Register 6, offset: 0x80 */
+
     kuint8_t  RESERVED_2[4];
     kuint32_t CMEOR;                                                /*!< CCM Module Enable Overide Register, offset: 0x88 */
 } srt_imx_ccm_t;
@@ -523,6 +667,7 @@ static inline kuint64_t hal_imx_sysclk_freq_counter(void)
 #define IMX6UL_CLK_UART_PODF		                122
 #define IMX6UL_CLK_ADC1			                    123
 #define IMX6UL_CLK_ADC2			                    124
+
 #define IMX6UL_CLK_AIPSTZ1		                    125
 #define IMX6UL_CLK_AIPSTZ2		                    126
 #define IMX6UL_CLK_AIPSTZ3		                    127

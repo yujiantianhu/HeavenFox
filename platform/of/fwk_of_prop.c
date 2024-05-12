@@ -11,6 +11,7 @@
  */
 
 /*!< The includes */
+#include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_prop.h>
 
 /*!< API function */
@@ -69,11 +70,11 @@ ksint32_t fwk_of_property_read_u8_array_index(struct fwk_device_node *sprt_node,
 	/*!< sprt_prop == mrt_nullptr : The property is not available */
 	sprt_prop = fwk_of_find_property(sprt_node, ptr_name, mrt_nullptr);
 	if (!isValid(sprt_prop))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	lenth = sprt_prop->length;
 	if ((index >= lenth) || (!size))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< sprt_prop->length: the number of bytes occupied by sprt_prop->value */
 	size = ((index + size) >= lenth) ? lenth : (index + size);
@@ -81,7 +82,7 @@ ksint32_t fwk_of_property_read_u8_array_index(struct fwk_device_node *sprt_node,
 	for (i = index; i < size; i++, ptr_value++)
 		*ptr_value = *((kuint8_t *)sprt_prop->value + i);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -99,11 +100,11 @@ ksint32_t fwk_of_property_read_u16_array_index(struct fwk_device_node *sprt_node
 	/*!< sprt_prop == mrt_nullptr : The property is not available */
 	sprt_prop = fwk_of_find_property(sprt_node, ptr_name, mrt_nullptr);
 	if (!isValid(sprt_prop))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	lenth = sprt_prop->length >> 1;
 	if ((index >= lenth) || (!size))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< sprt_prop->length: the number of bytes occupied by sprt_prop->value */
 	size = ((index + size) >= lenth) ? lenth : (index + size);
@@ -111,7 +112,7 @@ ksint32_t fwk_of_property_read_u16_array_index(struct fwk_device_node *sprt_node
 	for (i = index; i < size; i++, ptr_value++)
 		*ptr_value = FDT_TO_ARCH_ENDIAN16(*((kuint16_t *)sprt_prop->value + i));
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -129,11 +130,11 @@ ksint32_t fwk_of_property_read_u32_array_index(struct fwk_device_node *sprt_node
 	/*!< sprt_prop == mrt_nullptr : The property is not available */
 	sprt_prop = fwk_of_find_property(sprt_node, ptr_name, mrt_nullptr);
 	if (!isValid(sprt_prop))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	lenth = sprt_prop->length >> 2;
 	if ((index >= lenth) || (!size))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< sprt_prop->length: the number of bytes occupied by sprt_prop->value */
 	size = ((index + size) >= lenth) ? lenth : (index + size);
@@ -141,7 +142,7 @@ ksint32_t fwk_of_property_read_u32_array_index(struct fwk_device_node *sprt_node
 	for (i = index; i < size; i++, ptr_value++)
 		*ptr_value = FDT_TO_ARCH_ENDIAN32(*((kuint32_t *)sprt_prop->value + i));
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -236,12 +237,12 @@ ksint32_t fwk_of_property_read_string(struct fwk_device_node *sprt_node, const k
 	if (!isValid(sprt_prop))
 	{
 		*ptr_string = mrt_nullptr;
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 	}
 
 	*ptr_string	= (kstring_t *)sprt_prop->value;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -263,7 +264,7 @@ ksint32_t fwk_of_property_read_string_index(struct fwk_device_node *sprt_node,
 	if (!isValid(sprt_prop))
 	{
 		*ptr_string = mrt_nullptr;
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 	}
 
 	for (i = 0, iTotalLenth = 0; ((i <= index) && (iTotalLenth < sprt_prop->length)); i++)
@@ -275,11 +276,11 @@ ksint32_t fwk_of_property_read_string_index(struct fwk_device_node *sprt_node,
 
 	/*!< sprt_prop->length: the number of bytes occupied by sprt_prop->value */
 	if (iTotalLenth >= sprt_prop->length)
-		return -NR_isArrayOver;
+		return -NR_IS_MORE;
 
 	*ptr_string	= ptr_value;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -347,6 +348,105 @@ kbool_t fwk_of_device_is_compatible(struct fwk_device_node *sprt_node, const kst
 	}
 
 	return false;
+}
+
+/*!
+ * @brief   parse arguments
+ * @param   sprt_node: current node
+ * @param	list_name: property name
+ * @param	cells_name: the property named xxx-cells in parent node
+ * @param	index: position
+ * @param	sprt_args: save to this
+ * @retval  errno
+ * @note    none
+ */
+ksint32_t fwk_of_parse_phandle_with_args(struct fwk_device_node *sprt_node, const kstring_t *list_name,
+							const kstring_t *cells_name, kuint32_t cell_count, ksint32_t index, struct fwk_of_phandle_args *sprt_args)
+{
+	struct fwk_device_node *sprt_np;
+	kuint32_t *ptr_value, *ptr_end;
+	kuint32_t phandle, cells = 0, cur_index = 0;
+	kusize_t size = 0, count, i;
+
+	if (!sprt_node || (index < 0) || !sprt_args)
+		return -NR_IS_NODEV;
+
+	ptr_value = fwk_of_get_property(sprt_node, list_name, &size);
+	if (!ptr_value || !size)
+		return -NR_IS_NOTFOUND;
+
+	count = size / sizeof(*ptr_value);
+	ptr_end = ptr_value + count;
+
+	while (ptr_value < ptr_end)
+	{
+		phandle = FDT_TO_ARCH_PTR32(ptr_value++);
+
+		sprt_np = fwk_of_find_node_by_phandle(mrt_nullptr, phandle);
+		if (!sprt_np)
+			return -NR_IS_NOTFOUND;
+
+		if (cells_name)
+		{
+			if (fwk_of_property_read_u32(sprt_np, cells_name, &cells))
+				return -NR_IS_EMPTY;
+		}
+		else
+			cells = cell_count;
+
+		if (!cells)
+			return -NR_IS_CHECKERR;
+
+		if ((ptr_value + cells) > ptr_end)
+			return -NR_IS_MORE;
+
+		if ((cur_index++) == index)
+		{
+			sprt_args->sprt_node = sprt_np;
+			sprt_args->args_count = cells;
+
+			for (i = 0; i < cells; i++)
+				sprt_args->args[i] = FDT_TO_ARCH_PTR32(ptr_value++);
+
+			goto END;
+		}
+
+		ptr_value += cells;
+	}
+
+	return -NR_IS_ERROR;
+
+END:
+	return NR_IS_NORMAL;
+}
+
+ksint32_t fwk_of_property_match_string(struct fwk_device_node *sprt_node, const kstring_t *list_name, const kstring_t *match_name)
+{
+	struct fwk_of_property *sprt_prop;
+	kstring_t *str, *end;
+	kusize_t size = 0;
+	kuint32_t idx, lenth;
+
+	sprt_prop = fwk_of_find_property(sprt_node, list_name, &size);
+	if (!isValid(sprt_prop) || !size)
+		return -NR_IS_NOTFOUND;
+
+	str = (kstring_t *)sprt_prop->value;
+	end = str + size;
+
+	for (idx = 0; str < end; str += lenth)
+	{
+		lenth = strlen(str) + 1;
+		if ((str + lenth) > end)
+			return -NR_IS_MORE;
+
+		if (!strcmp(str, match_name))
+			return idx;
+
+		idx++;
+	}
+
+	return -NR_IS_CHECKERR;
 }
 
 /*!< end of file */

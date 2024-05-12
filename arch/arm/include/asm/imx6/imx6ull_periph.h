@@ -22,7 +22,7 @@
 /*!< The defines */
 /*!< ------------------------------------------------------------------------- */
 /*!< Gpio - Register Layout Typedef */
-typedef struct
+typedef struct hal_imx_gpio
 {
     kuint32_t DR;                                                   /*!< GPIO data register, offset: 0x0 */
     kuint32_t GDIR;                                                 /*!< GPIO direction register, offset: 0x4 */
@@ -32,7 +32,8 @@ typedef struct
     kuint32_t IMR;                                                  /*!< GPIO interrupt mask register, offset: 0x14 */
     kuint32_t ISR;                                                  /*!< GPIO interrupt status register, offset: 0x18 */
     kuint32_t EDGE_SEL;                                             /*!< GPIO edge select register, offset: 0x1C */
-} srt_imx_gpio_t;
+
+} srt_hal_imx_gpio_t;
 
 /*!< Peripheral GPIO base address */
 #define IMX6UL_GPIO1_ADDR_BASE                                      (0x209C000u)
@@ -40,12 +41,12 @@ typedef struct
 #define IMX6UL_GPIO3_ADDR_BASE                                      (0x20A4000u)
 #define IMX6UL_GPIO4_ADDR_BASE                                      (0x20A8000u)
 #define IMX6UL_GPIO5_ADDR_BASE                                      (0x20AC000u)
-#define IMX6UL_GPIO_PROPERTY_ENTRY(x)                               (srt_imx_gpio_t *)IMX6UL_GPIO##x##_ADDR_BASE
+#define IMX6UL_GPIO_PROPERTY_ENTRY(x)                               (srt_hal_imx_gpio_t *)IMX6UL_GPIO##x##_ADDR_BASE
 #define IMX6UL_GPIO_PIN_OFFSET_BIT(x)                               mrt_bit(x)
 
 /*!< ------------------------------------------------------------------------- */
 /*!< Timer - Register Layout Typedef */
-typedef struct
+typedef struct hal_imx_gptimer
 {
     kuint32_t CR;                                                   /*!< GPT Control Register, offset: 0x0 */
     kuint32_t PR;                                                   /*!< GPT Prescaler Register, offset: 0x4 */
@@ -54,12 +55,13 @@ typedef struct
     kuint32_t OCR[3];                                               /*!< GPT Output Compare Register 1..GPT Output Compare Register 3, array offset: 0x10, array step: 0x4 */
     kuint32_t ICR[2];                                               /*!< GPT Input Capture Register 1..GPT Input Capture Register 2, array offset: 0x1C, array step: 0x4 */
     kuint32_t CNT;                                                  /*!< GPT Counter Register, offset: 0x24 */
-} srt_imx_gptimer_t;
+    
+} srt_hal_imx_gptimer_t;
 
 /*!< Peripheral GPT base address */
 #define IMX6UL_GPT1_ADDR_BASE                                       (0x2098000u)
 #define IMX6UL_GPT2_ADDR_BASE                                       (0x20E8000u)
-#define IMX6UL_GPT_PROPERTY_ENTRY(x)                                (srt_imx_gptimer_t *)IMX6UL_GPT##x##_ADDR_BASE
+#define IMX6UL_GPT_PROPERTY_ENTRY(x)                                (srt_hal_imx_gptimer_t *)IMX6UL_GPT##x##_ADDR_BASE
 
 /*!< ------------------------------------------------------------------------- */
 /*!< WDOG - Register Layout Typedef */
@@ -116,7 +118,7 @@ typedef struct
 
 /*!< ------------------------------------------------------------------------- */
 /*!< I2C - Register Layout Typedef */
-typedef struct 
+typedef struct hal_imx_i2c
 {
     kuint16_t IADR;                                                 /*!< I2C Address Register, offset: 0x0 */
     kuint8_t  RESERVED_0[2];
@@ -127,7 +129,7 @@ typedef struct
     kuint16_t I2SR;                                                 /*!< I2C Status Register, offset: 0xC */
     kuint8_t  RESERVED_3[2];
     kuint16_t I2DR;                                                 /*!< I2C Data I/O Register, offset: 0x10 */
-} srt_imx_i2c_t;
+} srt_hal_imx_i2c_t;
 
 /*!< Peripheral I2C base address */
 #define IMX6UL_I2C1_ADDR_BASE                                       (0x21A0000u)

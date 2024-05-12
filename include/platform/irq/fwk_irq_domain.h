@@ -65,8 +65,10 @@ TARGET_EXT srt_fwk_irq_domain_t *fwk_irq_domain_add_linear(struct fwk_device_nod
 					 const struct fwk_irq_domain_ops *ops, void *host_data);
 TARGET_EXT srt_fwk_irq_domain_t *fwk_irq_domain_add_hierarchy(srt_fwk_irq_domain_t *sprt_parent, struct fwk_device_node *sprt_node, 
 												kuint32_t size, const srt_fwk_irq_domain_ops_t *ops, void *host_data);
+TARGET_EXT void fwk_irq_domain_del_hierarchy(srt_fwk_irq_domain_t *sprt_domain);
 TARGET_EXT srt_fwk_irq_domain_t *fwk_irq_get_domain_by_name(kstring_t *name, ksint32_t hwirq);
-TARGET_EXT ksint32_t fwk_irq_get_by_domain(kstring_t *name, ksint32_t hwirq);
+TARGET_EXT ksint32_t fwk_irq_get_by_domain(srt_fwk_irq_domain_t *sprt_domain, ksint32_t hwirq);
+TARGET_EXT ksint32_t fwk_irq_get_by_domain_name(kstring_t *name, ksint32_t hwirq);
 
 #ifdef __cplusplus
 	}

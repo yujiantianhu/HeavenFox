@@ -24,6 +24,7 @@
     support platform: bus - device - driver framework;
     provide APIs such as open/close/read/write, access hardware through “fd” and “file_operations”;
     support flexible selection of source files to be complied through Makefile;
+    support pinctrl, gpio (and gpio-irq), clock subsystem, and i2c bus framework
     
 # Methods:
     make clean:     delete all the .o and .d;
@@ -40,6 +41,15 @@
 
 # Readme:
 # -----------------------------------------------------------------------
+
+# 2024.05.13
+    author: Yang Yujun
+    commit:
+        01) add pinctrl device framework;
+        02) add gpio device framework;
+        03) add clock system framework;
+        04) add i2c master, device and instance (tsc2007) driver;
+        05) optimize irq framework
 
 # 2024.04.18
     author: Yang Yujun

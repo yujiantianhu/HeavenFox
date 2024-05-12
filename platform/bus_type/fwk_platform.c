@@ -14,6 +14,7 @@
 #include <platform/fwk_platform.h>
 #include <platform/fwk_platdev.h>
 #include <platform/fwk_platdrv.h>
+#include <platform/fwk_pinctrl.h>
 
 /*!<
  * One device can only be matched with one driver
@@ -46,12 +47,12 @@ static ksint32_t fwk_platform_match(struct fwk_device *sprt_dev, struct fwk_driv
 
 	/*!< Matching priority 1: override, where override is set, all other matching methods will be invalidated */
 	if (sprt_platdev->driver_override)
-		return ((!strcmp(sprt_platdev->driver_override, sprt_driver->name)) ? NR_isWell : (-NR_isNotSuccess));
+		return ((!strcmp(sprt_platdev->driver_override, sprt_driver->name)) ? NR_IS_NORMAL : (-NR_IS_FAILD));
 
 	/*!< Match Priority 2: Device Tree */
 	sprt_np = fwk_of_node_try_matches(sprt_dev->sprt_node, sprt_driver->sprt_of_match_table, mrt_nullptr);
 	if (isValid(sprt_np) && (sprt_dev->sprt_node == sprt_np))
-		return NR_isWell;
+		return NR_IS_NORMAL;
 
 	/*!< Match Priority 3: idTable */
 	for (idTable_cnt = 0; idTable_cnt < sprt_platdrv->num_idTable; idTable_cnt++)
@@ -59,7 +60,7 @@ static ksint32_t fwk_platform_match(struct fwk_device *sprt_dev, struct fwk_driv
 		sprt_idTable = sprt_platdrv->sprt_idTable + idTable_cnt;
 
 		if (!strcmp((char *)sprt_platdev->name, (char *)sprt_idTable->name))
-			return NR_isWell;
+			return NR_IS_NORMAL;
 	}
 
 	/*!< Match Priority 4: Name */
@@ -67,9 +68,9 @@ static ksint32_t fwk_platform_match(struct fwk_device *sprt_dev, struct fwk_driv
 	 * Each device is not allowed to have the same name;
 	 * So you can exit immediately after finding it, and there will be no more devices with the same name in the future */
 	if (!strcmp((char *)sprt_platdev->name, (char *)sprt_driver->name))
-		return NR_isWell;
+		return NR_IS_NORMAL;
 
-	return -NR_isNotFound;
+	return -NR_IS_NOTFOUND;
 }
 
 /*!
@@ -86,15 +87,15 @@ static ksint32_t fwk_platform_probe(struct fwk_device *sprt_dev)
 
 	sprt_driver	= sprt_dev->sprt_driver;
 	if (!sprt_driver)
-		return -NR_isArgFault;
+		return -NR_IS_NOTFOUND;
 
 	sprt_platdev = mrt_container_of(sprt_dev, struct fwk_platdev, sgrt_dev);
 	sprt_platdrv = mrt_container_of(sprt_driver, struct fwk_platdrv, sgrt_driver);
 
 	if ((!sprt_platdrv->probe) || (0 > sprt_platdrv->probe(sprt_platdev)))
-		return -NR_isPermit;
+		return -NR_IS_PERMIT;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -111,20 +112,20 @@ static ksint32_t fwk_platform_remove(struct fwk_device *sprt_dev)
 
 	sprt_driver	= sprt_dev->sprt_driver;
 	if (!sprt_driver)
-		return -NR_isArgFault;
+		return -NR_IS_NOTFOUND;
 
 	sprt_platdev = mrt_container_of(sprt_dev, struct fwk_platdev, sgrt_dev);
 	sprt_platdrv = mrt_container_of(sprt_driver, struct fwk_platdrv, sgrt_driver);
 
 	if ((!sprt_platdrv->remove) || (0 > sprt_platdrv->remove(sprt_platdev)))
-		return -NR_isPermit;
+		return -NR_IS_PERMIT;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
-struct fwk_SysPrivate sgrt_fwk_platform_SysPriv =
+static struct fwk_SysPrivate sgrt_fwk_platform_SysPriv =
 {
-	.sprt_bus_type		= &sgrt_fwk_platform_bus_type,
+	.sprt_bus = &sgrt_fwk_platform_bus_type,
 
 	.sgrt_list_devices	= LIST_HEAD_INIT(&sgrt_fwk_platform_SysPriv.sgrt_list_devices),
 	.sgrt_list_drivers	= LIST_HEAD_INIT(&sgrt_fwk_platform_SysPriv.sgrt_list_drivers),
@@ -149,9 +150,26 @@ struct fwk_bus_type sgrt_fwk_platform_bus_type =
  */
 ksint32_t fwk_device_driver_probe(struct fwk_device *sprt_dev)
 {
-	struct fwk_bus_type *sprt_bus_type = sprt_dev->sprt_bus_type;
+	struct fwk_bus_type *sprt_bus_type;
+	ksint32_t retval;
 
-	return sprt_bus_type->probe ? sprt_bus_type->probe(sprt_dev) : (-NR_isNotSupport);
+	sprt_bus_type = sprt_dev->sprt_bus;
+
+	/*!< bind pinctrl before probe */
+	if (fwk_pinctrl_bind_pins(sprt_dev))
+		return -NR_IS_PERMIT;
+
+	if (sprt_bus_type->probe)
+	{
+		retval = sprt_bus_type->probe(sprt_dev);
+		if (retval)
+		{
+			fwk_pinctrl_unbind_pins(sprt_dev);
+			return retval;
+		}
+	}
+
+	return -NR_IS_NSUPPORT;
 }
 
 /*!
@@ -162,9 +180,9 @@ ksint32_t fwk_device_driver_probe(struct fwk_device *sprt_dev)
  */
 ksint32_t fwk_device_driver_remove(struct fwk_device *sprt_dev)
 {
-	struct fwk_bus_type *sprt_bus_type = sprt_dev->sprt_bus_type;
+	struct fwk_bus_type *sprt_bus_type = sprt_dev->sprt_bus;
 
-	return sprt_bus_type->remove ? sprt_bus_type->remove(sprt_dev) : (-NR_isNotSupport);
+	return sprt_bus_type->remove ? sprt_bus_type->remove(sprt_dev) : (-NR_IS_NSUPPORT);
 }
 
 /*!

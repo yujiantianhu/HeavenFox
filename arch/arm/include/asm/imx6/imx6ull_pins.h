@@ -153,8 +153,6 @@ static inline void hal_imx_pin_attribute_init(srt_imx_pin_t *sprt_cfg, kuaddr_t 
                                                 kuint32_t input_data,
                                                 kuint32_t pad_data)
 {
-    kuaddr_t start = base ? base : IMX6UL_PIN_ADDR_BASE;
-
     /*!< clear all */
     /* memory_reset(sprt_cfg, sizeof(srt_imx_pin_t)); */
 
@@ -166,7 +164,7 @@ static inline void hal_imx_pin_attribute_init(srt_imx_pin_t *sprt_cfg, kuaddr_t 
      *               0, DISABLE, Determined by functionly. Suggest 0.
      *  bit[3 : 0]:  Function; ALT5 (0101 <0x5>) is generally used to configure GPIO. Refer to "imx6ul_pinfunc.h"
      */
-    sprt_cfg->mux_base   = start + mux_offset;
+    sprt_cfg->mux_base   = base + mux_offset;
     sprt_cfg->mux_data   = mrt_mask(mux_data, 0xfU) | mrt_bit_nr(0U, 4U);
 
     /*!<
@@ -174,13 +172,13 @@ static inline void hal_imx_pin_attribute_init(srt_imx_pin_t *sprt_cfg, kuaddr_t 
      * sometimes it will be set "0x10b0" ===>
      *                Hyst = 0, 100k pull down, keeper = 1, OD = 0, 100MHz, R0/6, slow slew rate
      */
-    sprt_cfg->pad_base   = start + pad_offset;
+    sprt_cfg->pad_base   = base + pad_offset;
     sprt_cfg->pad_data   = pad_data;
 
     /*!<
      * INPUT
      */
-    sprt_cfg->input_base = input_offset ? (start + input_offset) : 0;
+    sprt_cfg->input_base = input_offset ? (base + input_offset) : 0;
     sprt_cfg->input_data = input_data;
 }
 
@@ -192,7 +190,7 @@ static inline void hal_imx_pin_attribute_init(srt_imx_pin_t *sprt_cfg, kuaddr_t 
  */
 static inline void hal_imx_pin_auto_init(srt_imx_pin_t *sprt_cfg, kuaddr_t base, kuint32_t *ptr_value, kusize_t size)
 {
-    if (size == IMX6UL_MUX_CONF_SIZE)
+    if (size != IMX6UL_MUX_CONF_SIZE)
         hal_imx_pin_attribute_init(sprt_cfg, base, ptr_value[0], ptr_value[1], ptr_value[2], ptr_value[3], ptr_value[4], ptr_value[5]);
 }
 

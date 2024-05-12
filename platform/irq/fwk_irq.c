@@ -64,7 +64,7 @@ void fwk_of_irq_init(const struct fwk_of_device_id *sprt_matches)
     DECLARE_LIST_HEAD(sgrt_intc_parent_list);
 
     /*!< for each node */
-    FOREACH_OF_DT_NODE(sprt_np, mrt_nullptr)
+    foreach_fwk_of_dt_node(sprt_np, mrt_nullptr)
     {
         sprt_prop = fwk_of_find_property(sprt_np, "interrupt-controller", mrt_nullptr);
         of_status = fwk_of_device_is_avaliable(sprt_np);

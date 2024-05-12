@@ -35,6 +35,6 @@ TARGET_EXT struct fwk_char_device *sgrt_fwk_chrdevs[];
 /*!< The functions */
 TARGET_EXT ksint32_t fwk_alloc_chrdev(kuint32_t *devNum, kuint32_t baseminor, kuint32_t count, const kstring_t *name);
 TARGET_EXT ksint32_t fwk_register_chrdev(kuint32_t devNum, kuint32_t count, const kstring_t *name);
-TARGET_EXT ksint32_t fwk_unregister_chrdev(kuint32_t devNum, kuint32_t count);
+TARGET_EXT void fwk_unregister_chrdev(kuint32_t devNum, kuint32_t count);
 
 #endif /*!< __FWK_CHRDEV_H_ */

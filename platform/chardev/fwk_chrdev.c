@@ -39,7 +39,7 @@ ksint32_t __plat_init fwk_chrdev_init(void)
 	for (i = 0; i < chrdevMax; i++)
 		*(sprt_chrdev++) = mrt_nullptr;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 IMPORT_PLATFORM_INIT(fwk_chrdev_init);
 
@@ -66,7 +66,7 @@ ksint32_t __plat_exit fwk_chrdev_exit(void)
 		*sprt_chrdev = mrt_nullptr;
 	}
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 IMPORT_PLATFORM_EXIT(fwk_chrdev_exit);
 
@@ -241,11 +241,11 @@ ksint32_t fwk_alloc_chrdev(kuint32_t *devNum, kuint32_t baseminor, kuint32_t cou
 
 	sprt_chrdev = __fwk_register_chrdev(0, baseminor, count, name);
 	if (!isValid(sprt_chrdev))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	*devNum	= MKE_DEV_NUM(sprt_chrdev->major, sprt_chrdev->baseminor);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -272,14 +272,15 @@ ksint32_t fwk_register_chrdev(kuint32_t devNum, kuint32_t count, const kstring_t
 			goto fail;
 	}
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 
 fail:
 	/*!<
 	 * If the registration fails, you will need to cancel the previous registration together
 	 * The number of devices that have been registered: count = n - devNum
 	 */
-	return fwk_unregister_chrdev(devNum, n - devNum);
+	fwk_unregister_chrdev(devNum, n - devNum);
+	return -NR_IS_FAILD;
 }
 
 /*!
@@ -288,7 +289,7 @@ fail:
  * @retval  errno
  * @note    none
  */
-ksint32_t fwk_unregister_chrdev(kuint32_t devNum, kuint32_t count)
+void fwk_unregister_chrdev(kuint32_t devNum, kuint32_t count)
 {
 	struct fwk_char_device *sprt_chrdev;
 	kuint32_t major, last;
@@ -305,6 +306,6 @@ ksint32_t fwk_unregister_chrdev(kuint32_t devNum, kuint32_t count)
 		if (isValid(sprt_chrdev))
 			kfree(sprt_chrdev);
 	}
-
-	return NR_isWell;
 }
+
+/*!< end of file */

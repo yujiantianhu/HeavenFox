@@ -71,9 +71,9 @@ static ksint32_t gic_irq_domain_xlate(struct fwk_irq_domain *sprt_domain, struct
 				const kuint32_t *intspec, kuint32_t intsize, kuint32_t *out_hwirq, kuint32_t *out_type)
 {
 	if (sprt_domain->sprt_node != sprt_intc)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 	if (intsize < 3)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	/* skip over PPI, which is 0 ~ 15 */
 	*out_hwirq = intspec[1] + 16;
@@ -85,7 +85,7 @@ static ksint32_t gic_irq_domain_xlate(struct fwk_irq_domain *sprt_domain, struct
     /* interrupt trigger type */
 	*out_type = intspec[2] & IRQ_TYPE_SENSE_MASK;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 static const srt_fwk_irq_domain_ops_t sgrt_gic_domain_hierarchy_ops = 
@@ -174,8 +174,8 @@ static void fwk_gic_init_bases(kuint32_t gic_nr, kuint32_t irq_start,
 
     if (isValid(sprt_node))
     {
-        sprt_domain = (void *)fwk_irq_domain_add_hierarchy(mrt_nullptr, sprt_node, 
-                                                sprt_gic->gic_irqs, &sgrt_gic_domain_hierarchy_ops, sprt_gic);
+        sprt_domain = fwk_irq_domain_add_hierarchy(mrt_nullptr, sprt_node, 
+                                sprt_gic->gic_irqs, &sgrt_gic_domain_hierarchy_ops, sprt_gic);
         sprt_gic->sprt_domain = sprt_domain;
     }
 }
@@ -192,18 +192,18 @@ ksint32_t fwk_gic_of_init(struct fwk_device_node *sprt_node, struct fwk_device_n
     kuint32_t destributor = 0, cpu_interface = 0;
 
     if (isValid(sprt_parent))
-        return -NR_isUnvalid;
+        return -NR_IS_UNVALID;
 
     fwk_of_property_read_u32_index(sprt_node, "reg", 0, &destributor);
     fwk_of_property_read_u32_index(sprt_node, "reg", 2, &cpu_interface);
 
     if ((!destributor) || (!cpu_interface))
-        return -NR_isNotFound;
+        return -NR_IS_NOTFOUND;
 
     fwk_gic_init_bases(g_iHal_gic_cnts, -1, (void *)destributor, (void *)cpu_interface, 0, sprt_node);
     g_iHal_gic_cnts++;
 
-    return NR_isWell;
+    return NR_IS_NORMAL;
 }
 
 srt_ca7_gic_t *fwk_get_gic_data(kuint32_t gic_nr)
@@ -217,7 +217,7 @@ ksint32_t fwk_gic_to_gpc_irq(ksint32_t hwirq)
     if (hwirq < 0)
         return hwirq;
 
-    return fwk_irq_get_by_domain("gpc", hwirq);
+    return fwk_irq_get_by_domain_name("gpc", hwirq);
 }
 
 ksint32_t fwk_gpc_to_gic_irq(ksint32_t virq)
@@ -241,17 +241,17 @@ static ksint32_t gpc_irq_domain_xlate(struct fwk_irq_domain *sprt_domain, struct
 				const kuint32_t *intspec, kuint32_t intsize, kuint32_t *out_hwirq, kuint32_t *out_type)
 {
 	if (sprt_domain->sprt_node != sprt_intc)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 	if (intsize != 3)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
     if (intspec[0] != 0)
-        return -NR_isUnvalid;
+        return -NR_IS_UNVALID;
 
 	/* skip over PPI, which is 0 ~ 15 */
 	*out_hwirq = intspec[1];
     *out_type = intspec[2];
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 static const srt_fwk_irq_domain_ops_t sgrt_gpc_domain_hierarchy_ops = 
@@ -273,17 +273,17 @@ ksint32_t fwk_gpc_of_init(struct fwk_device_node *sprt_node, struct fwk_device_n
     srt_fwk_irq_domain_t *sprt_domain, *sprt_par;
 
     if (!isValid(sprt_parent) || !isValid(sprt_node))
-        return -NR_isUnvalid;
+        return -NR_IS_UNVALID;
 
     sprt_par = fwk_of_irq_host(sprt_parent);
     if (!isValid(sprt_par))
-        return -NR_isUnvalid;
+        return -NR_IS_UNVALID;
 
     sprt_domain = fwk_irq_domain_add_hierarchy(sprt_par, sprt_node, CA7_MAX_GPC_NR, &sgrt_gpc_domain_hierarchy_ops, mrt_nullptr);
     if (!isValid(sprt_domain))
-        return -NR_isNotSuccess;
+        return -NR_IS_FAILD;
 
-    return NR_isWell;
+    return NR_IS_NORMAL;
 }
 
 /* end of file */

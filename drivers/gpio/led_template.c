@@ -193,7 +193,7 @@ static ksint32_t led_template_driver_probe(struct fwk_platdev *sprt_dev)
 	sprt_cdev->privData = sprt_privdata;
 	fwk_platform_set_drvdata(sprt_dev, sprt_privdata);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 
 fail5:
 	fwk_device_destroy(LED_TEMPLATE_DRIVER_NAME);
@@ -204,7 +204,7 @@ fail3:
 fail2:
 	fwk_unregister_chrdev(devnum, 1);
 fail1:
-	return -NR_isNotSuccess;
+	return -NR_IS_FAILD;
 }
 
 /*!
@@ -220,7 +220,7 @@ static ksint32_t led_template_driver_remove(struct fwk_platdev *sprt_dev)
 
 	sprt_privdata = (struct led_template_drv *)fwk_platform_get_drvdata(sprt_dev);
 	if (!isValid(sprt_privdata))
-		return -NR_isNullPtr;
+		return -NR_IS_NULLPTR;
 
 	devnum = MKE_DEV_NUM(sprt_privdata->major, sprt_privdata->minor);
 
@@ -232,11 +232,11 @@ static ksint32_t led_template_driver_remove(struct fwk_platdev *sprt_dev)
 	kfree(sprt_privdata);
 	fwk_platform_set_drvdata(sprt_dev, mrt_nullptr);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!< device id for device-tree */
-static struct fwk_of_device_id sgrt_led_template_driver_id[] =
+static const struct fwk_of_device_id sgrt_led_template_driver_id[] =
 {
 	{ .compatible = "fsl, topeet, ledgpio", },
 	{},

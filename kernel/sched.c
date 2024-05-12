@@ -138,7 +138,7 @@ real_thread_t kel_sched_get_unused_tid(kuint32_t i_start, kuint32_t count)
 			return i;
 	}
 
-	return -NR_isArrayOver;
+	return -NR_IS_MORE;
 }
 
 /*!
@@ -164,7 +164,7 @@ ksint32_t kel_sched_thread_suspend(real_thread_t tid)
     if (tid == KEL_TABS_RUNNING_THREAD->tid)
     {
         kel_sched_self_suspend();
-        return NR_isWell;
+        return NR_IS_NORMAL;
     }
 
     KEL_SET_THREAD_STATUS(tid, NR_THREAD_SUSPEND);
@@ -180,7 +180,7 @@ ksint32_t kel_sched_thread_suspend(real_thread_t tid)
 ksint32_t kel_sched_thread_wakeup(real_thread_t tid)
 {
 	if (NR_THREAD_SUSPEND != KEL_GET_THREAD_STATUS(tid))
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
     KEL_SET_THREAD_STATUS(tid, NR_THREAD_READY);
 	return kel_sched_switch_thread(tid);
@@ -333,7 +333,7 @@ ksint32_t kel_sched_switch_thread(real_thread_t tid)
 			break;
 
 		default:
-			retval = -NR_isAnyErr;
+			retval = -NR_IS_ERROR;
 			break;
 	}
 
@@ -352,11 +352,11 @@ ksint32_t kel_sched_switch_thread(real_thread_t tid)
 	/*!< update thread status */
 	KEL_SYNC_THREAD_STATUS(tid, dst);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
     
 fail:
     KEL_SYNC_THREAD_STATUS(tid, src);
-    return -NR_isUnvalid;
+    return -NR_IS_UNVALID;
 }
 
 /*!
@@ -374,11 +374,11 @@ static ksint32_t kel_sched_despoil_work_role(real_thread_t tid)
 	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< only ready status can be switched to running */
 	if (NR_THREAD_READY != sprt_thread->status)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	/*!< get current */
 	sprt_running = KEL_TABS_RUNNING_THREAD;
@@ -396,7 +396,7 @@ static ksint32_t kel_sched_despoil_work_role(real_thread_t tid)
 	/*!< update current */
 	KEL_TABS_RUNNING_THREAD = sprt_thread;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -410,13 +410,13 @@ static ksint32_t kel_sched_reinstall_work_role(real_thread_t tid)
 	struct kel_thread *sprt_thread;
 
 	if (tid != KEL_TABS_RUNNING_THREAD->tid)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	/*!< no thread ready; current should be set to idle thread */
 	if (mrt_list_head_empty(KEL_TABS_READY_LIST))
 	{
 		KEL_TABS_RUNNING_THREAD = mrt_nullptr;
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 	}
 
 	/*!< get the first ready thread */
@@ -431,7 +431,7 @@ static ksint32_t kel_sched_reinstall_work_role(real_thread_t tid)
 		KEL_SYNC_THREAD_STATUS(sprt_thread->tid, NR_THREAD_RUNNING);
 	}
 
-	return sprt_thread ? NR_isWell : (-NR_isNotSuccess);
+	return sprt_thread ? NR_IS_NORMAL : (-NR_IS_FAILD);
 }
 
 /*!
@@ -447,11 +447,11 @@ static ksint32_t kel_sched_add_ready_list(real_thread_t tid)
 	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< avoid duplicate additions */
 	if (NR_THREAD_READY == sprt_thread->status)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	return __kel_sched_add_status_list(sprt_thread, KEL_TABS_READY_LIST);
 }
@@ -471,18 +471,18 @@ static ksint32_t kel_sched_detach_ready_list(real_thread_t tid)
 	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< check if is in ready status */
 	if (NR_THREAD_READY != sprt_thread->status)
 	{
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 	}
 
 	/*!< delete it */
 	__kel_sched_del_status_list(sprt_thread, KEL_TABS_READY_LIST);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -498,11 +498,11 @@ static ksint32_t kel_sched_add_suspend_list(real_thread_t tid)
 	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< avoid duplicate additions */
 	if (NR_THREAD_SUSPEND == sprt_thread->status)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	return __kel_sched_add_status_list(sprt_thread, KEL_TABS_SUSPEND_LIST);
 }
@@ -522,16 +522,16 @@ static ksint32_t kel_sched_detach_suspend_list(real_thread_t tid)
 	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< check if is in ready status */
 	if (NR_THREAD_SUSPEND != sprt_thread->status)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	/*!< delete it */
 	__kel_sched_del_status_list(sprt_thread, KEL_TABS_SUSPEND_LIST);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -547,11 +547,11 @@ static ksint32_t kel_sched_add_sleep_list(real_thread_t tid)
 	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< avoid duplicate additions */
 	if (NR_THREAD_SLEEP == sprt_thread->status)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	return __kel_sched_add_status_list(sprt_thread, KEL_TABS_SLEEP_LIST);
 }
@@ -571,16 +571,16 @@ static ksint32_t kel_sched_detach_sleep_list(real_thread_t tid)
 	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< check if is in ready status */
 	if (NR_THREAD_SLEEP != sprt_thread->status)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	/*!< delete it */
 	__kel_sched_del_status_list(sprt_thread, KEL_TABS_SLEEP_LIST);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -601,7 +601,7 @@ static ksint32_t __kel_sched_find_thread(real_thread_t tid, struct list_head *sp
 			return tid;
 	}
 
-	return -NR_isNotFound;
+	return -NR_IS_NOTFOUND;
 }
 
 /*!
@@ -617,7 +617,7 @@ static ksint32_t __kel_sched_add_status_list(struct kel_thread *sprt_thread, str
 	kuint32_t iPriority;
 
 	if ((!sprt_thread) || (!sprt_head))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< get priority */
 	iPriority = real_thread_get_priority(sprt_thread->sprt_attr);
@@ -628,7 +628,7 @@ static ksint32_t __kel_sched_add_status_list(struct kel_thread *sprt_thread, str
 
 	/*!< fault tolerance mechanism: check if this thread has been added to the list, and exit directly if it has been added */
 	if (0 <= __kel_sched_find_thread(sprt_thread->tid, sprt_head))
-		return NR_isWell;
+		return NR_IS_NORMAL;
 
 	/*!< traversing the ready list, inserting new thread into the tail of thread which is the same priority */
 	foreach_list_prev_entry(sprt_anyTask, sprt_head, sgrt_link)
@@ -637,7 +637,7 @@ static ksint32_t __kel_sched_add_status_list(struct kel_thread *sprt_thread, str
 		{
 			/*!< priority from high to low */
 			list_head_add_head(&sprt_anyTask->sgrt_link, &sprt_thread->sgrt_link);
-			return NR_isWell;
+			return NR_IS_NORMAL;
 		}
 	}
 
@@ -645,7 +645,7 @@ END:
 	/*!< target thread has the highest priority */
 	list_head_add_head(sprt_head, &sprt_thread->sgrt_link);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -680,11 +680,11 @@ ksint32_t register_kel_sched_thread(struct kel_thread *sprt_thread, real_thread_
 	sprt_it_attr = sprt_thread->sprt_attr;
 
 	if (KEL_TABS_THREAD_HANDLER(tid))
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	/*!< stack must be valid */
 	if (!sprt_it_attr->stack_addr)
-		return -NR_isMemErr;
+		return -NR_IS_NOMEM;
 
 	/*!< saved to tcb */
 	KEL_TABS_THREAD_HANDLER(tid) = sprt_thread;
@@ -703,7 +703,7 @@ ksint32_t register_kel_sched_thread(struct kel_thread *sprt_thread, real_thread_
 	/*!< set to ready status */
     KEL_SYNC_THREAD_STATUS(tid, NR_THREAD_READY);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
