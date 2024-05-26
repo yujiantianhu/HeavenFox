@@ -18,15 +18,17 @@
 #include <kernel/thread.h>
 
 /*!< The defines */
-typedef ksint32_t (*real_thread_init_t)(void);
+typedef kint32_t (*real_thread_init_t)(void);
 
 /*!< The globals */
 TARGET_EXT real_thread_init_t g_real_thread_init_tables[];
 
 /*!< The functions */
-TARGET_EXT ksint32_t rest_init(void);
-TARGET_EXT ksint32_t kthread_init(void);
-TARGET_EXT ksint32_t init_proc_init(void);
+TARGET_EXT kint32_t rest_init(void);
+TARGET_EXT kint32_t kthread_init(void);
+TARGET_EXT kint32_t kworker_init(void);
+
+TARGET_EXT kint32_t init_proc_init(void);
 
 /*!< API functions */
 /*!

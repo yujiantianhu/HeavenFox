@@ -81,7 +81,7 @@ void do_string_split(void *ptr_dst, kuint32_t offset, const void *ptr_src)
  * @retval  none
  * @note    copy string to another string
  */
-ksint8_t *do_string_copy(void *ptr_dst, const void *ptr_src)
+kint8_t *do_string_copy(void *ptr_dst, const void *ptr_src)
 {
 	kuint8_t *ptr_ch;
 	kuint8_t *ptr_buf;
@@ -95,7 +95,7 @@ ksint8_t *do_string_copy(void *ptr_dst, const void *ptr_src)
 
 	} while ('\0' != *ptr_ch);
 
-	return (ksint8_t *)ptr_dst;
+	return (kint8_t *)ptr_dst;
 }
 
 /*!
@@ -104,7 +104,7 @@ ksint8_t *do_string_copy(void *ptr_dst, const void *ptr_src)
  * @retval  none
  * @note    copy n char to another string
  */
-ksint8_t *do_string_n_copy(void *ptr_dst, const void *ptr_src, kuint32_t size)
+kint8_t *do_string_n_copy(void *ptr_dst, const void *ptr_src, kuint32_t size)
 {
 	kuint8_t *ptr_ch;
 	kuint8_t *ptr_buf;
@@ -115,7 +115,7 @@ ksint8_t *do_string_n_copy(void *ptr_dst, const void *ptr_src, kuint32_t size)
 	while ('\0' != *ptr_ch && (size--))
 		*(ptr_buf++) = *(ptr_ch++);
 
-	return (ksint8_t *)ptr_dst;
+	return (kint8_t *)ptr_dst;
 }
 
 /*!
@@ -299,14 +299,14 @@ kuint32_t seek_char_in_string(const void *ptr_src, kuint8_t ch)
  * @retval  none
  * @note    string format conversion
  */
-kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr_fmt, va_list ptr_list, kusize_t size)
+kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_fmt, va_list ptr_list, kusize_t size)
 {
-	kstring_t *ptr_data, *ptr_args;
+	kchar_t *ptr_data, *ptr_args;
 	kubyte_t ch;
 	kusize_t lenth, count;
 	kuint64_t i, num;
 
-	ptr_data = (kstring_t *)ptr_buf;
+	ptr_data = (kchar_t *)ptr_buf;
 	lenth = 0;
 	
 	if (size < 1)
@@ -417,7 +417,7 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr
 				break;
 
 			case 's':
-				ptr_args = (kstring_t *)va_arg(ptr_list, kstring_t *);
+				ptr_args = (kchar_t *)va_arg(ptr_list, kchar_t *);
 				count	 = get_string_lenth(ptr_args);
 
 				if ((lenth + count) > size)
@@ -458,7 +458,7 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kstring_t *ptr
  * @retval  none
  * @note    String format conversion
  */
-ksint32_t sprintk(void *ptr_buf, const kstring_t *ptr_fmt, ...)
+kint32_t sprintk(void *ptr_buf, const kchar_t *ptr_fmt, ...)
 {
 	va_list ptr_list;
 	kusize_t size;
@@ -545,7 +545,7 @@ __weak int strncmp(const char *__s1, const char *__s2, size_t __n)
  * @retval  none
  * @note    return string lenth
  */
-__weak kuint32_t kstrlen(const kstring_t *__s)
+__weak kuint32_t kstrlen(const kchar_t *__s)
 {
 	return (kuint32_t)get_string_lenth(__s);
 }
@@ -556,7 +556,7 @@ __weak kuint32_t kstrlen(const kstring_t *__s)
  * @retval  none
  * @note    copy src to dest
  */
-__weak kstring_t *kstrcpy(kstring_t *__dest, const kstring_t *__src)
+__weak kchar_t *kstrcpy(kchar_t *__dest, const kchar_t *__src)
 {
 	return do_string_copy(__dest, __src);
 }
@@ -567,7 +567,7 @@ __weak kstring_t *kstrcpy(kstring_t *__dest, const kstring_t *__src)
  * @retval  none
  * @note    copy src to dest
  */
-__weak kstring_t *kstrncpy(kstring_t *__dest, const kstring_t *__src, kusize_t __n)
+__weak kchar_t *kstrncpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
 {
 	return do_string_n_copy(__dest, __src, __n);
 }
@@ -578,7 +578,7 @@ __weak kstring_t *kstrncpy(kstring_t *__dest, const kstring_t *__src, kusize_t _
  * @retval  none
  * @note    copy src to dest
  */
-__weak kusize_t kstrlcpy(kstring_t *__dest, const kstring_t *__src, kusize_t __n)
+__weak kusize_t kstrlcpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
 {
 	return do_string_n_copy_safe(__dest, __src, __n);
 }
@@ -589,7 +589,7 @@ __weak kusize_t kstrlcpy(kstring_t *__dest, const kstring_t *__src, kusize_t __n
  * @retval  none
  * @note    compare s1 and s2
  */
-__weak ksint32_t kstrcmp(const kstring_t *__s1, const kstring_t *__s2)
+__weak kint32_t kstrcmp(const kchar_t *__s1, const kchar_t *__s2)
 {
 	return do_string_compare(__s1, __s2);
 }
@@ -600,7 +600,7 @@ __weak ksint32_t kstrcmp(const kstring_t *__s1, const kstring_t *__s2)
  * @retval  none
  * @note    compare s1 and s2
  */
-__weak ksint32_t kstrncmp(const kstring_t *__s1, const kstring_t *__s2, kusize_t __n)
+__weak kint32_t kstrncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
 {
 	return do_string_n_compare(__s1, __s2, __n);
 }

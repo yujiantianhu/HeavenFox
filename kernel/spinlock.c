@@ -31,7 +31,7 @@
 void spin_lock_init(struct spin_lock *sprt_lock)
 {
     if (isValid(sprt_lock))
-        sprt_lock->count = 0;
+        ATOMIC_SET(&sprt_lock->sgrt_atc);
 }
 
 /*!
@@ -42,10 +42,11 @@ void spin_lock_init(struct spin_lock *sprt_lock)
  */
 void spin_lock(struct spin_lock *sprt_lock)
 {
-    while (mrt_spin_is_locked(sprt_lock));
+    while (spin_is_locked(sprt_lock));
     
     mrt_preempt_disable();
-    COUNT_INC(sprt_lock->count);
+    mrt_barrier();
+    atomic_inc(&sprt_lock->sgrt_atc);
 }
 
 /*!
@@ -56,7 +57,11 @@ void spin_lock(struct spin_lock *sprt_lock)
  */
 void spin_unlock(struct spin_lock *sprt_lock)
 {
-    COUNT_DEC(sprt_lock->count);
+    if (!spin_is_locked(sprt_lock))
+        return;
+
+    atomic_dec(&sprt_lock->sgrt_atc);
+    mrt_barrier();
     mrt_preempt_enable();
 }
 
@@ -66,14 +71,78 @@ void spin_unlock(struct spin_lock *sprt_lock)
  * @retval  none
  * @note    if it has been locked, return right away
  */
-ksint32_t spin_trylock(struct spin_lock *sprt_lock)
+kint32_t spin_trylock(struct spin_lock *sprt_lock)
 {
-    if (mrt_spin_is_locked(sprt_lock))
-        return -NR_IS_EXISTED;
+    if (spin_is_locked(sprt_lock))
+        return -NR_IS_LOCKED;
 
     mrt_preempt_disable();
-    COUNT_INC(sprt_lock->count);
-    return 0;
+    mrt_barrier();
+    atomic_inc(&sprt_lock->sgrt_atc);
+    return NR_IS_NORMAL;
+}
+
+/*!< for SMP (if is single core, do not need to use them) */
+void spin_lock_irq(struct spin_lock *sprt_lock)
+{
+    spin_lock(sprt_lock);
+    mrt_disable_cpu_irq();
+}
+
+kint32_t spin_try_lock_irq(struct spin_lock *sprt_lock)
+{
+    if (spin_trylock(sprt_lock))
+        return -NR_IS_LOCKED;
+
+    mrt_barrier();
+    mrt_disable_cpu_irq();
+    return NR_IS_NORMAL;
+}
+
+void spin_unlock_irq(struct spin_lock *sprt_lock)
+{
+    if (!spin_is_locked(sprt_lock))
+        return;
+    
+    spin_unlock(sprt_lock);
+    mrt_barrier();
+    mrt_enable_cpu_irq();
+}
+
+void spin_lock_irqsave(struct spin_lock *sprt_lock)
+{
+    spin_lock(sprt_lock);
+    sprt_lock->flag = __get_cpsr();
+    mrt_disable_cpu_irq();
+}
+
+kint32_t spin_try_lock_irqsave(struct spin_lock *sprt_lock)
+{
+    if (spin_trylock(sprt_lock))
+        return -NR_IS_LOCKED;
+
+    sprt_lock->flag = __get_cpsr();
+    sprt_lock->flag &= CPSR_BIT_I;
+
+    mrt_barrier();
+    mrt_disable_cpu_irq();
+
+    return NR_IS_NORMAL;
+}
+
+void spin_unlock_irqrestore(struct spin_lock *sprt_lock)
+{
+    if (!spin_is_locked(sprt_lock))
+        return;
+    
+    spin_unlock(sprt_lock);
+    mrt_barrier();
+
+    /*!< bit4 ~ bit0 is mode bit, which are not equaled to 0 */
+    if (sprt_lock->flag & CPSR_BIT_I)
+        mrt_enable_cpu_irq();
+
+    sprt_lock->flag = 0;
 }
 
 /*!< end of file */

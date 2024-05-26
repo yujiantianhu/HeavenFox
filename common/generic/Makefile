@@ -9,6 +9,7 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
+obj-y	+=	generic.o
 obj-y	+=	errors.o
 obj-y	+=	api_string.o
 obj-y	+=	io_stream.o

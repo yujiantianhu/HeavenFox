@@ -22,9 +22,9 @@
 
 /*!< -------------------------------------------------------------------------- */
 /*!< The functions */
-static ksint32_t fwk_of_platform_default_populate(struct fwk_device_node *sprt_node);
-static ksint32_t fwk_of_platform_populate(struct fwk_device_node *sprt_node, const struct fwk_of_device_id *sprt_matches);
-static ksint32_t fwk_of_platform_bus_create(struct fwk_device_node *sprt_node, const struct fwk_of_device_id *sprt_matches, kbool_t strict);
+static kint32_t fwk_of_platform_default_populate(struct fwk_device_node *sprt_node);
+static kint32_t fwk_of_platform_populate(struct fwk_device_node *sprt_node, const struct fwk_of_device_id *sprt_matches);
+static kint32_t fwk_of_platform_bus_create(struct fwk_device_node *sprt_node, const struct fwk_of_device_id *sprt_matches, kbool_t strict);
 static struct fwk_platdev *fwk_of_platform_device_create_pdata(struct fwk_device_node *sprt_node);
 
 /*!< -------------------------------------------------------------------------- */
@@ -35,7 +35,7 @@ static struct fwk_platdev *fwk_of_platform_device_create_pdata(struct fwk_device
  * @retval  none
  * @note    none
  */
-ksint32_t __plat_init fwk_of_platform_populate_init(void)
+kint32_t __plat_init fwk_of_platform_populate_init(void)
 {
 	return fwk_of_platform_default_populate(mrt_nullptr);
 }
@@ -57,7 +57,7 @@ const struct fwk_of_device_id sgrt_fwk_of_default_bus_match_table[] =
  * @retval  none
  * @note    The default matching table mode
  */
-static ksint32_t fwk_of_platform_default_populate(struct fwk_device_node *sprt_node)
+static kint32_t fwk_of_platform_default_populate(struct fwk_device_node *sprt_node)
 {
 	return fwk_of_platform_populate(sprt_node, sgrt_fwk_of_default_bus_match_table);
 }
@@ -68,11 +68,11 @@ static ksint32_t fwk_of_platform_default_populate(struct fwk_device_node *sprt_n
  * @retval  none
  * @note    Take out each node and convert it to platform_device: You can start the conversion from a specific node
  */
-static ksint32_t fwk_of_platform_populate(struct fwk_device_node *sprt_node, const struct fwk_of_device_id *sprt_matches)
+static kint32_t fwk_of_platform_populate(struct fwk_device_node *sprt_node, const struct fwk_of_device_id *sprt_matches)
 {
 	struct fwk_device_node *sprt_head = mrt_nullptr;
 	struct fwk_device_node *sprt_list = mrt_nullptr;
-	ksint32_t retval;
+	kint32_t retval;
 
 	sprt_head = isValid(sprt_node) ? sprt_node : fwk_of_find_node_by_path("/");
 	retval = -NR_IS_ERROR;
@@ -99,12 +99,12 @@ static ksint32_t fwk_of_platform_populate(struct fwk_device_node *sprt_node, con
  * @retval  none
  * @note    Node properties match
  */
-static ksint32_t fwk_of_platform_bus_create(struct fwk_device_node *sprt_node, const struct fwk_of_device_id *sprt_matches, kbool_t strict)
+static kint32_t fwk_of_platform_bus_create(struct fwk_device_node *sprt_node, const struct fwk_of_device_id *sprt_matches, kbool_t strict)
 {
 	struct fwk_device_node *sprt_head;
 	struct fwk_device_node *sprt_list;
 	struct fwk_platdev *sprt_platdev;
-	ksint32_t retval;
+	kint32_t retval;
 
 	/*!< Don't have "compatible" property? The current node does not convert */
 	if (strict && (!isValid(fwk_of_get_property(sprt_node, "compatible", mrt_nullptr))))
@@ -161,7 +161,7 @@ static struct fwk_platdev *fwk_of_platform_device_create_pdata(struct fwk_device
 	struct fwk_platdev *sprt_platdev;
 	struct fwk_resources sgrt_resources;
 	struct fwk_resources *sprt_resources = mrt_nullptr;
-	ksint32_t retval;
+	kint32_t retval;
 	kuint32_t i, num_res = 0, num_irq = 0;
 
 	if (!isValid(sprt_node))
@@ -225,14 +225,14 @@ static struct fwk_platdev *fwk_of_platform_device_create_pdata(struct fwk_device
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_of_register_platdevice(struct fwk_device_node *sprt_node, struct fwk_platdev *sprt_platdev)
+kint32_t fwk_of_register_platdevice(struct fwk_device_node *sprt_node, struct fwk_platdev *sprt_platdev)
 {
 	if (!isValid(sprt_platdev))
 		return -NR_IS_FAULT;
 
 	/*!< Fill platform_device */
 	sprt_platdev->name = sprt_node->full_name;
-	sprt_platdev->id = -1;
+	sprt_platdev->id = fwk_of_get_alias_id(sprt_node);
 
 	sprt_platdev->sgrt_dev.init_name = sprt_node->full_name;
 	sprt_platdev->sgrt_dev.sprt_node = sprt_node;
@@ -242,7 +242,7 @@ ksint32_t fwk_of_register_platdevice(struct fwk_device_node *sprt_node, struct f
 	/*!< Bus hook-up */
 	sprt_platdev->sgrt_dev.sprt_bus = &sgrt_fwk_platform_bus_type;
 
-	return fwk_device_register(&sprt_platdev->sgrt_dev);
+	return fwk_device_add(&sprt_platdev->sgrt_dev);
 }
 
 /*!
@@ -259,7 +259,7 @@ void fwk_of_unregister_platdevice(struct fwk_device_node *sprt_node)
 		return;
 
 	/*!< Log out the device from the bus */
-	fwk_device_unregister(&sprt_platdev->sgrt_dev);
+	fwk_device_del(&sprt_platdev->sgrt_dev);
 
 	if (isValid(sprt_platdev->sprt_resources))
 		kfree(sprt_platdev->sprt_resources);
@@ -275,12 +275,12 @@ void fwk_of_unregister_platdevice(struct fwk_device_node *sprt_node)
  * @retval  none
  * @note    reg property data conversion
  */
-ksint32_t fwk_of_address_to_resource(struct fwk_device_node *sprt_node, kuint32_t index, struct fwk_resources *sprt_res)
+kint32_t fwk_of_address_to_resource(struct fwk_device_node *sprt_node, kuint32_t index, struct fwk_resources *sprt_res)
 {
 	kuint32_t cells_of_addr, cells_of_size;
 	kuint32_t address, size;
-	kstring_t *regName;
-	ksint32_t retval;
+	kchar_t *regName;
+	kint32_t retval;
 
 	/*!< Get value of "#address-cells" */
 	cells_of_addr = fwk_of_n_addr_cells(sprt_node);
@@ -319,11 +319,11 @@ ksint32_t fwk_of_address_to_resource(struct fwk_device_node *sprt_node, kuint32_
  * @retval  none
  * @note    interrupt property data conversion
  */
-ksint32_t fwk_of_irq_to_resource_table(struct fwk_device_node *sprt_node, struct fwk_resources *sprt_res, kuint32_t nr_irqs)
+kint32_t fwk_of_irq_to_resource_table(struct fwk_device_node *sprt_node, struct fwk_resources *sprt_res, kuint32_t nr_irqs)
 {
-	ksint32_t virq;
+	kint32_t virq;
 	kuint32_t index;
-	kstring_t *regName;
+	kchar_t *regName;
 
 	for (index = 0; index < nr_irqs; index++, sprt_res++)
 	{
@@ -392,7 +392,7 @@ kuaddr_t fwk_platform_get_address(struct fwk_platdev *sprt_pdev, kuint32_t index
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_platform_get_irq(struct fwk_platdev *sprt_pdev, kuint32_t index)
+kint32_t fwk_platform_get_irq(struct fwk_platdev *sprt_pdev, kuint32_t index)
 {
 	struct fwk_resources *sprt_res;
 

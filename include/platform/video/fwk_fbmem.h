@@ -37,7 +37,7 @@ struct fwk_fb_bitfield
 /*!< LCD fix parameters */
 struct fwk_fb_fix_screen_info
 {
-	kstring_t id[16];										/*!< LCD identifier in the form of a string */
+	kchar_t id[16];										/*!< LCD identifier in the form of a string */
 	kuaddr_t smem_start;									/*!< The starting physical address of the framebuffer memory */
 	kuint32_t smem_len;										/*!< The length of the framebuffer memory */
 	kuint32_t type;											/*!< The type of frame buffer storage, i.e. the way in which image data is stored in the frame buffer */
@@ -103,8 +103,8 @@ enum __ERT_FB_IOCTL_CMD
 
 typedef struct fwk_fb_info
 {
-	ksint32_t node;											/*!< minor */
-	ksint32_t flags;
+	kint32_t node;											/*!< minor */
+	kint32_t flags;
 
 	struct fwk_fb_fix_screen_info sgrt_fix;					/*!< fix parameters */
 	struct fwk_fb_var_screen_info sgrt_var;					/*!< variadics */
@@ -121,19 +121,19 @@ typedef struct fwk_fb_info
 
 struct fwk_fb_oprts
 {
-	ksint32_t (*fb_open) (struct fwk_fb_info *sprt_info, ksint32_t user);
-	ksint32_t (*fb_release) (struct fwk_fb_info *sprt_info, ksint32_t user);
+	kint32_t (*fb_open) (struct fwk_fb_info *sprt_info, kint32_t user);
+	kint32_t (*fb_release) (struct fwk_fb_info *sprt_info, kint32_t user);
 
-	kssize_t (*fb_read) (struct fwk_fb_info *sprt_info, ksbuffer_t *ptr_buf, kusize_t count, kuint8_t *ptr_offset);
-	kssize_t (*fb_write) (struct fwk_fb_info *sprt_info, const ksbuffer_t *ptr_buf, kusize_t count, kuint8_t *ptr_offset);
-	ksint32_t (*fb_ioctl) (struct fwk_fb_info *sprt_info, kuint32_t cmd, kuint64_t arg);
-	ksint32_t (*fb_mmap) (struct fwk_fb_info *sprt_info, struct fwk_vm_area *vma);
+	kssize_t (*fb_read) (struct fwk_fb_info *sprt_info, kbuffer_t *ptr_buf, kusize_t count, kuint8_t *ptr_offset);
+	kssize_t (*fb_write) (struct fwk_fb_info *sprt_info, const kbuffer_t *ptr_buf, kusize_t count, kuint8_t *ptr_offset);
+	kint32_t (*fb_ioctl) (struct fwk_fb_info *sprt_info, kuint32_t cmd, kuint64_t arg);
+	kint32_t (*fb_mmap) (struct fwk_fb_info *sprt_info, struct fwk_vm_area *vma);
 };
 
 /*!< The functions */
 TARGET_EXT struct fwk_fb_info *fwk_framebuffer_alloc(kusize_t size, struct fwk_device *sprt_dev);
 TARGET_EXT void fwk_framebuffer_release(struct fwk_fb_info *sprt_fb_info);
-TARGET_EXT ksint32_t fwk_register_framebuffer(struct fwk_fb_info *sprt_fb_info);
+TARGET_EXT kint32_t fwk_register_framebuffer(struct fwk_fb_info *sprt_fb_info);
 TARGET_EXT void fwk_unregister_framebuffer(struct fwk_fb_info *sprt_fb_info);
 TARGET_EXT struct fwk_fb_info *fwk_get_fb_info(kuint32_t idx);
 TARGET_EXT struct fwk_fb_info *fwk_file_fb_info(struct fwk_file *sprt_file);

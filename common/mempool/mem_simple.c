@@ -24,7 +24,7 @@ static struct mem_block *check_employ_simple_memory(void *ptr_head, void *ptr_me
  * @retval  none
  * @note    build simple memory block
  */
-ksint32_t memory_simple_block_create(struct mem_info *sprt_info, kuaddr_t mem_addr, kusize_t size)
+kint32_t memory_simple_block_create(struct mem_info *sprt_info, kuaddr_t mem_addr, kusize_t size)
 {
 	struct mem_block *sprt_block;
 	kusize_t header_size;

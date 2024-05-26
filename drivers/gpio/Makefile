@@ -10,6 +10,6 @@
 #
 
 obj-y	+=	imx-gpiochip.o
-obj-y	+=	led_template.o
+obj-y	+=	led_gpio.o
 
 # end of file

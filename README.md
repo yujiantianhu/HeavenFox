@@ -24,7 +24,8 @@
     support platform: bus - device - driver framework;
     provide APIs such as open/close/read/write, access hardware through “fd” and “file_operations”;
     support flexible selection of source files to be complied through Makefile;
-    support pinctrl, gpio (and gpio-irq), clock subsystem, and i2c bus framework
+    support pinctrl, gpio (and gpio-irq), clock subsystem, and i2c bus framework;
+    support workqueue, mutex lock, spin lock and mailbox (inter-thread communication, e.g, ITC)
     
 # Methods:
     make clean:     delete all the .o and .d;
@@ -41,6 +42,14 @@
 
 # Readme:
 # -----------------------------------------------------------------------
+
+# 2024.05.26
+    author: Yang Yujun
+    commit:
+        01) add mailbox (inter-thread communication);
+        02) optimize mutex lock and spin lock;
+        03) add workqueue (for the low half interrupt);
+        04) standardize the naming of variable types (such as kint32_t, structure, and so on)
 
 # 2024.05.13
     author: Yang Yujun

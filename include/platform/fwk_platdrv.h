@@ -21,14 +21,14 @@
 /*!< The defines */
 struct fwk_id_table
 {
-	kstring_t *name;
-	ksint32_t driver_data;
+	kchar_t *name;
+	kint32_t driver_data;
 };
 
 typedef struct fwk_platdrv
 {
-	ksint32_t (*probe) 	(struct fwk_platdev *sprt_dev);
-	ksint32_t (*remove) (struct fwk_platdev *sprt_dev);
+	kint32_t (*probe) 	(struct fwk_platdev *sprt_dev);
+	kint32_t (*remove) (struct fwk_platdev *sprt_dev);
 
 	struct fwk_id_table *sprt_idTable;
 	kusize_t num_idTable;
@@ -38,10 +38,10 @@ typedef struct fwk_platdrv
 } srt_fwk_platdrv_t;
 
 /*!< The functions */
-TARGET_EXT ksint32_t fwk_driver_register(struct fwk_driver *sprt_driver);
-TARGET_EXT ksint32_t fwk_driver_unregister(struct fwk_driver *sprt_driver);
-TARGET_EXT ksint32_t fwk_register_platdriver(struct fwk_platdrv *sprt_platdrv);
-TARGET_EXT ksint32_t fwk_unregister_platdriver(struct fwk_platdrv *sprt_platdrv);
+TARGET_EXT kint32_t fwk_driver_register(struct fwk_driver *sprt_driver);
+TARGET_EXT kint32_t fwk_driver_unregister(struct fwk_driver *sprt_driver);
+TARGET_EXT kint32_t fwk_register_platdriver(struct fwk_platdrv *sprt_platdrv);
+TARGET_EXT kint32_t fwk_unregister_platdriver(struct fwk_platdrv *sprt_platdrv);
 
 /*!< API function */
 /*!

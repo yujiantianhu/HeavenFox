@@ -21,7 +21,7 @@
 #define __DYNC_EXIT_SEC(n)							__section(".dync_exit."#n)
 
 /*!< typedef dync_init/dync_exit */
-typedef ksint32_t (*dync_init_t) (void);
+typedef kint32_t (*dync_init_t) (void);
 typedef void (*dync_exit_t) (void);
 
 /*!< sram memory area*/

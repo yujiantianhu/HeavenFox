@@ -17,16 +17,17 @@
 #include <common/basic_types.h>
 #include <common/error_types.h>
 #include <common/generic.h>
+#include <common/list_types.h>
 #include <kernel/instance.h>
 
 /*!< The defines */
 
-
 /*!< The globals */
 
-
 /*!< The functions */
-TARGET_EXT ksint32_t light_app_init(void);
-TARGET_EXT ksint32_t display_app_init(void);
+TARGET_EXT kint32_t light_app_init(void);
+TARGET_EXT kint32_t button_app_init(void);
+TARGET_EXT kint32_t display_app_init(void);
+TARGET_EXT kint32_t tsc_app_init(void);
 
 #endif /* __THREAD_TABLE_H_ */

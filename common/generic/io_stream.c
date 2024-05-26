@@ -40,7 +40,7 @@ __weak void io_putc(const kubyte_t ch)
  * @retval  none
  * @note    string output
  */
-void printk(const kstring_t *ptr_fmt, ...)
+void printk(const kchar_t *ptr_fmt, ...)
 {
 #if defined(CONFIG_PRINT_LEVEL)
 	va_list ptr_list;
@@ -84,17 +84,18 @@ void printk(const kstring_t *ptr_fmt, ...)
  * @retval  index (bit position); -1: not found
  * @note    find bit on bitmap
  */
-static ksint32_t bitmap_find_first_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_bits, kbool_t value)
+static kint32_t bitmap_find_first_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_bits, kbool_t value)
 {
-	ksint32_t index, temp;
+	kuint32_t index, bit_mask, area_mask;
+	kuint32_t bit_per_map = sizeof(*bitmap) << 3;
 
 	/*!< search by per 8 bits */
 	for (index = start; index < total_bits; index++)
 	{
-		bitmap += (index / (sizeof(*bitmap) << 3));
-		temp = index % (sizeof(*bitmap) << 3);
+		area_mask = mrt_udiv(index, bit_per_map);
+		bit_mask = mrt_urem(index, bit_per_map);
 
-		if ((!!(*(bitmap) & (1 << temp))) == value)
+		if ((!!(*(bitmap + area_mask) & (1 << bit_mask))) == value)
 			break;
 	}
 
@@ -111,10 +112,10 @@ static ksint32_t bitmap_find_first_bit(kuint8_t *bitmap, kuint32_t start, kusize
  * @retval  0: request successfully; > 0: the first bit failed
  * @note    request multiple consecutive bits on bitmap
  */
-static ksint32_t bitmap_find_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr, kbool_t value)
+static kint32_t bitmap_find_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr, kbool_t value)
 {
 	kuint32_t end = start + nr;
-	ksint32_t index;
+	kint32_t index;
 
 	if (end >= total_bits)
 		return -1;
@@ -136,20 +137,21 @@ static ksint32_t bitmap_find_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t 
 static void bitmap_set_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr, kbool_t value)
 {
 	kuint32_t end = start + nr;
-	kuint32_t index, temp;
+	kuint32_t index, bit_mask, area_mask;
+	kuint32_t bit_per_map = sizeof(*bitmap) << 3;
 
 	if (end >= total_bits)
 		return;
 
 	for (index = start; index < end; index++)
 	{
-		bitmap += (index / (sizeof(*bitmap) << 3));
-		temp = index % (sizeof(*bitmap) << 3);
+		area_mask = mrt_udiv(index, bit_per_map);
+		bit_mask = mrt_urem(index, bit_per_map);
 
 		if (value)
-			*(bitmap) |= (1 << temp);
+			*(bitmap + area_mask) |= (1 << bit_mask);
 		else
-			*(bitmap) &= ~(1 << temp);
+			*(bitmap + area_mask) &= ~(1 << bit_mask);
 	}
 }
 
@@ -159,7 +161,7 @@ static void bitmap_set_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_
  * @retval  none
  * @note    none
  */
-ksint32_t bitmap_find_first_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits)
+kint32_t bitmap_find_first_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits)
 {
 	return bitmap_find_first_bit((kuint8_t *)bitmap, start, total_bits, false);
 }
@@ -170,7 +172,7 @@ ksint32_t bitmap_find_first_zero_bit(void *bitmap, kuint32_t start, kusize_t tot
  * @retval  none
  * @note    none
  */
-ksint32_t bitmap_find_first_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits)
+kint32_t bitmap_find_first_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits)
 {
 	return bitmap_find_first_bit((kuint8_t *)bitmap, start, total_bits, true);
 }
@@ -181,7 +183,7 @@ ksint32_t bitmap_find_first_valid_bit(void *bitmap, kuint32_t start, kusize_t to
  * @retval  none
  * @note    none
  */
-ksint32_t bitmap_find_nr_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr)
+kint32_t bitmap_find_nr_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr)
 {
 	return bitmap_find_nr_bit((kuint8_t *)bitmap, start, total_bits, nr, false);
 }
@@ -192,7 +194,7 @@ ksint32_t bitmap_find_nr_zero_bit(void *bitmap, kuint32_t start, kusize_t total_
  * @retval  none
  * @note    none
  */
-ksint32_t bitmap_find_nr_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr)
+kint32_t bitmap_find_nr_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr)
 {
 	return bitmap_find_nr_bit((kuint8_t *)bitmap, start, total_bits, nr, true);
 }

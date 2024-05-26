@@ -142,18 +142,17 @@ static void fwk_display_write_frame_data(void *buffer, kuint32_t offset, kuint8_
  * @retval  none
  * @note    none
  */
-static void fwk_display_write_point(srt_fwk_disp_info_t *sprt_disp, kuint32_t xpos, kuint32_t ypos, kuint32_t data)
+static void fwk_display_write_point(struct fwk_disp_info *sprt_disp, kuint32_t xpos, kuint32_t ypos, kuint32_t data)
 {
     kuint32_t offset;
 
     if (!sprt_disp)
         return;
 
-    spin_lock(&sprt_disp->sgrt_lock);
-
     offset = fwk_display_advance_position(xpos, ypos, sprt_disp->width);
-    fwk_display_write_frame_data(sprt_disp->buffer, offset, sprt_disp->bpp, data);
 
+    spin_lock(&sprt_disp->sgrt_lock);
+    fwk_display_write_frame_data(sprt_disp->buffer, offset, sprt_disp->bpp, data);
     spin_unlock(&sprt_disp->sgrt_lock);
 }
 
@@ -166,11 +165,11 @@ static void fwk_display_write_point(srt_fwk_disp_info_t *sprt_disp, kuint32_t xp
  * @retval  none
  * @note    none
  */
-static void fwk_display_write_straight_line(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuint32_t y_start, 
+static void fwk_display_write_straight_line(struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start, 
                                                         kuint32_t x_end, kuint32_t y_end, kuint32_t data)
 {
-    ksint8_t  x_inc, y_inc, is_x_max;
-	ksint32_t x_distance, y_distance, distance_max, distance_min, distance_err, pcnt;
+    kint8_t  x_inc, y_inc, is_x_max;
+	kint32_t x_distance, y_distance, distance_max, distance_min, distance_err, pcnt;
 
     x_distance = mrt_usub(x_end, x_start);
     y_distance = mrt_usub(y_end, y_start);
@@ -219,7 +218,7 @@ static void fwk_display_write_straight_line(srt_fwk_disp_info_t *sprt_disp, kuin
  * @retval  none
  * @note    none
  */
-static void fwk_display_write_rectangle(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuint32_t y_start, 
+static void fwk_display_write_rectangle(struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start, 
                                                     kuint32_t x_end, kuint32_t y_end, kuint32_t data)
 {
     fwk_display_write_straight_line(sprt_disp, x_start, y_start, x_end,   y_start, data);
@@ -237,7 +236,7 @@ static void fwk_display_write_rectangle(srt_fwk_disp_info_t *sprt_disp, kuint32_
  * @retval  none
  * @note    none
  */
-static void fwk_display_fill_rectangle(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuint32_t y_start, 
+static void fwk_display_fill_rectangle(struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start, 
                                                     kuint32_t x_end, kuint32_t y_end, kuint32_t data)
 {
     kuint32_t offset;
@@ -266,7 +265,7 @@ static void fwk_display_fill_rectangle(srt_fwk_disp_info_t *sprt_disp, kuint32_t
     for (y_cnt = 0; y_cnt < height; y_cnt++)
     {
         offset = fwk_display_advance_position(x_start, y_start + y_cnt, sprt_disp->width);
-
+    
         for (x_cnt = 0; x_cnt < width; x_cnt++)
         {
             spin_lock(&sprt_disp->sgrt_lock);
@@ -283,20 +282,26 @@ static void fwk_display_fill_rectangle(srt_fwk_disp_info_t *sprt_disp, kuint32_t
  * @retval  none
  * @note    none
  */
-static void fwk_display_clear(srt_fwk_disp_info_t *sprt_disp, kuint32_t data)
+static void fwk_display_clear(struct fwk_disp_info *sprt_disp, kuint32_t data)
 {
     kuint32_t x_cnt, y_cnt, offset;
+
+    if ((data == RGB_BLACK) || (data == RGB_WHITE))
+    {
+        memset(sprt_disp->buffer, data, sprt_disp->buf_size);
+        return;
+    }
 
     offset = fwk_display_advance_position(0, 0, sprt_disp->width);
 
     for (y_cnt = 0; y_cnt < sprt_disp->height; y_cnt++)
     {
-        spin_lock(&sprt_disp->sgrt_lock);
         for (x_cnt = 0; x_cnt < sprt_disp->width; x_cnt++)
         {
+            spin_lock(&sprt_disp->sgrt_lock);
             fwk_display_write_frame_data(sprt_disp->buffer, offset++, sprt_disp->bpp, data);
+            spin_unlock(&sprt_disp->sgrt_lock);
         }
-        spin_unlock(&sprt_disp->sgrt_lock);
     }
 }
 
@@ -309,7 +314,7 @@ static void fwk_display_clear(srt_fwk_disp_info_t *sprt_disp, kuint32_t data)
  * @retval  none
  * @note    none
  */
-static void fwk_display_write_ten_line(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuint32_t y_start, kuint32_t data)
+static void fwk_display_write_ten_line(struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start, kuint32_t data)
 {
 	fwk_display_write_straight_line(sprt_disp, x_start,      y_start - 12, x_start,      y_start + 13, data);
 	fwk_display_write_straight_line(sprt_disp, x_start - 12, y_start,      x_start + 13, y_start,      data);
@@ -402,8 +407,8 @@ static void *fwk_fontlib_lseek(kuint8_t *ptr_lib, kuint32_t font, kuint32_t size
  * @retval  none
  * @note    none
  */
-static void __fwk_display_dot_matrix_word(srt_fwk_disp_info_t *sprt_disp, srt_fwk_font_setting_t *sprt_settings,
-                                        kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end, const kstring_t *fmt)
+static void __fwk_display_dot_matrix_word(struct fwk_disp_info *sprt_disp, struct fwk_font_setting *sprt_settings,
+                                        kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end, const kchar_t *fmt)
 {
     kuint8_t *ptr_ch, *ptr_dmatx;
     kuint32_t x_pos, y_pos;
@@ -514,11 +519,11 @@ static void __fwk_display_dot_matrix_word(srt_fwk_disp_info_t *sprt_disp, srt_fw
  * @retval  none
  * @note    none
  */
-static void fwk_display_dot_matrix_word(srt_fwk_disp_info_t *sprt_disp, srt_fwk_font_setting_t *sprt_settings,
-                                        kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end, const kstring_t *fmt, ...)
+static void fwk_display_dot_matrix_word(struct fwk_disp_info *sprt_disp, struct fwk_font_setting *sprt_settings,
+                                        kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end, const kchar_t *fmt, ...)
 {
 //  va_list ptr_list;
-//  ksint8_t buffer[8];
+//  kint8_t buffer[8];
 //  kusize_t size = 0;
 
 //  va_start(ptr_list, fmt);
@@ -532,7 +537,7 @@ static void fwk_display_dot_matrix_word(srt_fwk_disp_info_t *sprt_disp, srt_fwk_
 }
 
 /*!< global interface */
-static const srt_fwk_disp_ops_t sgrt_fwk_display_oprts =
+static const struct fwk_disp_ops sgrt_fwk_display_oprts =
 {
     .get_offset         = fwk_display_advance_position,
     .convert_rgbbit     = fwk_display_convert_rgbbit,
@@ -560,25 +565,28 @@ static const srt_fwk_disp_ops_t sgrt_fwk_display_oprts =
  * @retval  sprt_disp
  * @note    none
  */
-void *fwk_display_initial_info(srt_fwk_disp_info_t *sprt_disp, void *fbuffer, 
-                            kusize_t size, kuint32_t width, kuint32_t height, kuint32_t bpp)
+void *fwk_display_initial_info(struct fwk_disp_info *sprt_disp)
+//                          void *fbuffer, kusize_t size, kuint32_t width, kuint32_t height, kuint32_t bpp)
 {
+
     if (!sprt_disp)
         sprt_disp = kmalloc(sizeof(*sprt_disp), GFP_KERNEL);
 
     if (isValid(sprt_disp))
     {
+/*
         sprt_disp->buffer = fbuffer;
         sprt_disp->buf_size = size;
         sprt_disp->width = width;
         sprt_disp->height = height;
         sprt_disp->bpp = bpp;
-
+*/
         sprt_disp->sprt_ops = &sgrt_fwk_display_oprts;
         spin_lock_init(&sprt_disp->sgrt_lock);
     }
 
     return sprt_disp;
+
 }
 
 /*!< end of file */

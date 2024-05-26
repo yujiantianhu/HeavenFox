@@ -21,7 +21,7 @@
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_chrdev_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_chrdev_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	struct fwk_cdev *sprt_cdev;
 	kuint32_t devNum;
@@ -55,7 +55,7 @@ fail:
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_chrdev_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_chrdev_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	sprt_inode->sprt_cdev = mrt_nullptr;
 
@@ -74,7 +74,7 @@ static struct fwk_file_oprts sgrt_fwk_inode_def_chrfoprts =
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_blkdev_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_blkdev_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	return NR_IS_NORMAL;
 }
@@ -85,7 +85,7 @@ static ksint32_t fwk_blkdev_open(struct fwk_inode *sprt_inode, struct fwk_file *
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_blkdev_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_blkdev_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	return NR_IS_NORMAL;
 }
@@ -102,7 +102,7 @@ static struct fwk_file_oprts sgrt_fwk_inode_def_blkfoprts =
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_netdev_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_netdev_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	return NR_IS_NORMAL;
 }
@@ -113,7 +113,7 @@ static ksint32_t fwk_netdev_open(struct fwk_inode *sprt_inode, struct fwk_file *
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_netdev_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_netdev_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	return NR_IS_NORMAL;
 }
@@ -146,7 +146,7 @@ static struct fwk_inode sgrt_fwk_inode =
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_mk_inode(kstring_t *name, kuint32_t type, kuint32_t devNum)
+kint32_t fwk_mk_inode(kchar_t *name, kuint32_t type, kuint32_t devNum)
 {
 	struct fwk_inode *sprt_head;
 	struct fwk_inode *sprt_tail;
@@ -206,7 +206,7 @@ ksint32_t fwk_mk_inode(kstring_t *name, kuint32_t type, kuint32_t devNum)
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_rm_inode(kstring_t *name)
+kint32_t fwk_rm_inode(kchar_t *name)
 {
 	struct fwk_inode *sprt_head;
 	struct fwk_inode *sprt_prev;
@@ -247,7 +247,7 @@ ksint32_t fwk_rm_inode(kstring_t *name)
  * @retval  none
  * @note    none
  */
-struct fwk_inode *fwk_inode_find(kstring_t *name)
+struct fwk_inode *fwk_inode_find(kchar_t *name)
 {
 	struct fwk_inode *sprt_head;
 	struct fwk_inode *sprt_inode;
@@ -274,9 +274,9 @@ struct fwk_inode *fwk_inode_find(kstring_t *name)
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_device_create(kuint32_t type, kuint32_t devNum, kstring_t *name, ...)
+kint32_t fwk_device_create(kuint32_t type, kuint32_t devNum, kchar_t *name, ...)
 {
-	kstring_t node[INODE_ADD_PREX_LEN];
+	kchar_t node[INODE_ADD_PREX_LEN];
 	va_list ptr_list;
 
 	if (!name)
@@ -297,9 +297,9 @@ ksint32_t fwk_device_create(kuint32_t type, kuint32_t devNum, kstring_t *name, .
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_device_destroy(kstring_t *name, ...)
+kint32_t fwk_device_destroy(kchar_t *name, ...)
 {
-	kstring_t node[INODE_ADD_PREX_LEN];
+	kchar_t node[INODE_ADD_PREX_LEN];
 	va_list ptr_list;
 
 	if (!name)

@@ -25,7 +25,7 @@
  * @retval  none
  * @note    none
  */
-kuint32_t fwk_pixel_rgbform_convert(ksint8_t srctype, kuint32_t data)
+kuint32_t fwk_pixel_rgbform_convert(kint8_t srctype, kuint32_t data)
 {
     /*!< R, G, B, diaphaneity */
     kuint8_t  r_data, g_data, b_data, d_data;
@@ -77,9 +77,9 @@ kuint32_t fwk_pixel_rgbform_convert(ksint8_t srctype, kuint32_t data)
  * @retval  None
  * @note    none
  */
-void fwk_display_dot_matrix_image(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuint32_t y_start, const kuint8_t *image)
+void fwk_display_dot_matrix_image(struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start, const kuint8_t *image)
 {
-    srt_fwk_dotmat_header_t *sprt_dmatx = mrt_nullptr;
+    struct fwk_dotmat_header *sprt_dmatx = mrt_nullptr;
     kuint8_t *ptr_image = mrt_nullptr;
 
     kuint32_t offset, p_cnt = 0;
@@ -90,7 +90,7 @@ void fwk_display_dot_matrix_image(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_st
     if ((!image) || (!sprt_disp) || (!sprt_disp->sprt_ops))
         return;
 
-    sprt_dmatx = (srt_fwk_dotmat_header_t *)image;
+    sprt_dmatx = (struct fwk_dotmat_header *)image;
     ptr_image = (kuint8_t *)(image + sizeof(*sprt_dmatx));
 
     width   = (kuint32_t)sprt_dmatx->width;
@@ -137,10 +137,10 @@ void fwk_display_dot_matrix_image(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_st
  * @retval  None
  * @note    none
  */
-void fwk_display_bitmap(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuint32_t y_start, const kuint8_t *image)
+void fwk_display_bitmap(struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start, const kuint8_t *image)
 {
-    srt_fwk_bmp_file_header_t *sprt_file;
-    srt_fwk_bmp_info_header_t *sprt_info;
+    struct fwk_bmp_file_header *sprt_file;
+    struct fwk_bmp_info_header *sprt_info;
     kuint8_t *ptr_bitmap;
 
     union fwk_bmp_type
@@ -158,8 +158,8 @@ void fwk_display_bitmap(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuint
     if ((!image) || (!sprt_disp) || (!sprt_disp->sprt_ops))
         return;
 
-    sprt_file = (srt_fwk_bmp_file_header_t *)image;
-    sprt_info = (srt_fwk_bmp_info_header_t *)(image + sizeof(*sprt_file));
+    sprt_file = (struct fwk_bmp_file_header *)image;
+    sprt_info = (struct fwk_bmp_info_header *)(image + sizeof(*sprt_file));
     ptr_bitmap = (kuint8_t *)(image + sizeof(*sprt_file) + sizeof(*sprt_info));
 
     if (sprt_file->picType != ugrt_type.pic_type)

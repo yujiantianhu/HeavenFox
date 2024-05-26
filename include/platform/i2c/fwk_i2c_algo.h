@@ -33,13 +33,13 @@ struct fwk_i2c_msg
 	kuint16_t flags;
 
 	kuint16_t len;		                 				/*!< msg length */
-	kuint8_t *ptr_buf;		                 			/*!< pointer to msg data */
+	void *ptr_buf;		                 				/*!< pointer to msg data */
 };
 
 struct fwk_i2c_algo
 {
-	ksint32_t (*master_xfer)(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msgs, ksint32_t num);
-//	ksint32_t (*smbus_xfer) (struct fwk_i2c_adapter *adap, kuint16_t addr, kuint16_t flags, kuint8_t read_write, kuint8_t command, kssize_t size, union i2c_smbus_data *data);
+	kint32_t (*master_xfer)(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msgs, kint32_t num);
+//	kint32_t (*smbus_xfer) (struct fwk_i2c_adapter *adap, kuint16_t addr, kuint16_t flags, kuint8_t read_write, kuint8_t command, kssize_t size, union i2c_smbus_data *data);
 
 	/*!< To determine what the adapter supports */
 	kuint32_t (*functionality) (struct fwk_i2c_adapter *);

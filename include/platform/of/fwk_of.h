@@ -66,9 +66,9 @@ struct fwk_fdt_header
 /*!< The device tree matches the data structure */
 typedef struct fwk_of_device_id
 {
-    kstring_t   *name;
-    kstring_t   *type;
-    kstring_t	*compatible;
+    kchar_t   *name;
+    kchar_t   *type;
+    kchar_t	*compatible;
 
     const void 	*data;
 	
@@ -89,15 +89,15 @@ TARGET_EXT struct fwk_device_node *sprt_fwk_of_allNodes;
 /*!< The functions */
 TARGET_EXT void setup_machine_fdt(void *ptr);
 TARGET_EXT void destroy_machine_fdt(void);
-TARGET_EXT ksint32_t of_platform_default_populate_init(void);
+TARGET_EXT kint32_t of_platform_default_populate_init(void);
 
 /*!< Device tree operation API */
-TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_path(const kstring_t *ptr_path);
-TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_name(struct fwk_device_node *sprt_from, const kstring_t *ptr_name);
-TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_type(struct fwk_device_node *sprt_from, const kstring_t *ptr_type);
+TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_path(const kchar_t *ptr_path);
+TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_name(struct fwk_device_node *sprt_from, const kchar_t *ptr_name);
+TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_type(struct fwk_device_node *sprt_from, const kchar_t *ptr_type);
 TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_phandle(struct fwk_device_node *sprt_from, kuint32_t phandle);
 TARGET_EXT struct fwk_device_node *fwk_of_find_compatible_node(struct fwk_device_node *sprt_from,
-											const kstring_t *ptr_type, const kstring_t *ptr_compat);
+											const kchar_t *ptr_type, const kchar_t *ptr_compat);
 TARGET_EXT struct fwk_device_node *fwk_of_node_try_matches(struct fwk_device_node *sprt_node,
 							const struct fwk_of_device_id *sprt_matches, struct fwk_of_device_id **sprt_match);
 TARGET_EXT struct fwk_device_node *fwk_of_find_matching_node_and_match(struct fwk_device_node *sprt_from,
@@ -110,8 +110,8 @@ TARGET_EXT struct fwk_of_device_id *fwk_of_match_node(const struct fwk_of_device
 TARGET_EXT struct fwk_device_node *fwk_of_irq_parent(struct fwk_device_node *sprt_node);
 TARGET_EXT kuint32_t fwk_of_n_irq_cells(struct fwk_device_node *sprt_node);
 TARGET_EXT kuint32_t fwk_of_irq_count(struct fwk_device_node *sprt_node);
-TARGET_EXT ksint32_t fwk_of_get_id(srt_fwk_device_node_t *sprt_node, const kstring_t *id_name);
-TARGET_EXT ksint32_t fwk_of_modalias_node(srt_fwk_device_node_t *sprt_node, kstring_t *modalias, kuint32_t len);
+TARGET_EXT kint32_t fwk_of_get_alias_id(struct fwk_device_node *sprt_node);
+TARGET_EXT kint32_t fwk_of_modalias_node(struct fwk_device_node *sprt_node, kchar_t *modalias, kuint32_t len);
 
 /*!< API function */
 /*!

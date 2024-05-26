@@ -25,10 +25,10 @@
  * @retval  error code
  * @note    none
  */
-static ksint32_t fwk_pinmux_get_function_by_name(srt_fwk_pinctrl_dev_t *sprt_pctldev, const kstring_t *name)
+static kint32_t fwk_pinmux_get_function_by_name(struct fwk_pinctrl_dev *sprt_pctldev, const kchar_t *name)
 {
-    const srt_fwk_pinmux_ops_t *sprt_pmxops;
-    const kstring_t *func_name;
+    const struct fwk_pinmux_ops *sprt_pmxops;
+    const kchar_t *func_name;
     kuint32_t i, num_funcs;
 
     sprt_pmxops = sprt_pctldev->sprt_desc->sprt_pmxops;
@@ -59,10 +59,10 @@ static ksint32_t fwk_pinmux_get_function_by_name(srt_fwk_pinctrl_dev_t *sprt_pct
  * @retval  error code
  * @note    none
  */
-static ksint32_t fwk_pinmux_get_group_by_name(srt_fwk_pinctrl_dev_t *sprt_pctldev, kuint32_t func_selector, const kstring_t *name)
+static kint32_t fwk_pinmux_get_group_by_name(struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t func_selector, const kchar_t *name)
 {
-    const srt_fwk_pinctrl_ops_t *sprt_pctlops;
-    const kstring_t *grp_name;
+    const struct fwk_pinctrl_ops *sprt_pctlops;
+    const kchar_t *grp_name;
     kuint32_t i, num_grps;
 
     sprt_pctlops = sprt_pctldev->sprt_desc->sprt_pctlops;
@@ -93,10 +93,10 @@ static ksint32_t fwk_pinmux_get_group_by_name(srt_fwk_pinctrl_dev_t *sprt_pctlde
  * @retval  error code
  * @note    none
  */
-ksint32_t fwk_pinmux_map_to_setting(srt_fwk_pinctrl_map_t const *sprt_map, srt_fwk_pinctrl_setting_t *sprt_setting)
+kint32_t fwk_pinmux_map_to_setting(struct fwk_pinctrl_map const *sprt_map, struct fwk_pinctrl_setting *sprt_setting)
 {
-    srt_fwk_pinctrl_dev_t *sprt_pctldev;
-    ksint32_t func_selector, group_selector;
+    struct fwk_pinctrl_dev *sprt_pctldev;
+    kint32_t func_selector, group_selector;
 
     if (sprt_setting->type != NR_FWK_PINCTRL_PIN_MUX)
         return -NR_IS_FAULT;

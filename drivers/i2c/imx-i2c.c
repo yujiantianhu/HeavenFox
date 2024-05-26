@@ -22,6 +22,8 @@
 #include <platform/i2c/fwk_i2c_core.h>
 #include <platform/i2c/fwk_i2c_algo.h>
 
+#include <asm/imx6/imx6ull_periph.h>
+
 /*!< The defines */
 typedef struct imx_i2c_drv_data
 {
@@ -31,7 +33,7 @@ typedef struct imx_i2c_drv_data
     struct fwk_clk *sprt_clk;
     kbool_t is_lastMsgs;
 
-    ksint32_t irq;
+    kint32_t irq;
     kbool_t is_wake;
 
 } srt_imx_i2c_drv_data_t;
@@ -89,9 +91,17 @@ struct imx_i2c_idr_reg
 __align(4) struct imx_i2c_reg
 {
 	struct imx_i2c_iar_reg sgrt_iar;
+    kuint8_t rsvd_0[2];
+
 	struct imx_i2c_ifr_reg sgrt_ifr;
+    kuint8_t rsvd_1[2];
+
 	struct imx_i2c_icr_reg sgrt_icr;
+    kuint8_t rsvd_2[2];
+
 	struct imx_i2c_isr_reg sgrt_isr;
+    kuint8_t rsvd_3[2];
+
 	struct imx_i2c_idr_reg sgrt_idr;
 };
 
@@ -101,7 +111,71 @@ enum __ERT_IMX_I2C_ACK_STATUS
     NR_I2C_NACK = 1,
 };
 
+/*!< The globals */
+/*!<
+ * PLL2 = 528 MHz
+ * PLL2_PFD2 = 528 MHz * 18 / 24 = 396 MHz
+ * IPG_CLK_ROOT = (PLL2_PFD2 / ahb_podf )/ ipg_podf = (396 MHz/3)/2 = 66MHz
+ * PER_CLK_ROOT = IPG_CLK_ROOT/perclk_podf = 66MHz/1 = 66MHz
+ * I2C clock Frequency = (PERCLK_ROOT frequency)/(division factor corresponding to IFDR)
+ */
+static const kuint16_t g_imx_i2c_ifdr_field[][2] =
+{
+    { 0x00, 30 },   { 0x10, 288 },  { 0x20, 22 },   { 0x30, 160 },
+    { 0x01, 32 },   { 0x11, 320 },  { 0x21, 24 },   { 0x31, 192 },
+    { 0x02, 36 },   { 0x12, 384 },  { 0x22, 26 },   { 0x32, 224 },
+    { 0x03, 42 },   { 0x13, 480 },  { 0x23, 28 },   { 0x33, 256 },
+    { 0x04, 48 },   { 0x14, 576 },  { 0x24, 32 },   { 0x34, 320 },
+    { 0x05, 52 },   { 0x15, 640 },  { 0x25, 36 },   { 0x35, 384 },
+    { 0x06, 60 },   { 0x16, 768 },  { 0x26, 40 },   { 0x36, 448 },
+    { 0x07, 72 },   { 0x17, 960 },  { 0x27, 44 },   { 0x37, 512 },
+    { 0x08, 80 },   { 0x18, 1152 }, { 0x28, 48 },   { 0x38, 640 },
+    { 0x09, 88 },   { 0x19, 1280 }, { 0x29, 56 },   { 0x39, 768 },
+    { 0x0a, 104 },  { 0x1a, 1536 }, { 0x2a, 64 },   { 0x3a, 896 },
+    { 0x0b, 128 },  { 0x1b, 1920 }, { 0x2b, 72 },   { 0x3b, 1024 },
+    { 0x0c, 144 },  { 0x1c, 2304 }, { 0x2c, 80 },   { 0x3c, 1280 },
+    { 0x0d, 160 },  { 0x1d, 2560 }, { 0x2d, 96 },   { 0x3d, 1536 },
+    { 0x0e, 192 },  { 0x1e, 3072 }, { 0x2e, 112 },  { 0x3e, 1792 },
+    { 0x0f, 240 },  { 0x1f, 3840 }, { 0x2f, 128 },  { 0x3f, 2048 },
+};
+
+static struct hal_imx_i2c *sprt_imx_i2c_reg = IMX6UL_I2C_PROPERTY_ENTRY(2);
+
 /*!< API function */
+static kint16_t imx_i2c_find_frequency(kuint32_t freq)
+{
+    kusize_t num_field = ARRAY_SIZE(g_imx_i2c_ifdr_field);
+    kuint16_t div, field, last_temp, cur_temp; 
+    kuint16_t idx, idx_satisfy;
+
+    /*!< ipg_clk: 66MHz */
+    div = 66000000 / freq;
+    last_temp = (kuint16_t)(~0);
+    idx_satisfy = last_temp;
+
+    for (idx = 0; idx < num_field; idx++)
+    {
+        field = g_imx_i2c_ifdr_field[idx][1];
+        if (field == div)
+        {
+            idx_satisfy = idx;
+            break;
+        }
+
+        cur_temp = mrt_usub(field, div);
+        if (cur_temp < last_temp)
+        {
+            last_temp = cur_temp;
+            idx_satisfy = idx;
+        }
+    }
+
+    if (idx_satisfy < num_field)
+        return g_imx_i2c_ifdr_field[idx_satisfy][0];
+
+    return -NR_IS_NOTFOUND;
+}
+
 static void imx_i2c_adap_set_ack(struct imx_i2c_reg *sprt_i2c, kuint32_t ack)
 {
     if (ack == NR_I2C_NACK)
@@ -131,7 +205,7 @@ static kbool_t imx_i2c_adap_wait_complete(struct fwk_i2c_adapter *sprt_adap, kui
     struct imx_i2c_reg *sprt_i2c;
 
 	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-	sprt_i2c = (struct hal_imx_i2c *)sprt_data->reg;
+	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
     while (timeout--) 
     {
@@ -194,16 +268,16 @@ static kbool_t imx_i2c_adap_check_ack(struct imx_i2c_reg *sprt_i2c)
  * @note   iic起始位
  * 总线空闲时, SCL & SDA均为高电平, 此时若SDA产生下降沿, 表示iic开始
  */
-static ksint32_t imx_i2c_adap_start(struct fwk_i2c_adapter *sprt_adap)
+static kint32_t imx_i2c_adap_start(struct fwk_i2c_adapter *sprt_adap)
 {
     struct imx_i2c_drv_data *sprt_data;
     struct imx_i2c_reg *sprt_i2c;
 
 	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-	sprt_i2c = (struct hal_imx_i2c *)sprt_data->reg;
+	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
     /*!< open clock */
-    fwk_clk_prepare_enable(sprt_data->sprt_clk);
+//  fwk_clk_prepare_enable(sprt_data->sprt_clk);
 
     sprt_i2c->sgrt_icr.ien = true;
     mrt_resetw(&sprt_i2c->sgrt_isr);
@@ -237,13 +311,13 @@ fail:
  * @note   iic重新开始信号
  * 总线空闲时, SCL & SDA均为高电平, 此时若SDA产生下降沿, 表示iic开始
  */
-static ksint32_t imx_i2c_adap_restart(struct fwk_i2c_adapter *sprt_adap)
+static kint32_t imx_i2c_adap_restart(struct fwk_i2c_adapter *sprt_adap)
 {
     struct imx_i2c_drv_data *sprt_data;
     struct imx_i2c_reg *sprt_i2c;
 
 	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-	sprt_i2c = (struct hal_imx_i2c *)sprt_data->reg;
+	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
     /*!< 判断iic总线是否处于忙状态. 空闲: 0, 忙: 1 */
     if (imx_i2c_adap_is_busy(sprt_i2c))
@@ -278,7 +352,7 @@ static void imx_i2c_adap_stop(struct fwk_i2c_adapter *sprt_adap)
     struct imx_i2c_reg *sprt_i2c;
 
 	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-	sprt_i2c = (struct hal_imx_i2c *)sprt_data->reg;
+	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
     /*!< 清除设置 */
     sprt_i2c->sgrt_icr.msta = false;
@@ -300,11 +374,11 @@ static void imx_i2c_adap_stop(struct fwk_i2c_adapter *sprt_adap)
  * @retval None
  * @note   iic写时序
  */
-static ksint32_t imx_i2c_adap_write(struct imx_i2c_drv_data *sprt_data, kuint16_t slave, const kubuffer_t *buffer, kusize_t size)
+static kint32_t imx_i2c_adap_write(struct imx_i2c_drv_data *sprt_data, kuint16_t slave, const kubuffer_t *buffer, kusize_t size)
 {
 	struct imx_i2c_reg *sprt_i2c;
 
-	sprt_i2c = (struct hal_imx_i2c *)sprt_data->reg;
+	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
     /*!< 设置传输方向为发送 */
     sprt_i2c->sgrt_icr.mtx = true;
@@ -342,12 +416,12 @@ static ksint32_t imx_i2c_adap_write(struct imx_i2c_drv_data *sprt_data, kuint16_
  * @retval None
  * @note   iic读时序
  */
-static ksint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sprt_data, kuint16_t slave, kubuffer_t *buffer, kusize_t size)
+static kint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sprt_data, kuint16_t slave, kubuffer_t *buffer, kusize_t size)
 {
 	struct imx_i2c_reg *sprt_i2c;
     kuint32_t count;
 
-	sprt_i2c = (struct hal_imx_i2c *)sprt_data->reg;
+	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
     /*!< 设置传输方向为发送 */
     sprt_i2c->sgrt_icr.mtx = true;
@@ -405,7 +479,7 @@ static ksint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sprt_data, kuint16_t
     return NR_IS_NORMAL;
 }
 
-static ksint32_t __imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msg)
+static kint32_t __imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msg)
 {
 	struct imx_i2c_drv_data *sprt_data;
 
@@ -422,13 +496,13 @@ static ksint32_t __imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct f
     return NR_IS_NORMAL;
 }
 
-static irq_return_t imx_i2c_adap_handler(ksint32_t irq, void *ptrDev)
+static irq_return_t imx_i2c_adap_handler(void *ptrDev)
 {
     struct imx_i2c_drv_data *sprt_data;
     struct imx_i2c_reg *sprt_i2c;
 
 	sprt_data = fwk_i2c_adapter_get_drvdata(ptrDev);
-	sprt_i2c = (struct hal_imx_i2c *)sprt_data->reg;
+	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
     if (sprt_i2c->sgrt_isr.iif)
     {
@@ -449,31 +523,40 @@ static void imx_i2c_adap_initial(struct fwk_i2c_adapter *sprt_adap)
 {
     struct imx_i2c_drv_data *sprt_data;
     struct imx_i2c_reg *sprt_i2c;
+    kint16_t field;
 
 	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-	sprt_i2c = (struct hal_imx_i2c *)sprt_data->reg;
+	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
     /*!< 关闭iic */
-    sprt_i2c->sgrt_icr.ien  = false;
+    sprt_i2c->sgrt_icr.ien = false;
 
+    /*!< write zero to clear */
     mrt_resetw(&sprt_i2c->sgrt_isr);
 
-    /*!< 设置波特率为100KHz */
-    sprt_i2c->sgrt_ifr.freq = 0X15;
+    /*!< 设置波特率为100KHz (49.5MHz/480 ≈ 100KHz) */
+    field = imx_i2c_find_frequency(100000);
+    if (field < 0)
+        return;
+
+    sprt_i2c->sgrt_ifr.freq = field;
 
     /*!< 启用iic */
-    sprt_i2c->sgrt_icr.ien  = true;
+    sprt_i2c->sgrt_icr.ien = true;
 }
 
-static ksint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msgs, ksint32_t num)
+static kint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msgs, kint32_t num)
 {
 	struct imx_i2c_drv_data *sprt_data;
 	struct imx_i2c_reg *sprt_i2c;
     kuint32_t idx;
-    ksint32_t retval = -NR_IS_TRXERR;
+    kint32_t retval = -NR_IS_TRXERR;
 
 	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-	sprt_i2c = (struct hal_imx_i2c *)sprt_data->reg;
+	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
+
+    /*!< open clock */
+    fwk_clk_prepare_enable(sprt_data->sprt_clk);
 
     /*!< 等待数据传输完成 */
     if (!imx_i2c_adap_wait_complete(sprt_adap, 100))
@@ -489,11 +572,11 @@ static ksint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk
         return retval;
 
     /*!< iic功能检查 & 应答信号*/
-    if (!imx_i2c_adap_check_ack(sprt_i2c)) 
-    {
-        retval = -NR_IS_CHECKERR;
-        goto END;
-    }
+//    if (!imx_i2c_adap_check_ack(sprt_i2c)) 
+//    {
+//        retval = -NR_IS_CHECKERR;
+//        goto END;
+//    }
 
     for (idx = 0; idx < num; idx++) 
     {
@@ -507,8 +590,8 @@ static ksint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk
             imx_i2c_adap_restart(sprt_adap);
 
             /*!< iic功能检查 & 应答信号*/
-            if (!imx_i2c_adap_check_ack(sprt_i2c))
-                goto END;
+//            if (!imx_i2c_adap_check_ack(sprt_i2c))
+//                goto END;
 
             if (imx_i2c_adap_is_busy(sprt_i2c))
                 goto END;
@@ -539,13 +622,13 @@ static const struct fwk_i2c_algo sgrt_imx_i2c_algo =
  * @retval  errno
  * @note    none
  */
-static ksint32_t imx_i2c_driver_probe(struct fwk_platdev *sprt_pdev)
+static kint32_t imx_i2c_driver_probe(struct fwk_platdev *sprt_pdev)
 {
 	struct imx_i2c_drv_data *sprt_data;
 	struct fwk_i2c_adapter *sprt_adap;
 	struct fwk_device *sprt_dev;
 	kuaddr_t reg;
-	ksint32_t retval;
+	kint32_t retval;
 
 	sprt_data = kzalloc(sizeof(*sprt_data), GFP_KERNEL);
 	if (!isValid(sprt_data))
@@ -572,7 +655,7 @@ static ksint32_t imx_i2c_driver_probe(struct fwk_platdev *sprt_pdev)
 
 	sprt_adap->sprt_algo = &sgrt_imx_i2c_algo;
 	sprt_adap->algo_data = sprt_data;
-	sprt_adap->id = fwk_of_get_id(sprt_dev->sprt_node, "i2c");
+	sprt_adap->id = fwk_of_get_alias_id(sprt_dev->sprt_node);
 	sprintk(sprt_adap->name, "imx,i2c-%d", sprt_adap->id);
 
 	retval = fwk_i2c_add_adapter(sprt_adap);
@@ -607,11 +690,13 @@ fail1:
  * @retval  errno
  * @note    none
  */
-static ksint32_t imx_i2c_driver_remove(struct fwk_platdev *sprt_pdev)
+static kint32_t imx_i2c_driver_remove(struct fwk_platdev *sprt_pdev)
 {
 	struct imx_i2c_drv_data *sprt_data;
 
     sprt_data = fwk_platform_get_drvdata(sprt_pdev);
+    if (!sprt_data)
+        return NR_IS_NORMAL;
 
     fwk_free_irq(sprt_data->irq, &sprt_data->sgrt_adap);
     fwk_i2c_del_adapter(&sprt_data->sgrt_adap);
@@ -652,7 +737,7 @@ static struct fwk_platdrv sgrt_imx_i2c_platdriver =
  * @retval  errno
  * @note    none
  */
-ksint32_t __fwk_init imx_i2c_driver_init(void)
+kint32_t __fwk_init imx_i2c_driver_init(void)
 {
 	return fwk_register_platdriver(&sgrt_imx_i2c_platdriver);
 }
@@ -668,7 +753,7 @@ void __fwk_exit imx_i2c_driver_exit(void)
 	fwk_unregister_platdriver(&sgrt_imx_i2c_platdriver);
 }
 
-IMPORT_DRIVER_INIT(imx_i2c_driver_init);
-IMPORT_DRIVER_EXIT(imx_i2c_driver_exit);
+IMPORT_PATTERN_INIT(imx_i2c_driver_init);
+IMPORT_PATTERN_EXIT(imx_i2c_driver_exit);
 
 /*!< end of file */

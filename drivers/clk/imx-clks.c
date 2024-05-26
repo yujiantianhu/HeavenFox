@@ -34,15 +34,15 @@ struct imx_clks_data
 
 typedef struct imx_clk_gate_fix 
 {
-    srt_fwk_clk_one_cell_t sgrt_cell;
+    struct fwk_clk_one_cell sgrt_cell;
 	const struct fwk_clk_ops *sprt_ops;
 	void *reg;
 
 } srt_imx_clk_gate_fix_t;
 
 /*!< The globals */
-static srt_fwk_clk_t sgrt_imx_clks_data[IMX6UL_CLK_END];
-static srt_fwk_clk_one_cell_t sgrt_imx_clk_one_cell_data;
+static struct fwk_clk sgrt_imx_clks_data[IMX6UL_CLK_END];
+static struct fwk_clk_one_cell sgrt_imx_clk_one_cell_data;
 
 /*!< device id for device-tree */
 static struct fwk_of_device_id sgrt_imx_antop_driver_ids[] =
@@ -57,7 +57,7 @@ static struct fwk_of_device_id sgrt_imx_ccm_driver_ids[] =
 	{},
 };
 
-static void imx_clk_init_data(srt_imx_clk_gate_fix_t *sprt_data, const srt_fwk_clk_ops_t *sprt_ops, void *reg)
+static void imx_clk_init_data(srt_imx_clk_gate_fix_t *sprt_data, const struct fwk_clk_ops *sprt_ops, void *reg)
 {
     sprt_data->sgrt_cell.sprt_clks = &sgrt_imx_clks_data[0];
     sprt_data->sgrt_cell.clks_size = ARRAY_SIZE(sgrt_imx_clks_data);
@@ -70,8 +70,8 @@ static void imx_clk_init_data(srt_imx_clk_gate_fix_t *sprt_data, const srt_fwk_c
         sprt_data->reg = reg;
 }
 
-static srt_fwk_clk_t *imx_clk_gate(srt_fwk_clk_t *sprt_clk, const kstring_t *name, 
-                            kuint8_t shift, const kstring_t *parent, srt_imx_clk_gate_fix_t *sprt_data)
+static struct fwk_clk *imx_clk_gate(struct fwk_clk *sprt_clk, const kchar_t *name, 
+                            kuint8_t shift, const kchar_t *parent, srt_imx_clk_gate_fix_t *sprt_data)
 {
     return fwk_clk_gate_register(sprt_clk, 
                                  sprt_data->sprt_ops,
@@ -81,12 +81,12 @@ static srt_fwk_clk_t *imx_clk_gate(srt_fwk_clk_t *sprt_clk, const kstring_t *nam
                                  shift);
 }
 
-static ksint32_t imx_clk_init_gate(kuint32_t number, const kstring_t *name, 
-                            kuint8_t shift, const kstring_t *parent, srt_imx_clk_gate_fix_t *sprt_data)
+static kint32_t imx_clk_init_gate(kuint32_t number, const kchar_t *name, 
+                            kuint8_t shift, const kchar_t *parent, srt_imx_clk_gate_fix_t *sprt_data)
 {
-    srt_fwk_clk_t *sprt_clk;
+    struct fwk_clk *sprt_clk;
 
-    if (number > 15)
+    if (number > sprt_data->sgrt_cell.clks_size)
         return -NR_IS_FAULT;
 
     sprt_clk = &sprt_data->sgrt_cell.sprt_clks[number];
@@ -196,53 +196,53 @@ static void imx_clks_video_init(struct imx_clks_data *sprt_data)
     mrt_clrbitl(mrt_bit(11) | mrt_bit(10) | mrt_bit(9), &sprt_ccm->CSCDR2);
 
     /*!< enbale LCD clock */
-    mrt_setbitl(IMX6UL_CCM_CCGR_BIT(14), &sprt_ccm->CCGR2);
+//  mrt_setbitl(IMX6UL_CCM_CCGR_BIT(14), &sprt_ccm->CCGR2);
 
     /*!< enable LCD PixClock */
-    mrt_setbitl(IMX6UL_CCM_CCGR_BIT(5), &sprt_ccm->CCGR3);
+//  mrt_setbitl(IMX6UL_CCM_CCGR_BIT(5), &sprt_ccm->CCGR3);
 }
 
-static ksint32_t imx_clks_gate_enable(srt_fwk_clk_hw_t *sprt_hw)
+static kint32_t imx_clks_gate_enable(struct fwk_clk_hw *sprt_hw)
 {
-    srt_fwk_clk_gate_t *sprt_gate;
+    struct fwk_clk_gate *sprt_gate;
 
-    sprt_gate = mrt_container_of(sprt_hw, srt_fwk_clk_gate_t, sgrt_hw);
+    sprt_gate = mrt_container_of(sprt_hw, struct fwk_clk_gate, sgrt_hw);
     mrt_setbitl(IMX6UL_CCM_CCGR_BIT(sprt_gate->bit_idx), sprt_gate->reg);
 
     return NR_IS_NORMAL;
 }
 
-static void	imx_clks_gate_disable(srt_fwk_clk_hw_t *sprt_hw)
+static void	imx_clks_gate_disable(struct fwk_clk_hw *sprt_hw)
 {
-    srt_fwk_clk_gate_t *sprt_gate;
+    struct fwk_clk_gate *sprt_gate;
 
-    sprt_gate = mrt_container_of(sprt_hw, srt_fwk_clk_gate_t, sgrt_hw);
+    sprt_gate = mrt_container_of(sprt_hw, struct fwk_clk_gate, sgrt_hw);
     mrt_clrbitl(IMX6UL_CCM_CCGR_BIT(sprt_gate->bit_idx), sprt_gate->reg);
 }
 
-static ksint32_t imx_clks_gate_is_enabled(srt_fwk_clk_hw_t *sprt_hw)
+static kint32_t imx_clks_gate_is_enabled(struct fwk_clk_hw *sprt_hw)
 {
-    srt_fwk_clk_gate_t *sprt_gate;
+    struct fwk_clk_gate *sprt_gate;
     kuint32_t value;
 
-    sprt_gate = mrt_container_of(sprt_hw, srt_fwk_clk_gate_t, sgrt_hw);
+    sprt_gate = mrt_container_of(sprt_hw, struct fwk_clk_gate, sgrt_hw);
     value = mrt_getbitl(IMX6UL_CCM_CCGR_BIT(sprt_gate->bit_idx), sprt_gate->reg);
 
     return !!value;
 }
 
-static const srt_fwk_clk_ops_t sgrt_imx_clks_gate_oprts =
+static const struct fwk_clk_ops sgrt_imx_clks_gate_oprts =
 {
     .enable = imx_clks_gate_enable,
     .disable = imx_clks_gate_disable,
     .is_enabled = imx_clks_gate_is_enabled,
 };
 
-static ksint32_t imx_clks_driver_of_init(struct imx_clks_data *sprt_data)
+static kint32_t imx_clks_driver_of_init(struct imx_clks_data *sprt_data)
 {
-    srt_fwk_clk_t *sprt_gclk;
+    struct fwk_clk *sprt_gclk;
 	srt_imx_ccm_t *sprt_ccm;
-    srt_fwk_device_node_t *sprt_npccm;
+    struct fwk_device_node *sprt_npccm;
     srt_imx_clk_gate_fix_t sgrt_init;
     kuint32_t ret = 0;
 
@@ -389,7 +389,7 @@ static ksint32_t imx_clks_driver_of_init(struct imx_clks_data *sprt_data)
  * @retval  errno
  * @note    none
  */
-ksint32_t __fwk_init imx_clks_driver_init(void)
+kint32_t __fwk_init imx_clks_driver_init(void)
 {
 	srt_imx_ccm_t *sprt_ccm;
 	srt_imx_ccm_pll_t *sprt_pll;
@@ -422,6 +422,14 @@ ksint32_t __fwk_init imx_clks_driver_init(void)
  * Part of the clock has been initialized in boot, and the rest is supplemented here 
  * ----------------------------------------------------------------------------------*/
     /*!< 1. gpio */
+    /*!< gpio1 */
+    mrt_setbitl(IMX6UL_CCM_CCGR_BIT(13), &sprt_ccm->CCGR1);
+    /*!< gpio2 */
+    mrt_setbitl(IMX6UL_CCM_CCGR_BIT(15), &sprt_ccm->CCGR0);
+    /*!< gpio3 */
+    mrt_setbitl(IMX6UL_CCM_CCGR_BIT(13), &sprt_ccm->CCGR2);
+    /*!< gpio4 */
+    mrt_setbitl(IMX6UL_CCM_CCGR_BIT(6), &sprt_ccm->CCGR3);
     /*!< gpio5 */
     mrt_setbitl(IMX6UL_CCM_CCGR_BIT(15), &sprt_ccm->CCGR1);
 

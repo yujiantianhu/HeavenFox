@@ -36,18 +36,18 @@ enum __ERT_FWK_GPIO_TEMP
     NR_FWK_GPIO_NONE = 0,
     NR_FWK_GPIO_DIR_IN = NR_FWK_GPIO_BIT_SET,
     NR_FWK_GPIO_DIR_OUT = NR_FWK_GPIO_BIT_SET | NR_FWK_GPIO_BIT_OUT,
-    NR_FWK_GPIO_ACTIVE_LOW = NR_FWK_GPIO_BIT_SET | NR_FWK_GPIO_BIT_OUT,
-    NR_FWK_GPIO_ACTIVE_HIGH = NR_FWK_GPIO_BIT_SET | NR_FWK_GPIO_BIT_OUT | NR_FWK_GPIO_BIT_VAL,
+    NR_FWK_GPIO_LOW = NR_FWK_GPIO_BIT_SET | NR_FWK_GPIO_BIT_OUT,
+    NR_FWK_GPIO_HIGH = NR_FWK_GPIO_BIT_SET | NR_FWK_GPIO_BIT_OUT | NR_FWK_GPIO_BIT_VAL,
 
 #define FWK_GPIO_NONE                           NR_FWK_GPIO_NONE
 #define FWK_GPIO_DIR_IN                         NR_FWK_GPIO_DIR_IN
 #define FWK_GPIO_DIR_OUT                        NR_FWK_GPIO_DIR_OUT
-#define FWK_GPIO_ACTIVE_LOW                     NR_FWK_GPIO_ACTIVE_LOW
-#define FWK_GPIO_ACTIVE_HIGH                    NR_FWK_GPIO_ACTIVE_HIGH
+#define FWK_GPIO_LOW_LEVEL                      NR_FWK_GPIO_LOW
+#define FWK_GPIO_HIGH_LEVEL                     NR_FWK_GPIO_HIGH
 
 #define FWK_GPIO_DIR_MASK                       (FWK_GPIO_DIR_IN | FWK_GPIO_DIR_OUT)
-#define FWK_GPIO_ACTIVE_MASK                    (FWK_GPIO_ACTIVE_LOW | FWK_GPIO_ACTIVE_HIGH)
-#define FWK_GPIO_DIR_ACTIVE_MASK                (FWK_GPIO_DIR_MASK | FWK_GPIO_ACTIVE_MASK)
+#define FWK_GPIO_LEVEL_MASK                     (FWK_GPIO_LOW_LEVEL | FWK_GPIO_HIGH_LEVEL)
+#define FWK_GPIO_DIR_LEVEL_MASK                 (FWK_GPIO_DIR_MASK | FWK_GPIO_ACTIVE_MASK)
 };
 
 typedef enum __ERT_FWK_GPIODESC_FLAGS
@@ -77,51 +77,51 @@ typedef struct fwk_gpio_desc
     kuint32_t flags;
 
     /*!< name of gpio property, such as: xxx-gpios, xxx is label*/
-    const kstring_t *label;
+    const kchar_t *label;
 
 } srt_fwk_gpio_desc_t;
 
 typedef struct fwk_gpio_node_prop
 {
     struct fwk_device_node *sprt_par;
-    ksint32_t gpio;
+    kint32_t gpio;
     kuint32_t flags;
 
 } srt_fwk_gpio_node_prop_t;
 
 /*!< The functions */
-TARGET_EXT kuint32_t fwk_gpiodesc_to_hwgpio(srt_fwk_gpio_chip_t *sprt_chip, srt_fwk_gpio_desc_t *sprt_desc);
-TARGET_EXT srt_fwk_gpio_desc_t *fwk_gpiochip_get_desc(srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset);
+TARGET_EXT kuint32_t fwk_gpiodesc_to_hwgpio(struct fwk_gpio_chip *sprt_chip, struct fwk_gpio_desc *sprt_desc);
+TARGET_EXT struct fwk_gpio_desc *fwk_gpiochip_get_desc(struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
 
-TARGET_EXT srt_fwk_gpio_desc_t *fwk_of_get_named_gpiodesc_flags(srt_fwk_device_node_t *sprt_node, 
-                                            const kstring_t *list_name, ksint32_t index, kuint32_t *flags);
+TARGET_EXT struct fwk_gpio_desc *fwk_of_get_named_gpiodesc_flags(struct fwk_device_node *sprt_node, 
+                                            const kchar_t *list_name, kint32_t index, kuint32_t *flags);
 
-TARGET_EXT ksint32_t fwk_gpio_request(srt_fwk_gpio_desc_t *sprt_desc, const kstring_t *label);
-TARGET_EXT void fwk_gpio_free(srt_fwk_gpio_desc_t *sprt_desc);
-TARGET_EXT kbool_t fwk_gpio_is_requested(srt_fwk_gpio_desc_t *sprt_desc);
-TARGET_EXT srt_fwk_gpio_desc_t *fwk_gpio_desc_get(srt_fwk_device_t *sprt_dev, const kstring_t *con_id, kuint32_t flags);
-TARGET_EXT void fwk_gpio_desc_put(srt_fwk_gpio_desc_t *sprt_desc);
-TARGET_EXT ksint32_t fwk_gpio_desc_to_irq(srt_fwk_gpio_desc_t *sprt_desc);
-TARGET_EXT void fwk_gpio_set_value(srt_fwk_gpio_desc_t *sprt_desc, kuint32_t value);
-TARGET_EXT ksint32_t fwk_gpio_get_value(srt_fwk_gpio_desc_t *sprt_desc);
-TARGET_EXT void fwk_gpio_set_direction(srt_fwk_gpio_desc_t *sprt_desc, kuint32_t value);
-TARGET_EXT void fwk_gpio_set_direction_input(srt_fwk_gpio_desc_t *sprt_desc);
-TARGET_EXT void fwk_gpio_set_direction_output(srt_fwk_gpio_desc_t *sprt_desc, kuint32_t value);
-TARGET_EXT ksint32_t fwk_gpio_get_direction(srt_fwk_gpio_desc_t *sprt_desc);
-TARGET_EXT kbool_t fwk_gpio_dir_is_input(srt_fwk_gpio_desc_t *sprt_desc);
+TARGET_EXT kint32_t fwk_gpio_request(struct fwk_gpio_desc *sprt_desc, const kchar_t *label);
+TARGET_EXT void fwk_gpio_free(struct fwk_gpio_desc *sprt_desc);
+TARGET_EXT kbool_t fwk_gpio_is_requested(struct fwk_gpio_desc *sprt_desc);
+TARGET_EXT struct fwk_gpio_desc *fwk_gpio_desc_get(struct fwk_device *sprt_dev, const kchar_t *con_id, kuint32_t flags);
+TARGET_EXT void fwk_gpio_desc_put(struct fwk_gpio_desc *sprt_desc);
+TARGET_EXT kint32_t fwk_gpio_desc_to_irq(struct fwk_gpio_desc *sprt_desc);
+TARGET_EXT void fwk_gpio_set_value(struct fwk_gpio_desc *sprt_desc, kuint32_t value);
+TARGET_EXT kint32_t fwk_gpio_get_value(struct fwk_gpio_desc *sprt_desc);
+TARGET_EXT void fwk_gpio_set_direction(struct fwk_gpio_desc *sprt_desc, kuint32_t dir, kint32_t value);
+TARGET_EXT void fwk_gpio_set_direction_input(struct fwk_gpio_desc *sprt_desc);
+TARGET_EXT void fwk_gpio_set_direction_output(struct fwk_gpio_desc *sprt_desc, kint32_t value);
+TARGET_EXT kint32_t fwk_gpio_get_direction(struct fwk_gpio_desc *sprt_desc);
+TARGET_EXT kbool_t fwk_gpio_dir_is_input(struct fwk_gpio_desc *sprt_desc);
 
 /*!< API functions */
-static inline void fwk_gpio_desc_set_flags(srt_fwk_gpio_desc_t *sprt_desc, ert_fwk_gpiodesc_flag_t flag)
+static inline void fwk_gpio_desc_set_flags(struct fwk_gpio_desc *sprt_desc, ert_fwk_gpiodesc_flag_t flag)
 {
     sprt_desc->flags |= mrt_bit(flag);
 }
 
-static inline kbool_t fwk_gpio_desc_check_flags(srt_fwk_gpio_desc_t *sprt_desc, ert_fwk_gpiodesc_flag_t flag)
+static inline kbool_t fwk_gpio_desc_check_flags(struct fwk_gpio_desc *sprt_desc, ert_fwk_gpiodesc_flag_t flag)
 {
     return !!(sprt_desc->flags & mrt_bit(flag));
 }
 
-static inline void fwk_gpio_desc_clr_flags(srt_fwk_gpio_desc_t *sprt_desc, ert_fwk_gpiodesc_flag_t flag)
+static inline void fwk_gpio_desc_clr_flags(struct fwk_gpio_desc *sprt_desc, ert_fwk_gpiodesc_flag_t flag)
 {
     sprt_desc->flags &= ~mrt_bit(flag);
 }

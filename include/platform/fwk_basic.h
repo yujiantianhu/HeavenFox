@@ -18,6 +18,7 @@
 #include <common/generic.h>
 #include <common/list_types.h>
 #include <common/trie_tree.h>
+#include <common/radix_tree.h>
 #include <common/api_string.h>
 #include <common/io_stream.h>
 #include <common/time.h>
@@ -35,6 +36,27 @@ enum __ERT_DEVICE_TYPE
 	NR_TYPE_BLKDEV,
 	/*!< network device */
 	NR_TYPE_NETDEV,
+};
+
+enum __ERT_CHRDEV_MAJOR
+{
+	NR_CHRDEV_DUMMY_MAJOR = 0,
+
+	NR_STDIN_MAJOR,
+	NR_STDOUT_MAJOR,
+	NR_STDERR_MAJOR,
+	NR_DEBUG_MAJOR,
+
+	NR_LED_MAJOR,
+	NR_KEY_MAJOR,
+	NR_INPUT_MAJOR,
+	NR_RTC_MAJOR,
+	NR_FBDEV_MAJOR,
+	NR_MISC_MAJOR,
+	NR_TSC_MAJOR,
+	NR_USB_MAJOR,
+
+	NR_CHRDEV_MAJOR_MAX,
 };
 
 #define USE_VIRTUAL_MEM_ADDR						(0)						/*!< Whether virtual memory is used. 0: not use, virtual memory = physic memory */

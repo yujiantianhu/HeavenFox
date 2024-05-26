@@ -28,7 +28,7 @@ static FATFS sgrt_rfs_fatfs = {0};
  * @retval  none
  * @note    mount sdcard disk by fatfs
  */
-static ksint32_t rfs_fatfs_disk_mount(struct rfs_disk *sprt_disk)
+static kint32_t rfs_fatfs_disk_mount(struct rfs_disk *sprt_disk)
 {
 	/*!< Multiple mounts are not allowed */
 	if (sprt_disk->mnt_status)
@@ -58,7 +58,7 @@ fail:
  * @retval  none
  * @note    unmount sdcard disk by fatfs
  */
-static ksint32_t rfs_fatfs_disk_unmount(struct rfs_disk *sprt_disk)
+static kint32_t rfs_fatfs_disk_unmount(struct rfs_disk *sprt_disk)
 {
 	/*!< if not mounted ? */
 	if (!sprt_disk->mnt_status)
@@ -83,7 +83,7 @@ fail:
  * @retval  none
  * @note    format sdcard disk by fatfs
  */
-static ksint32_t rfs_fatfs_disk_mkfs(struct rfs_disk *sprt_disk)
+static kint32_t rfs_fatfs_disk_mkfs(struct rfs_disk *sprt_disk)
 {
 	kuint8_t work[RFS_FATFS_DISK_MAX_SS];
 
@@ -117,10 +117,10 @@ static void rfs_fatfs_disk_set_diskpath(struct rfs_disk *sprt_disk, kuint16_t dr
  * @retval  none
  * @note    start sdcard disk detect
  */
-static ksint32_t rfs_fatfs_disk_file_start(struct rfs_disk_file *sprt_this, 
-											const kstring_t *ptrName, kuint8_t flags, kuaddr_t bufferAddr, kuint32_t size)
+static kint32_t rfs_fatfs_disk_file_start(struct rfs_disk_file *sprt_this, 
+											const kchar_t *ptrName, kuint8_t flags, kuaddr_t bufferAddr, kuint32_t size)
 {
-	ksint32_t retval;
+	kint32_t retval;
 
 	if (!isValid(sprt_this))
 		return -NR_IS_NULLPTR;
@@ -203,7 +203,7 @@ static void rfs_fatfs_disk_file_release(struct rfs_disk_file *sprt_this)
  * @retval  none
  * @note    file name, and file path
  */
-static void rfs_fatfs_disk_set_filepath(struct rfs_disk_file *sprt_this, const kstring_t *ptrFileName)
+static void rfs_fatfs_disk_set_filepath(struct rfs_disk_file *sprt_this, const kchar_t *ptrFileName)
 {
 #if (IT_FALSE)
     kuint32_t iPathLenth, iNameOffset;
@@ -289,7 +289,7 @@ static kbool_t rfs_fatfs_disk_file_is_opened(struct rfs_disk_file *sprt_this)
  * @retval  none
  * @note    create folders
  */
-static ksint32_t rfs_fatfs_disk_mkdir(const kstring_t *ptrDirName)
+static kint32_t rfs_fatfs_disk_mkdir(const kchar_t *ptrDirName)
 {
     FRESULT retval;
 
@@ -306,7 +306,7 @@ static ksint32_t rfs_fatfs_disk_mkdir(const kstring_t *ptrDirName)
  * @retval  none
  * @note    open file which name is sprt_this->ptrFileName
  */
-static ksint32_t rfs_fatfs_disk_open(struct rfs_disk_file *sprt_this, kuint8_t flags)
+static kint32_t rfs_fatfs_disk_open(struct rfs_disk_file *sprt_this, kuint8_t flags)
 {
 	FIL *sprt_file;
 	kuint8_t mode = 0;
@@ -357,7 +357,7 @@ fail1:
  * @retval  none
  * @note    file offset/seek
  */
-static ksint32_t rfs_fatfs_disk_lseek(struct rfs_disk_file *sprt_this, kuint32_t offset)
+static kint32_t rfs_fatfs_disk_lseek(struct rfs_disk_file *sprt_this, kuint32_t offset)
 {
 	if (!isValid(sprt_this->sprt_file))
 		return -NR_IS_NULLPTR;
@@ -450,7 +450,7 @@ static kusize_t rfs_fatfs_disk_get_filesize(struct rfs_disk_file *sprt_this)
  * @retval  none
  * @note    close file
  */
-static ksint32_t rfs_fatfs_disk_close(struct rfs_disk_file *sprt_this)
+static kint32_t rfs_fatfs_disk_close(struct rfs_disk_file *sprt_this)
 {
 	/*!< no file is opened */
 	if (!sprt_this->is_opened(sprt_this))
@@ -565,7 +565,7 @@ void rfs_fatfs_file_free(struct rfs_disk_file *sprt_file)
  * @retval  none
  * @note    disk create
  */
-ksint32_t rfs_fatfs_disk_create(struct rfs_disk *sprt_disk, kuint16_t drvNumber)
+kint32_t rfs_fatfs_disk_create(struct rfs_disk *sprt_disk, kuint16_t drvNumber)
 {
 	if (!sprt_disk->mount)
 		return -NR_IS_UNVALID;

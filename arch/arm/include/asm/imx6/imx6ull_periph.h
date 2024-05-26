@@ -44,6 +44,13 @@ typedef struct hal_imx_gpio
 #define IMX6UL_GPIO_PROPERTY_ENTRY(x)                               (srt_hal_imx_gpio_t *)IMX6UL_GPIO##x##_ADDR_BASE
 #define IMX6UL_GPIO_PIN_OFFSET_BIT(x)                               mrt_bit(x)
 
+/*!< ICR1/ICR2 Register */
+#define HAL_IMX_ICR_LOW_LEVEL						                (0x00)
+#define HAL_IMX_ICR_HIGH_LEVEL						                (0x01)
+#define HAL_IMX_ICR_RISING_EDGE						                (0x02)
+#define HAL_IMX_ICR_FALLING_EDGE					                (0x03)
+#define HAL_IMX_ICR_MASK							                (0x03)
+
 /*!< ------------------------------------------------------------------------- */
 /*!< Timer - Register Layout Typedef */
 typedef struct hal_imx_gptimer
@@ -136,7 +143,7 @@ typedef struct hal_imx_i2c
 #define IMX6UL_I2C2_ADDR_BASE                                       (0x21A4000u)
 #define IMX6UL_I2C3_ADDR_BASE                                       (0x21A8000u)
 #define IMX6UL_I2C4_ADDR_BASE                                       (0x21F8000u)
-#define IMX6UL_I2C_PROPERTY_ENTRY(x)                                (srt_imx_i2c_t *)IMX6UL_I2C##x##_ADDR_BASE
+#define IMX6UL_I2C_PROPERTY_ENTRY(x)                                (srt_hal_imx_i2c_t *)IMX6UL_I2C##x##_ADDR_BASE
 
 /*!< ------------------------------------------------------------------------- */
 /*!< ECSPI - Register Layout Typedef */

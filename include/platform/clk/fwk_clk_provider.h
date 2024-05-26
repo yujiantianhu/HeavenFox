@@ -26,11 +26,11 @@ typedef struct fwk_clk_one_cell
 } srt_fwk_clk_one_cell_t;
 
 /*!< The functions */
-TARGET_EXT srt_fwk_clk_t *fwk_of_clk_src_onecell_get(srt_fwk_of_phandle_args_t *sprt_args, void *data);
-TARGET_EXT ksint32_t fwk_clk_add_provider(srt_fwk_device_node_t *sprt_node, 
-                    srt_fwk_clk_t *(*get)(srt_fwk_of_phandle_args_t *, void *), void *data);
-TARGET_EXT void fwk_clk_del_provider(srt_fwk_device_node_t *sprt_node);
-TARGET_EXT srt_fwk_clk_t *fwk_clk_provider_look_up(srt_fwk_of_phandle_args_t *sprt_args);
+TARGET_EXT struct fwk_clk *fwk_of_clk_src_onecell_get(struct fwk_of_phandle_args *sprt_args, void *data);
+TARGET_EXT kint32_t fwk_clk_add_provider(struct fwk_device_node *sprt_node, 
+                    struct fwk_clk *(*get)(struct fwk_of_phandle_args *, void *), void *data);
+TARGET_EXT void fwk_clk_del_provider(struct fwk_device_node *sprt_node);
+TARGET_EXT struct fwk_clk *fwk_clk_provider_look_up(struct fwk_of_phandle_args *sprt_args);
 
 
 #endif /*!< __FWK_CLK_PROVIDER_H_ */

@@ -42,21 +42,21 @@
 #define IMX_SDMMC_IF_PORT_ENTRY()                       IMX6UL_USDHC_PROPERTY_ENTRY(1)          /*!< register base address */
 
 /*!< The functions */
-static kbool_t imx6ull_sdmmc_is_card_insert(srt_fwk_sdcard_host_t *sprt_host);
-static void imx6ull_sdmmc_set_bus_width(srt_fwk_sdcard_host_t *sprt_host, kuint32_t option);
-static void imx6ull_sdmmc_set_clk_freq(srt_fwk_sdcard_host_t *sprt_host, kuint32_t option);
-static kbool_t imx6ull_sdmmc_initial_active(srt_fwk_sdcard_host_t *sprt_host, kuint32_t timeout);
-static ksint32_t imx6ull_sdmmc_switch_voltage(srt_fwk_sdcard_host_t *sprt_host, kuint32_t voltage);
-static ksint32_t imx6ull_sdmmc_send_command(srt_fwk_sdcard_cmd_t *sprt_cmds);
-static void imx6ull_sdmmc_recv_response(srt_fwk_sdcard_cmd_t *sprt_cmds);
-static ksint32_t imx6ull_sdmmc_transfer_data(srt_fwk_sdcard_data_t *sprt_data);
-static void imx6ull_sdmmc_reset_transfer(srt_fwk_sdcard_host_t *sprt_host);
+static kbool_t imx6ull_sdmmc_is_card_insert(struct fwk_sdcard_host *sprt_host);
+static void imx6ull_sdmmc_set_bus_width(struct fwk_sdcard_host *sprt_host, kuint32_t option);
+static void imx6ull_sdmmc_set_clk_freq(struct fwk_sdcard_host *sprt_host, kuint32_t option);
+static kbool_t imx6ull_sdmmc_initial_active(struct fwk_sdcard_host *sprt_host, kuint32_t timeout);
+static kint32_t imx6ull_sdmmc_switch_voltage(struct fwk_sdcard_host *sprt_host, kuint32_t voltage);
+static kint32_t imx6ull_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds);
+static void imx6ull_sdmmc_recv_response(struct fwk_sdcard_cmd *sprt_cmds);
+static kint32_t imx6ull_sdmmc_transfer_data(struct fwk_sdcard_data *sprt_data);
+static void imx6ull_sdmmc_reset_transfer(struct fwk_sdcard_host *sprt_host);
 
 /*!< private function */
 static void imx6ull_sdmmc_reset(srt_imx_usdhc_t *sprt_usdhc, kuint32_t optBit, kuint32_t timeout);
-static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sdcard_data_t *sprt_data, void *ptrData);
-static ksint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sdcard_data_t *sprt_data);
-static ksint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sdcard_data_t *sprt_data);
+static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data, void *ptrData);
+static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data);
+static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data);
 
 /*!< API function */
 /*!
@@ -339,7 +339,7 @@ static void imx6ull_sdmmc_reset(srt_imx_usdhc_t *sprt_usdhc, kuint32_t optBit, k
  * @retval  none
  * @note    reset command/data line
  */
-static void imx6ull_sdmmc_reset_transfer(srt_fwk_sdcard_host_t *sprt_host)
+static void imx6ull_sdmmc_reset_transfer(struct fwk_sdcard_host *sprt_host)
 {
     srt_imx_usdhc_t *sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
 
@@ -360,7 +360,7 @@ static void imx6ull_sdmmc_reset_transfer(srt_fwk_sdcard_host_t *sprt_host)
  * @retval  none
  * @note    detect if card insert
  */
-static kbool_t imx6ull_sdmmc_is_card_insert(srt_fwk_sdcard_host_t *sprt_host)
+static kbool_t imx6ull_sdmmc_is_card_insert(struct fwk_sdcard_host *sprt_host)
 {
     srt_hal_imx_gpio_t *sprt_cd = (srt_hal_imx_gpio_t *)sprt_host->iHostCDBase;
 
@@ -374,7 +374,7 @@ static kbool_t imx6ull_sdmmc_is_card_insert(srt_fwk_sdcard_host_t *sprt_host)
  * @retval  none
  * @note    configure card bus width
  */
-static void imx6ull_sdmmc_set_bus_width(srt_fwk_sdcard_host_t *sprt_host, kuint32_t option)
+static void imx6ull_sdmmc_set_bus_width(struct fwk_sdcard_host *sprt_host, kuint32_t option)
 {
     srt_imx_usdhc_t *sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
 
@@ -399,7 +399,7 @@ static void imx6ull_sdmmc_set_bus_width(srt_fwk_sdcard_host_t *sprt_host, kuint3
  * @retval  none
  * @note    configure sdcard clock frequency
  */
-static void imx6ull_sdmmc_set_clk_freq(srt_fwk_sdcard_host_t *sprt_host, kuint32_t option)
+static void imx6ull_sdmmc_set_clk_freq(struct fwk_sdcard_host *sprt_host, kuint32_t option)
 {
     srt_imx_usdhc_t *sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
     kuint32_t bitFreq, preScaler = 256U, divisor = 16U;
@@ -458,7 +458,7 @@ static void imx6ull_sdmmc_set_clk_freq(srt_fwk_sdcard_host_t *sprt_host, kuint32
  * @retval  none
  * @note    initial active card; it will make card enter idle status
  */
-static kbool_t imx6ull_sdmmc_initial_active(srt_fwk_sdcard_host_t *sprt_host, kuint32_t timeout)
+static kbool_t imx6ull_sdmmc_initial_active(struct fwk_sdcard_host *sprt_host, kuint32_t timeout)
 {
     srt_imx_usdhc_t *sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
 
@@ -493,7 +493,7 @@ static kbool_t imx6ull_sdmmc_initial_active(srt_fwk_sdcard_host_t *sprt_host, ku
  * @retval  none
  * @note    switch voltage by uSDHC
  */
-static ksint32_t imx6ull_sdmmc_switch_voltage(srt_fwk_sdcard_host_t *sprt_host, kuint32_t voltage)
+static kint32_t imx6ull_sdmmc_switch_voltage(struct fwk_sdcard_host *sprt_host, kuint32_t voltage)
 {
     srt_imx_usdhc_t *sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
 
@@ -539,16 +539,16 @@ static ksint32_t imx6ull_sdmmc_switch_voltage(srt_fwk_sdcard_host_t *sprt_host, 
  * @retval  none
  * @note    send command by uSDHC
  */
-static ksint32_t imx6ull_sdmmc_send_command(srt_fwk_sdcard_cmd_t *sprt_cmds)
+static kint32_t imx6ull_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds)
 {
     srt_imx_usdhc_t *sprt_usdhc;
-    srt_fwk_sdcard_host_t *sprt_host;
+    struct fwk_sdcard_host *sprt_host;
     kuint32_t iCmdXfrTypReg;
     kuint8_t index;
     kuint32_t argument;
-    ksint32_t iRetval;
+    kint32_t iRetval;
 
-    sprt_host = (srt_fwk_sdcard_host_t *)sprt_cmds->ptrHost;
+    sprt_host = (struct fwk_sdcard_host *)sprt_cmds->ptrHost;
     if (!isValid(sprt_host))
         return -NR_IS_NULLPTR;
 
@@ -574,7 +574,7 @@ static ksint32_t imx6ull_sdmmc_send_command(srt_fwk_sdcard_cmd_t *sprt_cmds)
     iCmdXfrTypReg = mrt_readl(&sprt_usdhc->CMD_XFR_TYP);
 
     /*!< configure data registers before command configure */
-    imx6ull_sdmmc_data_configure(sprt_usdhc, (srt_fwk_sdcard_data_t *)sprt_cmds->ptrData, &iCmdXfrTypReg);
+    imx6ull_sdmmc_data_configure(sprt_usdhc, (struct fwk_sdcard_data *)sprt_cmds->ptrData, &iCmdXfrTypReg);
 
     /*!< set Command index */
     mrt_clrbitl(IMX_USDHC_CMD_XFR_TYP_CMDINX_MASK, &iCmdXfrTypReg);
@@ -656,13 +656,13 @@ static ksint32_t imx6ull_sdmmc_send_command(srt_fwk_sdcard_cmd_t *sprt_cmds)
  * @retval  none
  * @note    receive response by uSDHC
  */
-static void imx6ull_sdmmc_recv_response(srt_fwk_sdcard_cmd_t *sprt_cmds)
+static void imx6ull_sdmmc_recv_response(struct fwk_sdcard_cmd *sprt_cmds)
 {
     srt_imx_usdhc_t *sprt_usdhc;
-    srt_fwk_sdcard_host_t *sprt_host;
+    struct fwk_sdcard_host *sprt_host;
     kuint8_t rsp_cnt = 3U;
 
-    sprt_host = (srt_fwk_sdcard_host_t *)sprt_cmds->ptrHost;
+    sprt_host = (struct fwk_sdcard_host *)sprt_cmds->ptrHost;
     if (!isValid(sprt_host))
         return;
 
@@ -705,16 +705,16 @@ static void imx6ull_sdmmc_recv_response(srt_fwk_sdcard_cmd_t *sprt_cmds)
  * @retval  none
  * @note    send data by uSDHC
  */
-static ksint32_t imx6ull_sdmmc_transfer_data(srt_fwk_sdcard_data_t *sprt_data)
+static kint32_t imx6ull_sdmmc_transfer_data(struct fwk_sdcard_data *sprt_data)
 {
     srt_imx_usdhc_t *sprt_usdhc;
-    srt_fwk_sdcard_host_t *sprt_host;
-    ksint32_t iRetval;
+    struct fwk_sdcard_host *sprt_host;
+    kint32_t iRetval;
 
     if (!sprt_data)
         return -NR_IS_NULLPTR;
 
-    sprt_host = (srt_fwk_sdcard_host_t *)sprt_data->ptrHost;
+    sprt_host = (struct fwk_sdcard_host *)sprt_data->ptrHost;
     if (!isValid(sprt_host))
         return -NR_IS_NULLPTR;
 
@@ -750,20 +750,20 @@ static ksint32_t imx6ull_sdmmc_transfer_data(srt_fwk_sdcard_data_t *sprt_data)
  * @retval  none
  * @note    write data to USDHC
  */
-static ksint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sdcard_data_t *sprt_data)
+static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data)
 {
-    srt_fwk_sdcard_host_t *sprt_host;
+    struct fwk_sdcard_host *sprt_host;
     kuint32_t iWaterMarkLimit;
     kuint32_t *ptrTxBuffer;
     kuint32_t iDataWords, iTransWords, iTransCnt;
     kuint32_t iRetry = 4096U;
-    ksint32_t iRetval;
+    kint32_t iRetval;
     kbool_t blRetval;
 
     if ((!sprt_data) || (!sprt_usdhc))
         return -NR_IS_NULLPTR;
 
-    sprt_host = (srt_fwk_sdcard_host_t *)sprt_data->ptrHost;
+    sprt_host = (struct fwk_sdcard_host *)sprt_data->ptrHost;
     if (!isValid(sprt_host))
         return -NR_IS_NULLPTR;
 
@@ -839,20 +839,20 @@ static ksint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_s
  * @retval  none
  * @note    read data from USDHC
  */
-static ksint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sdcard_data_t *sprt_data)
+static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data)
 {
-    srt_fwk_sdcard_host_t *sprt_host;
+    struct fwk_sdcard_host *sprt_host;
     kuint32_t iWaterMarkLimit;
     kuint32_t *ptrRxBuffer;
     kuint32_t iDataWords, iTransWords, iTransCnt;
     kuint32_t iRetry = 4096U;
-    ksint32_t iRetval = NR_IS_NORMAL;
+    kint32_t iRetval = NR_IS_NORMAL;
     kbool_t blRetval;
 
     if ((!sprt_data) || (!sprt_usdhc))
         return -NR_IS_NULLPTR;
 
-    sprt_host = (srt_fwk_sdcard_host_t *)sprt_data->ptrHost;
+    sprt_host = (struct fwk_sdcard_host *)sprt_data->ptrHost;
     if (!isValid(sprt_host))
         return -NR_IS_NULLPTR;
 
@@ -921,7 +921,7 @@ static ksint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sd
  * @retval  none
  * @note    configure registers about data transfer
  */
-static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sdcard_data_t *sprt_data, void *ptrData)
+static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data, void *ptrData)
 {
     kuint32_t iCmdXfrTyp;
     kuint32_t iMixCtrlReg;
@@ -1017,11 +1017,11 @@ static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, srt_fwk_sd
  * @retval  none
  * @note    initial host of SD Card
  */
-void *host_sdmmc_card_initial(srt_fwk_sdcard_t *sprt_card)
+void *host_sdmmc_card_initial(struct fwk_sdcard *sprt_card)
 {
     srt_imx_usdhc_t *sprt_usdhc;
-    srt_fwk_sdcard_if_t *sprt_if;
-    srt_fwk_sdcard_host_t *sprt_host;
+    struct fwk_sdcard_if *sprt_if;
+    struct fwk_sdcard_host *sprt_host;
     kuint32_t iDoEmpty;
 
     if (!isValid(sprt_card))
@@ -1029,7 +1029,7 @@ void *host_sdmmc_card_initial(srt_fwk_sdcard_t *sprt_card)
 
     sprt_if = &sprt_card->sgrt_if;
 
-    sprt_host = (srt_fwk_sdcard_host_t *)kzalloc(sizeof(srt_fwk_sdcard_host_t), GFP_KERNEL);
+    sprt_host = (struct fwk_sdcard_host *)kzalloc(sizeof(struct fwk_sdcard_host), GFP_KERNEL);
     if (!isValid(sprt_host))
         return mrt_nullptr;
 

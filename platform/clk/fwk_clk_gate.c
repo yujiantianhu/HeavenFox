@@ -16,12 +16,12 @@
 #include <platform/clk/fwk_clk_gate.h>
 
 /*!< API function */
-srt_fwk_clk_t *fwk_clk_gate_register(srt_fwk_clk_t *sprt_clk, const srt_fwk_clk_ops_t *sprt_ops,
-                                const kstring_t *name, const kstring_t *parent, void *reg, kuint8_t shift)
+struct fwk_clk *fwk_clk_gate_register(struct fwk_clk *sprt_clk, const struct fwk_clk_ops *sprt_ops,
+                                const kchar_t *name, const kchar_t *parent, void *reg, kuint8_t shift)
 {
-    srt_fwk_clk_gate_t *sprt_gate;
-    srt_fwk_clk_init_data_t sgrt_init;
-    srt_fwk_clk_t *sprt_rc;
+    struct fwk_clk_gate *sprt_gate;
+    struct fwk_clk_init_data sgrt_init;
+    struct fwk_clk *sprt_rc;
 
     sprt_gate = kzalloc(sizeof(*sprt_gate), GFP_KERNEL);
     if (!isValid(sprt_gate))
@@ -35,7 +35,7 @@ srt_fwk_clk_t *fwk_clk_gate_register(srt_fwk_clk_t *sprt_clk, const srt_fwk_clk_
     sprt_gate->reg = reg;
     sprt_gate->bit_idx = shift;
     sprt_gate->flags = 0;
-    sprt_gate->sgrt_hw.sprt_init = (const srt_fwk_clk_init_data_t *)&sgrt_init;
+    sprt_gate->sgrt_hw.sprt_init = (const struct fwk_clk_init_data *)&sgrt_init;
     sprt_gate->sgrt_hw.sprt_clk = sprt_clk;
 
     /*!< register clk */
@@ -46,10 +46,10 @@ srt_fwk_clk_t *fwk_clk_gate_register(srt_fwk_clk_t *sprt_clk, const srt_fwk_clk_
     return sprt_rc;
 }
 
-void fwk_clk_gate_unregister(srt_fwk_clk_t *sprt_clk)
+void fwk_clk_gate_unregister(struct fwk_clk *sprt_clk)
 {
-    srt_fwk_clk_hw_t *sprt_hw;
-    srt_fwk_clk_gate_t *sprt_gate;
+    struct fwk_clk_hw *sprt_hw;
+    struct fwk_clk_gate *sprt_gate;
 
     sprt_hw = fwk_clk_to_hw(sprt_clk);
     sprt_gate = mrt_container_of(sprt_hw, typeof(*sprt_gate), sgrt_hw);

@@ -39,7 +39,7 @@ typedef struct trie_node {
 } srt_trie_node_t;
 
 typedef struct trie_tree {
-    ksint32_t (*get) (ksint8_t ch);
+    kint32_t (*get) (kint8_t ch);
     void *(*alloc) (kusize_t size);
     void (*free) (void *ptr);
 
@@ -49,13 +49,13 @@ typedef struct trie_tree {
 } srt_trie_tree_t;
 
 /*!< The functions */
-TARGET_EXT ksint32_t get_trie_node_branch(ksint8_t ch);
+TARGET_EXT kint32_t get_trie_node_branch(kint8_t ch);
 TARGET_EXT struct trie_node **create_trie_branch(struct trie_tree *sprt_tree, struct trie_node *sprt_node, kuint32_t size);
 TARGET_EXT struct trie_node *allocate_trie_node(struct trie_tree *sprt_tree, struct trie_node *sprt_par, struct trie_node **sprt_branches);
 TARGET_EXT struct trie_node *find_trie_node(struct trie_tree *sprt_tree, const char *name);
-TARGET_EXT struct trie_link *trie_tree_look_up(struct trie_tree *sprt_tree, const kstring_t *name);
-TARGET_EXT void trie_node_add(struct trie_tree *sprt_tree, const kstring_t *name, struct trie_link *sprt_link);
-TARGET_EXT void trie_node_del(struct trie_tree *sprt_tree, const kstring_t *name);
+TARGET_EXT struct trie_link *trie_tree_look_up(struct trie_tree *sprt_tree, const kchar_t *name);
+TARGET_EXT void trie_node_add(struct trie_tree *sprt_tree, const kchar_t *name, struct trie_link *sprt_link);
+TARGET_EXT void trie_node_del(struct trie_tree *sprt_tree, const kchar_t *name);
 
 /*!< The defines */
 #define DECLARE_TRIE_TREE(name, branch, max, get_func, alloc_func, free_func) \

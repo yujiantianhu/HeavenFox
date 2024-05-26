@@ -16,12 +16,12 @@
 #include <platform/clk/fwk_clk_provider.h>
 
 /*!< The defines */
-typedef struct fwk_of_clk_provider 
+typedef struct fwk_of_clk_provider
 {
 	struct list_head sgrt_link;
 
-	srt_fwk_device_node_t *sprt_node;
-	srt_fwk_clk_t *(*get)(srt_fwk_of_phandle_args_t *sprt_args, void *data);
+	struct fwk_device_node *sprt_node;
+	struct fwk_clk *(*get)(struct fwk_of_phandle_args *sprt_args, void *data);
 	void *data;
 
 } srt_fwk_of_clk_provider_t;
@@ -30,24 +30,24 @@ typedef struct fwk_of_clk_provider
 static DECLARE_LIST_HEAD(sgrt_fwk_clk_providers);
 
 /*!< API function */
-srt_fwk_clk_t *fwk_of_clk_src_onecell_get(srt_fwk_of_phandle_args_t *sprt_args, void *data)
+struct fwk_clk *fwk_of_clk_src_onecell_get(struct fwk_of_phandle_args *sprt_args, void *data)
 {
-    srt_fwk_clk_one_cell_t *sprt_cell;
+    struct fwk_clk_one_cell *sprt_cell;
     kuint32_t index;
 
     if (!sprt_args || !data)
         return mrt_nullptr;
 
-    sprt_cell = (srt_fwk_clk_one_cell_t *)data;
+    sprt_cell = (struct fwk_clk_one_cell *)data;
     index = sprt_args->args[0];
 
     return sprt_cell->sprt_clks ? &sprt_cell->sprt_clks[index] : mrt_nullptr;
 }
 
-ksint32_t fwk_clk_add_provider(srt_fwk_device_node_t *sprt_node, 
-                    srt_fwk_clk_t *(*get)(srt_fwk_of_phandle_args_t *, void *), void *data)
+kint32_t fwk_clk_add_provider(struct fwk_device_node *sprt_node, 
+                    struct fwk_clk *(*get)(struct fwk_of_phandle_args *, void *), void *data)
 {
-    srt_fwk_of_clk_provider_t *sprt_provider;
+    struct fwk_of_clk_provider *sprt_provider;
 
     if (!sprt_node || !get)
         return -NR_IS_NODEV;
@@ -65,9 +65,9 @@ ksint32_t fwk_clk_add_provider(srt_fwk_device_node_t *sprt_node,
     return NR_IS_NORMAL;
 }
 
-void fwk_clk_del_provider(srt_fwk_device_node_t *sprt_node)
+void fwk_clk_del_provider(struct fwk_device_node *sprt_node)
 {
-    srt_fwk_of_clk_provider_t *sprt_provider;
+    struct fwk_of_clk_provider *sprt_provider;
 
     if (!sprt_node)
         return;
@@ -82,9 +82,9 @@ void fwk_clk_del_provider(srt_fwk_device_node_t *sprt_node)
     }
 }
 
-srt_fwk_clk_t *fwk_clk_provider_look_up(srt_fwk_of_phandle_args_t *sprt_args)
+struct fwk_clk *fwk_clk_provider_look_up(struct fwk_of_phandle_args *sprt_args)
 {
-    srt_fwk_of_clk_provider_t *sprt_provider;
+    struct fwk_of_clk_provider *sprt_provider;
 
     if (!sprt_args)
         return mrt_nullptr;

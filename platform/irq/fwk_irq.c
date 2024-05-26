@@ -19,7 +19,7 @@
 #include <platform/of/fwk_of.h>
 
 /*!< The defines */
-typedef ksint32_t (*func_fwk_irq_init_cb_t) (struct fwk_device_node *, struct fwk_device_node *);
+typedef kint32_t (*func_fwk_irq_init_cb_t) (struct fwk_device_node *, struct fwk_device_node *);
 
 /*!< The globals */
 
@@ -58,7 +58,7 @@ void fwk_of_irq_init(const struct fwk_of_device_id *sprt_matches)
     struct fwk_of_device_id *sprt_match;
     struct fwk_device_node *parent = mrt_nullptr;
     kbool_t of_status;
-    ksint32_t retval;
+    kint32_t retval;
 
     DECLARE_LIST_HEAD(sgrt_intc_desc_list);
     DECLARE_LIST_HEAD(sgrt_intc_parent_list);

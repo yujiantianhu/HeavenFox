@@ -25,34 +25,34 @@ typedef struct fwk_gpio_node_prop srt_fwk_gpio_node_prop_t;
 
 typedef struct fwk_gpio_chip
 {
-    const kstring_t *name;
+    const kchar_t *name;
     struct fwk_device *sprt_dev;
-    ksint32_t base;
+    kint32_t base;
     kuint32_t ngpios;
     struct fwk_gpio_desc *sprt_desc;
     struct list_head sgrt_link;
 	struct list_head sgrt_pin_ranges;
 
-	ksint32_t   (*request) (srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset);
-	void        (*free) (srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset);
-	ksint32_t   (*get_direction) (srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset);
-	ksint32_t   (*direction_input) (srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset);
-	ksint32_t   (*direction_output) (srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset, ksint32_t value);
-	ksint32_t   (*get) (srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset);
-	void        (*set) (srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset, ksint32_t value);
+	kint32_t   (*request) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
+	void        (*free) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
+	kint32_t   (*get_direction) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
+	kint32_t   (*direction_input) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
+	kint32_t   (*direction_output) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset, kint32_t value);
+	kint32_t   (*get) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
+	void        (*set) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset, kint32_t value);
 
-	ksint32_t   (*to_irq) (srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset);
+	kint32_t   (*to_irq) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
 
 	kuint32_t of_gpio_n_cells;
-	ksint32_t (*of_xlate)(srt_fwk_gpio_chip_t *sprt_chip,
-							const srt_fwk_of_phandle_args_t *sprt_spec, kuint32_t *flags);
+	kint32_t (*of_xlate)(struct fwk_gpio_chip *sprt_chip,
+							const struct fwk_of_phandle_args *sprt_spec, kuint32_t *flags);
 
 } srt_fwk_gpio_chip_t;
 
 /*!< The functions */
-TARGET_EXT ksint32_t fwk_gpiochip_init(srt_fwk_gpio_chip_t *sprt_chip, srt_fwk_device_t *sprt_dev, kuint32_t base, kuint32_t size);
-TARGET_EXT ksint32_t fwk_gpiochip_add(srt_fwk_gpio_chip_t *sprt_chip);
-TARGET_EXT void fwk_gpiochip_del(srt_fwk_gpio_chip_t *sprt_chip);
-TARGET_EXT srt_fwk_gpio_desc_t *fwk_gpiochip_and_desc_find(srt_fwk_gpio_node_prop_t *sprt_data, srt_fwk_of_phandle_args_t *sprt_spec);
+TARGET_EXT kint32_t fwk_gpiochip_init(struct fwk_gpio_chip *sprt_chip, struct fwk_device *sprt_dev, kuint32_t base, kuint32_t size);
+TARGET_EXT kint32_t fwk_gpiochip_add(struct fwk_gpio_chip *sprt_chip);
+TARGET_EXT void fwk_gpiochip_del(struct fwk_gpio_chip *sprt_chip);
+TARGET_EXT struct fwk_gpio_desc *fwk_gpiochip_and_desc_find(struct fwk_gpio_node_prop *sprt_data, struct fwk_of_phandle_args *sprt_spec);
 
 #endif /*!< __FWK_GPIOCHIP_H_ */

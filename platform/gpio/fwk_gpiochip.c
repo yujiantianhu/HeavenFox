@@ -18,9 +18,9 @@
 static DECLARE_LIST_HEAD(sgrt_fwk_gpiochip_list);
 
 /*!< API function */
-static ksint32_t fwk_gpiochip_request(srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset)
+static kint32_t fwk_gpiochip_request(struct fwk_gpio_chip *sprt_chip, kuint32_t offset)
 {
-    srt_fwk_gpio_desc_t *sprt_desc;
+    struct fwk_gpio_desc *sprt_desc;
 
     if (!sprt_chip || (offset >= sprt_chip->ngpios))
         return -NR_IS_NODEV;
@@ -32,15 +32,14 @@ static ksint32_t fwk_gpiochip_request(srt_fwk_gpio_chip_t *sprt_chip, kuint32_t 
     if (fwk_gpio_desc_check_flags(sprt_desc, NR_FWK_GPIODESC_REQUESTED))
         return -NR_IS_USED;
 
-    sprt_desc = &sprt_chip->sprt_desc[offset];
     fwk_gpio_desc_set_flags(sprt_desc, NR_FWK_GPIODESC_REQUESTED);
 
     return offset;
 }
 
-static void fwk_gpiochip_free(srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset)
+static void fwk_gpiochip_free(struct fwk_gpio_chip *sprt_chip, kuint32_t offset)
 {
-    srt_fwk_gpio_desc_t *sprt_desc;
+    struct fwk_gpio_desc *sprt_desc;
 
     if (!sprt_chip || (offset >= sprt_chip->ngpios))
         return;
@@ -52,8 +51,8 @@ static void fwk_gpiochip_free(srt_fwk_gpio_chip_t *sprt_chip, kuint32_t offset)
     sprt_desc->flags = 0;
 }
 
-static ksint32_t fwk_gpiochip_of_xlate(srt_fwk_gpio_chip_t *sprt_chip,
-							const srt_fwk_of_phandle_args_t *sprt_spec, kuint32_t *flags)
+static kint32_t fwk_gpiochip_of_xlate(struct fwk_gpio_chip *sprt_chip,
+							const struct fwk_of_phandle_args *sprt_spec, kuint32_t *flags)
 {
     kuint32_t base = 0;
 
@@ -73,13 +72,13 @@ static ksint32_t fwk_gpiochip_of_xlate(srt_fwk_gpio_chip_t *sprt_chip,
     return sprt_spec->args[base];
 }
 
-ksint32_t fwk_gpiochip_init(srt_fwk_gpio_chip_t *sprt_chip, srt_fwk_device_t *sprt_dev, kuint32_t base, kuint32_t size)
+kint32_t fwk_gpiochip_init(struct fwk_gpio_chip *sprt_chip, struct fwk_device *sprt_dev, kuint32_t base, kuint32_t size)
 {
     if (!sprt_chip || !sprt_dev)
         return -NR_IS_NODEV;
 
     sprt_chip->sprt_dev = sprt_dev;
-    sprt_chip->name = mrt_get_dev_name(sprt_dev);
+    sprt_chip->name = mrt_dev_get_name(sprt_dev);
 
     sprt_chip->base = base;
     sprt_chip->ngpios = size << 3;
@@ -98,9 +97,9 @@ ksint32_t fwk_gpiochip_init(srt_fwk_gpio_chip_t *sprt_chip, srt_fwk_device_t *sp
     return NR_IS_NORMAL;
 }
 
-ksint32_t fwk_gpiochip_add(srt_fwk_gpio_chip_t *sprt_chip)
+kint32_t fwk_gpiochip_add(struct fwk_gpio_chip *sprt_chip)
 {
-    srt_fwk_gpio_desc_t *sprt_desc;
+    struct fwk_gpio_desc *sprt_desc;
     kuint32_t i;
 
     if (!sprt_chip)
@@ -112,8 +111,8 @@ ksint32_t fwk_gpiochip_add(srt_fwk_gpio_chip_t *sprt_chip)
 
     for (i = 0; i < sprt_chip->ngpios; i++)
     {
-        sprt_desc->sprt_chip = sprt_chip;
-        fwk_gpio_desc_set_flags(sprt_desc, NR_FWK_GPIODESC_IS_OUT);
+        sprt_desc[i].sprt_chip = sprt_chip;
+        fwk_gpio_desc_set_flags(&sprt_desc[i], NR_FWK_GPIODESC_IS_OUT);
     }
 
     sprt_chip->sprt_desc = sprt_desc;
@@ -122,7 +121,7 @@ ksint32_t fwk_gpiochip_add(srt_fwk_gpio_chip_t *sprt_chip)
     return NR_IS_NORMAL;
 }
 
-void fwk_gpiochip_del(srt_fwk_gpio_chip_t *sprt_chip)
+void fwk_gpiochip_del(struct fwk_gpio_chip *sprt_chip)
 {
     if (!sprt_chip)
         return;
@@ -134,10 +133,10 @@ void fwk_gpiochip_del(srt_fwk_gpio_chip_t *sprt_chip)
     list_head_del(&sprt_chip->sgrt_link);
 }
 
-srt_fwk_gpio_desc_t *fwk_gpiochip_and_desc_find(srt_fwk_gpio_node_prop_t *sprt_data, srt_fwk_of_phandle_args_t *sprt_spec)
+struct fwk_gpio_desc *fwk_gpiochip_and_desc_find(struct fwk_gpio_node_prop *sprt_data, struct fwk_of_phandle_args *sprt_spec)
 {
-    srt_fwk_gpio_chip_t *sprt_chip;
-    ksint32_t gpio;
+    struct fwk_gpio_chip *sprt_chip;
+    kint32_t gpio;
     kuint32_t flags;
 
     if (!sprt_spec || !sprt_data)

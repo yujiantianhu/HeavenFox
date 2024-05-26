@@ -13,6 +13,7 @@
 /*!< The includes */
 #include <platform/fwk_basic.h>
 #include <platform/irq/fwk_irq_types.h>
+#include <platform/irq/fwk_irq_chip.h>
 #include <platform/irq/fwk_irq_domain.h>
 #include <platform/of/fwk_of.h>
 
@@ -36,11 +37,11 @@ static irq_return_t fwk_default_irqhandler(void *ptrDev)
  * @retval none
  * @note   irq register
  */
-void *fwk_find_irq_action(ksint32_t irq, const kstring_t *name, void *ptrDev)
+void *fwk_find_irq_action(kint32_t irq, const kchar_t *name, void *ptrDev)
 {
-	srt_fwk_irq_desc_t *sprt_desc;
-	srt_fwk_irq_action_t *sprt_action;
-	ksint32_t retval = 0;
+	struct fwk_irq_desc *sprt_desc;
+	struct fwk_irq_action *sprt_action;
+	kint32_t retval = 0;
 
 	sprt_desc = fwk_irq_to_desc(irq);
 	if (!isValid(sprt_desc))
@@ -64,10 +65,11 @@ void *fwk_find_irq_action(ksint32_t irq, const kstring_t *name, void *ptrDev)
  * @retval none
  * @note   irq register
  */
-ksint32_t fwk_request_irq(ksint32_t irq, irq_handler_t handler, kuint32_t flags, const kstring_t *name, void *ptrDev)
+kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, const kchar_t *name, void *ptrDev)
 {
-	srt_fwk_irq_desc_t *sprt_desc;
-	srt_fwk_irq_action_t *sprt_action;
+	struct fwk_irq_desc *sprt_desc;
+	struct fwk_irq_action *sprt_action;
+	kuint32_t len = kstrlen(name);
 
 	if ((!name) || (!ptrDev))
 		return -NR_IS_FAULT;
@@ -79,18 +81,29 @@ ksint32_t fwk_request_irq(ksint32_t irq, irq_handler_t handler, kuint32_t flags,
 	if (!isValid(sprt_desc))
 		return -NR_IS_NOMEM;
 
-	sprt_action = (srt_fwk_irq_action_t *)kzalloc(sizeof(*sprt_action), GFP_KERNEL);
+	sprt_action = (struct fwk_irq_action *)kzalloc(sizeof(*sprt_action), GFP_KERNEL);
 	if (!isValid(sprt_action))
 		return -NR_IS_NOMEM;
 
 	sprt_action->handler = handler ? handler : fwk_default_irqhandler;
 	sprt_action->flags = flags;
 	sprt_action->ptrArgs = ptrDev;
-	strcpy(sprt_action->name, name);
+
+	if (len >= sizeof(sprt_action->name))
+		goto fail;
 	
+	kstrcpy(sprt_action->name, name);
+	
+	fwk_irq_set_type(irq, flags);
 	list_head_add_tail(&sprt_desc->sgrt_action, &sprt_action->sgrt_link);
 
+	fwk_enable_irq(irq);
+
 	return NR_IS_NORMAL;
+
+fail:
+	kfree(sprt_action);
+	return -NR_IS_CHECKERR;
 }
 
 /*!
@@ -99,12 +112,14 @@ ksint32_t fwk_request_irq(ksint32_t irq, irq_handler_t handler, kuint32_t flags,
  * @retval none
  * @note   irq unregister
  */
-void fwk_free_irq(ksint32_t irq, void *ptrDev)
+void fwk_free_irq(kint32_t irq, void *ptrDev)
 {
-	srt_fwk_irq_action_t *sprt_action;
+	struct fwk_irq_action *sprt_action;
 
 	if ((irq < 0) || (!ptrDev))
 		return;
+
+	fwk_disable_irq(irq);
 
 	sprt_action = fwk_find_irq_action(irq, mrt_nullptr, ptrDev);
 	if (isValid(sprt_action))
@@ -120,10 +135,10 @@ void fwk_free_irq(ksint32_t irq, void *ptrDev)
  * @retval  none
  * @note    none
  */
-void fwk_destroy_irq_desc(ksint32_t irq)
+void fwk_destroy_irq_action(kint32_t irq)
 {
-	srt_fwk_irq_desc_t *sprt_desc;
-	srt_fwk_irq_action_t *sprt_action, *sprt_temp;
+	struct fwk_irq_desc *sprt_desc;
+	struct fwk_irq_action *sprt_action, *sprt_temp;
 
 	sprt_desc = fwk_irq_to_desc(irq);
 	if (!isValid(sprt_desc))
@@ -142,11 +157,11 @@ void fwk_destroy_irq_desc(ksint32_t irq)
  * @retval  none
  * @note    excute irq handler
  */
-void fwk_do_irq_handler(ksint32_t softIrq)
+void fwk_do_irq_handler(kint32_t softIrq)
 {
-	srt_fwk_irq_desc_t *sprt_desc;
-	srt_fwk_irq_action_t *sprt_action;
-	ksint32_t retval;
+	struct fwk_irq_desc *sprt_desc;
+	struct fwk_irq_action *sprt_action;
+	kint32_t retval;
 
 	if (softIrq < 0)
 		return;
@@ -178,7 +193,7 @@ void fwk_do_irq_handler(ksint32_t softIrq)
  * @retval  none
  * @note    excute irq handler
  */
-void fwk_handle_softirq(ksint32_t softIrq, kuint32_t event)
+void fwk_handle_softirq(kint32_t softIrq, kuint32_t event)
 {
 	switch (event)
 	{

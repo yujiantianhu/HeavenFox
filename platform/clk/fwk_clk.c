@@ -16,7 +16,7 @@
 #include <platform/clk/fwk_clk_provider.h>
 
 /*!< API function */
-srt_fwk_clk_t *fwk_clk_config(srt_fwk_clk_t *sprt_clk, srt_fwk_clk_hw_t *sprt_hw, const kstring_t *dev_id, const kstring_t *con_id)
+struct fwk_clk *fwk_clk_config(struct fwk_clk *sprt_clk, struct fwk_clk_hw *sprt_hw, const kchar_t *dev_id, const kchar_t *con_id)
 {
     if (!sprt_hw || !sprt_clk)
         return mrt_nullptr;
@@ -32,9 +32,9 @@ srt_fwk_clk_t *fwk_clk_config(srt_fwk_clk_t *sprt_clk, srt_fwk_clk_hw_t *sprt_hw
     return sprt_clk;
 }
 
-srt_fwk_clk_t *fwk_create_clk(srt_fwk_clk_hw_t *sprt_hw, const kstring_t *dev_id, const kstring_t *con_id)
+struct fwk_clk *fwk_create_clk(struct fwk_clk_hw *sprt_hw, const kchar_t *dev_id, const kchar_t *con_id)
 {
-    srt_fwk_clk_t *sprt_clk;
+    struct fwk_clk *sprt_clk;
 
     if (!sprt_hw)
         return mrt_nullptr;
@@ -49,12 +49,12 @@ srt_fwk_clk_t *fwk_create_clk(srt_fwk_clk_hw_t *sprt_hw, const kstring_t *dev_id
     return sprt_clk;
 }
 
-ksint32_t fwk_init_clk(srt_fwk_device_t *sprt_dev, srt_fwk_clk_t *sprt_clk)
+kint32_t fwk_init_clk(struct fwk_device *sprt_dev, struct fwk_clk *sprt_clk)
 {
     return NR_IS_NORMAL;
 }
 
-void fwk_free_clk(srt_fwk_clk_t *sprt_clk)
+void fwk_free_clk(struct fwk_clk *sprt_clk)
 {
     if (!sprt_clk)
         return;
@@ -65,10 +65,10 @@ void fwk_free_clk(srt_fwk_clk_t *sprt_clk)
         kfree(sprt_clk);
 }
 
-srt_fwk_clk_t *fwk_clk_register(srt_fwk_device_t *sprt_dev, srt_fwk_clk_hw_t *sprt_hw)
+struct fwk_clk *fwk_clk_register(struct fwk_device *sprt_dev, struct fwk_clk_hw *sprt_hw)
 {
-    srt_fwk_clk_core_t *sprt_core;
-    const srt_fwk_clk_init_data_t *sprt_init;
+    struct fwk_clk_core *sprt_core;
+    const struct fwk_clk_init_data *sprt_init;
     kuint32_t i;
 
     sprt_init = sprt_hw->sprt_init;
@@ -83,7 +83,7 @@ srt_fwk_clk_t *fwk_clk_register(srt_fwk_device_t *sprt_dev, srt_fwk_clk_hw_t *sp
     sprt_hw->sprt_core = sprt_core;
     init_list_head(&sprt_core->sgrt_clks);
 
-    sprt_core->parent_names = kzalloc(sprt_init->num_parents * sizeof(kstring_t *), GFP_KERNEL);
+    sprt_core->parent_names = kzalloc(sprt_init->num_parents * sizeof(kchar_t *), GFP_KERNEL);
     if (!isValid(sprt_core->parent_names))
         goto fail1;
 
@@ -122,10 +122,10 @@ fail1:
     return mrt_nullptr;
 }
 
-void fwk_clk_unregister(srt_fwk_clk_t *sprt_clk)
+void fwk_clk_unregister(struct fwk_clk *sprt_clk)
 {
-    srt_fwk_clk_hw_t *sprt_hw;
-    srt_fwk_clk_t *sprt_child, *sprt_temp;
+    struct fwk_clk_hw *sprt_hw;
+    struct fwk_clk *sprt_child, *sprt_temp;
 
     sprt_hw = fwk_clk_to_hw(sprt_clk);
 
@@ -139,12 +139,12 @@ void fwk_clk_unregister(srt_fwk_clk_t *sprt_clk)
     sprt_hw->sprt_core = mrt_nullptr;
 }
 
-srt_fwk_clk_t *fwk_clk_get(srt_fwk_device_t *sprt_dev, const kstring_t *name)
+struct fwk_clk *fwk_clk_get(struct fwk_device *sprt_dev, const kchar_t *name)
 {
-    srt_fwk_clk_t *sprt_clk;
-    srt_fwk_device_node_t *sprt_node;
-    srt_fwk_of_phandle_args_t sgrt_args;
-    ksint32_t index = 0;
+    struct fwk_clk *sprt_clk;
+    struct fwk_device_node *sprt_node;
+    struct fwk_of_phandle_args sgrt_args;
+    kint32_t index = 0;
 
     sprt_node = sprt_dev->sprt_node;
 
@@ -162,17 +162,17 @@ srt_fwk_clk_t *fwk_clk_get(srt_fwk_device_t *sprt_dev, const kstring_t *name)
     if (!isValid(sprt_clk))
         return mrt_nullptr;
 
-    return fwk_create_clk(fwk_clk_to_hw(sprt_clk), mrt_get_dev_name(sprt_dev), name);
+    return fwk_create_clk(fwk_clk_to_hw(sprt_clk), mrt_dev_get_name(sprt_dev), name);
 }
 
-void fwk_clk_put(srt_fwk_clk_t *sprt_clk)
+void fwk_clk_put(struct fwk_clk *sprt_clk)
 {
     fwk_free_clk(sprt_clk);
 }
 
-void fwk_clk_enable(srt_fwk_clk_t *sprt_clk)
+void fwk_clk_enable(struct fwk_clk *sprt_clk)
 {
-    const srt_fwk_clk_ops_t *sprt_ops;
+    const struct fwk_clk_ops *sprt_ops;
 
     sprt_ops = sprt_clk->sprt_core->sprt_ops;
 
@@ -180,9 +180,9 @@ void fwk_clk_enable(srt_fwk_clk_t *sprt_clk)
         sprt_ops->enable(fwk_clk_to_hw(sprt_clk));
 }
 
-void fwk_clk_disable(srt_fwk_clk_t *sprt_clk)
+void fwk_clk_disable(struct fwk_clk *sprt_clk)
 {
-    const srt_fwk_clk_ops_t *sprt_ops;
+    const struct fwk_clk_ops *sprt_ops;
 
     sprt_ops = sprt_clk->sprt_core->sprt_ops;
 
@@ -190,9 +190,9 @@ void fwk_clk_disable(srt_fwk_clk_t *sprt_clk)
         sprt_ops->disable(fwk_clk_to_hw(sprt_clk));
 }
 
-void fwk_clk_prepare(srt_fwk_clk_t *sprt_clk)
+void fwk_clk_prepare(struct fwk_clk *sprt_clk)
 {
-    const srt_fwk_clk_ops_t *sprt_ops;
+    const struct fwk_clk_ops *sprt_ops;
 
     sprt_ops = sprt_clk->sprt_core->sprt_ops;
 
@@ -200,9 +200,9 @@ void fwk_clk_prepare(srt_fwk_clk_t *sprt_clk)
         sprt_ops->prepare(fwk_clk_to_hw(sprt_clk));
 }
 
-void fwk_clk_unprepare(srt_fwk_clk_t *sprt_clk)
+void fwk_clk_unprepare(struct fwk_clk *sprt_clk)
 {
-    const srt_fwk_clk_ops_t *sprt_ops;
+    const struct fwk_clk_ops *sprt_ops;
 
     sprt_ops = sprt_clk->sprt_core->sprt_ops;
 
@@ -210,9 +210,9 @@ void fwk_clk_unprepare(srt_fwk_clk_t *sprt_clk)
         sprt_ops->unprepare(fwk_clk_to_hw(sprt_clk));
 }
 
-kbool_t fwk_clk_is_enabled(srt_fwk_clk_t *sprt_clk)
+kbool_t fwk_clk_is_enabled(struct fwk_clk *sprt_clk)
 {
-    const srt_fwk_clk_ops_t *sprt_ops;
+    const struct fwk_clk_ops *sprt_ops;
 
     sprt_ops = sprt_clk->sprt_core->sprt_ops;
 
@@ -222,13 +222,13 @@ kbool_t fwk_clk_is_enabled(srt_fwk_clk_t *sprt_clk)
     return false;
 }
 
-void fwk_clk_prepare_enable(srt_fwk_clk_t *sprt_clk)
+void fwk_clk_prepare_enable(struct fwk_clk *sprt_clk)
 {
     fwk_clk_prepare(sprt_clk);
     fwk_clk_enable(sprt_clk);
 }
 
-void fwk_clk_disable_unprepare(srt_fwk_clk_t *sprt_clk)
+void fwk_clk_disable_unprepare(struct fwk_clk *sprt_clk)
 {
     fwk_clk_disable(sprt_clk);
     fwk_clk_unprepare(sprt_clk);

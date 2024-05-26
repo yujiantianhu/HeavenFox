@@ -22,7 +22,7 @@ struct fwk_char_device
 	kuint32_t major;
 	kuint32_t baseminor;
 	kuint32_t count;
-	ksint8_t name[DEVICE_NAME_LEN];
+	kint8_t name[DEVICE_NAME_LEN];
 
 	/*!< All devices with the same primary device number form a list */
 	struct fwk_char_device *sprt_next;
@@ -33,8 +33,8 @@ struct fwk_char_device
 TARGET_EXT struct fwk_char_device *sgrt_fwk_chrdevs[];
 
 /*!< The functions */
-TARGET_EXT ksint32_t fwk_alloc_chrdev(kuint32_t *devNum, kuint32_t baseminor, kuint32_t count, const kstring_t *name);
-TARGET_EXT ksint32_t fwk_register_chrdev(kuint32_t devNum, kuint32_t count, const kstring_t *name);
+TARGET_EXT kint32_t fwk_alloc_chrdev(kuint32_t *devNum, kuint32_t baseminor, kuint32_t count, const kchar_t *name);
+TARGET_EXT kint32_t fwk_register_chrdev(kuint32_t devNum, kuint32_t count, const kchar_t *name);
 TARGET_EXT void fwk_unregister_chrdev(kuint32_t devNum, kuint32_t count);
 
 #endif /*!< __FWK_CHRDEV_H_ */

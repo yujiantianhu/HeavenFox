@@ -25,6 +25,7 @@
 #include <platform/fwk_inode.h>
 #include <platform/fwk_fs.h>
 #include <platform/input/fwk_input.h>
+#include <kernel/workqueue.h>
 
 /*!< The defines */
 #define TSC2007_DRVIVER_MAJOR                       (220)
@@ -96,11 +97,11 @@ typedef struct tsc2007_data
 
 typedef struct tsc2007_drv_info
 {
-    kstring_t *name;
+    kchar_t *name;
     struct fwk_i2c_client *sprt_client;
 
     struct fwk_gpio_desc *sprt_gdesc;
-    ksint32_t irq;
+    kint32_t irq;
 
     kuint32_t plate_ohms;
     struct tsc2007_data sgrt_data;
@@ -108,8 +109,10 @@ typedef struct tsc2007_drv_info
     kbool_t is_touch;
     kbool_t is_can_read;
 
-    ksint32_t devnum;
+    kint32_t devnum;
     struct fwk_cdev *sprt_cdev;
+
+    struct workqueue sgrt_wq;
 
 } tsc2007_drv_info_t;
 
@@ -221,14 +224,24 @@ static kbool_t tsc2007_read_ad_value(struct tsc2007_data *sprt_data)
     return true;
 }
 
-static irq_return_t tsc2007_touch_isr(ksint32_t irq, void *ptrDev)
+static irq_return_t tsc2007_touch_isr(void *ptrDev)
+{
+    struct tsc2007_drv_info *sprt_info;
+
+    sprt_info = (struct tsc2007_drv_info *)ptrDev;
+    schedule_work(&sprt_info->sgrt_wq);
+
+    return 0;
+}
+
+static void tsc2007_touch_half_isr(struct workqueue *sprt_wq)
 {
     struct tsc2007_drv_info *sprt_info;
     struct tsc2007_data *sprt_data;
     kuint16_t x_value, y_value;
     kuint16_t x_max_value, y_max_value, x_min_value, y_min_value;
 
-    sprt_info = (struct tsc2007_drv_info *)ptrDev;
+    sprt_info = mrt_container_of(sprt_wq, typeof(*sprt_info), sgrt_wq);
     sprt_data = &sprt_info->sgrt_data;
 
     x_value = y_value = x_max_value = y_max_value = 0;
@@ -271,31 +284,39 @@ static irq_return_t tsc2007_touch_isr(ksint32_t irq, void *ptrDev)
 
     sprt_info->is_can_read = true;
 
-    return 0;
+    return;
 
 fail:
     sprt_data->x = sprt_data->y = 0;
-    return 0;
+    return;
 }
 
-static ksint32_t tsc2007_driver_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t tsc2007_driver_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
     struct tsc2007_drv_info *sprt_info;
 
     sprt_info = sprt_inode->sprt_cdev->privData;
     sprt_file->private_data = sprt_info;
 
+    fwk_enable_irq(sprt_info->irq);
+    tsc2007_initial(&sprt_info->sgrt_data);
+
     return NR_IS_NORMAL;
 }
 
-static ksint32_t tsc2007_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t tsc2007_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
+    struct tsc2007_drv_info *sprt_info;
+
+    sprt_info = sprt_inode->sprt_cdev->privData;
+    fwk_disable_irq(sprt_info->irq);
+
     sprt_file->private_data = mrt_nullptr;
 
     return NR_IS_NORMAL;
 }
 
-static kssize_t tsc2007_driver_read(struct fwk_file *sprt_file, ksbuffer_t *buffer, kssize_t size)
+static kssize_t tsc2007_driver_read(struct fwk_file *sprt_file, kbuffer_t *buffer, kssize_t size)
 {
     struct tsc2007_drv_info *sprt_info;
     struct tsc2007_data *sprt_data;
@@ -308,6 +329,8 @@ static kssize_t tsc2007_driver_read(struct fwk_file *sprt_file, ksbuffer_t *buff
 
     if (size < bytes)
         return -NR_IS_UNVALID;
+
+    sprt_data = &sprt_info->sgrt_data;
 
     fwk_input_set_event(&sgrt_event[0], NR_INPUT_TYPE_KEY, NR_INPUT_BTN_TOUCH, sprt_info->is_touch);
     fwk_input_set_event(&sgrt_event[1], NR_INPUT_TYPE_ABS, NR_INPUT_ABS_X, sprt_data->x);
@@ -334,11 +357,11 @@ static const struct fwk_file_oprts sgrt_tsc2007_driver_oprts =
  * @retval  errno
  * @note    none
  */
-static ksint32_t tsc2007_driver_probe(struct fwk_i2c_client *sprt_client, const struct fwk_i2c_device_id *sprt_id)
+static kint32_t tsc2007_driver_probe(struct fwk_i2c_client *sprt_client, const struct fwk_i2c_device_id *sprt_id)
 {
     struct tsc2007_drv_info *sprt_info;
     struct fwk_device_node *sprt_node;
-    ksint32_t devnum;
+    kint32_t devnum;
 
     sprt_node = sprt_client->sgrt_dev.sprt_node;
 
@@ -346,7 +369,7 @@ static ksint32_t tsc2007_driver_probe(struct fwk_i2c_client *sprt_client, const 
     if (!isValid(sprt_info))
         return -NR_IS_NOMEM;
 
-    sprt_info->sprt_gdesc = fwk_gpio_desc_get(&sprt_client->sgrt_dev, "tsc-int", NR_FWK_GPIO_DIR_IN);
+    sprt_info->sprt_gdesc = fwk_gpio_desc_get(&sprt_client->sgrt_dev, "tsc-int", FWK_GPIO_DIR_IN);
     if (!isValid(sprt_info->sprt_gdesc)) 
         goto fail1;
 
@@ -359,10 +382,14 @@ static ksint32_t tsc2007_driver_probe(struct fwk_i2c_client *sprt_client, const 
 
     devnum = MKE_DEV_NUM(TSC2007_DRVIVER_MAJOR, 0);
     sprt_info->devnum = devnum;
-    sprt_info->name = "tsc2007,touch-screen";
+    sprt_info->name = "tsc2007";
+    sprt_info->sprt_client = sprt_client;
+    INIT_WORK(&sprt_info->sgrt_wq, tsc2007_touch_half_isr);
 
-    if (fwk_request_irq(sprt_info->irq, tsc2007_touch_isr, IRQ_TYPE_NONE, sprt_info->name, sprt_info))
+    if (fwk_request_irq(sprt_info->irq, tsc2007_touch_isr, IRQ_TYPE_EDGE_RISING | IRQ_TYPE_EDGE_FALLING, sprt_info->name, sprt_info))
         goto fail2;
+
+//  fwk_disable_irq(sprt_info->irq);
 
     if (fwk_register_chrdev(devnum, 1, sprt_info->name))
         goto fail3;
@@ -374,12 +401,14 @@ static ksint32_t tsc2007_driver_probe(struct fwk_i2c_client *sprt_client, const 
     if (fwk_cdev_add(sprt_info->sprt_cdev, devnum, 1))
         goto fail5;
 
-    if (fwk_device_create(NR_TYPE_CHRDEV, devnum, sprt_info->name))
+    if (fwk_device_create(NR_TYPE_CHRDEV, devnum, "input/event0"))
         goto fail6;
 
     sprt_info->sprt_cdev->privData = sprt_info;
     sprt_info->sgrt_data.sprt_info = sprt_info;
     fwk_i2c_set_client_data(sprt_client, sprt_info);
+
+    tsc2007_initial(&sprt_info->sgrt_data);
 
 	return NR_IS_NORMAL;
     
@@ -405,7 +434,7 @@ fail1:
  * @retval  errno
  * @note    none
  */
-static ksint32_t tsc2007_driver_remove(struct fwk_i2c_client *sprt_client)
+static kint32_t tsc2007_driver_remove(struct fwk_i2c_client *sprt_client)
 {
     struct tsc2007_drv_info *sprt_info;
 
@@ -425,7 +454,7 @@ static ksint32_t tsc2007_driver_remove(struct fwk_i2c_client *sprt_client)
 
 static const struct fwk_i2c_device_id sgrt_tsc2007_driver_ids[] =
 {
-    { .name = "i2c-tsc2007", .driver_data = mrt_nullptr },
+    { .name = "tsc2007", .driver_data = -1 },
     {},
 };
 
@@ -459,7 +488,7 @@ static struct fwk_i2c_driver sgrt_tsc2007_driver =
  * @retval  errno
  * @note    none
  */
-ksint32_t __fwk_init tsc2007_driver_init(void)
+kint32_t __fwk_init tsc2007_driver_init(void)
 {
 	return fwk_i2c_add_driver(&sgrt_tsc2007_driver);
 }

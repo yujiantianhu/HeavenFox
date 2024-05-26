@@ -16,20 +16,20 @@
 /*!< The defines */
 typedef struct fwk_pinctrl_dev_info
 {
-    srt_fwk_device_t *sprt_dev;
-    srt_fwk_pinctrl_t *sprt_pctl;
+    struct fwk_device *sprt_dev;
+    struct fwk_pinctrl *sprt_pctl;
 
-    srt_fwk_pinctrl_state_t *sprt_default;
-    srt_fwk_pinctrl_state_t *sprt_idle;
-    srt_fwk_pinctrl_state_t *sprt_sleep;
+    struct fwk_pinctrl_state *sprt_default;
+    struct fwk_pinctrl_state *sprt_idle;
+    struct fwk_pinctrl_state *sprt_sleep;
 
 } srt_fwk_pinctrl_dev_info_t;
 
 typedef struct fwk_pinctrl_dt_map 
 {
 	struct list_head sgrt_link;
-	srt_fwk_pinctrl_dev_t *sprt_pctldev;
-	srt_fwk_pinctrl_maps_t *sprt_maps;
+	struct fwk_pinctrl_dev *sprt_pctldev;
+	struct fwk_pinctrl_maps *sprt_maps;
 	kuint32_t num_maps;
 
 } srt_fwk_pinctrl_dt_map_t;
@@ -50,9 +50,9 @@ static DECLARE_LIST_HEAD(sgrt_fwk_pinctrl_map_list);
  * @retval  pinctrl_dev found
  * @note    none
  */
-static srt_fwk_pinctrl_t *fwk_get_pinctrl_from_node(srt_fwk_device_node_t *sprt_node)
+static struct fwk_pinctrl *fwk_get_pinctrl_from_node(struct fwk_device_node *sprt_node)
 {
-    srt_fwk_pinctrl_t *sprt_pctl;
+    struct fwk_pinctrl *sprt_pctl;
 
     foreach_list_next_entry(sprt_pctl, &sgrt_fwk_pinctrl_list, sgrt_link)
     {
@@ -69,9 +69,9 @@ static srt_fwk_pinctrl_t *fwk_get_pinctrl_from_node(srt_fwk_device_node_t *sprt_
  * @retval  pinctrl_dev found
  * @note    none
  */
-static srt_fwk_pinctrl_dev_t *fwk_get_pinctrl_dev_from_node(srt_fwk_device_node_t *sprt_node)
+static struct fwk_pinctrl_dev *fwk_get_pinctrl_dev_from_node(struct fwk_device_node *sprt_node)
 {
-    srt_fwk_pinctrl_dev_t *sprt_pctldev;
+    struct fwk_pinctrl_dev *sprt_pctldev;
 
     foreach_list_next_entry(sprt_pctldev, &sgrt_fwk_pinctrl_dev_list, sgrt_link)
     {
@@ -88,13 +88,13 @@ static srt_fwk_pinctrl_dev_t *fwk_get_pinctrl_dev_from_node(srt_fwk_device_node_
  * @retval  pinctrl_dev found
  * @note    none
  */
-static srt_fwk_pinctrl_dev_t *fwk_get_pinctrl_dev_from_name(const kstring_t *name)
+static struct fwk_pinctrl_dev *fwk_get_pinctrl_dev_from_name(const kchar_t *name)
 {
-    srt_fwk_pinctrl_dev_t *sprt_pctldev;
+    struct fwk_pinctrl_dev *sprt_pctldev;
 
     foreach_list_next_entry(sprt_pctldev, &sgrt_fwk_pinctrl_dev_list, sgrt_link)
     {
-        if (!strcmp(mrt_get_dev_name(sprt_pctldev->sprt_dev), name))
+        if (!strcmp(mrt_dev_get_name(sprt_pctldev->sprt_dev), name))
             return sprt_pctldev;
     }
 
@@ -108,9 +108,9 @@ static srt_fwk_pinctrl_dev_t *fwk_get_pinctrl_dev_from_name(const kstring_t *nam
  * @retval  none
  * @note    none
  */
-static void fwk_pinctrl_map_free(srt_fwk_pinctrl_dev_t *sprt_pctldev, srt_fwk_pinctrl_map_t *sprt_map, kuint32_t num_maps)
+static void fwk_pinctrl_map_free(struct fwk_pinctrl_dev *sprt_pctldev, struct fwk_pinctrl_map *sprt_map, kuint32_t num_maps)
 {
-    const srt_fwk_pinctrl_ops_t *sprt_pctlops;
+    const struct fwk_pinctrl_ops *sprt_pctlops;
 
     if (!sprt_map || !num_maps)
         return;
@@ -130,7 +130,7 @@ static void fwk_pinctrl_map_free(srt_fwk_pinctrl_dev_t *sprt_pctldev, srt_fwk_pi
  * @retval  none
  * @note    none
  */
-static void fwk_pinctrl_maps_free(srt_fwk_pinctrl_dev_t *sprt_pctldev, srt_fwk_pinctrl_maps_t *sprt_maps)
+static void fwk_pinctrl_maps_free(struct fwk_pinctrl_dev *sprt_pctldev, struct fwk_pinctrl_maps *sprt_maps)
 {
     if (!sprt_maps)
         return;
@@ -149,13 +149,13 @@ static void fwk_pinctrl_maps_free(srt_fwk_pinctrl_dev_t *sprt_pctldev, srt_fwk_p
  * @retval  none
  * @note    none
  */
-static void fwk_pinctrl_free(srt_fwk_pinctrl_t *sprt_pctl)
+static void fwk_pinctrl_free(struct fwk_pinctrl *sprt_pctl)
 {
-    srt_fwk_pinctrl_dev_t *sprt_pctldev;
-    srt_fwk_pinctrl_state_t *sprt_state, *sprt_statetemp;
-    srt_fwk_pinctrl_maps_t *sprt_maps;
-    srt_fwk_pinctrl_dt_map_t *sprt_dt_maps, *sprt_dt_maptemp;
-    srt_fwk_pinctrl_setting_t *sprt_setting, *sprt_settemp;
+    struct fwk_pinctrl_dev *sprt_pctldev;
+    struct fwk_pinctrl_state *sprt_state, *sprt_statetemp;
+    struct fwk_pinctrl_maps *sprt_maps;
+    struct fwk_pinctrl_dt_map *sprt_dt_maps, *sprt_dt_maptemp;
+    struct fwk_pinctrl_setting *sprt_setting, *sprt_settemp;
 
     if (!sprt_pctl)
         return;
@@ -201,9 +201,9 @@ static void fwk_pinctrl_free(srt_fwk_pinctrl_t *sprt_pctl)
  * @retval  state found
  * @note    none
  */
-static srt_fwk_pinctrl_state_t *fwk_pinctrl_find_state(srt_fwk_pinctrl_t *sprt_pctl, const kstring_t *name)
+static struct fwk_pinctrl_state *fwk_pinctrl_find_state(struct fwk_pinctrl *sprt_pctl, const kchar_t *name)
 {
-    srt_fwk_pinctrl_state_t *sprt_state;
+    struct fwk_pinctrl_state *sprt_state;
 
     if (mrt_list_head_empty(&sprt_pctl->sgrt_states))
         return mrt_nullptr;
@@ -225,17 +225,17 @@ static srt_fwk_pinctrl_state_t *fwk_pinctrl_find_state(srt_fwk_pinctrl_t *sprt_p
  * @retval  pinctrl_state
  * @note    none
  */
-static srt_fwk_pinctrl_state_t *fwk_pinctrl_create_state(srt_fwk_pinctrl_t *sprt_pctl, 
-                                                    const kstring_t *pinctl_name, const kstring_t *state_name)
+static struct fwk_pinctrl_state *fwk_pinctrl_create_state(struct fwk_pinctrl *sprt_pctl, 
+                                                    const kchar_t *pinctl_name, const kchar_t *state_name)
 {
-    srt_fwk_pinctrl_state_t *sprt_state;
-    srt_fwk_device_node_t *sprt_node, *sprt_cfg, *sprt_par;
-    srt_fwk_of_property_t *sprt_prop;
-    srt_fwk_pinctrl_dev_t *sprt_pctldev;
-    srt_fwk_pinctrl_map_t *sprt_map;
-    srt_fwk_pinctrl_maps_t *sprt_maps;
-    const srt_fwk_pinctrl_ops_t *sprt_pctlops;
-    srt_fwk_pinctrl_dt_map_t *sprt_dt_maps;
+    struct fwk_pinctrl_state *sprt_state;
+    struct fwk_device_node *sprt_node, *sprt_cfg, *sprt_par;
+    struct fwk_of_property *sprt_prop;
+    struct fwk_pinctrl_dev *sprt_pctldev;
+    struct fwk_pinctrl_map *sprt_map;
+    struct fwk_pinctrl_maps *sprt_maps;
+    const struct fwk_pinctrl_ops *sprt_pctlops;
+    struct fwk_pinctrl_dt_map *sprt_dt_maps;
 
     kuint32_t idx, grps, lenth, phandle, num_maps;
 
@@ -290,9 +290,9 @@ static srt_fwk_pinctrl_state_t *fwk_pinctrl_create_state(srt_fwk_pinctrl_t *sprt
         for (idx = 0; idx < num_maps; idx++)
         {
             /*!< sprt_map->name <===> sprt_state->name: "default", "sleep", ... */
-            sprt_map->dev_name = mrt_get_dev_name(sprt_pctl->sprt_dev);
-            sprt_map->name = FWK_PINCTRL_SET_MAP_NAME(lenth);
-            sprt_map->ctrl_dev_name = mrt_get_dev_name(sprt_pctldev->sprt_dev);
+            sprt_map[idx].dev_name = mrt_dev_get_name(sprt_pctl->sprt_dev);
+            sprt_map[idx].name = FWK_PINCTRL_SET_MAP_NAME(lenth);
+            sprt_map[idx].ctrl_dev_name = mrt_dev_get_name(sprt_pctldev->sprt_dev);
         }
 
         /*!< 
@@ -302,7 +302,7 @@ static srt_fwk_pinctrl_state_t *fwk_pinctrl_create_state(srt_fwk_pinctrl_t *sprt
          * num_maps is the number of sprt_map array, num_maps = the number of "mux" + the number of "conf"
          * sprt_maps->sprt_map = &sprt_map[0]
          */
-        sprt_maps = (srt_fwk_pinctrl_maps_t *)kzalloc(sizeof(*sprt_maps), GFP_KERNEL);
+        sprt_maps = (struct fwk_pinctrl_maps *)kzalloc(sizeof(*sprt_maps), GFP_KERNEL);
         if (!isValid(sprt_maps))
         {
             fwk_pinctrl_map_free(sprt_pctldev, sprt_map, num_maps);
@@ -314,7 +314,7 @@ static srt_fwk_pinctrl_state_t *fwk_pinctrl_create_state(srt_fwk_pinctrl_t *sprt
         list_head_add_tail(&sgrt_fwk_pinctrl_map_list, &sprt_maps->sgrt_link);
 
         /*!< each sprt_dt_maps links to sprt_pctl */
-        sprt_dt_maps = (srt_fwk_pinctrl_dt_map_t *)kzalloc(sizeof(*sprt_dt_maps), GFP_KERNEL);
+        sprt_dt_maps = (struct fwk_pinctrl_dt_map *)kzalloc(sizeof(*sprt_dt_maps), GFP_KERNEL);
         if (!isValid(sprt_dt_maps))
         {
             fwk_pinctrl_maps_free(sprt_pctldev, sprt_maps);
@@ -327,7 +327,7 @@ static srt_fwk_pinctrl_state_t *fwk_pinctrl_create_state(srt_fwk_pinctrl_t *sprt
         list_head_add_tail(&sprt_pctl->sgrt_dt_maps, &sprt_dt_maps->sgrt_link);
     }
 
-    sprt_state = (srt_fwk_pinctrl_state_t *)kzalloc(sizeof(*sprt_state), GFP_KERNEL);
+    sprt_state = (struct fwk_pinctrl_state *)kzalloc(sizeof(*sprt_state), GFP_KERNEL);
     if (!isValid(sprt_state))
         goto fail;
 
@@ -350,12 +350,12 @@ fail:
  * @retval  error code
  * @note    none
  */
-static ksint32_t fwk_pinctrl_add_state(srt_fwk_pinctrl_t *sprt_pctl)
+static kint32_t fwk_pinctrl_add_state(struct fwk_pinctrl *sprt_pctl)
 {
-    srt_fwk_pinctrl_state_t *sprt_state;
-    srt_fwk_device_node_t *sprt_node;
-    srt_fwk_of_property_t *sprt_prop;
-    kstring_t propname[16], *state_name;
+    struct fwk_pinctrl_state *sprt_state;
+    struct fwk_device_node *sprt_node;
+    struct fwk_of_property *sprt_prop;
+    kchar_t propname[16], *state_name;
     kuint32_t idx;
 
     if (!sprt_pctl)
@@ -405,16 +405,16 @@ fail:
  * @retval  error code
  * @note    none
  */
-static ksint32_t fwk_pinctrl_add_setting(srt_fwk_pinctrl_t *sprt_pctl)
+static kint32_t fwk_pinctrl_add_setting(struct fwk_pinctrl *sprt_pctl)
 {
-    srt_fwk_pinctrl_setting_t *sprt_setting;
-    srt_fwk_pinctrl_state_t *sprt_state;
-    srt_fwk_pinctrl_map_t *sprt_map = mrt_nullptr;
-    srt_fwk_pinctrl_maps_t *sprt_maps = mrt_nullptr;
+    struct fwk_pinctrl_setting *sprt_setting;
+    struct fwk_pinctrl_state *sprt_state;
+    struct fwk_pinctrl_map *sprt_map = mrt_nullptr;
+    struct fwk_pinctrl_maps *sprt_maps = mrt_nullptr;
     kuint32_t i;
-    ksint32_t retval = 0;
+    kint32_t retval = 0;
 
-    if (!mrt_list_head_empty(&sgrt_fwk_pinctrl_map_list))
+    if (mrt_list_head_empty(&sgrt_fwk_pinctrl_map_list))
         return -NR_IS_EMPTY;
 
     /*!< get each sprt_maps */
@@ -423,7 +423,7 @@ static ksint32_t fwk_pinctrl_add_setting(srt_fwk_pinctrl_t *sprt_pctl)
         for (i = 0; i < sprt_maps->num_maps; i++, sprt_map++)
         {
             /*!< judge if it is belongs to current device */
-            if (strcmp(sprt_map->dev_name, mrt_get_dev_name(sprt_pctl->sprt_dev)))
+            if (strcmp(sprt_map->dev_name, mrt_dev_get_name(sprt_pctl->sprt_dev)))
                 continue;
 
             /*!< found sprt_map; find state next*/
@@ -431,7 +431,7 @@ static ksint32_t fwk_pinctrl_add_setting(srt_fwk_pinctrl_t *sprt_pctl)
             if (!sprt_state)
                 continue;
 
-            sprt_setting = (srt_fwk_pinctrl_setting_t *)kzalloc(sizeof(*sprt_setting), GFP_KERNEL);
+            sprt_setting = (struct fwk_pinctrl_setting *)kzalloc(sizeof(*sprt_setting), GFP_KERNEL);
             if (!isValid(sprt_setting))
                 goto fail;
 
@@ -482,9 +482,9 @@ fail:
  * @retval  pinctrl that was found
  * @note    all pinctrls are linked to global list, you should loop up from it
  */
-static srt_fwk_pinctrl_t *fwk_find_pinctrl(srt_fwk_device_t *sprt_dev)
+static struct fwk_pinctrl *fwk_find_pinctrl(struct fwk_device *sprt_dev)
 {
-    srt_fwk_pinctrl_t *sprt_pctl;
+    struct fwk_pinctrl *sprt_pctl;
 
     if (!sprt_dev || mrt_list_head_empty(&sgrt_fwk_pinctrl_list))
         return mrt_nullptr;
@@ -505,14 +505,14 @@ static srt_fwk_pinctrl_t *fwk_find_pinctrl(srt_fwk_device_t *sprt_dev)
  * @retval  pinctrl that was allocated
  * @note    none
  */
-static srt_fwk_pinctrl_t *fwk_create_pinctrl(srt_fwk_device_t *sprt_dev)
+static struct fwk_pinctrl *fwk_create_pinctrl(struct fwk_device *sprt_dev)
 {
-    srt_fwk_pinctrl_t *sprt_pctl;
+    struct fwk_pinctrl *sprt_pctl;
 
     if (!sprt_dev)
         return mrt_nullptr;
 
-    sprt_pctl = (srt_fwk_pinctrl_t *)kzalloc(sizeof(*sprt_pctl), GFP_KERNEL);
+    sprt_pctl = (struct fwk_pinctrl *)kzalloc(sizeof(*sprt_pctl), GFP_KERNEL);
     if (!isValid(sprt_pctl))
         return mrt_nullptr;
 
@@ -555,11 +555,11 @@ fail1:
  * @retval  pinctrl_dev
  * @note    none
  */
-srt_fwk_pinctrl_dev_t *fwk_pinctrl_register(srt_fwk_pinctrl_desc_t *sprt_desc, srt_fwk_device_t *sprt_dev, void *driver_data)
+struct fwk_pinctrl_dev *fwk_pinctrl_register(struct fwk_pinctrl_desc *sprt_desc, struct fwk_device *sprt_dev, void *driver_data)
 {
-    srt_fwk_pinctrl_dev_t *sprt_pctldev;
-    srt_fwk_pinctrl_t *sprt_pctl;
-    srt_fwk_pinctrl_state_t *sprt_state;
+    struct fwk_pinctrl_dev *sprt_pctldev;
+    struct fwk_pinctrl *sprt_pctl;
+    struct fwk_pinctrl_state *sprt_state;
 
     if (!sprt_desc)
         return mrt_nullptr;
@@ -567,7 +567,7 @@ srt_fwk_pinctrl_dev_t *fwk_pinctrl_register(srt_fwk_pinctrl_desc_t *sprt_desc, s
     if ((!sprt_desc->sprt_pctlops) || (!sprt_desc->sprt_pmxops) || (!sprt_desc->sprt_confops))
         return mrt_nullptr;
 
-    sprt_pctldev = (srt_fwk_pinctrl_dev_t *)kzalloc(sizeof(*sprt_pctldev), GFP_KERNEL);
+    sprt_pctldev = (struct fwk_pinctrl_dev *)kzalloc(sizeof(*sprt_pctldev), GFP_KERNEL);
     if (!isValid(sprt_pctldev))
         return mrt_nullptr;
 
@@ -584,17 +584,19 @@ srt_fwk_pinctrl_dev_t *fwk_pinctrl_register(srt_fwk_pinctrl_desc_t *sprt_desc, s
     if (!sprt_pctl)
         goto fail1;
 
+    sprt_pctldev->sprt_pctl = sprt_pctl;
+    sprt_pctldev->sprt_hog_sleep = fwk_pinctrl_lookup_state(sprt_pctl, FWK_PINCTRL_STATE_SLEEP);
+
     sprt_state = fwk_pinctrl_lookup_state(sprt_pctl, FWK_PINCTRL_STATE_DEFAULT);
     if (!sprt_state)
-        goto fail2;
+        goto END;
 
     if (fwk_pinctrl_select_state(sprt_pctl, sprt_state))
         goto fail2;
 
-    sprt_pctldev->sprt_pctl = sprt_pctl;
     sprt_pctldev->sprt_hog_default = sprt_state;
-    sprt_pctldev->sprt_hog_sleep = fwk_pinctrl_lookup_state(sprt_pctl, FWK_PINCTRL_STATE_SLEEP);
-
+    
+END:
     return sprt_pctldev;
 
 fail2:
@@ -614,7 +616,7 @@ fail1:
  * @retval  pinctrl_dev
  * @note    none
  */
-void fwk_pinctrl_unregister(srt_fwk_pinctrl_dev_t *sprt_pctldev)
+void fwk_pinctrl_unregister(struct fwk_pinctrl_dev *sprt_pctldev)
 {
     if (!sprt_pctldev)
         return;
@@ -632,11 +634,11 @@ void fwk_pinctrl_unregister(srt_fwk_pinctrl_dev_t *sprt_pctldev)
  * @retval  errno
  * @note    pinctrl-device-info ===> sprt_dev->pinctrl_info = sprt_info
  */
-ksint32_t fwk_pinctrl_bind_pins(srt_fwk_device_t *sprt_dev)
+kint32_t fwk_pinctrl_bind_pins(struct fwk_device *sprt_dev)
 {
-    srt_fwk_pinctrl_dev_info_t *sprt_info;
-    srt_fwk_pinctrl_t *sprt_pctl;
-    srt_fwk_pinctrl_state_t *sprt_state;
+    struct fwk_pinctrl_dev_info *sprt_info;
+    struct fwk_pinctrl *sprt_pctl;
+    struct fwk_pinctrl_state *sprt_state;
 
     sprt_info = kzalloc(sizeof(*sprt_info), GFP_KERNEL);
     if (!sprt_info)
@@ -647,20 +649,21 @@ ksint32_t fwk_pinctrl_bind_pins(srt_fwk_device_t *sprt_dev)
     if (!sprt_pctl)
         goto fail1;
 
+    sprt_dev->sprt_pctlinfo = sprt_info;
+    sprt_info->sprt_pctl = sprt_pctl;
+    sprt_info->sprt_idle = fwk_pinctrl_lookup_state(sprt_pctl, FWK_PINCTRL_STATE_IDLE);
+    sprt_info->sprt_sleep = fwk_pinctrl_lookup_state(sprt_pctl, FWK_PINCTRL_STATE_SLEEP);
+
     sprt_state = fwk_pinctrl_lookup_state(sprt_pctl, FWK_PINCTRL_STATE_DEFAULT);
     if (!sprt_state)
-        goto fail2;
+        goto END;
 
     if (fwk_pinctrl_select_state(sprt_pctl, sprt_state))
         goto fail2;
 
-    sprt_info->sprt_pctl = sprt_pctl;
     sprt_info->sprt_default = sprt_state;
-    sprt_info->sprt_idle = fwk_pinctrl_lookup_state(sprt_pctl, FWK_PINCTRL_STATE_IDLE);
-    sprt_info->sprt_sleep = fwk_pinctrl_lookup_state(sprt_pctl, FWK_PINCTRL_STATE_SLEEP);
 
-    sprt_dev->sprt_pctlinfo = sprt_info;
-
+END:
     return NR_IS_NORMAL;
 
 fail2:
@@ -676,9 +679,9 @@ fail1:
  * @retval  errno
  * @note    release sprt_dev->pinctrl_info
  */
-void fwk_pinctrl_unbind_pins(srt_fwk_device_t *sprt_dev)
+void fwk_pinctrl_unbind_pins(struct fwk_device *sprt_dev)
 {
-    srt_fwk_pinctrl_dev_info_t *sprt_info;
+    struct fwk_pinctrl_dev_info *sprt_info;
     
     sprt_info = sprt_dev->sprt_pctlinfo;
     if (!sprt_info)
@@ -700,7 +703,7 @@ void fwk_pinctrl_unbind_pins(srt_fwk_device_t *sprt_dev)
  * @retval  none
  * @note    none
  */
-void fwk_pinctrl_put(srt_fwk_pinctrl_t *sprt_pctl)
+void fwk_pinctrl_put(struct fwk_pinctrl *sprt_pctl)
 {
     fwk_pinctrl_free(sprt_pctl);
     list_head_del(&sprt_pctl->sgrt_link);
@@ -713,9 +716,9 @@ void fwk_pinctrl_put(srt_fwk_pinctrl_t *sprt_pctl)
  * @retval  sprt_pctl
  * @note    none
  */
-srt_fwk_pinctrl_t *fwk_pinctrl_get(srt_fwk_device_t *sprt_dev)
+struct fwk_pinctrl *fwk_pinctrl_get(struct fwk_device *sprt_dev)
 {
-    srt_fwk_pinctrl_t *sprt_pctl;
+    struct fwk_pinctrl *sprt_pctl;
 
     sprt_pctl = fwk_find_pinctrl(sprt_dev);
     if (sprt_pctl)
@@ -731,9 +734,9 @@ srt_fwk_pinctrl_t *fwk_pinctrl_get(srt_fwk_device_t *sprt_dev)
  * @retval  pinctrl state structure
  * @note    none
  */
-srt_fwk_pinctrl_state_t *fwk_pinctrl_lookup_state(srt_fwk_pinctrl_t *sprt_pctl, const kstring_t *state_name)
+struct fwk_pinctrl_state *fwk_pinctrl_lookup_state(struct fwk_pinctrl *sprt_pctl, const kchar_t *state_name)
 {
-    srt_fwk_pinctrl_state_t *sprt_state;
+    struct fwk_pinctrl_state *sprt_state;
 
     if (!sprt_pctl || mrt_list_head_empty(&sprt_pctl->sgrt_states))
         return mrt_nullptr;
@@ -757,14 +760,14 @@ srt_fwk_pinctrl_state_t *fwk_pinctrl_lookup_state(srt_fwk_pinctrl_t *sprt_pctl, 
  * @retval  error code
  * @note    none
  */
-ksint32_t fwk_pinctrl_select_state(srt_fwk_pinctrl_t *sprt_pctl, srt_fwk_pinctrl_state_t *sprt_state)
+kint32_t fwk_pinctrl_select_state(struct fwk_pinctrl *sprt_pctl, struct fwk_pinctrl_state *sprt_state)
 {
-    srt_fwk_pinctrl_setting_t *sprt_setting;
-    srt_fwk_pinctrl_state_t *sprt_cur;
-    srt_fwk_pinctrl_dev_t *sprt_pctldev;
-	const srt_fwk_pinmux_ops_t *sprt_pmxops;
-	const srt_fwk_pinconf_ops_t *sprt_confops;
-    ksint32_t retval;
+    struct fwk_pinctrl_setting *sprt_setting;
+    struct fwk_pinctrl_state *sprt_cur;
+    struct fwk_pinctrl_dev *sprt_pctldev;
+	const struct fwk_pinmux_ops *sprt_pmxops;
+	const struct fwk_pinconf_ops *sprt_confops;
+    kint32_t retval;
 
     if (!sprt_pctl || !sprt_state)
         return -NR_IS_NODEV;

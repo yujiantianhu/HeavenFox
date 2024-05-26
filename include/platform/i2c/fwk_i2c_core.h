@@ -20,7 +20,7 @@
 #include "fwk_i2c_algo.h"
 
 /*!< The defines */
-struct fwk_i2c_client *sprt_client;
+struct fwk_i2c_client;
 
 typedef struct fwk_i2c_adapter
 {
@@ -28,19 +28,19 @@ typedef struct fwk_i2c_adapter
 	const struct fwk_i2c_algo *sprt_algo; 				/*!< the algorithm to access the bus */
 	void *algo_data;
 
-	ksint32_t timeout;		         	 				/*!< in jiffies */
-	ksint32_t retries;
+	kint32_t timeout;		         	 				/*!< in jiffies */
+	kint32_t retries;
 	struct fwk_device sgrt_dev;		         			/*!< the adapter device */
 
-	ksint32_t nr;
-	ksint8_t name[48];
+	kint32_t nr;
+	kint8_t name[48];
 
 	struct list_head sgrt_clients;
 
 } srt_fwk_i2c_adapter_t;
 
 /*!< The functions */
-TARGET_EXT ksint32_t fwk_i2c_transfer(struct fwk_i2c_client *sprt_client, struct fwk_i2c_msg *sprt_msgs, ksint32_t num);
+TARGET_EXT kint32_t fwk_i2c_transfer(struct fwk_i2c_client *sprt_client, struct fwk_i2c_msg *sprt_msgs, kint32_t num);
 
 /*!< API functions */
 static inline void fwk_i2c_adapter_set_drvdata(struct fwk_i2c_adapter *sprt_adap, void *data)

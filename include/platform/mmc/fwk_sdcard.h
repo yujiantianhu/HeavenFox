@@ -698,18 +698,18 @@ typedef struct fwk_sdcard_if
 {
     struct fwk_sdcard_host *sprt_host;
 
-    ksint32_t (*sendCommand) (srt_fwk_sdcard_cmd_t *sprt_cmds);
-    void (*recvResp) (srt_fwk_sdcard_cmd_t *sprt_cmds);
-    ksint32_t (*sendData) (srt_fwk_sdcard_data_t *sprt_data);
-    ksint32_t (*recvData) (srt_fwk_sdcard_data_t *sprt_data);
+    kint32_t (*sendCommand) (struct fwk_sdcard_cmd *sprt_cmds);
+    void (*recvResp) (struct fwk_sdcard_cmd *sprt_cmds);
+    kint32_t (*sendData) (struct fwk_sdcard_data *sprt_data);
+    kint32_t (*recvData) (struct fwk_sdcard_data *sprt_data);
 
-    kbool_t (*is_insert) (srt_fwk_sdcard_host_t *sprt_host);
-    void (*setBusWidth) (srt_fwk_sdcard_host_t *sprt_host, kuint32_t option);
-    void (*setClkFreq) (srt_fwk_sdcard_host_t *sprt_host, kuint32_t option);
-    kbool_t (*cardActive) (srt_fwk_sdcard_host_t *sprt_host, kuint32_t timeout);
-    ksint32_t (*switchVoltage) (srt_fwk_sdcard_host_t *sprt_host, kuint32_t voltage);
+    kbool_t (*is_insert) (struct fwk_sdcard_host *sprt_host);
+    void (*setBusWidth) (struct fwk_sdcard_host *sprt_host, kuint32_t option);
+    void (*setClkFreq) (struct fwk_sdcard_host *sprt_host, kuint32_t option);
+    kbool_t (*cardActive) (struct fwk_sdcard_host *sprt_host, kuint32_t timeout);
+    kint32_t (*switchVoltage) (struct fwk_sdcard_host *sprt_host, kuint32_t voltage);
 
-    void (*addHeadTail) (srt_fwk_sdcard_cmd_t *sprt_cmd);
+    void (*addHeadTail) (struct fwk_sdcard_cmd *sprt_cmd);
 
 } srt_fwk_sdcard_if_t;
 
@@ -780,17 +780,17 @@ enum __ERT_SDCARD_SW_VOLTAGE
 };
 
 /*!< The functions */
-TARGET_EXT void *host_sdmmc_card_initial(srt_fwk_sdcard_t *sprt_card);
+TARGET_EXT void *host_sdmmc_card_initial(struct fwk_sdcard *sprt_card);
 TARGET_EXT void *fwk_sdcard_allocate_device(void *sprt_sd);
-TARGET_EXT void fwk_sdcard_free_device(srt_fwk_sdcard_t *sprt_card);
-TARGET_EXT ksint32_t fwk_sdcard_initial_device(srt_fwk_sdcard_t *sprt_card);
-TARGET_EXT void fwk_sdcard_inactive_device(srt_fwk_sdcard_t *sprt_card);
+TARGET_EXT void fwk_sdcard_free_device(struct fwk_sdcard *sprt_card);
+TARGET_EXT kint32_t fwk_sdcard_initial_device(struct fwk_sdcard *sprt_card);
+TARGET_EXT void fwk_sdcard_inactive_device(struct fwk_sdcard *sprt_card);
 
-TARGET_EXT kbool_t fwk_sdcard_detect(srt_fwk_sdcard_t *sprt_card);
-TARGET_EXT kbool_t fwk_sdcard_to_normal(srt_fwk_sdcard_t *sprt_card);
-TARGET_EXT kbool_t fwk_sdcard_rw_blocks(srt_fwk_sdcard_t *sprt_card, void *ptrBuffer, 
+TARGET_EXT kbool_t fwk_sdcard_detect(struct fwk_sdcard *sprt_card);
+TARGET_EXT kbool_t fwk_sdcard_to_normal(struct fwk_sdcard *sprt_card);
+TARGET_EXT kbool_t fwk_sdcard_rw_blocks(struct fwk_sdcard *sprt_card, void *ptrBuffer, 
                                 kuint32_t iBlockStart, kuint32_t iBlockCount, ert_fwk_sdcard_rw_t egrt_rw);
-TARGET_EXT kbool_t fwk_sdcard_format_blocks(srt_fwk_sdcard_t *sprt_card, kuint32_t iBlockStart, kuint32_t iBlockCount);
+TARGET_EXT kbool_t fwk_sdcard_format_blocks(struct fwk_sdcard *sprt_card, kuint32_t iBlockStart, kuint32_t iBlockCount);
 
 /*!< API function */
 /*!
@@ -799,9 +799,9 @@ TARGET_EXT kbool_t fwk_sdcard_format_blocks(srt_fwk_sdcard_t *sprt_card, kuint32
  * @retval  none
  * @note    Command Structure fill up
  */
-static inline ksint32_t fwk_sdcard_initial_command(srt_fwk_sdcard_cmd_t *sprt_cmd, kuint32_t index, kuint32_t args, kuint32_t response)
+static inline kint32_t fwk_sdcard_initial_command(struct fwk_sdcard_cmd *sprt_cmd, kuint32_t index, kuint32_t args, kuint32_t response)
 {
-    memory_reset(sprt_cmd, sizeof(srt_fwk_sdcard_cmd_t));
+    memory_reset(sprt_cmd, sizeof(struct fwk_sdcard_cmd));
 
     sprt_cmd->index = index;
     sprt_cmd->args = mrt_be32_to_cpu(args);

@@ -21,7 +21,7 @@
 #define IS_STRING_ERR(offset)           (-2 == (offset))
 
 /*!< API function */
-__weak ksint32_t get_trie_node_branch(ksint8_t ch)
+__weak kint32_t get_trie_node_branch(kint8_t ch)
 {
     if (!ch)
         return -1;
@@ -67,8 +67,8 @@ struct trie_node *allocate_trie_node(struct trie_tree *sprt_tree, struct trie_no
 struct trie_node *find_trie_node(struct trie_tree *sprt_tree, const char *name)
 {
     struct trie_node *sprt_node;
-    const kstring_t *str = name;
-    ksint32_t offset = 0;
+    const kchar_t *str = name;
+    kint32_t offset = 0;
 
     foreach_trie_tree(sprt_node, sprt_tree, offset) {
         offset = sprt_tree->get(*(str++));
@@ -87,7 +87,7 @@ struct trie_node *find_trie_node(struct trie_tree *sprt_tree, const char *name)
     return mrt_nullptr;
 }
 
-struct trie_link *trie_tree_look_up(struct trie_tree *sprt_tree, const kstring_t *name)
+struct trie_link *trie_tree_look_up(struct trie_tree *sprt_tree, const kchar_t *name)
 {
     struct trie_node *sprt_node;
 
@@ -98,13 +98,13 @@ struct trie_link *trie_tree_look_up(struct trie_tree *sprt_tree, const kstring_t
     return sprt_node->sprt_link;
 }
 
-void trie_node_add(struct trie_tree *sprt_tree, const kstring_t *name, struct trie_link *sprt_link)
+void trie_node_add(struct trie_tree *sprt_tree, const kchar_t *name, struct trie_link *sprt_link)
 {
     struct trie_node *sprt_node, *sprt_temp;
-    const kstring_t *str = name;
+    const kchar_t *str = name;
     kuint32_t lenth = strlen(name);
     kuint32_t i;
-    ksint32_t offset;
+    kint32_t offset;
 
     if (!sprt_link)
         return;
@@ -184,13 +184,13 @@ out:
     return;
 }
 
-void trie_node_del(struct trie_tree *sprt_tree, const kstring_t *name)
+void trie_node_del(struct trie_tree *sprt_tree, const kchar_t *name)
 {
     struct trie_node *sprt_node;
-    const kstring_t *str = name;
+    const kchar_t *str = name;
     kuint32_t lenth = strlen(name);
     kuint32_t i;
-    ksint32_t offset = 0;
+    kint32_t offset = 0;
 
     for (i = 0, sprt_node = &sprt_tree->sgrt_node; i < lenth; i++) {
         if (!sprt_node || !sprt_node->sprt_branches)

@@ -19,9 +19,9 @@
 static DECLARE_LIST_HEAD(sgrt_fwk_irq_domain);
 
 /*!< API function */
-srt_fwk_irq_domain_t *fwk_of_irq_host(struct fwk_device_node *sprt_node)
+struct fwk_irq_domain *fwk_of_irq_host(struct fwk_device_node *sprt_node)
 {
-	srt_fwk_irq_domain_t *sprt_domain, *found = mrt_nullptr;
+	struct fwk_irq_domain *sprt_domain, *found = mrt_nullptr;
 
 	foreach_list_next_entry(sprt_domain, &sgrt_fwk_irq_domain, sgrt_link)
 	{
@@ -41,12 +41,12 @@ srt_fwk_irq_domain_t *fwk_of_irq_host(struct fwk_device_node *sprt_node)
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_of_irq_parse_one(struct fwk_device_node *sprt_node, kuint32_t index, struct fwk_of_phandle_args *sprt_irq)
+kint32_t fwk_of_irq_parse_one(struct fwk_device_node *sprt_node, kuint32_t index, struct fwk_of_phandle_args *sprt_irq)
 {
 	struct fwk_device_node *sprt_parent;
 	kuint32_t i, cells;
 	kuint32_t lenth, *ptr_value;
-	ksint32_t retval;
+	kint32_t retval;
 
 	if ((!isValid(sprt_node)) || (!sprt_irq))
 		return -NR_IS_NULLPTR;
@@ -86,7 +86,7 @@ ksint32_t fwk_of_irq_parse_one(struct fwk_device_node *sprt_node, kuint32_t inde
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_irq_find_mapping(srt_fwk_irq_domain_t *sprt_domain, kuint32_t type, ksint32_t hwirq)
+kint32_t fwk_irq_find_mapping(struct fwk_irq_domain *sprt_domain, kuint32_t type, kint32_t hwirq)
 {
 	return fwk_irq_domain_find_map(sprt_domain, hwirq, type);
 }
@@ -97,12 +97,12 @@ ksint32_t fwk_irq_find_mapping(srt_fwk_irq_domain_t *sprt_domain, kuint32_t type
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_irq_create_of_mapping(struct fwk_of_phandle_args *sprt_irq)
+kint32_t fwk_irq_create_of_mapping(struct fwk_of_phandle_args *sprt_irq)
 {
-	srt_fwk_irq_domain_t *sprt_domain;
-	ksint32_t virq;
+	struct fwk_irq_domain *sprt_domain;
+	kint32_t virq;
 	kuint32_t hwirq, type;
-	ksint32_t retval;
+	kint32_t retval;
 
 	if ((!sprt_irq) || !isValid(sprt_irq->sprt_node))
 		return -NR_IS_NOMEM;
@@ -126,7 +126,10 @@ ksint32_t fwk_irq_create_of_mapping(struct fwk_of_phandle_args *sprt_irq)
 	if (virq < 0)
 		return virq;
 
-	fwk_irq_set_type(virq, type);
+	if (sprt_domain->sprt_ops->alloc)
+		sprt_domain->sprt_ops->alloc(sprt_domain, virq, 1, mrt_nullptr);
+	
+	fwk_irq_desc_set_type(virq, type);
 
 	return virq;
 }
@@ -137,10 +140,10 @@ ksint32_t fwk_irq_create_of_mapping(struct fwk_of_phandle_args *sprt_irq)
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_irq_of_parse_and_map(struct fwk_device_node *sprt_node, kuint32_t index)
+kint32_t fwk_irq_of_parse_and_map(struct fwk_device_node *sprt_node, kuint32_t index)
 {
 	struct fwk_of_phandle_args sgrt_old;
-	ksint32_t retval;
+	kint32_t retval;
 
 	retval = fwk_of_irq_parse_one(sprt_node, index, &sgrt_old);
 	if (retval < 0)
@@ -155,13 +158,13 @@ ksint32_t fwk_irq_of_parse_and_map(struct fwk_device_node *sprt_node, kuint32_t 
  * @retval  none
  * @note    none
  */
-srt_fwk_irq_domain_t *fwk_irq_domain_add_linear(struct fwk_device_node *sprt_node, kuint32_t size,
-					 							const srt_fwk_irq_domain_ops_t *ops, void *host_data)
+struct fwk_irq_domain *fwk_irq_domain_add_linear(struct fwk_device_node *sprt_node, kuint32_t size,
+					 							const struct fwk_irq_domain_ops *ops, void *host_data)
 {
-	srt_fwk_irq_domain_t *sprt_domain;
+	struct fwk_irq_domain *sprt_domain;
 
 	/*!< extra size, with hard interrupt number as index and soft interrupt number as value */
-	sprt_domain = (srt_fwk_irq_domain_t *)kzalloc(sizeof(srt_fwk_irq_domain_t) + sizeof(ksint32_t) * size, GFP_KERNEL);
+	sprt_domain = (struct fwk_irq_domain *)kzalloc(sizeof(struct fwk_irq_domain) + sizeof(kint32_t) * size, GFP_KERNEL);
 	if (!isValid(sprt_domain))
 		return mrt_nullptr;
 
@@ -184,10 +187,10 @@ srt_fwk_irq_domain_t *fwk_irq_domain_add_linear(struct fwk_device_node *sprt_nod
  * @retval  none
  * @note    none
  */
-srt_fwk_irq_domain_t *fwk_irq_domain_add_hierarchy(srt_fwk_irq_domain_t *sprt_parent, struct fwk_device_node *sprt_node, 
-												kuint32_t size, const srt_fwk_irq_domain_ops_t *ops, void *host_data)
+struct fwk_irq_domain *fwk_irq_domain_add_hierarchy(struct fwk_irq_domain *sprt_parent, struct fwk_device_node *sprt_node, 
+												kuint32_t size, const struct fwk_irq_domain_ops *ops, void *host_data)
 {
-	srt_fwk_irq_domain_t *sprt_domain;
+	struct fwk_irq_domain *sprt_domain;
 
 	sprt_domain = fwk_irq_domain_add_linear(sprt_node, size, ops, host_data);
 	if (isValid(sprt_domain))
@@ -199,19 +202,19 @@ srt_fwk_irq_domain_t *fwk_irq_domain_add_hierarchy(srt_fwk_irq_domain_t *sprt_pa
 	return sprt_domain;
 }
 
-void fwk_irq_domain_del_hierarchy(srt_fwk_irq_domain_t *sprt_domain)
+void fwk_irq_domain_del_hierarchy(struct fwk_irq_domain *sprt_domain)
 {
 	if (!sprt_domain)
 		return;
 
-	fwk_irq_domain_free_irqs(sprt_domain, false);
+	fwk_irq_domain_free_irqs(sprt_domain);
 	list_head_del_tail(&sprt_domain->sgrt_link);
 }
 
-srt_fwk_irq_domain_t *fwk_irq_get_domain_by_name(kstring_t *name, ksint32_t hwirq)
+struct fwk_irq_domain *fwk_irq_get_domain_by_name(kchar_t *name, kint32_t hwirq)
 {
-	srt_fwk_irq_domain_t *sprt_domain;
-	ksint32_t retval;
+	struct fwk_irq_domain *sprt_domain;
+	kint32_t retval;
 
 	foreach_list_next_entry(sprt_domain, &sgrt_fwk_irq_domain, sgrt_link)
 	{
@@ -223,14 +226,14 @@ srt_fwk_irq_domain_t *fwk_irq_get_domain_by_name(kstring_t *name, ksint32_t hwir
 	return mrt_nullptr;
 }
 
-ksint32_t fwk_irq_get_by_domain(srt_fwk_irq_domain_t *sprt_domain, ksint32_t hwirq)
+kint32_t fwk_irq_get_by_domain(struct fwk_irq_domain *sprt_domain, kint32_t hwirq)
 {
 	return sprt_domain ? sprt_domain->revmap[hwirq] : -1;
 }
 
-ksint32_t fwk_irq_get_by_domain_name(kstring_t *name, ksint32_t hwirq)
+kint32_t fwk_irq_get_by_domain_name(kchar_t *name, kint32_t hwirq)
 {
-	srt_fwk_irq_domain_t *sprt_domain;
+	struct fwk_irq_domain *sprt_domain;
 
 	sprt_domain = fwk_irq_get_domain_by_name(name, hwirq);
 	return fwk_irq_get_by_domain(sprt_domain, hwirq);

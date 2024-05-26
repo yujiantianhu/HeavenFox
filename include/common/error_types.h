@@ -22,7 +22,7 @@ TARGET_EXT "C" {
 #endif
 
 /*!< The defines */
-typedef ksint32_t 	kstatus_t;
+typedef kint32_t 	kstatus_t;
 
 /*!< error code */
 enum __ERT_ERROR_CODE
@@ -47,6 +47,7 @@ enum __ERT_ERROR_CODE
 	NR_IS_EXISTED,
 	NR_IS_NOTFOUND,
 	NR_IS_USED,
+	NR_IS_LOCKED,
 
 	/*!< hardware */
 	NR_IS_IOERR,
@@ -70,8 +71,8 @@ enum __ERT_ERROR_CODE
 };
 
 /*!< The functions */
-TARGET_EXT void deal_assert_fail(const kstring_t *__assertion, const kstring_t *__file,
-			   					kuint32_t __line, const kstring_t *__function)
+TARGET_EXT void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
+			   					kuint32_t __line, const kchar_t *__function)
 								__THROW __attribute__ ((__noreturn__));
 /*!< The defines */
 #define mrt_void()									((void)(0))
@@ -102,7 +103,7 @@ __force_inline static inline void *ERR_PTR(kstype_t code)
 
 __force_inline static inline kstype_t PTR_ERR(const void *ptr)
 {
-	return (kstype_t)ptr;
+	return ptr ? (kstype_t)ptr : -NR_IS_NOMEM;
 }
 
 #ifdef __cplusplus

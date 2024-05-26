@@ -17,6 +17,11 @@
 #include <platform/fwk_basic.h>
 
 /*!< The defines */
+struct fwk_kobject
+{
+	kchar_t name[32];
+};
+
 struct fwk_probes
 {
 	kuint32_t devNum;
@@ -37,10 +42,10 @@ TARGET_EXT struct fwk_kobj_map *sprt_fwk_blkdev_map;
 TARGET_EXT struct fwk_kobj_map *sprt_fwk_netdev_map;
 
 /*!< The functions */
-TARGET_EXT ksint32_t fwk_kobj_init(void);
+TARGET_EXT kint32_t fwk_kobj_init(void);
 TARGET_EXT void fwk_kobj_del(void);
-TARGET_EXT ksint32_t fwk_kobj_map(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t range, void *data);
-TARGET_EXT ksint32_t fwk_kobj_unmap(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t range);
+TARGET_EXT kint32_t fwk_kobj_map(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t range, void *data);
+TARGET_EXT kint32_t fwk_kobj_unmap(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t range);
 TARGET_EXT void *fwk_kobj_lookUp(struct fwk_kobj_map *domain, kuint32_t devNum);
 
 #endif /*!< __FWK_KOBJ_H_ */

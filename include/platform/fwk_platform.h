@@ -15,6 +15,7 @@
 
 /*!< The includes */
 #include <platform/fwk_basic.h>
+#include <platform/fwk_kobj.h>
 #include <platform/of/fwk_of.h>
 #include <platform/irq/fwk_irq_types.h>
 
@@ -35,15 +36,16 @@ typedef struct fwk_SysPrivate
 
 typedef struct fwk_device
 {
-	kstring_t *init_name;
-
+	kchar_t *init_name;
 	struct fwk_device *sprt_parent;
 
 	struct fwk_bus_type *sprt_bus;
 	struct fwk_device_type *sprt_type;
 	struct list_head sgrt_list;
+	struct list_head sgrt_leaf;
 
 	struct fwk_driver *sprt_driver;
+	struct fwk_kobject sgrt_obj;
 
 	struct fwk_device_node *sprt_node;
 	void (*release)	(struct fwk_device *sprt_dev);
@@ -55,18 +57,18 @@ typedef struct fwk_device
 
 typedef struct fwk_driver
 {
-	kstring_t *name;
-	ksint32_t id;
+	kchar_t *name;
+	kint32_t id;
 
-	ksint32_t matches;
+	kint32_t matches;
 
 	const struct fwk_of_device_id *sprt_of_match_table;
 
 	struct fwk_bus_type *sprt_bus;
 	struct list_head sgrt_list;
 
-	ksint32_t (*probe)	(struct fwk_device *sprt_dev);
-	ksint32_t (*remove)	(struct fwk_device *sprt_dev);
+	kint32_t (*probe)	(struct fwk_device *sprt_dev);
+	kint32_t (*remove)	(struct fwk_device *sprt_dev);
 
 	struct fwk_device_oprts *sprt_oprts;
 
@@ -74,11 +76,11 @@ typedef struct fwk_driver
 
 typedef struct fwk_bus_type
 {
-	kstring_t *name;
+	kchar_t *name;
 
-	ksint32_t (*match)	(struct fwk_device *sprt_dev, struct fwk_driver *sprt_driver);
-	ksint32_t (*probe)	(struct fwk_device *sprt_dev);
-	ksint32_t (*remove)	(struct fwk_device *sprt_dev);
+	kint32_t (*match)	(struct fwk_device *sprt_dev, struct fwk_driver *sprt_driver);
+	kint32_t (*probe)	(struct fwk_device *sprt_dev);
+	kint32_t (*remove)	(struct fwk_device *sprt_dev);
 
 	struct fwk_SysPrivate *sprt_SysPriv;
 
@@ -86,15 +88,12 @@ typedef struct fwk_bus_type
 
 typedef struct fwk_device_type 
 {
-	const kstring_t *name;
+	const kchar_t *name;
 	void (*release)(struct fwk_device *sprt_dev);
 
 	const struct fwk_dev_pm_ops *sprt_pm;
 
 } srt_fwk_device_type_t;
-
-#define mrt_get_dev_name(dev)								((dev)->init_name)
-#define mrt_set_dev_name(dev, fmt, ...)						sprintk((dev)->init_name, fmt, ##__VA_ARGS__)
 
 #define FWK_GET_BUS_DEVICE(bus)								(&bus->sprt_SysPriv->sgrt_list_devices)
 #define FWK_GET_BUS_DRIVER(bus)								(&bus->sprt_SysPriv->sgrt_list_drivers)
@@ -116,8 +115,29 @@ typedef struct fwk_device_type
 TARGET_EXT struct fwk_bus_type sgrt_fwk_platform_bus_type;
 
 /*!< The functions */
-TARGET_EXT ksint32_t fwk_device_driver_probe(struct fwk_device *sprt_dev);
-TARGET_EXT ksint32_t fwk_device_driver_remove(struct fwk_device *sprt_dev);
-TARGET_EXT ksint32_t fwk_device_driver_match(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type, void *ptr_data);
+TARGET_EXT kint32_t fwk_device_driver_probe(struct fwk_device *sprt_dev);
+TARGET_EXT kint32_t fwk_device_driver_remove(struct fwk_device *sprt_dev);
+TARGET_EXT kint32_t fwk_device_driver_match(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type, void *ptr_data);
+
+/*!< API functions */
+static inline kchar_t *fwk_dev_get_name(struct fwk_device *sprt_dev)
+{
+	if (sprt_dev->init_name)
+		return sprt_dev->init_name;
+
+	return sprt_dev->sgrt_obj.name;
+}
+
+static inline void fwk_dev_set_name(struct fwk_device *sprt_dev, kchar_t *name, ...)
+{
+	va_list sprt_list;
+
+	va_start(sprt_list, name);
+	do_fmt_convert(sprt_dev->sgrt_obj.name, mrt_nullptr, name, sprt_list, sizeof(sprt_dev->sgrt_obj.name));
+	va_end(sprt_list);
+}
+
+#define mrt_dev_get_name(dev)								fwk_dev_get_name(dev)
+#define mrt_dev_set_name(dev, fmt, ...)						fwk_dev_set_name(dev, fmt, ##__VA_ARGS__)
 
 #endif /*!< __FWK_BUSTYPE_H_ */

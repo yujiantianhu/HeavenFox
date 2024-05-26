@@ -119,8 +119,8 @@ typedef struct list_head srt_list_head_t;
 #define foreach_list_head_backward(ptr_list, ptr_head)	\
 	for (ptr_list = (ptr_head)->sprt_prev; ptr_list != ptr_head; ptr_list = (ptr_list)->sprt_prev)
 
-#define mrt_list_first_entry(ptr, type, member)					mrt_container_of((ptr)->sprt_next, type, member)
-#define mrt_list_last_entry(ptr, type, member)					mrt_container_of((ptr)->sprt_prev, type, member)
+#define mrt_list_first_entry(head, type, member)				mrt_container_of((head)->sprt_next, type, member)
+#define mrt_list_last_entry(head, type, member)					mrt_container_of((head)->sprt_prev, type, member)
 #define mrt_list_next_entry(pos, member)						mrt_container_of((pos)->member.sprt_next, typeof(*(pos)), member)
 #define mrt_list_prev_entry(pos, member)						mrt_container_of((pos)->member.sprt_prev, typeof(*(pos)), member)
 
@@ -168,7 +168,7 @@ typedef struct list_head srt_list_head_t;
 	     pos = temp, temp = mrt_list_prev_entry(temp, member))
 
 /*!< check if the member is existed in target list */
-static inline ksint32_t list_head_for_each(struct list_head *head, struct list_head *list)
+static inline kint32_t list_head_for_each(struct list_head *head, struct list_head *list)
 {
 	struct list_head *ptr_right;
 	struct list_head *ptr_left;
@@ -237,7 +237,7 @@ static inline void list_head_del(struct list_head *list)
 }
 
 /*!< delete a member which is in the middle of list */
-static inline void list_head_del_anyone(struct list_head *head, struct list_head *list)
+static inline void list_head_del_safe(struct list_head *head, struct list_head *list)
 {
 	struct list_head *ptr_prev = list->sprt_prev;
 	struct list_head *ptr_next = list->sprt_next;

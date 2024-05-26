@@ -1,7 +1,7 @@
 /*
  * Video Driver : LCD with framebuffer
  *
- * File Name:   fbdev-imx.c
+ * File Name:   imx_fbdev.c
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2024.03.25
@@ -17,15 +17,16 @@
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_device.h>
 #include <platform/fwk_platdrv.h>
+#include <platform/clk/fwk_clk.h>
+#include <platform/fwk_pinctrl.h>
+#include <platform/gpio/fwk_gpiodesc.h>
 #include <platform/fwk_uaccess.h>
 #include <platform/video/fwk_fbmem.h>
 
-#include <asm/imx6/imx6ull_clocks.h>
-#include <asm/imx6/imx6ull_pins.h>
 #include <asm/imx6/imx6ull_periph.h>
 
 /*!< The defines */
-struct fbdev_imx_trigger
+struct imx_fbdev_trigger
 {
 	kuint32_t hsync_active;
 	kuint32_t vsync_active;
@@ -34,35 +35,42 @@ struct fbdev_imx_trigger
 	kuint32_t bus_width;
 };
 
-struct fbdev_imx_drv
+struct imx_fbdev_backlight
+{
+	struct fwk_device *sprt_par;
+	struct fwk_pinctrl *sprt_pctl;
+	struct fwk_gpio_desc *sprt_gdesc;
+
+	struct fwk_device *sprt_dev;
+};
+
+struct imx_fbdev_drv
 {
 	kuint32_t minor;
-	kuint32_t value[3];
 
 	void *base;
 	struct fwk_fb_info *sprt_fb;
 	struct fwk_device *sprt_dev;
 
-	srt_imx_pin_t sgrt_data[24];
-	srt_imx_pin_t sgrt_ctrl[4];
-	srt_imx_pin_t sgrt_reset;
+	struct imx_fbdev_trigger sgrt_phase;
 
-	struct fbdev_imx_trigger sgrt_phase;
+	struct fwk_clk *sprt_clk[3];
+	struct imx_fbdev_backlight sgrt_blight;
 };
 
 #define FBDEV_IMX_DRIVER_MINOR					0
 
 /* The globals */
-static kuint8_t g_fbdev_imx_buffer[480 * 272 * 4];
+static kuint8_t g_imx_fbdev_buffer[480 * 272 * 4];
 
 /*!< API function */
 /*!
- * @brief   fbdev_imx_init
+ * @brief   imx_fbdev_init
  * @param   base
  * @retval  errno
  * @note    none
  */
-static void fbdev_imx_init(void *base, struct fbdev_imx_drv *sprt_drv)
+static void imx_fbdev_init(void *base, struct imx_fbdev_drv *sprt_drv)
 {
 	srt_imx_lcdif_t *sprt_lcdif = (srt_imx_lcdif_t *)base;
 	struct fwk_fb_fix_screen_info *sprt_fix;
@@ -206,112 +214,117 @@ static void fbdev_imx_init(void *base, struct fbdev_imx_drv *sprt_drv)
 
 	/*!< Enable LCD */
 	mrt_writel(mrt_bit(17) | mrt_bit(0), &sprt_lcdif->CTRL_SET);
+
+	/*!< open backlight */
+	if (sprt_drv->sgrt_blight.sprt_gdesc)
+		fwk_gpio_set_value(sprt_drv->sgrt_blight.sprt_gdesc, 0);
 }
 
 /*!
- * @brief   fbdev_imx_driver_open
+ * @brief   imx_fbdev_driver_open
  * @param   sprt_inode, sprt_file
  * @retval  errno
  * @note    none
  */
-static ksint32_t fbdev_imx_open(struct fwk_fb_info *sprt_info, ksint32_t user)
+static kint32_t imx_fbdev_open(struct fwk_fb_info *sprt_info, kint32_t user)
 {
 	return NR_IS_NORMAL;
 }
 
-static ksint32_t fbdev_imx_close(struct fwk_fb_info *sprt_info, ksint32_t user)
+static kint32_t imx_fbdev_close(struct fwk_fb_info *sprt_info, kint32_t user)
 {
 	return NR_IS_NORMAL;
 }
 
 static const struct fwk_fb_oprts sgrt_fwk_fb_ops =
 {
-	.fb_open = fbdev_imx_open,
-	.fb_release = fbdev_imx_close,
+	.fb_open = imx_fbdev_open,
+	.fb_release = imx_fbdev_close,
 };
 
 /*!< --------------------------------------------------------------------- */
-static void fbdev_imx_configure_backlight(void *base)
+static kint32_t imx_fbdev_probe_backlight(struct imx_fbdev_backlight *sprt_blight, struct fwk_device_node *sprt_node)
 {
-	srt_imx_pin_t sgrt_conf;
-	srt_hal_imx_gpio_t *sprt_gpio;
+	struct fwk_device *sprt_dev;
+	struct fwk_pinctrl *sprt_pctl;
+	struct fwk_gpio_desc *sprt_gdesc;
+	struct fwk_pinctrl_state *sprt_state;
+	kint32_t init_value = 0;
 
-	/*!< set backlight */
-	hal_imx_pin_attribute_init(&sgrt_conf, (kuaddr_t)base, IMX6UL_MUX_GPIO1_IO08_GPIO1_IO08, 0xb9);
-	hal_imx_pin_configure(&sgrt_conf);
+	sprt_dev = kzalloc(sizeof(*sprt_dev), GFP_KERNEL);
+	if (!isValid(sprt_dev))
+		return -NR_IS_NOMEM;
 
-	/*!< output, high level */
-	sprt_gpio = (srt_hal_imx_gpio_t *)IMX6UL_GPIO1_ADDR_BASE;
-	mrt_setbitl(mrt_bit(8), &sprt_gpio->GDIR);
-	mrt_setbitl(mrt_bit(8), &sprt_gpio->DR);
-}
+	sprt_dev->init_name = sprt_node->full_name;
+	sprt_dev->sprt_node = sprt_node;
+	sprt_dev->sprt_parent = sprt_blight->sprt_par;
+	mrt_dev_set_name(sprt_dev, "backlight-gpios-%d", 0);
 
-static ksint32_t fbdev_imx_pinctrl_read_and_set(struct fwk_device_node *sprt_node, kuint32_t count, void *base)
-{
-	srt_imx_pin_t sgrt_conf;
-	kuint32_t index, value[IMX6UL_MUX_CONF_SIZE];
-	ksint32_t retval = NR_IS_NORMAL;
+	if (fwk_device_add(sprt_dev))
+		goto fail1;
 
-	for (index = 0; index < count; index++)
-	{
-		retval = fwk_of_property_read_u32_array_index(sprt_node, "fsl,pins", value, index * ARRAY_SIZE(value), ARRAY_SIZE(value));
-		if (retval < 0)
-			goto END;
+	sprt_pctl = fwk_pinctrl_get(sprt_dev);
+	if (!isValid(sprt_pctl))
+		goto fail2;
 
-		hal_imx_pin_auto_init(&sgrt_conf, (kuaddr_t)base, value, ARRAY_SIZE(value));
-		hal_imx_pin_configure(&sgrt_conf);
-	}
+	sprt_state = fwk_pinctrl_lookup_state(sprt_pctl, "default");
+	if (isValid(sprt_state))
+		fwk_pinctrl_select_state(sprt_pctl, sprt_state);
 
-END:
-	return retval;
-}
+	sprt_gdesc = fwk_of_get_named_gpiodesc_flags(sprt_node, "backlight-gpios", 0, mrt_nullptr);
+	if (!isValid(sprt_gdesc))
+		goto fail3;
 
-static ksint32_t fbdev_imx_driver_probe_mux(struct fwk_platdev *sprt_dev)
-{
-	struct fbdev_imx_drv *sprt_drv;
-	struct fwk_device_node *sprt_node, *sprt_pindat, *sprt_pinctl, *sprt_reset;
-	kuint32_t phandle[3];
-	ksint32_t retval = 0;
+	if (fwk_gpio_request(sprt_gdesc, "backlight-gpios"))
+		goto fail3;
+	
+	fwk_gpio_set_direction_output(sprt_gdesc, init_value);
 
-	sprt_node = sprt_dev->sgrt_dev.sprt_node;
-	sprt_drv = (struct fbdev_imx_drv *)fwk_platform_get_drvdata(sprt_dev);
-	if (!isValid(sprt_node) || !isValid(sprt_drv))
-		goto fail;
-
-	retval = fwk_of_property_read_u32_array(sprt_node, "pinctrl-0", phandle, ARRAY_SIZE(phandle));
-	if (retval < 0)
-		goto fail;
-
-	sprt_pindat = fwk_of_find_node_by_phandle(mrt_nullptr, phandle[0]);
-	sprt_pinctl = fwk_of_find_node_by_phandle(mrt_nullptr, phandle[1]);
-	sprt_reset  = fwk_of_find_node_by_phandle(mrt_nullptr, phandle[2]);
-	if (!sprt_pindat || !sprt_pinctl || !sprt_reset)
-		goto fail;
-
-	/* initial pin mux */
-	fbdev_imx_pinctrl_read_and_set(sprt_pindat, 24, 0);
-	fbdev_imx_pinctrl_read_and_set(sprt_pinctl, 4, 0);
-	fbdev_imx_pinctrl_read_and_set(sprt_reset, 1, 0);
-
-	fbdev_imx_configure_backlight(0);
+	sprt_blight->sprt_dev = sprt_dev;
+	sprt_blight->sprt_pctl = sprt_pctl;
+	sprt_blight->sprt_gdesc = sprt_gdesc;
 
 	return NR_IS_NORMAL;
 
-fail:
-	return -NR_IS_FAILD;
+fail3:
+	fwk_pinctrl_put(sprt_pctl);
+fail2:
+	fwk_device_del(sprt_dev);
+fail1:
+	kfree(sprt_dev);
+
+	return -NR_IS_ERROR;
 }
 
-static ksint32_t fbdev_imx_driver_probe_timings(struct fwk_platdev *sprt_dev)
+static void imx_fbdev_remove_backlight(struct imx_fbdev_backlight *sprt_blight)
 {
-	struct fbdev_imx_drv *sprt_drv;
+	if (sprt_blight->sprt_gdesc)
+	{
+		fwk_gpio_set_value(sprt_blight->sprt_gdesc, 0);
+		fwk_gpio_free(sprt_blight->sprt_gdesc);
+	}
+
+	if (sprt_blight->sprt_pctl)
+		fwk_pinctrl_put(sprt_blight->sprt_pctl);
+	
+	fwk_device_del(sprt_blight->sprt_dev);
+	kfree(sprt_blight->sprt_dev);
+	sprt_blight->sprt_dev = mrt_nullptr;
+}
+
+static kint32_t imx_fbdev_driver_probe_timings(struct fwk_platdev *sprt_pdev)
+{
+	struct imx_fbdev_drv *sprt_drv;
 	struct fwk_device_node *sprt_node, *sprt_tim, *sprt_disp;
+	struct fwk_device_node *sprt_blnode;
 	struct fwk_fb_info *sprt_fb;
 	struct fwk_fb_var_screen_info *sprt_var;
 	kuint32_t phandle;
-	ksint32_t retval = 0;
+	kchar_t *blight_ways = mrt_nullptr;
+	kint32_t retval = 0;
 
-	sprt_node = sprt_dev->sgrt_dev.sprt_node;
-	sprt_drv = (struct fbdev_imx_drv *)fwk_platform_get_drvdata(sprt_dev);
+	sprt_node = sprt_pdev->sgrt_dev.sprt_node;
+	sprt_drv = (struct imx_fbdev_drv *)fwk_platform_get_drvdata(sprt_pdev);
 	if (!isValid(sprt_node) || !isValid(sprt_drv))
 		goto fail;
 
@@ -355,25 +368,38 @@ static ksint32_t fbdev_imx_driver_probe_timings(struct fwk_platdev *sprt_dev)
 	if (retval < 0)
 		goto fail;
 
+	retval = fwk_of_property_read_u32(sprt_disp, "remote-endpoint", &phandle);
+	sprt_blnode = (retval < 0) ? mrt_nullptr : fwk_of_find_node_by_phandle(mrt_nullptr, phandle);
+	if (!isValid(sprt_blnode))
+		goto fail;
+
+	if (fwk_of_property_read_string(sprt_disp, "backlight-ways", &blight_ways))
+		goto fail;
+
+	if (blight_ways && (!strcmp(blight_ways, "gpio")))
+	{
+		sprt_drv->sgrt_blight.sprt_par = &sprt_pdev->sgrt_dev;
+		imx_fbdev_probe_backlight(&sprt_drv->sgrt_blight, sprt_blnode);
+	}
+
 	return NR_IS_NORMAL;
 
 fail:
 	return -NR_IS_FAILD;
-
 }
 
 /*!
- * @brief   fbdev_imx_driver_probe
+ * @brief   imx_fbdev_driver_probe
  * @param   sprt_pdev
  * @retval  errno
  * @note    none
  */
-static ksint32_t fbdev_imx_driver_probe(struct fwk_platdev *sprt_pdev)
+static kint32_t imx_fbdev_driver_probe(struct fwk_platdev *sprt_pdev)
 {
-	struct fbdev_imx_drv *sprt_drv;
+	struct imx_fbdev_drv *sprt_drv;
 	struct fwk_fb_info *sprt_fb;
 	void *base;
-	ksint32_t retval;
+	kint32_t retval;
 
 	sprt_fb = fwk_framebuffer_alloc(sizeof(*sprt_drv), &sprt_pdev->sgrt_dev);
 	if (!isValid(sprt_fb))
@@ -382,60 +408,91 @@ static ksint32_t fbdev_imx_driver_probe(struct fwk_platdev *sprt_pdev)
 	base = (void *)fwk_platform_get_address(sprt_pdev, 0);
 	base = fwk_io_remap(base);
 	if (!isValid(base))
-		goto fail;
+		goto fail1;
 
-	sprt_drv = (struct fbdev_imx_drv *)fwk_fb_get_drvdata(sprt_fb);
+	sprt_drv = (struct imx_fbdev_drv *)fwk_fb_get_drvdata(sprt_fb);
 	sprt_drv->minor = FBDEV_IMX_DRIVER_MINOR;
 	sprt_drv->base = base;
 	sprt_drv->sprt_fb = sprt_fb;
 	sprt_drv->sprt_dev = &sprt_pdev->sgrt_dev;
 
-	fwk_platform_set_drvdata(sprt_pdev, sprt_drv);
-	retval = fbdev_imx_driver_probe_timings(sprt_pdev);
-	if (retval < 0)
-		goto fail1;
+	sprt_drv->sprt_clk[0] = fwk_clk_get(&sprt_pdev->sgrt_dev, "pix");
+	if (!isValid(sprt_drv->sprt_clk[0]))
+		goto fail2;
 
-	retval = fbdev_imx_driver_probe_mux(sprt_pdev);
+	sprt_drv->sprt_clk[1] = fwk_clk_get(&sprt_pdev->sgrt_dev, "axi");
+	if (!isValid(sprt_drv->sprt_clk[1]))
+		goto fail3;
+
+//	sprt_drv->sprt_clk[2] = fwk_clk_get(&sprt_pdev->sgrt_dev, "disp_axi");
+//	if (!isValid(sprt_drv->sprt_clk[2]))
+//		goto fail4;
+
+	fwk_clk_prepare_enable(sprt_drv->sprt_clk[0]);
+	fwk_clk_prepare_enable(sprt_drv->sprt_clk[1]);
+
+	fwk_platform_set_drvdata(sprt_pdev, sprt_drv);
+	retval = imx_fbdev_driver_probe_timings(sprt_pdev);
 	if (retval < 0)
-		goto fail1;
+		goto fail5;
 
 	sprt_fb->sprt_fbops = &sgrt_fwk_fb_ops;
 	sprt_fb->node = sprt_drv->minor;
-	sprt_fb->sgrt_fix.smem_start = (kuaddr_t)(&g_fbdev_imx_buffer[0]);
-	sprt_fb->sgrt_fix.smem_len = sizeof(g_fbdev_imx_buffer);
+	sprt_fb->sgrt_fix.smem_start = (kuaddr_t)(&g_imx_fbdev_buffer[0]);
+	sprt_fb->sgrt_fix.smem_len = sizeof(g_imx_fbdev_buffer);
 
 	retval = fwk_register_framebuffer(sprt_fb);
 	if (retval < 0)
-		goto fail;
+		goto fail6;
 
-	fbdev_imx_init(base, sprt_drv);
+	imx_fbdev_init(base, sprt_drv);
 
 	return NR_IS_NORMAL;
 
-fail1:
+fail6:
+	imx_fbdev_remove_backlight(&sprt_drv->sgrt_blight);
+fail5:
 	fwk_platform_set_drvdata(sprt_pdev, mrt_nullptr);
+
+	fwk_clk_disable_unprepare(sprt_drv->sprt_clk[0]);
+	fwk_clk_disable_unprepare(sprt_drv->sprt_clk[1]);
+
+//	fwk_clk_put(sprt_drv->sprt_clk[2]);
+// fail4:
+	fwk_clk_put(sprt_drv->sprt_clk[1]);
+fail3:
+	fwk_clk_put(sprt_drv->sprt_clk[0]);
+fail2:
 	fwk_io_unmap(base);
-fail:
+fail1:
 	kfree(sprt_fb);
 	return -NR_IS_FAILD;
 }
 
 /*!
- * @brief   fbdev_imx_driver_remove
+ * @brief   imx_fbdev_driver_remove
  * @param   sprt_dev
  * @retval  errno
  * @note    none
  */
-static ksint32_t fbdev_imx_driver_remove(struct fwk_platdev *sprt_dev)
+static kint32_t imx_fbdev_driver_remove(struct fwk_platdev *sprt_pdev)
 {
-	struct fbdev_imx_drv *sprt_drv;
+	struct imx_fbdev_drv *sprt_drv;
 	struct fwk_fb_info *sprt_fb;
 
-	sprt_drv = (struct fbdev_imx_drv *)fwk_platform_get_drvdata(sprt_dev);
+	sprt_drv = (struct imx_fbdev_drv *)fwk_platform_get_drvdata(sprt_pdev);
 	sprt_fb = sprt_drv->sprt_fb;
 
 	fwk_unregister_framebuffer(sprt_fb);
-	fwk_platform_set_drvdata(sprt_dev, mrt_nullptr);
+	fwk_platform_set_drvdata(sprt_pdev, mrt_nullptr);
+
+	fwk_clk_disable_unprepare(sprt_drv->sprt_clk[0]);
+	fwk_clk_disable_unprepare(sprt_drv->sprt_clk[1]);
+	fwk_clk_put(sprt_drv->sprt_clk[1]);
+	fwk_clk_put(sprt_drv->sprt_clk[0]);
+
+	imx_fbdev_remove_backlight(&sprt_drv->sgrt_blight);
+
 	fwk_io_unmap(sprt_drv->base);
 	kfree(sprt_fb);
 	
@@ -443,50 +500,50 @@ static ksint32_t fbdev_imx_driver_remove(struct fwk_platdev *sprt_dev)
 }
 
 /*!< device id for device-tree */
-static const struct fwk_of_device_id sgrt_fbdev_imx_driver_ids[] =
+static const struct fwk_of_device_id sgrt_imx_fbdev_driver_ids[] =
 {
 	{ .compatible = "fsl,imx6ul-lcdif", },
 	{},
 };
 
 /*!< platform instance */
-static struct fwk_platdrv sgrt_fbdev_imx_platdriver =
+static struct fwk_platdrv sgrt_imx_fbdev_platdriver =
 {
-	.probe	= fbdev_imx_driver_probe,
-	.remove	= fbdev_imx_driver_remove,
+	.probe	= imx_fbdev_driver_probe,
+	.remove	= imx_fbdev_driver_remove,
 	
 	.sgrt_driver =
 	{
 		.name 	= "fbdev-imx",
 		.id 	= -1,
-		.sprt_of_match_table = sgrt_fbdev_imx_driver_ids,
+		.sprt_of_match_table = sgrt_imx_fbdev_driver_ids,
 	},
 };
 
 /*!< --------------------------------------------------------------------- */
 /*!
- * @brief   fbdev_imx_driver_init
+ * @brief   imx_fbdev_driver_init
  * @param   none
  * @retval  errno
  * @note    none
  */
-ksint32_t __fwk_init fbdev_imx_driver_init(void)
+kint32_t __fwk_init imx_fbdev_driver_init(void)
 {
-	return fwk_register_platdriver(&sgrt_fbdev_imx_platdriver);
+	return fwk_register_platdriver(&sgrt_imx_fbdev_platdriver);
 }
 
 /*!
- * @brief   fbdev_imx_driver_exit
+ * @brief   imx_fbdev_driver_exit
  * @param   none
  * @retval  none
  * @note    none
  */
-void __fwk_exit fbdev_imx_driver_exit(void)
+void __fwk_exit imx_fbdev_driver_exit(void)
 {
-	fwk_unregister_platdriver(&sgrt_fbdev_imx_platdriver);
+	fwk_unregister_platdriver(&sgrt_imx_fbdev_platdriver);
 }
 
-IMPORT_DRIVER_INIT(fbdev_imx_driver_init);
-IMPORT_DRIVER_EXIT(fbdev_imx_driver_exit);
+IMPORT_DRIVER_INIT(imx_fbdev_driver_init);
+IMPORT_DRIVER_EXIT(imx_fbdev_driver_exit);
 
 /*!< end of file */

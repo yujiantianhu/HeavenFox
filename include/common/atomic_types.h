@@ -19,10 +19,18 @@
 /*!< The defines */
 struct atomic
 {
+	/*!< 
+	 * atomic structure must have only one member (which is "counter")!!!
+	 * otherwise, functions such as "atomic_set_bit", "atomic_clear_bit" will generate incorrect calls!!!
+	 */
     kuint32_t counter;
-
 };
 typedef struct atomic srt_atomic_t;
+
+#define DECLARE_ATIMIC(name)			struct atomic name = { .counter = 0 }
+#define ATOMIC_SET(ptr)					do { (ptr)->counter = 0; } while (0)
+#define ATOMIC_READ(ptr)				((ptr)->counter)
+#define ATOMIC_INIT()					{ .counter = 0 }
 
 /*!< The functions */
 /*!
@@ -31,10 +39,10 @@ typedef struct atomic srt_atomic_t;
  * @retval  none
  * @note    add of atomic
  */
-static inline void atomic_add(ksint32_t i, srt_atomic_t *sprt_atomic)
+static inline void atomic_add(kint32_t i, srt_atomic_t *sprt_atomic)
 {
-	kuint64_t flag;
-	ksint32_t result;
+	kutype_t flag;
+	kuint32_t result;
 
 	__asm__ __volatile__ (
 		" 1:	                \n\t"
@@ -55,10 +63,10 @@ static inline void atomic_add(ksint32_t i, srt_atomic_t *sprt_atomic)
  * @retval  none
  * @note    subtract of atomic
  */
-static inline void atomic_sub(ksint32_t i, srt_atomic_t *sprt_atomic)
+static inline void atomic_sub(kint32_t i, srt_atomic_t *sprt_atomic)
 {
-	kuint64_t flag;
-	ksint32_t result;
+	kutype_t flag;
+	kuint32_t result;
 
 	__asm__ __volatile__ (
 		" 1:	                \n\t"
@@ -79,10 +87,10 @@ static inline void atomic_sub(ksint32_t i, srt_atomic_t *sprt_atomic)
  * @retval  none
  * @note    multiply of atomic
  */
-static inline void atomic_mul(ksint32_t i, srt_atomic_t *sprt_atomic)
+static inline void atomic_mul(kint32_t i, srt_atomic_t *sprt_atomic)
 {
-	kuint64_t flag;
-	ksint32_t result;
+	kutype_t flag;
+	kuint32_t result;
 
 	__asm__ __volatile__ (
 		" 1:		            \n\t"
@@ -103,10 +111,11 @@ static inline void atomic_mul(ksint32_t i, srt_atomic_t *sprt_atomic)
  * @retval  none
  * @note    signed divide of atomic
  */
-static inline void atomic_sdiv(ksint32_t i, srt_atomic_t *sprt_atomic)
+static inline void atomic_udiv(kuint32_t i, srt_atomic_t *sprt_atomic)
 {
-	kuint64_t flag;
-	ksint32_t result;
+#if 0
+	kutype_t flag;
+	kuint32_t result;
 
 	__asm__ __volatile__ (
 		" 1:	                \n\t"
@@ -119,6 +128,19 @@ static inline void atomic_sdiv(ksint32_t i, srt_atomic_t *sprt_atomic)
 		: "r"(i), "r"(&sprt_atomic->counter)
 		: "cc"
 	);
+
+#else
+	srt_atomic_t sgrt_temp = {};
+
+	while (sprt_atomic->counter >= i)
+	{
+		atomic_sub(i, sprt_atomic);
+		atomic_add(1, &sgrt_temp);
+	}
+
+	sprt_atomic->counter = sgrt_temp.counter;
+
+#endif
 }
 
 /*!
@@ -149,10 +171,10 @@ static inline void atomic_dec(srt_atomic_t *sprt_atomic)
  * @retval  none
  * @note    set bit
  */
-static inline void atomic_set_bit(ksint32_t nr, void *ptr_addr)
+static inline void atomic_set_bit(kint32_t nr, void *ptr_addr)
 {
-	ksint64_t flag;
-	ksint32_t result, bitmask;
+	kutype_t flag;
+	kuint32_t result, bitmask;
 
 	__asm__ __volatile__ (
 		" 1:	                \n\t"
@@ -175,10 +197,10 @@ static inline void atomic_set_bit(ksint32_t nr, void *ptr_addr)
  * @retval  none
  * @note    clear bit
  */
-static inline void atomic_clear_bit(ksint32_t nr, void *ptr_addr)
+static inline void atomic_clear_bit(kint32_t nr, void *ptr_addr)
 {
-	ksint64_t flag;
-	ksint32_t result, bitmask;
+	kutype_t flag;
+	kuint32_t result, bitmask;
 
 	__asm__ __volatile__ (
 		" 1:	                \n\t"
@@ -193,6 +215,23 @@ static inline void atomic_clear_bit(ksint32_t nr, void *ptr_addr)
 		: "r"(bitmask), "r"(nr), "r"(ptr_addr)
 		: "cc"
 	);
+}
+
+static inline kbool_t atomic_is_bitset(kint32_t nr, void *ptr_addr)
+{
+	kuint32_t result, bitmask;
+
+	__asm__ __volatile__ (
+        "   ldr %0, [%3]		\n\t"
+		"	mov %1, #0x01		\n\t"
+		"	lsl %1, %2			\n\t"
+		"	and %0, %0, %1		\n\t"
+		: "=&r"(result)
+		: "r"(bitmask), "r"(nr), "r"(ptr_addr)
+		: "cc"
+	);
+
+	return !!result;
 }
 
 #endif /* __ATOMIC_TYPES_H */

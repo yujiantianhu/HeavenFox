@@ -43,7 +43,7 @@ static void *fwk_fdt_populate_node(struct fwk_fdt_header *ptr_blob,
 									void **ptr_offset, void **mem, void **ptr_parent, void ***allNext);
 static void *fwk_fdt_populate_properties(struct fwk_fdt_header *ptr_blob,
 									void **ptr_offset, void **mem, void *node, void ***allNext, kbool_t *has_name);
-static void *fwk_fdt_add_string_properties(void **mem, void *node, kstring_t *name, kstring_t *value, kuint32_t size, void ***allNext);
+static void *fwk_fdt_add_string_properties(void **mem, void *node, kchar_t *name, kchar_t *value, kuint32_t size, void ***allNext);
 static void *fwk_fdt_memory_calculate(void **mem, kuint32_t size, kuint32_t align);
 static void *fwk_fdt_memory_alloc(kuint32_t size, kuint32_t align);
 
@@ -294,10 +294,10 @@ static void *fwk_fdt_populate_node(struct fwk_fdt_header *ptr_blob,
 	struct fwk_of_property *sprt_prop;
 	struct fwk_of_property **sprt_prev;
 	void *ptr_move, *ptr_mem, **ptr_allNext;
-	kstring_t *ptr_path;
+	kchar_t *ptr_path;
 	kuint32_t iTag;
 	kusize_t  ipathLenth, iLenthNeed;
-	kstring_t *ptr_fullName;
+	kchar_t *ptr_fullName;
 	kbool_t   has_name, new_format;
 
 	sprt_parent	= (struct fwk_device_node *)(*ptr_parent);
@@ -317,7 +317,7 @@ static void *fwk_fdt_populate_node(struct fwk_fdt_header *ptr_blob,
 	 * ipathLenth:	Node name length, containing '\0'
 	 */
 	ptr_move   += 4;
-	ptr_path	= (kstring_t *)ptr_move;
+	ptr_path	= (kchar_t *)ptr_move;
 	ipathLenth	= strlen(ptr_path) + 1;
 	iLenthNeed	= ipathLenth;
 
@@ -370,7 +370,7 @@ static void *fwk_fdt_populate_node(struct fwk_fdt_header *ptr_blob,
 	}
 
 	/*!< Point to (mem - iLenthNeed), which is dedicated to storing pathnames */
-	sprt_node->full_name = (kstring_t *)(sprt_node + 1);
+	sprt_node->full_name = (kchar_t *)(sprt_node + 1);
 	ptr_fullName = sprt_node->full_name;
 
 	if (new_format)
@@ -452,7 +452,7 @@ static void *fwk_fdt_populate_node(struct fwk_fdt_header *ptr_blob,
 	/*!< This node has been traversed, but the name property is not found: create one manually */
 	if (!has_name)
 	{
-		kstring_t *ptr_1, *ptr_2, *ptr_3;
+		kchar_t *ptr_1, *ptr_2, *ptr_3;
 
 		ptr_1 = sprt_node->full_name;
 		ptr_2 = sprt_node->full_name;
@@ -520,7 +520,7 @@ static void *fwk_fdt_populate_properties(struct fwk_fdt_header *ptr_blob,
 	struct fwk_of_property *sprt_prop;
 	void *ptr_move, *ptr_mem, **ptr_allNext, *ptr_value;
 	kuint32_t tag;
-	kstring_t *ptr_name;
+	kchar_t *ptr_name;
 	kuint32_t iPropOffset;
 	kusize_t  iPropLenth;
 
@@ -564,7 +564,7 @@ static void *fwk_fdt_populate_properties(struct fwk_fdt_header *ptr_blob,
 	 * Get property name
 	 */
 	ptr_str_start	= (void *)((void *)ptr_blob + FDT_TO_ARCH_ENDIAN32(ptr_blob->off_dt_strings));
-	ptr_name		= (kstring_t *)(ptr_str_start + iPropOffset);
+	ptr_name		= (kchar_t *)(ptr_str_start + iPropOffset);
 	*has_name		= (!strcmp("name", ptr_name)) ? true : (*has_name);
 
 	/*!< Record this property */
@@ -582,9 +582,9 @@ static void *fwk_fdt_populate_properties(struct fwk_fdt_header *ptr_blob,
 
 		/*!< Fill node information */
 		if (!strcmp("name", sprt_prop->name))
-			sprt_node->name	= (kstring_t *)sprt_prop->value;
+			sprt_node->name	= (kchar_t *)sprt_prop->value;
 		else if (!strcmp("device_type", sprt_prop->name))
-			sprt_node->type	= (kstring_t *)sprt_prop->value;
+			sprt_node->type	= (kchar_t *)sprt_prop->value;
 		else if (!strcmp("phandle", sprt_prop->name))
 			sprt_node->phandle = FDT_TO_ARCH_ENDIAN32(*(kuint32_t *)sprt_prop->value);
 	}
@@ -607,7 +607,7 @@ exit:
  * @retval  none
  * @note    If you want to add an integer property, build a separate function and then switch to big-endian mode when storing value
  */
-static void *fwk_fdt_add_string_properties(void **mem, void *node, kstring_t *name, kstring_t *value, kuint32_t size, void ***allNext)
+static void *fwk_fdt_add_string_properties(void **mem, void *node, kchar_t *name, kchar_t *value, kuint32_t size, void ***allNext)
 {
 	struct fwk_device_node *sprt_node;
 	struct fwk_of_property *sprt_prop;
@@ -634,13 +634,13 @@ static void *fwk_fdt_add_string_properties(void **mem, void *node, kstring_t *na
 
 		sprt_prop->value = (void *)(sprt_prop + 1);
 		memcpy(sprt_prop->value, value, size - 1);
-		*(kstring_t *)(sprt_prop->value + size - 1)	= '\0';
+		*(kchar_t *)(sprt_prop->value + size - 1)	= '\0';
 
 		/*!< Fill node information */
 		if (!strcmp("name", sprt_prop->name))
-			sprt_node->name	= (kstring_t *)sprt_prop->value;
+			sprt_node->name	= (kchar_t *)sprt_prop->value;
 		else if (!strcmp("device_type", sprt_prop->name))
-			sprt_node->type	= (kstring_t *)sprt_prop->value;
+			sprt_node->type	= (kchar_t *)sprt_prop->value;
 	}
 
 exit:
@@ -690,7 +690,7 @@ static void *fwk_fdt_memory_alloc(kuint32_t size, kuint32_t align)
  * @retval  none
  * @note    The essence is to compare the fullname of each node
  */
-struct fwk_device_node *fwk_of_find_node_by_path(const kstring_t *ptr_path)
+struct fwk_device_node *fwk_of_find_node_by_path(const kchar_t *ptr_path)
 {
 	struct fwk_device_node *sprt_list = mrt_nullptr;
 	struct fwk_device_node *sprt_head = mrt_fwk_fdt_node_header();
@@ -710,7 +710,7 @@ struct fwk_device_node *fwk_of_find_node_by_path(const kstring_t *ptr_path)
  * @retval  none
  * @note    The essence is to compare the name property of each node
  */
-struct fwk_device_node *fwk_of_find_node_by_name(struct fwk_device_node *sprt_from, const kstring_t *ptr_name)
+struct fwk_device_node *fwk_of_find_node_by_name(struct fwk_device_node *sprt_from, const kchar_t *ptr_name)
 {
 	struct fwk_device_node *sprt_list = mrt_nullptr;
 	struct fwk_device_node *sprt_head = isValid(sprt_from) ? sprt_from : mrt_fwk_fdt_node_header();
@@ -730,7 +730,7 @@ struct fwk_device_node *fwk_of_find_node_by_name(struct fwk_device_node *sprt_fr
  * @retval  none
  * @note    The essence is to compare the type property of each node
  */
-struct fwk_device_node *fwk_of_find_node_by_type(struct fwk_device_node *sprt_from, const kstring_t *ptr_type)
+struct fwk_device_node *fwk_of_find_node_by_type(struct fwk_device_node *sprt_from, const kchar_t *ptr_type)
 {
 	struct fwk_device_node *sprt_list = mrt_nullptr;
 	struct fwk_device_node *sprt_head = isValid(sprt_from) ? sprt_from : mrt_fwk_fdt_node_header();
@@ -771,7 +771,7 @@ struct fwk_device_node *fwk_of_find_node_by_phandle(struct fwk_device_node *sprt
  * @note    The essence is to compare the type property and the compatible property of each node; type can be NULL
  */
 struct fwk_device_node *fwk_of_find_compatible_node(struct fwk_device_node *sprt_from,
-										const kstring_t *ptr_type, const kstring_t *ptr_compat)
+										const kchar_t *ptr_type, const kchar_t *ptr_compat)
 {
 	struct fwk_device_node *sprt_list = mrt_nullptr;
 	struct fwk_device_node *sprt_head = isValid(sprt_from) ? sprt_from : mrt_fwk_fdt_node_header();
@@ -900,9 +900,9 @@ kuint32_t fwk_of_get_child_count(struct fwk_device_node *sprt_node)
  */
 kbool_t fwk_of_device_is_avaliable(struct fwk_device_node *sprt_node)
 {
-	kstring_t *ptr_value;
+	kchar_t *ptr_value;
 
-	ptr_value = (kstring_t *)fwk_of_get_property(sprt_node, "status", mrt_nullptr);
+	ptr_value = (kchar_t *)fwk_of_get_property(sprt_node, "status", mrt_nullptr);
 
 	if ((!ptr_value) || !strcmp(ptr_value, "ok") || !strcmp(ptr_value, "okay"))
 		return true;
@@ -943,7 +943,7 @@ struct fwk_device_node *fwk_of_irq_parent(struct fwk_device_node *sprt_node)
 	struct fwk_device_node *sprt_root, *sprt_np = sprt_node;
 	void *p = mrt_nullptr;
 	kuint32_t handle;
-	ksint32_t retval;
+	kint32_t retval;
 
 	sprt_root = fwk_of_find_node_by_path("/");
 
@@ -1004,7 +1004,7 @@ kuint32_t fwk_of_n_irq_cells(struct fwk_device_node *sprt_node)
 kuint32_t fwk_of_irq_count(struct fwk_device_node *sprt_node)
 {
 	kuint32_t value, count, cells;
-	ksint32_t retval;
+	kint32_t retval;
 
 	cells = fwk_of_n_irq_cells(sprt_node);
 	if (!cells)
@@ -1026,20 +1026,55 @@ kuint32_t fwk_of_irq_count(struct fwk_device_node *sprt_node)
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_of_get_id(srt_fwk_device_node_t *sprt_node, const kstring_t *id_name)
+kint32_t fwk_of_get_alias_id(struct fwk_device_node *sprt_node)
 {
-	ksint32_t id;
+	struct fwk_device_node *sprt_alias;
+	struct fwk_of_property *sprt_prop;
+	kuint32_t lenth;
+	kint32_t id, index;
+	kint8_t ch;
+	kchar_t *str;
 
-	id = *((ksint8_t *)sprt_node->name + strlen(id_name));
-	if (!id)
-		return -1;
+	sprt_alias = fwk_of_find_node_by_name(mrt_nullptr, "aliases");
+	if (!sprt_alias)
+		goto fail;
 
-	return (id - 1);
+	foreach_list_odd_head(sprt_alias->properties, sprt_prop)
+	{
+		str = (kchar_t *)sprt_prop->value;
+		if (strcmp(sprt_node->full_name, str))
+			continue;
+		
+		lenth = strlen(sprt_prop->name);
+		if (!lenth)
+			goto fail;
+
+		ch = *(sprt_prop->name + lenth - 1);
+		if (ch > '9' || ch < '0')
+			goto fail;
+
+		for (index = 0, id = 0; index < lenth; index++)
+		{
+			/*!< id *= 10 */
+			id = (id << 1) + (id << 3);
+			ch = *(sprt_prop->name + index);
+
+			if (ch > '9' || ch < '0')
+				id = 0;
+			else
+				id += (ch - '0');
+		}
+
+		return id;
+	}
+
+fail:
+	return -1;
 }
 
-ksint32_t fwk_of_modalias_node(srt_fwk_device_node_t *sprt_node, kstring_t *modalias, kuint32_t len)
+kint32_t fwk_of_modalias_node(struct fwk_device_node *sprt_node, kchar_t *modalias, kuint32_t len)
 {
-	const kstring_t *compatible, *p;
+	const kchar_t *compatible, *p;
 	kuint32_t cplen;
 
 	compatible = fwk_of_get_property(sprt_node, "compatible", &cplen);

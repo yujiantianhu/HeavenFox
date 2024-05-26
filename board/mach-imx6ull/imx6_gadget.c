@@ -98,7 +98,7 @@ static srt_imx_usbotg_t *imx6_gadget_get_otg_entry(void)
  * @retval  none
  * @note    none
  */
-static ksint32_t imx6_gadget_clk_initial(srt_imx_usbotg_t *sprt_otg, srt_imx_usbphy_t *sprt_phy)
+static kint32_t imx6_gadget_clk_initial(srt_imx_usbotg_t *sprt_otg, srt_imx_usbphy_t *sprt_phy)
 {
     if ((!sprt_otg) || (!sprt_phy))
         return -NR_IS_NULLPTR;
@@ -143,7 +143,7 @@ static ksint32_t imx6_gadget_clk_initial(srt_imx_usbotg_t *sprt_otg, srt_imx_usb
  * @retval  none
  * @note    none
  */
-static ksint32_t imx6_gadget_ehci_phy_initial(srt_imx_usbphy_t *sprt_phy)
+static kint32_t imx6_gadget_ehci_phy_initial(srt_imx_usbphy_t *sprt_phy)
 {
     if (!sprt_phy)
         return -NR_IS_NULLPTR;
@@ -173,7 +173,7 @@ static ksint32_t imx6_gadget_ehci_phy_initial(srt_imx_usbphy_t *sprt_phy)
  * @retval  none
  * @note    none
  */
-static ksint32_t imx6_gadget_ehci_otg_initial(srt_imx_usbotg_t *sprt_otg)
+static kint32_t imx6_gadget_ehci_otg_initial(srt_imx_usbotg_t *sprt_otg)
 {
     if (!sprt_otg)
         return -NR_IS_NULLPTR;
@@ -248,7 +248,7 @@ void imx6_usb_gadget_initial(void)
     srt_imx_usbphy_t *sprt_phy;
     srt_imx_usbnc_t *sprt_nc;
 
-    ksint32_t retval;
+    kint32_t retval;
 
     sprt_otg = imx6_gadget_get_otg_entry();
     sprt_phy = imx6_gadget_get_phy_entry();
@@ -297,7 +297,7 @@ void imx6_usb_gadget_initial(void)
             NR_ImxUsbOtgIntr_PortChangeDetectIntBit | NR_ImxUsbOtgIntr_UsbResetIntBit | 
             NR_ImxUsbOtgIntr_SleepIntBit, &sprt_otg->USBINTR);
     
-    mrt_enable_irq(NR_IMX_USB_OTG1_IRQn);
+    fwk_enable_irq(NR_IMX_USB_OTG1_IRQn);
 
     /*!< 
      * Start USB

@@ -28,8 +28,8 @@ typedef struct fwk_clk_gate
 } srt_fwk_clk_gate_t;
 
 /*!< The functions */
-TARGET_EXT srt_fwk_clk_t *fwk_clk_gate_register(srt_fwk_clk_t *sprt_clk, const srt_fwk_clk_ops_t *sprt_ops,
-                                const kstring_t *name, const kstring_t *parent, void *reg, kuint8_t shift);
-TARGET_EXT void fwk_clk_gate_unregister(srt_fwk_clk_t *sprt_clk);
+TARGET_EXT struct fwk_clk *fwk_clk_gate_register(struct fwk_clk *sprt_clk, const struct fwk_clk_ops *sprt_ops,
+                                const kchar_t *name, const kchar_t *parent, void *reg, kuint8_t shift);
+TARGET_EXT void fwk_clk_gate_unregister(struct fwk_clk *sprt_clk);
 
 #endif /*!< __FWK_CLK_GATE_H_ */

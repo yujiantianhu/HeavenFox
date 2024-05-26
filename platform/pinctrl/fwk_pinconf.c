@@ -21,15 +21,15 @@
 /*!
  * @brief   map sprt_map(type = conf) to sprt_setting
  * @param   sprt_pctldev: pinctrl_dev
- * @param   name: pin name (srt_fwk_pinctrl_desc_t::name)
+ * @param   name: pin name (struct fwk_pinctrl_desc::name)
  * @retval  error code
  * @note    none
  */
-ksint32_t fwk_pinconf_get_by_name(srt_fwk_pinctrl_dev_t *sprt_pctldev, const kstring_t *name)
+kint32_t fwk_pinconf_get_by_name(struct fwk_pinctrl_dev *sprt_pctldev, const kchar_t *name)
 {
-    srt_fwk_pinctrl_desc_t *sprt_desc;
-    const srt_fwk_pinctrl_ops_t *sprt_pctlops;
-    const kstring_t *pin_name;
+    struct fwk_pinctrl_desc *sprt_desc;
+    const struct fwk_pinctrl_ops *sprt_pctlops;
+    const kchar_t *pin_name;
     kuint32_t i, pin;
 
     sprt_desc = sprt_pctldev->sprt_desc;
@@ -54,10 +54,10 @@ ksint32_t fwk_pinconf_get_by_name(srt_fwk_pinctrl_dev_t *sprt_pctldev, const kst
  * @retval  error code
  * @note    none
  */
-ksint32_t fwk_pinconf_map_to_setting(srt_fwk_pinctrl_map_t const *sprt_map, srt_fwk_pinctrl_setting_t *sprt_setting)
+kint32_t fwk_pinconf_map_to_setting(struct fwk_pinctrl_map const *sprt_map, struct fwk_pinctrl_setting *sprt_setting)
 {
-    srt_fwk_pinctrl_dev_t *sprt_pctldev;
-    ksint32_t pin;
+    struct fwk_pinctrl_dev *sprt_pctldev;
+    kint32_t pin;
 
     if (sprt_setting->type != NR_FWK_PINCTRL_PIN_CONF)
         return -NR_IS_FAULT;

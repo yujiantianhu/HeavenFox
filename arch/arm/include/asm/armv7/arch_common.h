@@ -35,7 +35,7 @@
  * @retval  none
  * @note    GIC Interrupt
  */
-static inline void enable_irq(ksint32_t irqNumber)
+static inline void hw_enable_irq(kint32_t irqNumber)
 {
     mrt_enable_irq(irqNumber);
 }
@@ -46,7 +46,7 @@ static inline void enable_irq(ksint32_t irqNumber)
  * @retval  none
  * @note    GIC Interrupt
  */
-static inline void disable_irq(ksint32_t irqNumber)
+static inline void hw_disable_irq(kint32_t irqNumber)
 {
     mrt_disable_irq(irqNumber);
 }
@@ -57,7 +57,7 @@ static inline void disable_irq(ksint32_t irqNumber)
  * @retval  none
  * @note    GIC Interrupt
  */
-static inline kuint32_t get_irq_priority(ksint32_t irqNumber)
+static inline kuint32_t get_irq_priority(kint32_t irqNumber)
 {
     return mrt_get_irq_pri(irqNumber);
 }
@@ -68,7 +68,7 @@ static inline kuint32_t get_irq_priority(ksint32_t irqNumber)
  * @retval  none
  * @note    GIC Interrupt
  */
-static inline void set_irq_priority(ksint32_t irqNumber, kuint32_t priority)
+static inline void set_irq_priority(kint32_t irqNumber, kuint32_t priority)
 {
     mrt_set_irq_pri(irqNumber, priority);
 }

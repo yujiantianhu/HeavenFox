@@ -190,7 +190,7 @@ static inline void hal_imx_pin_attribute_init(srt_imx_pin_t *sprt_cfg, kuaddr_t 
  */
 static inline void hal_imx_pin_auto_init(srt_imx_pin_t *sprt_cfg, kuaddr_t base, kuint32_t *ptr_value, kusize_t size)
 {
-    if (size != IMX6UL_MUX_CONF_SIZE)
+    if (size == IMX6UL_MUX_CONF_SIZE)
         hal_imx_pin_attribute_init(sprt_cfg, base, ptr_value[0], ptr_value[1], ptr_value[2], ptr_value[3], ptr_value[4], ptr_value[5]);
 }
 
