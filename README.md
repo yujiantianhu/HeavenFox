@@ -1,4 +1,4 @@
-# Project Name: HeavenFox Operation System
+# HeavenFox Operation System
 # 
 # Note:
     HeavenFox OS aims to simplify the Linux kernel by refering to the kernel mechanism,
