@@ -22,8 +22,8 @@
  * @retval  none
  * @note    assertion solution
  */
-void deal_assert_fail(const kstring_t *__assertion, const kstring_t *__file,
-			   				kuint32_t __line, const kstring_t *__function)
+void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
+			   				kuint32_t __line, const kchar_t *__function)
 {
 	print_err("Program Aborted. Here is Error Information:\n");
 

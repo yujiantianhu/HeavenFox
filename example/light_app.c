@@ -21,6 +21,7 @@
 #include <kernel/thread.h>
 #include <kernel/sleep.h>
 #include <kernel/mutex.h>
+#include <kernel/mailbox.h>
 
 #include "thread_table.h"
 
@@ -29,8 +30,9 @@
 
 /*!< The globals */
 static real_thread_t g_light_app_tid;
-static srt_kel_thread_attr_t sgrt_light_app_attr;
+static struct kel_thread_attr sgrt_light_app_attr;
 static kuint32_t g_light_app_stack[LIGHTAPP_THREAD_STACK_SIZE];
+static struct mailbox sgrt_light_app_mailbox;
 
 /*!< API functions */
 /*!
@@ -41,22 +43,33 @@ static kuint32_t g_light_app_stack[LIGHTAPP_THREAD_STACK_SIZE];
  */
 static void *light_app_entry(void *args)
 {
-    static kbool_t iLightStatus = 0;
-    ksint32_t fd = 0;
+    kbool_t status = 0;
+    kint32_t fd;
+    struct mailbox *sprt_mb = &sgrt_light_app_mailbox;
+    struct mail sgrt_mail = {};
+    kint32_t retval;
+
+    mailbox_init(&sgrt_light_app_mailbox, mrt_current->tid, "light-app-mailbox");
 
     for (;;)
-    {
-        fd = virt_open("/dev/led-template", 0);
+    {       
+        fd = virt_open("/dev/ledgpio", 0);
         if (fd < 0)
-            goto END;
+            goto END1;
+        
+        retval = mail_recv(sprt_mb, &sgrt_mail, 0);
+        if (retval < 0)
+            goto END2;
 
-        virt_write(fd, &iLightStatus, 1);
+        status = *sgrt_mail.sprt_msg->buffer;
+        virt_write(fd, &status, 1);
+
+        mail_recv_finish(&sgrt_mail);
+
+END2:
         virt_close(fd);
-
-        iLightStatus ^= 1;
-
-END:
-        schedule_delay_ms(500);
+END1:
+        schedule_delay_ms(200);
     }
 
     return args;
@@ -68,10 +81,10 @@ END:
  * @retval 	error code
  * @note   	none
  */
-ksint32_t light_app_init(void)
+kint32_t light_app_init(void)
 {
-    srt_kel_thread_attr_t *sprt_attr = &sgrt_light_app_attr;
-    ksint32_t retval;
+    struct kel_thread_attr *sprt_attr = &sgrt_light_app_attr;
+    kint32_t retval;
 
 	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
 	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;

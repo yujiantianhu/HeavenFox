@@ -9,6 +9,6 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-obj-y	+=	fbdev-imx.o
+obj-y	+=	imx-fbdev.o
 
 # end of file

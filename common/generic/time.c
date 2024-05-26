@@ -189,7 +189,7 @@ void del_timer(struct timer_list *sprt_timer)
 	if (!isValid(sprt_timer))
 		return;
 
-	list_head_del_anyone(&sgrt_global_timer_list, &sprt_timer->sgrt_link);
+	list_head_del_safe(&sgrt_global_timer_list, &sprt_timer->sgrt_link);
 }
 
 /*!

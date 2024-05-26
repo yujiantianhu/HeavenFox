@@ -22,7 +22,7 @@
  * @retval  none
  * @note    initial heap and stack
  */
-ksint32_t system_boot_initial(void)
+kint32_t system_boot_initial(void)
 {
 #if CONFIG_STACK_WITH_LDS
     _SVC_MODE_STACK_BASE = SVC_MODE_STACK_BASE;
@@ -50,10 +50,10 @@ ksint32_t system_boot_initial(void)
  * @retval  none
  * @note    copy dtb to ram
  */
-ksint32_t fdt_boot_initial(void)
+kint32_t fdt_boot_initial(void)
 {
-    srt_rfs_disk_file_t sgrt_file;
-    ksint32_t iRetval;
+    struct rfs_disk_file sgrt_file;
+    kint32_t iRetval;
 
     if ((PROGRAM_RAM_START <= (CONFIG_DEVICE_TREE_BASE + CONFIG_FDT_MAX_SIZE - 1)))
         return RET_BOOT_ERR;
@@ -89,7 +89,7 @@ END:
  * @retval  none
  * @note    initial heap and stack
  */
-ksint32_t boot_main_loop(void)
+kint32_t boot_main_loop(void)
 {
     for (;;)
     {
@@ -113,9 +113,9 @@ ksint32_t boot_main_loop(void)
  */
 void jump_to_kernel(srt_gd_t *sprt_gd)
 {
-    void (*kernel_entry)(ksint32_t zero, ksint32_t arch, kuint32_t params);
+    void (*kernel_entry)(kint32_t zero, kint32_t arch, kuint32_t params);
 
-    kernel_entry = (void (*)(ksint32_t, ksint32_t, kuint32_t))sprt_gd->os_entry;
+    kernel_entry = (void (*)(kint32_t, kint32_t, kuint32_t))sprt_gd->os_entry;
 
     /*!< jump to head.S */
     kernel_entry(0, 0, 0);

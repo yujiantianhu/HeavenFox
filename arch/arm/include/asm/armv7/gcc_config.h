@@ -18,12 +18,12 @@
 
 /*!< The defines */
 /*!
- * @brief  	mrt_enable_global_irq
+ * @brief  	mrt_enable_cpu_irq
  * @param  	none
  * @retval 	none
  * @note   	enable irq
  */
-#define mrt_enable_global_irq()    \
+#define mrt_enable_cpu_irq()    \
 {   \
     __asm__ __volatile__ (  \
         " cpsie i   "   \
@@ -34,12 +34,12 @@
 }
 
 /*!
- * @brief  	mrt_disable_global_irq
+ * @brief  	mrt_disable_cpu_irq
  * @param  	none
  * @retval 	none
  * @note   	disable irq
  */
-#define mrt_disable_global_irq()    \
+#define mrt_disable_cpu_irq()    \
     do {   \
         __asm__ __volatile__ (  \
             " cpsid i   "   \
@@ -50,12 +50,12 @@
     } while (0)
 
 /*!
- * @brief  	mrt_enable_global_fiq
+ * @brief  	mrt_enable_cpu_fiq
  * @param  	none
  * @retval 	none
  * @note   	enable fiq
  */
-#define mrt_enable_global_fiq()    \
+#define mrt_enable_cpu_fiq()    \
     do {   \
         __asm__ __volatile__ (  \
             " cpsie f   "   \
@@ -66,12 +66,12 @@
     } while (0)
 
 /*!
- * @brief  	mrt_disable_global_fiq
+ * @brief  	mrt_disable_cpu_fiq
  * @param  	none
  * @retval 	none
  * @note   	disable fiq
  */
-#define mrt_disable_global_fiq()    \
+#define mrt_disable_cpu_fiq()    \
     do {   \
         __asm__ __volatile__ (  \
             " cpsid f   "   \
@@ -260,7 +260,7 @@ static inline void __set_cp15_vbar(kuint32_t address)
  * @retval 	none
  * @note   	get cp15 vector base address
  */
-__force_inline static inline kuint32_t __get_cp15_cbar(void)
+static inline kuint32_t __get_cp15_cbar(void)
 {
     kuint32_t result;
 
@@ -349,6 +349,30 @@ static inline void __set_cp15_isb(kuint32_t result)
     __asm__ __volatile__ (
         " mcr p15, 0, %0, c7, c5, 4  "
         :
+        : "r"(result)
+        : "memory"
+    );
+}
+
+static inline kuint32_t __get_cpsr(void)
+{
+    kuint32_t result = 0;
+
+    __asm__ __volatile__ (
+        " mrs %0, cpsr  "
+        : "=&r"(result)
+        :
+        : "memory"
+    );
+
+    return result;
+}
+
+static inline void __set_cpsr(kuint32_t result)
+{
+    __asm__ __volatile__ (
+        " msr cpsr, %0  "
+        : 
         : "r"(result)
         : "memory"
     );

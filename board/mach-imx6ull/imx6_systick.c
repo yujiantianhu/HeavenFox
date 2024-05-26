@@ -45,9 +45,9 @@ irq_return_t imx6_systick_handler(void *ptrDev);
 void imx6ull_systick_init(void)
 {
 	struct fwk_device_node *sprt_node;
-	srt_imx_gptimer_t *sprt_tick;
-	ksint32_t irq;
-	ksint32_t retval;
+	srt_hal_imx_gptimer_t *sprt_tick;
+	kint32_t irq;
+	kint32_t retval;
 
 	sprt_node = fwk_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_systick_ids, mrt_nullptr);
 	if (!isValid(sprt_node))
@@ -95,11 +95,8 @@ void imx6ull_systick_init(void)
 	mrt_resetl(&sprt_tick->IR);
 
 	retval = fwk_request_irq(irq, imx6_systick_handler, 0, "imx6-systick", sprt_tick);
-	if (!(retval < 0))
-	{
+	if (!retval)
 		mrt_setbitl(mrt_bit(0U), &sprt_tick->IR);
-		mrt_enable_irq(irq);
-	}
 
 	/*!<
 	 * CLKSRC: bit[8:6], Clock Source select.
@@ -168,7 +165,7 @@ void imx6ull_systick_init(void)
 
 irq_return_t imx6_systick_handler(void *ptrDev)
 {
-	srt_imx_gptimer_t *sprt_tick = (srt_imx_gptimer_t *)ptrDev;
+	srt_hal_imx_gptimer_t *sprt_tick = (srt_hal_imx_gptimer_t *)ptrDev;
 
 	if (mrt_isBitSetl(mrt_bit(0), &sprt_tick->SR))
 	{
@@ -180,7 +177,7 @@ irq_return_t imx6_systick_handler(void *ptrDev)
 		mrt_setbitl(mrt_bit(0), &sprt_tick->SR);
 	}
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /* end of file*/

@@ -32,7 +32,7 @@
 
 struct fwk_sockaddr
 {
-	ksint8_t sa_data[14];														/*!< Address data.  */
+	kint8_t sa_data[14];														/*!< Address data.  */
 };
 
 #if NET_UAPI_DEF_IF_IFMAP
@@ -54,7 +54,7 @@ struct fwk_ifreq
 #define IFHWADDRLEN	6
 	union
 	{
-		ksint8_t ifrn_name[NET_IFNAME_SIZE];										/*!< if name, e.g. "en0" */
+		kint8_t ifrn_name[NET_IFNAME_SIZE];										/*!< if name, e.g. "en0" */
 
 	} urt_fwk_ifr_ifrn;
 
@@ -65,12 +65,12 @@ struct fwk_ifreq
 		struct fwk_sockaddr ifru_broadaddr;
 		struct fwk_sockaddr ifru_netmask;
 		struct fwk_sockaddr ifru_hwaddr;
-		ksint16_t ifru_flags;
-		ksint32_t ifru_ivalue;
-		ksint32_t ifru_mtu;
+		kint16_t ifru_flags;
+		kint32_t ifru_ivalue;
+		kint32_t ifru_mtu;
 		struct fwk_ifmap ifru_map;
-		ksint8_t ifru_slave[NET_IFNAME_SIZE];									/*!< Just fits the size */
-		ksint8_t ifru_newname[NET_IFNAME_SIZE];
+		kint8_t ifru_slave[NET_IFNAME_SIZE];									/*!< Just fits the size */
+		kint8_t ifru_newname[NET_IFNAME_SIZE];
 		void *ifru_data;
 //		struct if_settings ifru_settings;
 

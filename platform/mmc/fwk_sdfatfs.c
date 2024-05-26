@@ -15,7 +15,7 @@
 #include <platform/mmc/fwk_sdfatfs.h>
 
 /*!< The globals */
-static srt_fwk_sdcard_t sgrt_sdFatfsDisk;
+static struct fwk_sdcard sgrt_sdFatfsDisk;
 
 /*!< API function */
 /*!
@@ -124,8 +124,8 @@ DSTATUS fwk_sdfatfs_status(kuint8_t physicalDrive)
  */
 DSTATUS fwk_sdfatfs_initial(kuint8_t physicalDrive)
 {
-    srt_fwk_sdcard_t *sprt_card;
-    ksint32_t iRetval;
+    struct fwk_sdcard *sprt_card;
+    kint32_t iRetval;
 
     if (physicalDrive != SDDISK)
         return STA_NOINIT;

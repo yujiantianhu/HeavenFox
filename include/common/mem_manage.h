@@ -47,7 +47,7 @@ typedef struct mem_info
 #define MEM_BLOCK_HEADER_SIZE								(mrt_num_align4(sizeof(struct mem_block)))
 
 /*!< The functions */
-TARGET_EXT ksint32_t memory_simple_block_create(struct mem_info *sprt_info, kuaddr_t mem_addr, kusize_t size);
+TARGET_EXT kint32_t memory_simple_block_create(struct mem_info *sprt_info, kuaddr_t mem_addr, kusize_t size);
 TARGET_EXT void memory_simple_block_destroy(struct mem_info *sprt_info);
 TARGET_EXT void *alloc_spare_simple_memory(void *ptr_head, kusize_t size);
 TARGET_EXT void free_employ_simple_memory(void *ptr_head, void *ptr_mem);
@@ -67,12 +67,17 @@ TARGET_EXT void malloc_block_destroy(void);
 static inline void memory_set(void *dest, kuint8_t data, kusize_t size)
 {
     kuaddr_t start_addr, end_addr;
+    kuaddr_t result;
+
+    if (!dest)
+        return;
     
     start_addr = (kuaddr_t)dest;
     end_addr   = (kuaddr_t)(start_addr + size);
 
     mrt_preempt_disable();
 
+#if 0
     __asm__ __volatile__ (
         "   push {r7 - r9}      \n\t"
         "   ldr r7, [%0]        \n\t"
@@ -90,6 +95,24 @@ static inline void memory_set(void *dest, kuint8_t data, kusize_t size)
         : "r"(&start_addr), "r"(end_addr), "r"(data)
         : "cc", "memory"
     );
+
+#else
+    __asm__ __volatile__ (
+        "   ldr %0, [%1]        \n\t"
+        " 1:                    \n\t"
+        "   cmp %0, %2          \n\t"
+        "   bhs 2f              \n\t"
+        "   strb %3, [%0]       \n\t"
+        "   add %0, #1          \n\t"
+        "   b 1b                \n\t"
+        " 2:                    \n\t"
+        "   str %0, [%1]        \n\t"
+        : "=&r"(result)
+        : "r"(&start_addr), "r"(end_addr), "r"(data)
+        : "cc", "memory"
+    );
+
+#endif
 
     mrt_preempt_enable();
 }
@@ -113,12 +136,15 @@ static inline void memory_reset(void *dest, kusize_t size)
  */
 static inline kuint8_t memory_compare(const void *s1, const void *s2, kusize_t size)
 {
-    kuaddr_t s1_addr, s2_addr;
-    kuint8_t value1, value2, flag = 0;
+    kuaddr_t s1_addr, s2_addr, end_addr;
+    kuaddr_t result1, result2;
+    kuint8_t data1, data2, flag = 0;
 
     s1_addr = (kuaddr_t)s1;
     s2_addr = (kuaddr_t)s2;
+    end_addr = (kuaddr_t)(s2_addr + size);
 
+#if 0
     __asm__ __volatile__ (
         "   push {r4 - r9}      \n\t"
         "   mov r5, %3          \n\t"
@@ -138,10 +164,37 @@ static inline kuint8_t memory_compare(const void *s1, const void *s2, kusize_t s
         "   mov %2, #1          \n\t"
         " 2:                    \n\t"
         "   pop {r4 - r9}       \n\t"
-        : "=r"(value1), "=r"(value2), "=r"(flag)
+        : "=r"(data1), "=r"(data2), "=r"(flag)
         : "r"(size), "r"(&s1_addr), "r"(&s2_addr)
         : "memory"
     );
+
+#else
+    __asm__ __volatile__ (
+        "   ldr %0, [%4]        \n\t"
+        "   ldr %1, [%5]        \n\t"
+        " 1:                    \n\t"
+        "   cmp %1, %6          \n\t"
+        "   bhs 3f              \n\t"
+        "   ldrb %2, [%0]       \n\t"
+        "   ldrb %3, [%1]       \n\t"
+        "   cmp %2, %3          \n\t"
+        "   bne 2f              \n\t"
+        "   add %0, #1          \n\t"
+        "   add %1, #1          \n\t"
+        "   b 1b                \n\t"
+        " 2:                    \n\t"
+        "   mov %2, #1          \n\t"
+        "   str %2, [%7]        \n\t"
+        " 3:                    \n\t"
+        "   str %0, [%4]        \n\t"
+        "   str %1, [%5]        \n\t"
+        : "=&r"(result1), "=&r"(result2), "=&r"(data1), "=&r"(data2)
+        : "r"(&s1_addr), "r"(&s2_addr), "r"(end_addr), "r"(&flag)
+        : "cc", "memory"
+    );
+
+#endif
 
     return flag;
 }
@@ -154,11 +207,18 @@ static inline kuint8_t memory_compare(const void *s1, const void *s2, kusize_t s
  */
 static inline void *memory_copy(void *dest, const void *src, kusize_t size)
 {
-    kuaddr_t s1_addr, s2_addr;
+    kuaddr_t s1_addr, s2_addr, end_addr;
+    kuaddr_t result1, result2;
+    kuint8_t data;
+
+    if (!dest || !src)
+        return mrt_nullptr;
 
     s1_addr = (kuaddr_t)dest;
     s2_addr = (kuaddr_t)src;
+    end_addr = (kuaddr_t)(s2_addr + size);
 
+#if 0
     __asm__ __volatile__ (
         "   push {r5 - r9}      \n\t"
         "   ldr r5, [%1]        \n\t"
@@ -181,7 +241,29 @@ static inline void *memory_copy(void *dest, const void *src, kusize_t size)
         : 
         : "r"(size), "r"(&s1_addr), "r"(&s2_addr)
         : "cc", "memory"
-    ); 
+    );
+
+#else
+    __asm__ __volatile__ (
+        "   ldr %0, [%3]        \n\t"
+        "   ldr %1, [%4]        \n\t"
+        " 1:                    \n\t"
+        "   cmp %1, %5          \n\t"
+        "   bhs 2f              \n\t"
+        "   ldrb %2, [%1]       \n\t"
+        "   strb %2, [%0]       \n\t"
+        "   add %0, #1          \n\t"
+        "   add %1, #1          \n\t"
+        "   b 1b                \n\t"
+        " 2:                    \n\t"
+        "   str %0, [%3]        \n\t"
+        "   str %1, [%4]        \n\t"
+        : "=&r"(result1), "=&r"(result2), "=&r"(data)
+        : "r"(&s1_addr), "r"(&s2_addr), "r"(end_addr)
+        : "cc", "memory"
+    );
+
+#endif
 
     return (void *)s1_addr;
 }

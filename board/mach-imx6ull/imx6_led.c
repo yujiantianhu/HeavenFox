@@ -36,7 +36,7 @@ void imx6ull_led_init(void)
 {
 	srt_imx_pin_t  sgrt_Port;
 	urt_imx_io_ctl_pad_t ugrt_ioPad;
-	srt_imx_gpio_t *sprt_Light;
+	srt_hal_imx_gpio_t *sprt_Light;
 
 	sprt_Light = IMX_LIGHT_PORT_ENTRY();
 
@@ -49,7 +49,7 @@ void imx6ull_led_init(void)
 						IMX6UL_IO_CTL_PAD_PUS_BIT(IMX6UL_IO_CTL_PAD_PUS_100K_UP) |
 						IMX6UL_IO_CTL_PAD_SPEED_BIT(IMX6UL_IO_CTL_PAD_SPEED_100MHZ) |
 						IMX6UL_IO_CTL_PAD_DSE_BIT(IMX6UL_IO_CTL_PAD_DSE_RDIV(6)));
-	hal_imx_pin_attribute_init(&sgrt_Port, 0, IMX_LIGHT_MUX_SELECT, mrt_trans_urt_data(&ugrt_ioPad));
+	hal_imx_pin_attribute_init(&sgrt_Port, IMX6UL_PIN_ADDR_BASE, IMX_LIGHT_MUX_SELECT, mrt_trans_urt_data(&ugrt_ioPad));
 
 	hal_imx_pin_mux_configure(&sgrt_Port);
 	hal_imx_pin_pad_configure(&sgrt_Port);

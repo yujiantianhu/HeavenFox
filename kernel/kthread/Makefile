@@ -11,6 +11,7 @@
 
 obj-y	+=	idle.o
 obj-y	+=	kthread.o
+obj-y	+=	kworker.o
 obj-y	+=	init_proc.o
 
 # end of file

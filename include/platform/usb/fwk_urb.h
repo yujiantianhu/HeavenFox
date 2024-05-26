@@ -307,13 +307,13 @@ typedef struct fwk_urb_class_ops
     kuint32_t type;
 
     /*!< Class driver initialization- entry  of the class driver */
-    ksint32_t (*classInit)(kuint8_t, void *, kuint32_t *);
+    kint32_t (*classInit)(kuint8_t, void *, kuint32_t *);
 
     /*!< Class driver de-initialization*/
-    ksint32_t (*classDeinit)(kuint32_t);
+    kint32_t (*classDeinit)(kuint32_t);
 
     /*!< Class driver event callback*/
-    ksint32_t (*classEvent)(void *, kuint32_t, void *); 
+    kint32_t (*classEvent)(void *, kuint32_t, void *); 
     
 } srt_fwk_urb_class_ops_t;
 
@@ -321,22 +321,22 @@ typedef struct fwk_urb_class_ops
 typedef struct fwk_urb_ops
 {
     /*!< Controller initialization */
-    ksint32_t (*init)(kuint8_t, void *, kuint32_t *);    
+    kint32_t (*init)(kuint8_t, void *, kuint32_t *);    
 
     /*!< Controller de-initialization */
-    ksint32_t (*exit)(kuint32_t);   
+    kint32_t (*exit)(kuint32_t);   
 
     /*!< Controller send data */
-    ksint32_t (*send)(void *, kuint8_t, kuint8_t *, kuint32_t); 
+    kint32_t (*send)(void *, kuint8_t, kuint8_t *, kuint32_t); 
 
     /*!< Controller receive data */
-    ksint32_t (*recv)(void *, kuint8_t, kuint8_t *, kuint32_t);      
+    kint32_t (*recv)(void *, kuint8_t, kuint8_t *, kuint32_t);      
 
     /*!< Controller cancel transfer */
-    ksint32_t (*cancel)(void *, kuint8_t);   
+    kint32_t (*cancel)(void *, kuint8_t);   
 
     /*!< Controller control */
-    ksint32_t (*ctrl)(void *, kuint32_t, void *); 
+    kint32_t (*ctrl)(void *, kuint32_t, void *); 
 
 } srt_fwk_urb_ops_t;
 

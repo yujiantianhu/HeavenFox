@@ -21,7 +21,7 @@
 #define INIT_THREAD_STACK_SIZE                          KEL_THREAD_STACK_HALF(1)    /*!< 1/2 page (2 kbytes) */
 
 /*!< The globals */
-static srt_kel_thread_attr_t sgrt_init_proc_attr;
+static struct kel_thread_attr sgrt_init_proc_attr;
 static kuint32_t g_init_proc_stack[INIT_THREAD_STACK_SIZE];
 
 /*!< API functions */
@@ -37,8 +37,8 @@ static void *init_proc_entry(void *args)
 
     for (;;)
     {
-        struct kel_thread *sprt_tid = mrt_current;
-        print_info("%s: tid = %d\n", __FUNCTION__, sprt_tid->tid);
+//      struct kel_thread *sprt_tid = mrt_current;
+//      print_info("%s: tid = %d\n", __FUNCTION__, sprt_tid->tid);
 
         schedule_delay_ms(200);
     }
@@ -52,9 +52,9 @@ static void *init_proc_entry(void *args)
  * @retval 	error code
  * @note   	none
  */
-ksint32_t init_proc_init(void)
+kint32_t init_proc_init(void)
 {
-    srt_kel_thread_attr_t *sprt_attr = &sgrt_init_proc_attr;
+    struct kel_thread_attr *sprt_attr = &sgrt_init_proc_attr;
 
 	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
 	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;

@@ -66,21 +66,20 @@ typedef ert_bool_t              kbool_t;
 #define mrt_to_kbool(x)         ((x) ? NR_TRUE : NR_FALSE)
 
 /*!< basic types */
-typedef                 char    ksint8_t;
-typedef                 char    ksint8_t;
+typedef                 char    kint8_t;
 typedef unsigned        char    kuint8_t;
-typedef                 short   ksint16_t;
+typedef                 short   kint16_t;
 typedef unsigned        short   kuint16_t;
-typedef                 int     ksint32_t;
+typedef                 int     kint32_t;
 typedef unsigned        int     kuint32_t;
-typedef          long   long    ksint64_t;
+typedef          long   long    kint64_t;
 typedef unsigned long   long    kuint64_t;
 
 /*!< super types */
-typedef                 char    kstring_t;
-typedef                 char    ksbyte_t;
+typedef                 char    kchar_t;
+typedef                 char    kbyte_t;
 typedef unsigned        char    kubyte_t;
-typedef				    char	ksbuffer_t;
+typedef				    char	kbuffer_t;
 typedef	unsigned 	    char	kubuffer_t;
 typedef				    int		kssize_t;
 typedef	unsigned 	    int		kusize_t;

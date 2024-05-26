@@ -12,6 +12,8 @@
 obj-y	+=	thread_table.o
 
 obj-y	+=	light_app.o
+obj-y	+=	button_app.o
 obj-y	+=	display_app.o
+obj-y	+=	tsc_app.o
 
 # end of file

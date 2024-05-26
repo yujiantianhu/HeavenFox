@@ -19,7 +19,7 @@
 #include <platform/fwk_platform.h>
 
 /*!< The defines */
-typedef ksint32_t netdev_tx_t;
+typedef kint32_t netdev_tx_t;
 
 struct fwk_netdev_stats
 {
@@ -59,11 +59,11 @@ struct fwk_netdev_queue
 
 struct fwk_net_device
 {
-	kstring_t name[NET_IFNAME_SIZE];								/*!< network device name */
-	kstring_t *ptr_ifalias;											/*!< network device aliases */
+	kchar_t name[NET_IFNAME_SIZE];								/*!< network device name */
+	kchar_t *ptr_ifalias;											/*!< network device aliases */
 
 	kuint64_t state;												/*!< network device interface state */
-	ksint32_t ifindex;												/*!< network Device Interface Index Value: Network device identifier */
+	kint32_t ifindex;												/*!< network Device Interface Index Value: Network device identifier */
 
 	struct list_head sgrt_netdev;								/*!< network device list */
 	struct fwk_netdev_stats sgrt_states;						/*!< statistics on network device interfaces */
@@ -98,29 +98,29 @@ struct fwk_net_device
 
 struct fwk_netdev_ops
 {
-	ksint32_t (*ndo_init) (struct fwk_net_device *sprt_dev);
+	kint32_t (*ndo_init) (struct fwk_net_device *sprt_dev);
 	void (*ndo_uninit) (struct fwk_net_device *sprt_dev);
-	ksint32_t (*ndo_open) (struct fwk_net_device *sprt_dev);
-	ksint32_t (*ndo_stop) (struct fwk_net_device *sprt_dev);
+	kint32_t (*ndo_open) (struct fwk_net_device *sprt_dev);
+	kint32_t (*ndo_stop) (struct fwk_net_device *sprt_dev);
 	netdev_tx_t (*ndo_start_xmit) (struct fwk_sk_buff *sprt_skb, struct fwk_net_device *sprt_dev);
 	void (*ndo_set_rx_mode) (struct fwk_net_device *sprt_dev);
-	ksint32_t (*ndo_set_mac_address) (struct fwk_net_device *sprt_dev, void *ptr_addr);
-	ksint32_t (*ndo_do_ioctl) (struct fwk_net_device *sprt_dev, struct fwk_ifreq *sprt_ifr, ksint32_t cmd);
+	kint32_t (*ndo_set_mac_address) (struct fwk_net_device *sprt_dev, void *ptr_addr);
+	kint32_t (*ndo_do_ioctl) (struct fwk_net_device *sprt_dev, struct fwk_ifreq *sprt_ifr, kint32_t cmd);
 	void (*ndo_tx_timeout) (struct fwk_net_device *sprt_dev);
 	struct fwk_netdev_stats* (*ndo_get_stats) (struct fwk_net_device *sprt_dev);
-	ksint32_t (*ndo_add_slave) (struct fwk_net_device *sprt_dev, struct fwk_net_device *sprt_slave_dev);
-	ksint32_t (*ndo_del_slave) (struct fwk_net_device *sprt_dev, struct fwk_net_device *sprt_slave_dev);
-	ksint32_t (*ndo_set_tx_maxrate) (struct fwk_net_device *sprt_dev, ksint32_t queue_index, kuint32_t maxrate);
+	kint32_t (*ndo_add_slave) (struct fwk_net_device *sprt_dev, struct fwk_net_device *sprt_slave_dev);
+	kint32_t (*ndo_del_slave) (struct fwk_net_device *sprt_dev, struct fwk_net_device *sprt_slave_dev);
+	kint32_t (*ndo_set_tx_maxrate) (struct fwk_net_device *sprt_dev, kint32_t queue_index, kuint32_t maxrate);
 };
 
 struct fwk_ethtool_ops
 {
-	ksint32_t (*begin) (struct fwk_net_device *);
+	kint32_t (*begin) (struct fwk_net_device *);
 	void (*complete) (struct fwk_net_device *);
 };
 
 /*!< The functions */
-TARGET_EXT struct fwk_net_device *fwk_alloc_netdev_mq(ksint32_t sizeof_priv, const kstring_t *name,
+TARGET_EXT struct fwk_net_device *fwk_alloc_netdev_mq(kint32_t sizeof_priv, const kchar_t *name,
 													void (*setup) (struct fwk_net_device *sprt_dev), kuint32_t queue_count);
 TARGET_EXT void fwk_free_netdev(struct fwk_net_device *sprt_dev);
 

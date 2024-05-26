@@ -21,7 +21,7 @@
 #define IDLE_THREAD_STACK_SIZE                      KEL_THREAD_STACK_QUAR(1)    /*!< 1/4 page (1kbytes) */
 
 /*!< The globals */
-static srt_kel_thread_attr_t sgrt_idle_attr;
+static struct kel_thread_attr sgrt_idle_attr;
 static kuint32_t g_idle_stack[IDLE_THREAD_STACK_SIZE];
 
 /*!< API functions */
@@ -45,9 +45,9 @@ static void *rest_entry(void *args)
  * @retval 	error code
  * @note   	none
  */
-ksint32_t rest_init(void)
+kint32_t rest_init(void)
 {
-    srt_kel_thread_attr_t *sprt_attr = &sgrt_idle_attr;
+    struct kel_thread_attr *sprt_attr = &sgrt_idle_attr;
 
 	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
 	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;

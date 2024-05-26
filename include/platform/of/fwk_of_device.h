@@ -20,14 +20,15 @@
 #include <platform/fwk_platdev.h>
 
 /*!< The functions */
-TARGET_EXT ksint32_t fwk_of_register_platdevice(struct fwk_device_node *sprt_node, struct fwk_platdev *sprt_platdev);
+TARGET_EXT kint32_t fwk_of_register_platdevice(struct fwk_device_node *sprt_node, struct fwk_platdev *sprt_platdev);
 TARGET_EXT void fwk_of_unregister_platdevice(struct fwk_device_node *sprt_node);
+TARGET_EXT kint32_t fwk_of_platform_populate_init(void);
 
-TARGET_EXT ksint32_t fwk_of_address_to_resource(struct fwk_device_node *sprt_node, kuint32_t index, struct fwk_resources *sprt_res);
-TARGET_EXT ksint32_t fwk_of_irq_to_resource_table(struct fwk_device_node *sprt_node, struct fwk_resources *sprt_res, kuint32_t nr_irqs);
+TARGET_EXT kint32_t fwk_of_address_to_resource(struct fwk_device_node *sprt_node, kuint32_t index, struct fwk_resources *sprt_res);
+TARGET_EXT kint32_t fwk_of_irq_to_resource_table(struct fwk_device_node *sprt_node, struct fwk_resources *sprt_res, kuint32_t nr_irqs);
 TARGET_EXT struct fwk_resources *fwk_platform_get_resources(struct fwk_platdev *sprt_pdev, kuint32_t index, kuint32_t type);
 TARGET_EXT kuaddr_t fwk_platform_get_address(struct fwk_platdev *sprt_pdev, kuint32_t index);
-TARGET_EXT ksint32_t fwk_platform_get_irq(struct fwk_platdev *sprt_pdev, kuint32_t index);
+TARGET_EXT kint32_t fwk_platform_get_irq(struct fwk_platdev *sprt_pdev, kuint32_t index);
 TARGET_EXT void *fwk_of_iomap(struct fwk_device_node *sprt_node, kuint32_t index);
 
 #endif /*!< __FWK_OF_DEVICE_H_ */

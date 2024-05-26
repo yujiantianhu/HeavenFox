@@ -17,7 +17,7 @@
 struct fwk_char_device *sgrt_fwk_chrdevs[DEVICE_MAX_NUM];
 
 /*!< The functions */
-static struct fwk_char_device *__fwk_register_chrdev(kuint32_t major, kuint32_t baseminor, kuint32_t count, const kstring_t *name);
+static struct fwk_char_device *__fwk_register_chrdev(kuint32_t major, kuint32_t baseminor, kuint32_t count, const kchar_t *name);
 static struct fwk_char_device *__fwk_unregister_chrdev(kuint32_t major, kuint32_t baseminor, kuint32_t count);
 
 /*!< API function */
@@ -27,7 +27,7 @@ static struct fwk_char_device *__fwk_unregister_chrdev(kuint32_t major, kuint32_
  * @retval  errno
  * @note    none
  */
-ksint32_t __plat_init fwk_chrdev_init(void)
+kint32_t __plat_init fwk_chrdev_init(void)
 {
 	struct fwk_char_device **sprt_chrdev;
 	kusize_t  chrdevMax;
@@ -39,7 +39,7 @@ ksint32_t __plat_init fwk_chrdev_init(void)
 	for (i = 0; i < chrdevMax; i++)
 		*(sprt_chrdev++) = mrt_nullptr;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 IMPORT_PLATFORM_INIT(fwk_chrdev_init);
 
@@ -49,7 +49,7 @@ IMPORT_PLATFORM_INIT(fwk_chrdev_init);
  * @retval  errno
  * @note    none
  */
-ksint32_t __plat_exit fwk_chrdev_exit(void)
+kint32_t __plat_exit fwk_chrdev_exit(void)
 {
 	struct fwk_char_device **sprt_chrdev;
 	struct fwk_char_device *sprt_prev;
@@ -66,7 +66,7 @@ ksint32_t __plat_exit fwk_chrdev_exit(void)
 		*sprt_chrdev = mrt_nullptr;
 	}
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 IMPORT_PLATFORM_EXIT(fwk_chrdev_exit);
 
@@ -76,13 +76,13 @@ IMPORT_PLATFORM_EXIT(fwk_chrdev_exit);
  * @retval  errno
  * @note    none
  */
-static struct fwk_char_device *__fwk_register_chrdev(kuint32_t major, kuint32_t baseminor, kuint32_t count, const kstring_t *name)
+static struct fwk_char_device *__fwk_register_chrdev(kuint32_t major, kuint32_t baseminor, kuint32_t count, const kchar_t *name)
 {
 	struct fwk_char_device *sprt_chrdev;
 	struct fwk_char_device **sprt_Dst;
 	kuint32_t  index;
 	kusize_t  chrdevMax;
-	ksint32_t i;
+	kint32_t i;
 
 	if (!count)
 		return mrt_nullptr;
@@ -235,17 +235,17 @@ static struct fwk_char_device *__fwk_unregister_chrdev(kuint32_t major, kuint32_
  * @retval  errno
  * @note    none
  */
-ksint32_t fwk_alloc_chrdev(kuint32_t *devNum, kuint32_t baseminor, kuint32_t count, const kstring_t *name)
+kint32_t fwk_alloc_chrdev(kuint32_t *devNum, kuint32_t baseminor, kuint32_t count, const kchar_t *name)
 {
 	struct fwk_char_device *sprt_chrdev;
 
 	sprt_chrdev = __fwk_register_chrdev(0, baseminor, count, name);
 	if (!isValid(sprt_chrdev))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	*devNum	= MKE_DEV_NUM(sprt_chrdev->major, sprt_chrdev->baseminor);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -254,7 +254,7 @@ ksint32_t fwk_alloc_chrdev(kuint32_t *devNum, kuint32_t baseminor, kuint32_t cou
  * @retval  errno
  * @note    none
  */
-ksint32_t fwk_register_chrdev(kuint32_t devNum, kuint32_t count, const kstring_t *name)
+kint32_t fwk_register_chrdev(kuint32_t devNum, kuint32_t count, const kchar_t *name)
 {
 	struct fwk_char_device *sprt_chrdev;
 	kuint32_t major, last;
@@ -272,14 +272,15 @@ ksint32_t fwk_register_chrdev(kuint32_t devNum, kuint32_t count, const kstring_t
 			goto fail;
 	}
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 
 fail:
 	/*!<
 	 * If the registration fails, you will need to cancel the previous registration together
 	 * The number of devices that have been registered: count = n - devNum
 	 */
-	return fwk_unregister_chrdev(devNum, n - devNum);
+	fwk_unregister_chrdev(devNum, n - devNum);
+	return -NR_IS_FAILD;
 }
 
 /*!
@@ -288,7 +289,7 @@ fail:
  * @retval  errno
  * @note    none
  */
-ksint32_t fwk_unregister_chrdev(kuint32_t devNum, kuint32_t count)
+void fwk_unregister_chrdev(kuint32_t devNum, kuint32_t count)
 {
 	struct fwk_char_device *sprt_chrdev;
 	kuint32_t major, last;
@@ -305,6 +306,6 @@ ksint32_t fwk_unregister_chrdev(kuint32_t devNum, kuint32_t count)
 		if (isValid(sprt_chrdev))
 			kfree(sprt_chrdev);
 	}
-
-	return NR_isWell;
 }
+
+/*!< end of file */

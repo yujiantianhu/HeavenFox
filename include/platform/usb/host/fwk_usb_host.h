@@ -52,12 +52,12 @@ enum __ERT_USB_HOST_INDEX
 
 typedef struct fwk_usb_host_if
 {
-    ksint32_t (*create) (kuint32_t index);
-    ksint32_t (*destroy) (kuint32_t index);
-    ksint32_t (*open) (kuint32_t index);
-    ksint32_t (*close) (kuint32_t index);
-    ksint32_t (*send) (kuint32_t index);
-    ksint32_t (*recv) (kuint32_t index);
+    kint32_t (*create) (kuint32_t index);
+    kint32_t (*destroy) (kuint32_t index);
+    kint32_t (*open) (kuint32_t index);
+    kint32_t (*close) (kuint32_t index);
+    kint32_t (*send) (kuint32_t index);
+    kint32_t (*recv) (kuint32_t index);
 
 } srt_fwk_usb_host_if_t;
 

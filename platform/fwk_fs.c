@@ -20,11 +20,11 @@
  * @retval  none
  * @note    none
  */
-struct fwk_file *fwk_do_filp_open(kstring_t *name, kuint32_t mode)
+struct fwk_file *fwk_do_filp_open(kchar_t *name, kuint32_t mode)
 {
 	struct fwk_file  *sprt_file;
 	struct fwk_inode *sprt_inode;
-	ksint32_t retval;
+	kint32_t retval;
 
 	sprt_inode = fwk_inode_find(name);
 	if (!isValid(sprt_inode))
