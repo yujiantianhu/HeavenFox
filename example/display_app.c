@@ -33,7 +33,7 @@
 
 /*!< The globals */
 static real_thread_t g_display_app_tid;
-static srt_kel_thread_attr_t sgrt_display_app_attr;
+static struct kel_thread_attr sgrt_display_app_attr;
 static kuint32_t g_display_app_stack[DISPLAY_APP_THREAD_STACK_SIZE];
 static struct mutex_lock sgrt_display_app_lock;
 
@@ -44,7 +44,7 @@ static struct mutex_lock sgrt_display_app_lock;
  * @retval none
  * @note   do display
  */
-static void display_initial_settings(srt_fwk_font_setting_t *sprt_settings)
+static void display_initial_settings(struct fwk_font_setting *sprt_settings)
 {
     sprt_settings->color = RGB_BLACK;
     sprt_settings->background = RGB_WHITE;
@@ -61,9 +61,9 @@ static void display_initial_settings(srt_fwk_font_setting_t *sprt_settings)
  * @retval none
  * @note   do display
  */
-static void display_clear(srt_fwk_disp_info_t *sprt_disp)
+static void display_clear(struct fwk_disp_info *sprt_disp)
 {
-    srt_fwk_font_setting_t sgrt_settings;
+    struct fwk_font_setting sgrt_settings;
 
     display_initial_settings(&sgrt_settings);
 
@@ -77,9 +77,9 @@ static void display_clear(srt_fwk_disp_info_t *sprt_disp)
  * @retval none
  * @note   do display
  */
-static void display_word(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end, const kstring_t *fmt, ...)
+static void display_word(struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end, const kchar_t *fmt, ...)
 {
-    srt_fwk_font_setting_t sgrt_settings;
+    struct fwk_font_setting sgrt_settings;
 
     display_initial_settings(&sgrt_settings);
     sgrt_settings.color = RGB_RED;
@@ -97,9 +97,9 @@ static void display_word(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuin
  * @retval none
  * @note   do display
  */
-static void display_graphic(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end)
+static void display_graphic(struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end)
 {
-    srt_fwk_font_setting_t sgrt_settings;
+    struct fwk_font_setting sgrt_settings;
 
     display_initial_settings(&sgrt_settings);
     
@@ -124,11 +124,11 @@ static void display_graphic(srt_fwk_disp_info_t *sprt_disp, kuint32_t x_start, k
  */
 static void *display_app_entry(void *args)
 {
-    ksint32_t fd;
-    struct fwk_fb_fix_screen_info sgrt_fix;
-	struct fwk_fb_var_screen_info sgrt_var;
-    kuint32_t *fbuffer;
-    srt_fwk_disp_info_t sgrt_disp;
+    kint32_t fd;
+    struct fwk_fb_fix_screen_info sgrt_fix = {};
+	struct fwk_fb_var_screen_info sgrt_var = {};
+    kuint32_t *fbuffer = mrt_nullptr;
+    struct fwk_disp_info sgrt_disp;
 
     mutex_init(&sgrt_display_app_lock);
 
@@ -149,7 +149,13 @@ static void *display_app_entry(void *args)
     
     } while (!isValid(fbuffer));
 
-    fwk_display_initial_info(&sgrt_disp, fbuffer, sgrt_fix.smem_len, sgrt_var.xres, sgrt_var.yres, FWK_RGB_PIXEL32);
+    fwk_display_initial_info(&sgrt_disp);
+    sgrt_disp.buffer = fbuffer;
+    sgrt_disp.buf_size = sgrt_fix.smem_len;
+    sgrt_disp.width = sgrt_var.xres;
+    sgrt_disp.height = sgrt_var.yres;
+    sgrt_disp.bpp = FWK_RGB_PIXEL32;
+
     display_clear(&sgrt_disp);
     display_graphic(&sgrt_disp, sgrt_disp.width / 4, (sgrt_disp.height * 3) / 8, (sgrt_disp.width * 3) / 4, (sgrt_disp.height * 7) / 8);
 
@@ -169,12 +175,19 @@ static void *display_app_entry(void *args)
             goto END;
         }
 
+#if 0
+        printk("%s: lenth: %d\n", __FUNCTION__, sgrt_fix.smem_len);
+        memset(fbuffer, 0xff, sgrt_fix.smem_len);
+        schedule_delay_ms(500);
+        memset(fbuffer, 0x00, sgrt_fix.smem_len);
+#else
+        sgrt_disp.buffer = fbuffer;
         display_word(&sgrt_disp, 140, 80, 
                                  sgrt_disp.width, 80 + 16, "welcome to use!");
         schedule_delay_ms(500);
         display_word(&sgrt_disp, 140, 80, 
                                  sgrt_disp.width, 80 + 16, "happly every day!");
-    
+#endif
         virt_munmap(fbuffer, sgrt_fix.smem_len);
         virt_close(fd);
 
@@ -191,17 +204,17 @@ END:
  * @retval 	error code
  * @note   	none
  */
-ksint32_t display_app_init(void)
+kint32_t display_app_init(void)
 {
-    srt_kel_thread_attr_t *sprt_attr = &sgrt_display_app_attr;
-    ksint32_t retval;
+    struct kel_thread_attr *sprt_attr = &sgrt_display_app_attr;
+    kint32_t retval;
 
 	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
 	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;
 	sprt_attr->schedpolicy = KEL_THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-	real_thread_set_stack(sprt_attr, mrt_nullptr, g_display_app_stack, sizeof(g_display_app_stack));
+	real_thread_set_stack(sprt_attr, mrt_nullptr, &g_display_app_stack[0], sizeof(g_display_app_stack));
     /*!< lowest priority */
 	real_thread_set_priority(sprt_attr, KEL_THREAD_PROTY_DEFAULT);
     /*!< default time slice */

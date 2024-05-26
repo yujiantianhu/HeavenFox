@@ -21,7 +21,7 @@
  * @retval  none
  * @note    none
  */
-struct fwk_net_device *fwk_alloc_netdev_mq(ksint32_t sizeof_priv, const kstring_t *name,
+struct fwk_net_device *fwk_alloc_netdev_mq(kint32_t sizeof_priv, const kchar_t *name,
 													void (*setup) (struct fwk_net_device *sprt_dev), kuint32_t queue_count)
 {
 	struct fwk_net_device *sprt_netdev;

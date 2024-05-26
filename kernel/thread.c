@@ -21,14 +21,14 @@
  * @retval 	err code
  * @note   	configure attribute and thread
  */
-static ksint32_t __real_thread_create(real_thread_t *ptr_id, ksint32_t base, srt_kel_thread_attr_t *sprt_attr,
+static kint32_t __real_thread_create(real_thread_t *ptr_id, kint32_t base, struct kel_thread_attr *sprt_attr,
                                     void *(*pfunc_start_routine) (void *), void *ptr_args, kuint32_t flags)
 {
 	real_thread_t tid;
 	struct kel_thread *sprt_thread;
-	srt_kel_thread_attr_t *sprt_it_attr;
+	struct kel_thread_attr *sprt_it_attr;
 	kuint32_t i_start, count;
-	ksint32_t retval;
+	kint32_t retval;
 
 	/*!< check if is user thread */
 	if ((KEL_THREAD_USER & flags) == KEL_THREAD_USER)
@@ -58,7 +58,7 @@ static ksint32_t __real_thread_create(real_thread_t *ptr_id, ksint32_t base, srt
 
 	if (!sprt_attr)
 	{
-		sprt_it_attr = (srt_kel_thread_attr_t *)kzalloc(sizeof(srt_kel_thread_attr_t), GFP_KERNEL);
+		sprt_it_attr = (struct kel_thread_attr *)kzalloc(sizeof(struct kel_thread_attr), GFP_KERNEL);
 		if (!isValid(sprt_it_attr))
 			goto fail;
 
@@ -89,7 +89,7 @@ static ksint32_t __real_thread_create(real_thread_t *ptr_id, ksint32_t base, srt
     if (ptr_id)
         *ptr_id = tid;
     
-	return NR_isWell;
+	return NR_IS_NORMAL;
 
 fail4:
 	kfree(sprt_thread);
@@ -99,7 +99,7 @@ fail2:
 	if (!isValid(sprt_attr))
 		kfree(sprt_it_attr);
 fail:
-	return -NR_isArgFault;
+	return -NR_IS_FAULT;
 }
 
 /*!
@@ -108,7 +108,7 @@ fail:
  * @retval 	err code
  * @note   	none
  */
-ksint32_t __kernel_thread_create(real_thread_t *ptr_id, ksint32_t base, srt_kel_thread_attr_t *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
+kint32_t __kernel_thread_create(real_thread_t *ptr_id, kint32_t base, struct kel_thread_attr *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {
 	return __real_thread_create(ptr_id, base, sprt_attr, pfunc_start_routine, ptr_args, 0);
 }
@@ -119,7 +119,7 @@ ksint32_t __kernel_thread_create(real_thread_t *ptr_id, ksint32_t base, srt_kel_
  * @retval 	err code
  * @note   	none
  */
-ksint32_t __real_user_thread_create(real_thread_t *ptr_id, ksint32_t base, srt_kel_thread_attr_t *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
+kint32_t __real_user_thread_create(real_thread_t *ptr_id, kint32_t base, struct kel_thread_attr *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {
 	return __real_thread_create(ptr_id, base, sprt_attr, pfunc_start_routine, ptr_args, KEL_THREAD_USER);
 }
@@ -130,7 +130,7 @@ ksint32_t __real_user_thread_create(real_thread_t *ptr_id, ksint32_t base, srt_k
  * @retval 	err code
  * @note   	none
  */
-ksint32_t kernel_thread_create(real_thread_t *ptr_id, srt_kel_thread_attr_t *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
+kint32_t kernel_thread_create(real_thread_t *ptr_id, struct kel_thread_attr *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {
 	return __kernel_thread_create(ptr_id, -1, sprt_attr, pfunc_start_routine, ptr_args);
 }
@@ -141,7 +141,7 @@ ksint32_t kernel_thread_create(real_thread_t *ptr_id, srt_kel_thread_attr_t *spr
  * @retval 	err code
  * @note   	none
  */
-ksint32_t real_thread_create(real_thread_t *ptr_id, srt_kel_thread_attr_t *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
+kint32_t real_thread_create(real_thread_t *ptr_id, struct kel_thread_attr *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {
 	return __real_user_thread_create(ptr_id, -1, sprt_attr, pfunc_start_routine, ptr_args);
 }
@@ -152,7 +152,7 @@ ksint32_t real_thread_create(real_thread_t *ptr_id, srt_kel_thread_attr_t *sprt_
  * @retval 	err code
  * @note   	tid is fixed to KEL_THREAD_TID_IDLE
  */
-ksint32_t kernel_thread_idle_create(srt_kel_thread_attr_t *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
+kint32_t kernel_thread_idle_create(struct kel_thread_attr *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {  
     return __kernel_thread_create(mrt_nullptr, KEL_THREAD_TID_IDLE, sprt_attr, pfunc_start_routine, ptr_args);
 }
@@ -163,7 +163,7 @@ ksint32_t kernel_thread_idle_create(srt_kel_thread_attr_t *sprt_attr, void *(*pf
  * @retval 	err code
  * @note   	tid is fixed to KEL_THREAD_TID_BASE
  */
-ksint32_t kernel_thread_base_create(srt_kel_thread_attr_t *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
+kint32_t kernel_thread_base_create(struct kel_thread_attr *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {  
     return __kernel_thread_create(mrt_nullptr, KEL_THREAD_TID_BASE, sprt_attr, pfunc_start_routine, ptr_args);
 }
@@ -174,7 +174,7 @@ ksint32_t kernel_thread_base_create(srt_kel_thread_attr_t *sprt_attr, void *(*pf
  * @retval 	err code
  * @note   	tid is fixed to KEL_THREAD_TID_INIT
  */
-ksint32_t kernel_thread_init_create(srt_kel_thread_attr_t *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
+kint32_t kernel_thread_init_create(struct kel_thread_attr *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {  
     return __kernel_thread_create(mrt_nullptr, KEL_THREAD_TID_INIT, sprt_attr, pfunc_start_routine, ptr_args);
 }
@@ -185,7 +185,7 @@ ksint32_t kernel_thread_init_create(srt_kel_thread_attr_t *sprt_attr, void *(*pf
  * @retval 	err code
  * @note   	tid is fixed to KEL_THREAD_TID_TIME
  */
-ksint32_t kernel_thread_time_create(srt_kel_thread_attr_t *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
+kint32_t kernel_thread_time_create(struct kel_thread_attr *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {  
     return __kernel_thread_create(mrt_nullptr, KEL_THREAD_TID_TIME, sprt_attr, pfunc_start_routine, ptr_args);
 }
@@ -196,11 +196,11 @@ ksint32_t kernel_thread_time_create(srt_kel_thread_attr_t *sprt_attr, void *(*pf
  * @retval 	none
  * @note   	none
  */
-void *real_thread_attr_init(srt_kel_thread_attr_t *sprt_attr)
+void *real_thread_attr_init(struct kel_thread_attr *sprt_attr)
 {
 	void *ptr_stack;
 
-	memset(sprt_attr, 0, sizeof(srt_kel_thread_attr_t));
+	memset(sprt_attr, 0, sizeof(struct kel_thread_attr));
 
 	/*!< set default parmeters */
 	/*!< detach state: join */
@@ -228,7 +228,7 @@ void *real_thread_attr_init(srt_kel_thread_attr_t *sprt_attr)
  * @retval 	none
  * @note   	none
  */
-void *real_thread_attr_revise(srt_kel_thread_attr_t *sprt_attr)
+void *real_thread_attr_revise(struct kel_thread_attr *sprt_attr)
 {
 	void *ptr_stack;
 
@@ -260,7 +260,7 @@ void *real_thread_attr_revise(srt_kel_thread_attr_t *sprt_attr)
  * @retval 	none
  * @note   	none
  */
-void real_thread_attr_destroy(srt_kel_thread_attr_t *sprt_attr)
+void real_thread_attr_destroy(struct kel_thread_attr *sprt_attr)
 {
 	if (!sprt_attr)
 		return;
@@ -268,7 +268,7 @@ void real_thread_attr_destroy(srt_kel_thread_attr_t *sprt_attr)
 	if (sprt_attr->ptr_stack_start)
 		kfree(sprt_attr->ptr_stack_start);
 	
-	memset(sprt_attr, 0, sizeof(srt_kel_thread_attr_t));
+	memset(sprt_attr, 0, sizeof(struct kel_thread_attr));
 }
 
 /*!< end of file */

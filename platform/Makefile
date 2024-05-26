@@ -12,20 +12,25 @@
 obj-y	+=	mem/
 obj-y	+=	bus_type/
 obj-y	+=	of/
-obj-y	+=	irq/
-obj-y	+=	pinctrl/
-obj-y	+=	chardev/
-# obj-y	+=	block_device/
-obj-y	+=	net_device/
-obj-y	+=	gpio_desc/
-obj-y	+=	framebuffer/
-obj-y	+=	mmc/
-obj-y	+=	usb/
 
 obj-y	+=	fwk_uaccess.o
 obj-y	+=	fwk_fcntl.o
 obj-y	+=	fwk_fs.o
-obj-y	+=	fwk_kobj.o
+obj-y	+=	fwk_kobjmap.o
 obj-y	+=	fwk_inode.o
+
+obj-y	+=	clk/
+obj-y	+=	irq/
+obj-y	+=	pinctrl/
+obj-y	+=	gpio/
+obj-y	+=	i2c/
+
+obj-y	+=	chardev/
+# obj-y	+=	blk_device/
+obj-y	+=	net_device/
+
+obj-y	+=	framebuffer/
+obj-y	+=	mmc/
+obj-y	+=	usb/
 
 # end of file

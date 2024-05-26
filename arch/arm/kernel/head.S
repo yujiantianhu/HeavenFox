@@ -109,11 +109,11 @@ _kernel_reset:
     bic r0, r0, #CPSR_BIT_A                         @ enable abort
     msr cpsr, r0
 
-#   READ_CP15_SCTLR(r0)
-#   orr r0, r0, #CP15_SCTLR_BIT_C                   @ enable D-Cache
-#   orr r0, r0, #CP15_SCTLR_BIT_I                   @ enable I-Cache
-#   orr r0, r0, #CP15_SCTLR_BIT_Z                   @ enable branch prediction
-#   WRITE_CP15_SCTLR(r0)
+    READ_CP15_SCTLR(r0)
+    orr r0, r0, #CP15_SCTLR_BIT_C                   @ enable D-Cache
+    orr r0, r0, #CP15_SCTLR_BIT_I                   @ enable I-Cache
+    orr r0, r0, #CP15_SCTLR_BIT_Z                   @ enable branch prediction
+    WRITE_CP15_SCTLR(r0)
 
     b _kernel_start                                 @ jump to head-common.S (configure mmu)
 

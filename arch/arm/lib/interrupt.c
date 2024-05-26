@@ -12,6 +12,8 @@
 
 /*!< The includes */
 #include <configs/configs.h>
+#include <common/generic.h>
+#include <common/io_stream.h>
 #include <asm/interrupt.h>
 #include <platform/irq/fwk_irq_types.h>
 
@@ -35,7 +37,7 @@ void exec_fiq_handler(void)
  */
 void exec_irq_handler(void)
 {
-    ksint32_t hardirq, softIrq;
+    kint32_t hardirq, softIrq;
 
     /*!< read IAR, enable IRQ */
     hardirq = local_irq_acknowledge();
@@ -56,7 +58,7 @@ void exec_irq_handler(void)
  */
 void exec_software_irq_handler(void)
 {
-    ksint32_t hardirq;
+    kint32_t hardirq;
     kuint32_t event = 0;
 
     __asm__ __volatile__ (

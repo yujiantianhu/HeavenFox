@@ -31,7 +31,7 @@
 void mutex_init(struct mutex_lock *sprt_lock)
 {
     if (sprt_lock)
-        sprt_lock->count = 0;
+        ATOMIC_SET(&sprt_lock->sgrt_atc);
 }
 
 /*!
@@ -42,10 +42,13 @@ void mutex_init(struct mutex_lock *sprt_lock)
  */
 void mutex_lock(struct mutex_lock *sprt_lock)
 {
-    if (mrt_mutex_is_locked(sprt_lock))
+    if (!mrt_current)
+        return;
+
+    if (mutex_is_locked(sprt_lock))
         real_thread_schedule();
     
-    COUNT_INC(sprt_lock->count);
+    atomic_inc(&sprt_lock->sgrt_atc);
 }
 
 /*!
@@ -56,7 +59,10 @@ void mutex_lock(struct mutex_lock *sprt_lock)
  */
 void mutex_unlock(struct mutex_lock *sprt_lock)
 {
-    COUNT_DEC(sprt_lock->count);
+    if (!mrt_current)
+        return;
+    
+    atomic_dec(&sprt_lock->sgrt_atc);
 }
 
 /*!< end of file */

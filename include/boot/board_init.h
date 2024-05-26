@@ -18,7 +18,7 @@
 #include <common/api_string.h>
 #include <common/io_stream.h>
 #include <common/mem_manage.h>
-#include <board/board_common.h>
+#include <board/board.h>
 #include <platform/fwk_mempool.h>
 #include <platform/mmc/fwk_sdcard.h>
 #include <boot/boot_text.h>
@@ -39,7 +39,7 @@ struct global_data
 };
 typedef struct global_data srt_gd_t;
 
-typedef ksint32_t (*board_init_t) (void);
+typedef kint32_t (*board_init_t) (void);
 
 TARGET_EXT kuaddr_t _SVC_MODE_STACK_BASE;
 TARGET_EXT kuaddr_t _SYS_MODE_STACK_BASE;
@@ -61,10 +61,10 @@ TARGET_EXT kuaddr_t board_init_f_alloc_reserve(kuaddr_t base);
 TARGET_EXT void board_init_f_init_reserve(kuaddr_t base);
 
 /*!< initialized by being called by "board_init_f/r" */
-TARGET_EXT ksint32_t board_init_console(void);
-TARGET_EXT ksint32_t board_init_light(void);
-TARGET_EXT ksint32_t board_init_sdmmc(void);
-TARGET_EXT ksint32_t board_init_systick(void);
+TARGET_EXT kint32_t board_init_console(void);
+TARGET_EXT kint32_t board_init_light(void);
+TARGET_EXT kint32_t board_init_sdmmc(void);
+TARGET_EXT kint32_t board_init_systick(void);
 
 /*!< API function */
 /*!
@@ -91,7 +91,7 @@ static inline srt_gd_t *board_get_gd(void)
  * @retval  none
  * @note    call every function from board 
  */
-static inline ksint32_t board_initcall_run_list(const board_init_t init_sequence[])
+static inline kint32_t board_initcall_run_list(const board_init_t init_sequence[])
 {
 	const board_init_t *pFunc_init;
 

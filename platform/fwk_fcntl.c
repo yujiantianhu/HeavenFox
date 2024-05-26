@@ -29,6 +29,8 @@ static struct fwk_file_table sgrt_fwk_file_table =
 
 	.fds		= mrt_nullptr,
 	.fd_array	= { mrt_nullptr },
+
+	.sgrt_mutex	= MUTEX_LOCK_INIT(),
 };
 
 static struct fwk_file sgrt_fwk_file_stdio[DEVICE_MAJOR_BASE] =
@@ -54,7 +56,7 @@ static struct fwk_file sgrt_fwk_file_stdio[DEVICE_MAJOR_BASE] =
  * @retval  none
  * @note    none
  */
-static ksint32_t __plat_init fwk_file_system_init(void)
+static kint32_t __plat_init fwk_file_system_init(void)
 {
 	struct fwk_file_table *sprt_table;
 	kusize_t  num_farray;
@@ -70,7 +72,7 @@ static ksint32_t __plat_init fwk_file_system_init(void)
 	num_farray = ARRAY_SIZE(sgrt_fwk_file_stdio);
 
 	if (sprt_table->max_fdarr < num_farray)
-		return -NR_isArrayOver;
+		return -NR_IS_MORE;
 
 	/*!< Occupy the top three */
 	for (fileCnt = 0; fileCnt < num_farray; fileCnt++)
@@ -78,9 +80,11 @@ static ksint32_t __plat_init fwk_file_system_init(void)
 
 	sprt_table->max_fds		= sprt_table->max_fdarr;
 	sprt_table->ref_fdarr	= fileCnt;
-	sprt_table->max_fdset 	= mrt_cmp_gt(num_farray, 0, num_farray - 1, sprt_table->max_fdset);
+	sprt_table->max_fdset 	= CMP_GT2(num_farray, 0, num_farray - 1, sprt_table->max_fdset);
 
-	return NR_isWell;
+	mutex_init(&sprt_table->sgrt_mutex);
+
+	return NR_IS_NORMAL;
 }
 IMPORT_PLATFORM_INIT(fwk_file_system_init);
 
@@ -90,13 +94,13 @@ IMPORT_PLATFORM_INIT(fwk_file_system_init);
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_get_expand_fdtable(struct fwk_file_table *sprt_table, kuint32_t flags)
+static kint32_t fwk_get_expand_fdtable(struct fwk_file_table *sprt_table, kuint32_t flags)
 {
-	ksint32_t index;
+	kint32_t index;
 
 	/*!< Created for the first time */
 	if (!isValid(sprt_table->fds))
-		sprt_table->fds	= (struct fwk_file **)kzalloc(sizeof(struct fwk_file) * FILE_DESC_EXP_NUM, GFP_KERNEL);
+		sprt_table->fds	= (struct fwk_file **)kcalloc(sizeof(struct fwk_file), FILE_DESC_EXP_NUM, GFP_KERNEL);
 
 	/*!< It still doesn't exist after it was created */
 	if (!isValid(sprt_table->fds))
@@ -120,7 +124,7 @@ fdget:
 	return index;
 
 fail:
-	return -NR_isAnyErr;
+	return -NR_IS_ERROR;
 }
 
 /*!
@@ -129,9 +133,9 @@ fail:
  * @retval  none
  * @note    none
  */
-static void fwk_put_expand_fdtable(struct fwk_file_table *sprt_table, ksint32_t fd)
+static void fwk_put_expand_fdtable(struct fwk_file_table *sprt_table, kint32_t fd)
 {
-	ksint32_t index;
+	kint32_t index;
 
 	/*!< The array does not exist */
 	if (!isValid(sprt_table->fds) || (fd < sprt_table->max_fdarr))
@@ -140,7 +144,7 @@ static void fwk_put_expand_fdtable(struct fwk_file_table *sprt_table, ksint32_t 
 	index = fd - sprt_table->max_fdarr;
 	sprt_table->fds[index] = mrt_nullptr;
 
-	sprt_table->max_fdset = mrt_ret_max_super(sprt_table->max_fdset, fd, fd - 1);
+	sprt_table->max_fdset = CMP_GTS(sprt_table->max_fdset, fd, fd - 1);
 
 	/*!< The extended array has all been emptied. Free up space and save memory */
 	if (!index)
@@ -158,10 +162,10 @@ static void fwk_put_expand_fdtable(struct fwk_file_table *sprt_table, ksint32_t 
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_get_unused_fd_flags(kuint32_t flags)
+static kint32_t fwk_get_unused_fd_flags(kuint32_t flags)
 {
 	struct fwk_file_table *sprt_table;
-	ksint32_t index;
+	kint32_t index;
 
 	sprt_table = &sgrt_fwk_file_table;
 
@@ -170,8 +174,10 @@ static ksint32_t fwk_get_unused_fd_flags(kuint32_t flags)
 	if (index < 0)
 		goto expand;
 
+	mutex_lock(&sprt_table->sgrt_mutex);
+
 	/*!< Priority is given to backward allocation */
-	index = mrt_ret_min_super(sprt_table->max_fdset + 1, sprt_table->max_fdarr, -1);
+	index = CMP_LTS(sprt_table->max_fdset + 1, sprt_table->max_fdarr, -1);
 	if (index >= 0)
 	{
 		sprt_table->max_fdset++;
@@ -185,16 +191,23 @@ static ksint32_t fwk_get_unused_fd_flags(kuint32_t flags)
 			goto fdget;
 	}
 
+	mutex_unlock(&sprt_table->sgrt_mutex);
+
 	/*!< Fail: fwk_get_fd_available check failed || RET_MIN_SUPER fail to get || for loop calls the overrun */
-	return -NR_isArrayOver;
+	return -NR_IS_MORE;
 
 fdget:
 	fwk_fdtable_get(sprt_table);
+	mutex_unlock(&sprt_table->sgrt_mutex);
+
 	return index;
 
 expand:
 	/*!< fd has run out */
-	return fwk_get_expand_fdtable(sprt_table, flags);
+	index = fwk_get_expand_fdtable(sprt_table, flags);
+	mutex_unlock(&sprt_table->sgrt_mutex);
+
+	return index;
 }
 
 /*!
@@ -203,10 +216,10 @@ expand:
  * @retval  none
  * @note    none
  */
-static void fwk_put_used_fd_flags(ksint32_t fd)
+static void fwk_put_used_fd_flags(kint32_t fd)
 {
 	struct fwk_file_table *sprt_table;
-	ksint32_t index;
+	kint32_t index;
 
 	if (FILE_DESC_OVER_BASE(fd))
 		return;
@@ -217,15 +230,21 @@ static void fwk_put_used_fd_flags(ksint32_t fd)
 	if (index >= sprt_table->max_fdarr)
 		goto expand;
 
+	mutex_lock(&sprt_table->sgrt_mutex);
+
 	sprt_table->fd_array[index]	= mrt_nullptr;
-	sprt_table->max_fdset = mrt_ret_max_super(sprt_table->max_fdset, fd, fd - 1);
+	sprt_table->max_fdset = CMP_GTS(sprt_table->max_fdset, fd, fd - 1);
 	fwk_fdtable_put(sprt_table);
+
+	mutex_unlock(&sprt_table->sgrt_mutex);
 
 	return;
 
 expand:
+	mutex_lock(&sprt_table->sgrt_mutex);
 	/*!< fd has run out */
 	fwk_put_expand_fdtable(sprt_table, fd);
+	mutex_unlock(&sprt_table->sgrt_mutex);
 }
 
 /*!
@@ -234,14 +253,14 @@ expand:
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_fd_install(ksint32_t fd, struct fwk_file *sprt_file)
+static kint32_t fwk_fd_install(kint32_t fd, struct fwk_file *sprt_file)
 {
 	struct fwk_file_table *sprt_table;
-	struct fwk_file  **sprt_fdt;
-	ksint32_t index;
+	struct fwk_file **sprt_fdt;
+	kint32_t index;
 
 	if (FILE_DESC_OVER_BASE(fd) || !isValid(sprt_file))
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	sprt_table	= &sgrt_fwk_file_table;
 	sprt_fdt	= sprt_table->fd_array;
@@ -254,11 +273,13 @@ static ksint32_t fwk_fd_install(ksint32_t fd, struct fwk_file *sprt_file)
 	}
 
 	if (sprt_fdt[index])
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
+	mutex_lock(&sprt_table->sgrt_mutex);
 	sprt_fdt[index] = sprt_file;
+	mutex_unlock(&sprt_table->sgrt_mutex);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -267,11 +288,11 @@ static ksint32_t fwk_fd_install(ksint32_t fd, struct fwk_file *sprt_file)
  * @retval  none
  * @note    none
  */
-static struct fwk_file *fwk_fd_to_file(ksint32_t fd)
+static struct fwk_file *fwk_fd_to_file(kint32_t fd)
 {
 	struct fwk_file_table *sprt_table;
 	struct fwk_file  **sprt_fdt;
-	ksint32_t index;
+	kint32_t index;
 
 	if (FILE_DESC_OVER_BASE(fd))
 		return mrt_nullptr;
@@ -295,17 +316,17 @@ static struct fwk_file *fwk_fd_to_file(ksint32_t fd)
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_do_open(const kstring_t *dev, kuint32_t mode)
+static kint32_t fwk_do_open(const kchar_t *dev, kuint32_t mode)
 {
 	struct fwk_file  *sprt_file;
-	ksint32_t fd;
-	ksint32_t retval;
+	kint32_t fd;
+	kint32_t retval;
 
 	fd = fwk_get_unused_fd_flags(mode);
 	if (fd < 0)
 		goto fail1;
 
-	sprt_file = fwk_do_filp_open((kstring_t *)dev, mode);
+	sprt_file = fwk_do_filp_open((kchar_t *)dev, mode);
 	if (!isValid(sprt_file))
 		goto fail2;
 
@@ -320,7 +341,7 @@ fail3:
 fail2:
 	fwk_put_used_fd_flags(fd);
 fail1:
-	return -NR_isArgFault;
+	return -NR_IS_FAULT;
 }
 
 /*!
@@ -329,7 +350,7 @@ fail1:
  * @retval  none
  * @note    none
  */
-static void fwk_do_close(ksint32_t fd)
+static void fwk_do_close(kint32_t fd)
 {
 	struct fwk_file *sprt_file;
 
@@ -347,26 +368,26 @@ static void fwk_do_close(ksint32_t fd)
  * @retval  none
  * @note    none
  */
-static kssize_t fwk_do_write(ksint32_t fd, const void *buf, kusize_t size)
+static kssize_t fwk_do_write(kint32_t fd, const void *buf, kusize_t size)
 {
 	struct fwk_file *sprt_file;
-	ksint32_t retval;
+	kint32_t retval;
 
 	if (fd < 0)
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	sprt_file = fwk_fd_to_file(fd);
 	if (!isValid(sprt_file))
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	if (sprt_file->sprt_foprts->write)
 	{
-		retval = sprt_file->sprt_foprts->write(sprt_file, (const ksbuffer_t *)buf, size);
+		retval = sprt_file->sprt_foprts->write(sprt_file, (const kbuffer_t *)buf, size);
 		if (!retval)
 			return size;
 	}
 
-	return -NR_isAnyErr;
+	return -NR_IS_ERROR;
 }
 
 /*!
@@ -375,26 +396,28 @@ static kssize_t fwk_do_write(ksint32_t fd, const void *buf, kusize_t size)
  * @retval  none
  * @note    none
  */
-static kssize_t fwk_do_read(ksint32_t fd, void *buf, kusize_t size)
+static kssize_t fwk_do_read(kint32_t fd, void *buf, kusize_t size)
 {
 	struct fwk_file *sprt_file;
-	ksint32_t retval;
+	kint32_t retval;
 
 	if (fd < 0)
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	sprt_file = fwk_fd_to_file(fd);
 	if (!isValid(sprt_file))
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	if (sprt_file->sprt_foprts->read)
 	{
-		retval = sprt_file->sprt_foprts->read(sprt_file, (ksbuffer_t *)buf, size);
+		retval = sprt_file->sprt_foprts->read(sprt_file, (kbuffer_t *)buf, size);
 		if (!retval)
 			return size;
+		else if (retval > 0)
+			return retval;
 	}
 
-	return -NR_isAnyErr;
+	return -NR_IS_ERROR;
 }
 
 /*!
@@ -403,26 +426,26 @@ static kssize_t fwk_do_read(ksint32_t fd, void *buf, kusize_t size)
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_do_ioctl(ksint32_t fd, kuint32_t request, kuaddr_t args)
+static kint32_t fwk_do_ioctl(kint32_t fd, kuint32_t request, kuaddr_t args)
 {
 	struct fwk_file *sprt_file;
-	ksint32_t retval;
+	kint32_t retval;
 
 	if (fd < 0)
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	sprt_file = fwk_fd_to_file(fd);
 	if (!isValid(sprt_file))
-		return -NR_isAnyErr;
+		return -NR_IS_ERROR;
 
 	if (sprt_file->sprt_foprts->unlocked_ioctl)
 	{
 		retval = sprt_file->sprt_foprts->unlocked_ioctl(sprt_file, request, args);
 		if (!retval)
-			return NR_isWell;
+			return NR_IS_NORMAL;
 	}
 
-	return -NR_isAnyErr;
+	return -NR_IS_ERROR;
 }
 
 /*!
@@ -431,11 +454,11 @@ static ksint32_t fwk_do_ioctl(ksint32_t fd, kuint32_t request, kuaddr_t args)
  * @retval  none
  * @note    none
  */
-static void *fwk_do_mmap(void *addr, kusize_t length, ksint32_t prot, ksint32_t flags, ksint32_t fd, kuint32_t offset)
+static void *fwk_do_mmap(void *addr, kusize_t length, kint32_t prot, kint32_t flags, kint32_t fd, kuint32_t offset)
 {
 	struct fwk_vm_area sgrt_vm;
 	struct fwk_file *sprt_file;
-	ksint32_t retval;
+	kint32_t retval;
 
 	if (fd < 0)
 		return mrt_nullptr;
@@ -467,7 +490,7 @@ static void *fwk_do_mmap(void *addr, kusize_t length, ksint32_t prot, ksint32_t 
  * @retval  none
  * @note    The interface is provided for use by the application layer
  */
-ksint32_t virt_open(const kstring_t *dev, kuint32_t mode)
+kint32_t virt_open(const kchar_t *dev, kuint32_t mode)
 {
 	return fwk_do_open(dev, mode);
 }
@@ -478,7 +501,7 @@ ksint32_t virt_open(const kstring_t *dev, kuint32_t mode)
  * @retval  none
  * @note    The interface is provided for use by the application layer
  */
-void virt_close(ksint32_t fd)
+void virt_close(kint32_t fd)
 {
 	return fwk_do_close(fd);
 }
@@ -489,7 +512,7 @@ void virt_close(ksint32_t fd)
  * @retval  none
  * @note    The interface is provided for use by the application layer
  */
-kssize_t virt_write(ksint32_t fd, const void *buf, kusize_t size)
+kssize_t virt_write(kint32_t fd, const void *buf, kusize_t size)
 {
 	return fwk_do_write(fd, buf, size);
 }
@@ -500,7 +523,7 @@ kssize_t virt_write(ksint32_t fd, const void *buf, kusize_t size)
  * @retval  none
  * @note    The interface is provided for use by the application layer
  */
-kssize_t virt_read(ksint32_t fd, void *buf, kusize_t size)
+kssize_t virt_read(kint32_t fd, void *buf, kusize_t size)
 {
 	return fwk_do_read(fd, buf, size);
 }
@@ -511,11 +534,11 @@ kssize_t virt_read(ksint32_t fd, void *buf, kusize_t size)
  * @retval  none
  * @note    The interface is provided for use by the application layer
  */
-ksint32_t virt_ioctl(ksint32_t fd, kuint32_t request, ...)
+kint32_t virt_ioctl(kint32_t fd, kuint32_t request, ...)
 {
 	va_list ptr_list;
 	kuaddr_t args;
-	ksint32_t retval;
+	kint32_t retval;
 
 	va_start(ptr_list, request);
 
@@ -532,7 +555,7 @@ ksint32_t virt_ioctl(ksint32_t fd, kuint32_t request, ...)
  * @retval  none
  * @note    The interface is provided for use by the application layer
  */
-void *virt_mmap(void *addr, kusize_t length, ksint32_t prot, ksint32_t flags, ksint32_t fd, kuint32_t offset)
+void *virt_mmap(void *addr, kusize_t length, kint32_t prot, kint32_t flags, kint32_t fd, kuint32_t offset)
 {
 	return fwk_do_mmap(addr, length, prot, flags, fd, offset);
 }
@@ -543,7 +566,7 @@ void *virt_mmap(void *addr, kusize_t length, ksint32_t prot, ksint32_t flags, ks
  * @retval  none
  * @note    The interface is provided for use by the application layer
  */
-ksint32_t virt_munmap(void *addr, kusize_t length)
+kint32_t virt_munmap(void *addr, kusize_t length)
 {
 	return 0;
 }

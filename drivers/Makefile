@@ -10,7 +10,10 @@
 #
 
 obj-y	+=	clk/
+obj-y	+=	pinctrl/
 obj-y	+=	gpio/
+obj-y	+=	input/
+obj-y	+=	i2c/
 obj-y	+=	usb/
 obj-y	+=	video/
 

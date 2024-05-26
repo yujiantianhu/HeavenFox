@@ -21,7 +21,7 @@
 /*!< Maximum number of fb devices (total number of secondary devices) */
 #define FWK_FB_DEVICE_MAX							(32)
 /*!< The primary device number of the fb device */
-#define FWK_FB_DEVICE_MAJOR							(29)
+#define FWK_FB_DEVICE_MAJOR							(NR_FBDEV_MAJOR)
 
 /*!< The globals */
 static struct fwk_fb_info *sgrt_fwk_registered_fb[FWK_FB_DEVICE_MAX] = {mrt_nullptr};
@@ -59,6 +59,7 @@ struct fwk_fb_info *fwk_framebuffer_alloc(kusize_t size, struct fwk_device *sprt
 	{
 		/*!< Save private variables */
 		sprt_fb_info->ptr_par = sprt_fb_info + fb_info_size;
+		memset(sprt_fb_info->ptr_par, 0, size);
 	}
 
 	/*!< Save the parent node of the device */
@@ -88,14 +89,14 @@ void fwk_framebuffer_release(struct fwk_fb_info *sprt_fb_info)
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_register_framebuffer(struct fwk_fb_info *sprt_fb_info)
+kint32_t fwk_register_framebuffer(struct fwk_fb_info *sprt_fb_info)
 {
 	struct fwk_fb_info **sprt_exsited;
-	ksint32_t retval;
+	kint32_t retval;
 	kuint32_t i;
 
 	if (!isValid(sprt_fb_info))
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	sprt_exsited = &sgrt_fwk_registered_fb[0];
 
@@ -108,7 +109,7 @@ ksint32_t fwk_register_framebuffer(struct fwk_fb_info *sprt_fb_info)
 
 	/*!< The retrieval failed, and the number of fb devices has reached the upper limit */
 	if (i == FWK_FB_DEVICE_MAX)
-		return -NR_isArrayOver;
+		return -NR_IS_MORE;
 
 	/*!< Save the secondary device number */
 	sprt_fb_info->node = i;
@@ -116,12 +117,12 @@ ksint32_t fwk_register_framebuffer(struct fwk_fb_info *sprt_fb_info)
 	/*!< Create a character device node */
 	retval = fwk_device_create(NR_TYPE_CHRDEV, MKE_DEV_NUM(FWK_FB_DEVICE_MAJOR, i), "fb%d", i);
 	if (retval < 0)
-		return -NR_isUnvalid;
+		return -NR_IS_UNVALID;
 
 	/*!< Register to the global array */
 	sprt_exsited[i] = sprt_fb_info;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -182,16 +183,16 @@ static struct fwk_cdev *sprt_fwk_fb_cdev;
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_fb_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_fb_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	struct fwk_fb_info *sprt_info;
 	kuint32_t fbidx;
-	ksint32_t retval;
+	kint32_t retval;
 
 	fbidx = RET_INODE_MINOR(sprt_inode);
 	sprt_info = fwk_get_fb_info(fbidx);
 	if (!isValid(sprt_info))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	sprt_file->private_data	= sprt_info;
 
@@ -201,11 +202,11 @@ static ksint32_t fwk_fb_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt
 		if (retval < 0)
 		{
 			/*!< Open fb device failed */
-			return -NR_isAnyErr;
+			return -NR_IS_ERROR;
 		}
 	}
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -214,7 +215,7 @@ static ksint32_t fwk_fb_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_fb_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_fb_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
 	struct fwk_fb_info *sprt_info;
 
@@ -223,7 +224,7 @@ static ksint32_t fwk_fb_close(struct fwk_inode *sprt_inode, struct fwk_file *spr
 	if (sprt_info->sprt_fbops->fb_release)
 		sprt_info->sprt_fbops->fb_release(sprt_info, 1);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -232,9 +233,9 @@ static ksint32_t fwk_fb_close(struct fwk_inode *sprt_inode, struct fwk_file *spr
  * @retval  none
  * @note    none
  */
-static kssize_t fwk_fb_write(struct fwk_file *sprt_file, const ksbuffer_t *ptr_buf, kssize_t size)
+static kssize_t fwk_fb_write(struct fwk_file *sprt_file, const kbuffer_t *ptr_buf, kssize_t size)
 {
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -243,9 +244,9 @@ static kssize_t fwk_fb_write(struct fwk_file *sprt_file, const ksbuffer_t *ptr_b
  * @retval  none
  * @note    none
  */
-static kssize_t fwk_fb_read(struct fwk_file *sprt_file, ksbuffer_t *ptr_buf, kssize_t size)
+static kssize_t fwk_fb_read(struct fwk_file *sprt_file, kbuffer_t *ptr_buf, kssize_t size)
 {
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -254,13 +255,13 @@ static kssize_t fwk_fb_read(struct fwk_file *sprt_file, ksbuffer_t *ptr_buf, kss
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_fb_ioctl(struct fwk_file *sprt_file, kuint32_t cmd, kuaddr_t args)
+static kint32_t fwk_fb_ioctl(struct fwk_file *sprt_file, kuint32_t cmd, kuaddr_t args)
 {
 	struct fwk_fb_info *sprt_info;
 	struct fwk_fb_fix_screen_info sgrt_fix;
 	struct fwk_fb_var_screen_info sgrt_var;
 	kuint8_t *ptr_user;
-	ksint32_t retval;
+	kint32_t retval;
 
 	sprt_info = (struct fwk_fb_info *)sprt_file->private_data;
 	ptr_user = (kuint8_t *)args;
@@ -269,12 +270,12 @@ static ksint32_t fwk_fb_ioctl(struct fwk_file *sprt_file, kuint32_t cmd, kuaddr_
 	{
 		case NR_FB_IOGetVScreenInfo:
 			sgrt_var = sprt_info->sgrt_var;
-			retval = fwk_copy_to_user(ptr_user, &sgrt_var, sizeof(sgrt_var)) ? NR_isWell : -NR_isAnyErr;
+			retval = fwk_copy_to_user(ptr_user, &sgrt_var, sizeof(sgrt_var)) ? NR_IS_NORMAL : -NR_IS_ERROR;
 			break;
 
 		case NR_FB_IOPutVScreenInfo:
 			if (!fwk_copy_to_user(&sgrt_var, ptr_user, sizeof(sgrt_var)))
-				return -NR_isAnyErr;
+				return -NR_IS_ERROR;
 
 			/*!< Set the variable parameters */
 
@@ -282,11 +283,11 @@ static ksint32_t fwk_fb_ioctl(struct fwk_file *sprt_file, kuint32_t cmd, kuaddr_
 
 		case NR_FB_IOGetFScreenInfo:
 			sgrt_fix = sprt_info->sgrt_fix;
-			retval = fwk_copy_to_user(ptr_user, &sgrt_fix, sizeof(sgrt_fix)) ? NR_isWell : -NR_isAnyErr;
+			retval = fwk_copy_to_user(ptr_user, &sgrt_fix, sizeof(sgrt_fix)) ? NR_IS_NORMAL : -NR_IS_ERROR;
 			break;
 
 		default:
-			retval = -NR_isUnvalid;
+			retval = -NR_IS_UNVALID;
 			break;
 	}
 
@@ -299,14 +300,14 @@ static ksint32_t fwk_fb_ioctl(struct fwk_file *sprt_file, kuint32_t cmd, kuaddr_
  * @retval  none
  * @note    none
  */
-static ksint32_t fwk_fb_mmap(struct fwk_file *sprt_file, struct fwk_vm_area *vm_area)
+static kint32_t fwk_fb_mmap(struct fwk_file *sprt_file, struct fwk_vm_area *vm_area)
 {
 	struct fwk_fb_info *sprt_info;
-	ksint32_t retval;
+	kint32_t retval;
 
 	sprt_info = (struct fwk_fb_info *)sprt_file->private_data;
 	if (!isValid(sprt_info))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	if (sprt_info->sprt_fbops->fb_mmap)
 	{
@@ -314,14 +315,14 @@ static ksint32_t fwk_fb_mmap(struct fwk_file *sprt_file, struct fwk_vm_area *vm_
 		if (retval < 0)
 		{
 			/*!< Open fb device failed */
-			return -NR_isAnyErr;
+			return -NR_IS_ERROR;
 		}
 	}
 
 	vm_area->virt_addr = sprt_info->sgrt_fix.smem_start;
 	vm_area->size = sprt_info->sgrt_fix.smem_len;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 static struct fwk_file_oprts sgrt_fwk_fb_foprts =
@@ -340,11 +341,11 @@ static struct fwk_file_oprts sgrt_fwk_fb_foprts =
  * @retval  none
  * @note    none
  */
-ksint32_t __dync_init fwk_fbmem_init(void)
+kint32_t __dync_init fwk_fbmem_init(void)
 {
 	struct fwk_cdev *sprt_cdev;
 	kuint32_t devNum;
-	ksint32_t retval;
+	kint32_t retval;
 
 	devNum = MKE_DEV_NUM(FWK_FB_DEVICE_MAJOR, 0);
 	retval = fwk_register_chrdev(devNum, FWK_FB_DEVICE_MAX, "fb");
@@ -362,14 +363,14 @@ ksint32_t __dync_init fwk_fbmem_init(void)
 	/*!< Save to global variable */
 	sprt_fwk_fb_cdev = sprt_cdev;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 
 fail3:
 	fwk_cdev_del(sprt_cdev);
 fail2:
 	fwk_unregister_chrdev(devNum, FWK_FB_DEVICE_MAX);
 fail1:
-	return -NR_isMemErr;
+	return -NR_IS_NOMEM;
 }
 
 /*!

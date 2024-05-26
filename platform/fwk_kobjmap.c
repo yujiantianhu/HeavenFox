@@ -25,7 +25,7 @@ struct fwk_kobj_map *sprt_fwk_netdev_map;
  * @retval  none
  * @note    none
  */
-ksint32_t __plat_init fwk_kobj_init(void)
+kint32_t __plat_init fwk_kobj_init(void)
 {
 	kuint32_t i;
 
@@ -53,7 +53,7 @@ ksint32_t __plat_init fwk_kobj_init(void)
 	for (i = 0; i < ARRAY_SIZE(sprt_fwk_netdev_map->sprt_probes); i++)
 		sprt_fwk_netdev_map->sprt_probes[i] = mrt_nullptr;
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 
 fail3:
 	kfree(sprt_fwk_blkdev_map);
@@ -62,7 +62,7 @@ fail2:
 	kfree(sprt_fwk_chrdev_map);
 	sprt_fwk_chrdev_map = mrt_nullptr;
 fail1:
-	return -NR_isMemErr;
+	return -NR_IS_NOMEM;
 }
 IMPORT_PLATFORM_INIT(fwk_kobj_init);
 
@@ -120,7 +120,7 @@ IMPORT_PLATFORM_EXIT(fwk_kobj_del);
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_kobj_map(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t range, void *data)
+kint32_t fwk_kobj_map(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t range, void *data)
 {
 	struct fwk_probes *sprt_probe;
 	kuint32_t major;
@@ -129,7 +129,7 @@ ksint32_t fwk_kobj_map(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t 
 	kusize_t probeMax;
 
 	if (!isValid(domain) || (!isValid(data)))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< The maximum number of primary devices that can be supported */
 	probeMax = ARRAY_SIZE(domain->sprt_probes);
@@ -138,11 +138,11 @@ ksint32_t fwk_kobj_map(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t 
 	major = GET_DEV_MAJOR(devNum);
 	major = mrt_ret_min2(probeMax, major);
 	majorCnt = GET_DEV_MAJOR(devNum + range) - major + 1;
-	majorCnt = mrt_cmp_gt(major + majorCnt, probeMax, probeMax - major, majorCnt);
+	majorCnt = CMP_GT2(major + majorCnt, probeMax, probeMax - major, majorCnt);
 
 	sprt_probe = (struct fwk_probes *)kzalloc(sizeof(struct fwk_probes) * majorCnt, GFP_KERNEL);
 	if (!isValid(sprt_probe))
-		return -NR_isMemErr;
+		return -NR_IS_NOMEM;
 
 	for (i = 0; i < majorCnt; i++)
 	{
@@ -177,7 +177,7 @@ ksint32_t fwk_kobj_map(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t 
 		*sprt_Dst = sprt_Temp;
 	}
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -186,7 +186,7 @@ ksint32_t fwk_kobj_map(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t 
  * @retval  none
  * @note    none
  */
-ksint32_t fwk_kobj_unmap(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t range)
+kint32_t fwk_kobj_unmap(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t range)
 {
 	struct fwk_probes *sprt_Rlt;
 	kuint32_t major;
@@ -195,7 +195,7 @@ ksint32_t fwk_kobj_unmap(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_
 	kusize_t probeMax;
 
 	if (!isValid(domain))
-		return -NR_isArgFault;
+		return -NR_IS_FAULT;
 
 	/*!< The maximum number of primary devices that can be supported */
 	probeMax = ARRAY_SIZE(domain->sprt_probes);
@@ -204,7 +204,7 @@ ksint32_t fwk_kobj_unmap(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_
 	major = GET_DEV_MAJOR(devNum);
 	major = mrt_ret_min2(probeMax, major);
 	majorCnt = GET_DEV_MAJOR(devNum + range) - major + 1;
-	majorCnt = mrt_cmp_gt(major + majorCnt, probeMax, probeMax - major, majorCnt);;
+	majorCnt = CMP_GT2(major + majorCnt, probeMax, probeMax - major, majorCnt);;
 
 	for (i = 0, sprt_Rlt = mrt_nullptr; i < majorCnt; i++)
 	{
@@ -234,7 +234,7 @@ ksint32_t fwk_kobj_unmap(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_
 	if (sprt_Rlt)
 		kfree(sprt_Rlt);
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!

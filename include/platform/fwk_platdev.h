@@ -31,7 +31,7 @@ enum __ERT_DEVICE_RESOURCE_TYPE
 /*!< Hardware Information Table 1: Obtain hardware by address */
 struct fwk_resources
 {
-	kstring_t *name;
+	kchar_t *name;
 	kuaddr_t start;
 	kuaddr_t end;
 	kuint32_t type;
@@ -40,16 +40,16 @@ struct fwk_resources
 /*!< Hardware Information Table 2: Obtain hardware by enum */
 struct fwk_enums
 {
-	ksint32_t pinEnum;
-	ksint32_t irqNum;
+	kint32_t pinEnum;
+	kint32_t irqNum;
 
 	void *data;
 };
 
 struct fwk_platdev
 {
-	kstring_t *name;
-	ksint32_t id;
+	kchar_t *name;
+	kint32_t id;
 
 	struct fwk_resources *sprt_resources;
 	kusize_t num_resources;
@@ -57,17 +57,17 @@ struct fwk_platdev
 	struct fwk_enums *sprt_enums;
 	kusize_t num_enums;
 
-	kstring_t *driver_override;
+	kchar_t *driver_override;
 	struct fwk_device sgrt_dev;
 };
 
 #define RESOURCE_SIZE(sprt_res)						(sprt_res ? (sprt_res->end - sprt_res->start + 1) : 0)
 
 /*!< The functions */
-TARGET_EXT ksint32_t fwk_device_register(struct fwk_device *sprt_dev);
-TARGET_EXT ksint32_t fwk_device_unregister(struct fwk_device *sprt_dev);
-TARGET_EXT ksint32_t fwk_register_platdevice(struct fwk_platdev *sprt_platdev);
-TARGET_EXT ksint32_t fwk_unregister_platdevice(struct fwk_platdev *sprt_platdev);
+TARGET_EXT kint32_t fwk_device_add(struct fwk_device *sprt_dev);
+TARGET_EXT kint32_t fwk_device_del(struct fwk_device *sprt_dev);
+TARGET_EXT kint32_t fwk_register_platdevice(struct fwk_platdev *sprt_platdev);
+TARGET_EXT kint32_t fwk_unregister_platdevice(struct fwk_platdev *sprt_platdev);
 
 /*!< API functions */
 /*!

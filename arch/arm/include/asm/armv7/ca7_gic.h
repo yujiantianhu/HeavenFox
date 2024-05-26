@@ -131,8 +131,8 @@ typedef struct ca7_gic_cpu
 
 /* The functions */
 TARGET_EXT srt_ca7_gic_t *fwk_get_gic_data(kuint32_t gic_nr);
-TARGET_EXT ksint32_t fwk_gic_to_gpc_irq(ksint32_t hwirq);
-TARGET_EXT ksint32_t fwk_gpc_to_gic_irq(ksint32_t virq);
+TARGET_EXT kint32_t fwk_gic_to_gpc_irq(kint32_t hwirq);
+TARGET_EXT kint32_t fwk_gpc_to_gic_irq(kint32_t virq);
 
 /*!
  * @brief   gic enbale irq
@@ -140,17 +140,15 @@ TARGET_EXT ksint32_t fwk_gpc_to_gic_irq(ksint32_t virq);
  * @retval  none
  * @note    enable IRQ: group0
  */
-static inline void local_irq_enable(ksint32_t irq_number)
+static inline void local_irq_enable(kint32_t irq_number)
 {
     srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_des_t *sprt_dest;
-    ksint32_t hwirq;
+    kint32_t hwirq;
 
     hwirq = fwk_gpc_to_gic_irq(irq_number);
     if (hwirq < 0)
-    {
         return;
-    }
 
     sprt_dest = mrt_get_gic_destributor(sprt_gic);
     mrt_setbit_towords(hwirq, &sprt_dest->D_ISENABLER);
@@ -162,17 +160,15 @@ static inline void local_irq_enable(ksint32_t irq_number)
  * @retval  none
  * @note    disable IRQ: group0
  */
-static inline void local_irq_disable(ksint32_t irq_number)
+static inline void local_irq_disable(kint32_t irq_number)
 {
     srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_des_t *sprt_dest;
-    ksint32_t hwirq;
+    kint32_t hwirq;
 
     hwirq = fwk_gpc_to_gic_irq(irq_number);
     if (hwirq < 0)
-    {
         return;
-    }
 
     sprt_dest = mrt_get_gic_destributor(sprt_gic);
     mrt_setbit_towords(hwirq, &sprt_dest->D_ICENABLER);
@@ -184,7 +180,7 @@ static inline void local_irq_disable(ksint32_t irq_number)
  * @retval  none
  * @note    return IRQ number (and CPU source in SGI case)
  */
-static inline ksint32_t local_irq_acknowledge(void)
+static inline kint32_t local_irq_acknowledge(void)
 {
     srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_cpu_t *sprt_cpu;
@@ -263,13 +259,11 @@ static inline void local_irq_setPriority(kuint32_t irq_number, kuint32_t priorit
 {
     srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_des_t *sprt_dest;
-    ksint32_t hwirq;
+    kint32_t hwirq;
 
     hwirq = fwk_gpc_to_gic_irq(irq_number);
     if (hwirq < 0)
-    {
         return;
-    }
 
     sprt_dest = mrt_get_gic_destributor(sprt_gic);
     mrt_writeb(mrt_bit_mask(priority, 0xffU, 8U - __CA7_GIC_PRIO_BITS), &sprt_dest->D_IPRIORITYR[hwirq]);
@@ -285,13 +279,11 @@ static inline kuint32_t local_irq_getPriority(kuint32_t irq_number)
 {
     srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
     srt_ca7_gic_des_t *sprt_dest;
-    ksint32_t hwirq;
+    kint32_t hwirq;
 
     hwirq = fwk_gpc_to_gic_irq(irq_number);
     if (hwirq < 0)
-    {
         return 0;
-    }
 
     sprt_dest = mrt_get_gic_destributor(sprt_gic);
     return (kuint32_t)mrt_getbit_u8(0xffU, 8U - __CA7_GIC_PRIO_BITS, &sprt_dest->D_IPRIORITYR[hwirq]);

@@ -36,7 +36,7 @@ TARGET_EXT DSTATUS fwk_sdfatfs_release(kuint8_t physicalDrive);
 TARGET_EXT void rfs_fatfs_file_initial(struct rfs_disk_file *sprt_file);
 TARGET_EXT void *rfs_fatfs_file_allocate(void);
 TARGET_EXT void rfs_fatfs_file_free(struct rfs_disk_file *sprt_file);
-TARGET_EXT ksint32_t rfs_fatfs_disk_create(struct rfs_disk *sprt_disk, kuint16_t drvNumber);
+TARGET_EXT kint32_t rfs_fatfs_disk_create(struct rfs_disk *sprt_disk, kuint16_t drvNumber);
 TARGET_EXT void rfs_fatfs_disk_destroy(struct rfs_disk *sprt_disk);
 
 #ifdef __cplusplus

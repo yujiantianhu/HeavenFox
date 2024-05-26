@@ -21,7 +21,7 @@
  * @retval  none
  * @note    initial console
  */
-ksint32_t board_init_console(void)
+kint32_t board_init_console(void)
 {
     imx6ull_console_init();
 
@@ -38,7 +38,7 @@ ksint32_t board_init_console(void)
  * @retval  none
  * @note    initial systick
  */
-ksint32_t board_init_systick(void)
+kint32_t board_init_systick(void)
 {
     imx6ull_systick_init();
 
@@ -51,7 +51,7 @@ ksint32_t board_init_systick(void)
  * @retval  none
  * @note    initial sdio
  */
-ksint32_t board_init_sdmmc(void)
+kint32_t board_init_sdmmc(void)
 {
     imx6ull_sdmmc_init();
 
@@ -64,7 +64,7 @@ ksint32_t board_init_sdmmc(void)
  * @retval  none
  * @note    initial led
  */
-ksint32_t board_init_light(void)
+kint32_t board_init_light(void)
 {
     imx6ull_led_init();
 

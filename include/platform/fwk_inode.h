@@ -27,7 +27,7 @@
 
 struct fwk_inode
 {
-	kstring_t fileName[INODE_ADD_PREX_LEN];
+	kchar_t fileName[INODE_ADD_PREX_LEN];
 	kuint32_t r_dev;
 
 	struct fwk_inode *sprt_next;
@@ -40,10 +40,10 @@ struct fwk_inode
 };
 
 /*!< The functions */
-TARGET_EXT ksint32_t fwk_mk_inode(kstring_t *name, kuint32_t type, kuint32_t devNum);
-TARGET_EXT ksint32_t fwk_rm_inode(kstring_t *name);
-TARGET_EXT struct fwk_inode *fwk_inode_find(kstring_t *name);
-TARGET_EXT ksint32_t fwk_device_create(kuint32_t type, kuint32_t devNum, kstring_t *name, ...);
-TARGET_EXT ksint32_t fwk_device_destroy(kstring_t *name, ...);
+TARGET_EXT kint32_t fwk_mk_inode(kchar_t *name, kuint32_t type, kuint32_t devNum);
+TARGET_EXT kint32_t fwk_rm_inode(kchar_t *name);
+TARGET_EXT struct fwk_inode *fwk_inode_find(kchar_t *name);
+TARGET_EXT kint32_t fwk_device_create(kuint32_t type, kuint32_t devNum, kchar_t *name, ...);
+TARGET_EXT kint32_t fwk_device_destroy(kchar_t *name, ...);
 
 #endif /*!< __FWK_INODE_H_ */

@@ -9,6 +9,7 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-obj-y	+=	led_template.o
+obj-y	+=	imx-gpiochip.o
+obj-y	+=	led_gpio.o
 
 # end of file

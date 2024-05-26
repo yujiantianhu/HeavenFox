@@ -61,7 +61,7 @@ void board_init_f_init_reserve(kuaddr_t base)
  * @retval  none
  * @note    initial malloc_space
  */
-ksint32_t board_init_malloc_space(void)
+kint32_t board_init_malloc_space(void)
 {
     srt_gd_t *sprt_gd;
     kbool_t retval;

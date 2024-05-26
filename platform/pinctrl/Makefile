@@ -10,5 +10,7 @@
 #
 
 obj-y	+=	fwk_pinctrl.o
+obj-y	+=	fwk_pinmux.o
+obj-y	+=	fwk_pinconf.o
 
 # end of file

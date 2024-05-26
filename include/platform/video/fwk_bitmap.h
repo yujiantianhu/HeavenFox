@@ -47,13 +47,13 @@ typedef struct fwk_bmp_file_header
 typedef struct fwk_bmp_info_header
 {
 	kuint32_t infoSize;              		/*!< the size of the entire bitmap info header in bytes, i.e. the size of the BmpInfoHeader struct */
-	ksint32_t width;                 		/*!< image width (unit: pixel) */
+	kint32_t width;                 		/*!< image width (unit: pixel) */
 
 	/*!< 
 	 * image height (unit: pixel). Positive number indicates a positive direction (starting from the bottom left corner), 
 	 * and a negative number indicates a reverse direction (starting from the upper left corner) 
 	 */
-	ksint32_t height;                		
+	kint32_t height;                		
 	kuint16_t plane;                 		/*!< color flat book, generally fixed at 1 */
 	kuint16_t pixelbit;              		/*!< number of pixel color bits: 1、4、8、16、24. (From the header of the file, this entry is at the 28th byte) */
 	kuint32_t compression;           		/*!< compression properties of the data */

@@ -16,6 +16,7 @@
 /*!< The includes */
 #include <platform/fwk_basic.h>
 #include <platform/fwk_fs.h>
+#include <kernel/mutex.h>
 
 /*!< The defines */
 #define FILE_DESC_NUM_MAX										(32)	/*!< The maximum number of default file descriptors that can be assigned */
@@ -25,23 +26,25 @@
 
 struct fwk_file_table
 {
-	ksint32_t max_fdarr;												/*!< size of fd_array */
-	ksint32_t max_fds; 													/*!< The maximum number of current file objects = max_fdarr + array number of fds */
-	ksint32_t max_fdset;												/*!< The maximum number of current file descriptors */
-	ksint32_t ref_fdarr; 												/*!< The number of descriptors that have been assigned on fd_array */
+	kint32_t max_fdarr;												/*!< size of fd_array */
+	kint32_t max_fds; 													/*!< The maximum number of current file objects = max_fdarr + array number of fds */
+	kint32_t max_fdset;												/*!< The maximum number of current file descriptors */
+	kint32_t ref_fdarr; 												/*!< The number of descriptors that have been assigned on fd_array */
 
 	struct fwk_file **fds;
 	struct fwk_file *fd_array[FILE_DESC_NUM_MAX];
+
+	struct mutex_lock sgrt_mutex;
 };
 
 /*!< The functions */
-TARGET_EXT ksint32_t virt_open(const kstring_t *dev, kuint32_t mode);
-TARGET_EXT void virt_close(ksint32_t fd);
-TARGET_EXT kssize_t virt_write(ksint32_t fd, const void *buf, kusize_t size);
-TARGET_EXT kssize_t virt_read(ksint32_t fd, void *buf, kusize_t size);
-TARGET_EXT kssize_t virt_ioctl(ksint32_t fd, kuint32_t request, ...);
-TARGET_EXT void *virt_mmap(void *addr, kusize_t length, ksint32_t prot, ksint32_t flags, ksint32_t fd, kuint32_t offset);
-TARGET_EXT ksint32_t virt_munmap(void *addr, kusize_t length);
+TARGET_EXT kint32_t virt_open(const kchar_t *dev, kuint32_t mode);
+TARGET_EXT void virt_close(kint32_t fd);
+TARGET_EXT kssize_t virt_write(kint32_t fd, const void *buf, kusize_t size);
+TARGET_EXT kssize_t virt_read(kint32_t fd, void *buf, kusize_t size);
+TARGET_EXT kssize_t virt_ioctl(kint32_t fd, kuint32_t request, ...);
+TARGET_EXT void *virt_mmap(void *addr, kusize_t length, kint32_t prot, kint32_t flags, kint32_t fd, kuint32_t offset);
+TARGET_EXT kint32_t virt_munmap(void *addr, kusize_t length);
 
 /*!< API function */
 /*!
@@ -50,7 +53,7 @@ TARGET_EXT ksint32_t virt_munmap(void *addr, kusize_t length);
  * @retval  none
  * @note    none
  */
-static inline ksint32_t fwk_get_fd_available(struct fwk_file_table *sprt_table)
+static inline kint32_t fwk_get_fd_available(struct fwk_file_table *sprt_table)
 {
 	return (sprt_table->ref_fdarr < sprt_table->max_fdarr) ? (sprt_table->ref_fdarr) : (-1);
 }

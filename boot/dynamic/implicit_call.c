@@ -60,20 +60,20 @@ const dync_exit_t *dync_exit_sections[] =
  * @retval  none
  * @note    call every function from .dync.init 
  */
-ksint32_t dync_initcall_run_list(const kuint32_t section)
+kint32_t dync_initcall_run_list(const kuint32_t section)
 {
 	const dync_init_t *pFunc_init;
 
     if (section >= NR_DYNC_SEC_END)
-        return -NR_isMemErr;
+        return -NR_IS_NOMEM;
 
 	for (pFunc_init = dync_init_sections[section]; (*pFunc_init) && (pFunc_init < dync_init_sections[section + 1]); pFunc_init++)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_isAnyErr;
+			return -NR_IS_ERROR;
 	}
 
-	return NR_isWell;
+	return NR_IS_NORMAL;
 }
 
 /*!
@@ -101,7 +101,7 @@ void dync_exitcall_run_list(const kuint32_t section)
  * @retval  none
  * @note    if (*pFunc_init)() return error, other initcalls will be stopped immediately
  */
-ksint32_t board_early_initcall(void)
+kint32_t board_early_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
     return dync_initcall_run_list(NR_DYNC_SEC_EARLY);
@@ -112,10 +112,10 @@ ksint32_t board_early_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_isAnyErr;
+			return -NR_IS_ERROR;
 	}
 
-    return NR_isWell;
+    return NR_IS_NORMAL;
 
 #endif
 }
@@ -148,7 +148,7 @@ void board_early_exitcall(void)
  * @retval  none
  * @note    if (*pFunc_init)() return error, other initcalls will be stopped immediately
  */
-ksint32_t board_late_initcall(void)
+kint32_t board_late_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
     return dync_initcall_run_list(NR_DYNC_SEC_LATE);
@@ -159,10 +159,10 @@ ksint32_t board_late_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_isAnyErr;
+			return -NR_IS_ERROR;
 	}
 
-    return NR_isWell;
+    return NR_IS_NORMAL;
 
 #endif
 }
@@ -195,7 +195,7 @@ void board_late_exitcall(void)
  * @retval  none
  * @note    if (*pFunc_init)() return error, other initcalls will be stopped immediately
  */
-ksint32_t system_kernel_initcall(void)
+kint32_t system_kernel_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
     return dync_initcall_run_list(NR_DYNC_SEC_KERNEL);
@@ -206,10 +206,10 @@ ksint32_t system_kernel_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_isAnyErr;
+			return -NR_IS_ERROR;
 	}
 
-    return NR_isWell;
+    return NR_IS_NORMAL;
 
 #endif
 }
@@ -243,7 +243,7 @@ void system_kernel_exitcall(void)
  * @retval  none
  * @note    if (*pFunc_init)() return error, other initcalls will be stopped immediately
  */
-ksint32_t root_filesystem_initcall(void)
+kint32_t root_filesystem_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
     return dync_initcall_run_list(NR_DYNC_SEC_ROOTFS);
@@ -254,10 +254,10 @@ ksint32_t root_filesystem_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_isAnyErr;
+			return -NR_IS_ERROR;
 	}
 
-    return NR_isWell;
+    return NR_IS_NORMAL;
 
 #endif
 }
@@ -290,7 +290,7 @@ void root_filesystem_exitcall(void)
  * @retval  none
  * @note    if (*pFunc_init)() return error, other initcalls will be stopped immediately
  */
-ksint32_t platform_built_initcall(void)
+kint32_t platform_built_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
     return dync_initcall_run_list(NR_DYNC_SEC_PLATFORM);
@@ -301,10 +301,10 @@ ksint32_t platform_built_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_isAnyErr;
+			return -NR_IS_ERROR;
 	}
 
-    return NR_isWell;
+    return NR_IS_NORMAL;
 
 #endif
 }
@@ -337,7 +337,7 @@ void platform_built_exitcall(void)
  * @retval  none
  * @note    if (*pFunc_init)() return error, other initcalls will be stopped immediately
  */
-ksint32_t platform_reality_initcall(void)
+kint32_t platform_reality_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
     return dync_initcall_run_list(NR_DYNC_SEC_PATTERN);
@@ -348,10 +348,10 @@ ksint32_t platform_reality_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_isAnyErr;
+			return -NR_IS_ERROR;
 	}
 
-    return NR_isWell;
+    return NR_IS_NORMAL;
 
 #endif
 }
@@ -384,7 +384,7 @@ void platform_reality_exitcall(void)
  * @retval  none
  * @note    if (*pFunc_init)() return error, other initcalls will be stopped immediately
  */
-ksint32_t hardware_device_initcall(void)
+kint32_t hardware_device_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
     return dync_initcall_run_list(NR_DYNC_SEC_DEVICE);
@@ -395,10 +395,10 @@ ksint32_t hardware_device_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_isAnyErr;
+			return -NR_IS_ERROR;
 	}
 
-    return NR_isWell;
+    return NR_IS_NORMAL;
 
 #endif
 }
@@ -431,7 +431,7 @@ void hardware_device_exitcall(void)
  * @retval  none
  * @note    if (*pFunc_init)() return error, other initcalls will be stopped immediately
  */
-ksint32_t abstract_driver_initcall(void)
+kint32_t abstract_driver_initcall(void)
 {
 #if DYNAMIC_INIT_EXIT_WAYS
     return dync_initcall_run_list(NR_DYNC_SEC_DRIVER);
@@ -442,10 +442,10 @@ ksint32_t abstract_driver_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_isAnyErr;
+			return -NR_IS_ERROR;
 	}
 
-    return NR_isWell;
+    return NR_IS_NORMAL;
 
 #endif
 }
@@ -478,9 +478,9 @@ void abstract_driver_exitcall(void)
  * @retval  none
  * @note    if (*pFunc_init)() return error, other initcalls will be stopped immediately
  */
-ksint32_t run_machine_initcall(void)
+kint32_t run_machine_initcall(void)
 {
-	ksint32_t retval;
+	kint32_t retval;
 
     retval = board_early_initcall();
     if (retval < 0)
@@ -499,9 +499,9 @@ ksint32_t run_machine_initcall(void)
  * @retval  none
  * @note    if (*pFunc_init)() return error, other initcalls will be stopped immediately
  */
-ksint32_t run_platform_initcall(void)
+kint32_t run_platform_initcall(void)
 {
-	ksint32_t retval;
+	kint32_t retval;
 
     /*!< initcall */
     retval = platform_built_initcall();

@@ -24,7 +24,7 @@
 /*!< The globals */
 TARGET_EXT kuint32_t g_asm_sched_flag;
 
-static srt_kel_thread_attr_t sgrt_kthread_attr;
+static struct kel_thread_attr sgrt_kthread_attr;
 static kuint32_t g_kthread_stack[KERL_THREAD_STACK_SIZE];
 static struct timer_list sgrt_kthread_timer;
 
@@ -77,16 +77,24 @@ END:
 static void *kthread_entry(void *args)
 {
     struct timer_list *sprt_tim = &sgrt_kthread_timer;
+    kuint64_t stats;
     
     setup_timer(sprt_tim, kthread_schedule_timeout, (kuint32_t)sprt_tim);
 
-    /*!< create init task */
+    /*!< fixed tid */
+    /*!< --------------------------------------------------------- */
+    /*!< 1. create init task */
     init_proc_init();
+
+    /*!< random tid */
+    /*!< --------------------------------------------------------- */
+    /*!< 1. create kworker task */
+    kworker_init();
 
     for (;;)
     {
-        struct kel_thread *sprt_tid = mrt_current;
-        print_info("%s: tid = %d\n", __FUNCTION__, sprt_tid->tid);
+        stats = kel_sched_stat_get();
+        print_info("%s: tid = %d: the number of scheduled threads is: %ld\n", __FUNCTION__, mrt_current->tid, stats);
         
         /*!< start timer */
         if (!sprt_tim->expires)
@@ -104,9 +112,9 @@ static void *kthread_entry(void *args)
  * @retval 	error code
  * @note   	none
  */
-ksint32_t kthread_init(void)
+kint32_t kthread_init(void)
 {
-    srt_kel_thread_attr_t *sprt_attr = &sgrt_kthread_attr;
+    struct kel_thread_attr *sprt_attr = &sgrt_kthread_attr;
 
 	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
 	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;

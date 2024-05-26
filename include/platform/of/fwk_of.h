@@ -64,22 +64,24 @@ struct fwk_fdt_header
 };
 
 /*!< The device tree matches the data structure */
-struct fwk_of_device_id
+typedef struct fwk_of_device_id
 {
-    kstring_t   *name;
-    kstring_t   *type;
-    kstring_t	*compatible;
+    kchar_t   *name;
+    kchar_t   *type;
+    kchar_t	*compatible;
 
     const void 	*data;
-};
+	
+} srt_fwk_of_device_id_t;
 
 #define FWK_OF_MAX_PHANDLE_ARGS 				(16)
-struct fwk_of_phandle_args 
+typedef struct fwk_of_phandle_args 
 {
 	struct fwk_device_node *sprt_node;
 	kuint32_t args_count;
 	kuint32_t args[FWK_OF_MAX_PHANDLE_ARGS];
-};
+	
+} srt_fwk_of_phandle_args_t;
 
 /*!< The gloabls */
 TARGET_EXT struct fwk_device_node *sprt_fwk_of_allNodes;
@@ -87,26 +89,29 @@ TARGET_EXT struct fwk_device_node *sprt_fwk_of_allNodes;
 /*!< The functions */
 TARGET_EXT void setup_machine_fdt(void *ptr);
 TARGET_EXT void destroy_machine_fdt(void);
-TARGET_EXT ksint32_t of_platform_default_populate_init(void);
+TARGET_EXT kint32_t of_platform_default_populate_init(void);
 
 /*!< Device tree operation API */
-TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_path(const kstring_t *ptr_path);
-TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_name(struct fwk_device_node *sprt_from, const kstring_t *ptr_name);
-TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_type(struct fwk_device_node *sprt_from, const kstring_t *ptr_type);
+TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_path(const kchar_t *ptr_path);
+TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_name(struct fwk_device_node *sprt_from, const kchar_t *ptr_name);
+TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_type(struct fwk_device_node *sprt_from, const kchar_t *ptr_type);
 TARGET_EXT struct fwk_device_node *fwk_of_find_node_by_phandle(struct fwk_device_node *sprt_from, kuint32_t phandle);
 TARGET_EXT struct fwk_device_node *fwk_of_find_compatible_node(struct fwk_device_node *sprt_from,
-											const kstring_t *ptr_type, const kstring_t *ptr_compat);
+											const kchar_t *ptr_type, const kchar_t *ptr_compat);
 TARGET_EXT struct fwk_device_node *fwk_of_node_try_matches(struct fwk_device_node *sprt_node,
 							const struct fwk_of_device_id *sprt_matches, struct fwk_of_device_id **sprt_match);
 TARGET_EXT struct fwk_device_node *fwk_of_find_matching_node_and_match(struct fwk_device_node *sprt_from,
 											const struct fwk_of_device_id *sprt_matches, struct fwk_of_device_id **sprt_match);
 TARGET_EXT struct fwk_device_node *fwk_of_get_parent(struct fwk_device_node *sprt_node);
 TARGET_EXT struct fwk_device_node *fwk_of_get_next_child(struct fwk_device_node *sprt_node, struct fwk_device_node *ptr_prev);
+TARGET_EXT kuint32_t fwk_of_get_child_count(struct fwk_device_node *sprt_node);
 TARGET_EXT kbool_t fwk_of_device_is_avaliable(struct fwk_device_node *sprt_node);
 TARGET_EXT struct fwk_of_device_id *fwk_of_match_node(const struct fwk_of_device_id *sprt_matches, struct fwk_device_node *sprt_node);
 TARGET_EXT struct fwk_device_node *fwk_of_irq_parent(struct fwk_device_node *sprt_node);
 TARGET_EXT kuint32_t fwk_of_n_irq_cells(struct fwk_device_node *sprt_node);
 TARGET_EXT kuint32_t fwk_of_irq_count(struct fwk_device_node *sprt_node);
+TARGET_EXT kint32_t fwk_of_get_alias_id(struct fwk_device_node *sprt_node);
+TARGET_EXT kint32_t fwk_of_modalias_node(struct fwk_device_node *sprt_node, kchar_t *modalias, kuint32_t len);
 
 /*!< API function */
 /*!
@@ -144,8 +149,25 @@ static inline kbool_t fwk_of_node_check_flag(struct fwk_device_node *sprt_node, 
 	return (((sprt_node->flags & flags) == flags) ? true : false);
 }
 
+/*!
+ * @brief   fwk_of_node_root
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+static inline struct fwk_device_node *fwk_of_node_root(void)
+{
+	return mrt_fwk_fdt_node_header();
+}
+
 /*!< get each node */
-#define FOREACH_OF_DT_NODE(np, head)	\
-	for (np = (isValid(head) ? head : mrt_fwk_fdt_node_header()); isValid(np); np = np->allnext)
+#define foreach_fwk_of_dt_node(np, head)	\
+	for (np = (isValid(head) ? head : fwk_of_node_root()); isValid(np); np = np->allnext)
+
+#define foreach_fwk_of_child(parent, np)	\
+	for (np = fwk_of_get_next_child(parent, mrt_nullptr); np; np = fwk_of_get_next_child(parent, np))
+
+#define foreach_fwk_of_parent(np, child)	\
+	for (np = child; np; np = fwk_of_get_parent(np))
 
 #endif /*!< __FWK_OF_H_ */
