@@ -1,12 +1,12 @@
-# Project Name: Gardens System
+# Project Name: HeavenFox Operation System
 # 
 # Note:
-    Gardens System aims to simplify the Linux kernel by refering to the kernel mechanism,
+    HeavenFox OS aims to simplify the Linux kernel by refering to the kernel mechanism,
     which is convenient for the developers to research and apply, and the project follows
     the GPL license and is open source for life.
 
 # Information:
-    git commit logs > git@github.com:yujiantianhu/gardens.git
+    git commit logs > git@github.com:yujiantianhu/HeavenFox.git
     
     author: Yang Yujun
     created on: 2023.12.21
@@ -38,7 +38,7 @@
     cmake -DCMAKE_BUILD_TYPE=Debug ..
     make
     
-    Image path: ./boot/gardens.img
+    Image path: ./boot/HeavenFox.img
 
 # Readme:
 # -----------------------------------------------------------------------
@@ -50,6 +50,7 @@
         02) optimize mutex lock and spin lock;
         03) add workqueue (for the low half interrupt);
         04) standardize the naming of variable types (such as kint32_t, structure, and so on)
+        05) change project name to "HeavenFox"
 
 # 2024.05.13
     author: Yang Yujun

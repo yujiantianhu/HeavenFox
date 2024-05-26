@@ -29,13 +29,13 @@ set(CMAKE_OBJCOPY           arm-linux-gnueabihf-objcopy)
 set(CMAKE_OBJDUMP           arm-linux-gnueabihf-objdump)
 
 # name
-set(PROJECT_NAME            gardens)
+set(PROJECT_NAME            HeavenFox)
 
 # set output file name
+set(PROJECT_LINK_FILE       cpu_ramboot.lds)
 set(PROJECT_EXEC_FILE       ${PROJECT_NAME}.elf)
 set(PROJECT_IMGE_FILE       ${PROJECT_NAME}.img)
 set(PROJECT_NASM_FILE       ${PROJECT_NAME}.dis)
-set(PROJECT_LINK_FILE       ${PROJECT_NAME}-link.lds)
 
 # project name
 project(${PROJECT_EXEC_FILE})

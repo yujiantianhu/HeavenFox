@@ -9,7 +9,7 @@
 # Copyright (c) 2023   Yang Yujun <yujiantianhu@163.com>
 #
 
-TARGET			:=	gardens
+TARGET			:=	HeavenFox
 
 MAKE			:=	make
 Q				:=	
@@ -53,7 +53,7 @@ PROJECT_DIR		:=	$(shell pwd)
 OBJECT_PATH		:=	$(PROJECT_DIR)/objects
 
 OUTPUT_PATH		:=	$(PROJECT_DIR)/boot
-LINK_SCRIPT		:=	$(PROJECT_DIR)/arch/$(ARCH)/$(TARGET)-link.lds
+LINK_SCRIPT		:=	$(PROJECT_DIR)/arch/$(ARCH)/cpu_ramboot.lds
 DTC				:=	$(PROJECT_DIR)/scripts/dtc/dtc
 BUILD_SCRIPT	:=	$(PROJECT_DIR)/scripts/Makefile.build
 
