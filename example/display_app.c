@@ -149,12 +149,7 @@ static void *display_app_entry(void *args)
     
     } while (!isValid(fbuffer));
 
-    fwk_display_initial_info(&sgrt_disp);
-    sgrt_disp.buffer = fbuffer;
-    sgrt_disp.buf_size = sgrt_fix.smem_len;
-    sgrt_disp.width = sgrt_var.xres;
-    sgrt_disp.height = sgrt_var.yres;
-    sgrt_disp.bpp = FWK_RGB_PIXEL32;
+    fwk_display_initial_info(&sgrt_disp, fbuffer, sgrt_fix.smem_len, sgrt_var.xres, sgrt_var.yres, FWK_RGB_PIXEL32);
 
     display_clear(&sgrt_disp);
     display_graphic(&sgrt_disp, sgrt_disp.width / 4, (sgrt_disp.height * 3) / 8, (sgrt_disp.width * 3) / 4, (sgrt_disp.height * 7) / 8);
@@ -175,19 +170,14 @@ static void *display_app_entry(void *args)
             goto END;
         }
 
-#if 0
-        printk("%s: lenth: %d\n", __FUNCTION__, sgrt_fix.smem_len);
-        memset(fbuffer, 0xff, sgrt_fix.smem_len);
-        schedule_delay_ms(500);
-        memset(fbuffer, 0x00, sgrt_fix.smem_len);
-#else
         sgrt_disp.buffer = fbuffer;
         display_word(&sgrt_disp, 140, 80, 
                                  sgrt_disp.width, 80 + 16, "welcome to use!");
         schedule_delay_ms(500);
+        
         display_word(&sgrt_disp, 140, 80, 
                                  sgrt_disp.width, 80 + 16, "happly every day!");
-#endif
+
         virt_munmap(fbuffer, sgrt_fix.smem_len);
         virt_close(fd);
 

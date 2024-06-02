@@ -89,6 +89,7 @@ END:
         schedule_delay_ms(200);
     }
 
+    virt_close(fd);
     return args;
 }
 

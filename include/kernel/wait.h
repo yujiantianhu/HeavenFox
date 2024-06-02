@@ -62,7 +62,7 @@ TARGET_EXT void remove_wait_queue(struct wait_queue_head *sprt_wqh, struct wait_
 TARGET_EXT void wake_up_common(struct wait_queue_head *sprt_wqh, kuint32_t state);
 
 /*!< The defines */
-#define __wait_is_interruptable(sprt_wq)                (mrt_thread_is_flags(NR_THREAD_SIG_INTR, (sprt_wq)->sprt_task))
+#define __wait_is_interruptible(sprt_wq)                (mrt_thread_is_flags(NR_THREAD_SIG_INTR, (sprt_wq)->sprt_task))
 
 #define __wait_event(sprt_wqh, condition, sig_enable, func) \
 ({  \
@@ -83,7 +83,7 @@ TARGET_EXT void wake_up_common(struct wait_queue_head *sprt_wqh, kuint32_t state
                 break;  \
             \
             /*!< signal pending (by calling "wake_up") */   \
-            if (__wait_is_interruptable(&sgrt_wq) && real_thread_state_pending(sgrt_wq.sprt_task)) \
+            if (__wait_is_interruptible(&sgrt_wq) && real_thread_state_pending(sgrt_wq.sprt_task)) \
                 break;  \
             \
             func; \
@@ -109,14 +109,14 @@ TARGET_EXT void wake_up_common(struct wait_queue_head *sprt_wqh, kuint32_t state
         (void)__wait_event(sprt_wqh, condition, 0, schedule_timeout(timeout));    \
     } while (0)
 
-#define wait_event_interruptable(sprt_wqh, condition) \
+#define wait_event_interruptible(sprt_wqh, condition) \
     do {    \
         if (condition)  \
             break;  \
         (void)__wait_event(sprt_wqh, condition, 1, schedule_thread());    \
     } while (0)
 
-#define wait_event_interruptable_timeout(sprt_wqh, condition, timeout) \
+#define wait_event_interruptible_timeout(sprt_wqh, condition, timeout) \
     do {    \
         if (condition)  \
             break;  \
@@ -128,7 +128,7 @@ TARGET_EXT void wake_up_common(struct wait_queue_head *sprt_wqh, kuint32_t state
         wake_up_common(sprt_wqh, NR_THREAD_SIG_NORMAL);    \
     } while (0)
 
-#define wake_up_interruptable(sprt_wqh)   \
+#define wake_up_interruptible(sprt_wqh)   \
     do {    \
         wake_up_common(sprt_wqh, NR_THREAD_SIG_INTR);    \
     } while (0)

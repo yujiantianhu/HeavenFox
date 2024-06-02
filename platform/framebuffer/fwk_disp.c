@@ -565,8 +565,8 @@ static const struct fwk_disp_ops sgrt_fwk_display_oprts =
  * @retval  sprt_disp
  * @note    none
  */
-void *fwk_display_initial_info(struct fwk_disp_info *sprt_disp)
-//                          void *fbuffer, kusize_t size, kuint32_t width, kuint32_t height, kuint32_t bpp)
+void *fwk_display_initial_info(struct fwk_disp_info *sprt_disp,
+                          void *fbuffer, kusize_t size, kuint32_t width, kuint32_t height, kuint32_t bpp)
 {
 
     if (!sprt_disp)
@@ -574,13 +574,13 @@ void *fwk_display_initial_info(struct fwk_disp_info *sprt_disp)
 
     if (isValid(sprt_disp))
     {
-/*
+
         sprt_disp->buffer = fbuffer;
         sprt_disp->buf_size = size;
         sprt_disp->width = width;
         sprt_disp->height = height;
         sprt_disp->bpp = bpp;
-*/
+
         sprt_disp->sprt_ops = &sgrt_fwk_display_oprts;
         spin_lock_init(&sprt_disp->sgrt_lock);
     }

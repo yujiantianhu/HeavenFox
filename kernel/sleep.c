@@ -13,6 +13,7 @@
 /*!< The globals */
 #include <kernel/kernel.h>
 #include <kernel/sched.h>
+#include <kernel/spinlock.h>
 
 /*!< The defines */
 
@@ -30,6 +31,10 @@
 static void real_thread_sleep_timeout(kuint32_t args)
 {
     struct real_thread *sprt_thread = (struct real_thread *)args;
+    struct spin_lock *sprt_lock = scheduler_lock();
+
+    if (spin_is_locked(sprt_lock))
+		return;
 
     if (sprt_thread->status == NR_THREAD_SUSPEND)
         schedule_thread_wakeup(sprt_thread->tid);
@@ -45,19 +50,20 @@ void schedule_timeout(kutime_t count)
 {
     struct timer_list sgrt_tm;
     struct real_thread *sprt_thread = mrt_current;
+    struct spin_lock *sprt_lock = scheduler_lock();
 	
-	schedule_lock();
+	spin_lock_irqsave(sprt_lock);
     setup_timer(&sgrt_tm, real_thread_sleep_timeout, (kuint32_t)sprt_thread);
     mod_timer(&sgrt_tm, count);
 
-    schedule_unlock();
+    spin_unlock_irqrestore(sprt_lock);
     
     /*!< suspend current thread, and schedule others */
     schedule_self_suspend();
     
-    schedule_lock();
+    spin_lock_irqsave(sprt_lock);
     del_timer(&sgrt_tm);
-    schedule_unlock();
+    spin_unlock_irqrestore(sprt_lock);
 }
 
 /*!

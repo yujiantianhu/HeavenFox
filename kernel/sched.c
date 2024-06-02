@@ -37,39 +37,38 @@ static struct scheduler_table sgrt_real_thread_Tabs =
 };
 
 /*!< The defines */
-#define KEL_TABS_THREAD_HANDLER(tid)				__REAL_THREAD_HANDLER(&sgrt_real_thread_Tabs, tid)
-#define KEL_TABS_RUNNING_THREAD						__REAL_THREAD_RUNNING_LIST(&sgrt_real_thread_Tabs)
-#define KEL_TABS_READY_LIST							__REAL_THREAD_READY_LIST(&sgrt_real_thread_Tabs)
-#define KEL_TABS_SUSPEND_LIST						__REAL_THREAD_SUSPEND_LIST(&sgrt_real_thread_Tabs)
-#define KEL_TABS_SLEEP_LIST							__REAL_THREAD_SLEEP_LIST(&sgrt_real_thread_Tabs)
+#define SCHED_THREAD_HANDLER(tid)					__REAL_THREAD_HANDLER(&sgrt_real_thread_Tabs, tid)
+#define SCHED_RUNNING_THREAD						__REAL_THREAD_RUNNING_LIST(&sgrt_real_thread_Tabs)
+#define SCHED_READY_LIST							__REAL_THREAD_READY_LIST(&sgrt_real_thread_Tabs)
+#define SCHED_SUSPEND_LIST							__REAL_THREAD_SUSPEND_LIST(&sgrt_real_thread_Tabs)
+#define SCHED_SLEEP_LIST							__REAL_THREAD_SLEEP_LIST(&sgrt_real_thread_Tabs)
 
-#define KEL_TABS_LOCK()								spin_lock_irqsave(&sgrt_real_thread_Tabs.sgrt_lock)
-#define KEL_TABS_UNLOCK()							spin_unlock_irqrestore(&sgrt_real_thread_Tabs.sgrt_lock)
+#define __SCHED_LOCK								sgrt_real_thread_Tabs.sgrt_lock
 
 /*!< set thread status */
-#define KEL_SET_THREAD_STATUS(tid, value)	\
+#define __SET_THREAD_STATUS(tid, value)	\
 	do {	\
 		if ((value) < NR_THREAD_STATUS_MAX)	\
 		{	\
-			struct real_thread *sprt_task = KEL_TABS_THREAD_HANDLER(tid);	\
+			struct real_thread *sprt_task = SCHED_THREAD_HANDLER(tid);	\
 			sprt_task->to_status = (value);	\
 		}	\
 	} while (0)
 
-#define KEL_SYNC_THREAD_STATUS(tid, value)	\
+#define __SYNC_THREAD_STATUS(tid, value)	\
 	do {	\
 		if ((value) < NR_THREAD_STATUS_MAX)	\
 		{	\
-			struct real_thread *sprt_task = KEL_TABS_THREAD_HANDLER(tid);	\
+			struct real_thread *sprt_task = SCHED_THREAD_HANDLER(tid);	\
 			sprt_task->status = (value);	\
             sprt_task->to_status = NR_THREAD_NONE;    \
 		}	\
 	} while (0)
 
 /* get thread status */
-#define KEL_GET_THREAD_STATUS(tid)	\
+#define __GET_THREAD_STATUS(tid)	\
 ({	\
-	struct real_thread *sprt_task = KEL_TABS_THREAD_HANDLER(tid);	\
+	struct real_thread *sprt_task = SCHED_THREAD_HANDLER(tid);	\
 	sprt_task->status;	\
 })
 
@@ -96,7 +95,7 @@ static kint32_t schedule_detach_sleep_list(real_thread_t tid);
  */
 struct real_thread *get_current_thread(void)
 {
-    return KEL_TABS_RUNNING_THREAD;
+    return SCHED_RUNNING_THREAD;
 }
 
 /*!
@@ -107,7 +106,7 @@ struct real_thread *get_current_thread(void)
  */
 struct real_thread *get_thread_handle(real_thread_t tid)
 {
-    return KEL_TABS_THREAD_HANDLER(tid);
+    return SCHED_THREAD_HANDLER(tid);
 }
 
 /*!
@@ -120,7 +119,7 @@ void real_thread_set_name(const kchar_t *name)
 {
 	struct real_thread *sprt_work;
 
-	sprt_work = KEL_TABS_RUNNING_THREAD;
+	sprt_work = SCHED_RUNNING_THREAD;
 
 	memset(sprt_work->name, 0, REAL_THREAD_NAME_SIZE);
 	strncpy(sprt_work->name, name, REAL_THREAD_NAME_SIZE);
@@ -134,17 +133,12 @@ void real_thread_set_name(const kchar_t *name)
  */
 void real_thread_set_state(struct real_thread *sprt_thread, kuint32_t state)
 {
-	KEL_SET_THREAD_STATUS(sprt_thread->tid, state);
+	__SET_THREAD_STATUS(sprt_thread->tid, state);
 }
 
-void schedule_lock(void)
+struct spin_lock *scheduler_lock(void)
 {
-	KEL_TABS_LOCK();
-}
-
-void schedule_unlock(void)
-{
-	KEL_TABS_UNLOCK();
+	return &__SCHED_LOCK;
 }
 
 /*!
@@ -158,17 +152,17 @@ real_thread_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count)
 {
 	kuint32_t i;
 
-	schedule_lock();
+	spin_lock_irqsave(&__SCHED_LOCK);
 	for (i = i_start; i < (i_start + count); i++)
 	{
-		if (!KEL_TABS_THREAD_HANDLER(i))
+		if (!SCHED_THREAD_HANDLER(i))
 		{
-			schedule_unlock();
+			spin_unlock_irqrestore(&__SCHED_LOCK);
 			return i;
 		}
 	}
 
-	schedule_unlock();
+	spin_unlock_irqrestore(&__SCHED_LOCK);
 
 	return -ER_MORE;
 }
@@ -203,9 +197,9 @@ kuint64_t scheduler_stats_get(void)
 
 	sprt_tab = &sgrt_real_thread_Tabs;
 
-	schedule_lock();
+	spin_lock_irqsave(&__SCHED_LOCK);
 	sum = (__REAL_THREAD_MAX_STATS * sprt_tab->sgrt_cnt.cnt_out + sprt_tab->sgrt_cnt.sched_cnt);
-	schedule_unlock();
+	spin_unlock_irqrestore(&__SCHED_LOCK);
 
 	return sum;
 }
@@ -218,9 +212,9 @@ kuint64_t scheduler_stats_get(void)
  */
 void schedule_self_suspend(void)
 {
-	schedule_lock();
-	KEL_SET_THREAD_STATUS(KEL_TABS_RUNNING_THREAD->tid, NR_THREAD_SUSPEND);
-	schedule_unlock();
+	spin_lock_irqsave(&__SCHED_LOCK);
+	__SET_THREAD_STATUS(SCHED_RUNNING_THREAD->tid, NR_THREAD_SUSPEND);
+	spin_unlock_irqrestore(&__SCHED_LOCK);
 
     schedule_thread();
 }
@@ -233,19 +227,21 @@ void schedule_self_suspend(void)
  */
 kint32_t schedule_thread_suspend(real_thread_t tid)
 {
-	schedule_lock();
+	kint32_t retval;
 
-    if (tid == KEL_TABS_RUNNING_THREAD->tid)
+    if (tid == SCHED_RUNNING_THREAD->tid)
     {
-		schedule_unlock();
         schedule_self_suspend();
         return ER_NORMAL;
     }
 
-    KEL_SET_THREAD_STATUS(tid, NR_THREAD_SUSPEND);
-	schedule_unlock();
+	spin_lock_irqsave(&__SCHED_LOCK);
+    __SET_THREAD_STATUS(tid, NR_THREAD_SUSPEND);
 
-	return schedule_thread_switch(tid);
+	retval = schedule_thread_switch(tid);
+	spin_unlock_irqrestore(&__SCHED_LOCK);
+	
+	return retval;
 }
 
 /*!
@@ -256,18 +252,22 @@ kint32_t schedule_thread_suspend(real_thread_t tid)
  */
 kint32_t schedule_thread_wakeup(real_thread_t tid)
 {
-	schedule_lock();
+	kint32_t retval;
 
-	if (NR_THREAD_SUSPEND != KEL_GET_THREAD_STATUS(tid))
+//	spin_lock(&__SCHED_LOCK);
+
+	if (NR_THREAD_SUSPEND != __GET_THREAD_STATUS(tid))
 	{
-		schedule_unlock();
-		return -ER_UNVALID;
+		retval = -ER_UNVALID;
+		goto END;
 	}
 
-    KEL_SET_THREAD_STATUS(tid, NR_THREAD_READY);
-	schedule_unlock();
-	
-	return schedule_thread_switch(tid);
+    __SET_THREAD_STATUS(tid, NR_THREAD_READY);
+	retval = schedule_thread_switch(tid);
+
+END:
+//	spin_unlock(&__SCHED_LOCK);
+	return retval;
 }
 
 /*!
@@ -278,7 +278,7 @@ kint32_t schedule_thread_wakeup(real_thread_t tid)
  */
 kbool_t is_ready_thread_empty(void)
 {
-    return !!mrt_list_head_empty(KEL_TABS_READY_LIST);
+    return !!mrt_list_head_empty(SCHED_READY_LIST);
 }
 
 /*!
@@ -289,7 +289,7 @@ kbool_t is_ready_thread_empty(void)
  */
 kbool_t is_suspend_thread_empty(void)
 {
-    return !!mrt_list_head_empty(KEL_TABS_SUSPEND_LIST);
+    return !!mrt_list_head_empty(SCHED_SUSPEND_LIST);
 }
 
 /*!
@@ -300,7 +300,7 @@ kbool_t is_suspend_thread_empty(void)
  */
 kbool_t is_sleep_thread_empty(void)
 {
-    return !!mrt_list_head_empty(KEL_TABS_SLEEP_LIST);
+    return !!mrt_list_head_empty(SCHED_SLEEP_LIST);
 }
 
 /*!
@@ -311,8 +311,8 @@ kbool_t is_sleep_thread_empty(void)
  */
 struct real_thread *get_first_ready_thread(void)
 {
-    kbool_t existed = mrt_list_head_empty(KEL_TABS_READY_LIST);
-    return existed ? mrt_nullptr : mrt_list_first_entry(KEL_TABS_READY_LIST, struct real_thread, sgrt_link);
+    kbool_t existed = mrt_list_head_empty(SCHED_READY_LIST);
+    return existed ? mrt_nullptr : mrt_list_first_entry(SCHED_READY_LIST, struct real_thread, sgrt_link);
 }
 
 /*!
@@ -323,8 +323,8 @@ struct real_thread *get_first_ready_thread(void)
  */
 struct real_thread *get_first_suspend_thread(void)
 {
-    kbool_t existed = mrt_list_head_empty(KEL_TABS_SUSPEND_LIST);
-    return existed ? mrt_nullptr : mrt_list_first_entry(KEL_TABS_SUSPEND_LIST, struct real_thread, sgrt_link);
+    kbool_t existed = mrt_list_head_empty(SCHED_SUSPEND_LIST);
+    return existed ? mrt_nullptr : mrt_list_first_entry(SCHED_SUSPEND_LIST, struct real_thread, sgrt_link);
 }
 
 /*!
@@ -335,8 +335,8 @@ struct real_thread *get_first_suspend_thread(void)
  */
 struct real_thread *get_first_sleep_thread(void)
 {
-    kbool_t existed = mrt_list_head_empty(KEL_TABS_SLEEP_LIST);
-    return existed ? mrt_nullptr : mrt_list_first_entry(KEL_TABS_SLEEP_LIST, struct real_thread, sgrt_link);
+    kbool_t existed = mrt_list_head_empty(SCHED_SLEEP_LIST);
+    return existed ? mrt_nullptr : mrt_list_first_entry(SCHED_SLEEP_LIST, struct real_thread, sgrt_link);
 }
 
 /*!
@@ -351,11 +351,9 @@ kint32_t schedule_thread_switch(real_thread_t tid)
 {
     kuint32_t src, dst;
 	kint32_t retval;
-
-	schedule_lock();
     
-    src = KEL_TABS_THREAD_HANDLER(tid)->status;
-    dst = KEL_TABS_THREAD_HANDLER(tid)->to_status;
+    src = SCHED_THREAD_HANDLER(tid)->status;
+    dst = SCHED_THREAD_HANDLER(tid)->to_status;
 
 	/*!<
 	 * thread switch:
@@ -428,26 +426,22 @@ kint32_t schedule_thread_switch(real_thread_t tid)
 	if (retval < 0)
 	{
 		print_warn("switch thread failed ! current and target status is : %d, %d\n", src, dst);
-		schedule_unlock();
 		return retval;
 	}
 
-	if (!KEL_TABS_RUNNING_THREAD)
+	if (!SCHED_RUNNING_THREAD)
 	{
 		print_err("no thread is running !!! dangerous action !!!\n");
-		schedule_unlock();
 		return retval;
 	}
 
 	/*!< update thread status */
-	KEL_SYNC_THREAD_STATUS(tid, dst);
-	schedule_unlock();
+	__SYNC_THREAD_STATUS(tid, dst);
 
 	return ER_NORMAL;
     
 fail:
-    KEL_SYNC_THREAD_STATUS(tid, src);
-	schedule_unlock();
+    __SYNC_THREAD_STATUS(tid, src);
 
     return -ER_UNVALID;
 }
@@ -464,7 +458,7 @@ static kint32_t schedule_despoil_work_role(real_thread_t tid)
 	struct real_thread *sprt_running;
 	kint32_t retval;
 
-	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
+	sprt_thread = SCHED_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
 		return -ER_FAULT;
@@ -474,7 +468,7 @@ static kint32_t schedule_despoil_work_role(real_thread_t tid)
 		return -ER_UNVALID;
 
 	/*!< get current */
-	sprt_running = KEL_TABS_RUNNING_THREAD;
+	sprt_running = SCHED_RUNNING_THREAD;
 
 	if (sprt_running)
 	{
@@ -483,11 +477,11 @@ static kint32_t schedule_despoil_work_role(real_thread_t tid)
 		if (retval < 0)
 			return retval;
 
-		KEL_SYNC_THREAD_STATUS(sprt_running->tid, NR_THREAD_READY);
+		__SYNC_THREAD_STATUS(sprt_running->tid, NR_THREAD_READY);
 	}
 
 	/*!< update current */
-	KEL_TABS_RUNNING_THREAD = sprt_thread;
+	SCHED_RUNNING_THREAD = sprt_thread;
 
 	return ER_NORMAL;
 }
@@ -502,24 +496,24 @@ static kint32_t schedule_reinstall_work_role(real_thread_t tid)
 {
 	struct real_thread *sprt_thread;
 
-	if (tid != KEL_TABS_RUNNING_THREAD->tid)
+	if (tid != SCHED_RUNNING_THREAD->tid)
 		return -ER_UNVALID;
 
 	/*!< no thread ready; current should be set to idle thread */
-	if (mrt_list_head_empty(KEL_TABS_READY_LIST))
+	if (mrt_list_head_empty(SCHED_READY_LIST))
 		return -ER_FAULT;
 
 	/*!< get the first ready thread */
-	sprt_thread = mrt_list_first_valid_entry(KEL_TABS_READY_LIST, struct real_thread, sgrt_link);
+	sprt_thread = mrt_list_first_valid_entry(SCHED_READY_LIST, struct real_thread, sgrt_link);
 	if (sprt_thread)
 	{
 		/*!< detached from ready list */
 		schedule_detach_ready_list(sprt_thread->tid);
 
 		/*!< ready thread ---> running */
-		KEL_TABS_RUNNING_THREAD = sprt_thread;
+		SCHED_RUNNING_THREAD = sprt_thread;
 		mrt_barrier();
-		KEL_SYNC_THREAD_STATUS(sprt_thread->tid, NR_THREAD_RUNNING);
+		__SYNC_THREAD_STATUS(sprt_thread->tid, NR_THREAD_RUNNING);
 	}
 
 	return sprt_thread ? ER_NORMAL : (-ER_FAILD);
@@ -535,7 +529,7 @@ static kint32_t schedule_add_ready_list(real_thread_t tid)
 {
 	struct real_thread *sprt_thread;
 
-	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
+	sprt_thread = SCHED_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
 		return -ER_FAULT;
@@ -544,7 +538,7 @@ static kint32_t schedule_add_ready_list(real_thread_t tid)
 	if (NR_THREAD_READY == sprt_thread->status)
 		return -ER_UNVALID;
 
-	return __schedule_add_status_list(sprt_thread, KEL_TABS_READY_LIST);
+	return __schedule_add_status_list(sprt_thread, SCHED_READY_LIST);
 }
 
 /*!
@@ -559,7 +553,7 @@ static kint32_t schedule_detach_ready_list(real_thread_t tid)
 {
 	struct real_thread *sprt_thread;
 
-	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
+	sprt_thread = SCHED_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
 		return -ER_FAULT;
@@ -569,7 +563,7 @@ static kint32_t schedule_detach_ready_list(real_thread_t tid)
 		return -ER_UNVALID;
 
 	/*!< delete it */
-	__schedule_del_status_list(sprt_thread, KEL_TABS_READY_LIST);
+	__schedule_del_status_list(sprt_thread, SCHED_READY_LIST);
 
 	return ER_NORMAL;
 }
@@ -584,7 +578,7 @@ static kint32_t schedule_add_suspend_list(real_thread_t tid)
 {
 	struct real_thread *sprt_thread;
 
-	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
+	sprt_thread = SCHED_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
 		return -ER_FAULT;
@@ -593,7 +587,7 @@ static kint32_t schedule_add_suspend_list(real_thread_t tid)
 	if (NR_THREAD_SUSPEND == sprt_thread->status)
 		return -ER_UNVALID;
 
-	return __schedule_add_status_list(sprt_thread, KEL_TABS_SUSPEND_LIST);
+	return __schedule_add_status_list(sprt_thread, SCHED_SUSPEND_LIST);
 }
 
 /*!
@@ -608,7 +602,7 @@ static kint32_t schedule_detach_suspend_list(real_thread_t tid)
 {
 	struct real_thread *sprt_thread;
 
-	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
+	sprt_thread = SCHED_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
 		return -ER_FAULT;
@@ -618,7 +612,7 @@ static kint32_t schedule_detach_suspend_list(real_thread_t tid)
 		return -ER_UNVALID;
 
 	/*!< delete it */
-	__schedule_del_status_list(sprt_thread, KEL_TABS_SUSPEND_LIST);
+	__schedule_del_status_list(sprt_thread, SCHED_SUSPEND_LIST);
 
 	return ER_NORMAL;
 }
@@ -633,7 +627,7 @@ static kint32_t schedule_add_sleep_list(real_thread_t tid)
 {
 	struct real_thread *sprt_thread;
 
-	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
+	sprt_thread = SCHED_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
 		return -ER_FAULT;
@@ -642,7 +636,7 @@ static kint32_t schedule_add_sleep_list(real_thread_t tid)
 	if (NR_THREAD_SLEEP == sprt_thread->status)
 		return -ER_UNVALID;
 
-	return __schedule_add_status_list(sprt_thread, KEL_TABS_SLEEP_LIST);
+	return __schedule_add_status_list(sprt_thread, SCHED_SLEEP_LIST);
 }
 
 /*!
@@ -657,7 +651,7 @@ static kint32_t schedule_detach_sleep_list(real_thread_t tid)
 {
 	struct real_thread *sprt_thread;
 
-	sprt_thread = KEL_TABS_THREAD_HANDLER(tid);
+	sprt_thread = SCHED_THREAD_HANDLER(tid);
 
 	if (!sprt_thread)
 		return -ER_FAULT;
@@ -667,7 +661,7 @@ static kint32_t schedule_detach_sleep_list(real_thread_t tid)
 		return -ER_UNVALID;
 
 	/*!< delete it */
-	__schedule_del_status_list(sprt_thread, KEL_TABS_SLEEP_LIST);
+	__schedule_del_status_list(sprt_thread, SCHED_SLEEP_LIST);
 
 	return ER_NORMAL;
 }
@@ -682,7 +676,7 @@ static kint32_t schedule_detach_sleep_list(real_thread_t tid)
 static kint32_t __find_thread_from_scheduler(real_thread_t tid, struct list_head *sprt_head)
 {
 	struct real_thread *sprt_anyTask;
-	struct real_thread *sprt_thread = KEL_TABS_THREAD_HANDLER(tid); 
+	struct real_thread *sprt_thread = SCHED_THREAD_HANDLER(tid); 
 
 	foreach_list_next_entry(sprt_anyTask, sprt_head, sgrt_link)
 	{
@@ -775,16 +769,16 @@ kint32_t register_new_thread(struct real_thread *sprt_thread, real_thread_t tid)
 
 	sprt_it_attr = sprt_thread->sprt_attr;
 
-	if (KEL_TABS_THREAD_HANDLER(tid))
+	if (SCHED_THREAD_HANDLER(tid))
 		return -ER_UNVALID;
 
 	/*!< stack must be valid */
 	if (!sprt_it_attr->stack_addr)
 		return -ER_NOMEM;
 
-	schedule_lock();
+	spin_lock_irqsave(&__SCHED_LOCK);
 	/*!< saved to tcb */
-	KEL_TABS_THREAD_HANDLER(tid) = sprt_thread;
+	SCHED_THREAD_HANDLER(tid) = sprt_thread;
 
 	/*!< initial link */
 	init_list_head(&sprt_thread->sgrt_link);
@@ -796,14 +790,14 @@ kint32_t register_new_thread(struct real_thread *sprt_thread, real_thread_t tid)
 	retval = schedule_add_ready_list(tid);
 	if (retval < 0)
 	{
-		KEL_TABS_THREAD_HANDLER(tid) = mrt_nullptr;
-		schedule_unlock();
+		SCHED_THREAD_HANDLER(tid) = mrt_nullptr;
+		spin_unlock_irqrestore(&__SCHED_LOCK);
 		return retval;
 	}
 
 	/*!< set to ready status */
-    KEL_SYNC_THREAD_STATUS(tid, NR_THREAD_READY);
-	schedule_unlock();
+    __SYNC_THREAD_STATUS(tid, NR_THREAD_READY);
+	spin_unlock_irqrestore(&__SCHED_LOCK);
 
 	return ER_NORMAL;
 }
@@ -816,7 +810,7 @@ kint32_t register_new_thread(struct real_thread *sprt_thread, real_thread_t tid)
  */
 void __real_thread_init_before(void)
 {
-    struct real_thread *sprt_thread = KEL_TABS_RUNNING_THREAD;
+    struct real_thread *sprt_thread = SCHED_RUNNING_THREAD;
     kuint32_t milseconds = real_thread_get_sched_msecs(sprt_thread->sprt_attr);
     
     sprt_thread->expires = jiffies + msecs_to_jiffies(milseconds);
@@ -838,14 +832,12 @@ struct scheduler_context *__schedule_thread(void)
 	static struct scheduler_context sgrt_context;
 	static kuint32_t thread_schedule_ref = 0;
 
-	schedule_lock();
-
 	/*!< no ready thread here, unable to start or switch */
-	if (mrt_list_head_empty(KEL_TABS_READY_LIST))
+	if (mrt_list_head_empty(SCHED_READY_LIST))
 		goto fail;
 
 	/*!< get the current thread */
-	sprt_prev = KEL_TABS_RUNNING_THREAD;
+	sprt_prev = SCHED_RUNNING_THREAD;
 	if (!sprt_prev)
     {
         if (thread_schedule_ref)
@@ -853,25 +845,21 @@ struct scheduler_context *__schedule_thread(void)
         else
         {
             /*!< scheduled by "start_kernel" for the first time */
-            sprt_prev = mrt_list_first_valid_entry(KEL_TABS_READY_LIST, struct real_thread, sgrt_link);
+            sprt_prev = mrt_list_first_valid_entry(SCHED_READY_LIST, struct real_thread, sgrt_link);
             if (!sprt_prev)
                 goto fail;
             
-            KEL_SET_THREAD_STATUS(sprt_prev->tid, NR_THREAD_RUNNING);
+            __SET_THREAD_STATUS(sprt_prev->tid, NR_THREAD_RUNNING);
         }
     }
     
     /*!< if not set target status, default to ready */
     if (!sprt_prev->to_status)
-        KEL_SET_THREAD_STATUS(sprt_prev->tid, NR_THREAD_READY);
-
-	schedule_unlock();
+        __SET_THREAD_STATUS(sprt_prev->tid, NR_THREAD_READY);
 
 	/*!< select next valid thread */
 	retval = schedule_thread_switch(sprt_prev->tid);
-
-	schedule_lock();
-    sprt_thread = KEL_TABS_RUNNING_THREAD;
+    sprt_thread = SCHED_RUNNING_THREAD;
 	if ((retval < 0) || (!sprt_thread))
 		goto fail;
     
@@ -885,13 +873,11 @@ struct scheduler_context *__schedule_thread(void)
 		sgrt_context.prev_sp = real_thread_get_stack(sprt_prev->sprt_attr);
 
 	scheduler_record();
-	schedule_unlock();
 
     /*!< address of sgrt_context ===> r0 */
     return &sgrt_context;
 
 fail:
-	schedule_unlock();
 	return mrt_nullptr;
 }
 
@@ -905,12 +891,20 @@ void schedule_thread(void)
 {
     struct scheduler_context *sprt_context;
 
+	spin_lock_irqsave(&__SCHED_LOCK);
+
     sprt_context = __schedule_thread();
     if (!sprt_context)
-        return;
+        goto END;
+
+	spin_unlock_irqrestore(&__SCHED_LOCK);
 
 	/*!< sprt_context ===> r0 */
 	context_switch(sprt_context);
+	return;
+
+END:
+	spin_unlock_irqrestore(&__SCHED_LOCK);
 }
 
 /*!< end of file */

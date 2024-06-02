@@ -71,7 +71,7 @@ void spin_unlock(struct spin_lock *sprt_lock)
  * @retval  none
  * @note    if it has been locked, return right away
  */
-kint32_t spin_trylock(struct spin_lock *sprt_lock)
+kint32_t spin_try_lock(struct spin_lock *sprt_lock)
 {
     if (spin_is_locked(sprt_lock))
         return -ER_LOCKED;
@@ -92,7 +92,7 @@ void spin_lock_irq(struct spin_lock *sprt_lock)
 
 kint32_t spin_try_lock_irq(struct spin_lock *sprt_lock)
 {
-    if (spin_trylock(sprt_lock))
+    if (spin_try_lock(sprt_lock))
         return -ER_LOCKED;
 
     mrt_barrier();
@@ -119,7 +119,7 @@ void spin_lock_irqsave(struct spin_lock *sprt_lock)
 
 kint32_t spin_try_lock_irqsave(struct spin_lock *sprt_lock)
 {
-    if (spin_trylock(sprt_lock))
+    if (spin_try_lock(sprt_lock))
         return -ER_LOCKED;
 
     sprt_lock->flag = __get_cpsr();

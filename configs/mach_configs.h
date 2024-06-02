@@ -22,8 +22,8 @@
 #define CONFIG_HZ                               (100UL)             /*!< timer interrupt per 10ms*/
 
 #define CONFIG_SCHDULE                          (1)
-#define CONFIG_PREEMPT                          (0)
-#define CONFIG_ROLL_POLL                        (1)
+#define CONFIG_PREEMPT                          (1)
+#define CONFIG_ROLL_POLL                        (0)
 
 /*!< The includes */
 /*!< Board Configuration */

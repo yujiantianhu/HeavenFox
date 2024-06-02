@@ -9,6 +9,6 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-dtb-y   += imx6ull_rain_topeet_emmc.dtb
+dtb-y   += imx6ull_topeet.dtb
 
 # end of file

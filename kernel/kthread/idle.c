@@ -40,7 +40,7 @@ static void *rest_entry(void *args)
 #if (!CONFIG_PREEMPT)
         /*!< check priority */
         sprt_ready = get_first_ready_thread();
-        if (!sprt_ready)
+        if (!sprt_ready || (sprt_ready == mrt_current))
             continue;
 
         schedule_thread();

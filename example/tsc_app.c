@@ -49,7 +49,7 @@ static void *tsc_app_entry(void *args)
 
     do 
     {
-        fd = virt_open("/dev/input/event0", O_RDONLY | O_NONBLOCK);
+        fd = virt_open("/dev/input/event0", O_RDONLY);
         if (fd < 0)
             schedule_delay_ms(200);
 
@@ -70,6 +70,7 @@ END:
         schedule_delay_ms(200);
     }
 
+    virt_close(fd);
     return args;
 }
 
