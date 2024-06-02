@@ -217,7 +217,7 @@ static void imx_fbdev_init(void *base, struct imx_fbdev_drv *sprt_drv)
 
 	/*!< open backlight */
 	if (sprt_drv->sgrt_blight.sprt_gdesc)
-		fwk_gpio_set_value(sprt_drv->sgrt_blight.sprt_gdesc, 0);
+		fwk_gpio_set_value(sprt_drv->sgrt_blight.sprt_gdesc, 1);
 }
 
 /*!
