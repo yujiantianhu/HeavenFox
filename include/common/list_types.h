@@ -176,13 +176,13 @@ static inline kint32_t list_head_for_each(struct list_head *head, struct list_he
 	foreach_list_head(ptr_left, ptr_right, head)
 	{
 		if ((ptr_left == list) || (ptr_right == list))
-			return NR_IS_NORMAL;
+			return ER_NORMAL;
 
 		if (ptr_left == ptr_right)
 			break;
 	}
 
-	return -NR_IS_ERROR;
+	return -ER_ERROR;
 }
 
 /*!< insert a new member behind list head */

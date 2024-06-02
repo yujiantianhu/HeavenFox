@@ -26,6 +26,7 @@
 
 /*!< The defines */
 #define IMX6UL_MUX_PIN_PER_LENTH                            (IMX6UL_MUX_CONF_SIZE)
+#define IMX6UL_MUX_PIN_CONFIG_SION                          (0x40000000)
 
 /*!< defines by driver */
 typedef struct imx_iomuxc_pads
@@ -40,7 +41,7 @@ typedef struct imx_iomuxc_pin
     kuint32_t pin;
 
     /*!< see device_node of dts: such as "fsl,pins" */
-    srt_imx_pin_t sgrt_pin;
+    srt_hal_imx_pin_t sgrt_pin;
     
 } srt_imx_iomuxc_pin_t;
 
@@ -312,18 +313,18 @@ static kint32_t imx_iomuxc_dt_node_to_map(struct fwk_pinctrl_dev *sprt_pctldev, 
     kuint32_t i;
 
     if (!sprt_pctldev || !sprt_node)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     sprt_data = (srt_imx_iomuxc_data_t *)fwk_pinctrl_get_drvdata(sprt_pctldev);
     sprt_pingrp = (srt_imx_iomuxc_pin_grp_t *)imx_iomuxc_get_group_by_name(sprt_data, sprt_node->name);
     if (!sprt_pingrp)
-        return -NR_IS_NOTFOUND;
+        return -ER_NOTFOUND;
 
     sprt_pdesc = sprt_pctldev->sprt_desc->sprt_pins;
 
     sprt_newmap = (struct fwk_pinctrl_map *)kzalloc((sprt_pingrp->npins + 1) * sizeof(*sprt_newmap), GFP_KERNEL);
     if (!isValid(sprt_newmap))
-        return -NR_IS_NOMEM;
+        return -ER_NOMEM;
 
     sprt_newmap[0].type = NR_FWK_PINCTRL_PIN_MUX;
     sprt_newmap[0].ugrt_data.sgrt_mux.function = sprt_node->parent->name;
@@ -343,7 +344,7 @@ static kint32_t imx_iomuxc_dt_node_to_map(struct fwk_pinctrl_dev *sprt_pctldev, 
         sprt_newmap[i].ugrt_data.sgrt_configs.num_configs = 1;
     }
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!
@@ -379,7 +380,7 @@ static kint32_t imx_iomuxc_get_function_groups(struct fwk_pinctrl_dev *sprt_pctl
     *groups = (kuaddr_t *)sprt_data->sprt_pinfuncs[selector].sprt_pingrps;
     *num_groups = sprt_data->sprt_pinfuncs[selector].ngrps;
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!
@@ -448,7 +449,7 @@ static const struct fwk_pinctrl_ops sgrt_imx_iomuxc_pctl_oprts =
  */
 static kint32_t imx_iomuxc_request(struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t offset)
 {
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!
@@ -459,7 +460,7 @@ static kint32_t imx_iomuxc_request(struct fwk_pinctrl_dev *sprt_pctldev, kuint32
  */
 static kint32_t imx_iomuxc_free(struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t offset)
 {
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!
@@ -508,21 +509,21 @@ static kint32_t imx_iomuxc_set_mux(struct fwk_pinctrl_dev *sprt_pctldev, kuint32
     kuint32_t i;
 
     if (!sprt_pctldev)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     sprt_data = (srt_imx_iomuxc_data_t *)fwk_pinctrl_get_drvdata(sprt_pctldev);
     if (!sprt_data || !sprt_data->sprt_pinfuncs || (func_selector >= sprt_data->nfuncs))
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     /*!< get function */
     sprt_pinfunc = &sprt_data->sprt_pinfuncs[func_selector];
     if (!sprt_pinfunc->sprt_pingrps || (group_selector >= sprt_pinfunc->ngrps))
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     /*!< get group */
     sprt_pingrp = &sprt_pinfunc->sprt_pingrps[group_selector];
     if (!sprt_pingrp->sprt_pin || !sprt_pingrp->npins)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     base = (kuaddr_t)sprt_data->base;
 
@@ -536,7 +537,7 @@ static kint32_t imx_iomuxc_set_mux(struct fwk_pinctrl_dev *sprt_pctldev, kuint32
             mrt_writel(sprt_pin->sgrt_pin.input_data, sprt_pin->sgrt_pin.input_base + base);
     }
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!
@@ -550,7 +551,7 @@ static kint32_t imx_iomuxc_set_mux(struct fwk_pinctrl_dev *sprt_pctldev, kuint32
 static kint32_t imx_iomuxc_gpio_request_enable(struct fwk_pinctrl_dev *sprt_pctldev, 
 										struct fwk_pinctrl_gpio_range *sprt_range, kuint32_t offset)
 {
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!
@@ -579,7 +580,7 @@ static void imx_iomuxc_gpio_disable_free(struct fwk_pinctrl_dev *sprt_pctldev,
 static kint32_t imx_iomuxc_gpio_set_direction(struct fwk_pinctrl_dev *sprt_pctldev, 
 										struct fwk_pinctrl_gpio_range *sprt_range, kuint32_t offset, kbool_t input)
 {
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 static const struct fwk_pinmux_ops sgrt_imx_iomuxc_pinmux_oprts =
@@ -609,20 +610,20 @@ static kint32_t imx_iomuxc_pin_config_get(struct fwk_pinctrl_dev *sprt_pctldev, 
     kuaddr_t base;
 
     if (!sprt_pctldev)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     sprt_data = (srt_imx_iomuxc_data_t *)fwk_pinctrl_get_drvdata(sprt_pctldev);
     if (!sprt_data)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     base = (kuaddr_t)sprt_data->base;
     sprt_pins = &sprt_data->sprt_pins[pin];
     if (!sprt_pins->conf_base)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     *config = mrt_readl(base + sprt_pins->conf_base);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!
@@ -643,16 +644,16 @@ static kint32_t imx_iomuxc_pin_config_set(struct fwk_pinctrl_dev *sprt_pctldev,
     kuint32_t i, reg_data;
 
     if (!sprt_pctldev)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     sprt_data = (srt_imx_iomuxc_data_t *)fwk_pinctrl_get_drvdata(sprt_pctldev);
     if (!sprt_data)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     base = (kuaddr_t)sprt_data->base;
     sprt_pins = &sprt_data->sprt_pins[pin];
     if (!sprt_pins->conf_base)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     reg_data = mrt_readl(base + sprt_pins->conf_base);
     reg_data &= ~0xffff;
@@ -662,7 +663,7 @@ static kint32_t imx_iomuxc_pin_config_set(struct fwk_pinctrl_dev *sprt_pctldev,
 
     mrt_writel(reg_data, base + sprt_pins->conf_base);
     
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 static const struct fwk_pinconf_ops sgrt_imx_iomuxc_pinconf_oprts =
@@ -741,7 +742,7 @@ static kint32_t imx_iomuxc_driver_probe_dt(struct fwk_platdev *sprt_pdev)
     struct fwk_device_node *sprt_node, *sprt_func, *sprt_grp;
     struct fwk_of_property *sprt_prop;
     srt_imx_iomuxc_pin_t *sprt_pin;
-    srt_imx_pin_t *sprt_conf;
+    srt_hal_imx_pin_t *sprt_conf;
     srt_imx_iomuxc_pin_func_t *sprt_pinfunc, *sprt_pinfuncs;
     srt_imx_iomuxc_pin_grp_t *sprt_pingrp, *sprt_pingrps;
     srt_imx_iomuxc_pin_res_t *sprt_pins;
@@ -756,11 +757,11 @@ static kint32_t imx_iomuxc_driver_probe_dt(struct fwk_platdev *sprt_pdev)
     /*!< how many boards here (sprt_node: iomuxc/iomuxc_snvs) */
     nfuncs = fwk_of_get_child_count(sprt_node);
     if (!nfuncs)
-        return -NR_IS_EMPTY;
+        return -ER_EMPTY;
 
     sprt_pinfuncs = (srt_imx_iomuxc_pin_func_t *)kzalloc(nfuncs * sizeof(*sprt_pinfuncs), GFP_KERNEL);
     if (!isValid(sprt_pinfuncs))
-        return -NR_IS_NOMEM;
+        return -ER_NOMEM;
 
     sprt_data->sprt_pinfuncs = sprt_pinfuncs;
     sprt_data->nfuncs = nfuncs;
@@ -829,7 +830,14 @@ static kint32_t imx_iomuxc_driver_probe_dt(struct fwk_platdev *sprt_pdev)
                     goto fail;
                 
                 sprt_conf = &sprt_pin[idx].sgrt_pin;
-                hal_imx_pin_auto_init(sprt_conf, 0, value, v_size);
+
+                if (value[5] & IMX6UL_MUX_PIN_CONFIG_SION)
+                {
+                    value[5] &= ~IMX6UL_MUX_PIN_CONFIG_SION;
+                    hal_imx_pin_auto_init(sprt_conf, 0, value, IMX6UL_PIN_MUX_FUNC_ENABLE, v_size);
+                }
+                else
+                    hal_imx_pin_auto_init(sprt_conf, 0, value, IMX6UL_PIN_MUX_FUNC_DISABLE, v_size);
 
                 /*!< pin refers to the index of "struct fwk_pinctrl_pin_desc[]" */
                 /*!< or: pin = sprt_conf->pad_base >> 2 */
@@ -848,12 +856,12 @@ static kint32_t imx_iomuxc_driver_probe_dt(struct fwk_platdev *sprt_pdev)
         sprt_pinfunc++;
     }
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 fail:
     imx_iomuxc_driver_remove_dt(sprt_pdev);
 
-    return -NR_IS_ERROR;    
+    return -ER_ERROR;    
 }
 
 /*!
@@ -880,7 +888,7 @@ static kint32_t imx_iomuxc_driver_probe(struct fwk_platdev *sprt_pdev)
     /*!< private driver data for imx */
     sprt_data = (srt_imx_iomuxc_data_t *)kzalloc(sizeof(*sprt_data), GFP_KERNEL);
     if (!isValid(sprt_data))
-        return -NR_IS_NOMEM;
+        return -ER_NOMEM;
 
     /*!< get the reg address of "iomuxc"/"iomuxc_snvs" */
     sprt_data->base = fwk_of_iomap(sprt_node, 0);
@@ -949,7 +957,7 @@ static kint32_t imx_iomuxc_driver_probe(struct fwk_platdev *sprt_pdev)
         }
     }
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 fail5:
     imx_iomuxc_driver_remove_dt(sprt_pdev);
@@ -962,7 +970,7 @@ fail2:
 fail1:
     kfree(sprt_data);
 
-    return -NR_IS_ERROR;
+    return -ER_ERROR;
 }
 
 /*!
@@ -987,7 +995,7 @@ static kint32_t imx_iomuxc_driver_remove(struct fwk_platdev *sprt_pdev)
     fwk_io_unmap(sprt_data->base);
     kfree(sprt_data);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!< platform instance */

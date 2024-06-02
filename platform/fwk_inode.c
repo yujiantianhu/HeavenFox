@@ -43,10 +43,10 @@ static kint32_t fwk_chrdev_open(struct fwk_inode *sprt_inode, struct fwk_file *s
 	if (sprt_file->sprt_foprts->open)
 		return sprt_file->sprt_foprts->open(sprt_inode, sprt_file);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 
 fail:
-	return -NR_IS_UNVALID;
+	return -ER_UNVALID;
 }
 
 /*!
@@ -59,7 +59,7 @@ static kint32_t fwk_chrdev_close(struct fwk_inode *sprt_inode, struct fwk_file *
 {
 	sprt_inode->sprt_cdev = mrt_nullptr;
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 static struct fwk_file_oprts sgrt_fwk_inode_def_chrfoprts =
@@ -76,7 +76,7 @@ static struct fwk_file_oprts sgrt_fwk_inode_def_chrfoprts =
  */
 static kint32_t fwk_blkdev_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -87,7 +87,7 @@ static kint32_t fwk_blkdev_open(struct fwk_inode *sprt_inode, struct fwk_file *s
  */
 static kint32_t fwk_blkdev_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 static struct fwk_file_oprts sgrt_fwk_inode_def_blkfoprts =
@@ -104,7 +104,7 @@ static struct fwk_file_oprts sgrt_fwk_inode_def_blkfoprts =
  */
 static kint32_t fwk_netdev_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -115,7 +115,7 @@ static kint32_t fwk_netdev_open(struct fwk_inode *sprt_inode, struct fwk_file *s
  */
 static kint32_t fwk_netdev_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 static struct fwk_file_oprts sgrt_fwk_inode_def_netfoprts =
@@ -153,7 +153,7 @@ kint32_t fwk_mk_inode(kchar_t *name, kuint32_t type, kuint32_t devNum)
 	struct fwk_inode *sprt_inode;
 
 	if (!name)
-		return -NR_IS_ERROR;
+		return -ER_ERROR;
 
 	sprt_head = &sgrt_fwk_inode;
 
@@ -162,7 +162,7 @@ kint32_t fwk_mk_inode(kchar_t *name, kuint32_t type, kuint32_t devNum)
 	{
 		/*!< Heavy name */
 		if (!strcmp(name, sprt_inode->fileName))
-			return -NR_IS_ERROR;
+			return -ER_ERROR;
 
 		/*!< Get the last inode */
 		sprt_tail = sprt_inode;
@@ -170,7 +170,7 @@ kint32_t fwk_mk_inode(kchar_t *name, kuint32_t type, kuint32_t devNum)
 
 	sprt_inode = (struct fwk_inode *)kzalloc(sizeof(struct fwk_inode), GFP_KERNEL);
 	if (!isValid(sprt_inode))
-		return -NR_IS_NOMEM;
+		return -ER_NOMEM;
 
 	sprt_inode->r_dev = devNum;
 	sprt_inode->sprt_next = mrt_nullptr;
@@ -197,7 +197,7 @@ kint32_t fwk_mk_inode(kchar_t *name, kuint32_t type, kuint32_t devNum)
 	/*!< Updated to the last inode */
 	mrt_list_add_tail(sprt_tail, sprt_inode);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -213,7 +213,7 @@ kint32_t fwk_rm_inode(kchar_t *name)
 	struct fwk_inode *sprt_inode;
 
 	if (!name)
-		return -NR_IS_ERROR;
+		return -ER_ERROR;
 
 	sprt_head = &sgrt_fwk_inode;
 	sprt_prev = mrt_nullptr;
@@ -230,7 +230,7 @@ kint32_t fwk_rm_inode(kchar_t *name)
 
 	/*!< Not found */
 	if (!isValid(sprt_inode))
-		return -NR_IS_MORE;
+		return -ER_MORE;
 
 	/*!< Deletes the current node */
 	mrt_list_del_any(sprt_prev, sprt_inode);
@@ -238,7 +238,7 @@ kint32_t fwk_rm_inode(kchar_t *name)
 	/*!< Free up resources */
 	kfree(sprt_inode);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -280,7 +280,7 @@ kint32_t fwk_device_create(kuint32_t type, kuint32_t devNum, kchar_t *name, ...)
 	va_list ptr_list;
 
 	if (!name)
-		return -NR_IS_ERROR;
+		return -ER_ERROR;
 
 	sprintk(node, "/dev/");
 
@@ -303,7 +303,7 @@ kint32_t fwk_device_destroy(kchar_t *name, ...)
 	va_list ptr_list;
 
 	if (!name)
-		return -NR_IS_ERROR;
+		return -ER_ERROR;
 
 	sprintk(node, "/dev/");
 

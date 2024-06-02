@@ -31,7 +31,7 @@
 void spin_lock_init(struct spin_lock *sprt_lock)
 {
     if (isValid(sprt_lock))
-        ATOMIC_SET(&sprt_lock->sgrt_atc);
+        ATOMIC_SET(&sprt_lock->sgrt_atc, 0);
 }
 
 /*!
@@ -74,12 +74,13 @@ void spin_unlock(struct spin_lock *sprt_lock)
 kint32_t spin_trylock(struct spin_lock *sprt_lock)
 {
     if (spin_is_locked(sprt_lock))
-        return -NR_IS_LOCKED;
+        return -ER_LOCKED;
 
     mrt_preempt_disable();
     mrt_barrier();
     atomic_inc(&sprt_lock->sgrt_atc);
-    return NR_IS_NORMAL;
+    
+    return ER_NORMAL;
 }
 
 /*!< for SMP (if is single core, do not need to use them) */
@@ -92,11 +93,11 @@ void spin_lock_irq(struct spin_lock *sprt_lock)
 kint32_t spin_try_lock_irq(struct spin_lock *sprt_lock)
 {
     if (spin_trylock(sprt_lock))
-        return -NR_IS_LOCKED;
+        return -ER_LOCKED;
 
     mrt_barrier();
     mrt_disable_cpu_irq();
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 void spin_unlock_irq(struct spin_lock *sprt_lock)
@@ -119,7 +120,7 @@ void spin_lock_irqsave(struct spin_lock *sprt_lock)
 kint32_t spin_try_lock_irqsave(struct spin_lock *sprt_lock)
 {
     if (spin_trylock(sprt_lock))
-        return -NR_IS_LOCKED;
+        return -ER_LOCKED;
 
     sprt_lock->flag = __get_cpsr();
     sprt_lock->flag &= CPSR_BIT_I;
@@ -127,7 +128,7 @@ kint32_t spin_try_lock_irqsave(struct spin_lock *sprt_lock)
     mrt_barrier();
     mrt_disable_cpu_irq();
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 void spin_unlock_irqrestore(struct spin_lock *sprt_lock)

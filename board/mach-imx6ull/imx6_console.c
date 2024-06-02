@@ -162,7 +162,7 @@ static kubyte_t imx_console_getc(void)
  */
 static void imx6ull_console_clk_init(void)
 {
-	srt_imx_ccm_t *sprt_clkRegs;
+	srt_hal_imx_ccm_t *sprt_clkRegs;
 
 	sprt_clkRegs = IMX_CONSOLE_CLK_PORT_ENTRY();
 
@@ -187,8 +187,8 @@ static void imx6ull_console_clk_init(void)
  */
 void imx6ull_console_init(void)
 {
-    srt_imx_pin_t  sgrt_txPort;
-    srt_imx_pin_t  sgrt_rxPort;
+    srt_hal_imx_pin_t  sgrt_txPort;
+    srt_hal_imx_pin_t  sgrt_rxPort;
 	urt_imx_io_ctl_pad_t ugrt_ioPad;
     srt_imx_uart_t *sprt_Uart;
 
@@ -203,8 +203,10 @@ void imx6ull_console_init(void)
 						IMX6UL_IO_CTL_PAD_PUS_BIT(IMX6UL_IO_CTL_PAD_PUS_100K_UP) |
 						IMX6UL_IO_CTL_PAD_SPEED_BIT(IMX6UL_IO_CTL_PAD_SPEED_100MHZ) |
 						IMX6UL_IO_CTL_PAD_DSE_BIT(IMX6UL_IO_CTL_PAD_DSE_RDIV(6)));
-	hal_imx_pin_attribute_init(&sgrt_txPort, IMX6UL_PIN_ADDR_BASE, IMX_CONSOLE_MUX_SELECT_TX, mrt_trans_urt_data(&ugrt_ioPad));
-	hal_imx_pin_attribute_init(&sgrt_rxPort, IMX6UL_PIN_ADDR_BASE, IMX_CONSOLE_MUX_SELECT_RX, mrt_trans_urt_data(&ugrt_ioPad));
+	hal_imx_pin_attribute_init(&sgrt_txPort, IMX6UL_PIN_ADDR_BASE, 
+						IMX_CONSOLE_MUX_SELECT_TX, mrt_trans_urt_data(&ugrt_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
+	hal_imx_pin_attribute_init(&sgrt_rxPort, IMX6UL_PIN_ADDR_BASE, 
+						IMX_CONSOLE_MUX_SELECT_RX, mrt_trans_urt_data(&ugrt_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
 
     hal_imx_pin_mux_configure(&sgrt_txPort);
     hal_imx_pin_mux_configure(&sgrt_rxPort);

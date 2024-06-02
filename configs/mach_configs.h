@@ -21,6 +21,10 @@
 #define CONFIG_OF                               (1)
 #define CONFIG_HZ                               (100UL)             /*!< timer interrupt per 10ms*/
 
+#define CONFIG_SCHDULE                          (1)
+#define CONFIG_PREEMPT                          (0)
+#define CONFIG_ROLL_POLL                        (1)
+
 /*!< The includes */
 /*!< Board Configuration */
 #if defined(CONFIG_MACH_AM4378_MYIR)

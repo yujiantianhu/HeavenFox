@@ -28,8 +28,8 @@ typedef struct mem_block
 	kusize_t lenth;										    /*!< current block total lenth(unit: byte), including header of memory info */
 	kusize_t remain;										/*!< the lenth of remaining usable memoty(unit: byte) */
 
-	struct mem_block *sprt_prev;						/*!< the first address of last memory block */
-	struct mem_block *sprt_next;						/*!< the first address of next memory block */
+	struct mem_block *sprt_prev;						    /*!< the first address of last memory block */
+	struct mem_block *sprt_next;						    /*!< the first address of next memory block */
 
 #define IS_MEMORYPOOL_VALID(this)                           ((this)->magic == MEMORY_POOL_MAGIC)
 

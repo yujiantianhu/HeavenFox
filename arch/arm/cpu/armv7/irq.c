@@ -72,9 +72,9 @@ static kint32_t gic_irq_domain_xlate(struct fwk_irq_domain *sprt_domain, struct 
 				const kuint32_t *intspec, kuint32_t intsize, kuint32_t *out_hwirq, kuint32_t *out_type)
 {
 	if (sprt_domain->sprt_node != sprt_intc)
-		return -NR_IS_UNVALID;
+		return -ER_UNVALID;
 	if (intsize < 3)
-		return -NR_IS_UNVALID;
+		return -ER_UNVALID;
 
 	/* skip over PPI, which is 0 ~ 15 */
 	*out_hwirq = intspec[1] + 16;
@@ -86,7 +86,7 @@ static kint32_t gic_irq_domain_xlate(struct fwk_irq_domain *sprt_domain, struct 
     /* interrupt trigger type */
 	*out_type = intspec[2] & IRQ_TYPE_SENSE_MASK;
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 static const struct fwk_irq_domain_ops sgrt_gic_domain_hierarchy_ops = 
@@ -193,18 +193,18 @@ kint32_t fwk_gic_of_init(struct fwk_device_node *sprt_node, struct fwk_device_no
     kuint32_t destributor = 0, cpu_interface = 0;
 
     if (isValid(sprt_parent))
-        return -NR_IS_UNVALID;
+        return -ER_UNVALID;
 
     fwk_of_property_read_u32_index(sprt_node, "reg", 0, &destributor);
     fwk_of_property_read_u32_index(sprt_node, "reg", 2, &cpu_interface);
 
     if ((!destributor) || (!cpu_interface))
-        return -NR_IS_NOTFOUND;
+        return -ER_NOTFOUND;
 
     fwk_gic_init_bases(g_iHal_gic_cnts, -1, (void *)destributor, (void *)cpu_interface, 0, sprt_node);
     g_iHal_gic_cnts++;
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 srt_ca7_gic_t *fwk_get_gic_data(kuint32_t gic_nr)
@@ -243,17 +243,17 @@ static kint32_t gpc_irq_domain_xlate(struct fwk_irq_domain *sprt_domain, struct 
 				const kuint32_t *intspec, kuint32_t intsize, kuint32_t *out_hwirq, kuint32_t *out_type)
 {
 	if (sprt_domain->sprt_node != sprt_intc)
-		return -NR_IS_UNVALID;
+		return -ER_UNVALID;
 	if (intsize != 3)
-		return -NR_IS_UNVALID;
+		return -ER_UNVALID;
     if (intspec[0] != 0)
-        return -NR_IS_UNVALID;
+        return -ER_UNVALID;
 
 	/* skip over PPI, which is 0 ~ 15 */
 	*out_hwirq = intspec[1];
     *out_type = intspec[2];
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 static void gpc_irq_chip_enable(struct fwk_irq_data *sprt_data)
@@ -312,11 +312,11 @@ kint32_t gpc_irq_domain_alloc(struct fwk_irq_domain *sprt_domain, kuint32_t virq
     struct fwk_irq_generic *sprt_gc;
 
     if (!sprt_domain)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
 	sprt_gc = kzalloc(sizeof(*sprt_gc), GFP_KERNEL);
 	if (!isValid(sprt_gc))
-        return -NR_IS_NOMEM;
+        return -ER_NOMEM;
 
     sprt_gc->sgrt_chip.irq_enable = gpc_irq_chip_enable;
     sprt_gc->sgrt_chip.irq_disable = gpc_irq_chip_disable;
@@ -325,7 +325,7 @@ kint32_t gpc_irq_domain_alloc(struct fwk_irq_domain *sprt_domain, kuint32_t virq
 
     fwk_irq_setup_generic_chip(virq, nr_irqs, sprt_gc, mrt_nullptr);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 void gpc_irq_domain_free(struct fwk_irq_domain *sprt_domain, kuint32_t virq, kuint32_t nr_irqs)
@@ -362,17 +362,17 @@ kint32_t fwk_gpc_of_init(struct fwk_device_node *sprt_node, struct fwk_device_no
     struct fwk_irq_domain *sprt_domain, *sprt_par;
 
     if (!isValid(sprt_parent) || !isValid(sprt_node))
-        return -NR_IS_UNVALID;
+        return -ER_UNVALID;
 
     sprt_par = fwk_of_irq_host(sprt_parent);
     if (!isValid(sprt_par))
-        return -NR_IS_UNVALID;
+        return -ER_UNVALID;
 
     sprt_domain = fwk_irq_domain_add_hierarchy(sprt_par, sprt_node, CA7_MAX_GPC_NR, &sgrt_gpc_domain_hierarchy_ops, mrt_nullptr);
     if (!isValid(sprt_domain))
-        return -NR_IS_FAILD;
+        return -ER_FAILD;
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /* end of file */

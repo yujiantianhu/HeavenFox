@@ -1079,12 +1079,12 @@ kint32_t fwk_of_modalias_node(struct fwk_device_node *sprt_node, kchar_t *modali
 
 	compatible = fwk_of_get_property(sprt_node, "compatible", &cplen);
 	if (!compatible || (strlen(compatible) > cplen))
-		return -NR_IS_CHECKERR;
+		return -ER_CHECKERR;
 	
 	p = strchr(compatible, ',');
 	kstrlcpy(modalias, p ? p + 1 : compatible, len);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!< end of file */

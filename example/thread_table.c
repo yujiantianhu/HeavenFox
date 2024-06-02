@@ -21,7 +21,7 @@ real_thread_init_t g_real_thread_init_tables[] =
 {
     light_app_init,
     button_app_init,
-//  display_app_init,
+    display_app_init,
     tsc_app_init,
     
     mrt_nullptr,

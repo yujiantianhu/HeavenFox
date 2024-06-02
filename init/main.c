@@ -29,8 +29,6 @@
 #include <kernel/instance.h>
 
 /*!< The globals */
-static kint32_t fd0, fd1;
-static kuint8_t iLightStatus = 0, iKeyStatus = 0;
 
 /*!< API functions */
 /*!
@@ -72,7 +70,7 @@ void start_kernel(void)
     /*!< enable interrupt */
     mrt_enable_cpu_irq();
 
-#if 1
+#if CONFIG_SCHDULE
     /*!< create thread */
     if (kthread_init())
         goto fail;
@@ -82,7 +80,7 @@ void start_kernel(void)
     print_info("initial system finished, start scheduler now\n");
 
     /*!< start */
-    real_thread_schedule();
+    schedule_thread();
 
 #endif
 
@@ -90,30 +88,7 @@ fail:
     print_info("start kernel failed!\n");
 
     for (;;)
-    {
-        fd1 = virt_open("/dev/extkey", 0);
-        if (fd1 < 0)
-            continue;
-
-        fd0 = virt_open("/dev/ledgpio", 0);
-        if (fd0 < 0)
-        {
-            virt_close(fd1);
-            continue;
-        }
-
-        if (virt_read(fd1, &iKeyStatus, 1) < 0)
-            goto END;
-
-        iLightStatus = !!iKeyStatus;
-        virt_write(fd0, &iLightStatus, 1);
-
-END:
-        virt_close(fd0);
-        virt_close(fd1);
-
-        delay_ms(100);
-    };
+    {};
 }
 
 /* end of file */

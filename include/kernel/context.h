@@ -17,7 +17,7 @@
 #include <kernel/kernel.h>
 
 /*!< The defines */
-struct kel_context_regs
+struct scheduler_context_regs
 {
 	kuaddr_t r0;
 	kuaddr_t r1;
@@ -40,7 +40,7 @@ struct kel_context_regs
 	kuaddr_t flags;							/*!< save scheduling reason (1: scheduled by preempt; 0: scheduled by self) */
 };
 
-struct kel_context_info
+struct scheduler_context
 {
 	kuaddr_t entry;							/*!< if (*flags) is 0, entry will be run */
 	kuaddr_t args;
@@ -60,9 +60,8 @@ TARGET_EXT void __switch_to(kuaddr_t info);
  * @retval 	none
  * @note   	jump to asm
  */
-static inline void context_switch(struct kel_context_info *sprt_info)
+static inline void context_switch(struct scheduler_context *sprt_info)
 {
-	mrt_preempt_enable();
 	__switch_to((kuaddr_t)sprt_info);
 }
 

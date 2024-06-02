@@ -18,10 +18,10 @@
 #include <kernel/instance.h>
 
 /*!< The defines */
-#define INIT_THREAD_STACK_SIZE                          KEL_THREAD_STACK_HALF(1)    /*!< 1/2 page (2 kbytes) */
+#define INIT_THREAD_STACK_SIZE                          REAL_THREAD_STACK_HALF(1)    /*!< 1/2 page (2 kbytes) */
 
 /*!< The globals */
-static struct kel_thread_attr sgrt_init_proc_attr;
+static struct real_thread_attr sgrt_init_proc_attr;
 static kuint32_t g_init_proc_stack[INIT_THREAD_STACK_SIZE];
 
 /*!< API functions */
@@ -37,7 +37,7 @@ static void *init_proc_entry(void *args)
 
     for (;;)
     {
-//      struct kel_thread *sprt_tid = mrt_current;
+//      struct real_thread *sprt_tid = mrt_current;
 //      print_info("%s: tid = %d\n", __FUNCTION__, sprt_tid->tid);
 
         schedule_delay_ms(200);
@@ -54,18 +54,18 @@ static void *init_proc_entry(void *args)
  */
 kint32_t init_proc_init(void)
 {
-    struct kel_thread_attr *sprt_attr = &sgrt_init_proc_attr;
+    struct real_thread_attr *sprt_attr = &sgrt_init_proc_attr;
 
-	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
-	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;
-	sprt_attr->schedpolicy = KEL_THREAD_SCHED_FIFO;
+	sprt_attr->detachstate = REAL_THREAD_CREATE_JOINABLE;
+	sprt_attr->inheritsched	= REAL_THREAD_INHERIT_SCHED;
+	sprt_attr->schedpolicy = REAL_THREAD_SCHED_FIFO;
 
     /*!< thread stack */
 	real_thread_set_stack(sprt_attr, mrt_nullptr, g_init_proc_stack, sizeof(g_init_proc_stack));
     /*!< lowest priority */
-	real_thread_set_priority(sprt_attr, KEL_THREAD_PROTY_INIT);
+	real_thread_set_priority(sprt_attr, REAL_THREAD_PROTY_INIT);
     /*!< default time slice */
-    real_thread_set_time_slice(sprt_attr, KEL_THREAD_TIME_DEFUALT);
+    real_thread_set_time_slice(sprt_attr, REAL_THREAD_TIME_DEFUALT);
 
     /*!< register thread */
     return kernel_thread_init_create(sprt_attr, init_proc_entry, mrt_nullptr);

@@ -20,9 +20,9 @@
 
 
 /*!< The functions */
-TARGET_EXT void schedule_for_timeout(kutime_t count);
+TARGET_EXT void schedule_timeout(kutime_t count);
 TARGET_EXT void schedule_delay(kuint32_t seconds);
 TARGET_EXT void schedule_delay_ms(kuint32_t milseconds);
 TARGET_EXT void schedule_delay_us(kuint32_t useconds);
 
-#endif /* __KEL_CONTEXT_H_ */
+#endif /* __KEL_SLEEP_H_ */

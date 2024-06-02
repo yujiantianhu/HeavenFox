@@ -39,7 +39,7 @@ kint32_t __plat_init fwk_chrdev_init(void)
 	for (i = 0; i < chrdevMax; i++)
 		*(sprt_chrdev++) = mrt_nullptr;
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 IMPORT_PLATFORM_INIT(fwk_chrdev_init);
 
@@ -66,7 +66,7 @@ kint32_t __plat_exit fwk_chrdev_exit(void)
 		*sprt_chrdev = mrt_nullptr;
 	}
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 IMPORT_PLATFORM_EXIT(fwk_chrdev_exit);
 
@@ -241,11 +241,11 @@ kint32_t fwk_alloc_chrdev(kuint32_t *devNum, kuint32_t baseminor, kuint32_t coun
 
 	sprt_chrdev = __fwk_register_chrdev(0, baseminor, count, name);
 	if (!isValid(sprt_chrdev))
-		return -NR_IS_FAULT;
+		return -ER_FAULT;
 
 	*devNum	= MKE_DEV_NUM(sprt_chrdev->major, sprt_chrdev->baseminor);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -272,7 +272,7 @@ kint32_t fwk_register_chrdev(kuint32_t devNum, kuint32_t count, const kchar_t *n
 			goto fail;
 	}
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 
 fail:
 	/*!<
@@ -280,7 +280,7 @@ fail:
 	 * The number of devices that have been registered: count = n - devNum
 	 */
 	fwk_unregister_chrdev(devNum, n - devNum);
-	return -NR_IS_FAILD;
+	return -ER_FAILD;
 }
 
 /*!

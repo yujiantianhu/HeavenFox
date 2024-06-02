@@ -43,6 +43,17 @@
 # Readme:
 # -----------------------------------------------------------------------
 
+# 2024.06.02
+    author: Yang Yujun
+    commit: 
+        01) support semaphore, wait queue;
+        02) standardize the naming of scheduler APIs;
+        03) support multiple scheduling methods (configured by "CONFIG_PREEMPT", "CONFIG_SCHEDUL", ...)
+
+# 2024.05.27
+    author: Yang Yujun
+    commit: standardize the naming of error code
+
 # 2024.05.26
     author: Yang Yujun
     commit:

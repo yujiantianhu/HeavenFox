@@ -124,7 +124,7 @@ _switch_restore:
     ldr r2, [r7]                                    @ if r2 == 0, current thread is scheduled by "start_kernel"
 
 1:
-    push { r0 - r2, r7 }                             @ r1: next sp; r2: first; r7: address of [first]
+    push { r0 - r2, r7 }                            @ r1: next sp; r2: first; r7: address of [first]
     ldr r1, =__real_thread_init_before              @ init thread before running
     blx r1
 
@@ -188,7 +188,7 @@ __schedule_before:
     _set_preempt_cnt add                            @ preempt_disable
 
     _generic_save_params
-    ldr r0, =__real_thread_schedule
+    ldr r0, =__schedule_thread
     blx r0                                          @ schedule threads
     str r0, g_asm_context_info
     _generic_restore_params
@@ -196,7 +196,7 @@ __schedule_before:
 1:
     push { r0 }
     push { r1, r2 }
-    ldr r0, g_asm_context_info                      @ get context_info from "__real_thread_schedule"
+    ldr r0, g_asm_context_info                      @ get context_info from "__schedule_thread"
     ldr r2, [r0, #16]                               @ r1: prev sp (frame register base)
     ldr r1, [r2]
 

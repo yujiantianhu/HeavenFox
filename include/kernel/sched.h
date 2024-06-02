@@ -20,12 +20,14 @@
 #include <kernel/spinlock.h>
 
 /*!< The defines */
-#define KEL_THREAD_NAME_SIZE                    (32)
+struct spin_lock;
 
-struct kel_thread
+#define REAL_THREAD_NAME_SIZE                    (32)
+
+struct real_thread
 {
 	/*!< thread name */
-	kchar_t name[KEL_THREAD_NAME_SIZE];
+	kchar_t name[REAL_THREAD_NAME_SIZE];
 
 	/*!< thread id */
 	kuint32_t tid;
@@ -36,7 +38,7 @@ struct kel_thread
 
 	/*!< thread entry */
 	void *(*start_routine) (void *);
-	struct kel_thread_attr *sprt_attr;
+	struct real_thread_attr *sprt_attr;
 	void *ptr_args;
 
 	/*!< thread list (to ready/suspend/sleep list) */
@@ -44,13 +46,30 @@ struct kel_thread
 
 	/*!< thread time slice (period = sprt_attr->sgrt_param.mrt_sched_init_budget) */
     kutime_t expires;
+
+	/*!< refer to "__ERT_REAL_THREAD_SIGNALS" */
+	kuint32_t flags;
+
+	struct spin_lock sgrt_lock;
 };
 
+#define mrt_thread_set_flags(signal, sprt_tsk)	\
+	do {	\
+		sprt_tsk->flags |= mrt_bit(signal);	\
+	} while (0)
+
+#define mrt_thread_clr_flags(signal, sprt_tsk)	\
+	do {	\
+		sprt_tsk->flags &= ~mrt_bit(signal);	\
+	} while (0)
+
+#define mrt_thread_is_flags(signal, sprt_tsk)						(!!((sprt_tsk)->flags & mrt_bit(signal)))
+
 /*!< thread manage table */
-struct kel_thread_table
+struct scheduler_table
 {
-	kint32_t max_tidarr;											/*!< = KEL_THREAD_MAX_NUM */
-	kint32_t max_tids; 												/*!< = KEL_THREAD_MAX_NUM + count of sprt_tids */
+	kint32_t max_tidarr;											/*!< = REAL_THREAD_MAX_NUM */
+	kint32_t max_tids; 												/*!< = REAL_THREAD_MAX_NUM + count of sprt_tids */
 	kint32_t max_tidset;											/*!< the max tid */
 	kint32_t ref_tidarr; 											/*!< number of allocated descriptors in sprt_tid_array */
 
@@ -63,46 +82,79 @@ struct kel_thread_table
 	struct list_head sgrt_suspend;									/*!< suspend list head (manage all suspend thread) */
 	struct list_head sgrt_sleep;									/*!< sleep list head (manage all sleepy thread) */
 
-	struct kel_thread *sprt_work;									/*!< current thread (status is running) */
+	struct real_thread *sprt_work;									/*!< current thread (status is running) */
 
-	struct kel_thread **sprt_tids;									/*!< if sprt_tid_array is up to max, new thread form mempool */
-	struct kel_thread *sprt_tid_array[KEL_THREAD_MAX_NUM];			/*!< thread maximum, tid = 0 ~ KEL_THREAD_MAX_NUM */
+	struct real_thread **sprt_tids;									/*!< if sprt_tid_array is up to max, new thread form mempool */
+	struct real_thread *sprt_tid_array[REAL_THREAD_MAX_NUM];		/*!< thread maximum, tid = 0 ~ REAL_THREAD_MAX_NUM */
 
 	struct spin_lock sgrt_lock;
 
-#define __KEL_THREAD_MAX_STATS					((kutype_t)(~0))
-#define __KEL_THREAD_HANDLER(ptr, tid)			((ptr)->sprt_tid_array[(tid)])
-#define __KEL_THREAD_RUNNING_LIST(ptr)			((ptr)->sprt_work)
-#define __KEL_THREAD_READY_LIST(ptr)			(&((ptr)->sgrt_ready))
-#define __KEL_THREAD_SUSPEND_LIST(ptr)			(&((ptr)->sgrt_suspend))
-#define __KEL_THREAD_SLEEP_LIST(ptr)			(&((ptr)->sgrt_sleep))
+#define __REAL_THREAD_MAX_STATS					((kutype_t)(~0))
+#define __REAL_THREAD_HANDLER(ptr, tid)			((ptr)->sprt_tid_array[(tid)])
+#define __REAL_THREAD_RUNNING_LIST(ptr)			((ptr)->sprt_work)
+#define __REAL_THREAD_READY_LIST(ptr)			(&((ptr)->sgrt_ready))
+#define __REAL_THREAD_SUSPEND_LIST(ptr)			(&((ptr)->sgrt_suspend))
+#define __REAL_THREAD_SLEEP_LIST(ptr)			(&((ptr)->sgrt_sleep))
 };
 
 /*!< The functions */
-TARGET_EXT struct kel_thread *get_current_thread(void);
-TARGET_EXT struct kel_thread *get_thread_handle(real_thread_t tid);
+TARGET_EXT struct real_thread *get_current_thread(void);
+TARGET_EXT struct real_thread *get_thread_handle(real_thread_t tid);
 TARGET_EXT void real_thread_set_name(const kchar_t *name);
-TARGET_EXT real_thread_t kel_sched_get_unused_tid(kuint32_t i_start, kuint32_t count);
-TARGET_EXT kuint64_t kel_sched_stat_get(void);
-TARGET_EXT void kel_sched_self_suspend(void);
-TARGET_EXT kint32_t kel_sched_thread_suspend(real_thread_t tid);
-TARGET_EXT kint32_t kel_sched_thread_wakeup(real_thread_t tid);
+TARGET_EXT void real_thread_set_state(struct real_thread *sprt_thread, kuint32_t state);
+TARGET_EXT void schedule_lock(void);
+TARGET_EXT void schedule_unlock(void);
+TARGET_EXT real_thread_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count);
+TARGET_EXT kuint64_t scheduler_stats_get(void);
+TARGET_EXT void schedule_self_suspend(void);
+TARGET_EXT kint32_t schedule_thread_suspend(real_thread_t tid);
+TARGET_EXT kint32_t schedule_thread_wakeup(real_thread_t tid);
 
 TARGET_EXT kbool_t is_ready_thread_empty(void);
 TARGET_EXT kbool_t is_suspend_thread_empty(void);
 TARGET_EXT kbool_t is_sleep_thread_empty(void);
-TARGET_EXT struct kel_thread *get_first_ready_thread(void);
-TARGET_EXT struct kel_thread *get_first_suspend_thread(void);
-TARGET_EXT struct kel_thread *get_first_sleep_thread(void);
+TARGET_EXT struct real_thread *get_first_ready_thread(void);
+TARGET_EXT struct real_thread *get_first_suspend_thread(void);
+TARGET_EXT struct real_thread *get_first_sleep_thread(void);
 
-TARGET_EXT kint32_t kel_sched_switch_thread(real_thread_t tid);
-TARGET_EXT kint32_t register_kel_sched_thread(struct kel_thread *sprt_thread, real_thread_t tid);
+TARGET_EXT kint32_t schedule_thread_switch(real_thread_t tid);
+TARGET_EXT kint32_t register_new_thread(struct real_thread *sprt_thread, real_thread_t tid);
 TARGET_EXT void __real_thread_init_before(void);
-TARGET_EXT struct kel_context_info *__real_thread_schedule(void);
-TARGET_EXT void real_thread_schedule(void);
+TARGET_EXT struct scheduler_context *__schedule_thread(void);
+TARGET_EXT void schedule_thread(void);
 
 /*!< The defines */
-#define mrt_current                             ({ struct kel_thread *sprt_current = get_current_thread(); sprt_current; })
+#define mrt_current                             ({ struct real_thread *sprt_current = get_current_thread(); sprt_current; })
 #define mrt_tid_handle(tid)                     get_thread_handle(tid)
+
+/*!< API functions */
+static inline kbool_t real_thread_state_pending(struct real_thread *sprt_thread)
+{
+	kbool_t is_wakeup, is_killed;
+
+	spin_lock_irqsave(&sprt_thread->sgrt_lock);
+	is_wakeup = mrt_thread_is_flags(NR_THREAD_SIG_WAKEUP, sprt_thread);
+	is_killed = mrt_thread_is_flags(NR_THREAD_SIG_KILL, sprt_thread);
+
+	mrt_barrier();
+
+	mrt_thread_clr_flags(NR_THREAD_SIG_WAKEUP, sprt_thread);
+	mrt_thread_clr_flags(NR_THREAD_SIG_KILL, sprt_thread);
+	spin_unlock_irqrestore(&sprt_thread->sgrt_lock);
+
+	return (is_wakeup || is_killed);
+}
+
+static inline void real_thread_state_signal(struct real_thread *sprt_thread, kuint32_t state, kbool_t mode)
+{
+	spin_lock_irqsave(&sprt_thread->sgrt_lock);
+
+	if (mode)
+		mrt_thread_set_flags(state, sprt_thread);
+	else
+		mrt_thread_clr_flags(state, sprt_thread);
+	
+	spin_unlock_irqrestore(&sprt_thread->sgrt_lock);
+}
 
 #endif /* __KEL_SCHED_H_ */

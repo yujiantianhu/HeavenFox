@@ -123,7 +123,7 @@ static kint32_t led_driver_probe(struct fwk_platdev *sprt_pdev)
 
 	sprt_gdesc = fwk_gpio_desc_get(&sprt_pdev->sgrt_dev, "led1", 0);
 	if (!isValid(sprt_gdesc))
-		return -NR_IS_NODEV;
+		return -ER_NODEV;
 
 	fwk_gpio_set_direction_output(sprt_gdesc, 0);
 	fwk_gpio_set_value(sprt_gdesc, 0);
@@ -158,7 +158,7 @@ static kint32_t led_driver_probe(struct fwk_platdev *sprt_pdev)
 	sprt_cdev->privData = sprt_data;
 	fwk_platform_set_drvdata(sprt_pdev, sprt_data);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 
 fail5:
 	fwk_device_destroy(LED_DRIVER_NAME);
@@ -171,7 +171,7 @@ fail2:
 fail1:
 	fwk_gpio_desc_put(sprt_gdesc);
 
-	return -NR_IS_FAILD;
+	return -ER_FAILD;
 }
 
 /*!
@@ -187,7 +187,7 @@ static kint32_t led_driver_remove(struct fwk_platdev *sprt_pdev)
 
 	sprt_data = (struct led_drv_data *)fwk_platform_get_drvdata(sprt_pdev);
 	if (!isValid(sprt_data))
-		return -NR_IS_NULLPTR;
+		return -ER_NULLPTR;
 
 	devnum = MKE_DEV_NUM(sprt_data->major, sprt_data->minor);
 
@@ -201,7 +201,7 @@ static kint32_t led_driver_remove(struct fwk_platdev *sprt_pdev)
 	kfree(sprt_data);
 	fwk_platform_set_drvdata(sprt_pdev, mrt_nullptr);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!< device id for device-tree */

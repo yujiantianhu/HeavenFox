@@ -29,11 +29,11 @@
 #include "thread_table.h"
 
 /*!< The defines */
-#define DISPLAY_APP_THREAD_STACK_SIZE                       KEL_THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
+#define DISPLAY_APP_THREAD_STACK_SIZE                       REAL_THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
 
 /*!< The globals */
 static real_thread_t g_display_app_tid;
-static struct kel_thread_attr sgrt_display_app_attr;
+static struct real_thread_attr sgrt_display_app_attr;
 static kuint32_t g_display_app_stack[DISPLAY_APP_THREAD_STACK_SIZE];
 static struct mutex_lock sgrt_display_app_lock;
 
@@ -133,7 +133,7 @@ static void *display_app_entry(void *args)
     mutex_init(&sgrt_display_app_lock);
 
     do {
-        fd = virt_open("/dev/fb0", 0);
+        fd = virt_open("/dev/fb0", O_RDWR);
         if (fd < 0)
             continue;
 
@@ -206,19 +206,19 @@ END:
  */
 kint32_t display_app_init(void)
 {
-    struct kel_thread_attr *sprt_attr = &sgrt_display_app_attr;
+    struct real_thread_attr *sprt_attr = &sgrt_display_app_attr;
     kint32_t retval;
 
-	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
-	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;
-	sprt_attr->schedpolicy = KEL_THREAD_SCHED_FIFO;
+	sprt_attr->detachstate = REAL_THREAD_CREATE_JOINABLE;
+	sprt_attr->inheritsched	= REAL_THREAD_INHERIT_SCHED;
+	sprt_attr->schedpolicy = REAL_THREAD_SCHED_FIFO;
 
     /*!< thread stack */
 	real_thread_set_stack(sprt_attr, mrt_nullptr, &g_display_app_stack[0], sizeof(g_display_app_stack));
     /*!< lowest priority */
-	real_thread_set_priority(sprt_attr, KEL_THREAD_PROTY_DEFAULT);
+	real_thread_set_priority(sprt_attr, REAL_THREAD_PROTY_DEFAULT);
     /*!< default time slice */
-    real_thread_set_time_slice(sprt_attr, KEL_THREAD_TIME_DEFUALT);
+    real_thread_set_time_slice(sprt_attr, REAL_THREAD_TIME_DEFUALT);
 
     /*!< register thread */
     retval = real_thread_create(&g_display_app_tid, sprt_attr, display_app_entry, mrt_nullptr);

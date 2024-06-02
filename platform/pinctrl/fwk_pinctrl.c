@@ -359,7 +359,7 @@ static kint32_t fwk_pinctrl_add_state(struct fwk_pinctrl *sprt_pctl)
     kuint32_t idx;
 
     if (!sprt_pctl)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     /*!< get current node */
     sprt_node = sprt_pctl->sprt_dev->sprt_node;
@@ -392,11 +392,11 @@ static kint32_t fwk_pinctrl_add_state(struct fwk_pinctrl *sprt_pctl)
         list_head_add_tail(&sprt_pctl->sgrt_states, &sprt_state->sgrt_link);
     }
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 fail:
     fwk_pinctrl_free(sprt_pctl);
-    return -NR_IS_FAILD;
+    return -ER_FAILD;
 }
 
 /*!
@@ -415,7 +415,7 @@ static kint32_t fwk_pinctrl_add_setting(struct fwk_pinctrl *sprt_pctl)
     kint32_t retval = 0;
 
     if (mrt_list_head_empty(&sgrt_fwk_pinctrl_map_list))
-        return -NR_IS_EMPTY;
+        return -ER_EMPTY;
 
     /*!< get each sprt_maps */
     foreach_fwk_pinctrl_maps(sprt_maps, sprt_map, sgrt_link)
@@ -469,11 +469,11 @@ static kint32_t fwk_pinctrl_add_setting(struct fwk_pinctrl *sprt_pctl)
         }
     }
    
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 fail:
     fwk_pinctrl_free(sprt_pctl);
-    return -NR_IS_FAILD;
+    return -ER_FAILD;
 }
 
 /*!
@@ -642,7 +642,7 @@ kint32_t fwk_pinctrl_bind_pins(struct fwk_device *sprt_dev)
 
     sprt_info = kzalloc(sizeof(*sprt_info), GFP_KERNEL);
     if (!sprt_info)
-        return -NR_IS_NOMEM;
+        return -ER_NOMEM;
 
     /*!< init pinctrl state after adding to sgrt_fwk_pinctrl_dev_list */
     sprt_pctl = fwk_pinctrl_get(sprt_dev);
@@ -664,13 +664,13 @@ kint32_t fwk_pinctrl_bind_pins(struct fwk_device *sprt_dev)
     sprt_info->sprt_default = sprt_state;
 
 END:
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 fail2:
     fwk_pinctrl_put(sprt_pctl);
 fail1:
     kfree(sprt_info);
-    return -NR_IS_ERROR;
+    return -ER_ERROR;
 }
 
 /*!
@@ -770,12 +770,12 @@ kint32_t fwk_pinctrl_select_state(struct fwk_pinctrl *sprt_pctl, struct fwk_pinc
     kint32_t retval;
 
     if (!sprt_pctl || !sprt_state)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     sprt_cur = sprt_pctl->sprt_state;
 
     if (sprt_cur == sprt_state)
-        return -NR_IS_EXISTED;
+        return -ER_EXISTED;
 
     /*!< disable current pins */
     if (sprt_cur)
@@ -794,7 +794,7 @@ kint32_t fwk_pinctrl_select_state(struct fwk_pinctrl *sprt_pctl, struct fwk_pinc
         sprt_confops = sprt_pctldev->sprt_desc->sprt_confops;
 
         if (!sprt_pmxops || !sprt_confops)
-            return -NR_IS_NSUPPORT;
+            return -ER_NSUPPORT;
 
         retval = false;
 
@@ -817,7 +817,7 @@ kint32_t fwk_pinctrl_select_state(struct fwk_pinctrl *sprt_pctl, struct fwk_pinc
                 break;
 
             default:
-                return -NR_IS_FAULT;
+                return -ER_FAULT;
         }
 
         if (retval)
@@ -826,7 +826,7 @@ kint32_t fwk_pinctrl_select_state(struct fwk_pinctrl *sprt_pctl, struct fwk_pinc
 
     sprt_pctl->sprt_state = sprt_state;
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!< end of file */

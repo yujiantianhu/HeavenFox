@@ -31,7 +31,7 @@
 void mutex_init(struct mutex_lock *sprt_lock)
 {
     if (sprt_lock)
-        ATOMIC_SET(&sprt_lock->sgrt_atc);
+        ATOMIC_SET(&sprt_lock->sgrt_atc, 0);
 }
 
 /*!
@@ -45,10 +45,29 @@ void mutex_lock(struct mutex_lock *sprt_lock)
     if (!mrt_current)
         return;
 
-    if (mutex_is_locked(sprt_lock))
-        real_thread_schedule();
+    while (mutex_is_locked(sprt_lock))
+        schedule_thread();
     
     atomic_inc(&sprt_lock->sgrt_atc);
+}
+
+/*!
+ * @brief   mutex lock
+ * @param   sprt_lock
+ * @retval  none
+ * @note    if it has been locked, return directly
+ */
+kint32_t mutex_try_lock(struct mutex_lock *sprt_lock)
+{
+    if (!mrt_current)
+        return -ER_FORBID;
+
+    if (mutex_is_locked(sprt_lock))
+        return -ER_BUSY;
+    
+    atomic_inc(&sprt_lock->sgrt_atc);
+
+    return ER_NORMAL;
 }
 
 /*!
@@ -59,7 +78,7 @@ void mutex_lock(struct mutex_lock *sprt_lock)
  */
 void mutex_unlock(struct mutex_lock *sprt_lock)
 {
-    if (!mrt_current)
+    if (!mrt_current || !mutex_is_locked(sprt_lock))
         return;
     
     atomic_dec(&sprt_lock->sgrt_atc);

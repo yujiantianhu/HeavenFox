@@ -26,11 +26,11 @@
 #include "thread_table.h"
 
 /*!< The defines */
-#define BUTTONAPP_THREAD_STACK_SIZE                          KEL_THREAD_STACK_HALF(1)    /*!< 1/2 page (1kbytes) */
+#define BUTTONAPP_THREAD_STACK_SIZE                          REAL_THREAD_STACK_HALF(1)    /*!< 1/2 page (1kbytes) */
 
 /*!< The globals */
 static real_thread_t g_button_app_tid;
-static struct kel_thread_attr sgrt_button_app_attr;
+static struct real_thread_attr sgrt_button_app_attr;
 static kuint32_t g_button_app_stack[BUTTONAPP_THREAD_STACK_SIZE];
 static struct mailbox sgrt_button_app_mailbox;
 
@@ -52,16 +52,19 @@ static void *button_app_entry(void *args)
 
     mailbox_init(sprt_mb, mrt_current->tid, "button-app-mailbox");
 
+    do {
+        fd = virt_open("/dev/extkey", O_RDONLY);
+        if (mrt_unlikely(fd < 0))
+            schedule_delay_ms(200);
+
+    } while (fd < 0);
+
     for (;;)
     {
-        fd = virt_open("/dev/extkey", 0);
-        if (fd < 0)
-            goto END1;
-
         retval = virt_read(fd, &status, 1);
         if ((retval < 0) || (status == last_status))
-            goto END2;
-
+            goto END;
+        
         if (sprt_mail)
             mail_destroy(sprt_mb, sprt_mail);
 
@@ -69,7 +72,7 @@ static void *button_app_entry(void *args)
         if (!isValid(sprt_mail))
         {
             sprt_mail = mrt_nullptr;
-            goto END2;
+            goto END;
         }
 
         sgrt_msg[0].buffer = &status;
@@ -81,10 +84,8 @@ static void *button_app_entry(void *args)
 
         mail_send("light-app-mailbox", sprt_mail);
         last_status = status;
-        
-END2:
-        virt_close(fd);
-END1:
+
+END:
         schedule_delay_ms(200);
     }
 
@@ -99,19 +100,19 @@ END1:
  */
 kint32_t button_app_init(void)
 {
-    struct kel_thread_attr *sprt_attr = &sgrt_button_app_attr;
+    struct real_thread_attr *sprt_attr = &sgrt_button_app_attr;
     kint32_t retval;
 
-	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
-	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;
-	sprt_attr->schedpolicy = KEL_THREAD_SCHED_FIFO;
+	sprt_attr->detachstate = REAL_THREAD_CREATE_JOINABLE;
+	sprt_attr->inheritsched	= REAL_THREAD_INHERIT_SCHED;
+	sprt_attr->schedpolicy = REAL_THREAD_SCHED_FIFO;
 
     /*!< thread stack */
 	real_thread_set_stack(sprt_attr, mrt_nullptr, g_button_app_stack, sizeof(g_button_app_stack));
     /*!< lowest priority */
-	real_thread_set_priority(sprt_attr, KEL_THREAD_PROTY_DEFAULT);
+	real_thread_set_priority(sprt_attr, REAL_THREAD_PROTY_DEFAULT);
     /*!< default time slice */
-    real_thread_set_time_slice(sprt_attr, KEL_THREAD_TIME_DEFUALT);
+    real_thread_set_time_slice(sprt_attr, REAL_THREAD_TIME_DEFUALT);
 
     /*!< register thread */
     retval = real_thread_create(&g_button_app_tid, sprt_attr, button_app_entry, mrt_nullptr);

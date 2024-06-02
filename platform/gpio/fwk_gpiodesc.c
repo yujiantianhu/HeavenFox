@@ -71,7 +71,7 @@ kint32_t fwk_of_get_named_gpio_flags(struct fwk_device_node *sprt_node,
 
     sprt_desc = fwk_of_get_named_gpiodesc_flags(sprt_node, list_name, index, flags);
     if (!isValid(sprt_desc))
-        return -NR_IS_NOTFOUND;
+        return -ER_NOTFOUND;
 
     return fwk_gpiodesc_to_hwgpio(sprt_desc->sprt_chip, sprt_desc);
 }
@@ -98,7 +98,7 @@ kint32_t fwk_gpio_request(struct fwk_gpio_desc *sprt_desc, const kchar_t *label)
     if (retval < 0)
         return retval;
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 void fwk_gpio_free(struct fwk_gpio_desc *sprt_desc)
@@ -182,7 +182,7 @@ kint32_t fwk_gpio_desc_to_irq(struct fwk_gpio_desc *sprt_desc)
         }
     }
 
-    return -NR_IS_IOERR;
+    return -ER_IOERR;
 }
 
 /*!
@@ -228,7 +228,7 @@ kint32_t fwk_gpio_get_value(struct fwk_gpio_desc *sprt_desc)
     {
         value = sprt_chip->get(sprt_chip, offset);
         if (value < 0)
-            return -NR_IS_IOERR;
+            return -ER_IOERR;
 
         /*!< if active level is 0, it means that level 0 is logic 1 */
         if (fwk_gpio_desc_check_flags(sprt_desc, NR_FWK_GPIODESC_ACTIVE_LOW))
@@ -237,7 +237,7 @@ kint32_t fwk_gpio_get_value(struct fwk_gpio_desc *sprt_desc)
         return value;
     }    
 
-    return -NR_IS_IOERR;
+    return -ER_IOERR;
 }
 
 /*!
@@ -319,7 +319,7 @@ kint32_t fwk_gpio_get_direction(struct fwk_gpio_desc *sprt_desc)
         return (dir & NR_FWK_GPIO_BIT_OUT);
     }
 
-    return -NR_IS_IOERR;
+    return -ER_IOERR;
 }
 
 kbool_t fwk_gpio_dir_is_input(struct fwk_gpio_desc *sprt_desc)

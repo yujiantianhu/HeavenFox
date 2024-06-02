@@ -359,7 +359,7 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_f
 		switch (ch)
 		{
 			case 'c':
-				num = (kuint8_t)va_arg(ptr_list, kuint32_t);
+				num = (kchar_t)va_arg(ptr_list, kuint32_t);
 
 				if ((lenth + 1) > size)
 					break;
@@ -431,6 +431,37 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_f
 
 				lenth += count;
 
+				break;
+
+			case 'x':
+			case 'p':
+				num = (kutype_t)va_arg(ptr_list, kutype_t);
+				count = dec_to_hex(mrt_nullptr, num, false);
+
+				if ((lenth + count) > size)
+					break;
+
+				dec_to_hex(ptr_data, num, false);
+
+				if (isValid(ptr_buf))
+					ptr_data += count;
+
+				lenth += count;
+				break;
+
+			case 'b':
+				num = (kutype_t)va_arg(ptr_list, kutype_t);
+				count = dec_to_binary(mrt_nullptr, num);
+
+				if ((lenth + count) > size)
+					break;
+
+				dec_to_binary(ptr_data, num);
+
+				if (isValid(ptr_buf))
+					ptr_data += count;
+
+				lenth += count;
 				break;
 
 			default:

@@ -68,7 +68,7 @@ static kint32_t fwk_driver_attach(struct fwk_driver *sprt_driver, struct fwk_bus
 
 	/*!< First check if the match function is defined */
 	if (!sprt_bus_type->match)
-		return -NR_IS_ERROR;
+		return -ER_ERROR;
 
 	matches	= 0;
 	FWK_INIT_BUS_DEVICE_LIST(sprt_parent, sprt_list, sprt_bus_type);
@@ -84,7 +84,7 @@ static kint32_t fwk_driver_attach(struct fwk_driver *sprt_driver, struct fwk_bus
 		/*!< One driver supports matching multiple devices, and does not exit until the linked list is fully traversed */
 		/*!< However, try not to mount multiple devices with the same driver at the same time to avoid misoperation */
 		retval = (*pFunc_Match)(sprt_dev, sprt_bus_type, sprt_driver);
-		if (!retval || (retval == -NR_IS_PERMIT))
+		if (!retval || (retval == -ER_PERMIT))
 		{
 			/*!< Record the number of matching devices */
 			matches++;
@@ -94,12 +94,12 @@ static kint32_t fwk_driver_attach(struct fwk_driver *sprt_driver, struct fwk_bus
 	sprt_driver->matches += matches;
 
 	/*!<
-	 * NR_IS_NOTFOUND: no device can be matched
-	 * NR_IS_PERMIT: matched already, but probe failed;
-	 * NR_IS_NORMAL: matched already, and probe successfully;
+	 * ER_NOTFOUND: no device can be matched
+	 * ER_PERMIT: matched already, but probe failed;
+	 * ER_NORMAL: matched already, and probe successfully;
 	 * other (retval < 0): error
 	 */
-	return ((retval == (-NR_IS_NOTFOUND)) || matches) ? matches : retval;
+	return ((retval == (-ER_NOTFOUND)) || matches) ? matches : retval;
 }
 
 /*!
@@ -132,7 +132,7 @@ static kint32_t fwk_driver_detach(struct fwk_driver *sprt_driver, struct fwk_bus
 		sprt_driver->matches--;
 	}
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -158,25 +158,25 @@ static kint32_t fwk_driver_find(struct fwk_driver *sprt_driver, struct fwk_bus_t
 	{
 		/*!< 1. Matching address */
 		if ((ptr_left == sprt_list) || (ptr_right == sprt_list))
-			return NR_IS_NORMAL;
+			return ER_NORMAL;
 
 		/*!< 2. Match the device name */
 		sprt_drv = mrt_container_of(ptr_left, struct fwk_driver, sgrt_list);
 		if (!strcmp((char *)sprt_drv->name, (char *)sprt_driver->name))
-			return NR_IS_NORMAL;
+			return ER_NORMAL;
 
 		if (ptr_left != ptr_right)
 		{
 			sprt_drv = mrt_container_of(ptr_right, struct fwk_driver, sgrt_list);
 			if (!strcmp((char *)sprt_drv->name, (char *)sprt_driver->name))
-				return NR_IS_NORMAL;
+				return ER_NORMAL;
 		}
 		/*!< The search is complete, and there is no same driver */
 		else
 			break;
 	}
 
-	return -NR_IS_ERROR;
+	return -ER_ERROR;
 }
 
 /*!
@@ -258,7 +258,7 @@ kint32_t fwk_driver_register(struct fwk_driver *sprt_driver)
 	return fwk_driver_to_bus(sprt_driver, sprt_bus_type);
 
 fail:
-	return -NR_IS_ERROR;
+	return -ER_ERROR;
 }
 
 /*!
@@ -291,5 +291,5 @@ kint32_t fwk_driver_unregister(struct fwk_driver *sprt_driver)
 	return fwk_bus_del_driver(sprt_driver, sprt_bus_type);
 
 fail:
-	return -NR_IS_ERROR;
+	return -ER_ERROR;
 }

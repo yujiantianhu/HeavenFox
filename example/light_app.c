@@ -26,11 +26,11 @@
 #include "thread_table.h"
 
 /*!< The defines */
-#define LIGHTAPP_THREAD_STACK_SIZE                          KEL_THREAD_STACK_HALF(1)    /*!< 1/2 page (1kbytes) */
+#define LIGHTAPP_THREAD_STACK_SIZE                          REAL_THREAD_STACK_HALF(1)    /*!< 1/2 page (1kbytes) */
 
 /*!< The globals */
 static real_thread_t g_light_app_tid;
-static struct kel_thread_attr sgrt_light_app_attr;
+static struct real_thread_attr sgrt_light_app_attr;
 static kuint32_t g_light_app_stack[LIGHTAPP_THREAD_STACK_SIZE];
 static struct mailbox sgrt_light_app_mailbox;
 
@@ -53,7 +53,7 @@ static void *light_app_entry(void *args)
 
     for (;;)
     {       
-        fd = virt_open("/dev/ledgpio", 0);
+        fd = virt_open("/dev/ledgpio", O_RDWR);
         if (fd < 0)
             goto END1;
         
@@ -83,19 +83,19 @@ END1:
  */
 kint32_t light_app_init(void)
 {
-    struct kel_thread_attr *sprt_attr = &sgrt_light_app_attr;
+    struct real_thread_attr *sprt_attr = &sgrt_light_app_attr;
     kint32_t retval;
 
-	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
-	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;
-	sprt_attr->schedpolicy = KEL_THREAD_SCHED_FIFO;
+	sprt_attr->detachstate = REAL_THREAD_CREATE_JOINABLE;
+	sprt_attr->inheritsched	= REAL_THREAD_INHERIT_SCHED;
+	sprt_attr->schedpolicy = REAL_THREAD_SCHED_FIFO;
 
     /*!< thread stack */
 	real_thread_set_stack(sprt_attr, mrt_nullptr, g_light_app_stack, sizeof(g_light_app_stack));
     /*!< lowest priority */
-	real_thread_set_priority(sprt_attr, KEL_THREAD_PROTY_DEFAULT);
+	real_thread_set_priority(sprt_attr, REAL_THREAD_PROTY_DEFAULT);
     /*!< default time slice */
-    real_thread_set_time_slice(sprt_attr, KEL_THREAD_TIME_DEFUALT);
+    real_thread_set_time_slice(sprt_attr, REAL_THREAD_TIME_DEFUALT);
 
     /*!< register thread */
     retval = real_thread_create(&g_light_app_tid, sprt_attr, light_app_entry, mrt_nullptr);

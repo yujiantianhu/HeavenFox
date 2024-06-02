@@ -29,45 +29,46 @@ enum __ERT_ERROR_CODE
 {
 	/*!< --------------------------------------------------------- */
 	/*!< 0: well */
-	NR_IS_NORMAL = 0,
+	ER_NORMAL = 0,
 
 	/*!< --------------------------------------------------------- */
 	/*!< use with negative */
-	NR_IS_ERROR,
-	NR_IS_RETRY,
-	NR_IS_PERMIT,
-	NR_IS_NOMEM,
-	NR_IS_UNVALID,
-	NR_IS_EMPTY,
-	NR_IS_NULLPTR,
-	NR_IS_WILDPTR,
-	NR_IS_FAULT,
-	NR_IS_MORE,
-	NR_IS_NOTALIGN,
-	NR_IS_EXISTED,
-	NR_IS_NOTFOUND,
-	NR_IS_USED,
-	NR_IS_LOCKED,
+	ER_ERROR,
+	ER_RETRY,
+	ER_PERMIT,
+	ER_NOMEM,
+	ER_UNVALID,
+	ER_EMPTY,
+	ER_NULLPTR,
+	ER_WILDPTR,
+	ER_FAULT,
+	ER_MORE,
+	ER_NOTALIGN,
+	ER_EXISTED,
+	ER_NOTFOUND,
+	ER_USED,
+	ER_LOCKED,
+	ER_FORBID,
 
 	/*!< hardware */
-	NR_IS_IOERR,
-	NR_IS_NSUPPORT,
-	NR_IS_NREADY,
-	NR_IS_FAILD,
-	NR_IS_TIMEOUT,
-	NR_IS_NODEV,
-	NR_IS_BUSY,
-	NR_IS_CHECKERR,
+	ER_IOERR,
+	ER_NSUPPORT,
+	ER_NREADY,
+	ER_FAILD,
+	ER_TIMEOUT,
+	ER_NODEV,
+	ER_BUSY,
+	ER_CHECKERR,
 
 	/*!< comunication */
-	NR_IS_TRXERR,
-	NR_IS_SEND_FAILD,
-	NR_IS_RECV_FAILD,
-	NR_IS_SCMD_FAILD,
-	NR_IS_RCMD_FAILD,
-	NR_IS_SDATA_FAILD,
-	NR_IS_RDATA_FAILD,
-	NR_IS_STOP_FAILD,					
+	ER_TRXERR,
+	ER_SEND_FAILD,
+	ER_RECV_FAILD,
+	ER_SCMD_FAILD,
+	ER_RCMD_FAILD,
+	ER_SDATA_FAILD,
+	ER_RDATA_FAILD,
+	ER_STOP_FAILD,					
 };
 
 /*!< The functions */
@@ -93,7 +94,7 @@ TARGET_EXT void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__fi
 __force_inline static inline kbool_t IS_ERR(const void *ptr)
 {
 	/*!< the highest 4KB (0xfffff000 ~ 0xffffffff) is used to deal with exceptions */
-	return (kuaddr_t)ptr >= (kuaddr_t)(-(4UL << 10));
+	return ((kuaddr_t)ptr >= (kuaddr_t)(-(4UL << 10)));
 }
 
 __force_inline static inline void *ERR_PTR(kstype_t code)
@@ -103,7 +104,7 @@ __force_inline static inline void *ERR_PTR(kstype_t code)
 
 __force_inline static inline kstype_t PTR_ERR(const void *ptr)
 {
-	return ptr ? (kstype_t)ptr : -NR_IS_NOMEM;
+	return ptr ? (kstype_t)ptr : -ER_NOMEM;
 }
 
 #ifdef __cplusplus
