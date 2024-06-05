@@ -16,8 +16,8 @@
 
 /*!< The defines */
 #define SYSTEM_CLK_FREQ_CNT_PER_MS                          (0x7ffU)
-#define SYSTEM_CLK_FREQ_CNT_PER_S                          	(IMX_SYSCLK_FREQ_COUNTER * 1000)
-#define SYSTEM_CLK_FREQ_CNT_PER_US                          (IMX_SYSCLK_FREQ_COUNTER / 1000)
+#define SYSTEM_CLK_FREQ_CNT_PER_S                          	(SYSTEM_CLK_FREQ_CNT_PER_MS * 1000)
+#define SYSTEM_CLK_FREQ_CNT_PER_US                          (SYSTEM_CLK_FREQ_CNT_PER_MS / 1000)
 
 /*!< API function */
 /*!

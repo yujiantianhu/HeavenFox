@@ -130,6 +130,7 @@ static kuint16_t tsc2007_read_value(struct tsc2007_drv_info *sprt_info, kuint8_t
 {
     struct fwk_i2c_msg sgrt_msgs[2];
     kuint16_t value = 0;
+    kint32_t retval;
 
     sgrt_msgs[0].addr = sprt_info->sprt_client->addr;
     sgrt_msgs[0].flags = 0;
@@ -141,7 +142,8 @@ static kuint16_t tsc2007_read_value(struct tsc2007_drv_info *sprt_info, kuint8_t
     sgrt_msgs[1].ptr_buf = &value;
     sgrt_msgs[1].len = sizeof(value);
 
-    if (fwk_i2c_transfer(sprt_info->sprt_client, &sgrt_msgs[0], ARRAY_SIZE(sgrt_msgs)))
+    retval = fwk_i2c_transfer(sprt_info->sprt_client, &sgrt_msgs[0], ARRAY_SIZE(sgrt_msgs));
+    if (retval)
         return (TSC_MAX_12BIT + 1);
 
     return (TO_CONVERT_BYTE16(value) >> 4);

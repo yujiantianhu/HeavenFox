@@ -119,10 +119,13 @@ void real_thread_set_name(const kchar_t *name)
 {
 	struct real_thread *sprt_work;
 
+	if (!name || !(*name))
+		return;
+
 	sprt_work = SCHED_RUNNING_THREAD;
 
 	memset(sprt_work->name, 0, REAL_THREAD_NAME_SIZE);
-	strncpy(sprt_work->name, name, REAL_THREAD_NAME_SIZE);
+	kstrlcpy(sprt_work->name, name, REAL_THREAD_NAME_SIZE);
 }
 
 /*!
@@ -785,6 +788,9 @@ kint32_t register_new_thread(struct real_thread *sprt_thread, real_thread_t tid)
 
 	/*!< initial spinlock */
 	spin_lock_init(&sprt_thread->sgrt_lock);
+
+	/*!< set name */
+	sprintk(sprt_thread->name, "thread-%d\n", tid);
 
 	/*!< add and sorted by priority */
 	retval = schedule_add_ready_list(tid);

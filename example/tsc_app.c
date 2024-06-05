@@ -27,7 +27,7 @@
 #include "thread_table.h"
 
 /*!< The defines */
-#define TSCAPP_THREAD_STACK_SIZE                          REAL_THREAD_STACK_HALF(1)    /*!< 1/2 page (1kbytes) */
+#define TSCAPP_THREAD_STACK_SIZE                          REAL_THREAD_STACK_HALF(1)    /*!< 1/2 page (2kbytes) */
 
 /*!< The globals */
 static real_thread_t g_tsc_app_tid;

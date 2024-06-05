@@ -17,10 +17,10 @@
 #include <platform/fwk_platdrv.h>
 #include <platform/fwk_uaccess.h>
 #include <platform/clk/fwk_clk.h>
-
 #include <platform/i2c/fwk_i2c_dev.h>
 #include <platform/i2c/fwk_i2c_core.h>
 #include <platform/i2c/fwk_i2c_algo.h>
+#include <kernel/wait.h>
 
 #include <asm/imx6/imx6ull_pins.h>
 #include <asm/imx6/imx6ull_periph.h>
@@ -37,6 +37,8 @@ typedef struct imx_i2c_drv_data
 
     kint32_t irq;
     kbool_t is_wake;
+
+    struct wait_queue_head sgrt_wqh;
 
 } srt_imx_i2c_drv_data_t;
 
@@ -207,26 +209,35 @@ static kbool_t imx_i2c_adap_wait_complete(struct fwk_i2c_adapter *sprt_adap, kui
 	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
 	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
-    while (timeout--) 
-    {
-        if (sprt_i2c->sgrt_isr.icf || sprt_data->is_wake)
-            return true;
-    }
-
-    return false;
-}
-
-static kbool_t imx_i2c_adap_is_busy(struct imx_i2c_reg *sprt_i2c)
-{
-    kuint32_t timeout = 100;
-
-    while (timeout--)
-    {
-        if (!sprt_i2c->sgrt_isr.ibb)
-            return false;
-    }
+    wait_event_interruptible_timeout(&sprt_data->sgrt_wqh, 
+                                    sprt_i2c->sgrt_isr.icf && (sprt_i2c->sgrt_isr.iif || sprt_data->is_wake), 
+                                    timeout);
+    sprt_data->is_wake = false;
 
     return true;
+}
+
+static kint32_t imx_i2c_adap_for_busy(struct imx_i2c_reg *sprt_i2c, kbool_t ways)
+{
+    kutime_t expires = jiffies + msecs_to_jiffies(500);
+
+    for (;;)
+    {
+        /*!< ways = 1: i2c is running, bus should be busy */
+        if (ways && sprt_i2c->sgrt_isr.ibb)
+            break;
+
+        /*!< ways = 0: i2c is stopped, bus should be idle */
+        if (!ways && !sprt_i2c->sgrt_isr.ibb)
+            break;
+
+        if (mrt_time_after(jiffies, expires))
+            return -ER_TIMEOUT;
+
+        schedule_thread();
+    }
+
+    return ER_NORMAL;
 }
 
 static void imx_i2c_adap_clear_intr(struct imx_i2c_reg *sprt_i2c)
@@ -277,16 +288,21 @@ static kint32_t imx_i2c_adap_start(struct fwk_i2c_adapter *sprt_adap)
     sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
     /*!< open clock */
-//  fwk_clk_prepare_enable(sprt_data->sprt_clk);
+    fwk_clk_prepare_enable(sprt_data->sprt_clk);
+
+    sprt_i2c->sgrt_isr.iif = false;
+    sprt_i2c->sgrt_isr.ial = false;
 
     sprt_i2c->sgrt_icr.ien = true;
-    /*!< 设置iic工作在主机模式, 且传输方向为发送 */
-    sprt_i2c->sgrt_icr.msta = true;
-
     mrt_resetw(&sprt_i2c->sgrt_isr);
 
+    delay_us(50);
+    
+    /*!< 设置iic工作在主机模式 */
+    sprt_i2c->sgrt_icr.msta = true;
+    
     /*!< 判断iic总线是否处于忙状态. 空闲: 0, 忙: 1 */
-    if (imx_i2c_adap_is_busy(sprt_i2c))
+    if (imx_i2c_adap_for_busy(sprt_i2c, true))
         goto fail;
 
     /*!< set direction to "send" */
@@ -296,8 +312,8 @@ static kint32_t imx_i2c_adap_start(struct fwk_i2c_adapter *sprt_adap)
     imx_i2c_adap_set_ack(sprt_i2c, NR_I2C_NACK);
 
     /*!< 等待传输完成 */
-    if (!imx_i2c_adap_wait_complete(sprt_adap, 100))
-        goto fail;
+//  if (!imx_i2c_adap_wait_complete(sprt_adap, 100))
+//        goto fail;
 
     return ER_NORMAL;
 
@@ -326,11 +342,12 @@ static kint32_t imx_i2c_adap_restart(struct fwk_i2c_adapter *sprt_adap)
         return -ER_CHECKERR;
 
     /*!< if i2c is running, bus will be busy; otherwise, i2c bus is stopped */
-    if (!imx_i2c_adap_is_busy(sprt_i2c))
-        return -ER_NREADY;
+    if (imx_i2c_adap_for_busy(sprt_i2c, true))
+        return -ER_WILDPTR;
 
     /*!< set restart */
     sprt_i2c->sgrt_icr.rsta = true;
+    delay_us(50);
 
     return ER_NORMAL;
 }
@@ -357,7 +374,7 @@ static void imx_i2c_adap_stop(struct fwk_i2c_adapter *sprt_adap)
     sprt_i2c->sgrt_icr.txak = false;
 
     /*!< 等待忙结束: 循环比较费时间 */
-    imx_i2c_adap_is_busy(sprt_i2c);
+    imx_i2c_adap_for_busy(sprt_i2c, false);
 
     sprt_i2c->sgrt_icr.ien = false;
     sprt_i2c->sgrt_icr.iien = false;
@@ -460,7 +477,7 @@ static kint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sprt_data, kuint16_t 
                 sprt_i2c->sgrt_icr.mtx = false;
                 sprt_i2c->sgrt_icr.msta = false;
 
-                if (imx_i2c_adap_is_busy(sprt_i2c))
+                if (imx_i2c_adap_for_busy(sprt_i2c, false))
                     return -ER_BUSY;
             }
         }
@@ -493,7 +510,7 @@ static kint32_t __imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fw
     return ER_NORMAL;
 }
 
-static irq_return_t imx_i2c_adap_handler(void *ptrDev)
+static irq_return_t imx_i2c_adap_isr(void *ptrDev)
 {
     struct imx_i2c_drv_data *sprt_data;
     struct imx_i2c_reg *sprt_i2c;
@@ -505,6 +522,8 @@ static irq_return_t imx_i2c_adap_handler(void *ptrDev)
     {
         sprt_data->is_wake = true;
         imx_i2c_adap_clear_intr(sprt_i2c);
+
+        wake_up_interruptible(&sprt_data->sgrt_wqh);
     }
 
     return 0;
@@ -545,23 +564,10 @@ static void imx_i2c_adap_initial(struct fwk_i2c_adapter *sprt_adap)
 static kint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msgs, kint32_t num)
 {
 	struct imx_i2c_drv_data *sprt_data;
-	struct imx_i2c_reg *sprt_i2c;
     kuint32_t idx;
     kint32_t retval;
 
 	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
-
-    /*!< open clock */
-    fwk_clk_prepare_enable(sprt_data->sprt_clk);
-
-    /*!< 等待数据传输完成 */
-    if (!imx_i2c_adap_wait_complete(sprt_adap, 100))
-        return -ER_TIMEOUT;
-
-    /*!< 清除各种标志位, 开启新一轮传输 */
-    sprt_i2c->sgrt_isr.ial = false;
-    sprt_i2c->sgrt_isr.iif = false;
 
     /*!< 开始信号 */
     retval = imx_i2c_adap_start(sprt_adap);
@@ -644,6 +650,7 @@ static kint32_t imx_i2c_driver_probe(struct fwk_platdev *sprt_pdev)
 	sprt_adap->algo_data = sprt_data;
 	sprt_adap->id = (sprt_pdev->id < 0) ? fwk_of_get_alias_id(sprt_dev->sprt_node) : sprt_pdev->id;
 	sprintk(sprt_adap->name, "imx,i2c-%d", sprt_adap->id);
+    init_waitqueue_head(&sprt_data->sgrt_wqh);
 
 	retval = fwk_i2c_add_adapter(sprt_adap);
 	if (retval < 0)
@@ -656,7 +663,7 @@ static kint32_t imx_i2c_driver_probe(struct fwk_platdev *sprt_pdev)
     imx_i2c_adap_initial(sprt_adap);
     fwk_clk_disable_unprepare(sprt_data->sprt_clk);
 
-    if (fwk_request_irq(sprt_data->irq, imx_i2c_adap_handler, IRQ_TYPE_NONE, "imx,i2c", sprt_adap))
+    if (fwk_request_irq(sprt_data->irq, imx_i2c_adap_isr, IRQ_TYPE_NONE, "imx,i2c", sprt_adap))
         goto fail3;
 
 	return ER_NORMAL;

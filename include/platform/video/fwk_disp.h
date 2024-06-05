@@ -15,6 +15,7 @@
 
 /*!< The includes */
 #include <platform/fwk_basic.h>
+#include <kernel/mutex.h>
 #include <kernel/spinlock.h>
 
 #include "fwk_font.h"
@@ -31,7 +32,7 @@ typedef struct fwk_disp_info
     kuint8_t bpp;
 
     const struct fwk_disp_ops *sprt_ops;
-    struct spin_lock sgrt_lock;
+    struct mutex_lock sgrt_lock;
 
 } srt_fwk_disp_info_t;
 

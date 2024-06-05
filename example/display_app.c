@@ -72,6 +72,18 @@ static void display_clear(struct fwk_disp_info *sprt_disp)
 }
 
 /*!
+ * @brief  fill display
+ * @param  none
+ * @retval none
+ * @note   do display
+ */
+static void display_fill(struct fwk_disp_info *sprt_disp, kuint32_t color)
+{
+    if (sprt_disp->sprt_ops->clear)
+        sprt_disp->sprt_ops->clear(sprt_disp, color);
+}
+
+/*!
  * @brief  display task
  * @param  none
  * @retval none
@@ -131,6 +143,7 @@ static void *display_app_entry(void *args)
     struct fwk_disp_info sgrt_disp;
 
     mutex_init(&sgrt_display_app_lock);
+    real_thread_set_name("display_app");
 
     do {
         fd = virt_open("/dev/fb0", O_RDWR);
@@ -171,12 +184,15 @@ static void *display_app_entry(void *args)
         }
 
         sgrt_disp.buffer = fbuffer;
+        
+        display_fill(&sgrt_disp, RGB_BLUE);
         display_word(&sgrt_disp, 140, 80, 
-                                 sgrt_disp.width, 80 + 16, "welcome to use!");
+                                 140 + 20 * 8, 80 + 16, "welcome to use!");
         schedule_delay_ms(500);
         
+        display_fill(&sgrt_disp, RGB_PURPLE);
         display_word(&sgrt_disp, 140, 80, 
-                                 sgrt_disp.width, 80 + 16, "happly every day!");
+                                 140 + 20 * 8, 80 + 16, "happly every day!");
 
         virt_munmap(fbuffer, sgrt_fix.smem_len);
         virt_close(fd);

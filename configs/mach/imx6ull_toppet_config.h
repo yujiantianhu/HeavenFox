@@ -79,4 +79,7 @@
 #define CONFIG_HEAP_STACK_BASE                  (CONFIG_SYS_STACK_BASE)
 #define CONFIG_MEMORY_POOL_BASE                 (CONFIG_HEAP_STACK_BASE + CONFIG_MEMPOOL_SIZE)
 
+/*!< Board */
+#define CONFIG_LCD_PIXELBIT                     (24)
+
 #endif /*!< __IMX6ULL_TOPPET_CONFIG_H */

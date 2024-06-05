@@ -20,7 +20,7 @@
 
 /*!< The defines */
 #define KERL_THREAD_PREEMPT_PERIOD                      (20)                        /*!< 20ms */
-#define KERL_THREAD_STACK_SIZE                          REAL_THREAD_STACK_HALF(1)    /*!< 1/2 page (2 kbytes) */
+#define KERL_THREAD_STACK_SIZE                          REAL_THREAD_STACK_HALF(1)   /*!< 1/2 page (2 kbytes) */
 
 /*!< The globals */
 TARGET_EXT kuint32_t g_asm_sched_flag;
@@ -49,6 +49,9 @@ static void kthread_schedule_timeout(kuint32_t args)
     /*!< check time slice (when the time slice is not exhuasted, current cannot be preempted) */
     if (mrt_time_before(jiffies, sprt_work->expires))
         goto END;
+
+    /*!< automatic tracking of time-slice */
+    sprt_work->expires = (JIFFIES_MAX - jiffies) <= KERL_THREAD_PREEMPT_PERIOD ? 0 : jiffies;
     
     /*!< --------------------------------------------------------- */
     /*!< check priority */

@@ -25,12 +25,17 @@ typedef kutype_t 	kutime_t;
 typedef kstype_t 	kstime_t;
 
 TARGET_EXT kutime_t jiffies;
+TARGET_EXT kutime_t jiffies_out;
+
 TARGET_EXT kutime_t *ptr_systick_counter;
 TARGET_EXT kutime_t g_delay_timer_counter;
 
 /*!< The defines */
 #define TICK_HZ                                             CONFIG_HZ
 #define mrt_jiffies                                         (*ptr_systick_counter)
+
+#define JIFFIES_INITVAL                                     (86400000 - 1)
+#define JIFFIES_MAX                                         ((kutime_t)(~0))
 
 #define TIMER_DELAY_COUNTER                                 (g_delay_timer_counter)
 #define TIMER_DELAY_COUNTER_INIT                            (0U)
@@ -119,7 +124,8 @@ TARGET_EXT void do_timer_event(void);
 /*!< jiffies counter */
 static inline void get_time_counter(void)
 {
-    jiffies = (jiffies >= (typeof(jiffies))(~0)) ? 0 : (jiffies + 1);
+    jiffies = (jiffies >= JIFFIES_MAX) ? 0 : (jiffies + 1);
+    jiffies_out = jiffies ? jiffies_out : (jiffies_out + 1);
 }
 
 static inline kuint32_t jiffies_to_secs(const kutime_t j)
