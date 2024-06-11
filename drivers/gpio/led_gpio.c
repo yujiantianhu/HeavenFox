@@ -30,6 +30,7 @@ struct led_drv_data
 	struct fwk_gpio_desc *sprt_gdesc;
 
 	struct fwk_cdev *sprt_cdev;
+	struct fwk_device *sprt_idev;
 
 	void *ptrData;
 };
@@ -118,6 +119,7 @@ static kint32_t led_driver_probe(struct fwk_platdev *sprt_pdev)
 	struct led_drv_data *sprt_data;
 	struct fwk_gpio_desc *sprt_gdesc;
 	struct fwk_cdev *sprt_cdev;
+	struct fwk_device *sprt_idev;
 	kuint32_t devnum;
 	kint32_t retval;
 
@@ -141,8 +143,8 @@ static kint32_t led_driver_probe(struct fwk_platdev *sprt_pdev)
 	if (retval < 0)
 		goto fail3;
 
-	retval = fwk_device_create(NR_TYPE_CHRDEV, devnum, LED_DRIVER_NAME);
-	if (retval < 0)
+	sprt_idev = fwk_device_create(NR_TYPE_CHRDEV, devnum, LED_DRIVER_NAME);
+	if (!isValid(sprt_idev))
 		goto fail4;
 	
 	sprt_data = (struct led_drv_data *)kzalloc(sizeof(struct led_drv_data), GFP_KERNEL);
@@ -154,6 +156,7 @@ static kint32_t led_driver_probe(struct fwk_platdev *sprt_pdev)
 	sprt_data->minor = GET_DEV_MINOR(devnum);
 	sprt_data->sprt_cdev = sprt_cdev;
 	sprt_data->sprt_gdesc = sprt_gdesc;
+	sprt_data->sprt_idev = sprt_idev;
 
 	sprt_cdev->privData = sprt_data;
 	fwk_platform_set_drvdata(sprt_pdev, sprt_data);
@@ -161,7 +164,7 @@ static kint32_t led_driver_probe(struct fwk_platdev *sprt_pdev)
 	return ER_NORMAL;
 
 fail5:
-	fwk_device_destroy(LED_DRIVER_NAME);
+	fwk_device_destroy(sprt_idev);
 fail4:
 	fwk_cdev_del(sprt_cdev);
 fail3:
@@ -191,7 +194,7 @@ static kint32_t led_driver_remove(struct fwk_platdev *sprt_pdev)
 
 	devnum = MKE_DEV_NUM(sprt_data->major, sprt_data->minor);
 
-	fwk_device_destroy(sprt_data->ptrName);
+	fwk_device_destroy(sprt_data->sprt_idev);
 	fwk_cdev_del(sprt_data->sprt_cdev);
 	kfree(sprt_data->sprt_cdev);
 	fwk_unregister_chrdev(devnum, 1);

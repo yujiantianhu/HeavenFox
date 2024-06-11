@@ -700,7 +700,7 @@ static kint32_t __find_thread_from_scheduler(real_thread_t tid, struct list_head
 static kint32_t __schedule_add_status_list(struct real_thread *sprt_thread, struct list_head *sprt_head)
 {
 	struct real_thread *sprt_anyTask;
-	kuint32_t iPriority;
+	kuint32_t iPriority, iPriority2;
 
 	if ((!sprt_thread) || (!sprt_head))
 		return -ER_FAULT;
@@ -724,7 +724,8 @@ static kint32_t __schedule_add_status_list(struct real_thread *sprt_thread, stru
 	/*!< traversing the ready list, inserting new thread into the tail of thread which is the same priority */
 	foreach_list_prev_entry(sprt_anyTask, sprt_head, sgrt_link)
 	{
-		if (iPriority <= real_thread_get_priority(sprt_anyTask->sprt_attr))
+		iPriority2 = real_thread_get_priority(sprt_anyTask->sprt_attr);
+		if (__THREAD_IS_LOW_PRIO(iPriority, iPriority2))
 		{
 			/*!< priority from high to low */
 			list_head_add_head(&sprt_anyTask->sgrt_link, &sprt_thread->sgrt_link);

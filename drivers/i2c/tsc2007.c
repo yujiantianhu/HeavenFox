@@ -113,6 +113,7 @@ typedef struct tsc2007_drv_info
 
     kint32_t devnum;
     struct fwk_cdev *sprt_cdev;
+    struct fwk_device *sprt_idev;
 
     struct workqueue sgrt_work;
     struct wait_queue_head sgrt_wqh;
@@ -373,6 +374,7 @@ static kint32_t tsc2007_driver_probe(struct fwk_i2c_client *sprt_client, const s
 {
     struct tsc2007_drv_info *sprt_info;
     struct fwk_device_node *sprt_node;
+    struct fwk_device *sprt_idev;
     kint32_t devnum;
 
     sprt_node = sprt_client->sgrt_dev.sprt_node;
@@ -414,9 +416,11 @@ static kint32_t tsc2007_driver_probe(struct fwk_i2c_client *sprt_client, const s
     if (fwk_cdev_add(sprt_info->sprt_cdev, devnum, 1))
         goto fail5;
 
-    if (fwk_device_create(NR_TYPE_CHRDEV, devnum, "input/event0"))
+    sprt_idev = fwk_device_create(NR_TYPE_CHRDEV, devnum, "%s%d", "input/event", 1);
+    if (!isValid(sprt_idev))
         goto fail6;
 
+    sprt_info->sprt_idev = sprt_idev;
     sprt_info->sprt_cdev->privData = sprt_info;
     sprt_info->sgrt_data.sprt_info = sprt_info;
     fwk_i2c_set_client_data(sprt_client, sprt_info);
@@ -451,7 +455,7 @@ static kint32_t tsc2007_driver_remove(struct fwk_i2c_client *sprt_client)
 
     sprt_info = fwk_i2c_get_client_data(sprt_client);
 
-    fwk_device_destroy(sprt_info->name);
+    fwk_device_destroy(sprt_info->sprt_idev);
     fwk_cdev_del(sprt_info->sprt_cdev);
     kfree(sprt_info->sprt_cdev);
     fwk_unregister_chrdev(sprt_info->devnum, 0);

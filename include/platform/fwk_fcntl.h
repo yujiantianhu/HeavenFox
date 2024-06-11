@@ -143,6 +143,10 @@ struct fwk_file_table
 #endif
 
 /*!< The functions */
+/*!< -------------------------------------------------------------- */
+TARGET_EXT kint32_t fwk_file_system_init(void);
+
+/*!< -------------------------------------------------------------- */
 TARGET_EXT kint32_t virt_open(const kchar_t *dev, kuint32_t mode);
 TARGET_EXT void virt_close(kint32_t fd);
 TARGET_EXT kssize_t virt_write(kint32_t fd, const void *buf, kusize_t size);

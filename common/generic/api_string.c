@@ -13,6 +13,7 @@
 /*!< The includes */
 #include <common/api_string.h>
 #include <common/io_stream.h>
+#include <platform/fwk_mempool.h>
 
 /*!< API function */
 /*!
@@ -271,26 +272,21 @@ kusize_t convert_number_to_string(void *ptr_dst, kuint64_t value)
  * @retval  the character position in string
  * @note    find a character position
  */
-kuint32_t seek_char_in_string(const void *ptr_src, kuint8_t ch)
+kchar_t *seek_char_in_string(const void *ptr_src, kchar_t ch)
 {
-	kuint8_t *ptr_head, *ptr_tail;
-	kuint32_t iChPosition = 0;
+	kchar_t *ptr_ch;
 
-	ptr_head = (kuint8_t *)ptr_src;
-	ptr_tail = ptr_head + get_string_lenth(ptr_src) - 1;
+	ptr_ch = (kchar_t *)ptr_src;
 
-	while (ptr_head != ptr_tail)
+	while (*ptr_ch != '\0')
 	{
-		if (ch == *(ptr_tail--))
-			return iChPosition;
+		if (ch == *ptr_ch)
+			return ptr_ch;
 
-		iChPosition++;
+		ptr_ch++;
 	}
 
-	if (ch == *ptr_tail)
-		return iChPosition;
-
-	return 0;
+	return mrt_nullptr;
 }
 
 /*!
@@ -484,6 +480,34 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_f
 }
 
 /*!
+ * @brief   vasprintk
+ * @param   ptr_buf, ptr_fmt
+ * @retval  none
+ * @note    String format conversion
+ */
+kchar_t *vasprintk(const kchar_t *ptr_fmt, va_list sprt_list)
+{
+	va_list sprt_copy;
+	kusize_t size;
+	kchar_t *ptr;
+
+	if (!ptr_fmt)
+		return mrt_nullptr;
+
+	va_copy(sprt_copy, sprt_list);
+	size = do_fmt_convert(mrt_nullptr, mrt_nullptr, ptr_fmt, sprt_copy, (kusize_t)(~0));
+	va_end(sprt_copy);
+
+	ptr = kmalloc(size + 1, GFP_KERNEL);
+	if (!isValid(ptr))
+		return mrt_nullptr;
+
+	do_fmt_convert(ptr, mrt_nullptr, ptr_fmt, sprt_list, size + 1);
+
+	return ptr;
+}
+
+/*!
  * @brief   sprintk
  * @param   ptr_buf, ptr_fmt
  * @retval  none
@@ -495,7 +519,7 @@ kint32_t sprintk(void *ptr_buf, const kchar_t *ptr_fmt, ...)
 	kusize_t size;
 
 	va_start(ptr_list, ptr_fmt);
-	size = do_fmt_convert(ptr_buf, mrt_nullptr, ptr_fmt, ptr_list, (~0) - 1);
+	size = do_fmt_convert(ptr_buf, mrt_nullptr, ptr_fmt, ptr_list, (kusize_t)(~0));
 	va_end(ptr_list);
 
 	return size;
@@ -634,6 +658,11 @@ __weak kint32_t kstrcmp(const kchar_t *__s1, const kchar_t *__s2)
 __weak kint32_t kstrncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
 {
 	return do_string_n_compare(__s1, __s2, __n);
+}
+
+__weak kchar_t *kstrchr(const kchar_t *__s1, kchar_t ch)
+{
+	return seek_char_in_string(__s1, ch);
 }
 
 #endif

@@ -41,11 +41,11 @@ typedef struct fwk_device
 
 	struct fwk_bus_type *sprt_bus;
 	struct fwk_device_type *sprt_type;
-	struct list_head sgrt_list;
+	struct list_head sgrt_link;
 	struct list_head sgrt_leaf;
 
 	struct fwk_driver *sprt_driver;
-	struct fwk_kobject sgrt_obj;
+	struct fwk_kobject sgrt_kobj;
 
 	struct fwk_device_node *sprt_node;
 	void (*release)	(struct fwk_device *sprt_dev);
@@ -65,7 +65,7 @@ typedef struct fwk_driver
 	const struct fwk_of_device_id *sprt_of_match_table;
 
 	struct fwk_bus_type *sprt_bus;
-	struct list_head sgrt_list;
+	struct list_head sgrt_link;
 
 	kint32_t (*probe)	(struct fwk_device *sprt_dev);
 	kint32_t (*remove)	(struct fwk_device *sprt_dev);
@@ -95,8 +95,8 @@ typedef struct fwk_device_type
 
 } srt_fwk_device_type_t;
 
-#define FWK_GET_BUS_DEVICE(bus)								(&bus->sprt_SysPriv->sgrt_list_devices)
-#define FWK_GET_BUS_DRIVER(bus)								(&bus->sprt_SysPriv->sgrt_list_drivers)
+#define FWK_GET_BUS_DEVICE(bus)								(&(bus)->sprt_SysPriv->sgrt_list_devices)
+#define FWK_GET_BUS_DRIVER(bus)								(&(bus)->sprt_SysPriv->sgrt_list_drivers)
 
 #define FWK_INIT_BUS_DEVICE_LIST(parent, list, bus)	\
 {	\
@@ -108,8 +108,8 @@ typedef struct fwk_device_type
 	parent 	= FWK_GET_BUS_DRIVER(bus);	\
 	list	= parent;	\
 }
-#define FWK_NEXT_DEVICE(parent, list)						mrt_list_head_parent(parent, list, struct fwk_device, sgrt_list)
-#define FWK_NEXT_DRIVER(parent, list)						mrt_list_head_parent(parent, list, struct fwk_driver, sgrt_list)
+#define FWK_NEXT_DEVICE(parent, list)						mrt_list_head_parent(parent, list, struct fwk_device, sgrt_link)
+#define FWK_NEXT_DRIVER(parent, list)						mrt_list_head_parent(parent, list, struct fwk_driver, sgrt_link)
 
 /*!< The globals */
 TARGET_EXT struct fwk_bus_type sgrt_fwk_platform_bus_type;
@@ -119,13 +119,17 @@ TARGET_EXT kint32_t fwk_device_driver_probe(struct fwk_device *sprt_dev);
 TARGET_EXT kint32_t fwk_device_driver_remove(struct fwk_device *sprt_dev);
 TARGET_EXT kint32_t fwk_device_driver_match(struct fwk_device *sprt_dev, struct fwk_bus_type *sprt_bus_type, void *ptr_data);
 
+TARGET_EXT kint32_t fwk_device_initial(struct fwk_device *sprt_dev);
+TARGET_EXT struct fwk_device *fwk_device_create(kuint32_t type, kuint32_t devNum, kchar_t *fmt, ...);
+TARGET_EXT kint32_t fwk_device_destroy(struct fwk_device *sprt_dev);
+
 /*!< API functions */
 static inline kchar_t *fwk_dev_get_name(struct fwk_device *sprt_dev)
 {
 	if (sprt_dev->init_name)
 		return sprt_dev->init_name;
 
-	return sprt_dev->sgrt_obj.name;
+	return fwk_kobject_get_name(&sprt_dev->sgrt_kobj);
 }
 
 static inline void fwk_dev_set_name(struct fwk_device *sprt_dev, kchar_t *name, ...)
@@ -133,11 +137,17 @@ static inline void fwk_dev_set_name(struct fwk_device *sprt_dev, kchar_t *name, 
 	va_list sprt_list;
 
 	va_start(sprt_list, name);
-	do_fmt_convert(sprt_dev->sgrt_obj.name, mrt_nullptr, name, sprt_list, sizeof(sprt_dev->sgrt_obj.name));
+	fwk_kobject_set_name_args(&sprt_dev->sgrt_kobj, name, sprt_list);
 	va_end(sprt_list);
+}
+
+static inline void fwk_dev_del_name(struct fwk_device *sprt_dev)
+{
+	fwk_kobject_del_name(&sprt_dev->sgrt_kobj);
 }
 
 #define mrt_dev_get_name(dev)								fwk_dev_get_name(dev)
 #define mrt_dev_set_name(dev, fmt, ...)						fwk_dev_set_name(dev, fmt, ##__VA_ARGS__)
+#define mrt_dev_del_name(dev)								fwk_dev_del_name(dev)
 
 #endif /*!< __FWK_BUSTYPE_H_ */

@@ -230,6 +230,9 @@ kint32_t fwk_of_register_platdevice(struct fwk_device_node *sprt_node, struct fw
 	if (!isValid(sprt_platdev))
 		return -ER_FAULT;
 
+	if (fwk_device_initial(&sprt_platdev->sgrt_dev))
+		return -ER_FAILD;
+
 	/*!< Fill platform_device */
 	sprt_platdev->name = sprt_node->full_name;
 	sprt_platdev->id = fwk_of_get_alias_id(sprt_node);

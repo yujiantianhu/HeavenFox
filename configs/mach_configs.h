@@ -29,7 +29,7 @@
  */
 #define CONFIG_PREEMPT                          (1)
 /*!< if CONFIG_PREEMPT is diabled, thread can be chosen ===> 0: polling by priority; 1: polling in order */
-#define CONFIG_ROLL_POLL                        (0)
+#define CONFIG_ROLL_POLL                        (1)
 
 #if CONFIG_PREEMPT
 /*!< disable priority,  */

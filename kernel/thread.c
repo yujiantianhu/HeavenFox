@@ -180,17 +180,6 @@ kint32_t kernel_thread_init_create(struct real_thread_attr *sprt_attr, void *(*p
 }
 
 /*!
- * @brief	create time thread
- * @param  	...
- * @retval 	err code
- * @note   	tid is fixed to REAL_THREAD_TID_TIME
- */
-kint32_t kernel_thread_time_create(struct real_thread_attr *sprt_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
-{  
-    return __kernel_thread_create(mrt_nullptr, REAL_THREAD_TID_TIME, sprt_attr, pfunc_start_routine, ptr_args);
-}
-
-/*!
  * @brief	initial attribute
  * @param  	sprt_attr: attr
  * @retval 	none

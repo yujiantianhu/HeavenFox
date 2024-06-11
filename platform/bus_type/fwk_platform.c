@@ -15,6 +15,7 @@
 #include <platform/fwk_platdev.h>
 #include <platform/fwk_platdrv.h>
 #include <platform/fwk_pinctrl.h>
+#include <platform/fwk_inode.h>
 
 /*!<
  * One device can only be matched with one driver
@@ -201,7 +202,7 @@ kint32_t fwk_device_driver_match(struct fwk_device *sprt_dev, struct fwk_bus_typ
 	sprt_driver	= (struct fwk_driver *)ptr_data;
 	retval = sprt_bus_type->match(sprt_dev, sprt_driver);
 	if (retval < 0)
-		return retval;
+		return -ER_NOTFOUND;
 
 	/*!< 
 	 * Save the device to indicate that the driver has been matched;
@@ -212,3 +213,111 @@ kint32_t fwk_device_driver_match(struct fwk_device *sprt_dev, struct fwk_bus_typ
 	return fwk_device_driver_probe(sprt_dev);
 }
 
+kint32_t fwk_device_initial(struct fwk_device *sprt_dev)
+{
+	struct fwk_kobject *sprt_kobj;
+
+	init_list_head(&sprt_dev->sgrt_leaf);
+	init_list_head(&sprt_dev->sgrt_link);
+	fwk_kobject_init(&sprt_dev->sgrt_kobj);
+
+	sprt_kobj = fwk_find_kobject_by_path(mrt_nullptr, FWK_PATH_SYS_DEVICE);
+	if (!isValid(sprt_kobj))
+		return PTR_ERR(sprt_kobj);
+
+	sprt_dev->sgrt_kobj.sprt_kset = mrt_fwk_kset_get(sprt_kobj);
+	if (!isValid(sprt_dev->sgrt_kobj.sprt_kset))
+		return PTR_ERR(sprt_dev->sgrt_kobj.sprt_kset);
+
+	return ER_NORMAL;
+}
+
+/*!
+ * @brief   fwk_device_create
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+struct fwk_device *fwk_device_create(kuint32_t type, kuint32_t devNum, kchar_t *fmt, ...)
+{
+	struct fwk_kobject *sprt_kobj;
+	struct fwk_kobject *sprt_parent;
+	struct fwk_device *sprt_dev;
+	kchar_t *name;
+	va_list sprt_valist;
+
+	if (!fmt)
+		return ERR_PTR(-ER_ERROR);
+
+	sprt_parent = fwk_find_kobject_by_path(mrt_nullptr, FWK_PATH_DEVICE);
+	if (!isValid(sprt_parent))
+		return ERR_PTR(-ER_NOTFOUND);
+
+	va_start(sprt_valist, fmt);
+	name = vasprintk(fmt, sprt_valist);
+	va_end(sprt_valist);
+
+	if (!name)
+		return ERR_PTR(-ER_NOMEM);
+
+	sprt_kobj = fwk_kobject_populate(sprt_parent, name);
+	if (!isValid(sprt_kobj))
+		goto fail1;
+
+	if (sprt_kobj->sprt_inode->type == INODE_TYPE_FILE)
+		fwk_inode_set_ops(sprt_kobj->sprt_inode, type, devNum);
+
+	sprt_dev = kzalloc(sizeof(*sprt_dev), GFP_KERNEL);
+	if (!isValid(sprt_dev))
+		goto fail2;
+
+	if (fwk_device_initial(sprt_dev))
+		goto fail3;
+
+	mrt_dev_set_name(sprt_dev, "%s", name);
+	if (fwk_device_add(sprt_dev))
+		goto fail4;
+
+	kfree(name);
+	return sprt_dev;
+
+fail4:
+	mrt_dev_del_name(sprt_dev);
+fail3:
+	kfree(sprt_dev);
+fail2:
+	fwk_kset_kobject_remove(sprt_kobj);
+fail1:
+	kfree(name);
+	return ERR_PTR(-ER_FAILD);
+}
+
+/*!
+ * @brief   fwk_device_destroy
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+kint32_t fwk_device_destroy(struct fwk_device *sprt_dev)
+{
+	struct fwk_kobject *sprt_parent;
+	struct fwk_kobject *sprt_kobj;
+
+	if (!sprt_dev)
+		return -ER_NOMEM;
+
+	sprt_parent = fwk_find_kobject_by_path(mrt_nullptr, FWK_PATH_DEVICE);
+	if (!isValid(sprt_parent))
+		return -ER_NOTFOUND;
+
+	sprt_kobj = fwk_find_kobject_by_path(sprt_parent, mrt_dev_get_name(sprt_dev));
+	if (!isValid(sprt_kobj))
+		return -ER_NOTFOUND;
+
+	fwk_device_del(sprt_dev);
+	fwk_kset_kobject_remove(sprt_kobj);
+
+	return ER_NORMAL;
+}
+
+/*!< end of file */

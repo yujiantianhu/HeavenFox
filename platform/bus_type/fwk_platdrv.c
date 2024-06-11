@@ -145,35 +145,10 @@ static kint32_t fwk_driver_find(struct fwk_driver *sprt_driver, struct fwk_bus_t
 {
 	struct fwk_driver *sprt_drv;
 
-	DECLARE_LIST_HEAD_PTR(sprt_list);
-	DECLARE_LIST_HEAD_PTR(sprt_parent);
-	DECLARE_LIST_HEAD_PTR(ptr_left);
-	DECLARE_LIST_HEAD_PTR(ptr_right);
-
-	sprt_list 	= &sprt_driver->sgrt_list;
-	sprt_parent	= FWK_GET_BUS_DRIVER(sprt_bus_type);
-
-	/*!< Two-way search */
-	foreach_list_head(ptr_left, ptr_right, sprt_parent)
+	foreach_list_next_entry(sprt_drv, FWK_GET_BUS_DRIVER(sprt_bus_type), sgrt_link)
 	{
-		/*!< 1. Matching address */
-		if ((ptr_left == sprt_list) || (ptr_right == sprt_list))
-			return ER_NORMAL;
-
-		/*!< 2. Match the device name */
-		sprt_drv = mrt_container_of(ptr_left, struct fwk_driver, sgrt_list);
 		if (!strcmp((char *)sprt_drv->name, (char *)sprt_driver->name))
 			return ER_NORMAL;
-
-		if (ptr_left != ptr_right)
-		{
-			sprt_drv = mrt_container_of(ptr_right, struct fwk_driver, sgrt_list);
-			if (!strcmp((char *)sprt_drv->name, (char *)sprt_driver->name))
-				return ER_NORMAL;
-		}
-		/*!< The search is complete, and there is no same driver */
-		else
-			break;
 	}
 
 	return -ER_ERROR;
@@ -187,14 +162,8 @@ static kint32_t fwk_driver_find(struct fwk_driver *sprt_driver, struct fwk_bus_t
  */
 static kint32_t fwk_driver_to_bus(struct fwk_driver *sprt_driver, struct fwk_bus_type *sprt_bus_type)
 {
-	DECLARE_LIST_HEAD_PTR(sprt_list);
-	DECLARE_LIST_HEAD_PTR(sprt_parent);
-
-	sprt_list 	= &sprt_driver->sgrt_list;
-	sprt_parent	= FWK_GET_BUS_DRIVER(sprt_bus_type);
-
 	/*!< Insert from the tail of the bus */
-	list_head_add_tail(sprt_parent, sprt_list);
+	list_head_add_tail(FWK_GET_BUS_DRIVER(sprt_bus_type), &sprt_driver->sgrt_link);
 
 	/*!< Execute the device driver matching logic */
 	return fwk_driver_attach(sprt_driver, sprt_bus_type, fwk_device_driver_match);
@@ -210,17 +179,11 @@ static kint32_t fwk_bus_del_driver(struct fwk_driver *sprt_driver, struct fwk_bu
 {
 	kint32_t retval;
 
-	DECLARE_LIST_HEAD_PTR(sprt_list);
-	DECLARE_LIST_HEAD_PTR(sprt_parent);
-
-	sprt_list 	= &sprt_driver->sgrt_list;
-	sprt_parent	= FWK_GET_BUS_DRIVER(sprt_bus_type);
-
 	/*!< Perform the device drive separation procedure */
 	retval = fwk_driver_detach(sprt_driver, sprt_bus_type);
 
 	/*!< Remove the driver from the bus */
-	list_head_del_safe(sprt_parent, sprt_list);
+	list_head_del_safe(FWK_GET_BUS_DRIVER(sprt_bus_type), &sprt_driver->sgrt_link);
 
 	return retval;
 }

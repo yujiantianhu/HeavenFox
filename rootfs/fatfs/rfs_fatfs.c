@@ -212,7 +212,7 @@ static void rfs_fatfs_disk_set_filepath(struct rfs_disk_file *sprt_this, const k
     if (!iPathLenth)
         return;
 
-    iNameOffset = seek_char_in_string(ptrFileName, '/');
+    iNameOffset = (kuint32_t)(seek_char_in_string(ptrFileName, '/') - ptrFileName);
     iPathLenth -= iNameOffset;
 
     if (sprt_this->ptrFilePath)

@@ -1,7 +1,7 @@
 /*
- * Platform Object Defines
+ * Platform Object Maps Defines
  *
- * File Name:   fwk_kboj.c
+ * File Name:   fwk_kbojmap.c
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2023.05.18
@@ -20,12 +20,12 @@ struct fwk_kobj_map *sprt_fwk_netdev_map;
 
 /*!< API function */
 /*!
- * @brief   fwk_kobj_init
+ * @brief   fwk_kobjmap_init
  * @param   none
  * @retval  none
  * @note    none
  */
-kint32_t __plat_init fwk_kobj_init(void)
+kint32_t __plat_init fwk_kobjmap_init(void)
 {
 	kuint32_t i;
 
@@ -64,15 +64,14 @@ fail2:
 fail1:
 	return -ER_NOMEM;
 }
-IMPORT_PLATFORM_INIT(fwk_kobj_init);
 
 /*!
- * @brief   fwk_kobj_del
+ * @brief   fwk_kobjmap_del
  * @param   none
  * @retval  none
  * @note    none
  */
-void __plat_exit fwk_kobj_del(void)
+void __plat_exit fwk_kobjmap_del(void)
 {
 	struct fwk_probes *sprt_prev;
 	struct fwk_probes *sprt_list;
@@ -112,7 +111,6 @@ void __plat_exit fwk_kobj_del(void)
 	kfree(sprt_fwk_netdev_map);
 	sprt_fwk_netdev_map = mrt_nullptr;
 }
-IMPORT_PLATFORM_EXIT(fwk_kobj_del);
 
 /*!
  * @brief   fwk_kobj_map
@@ -238,12 +236,12 @@ kint32_t fwk_kobj_unmap(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t
 }
 
 /*!
- * @brief   fwk_kobj_lookUp
+ * @brief   fwk_kobjmap_lookup
  * @param   none
  * @retval  none
  * @note    none
  */
-void *fwk_kobj_lookUp(struct fwk_kobj_map *domain, kuint32_t devNum)
+void *fwk_kobjmap_lookup(struct fwk_kobj_map *domain, kuint32_t devNum)
 {
 	struct fwk_probes *sprt_Temp;
 	kuint32_t index;

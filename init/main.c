@@ -61,7 +61,8 @@ void start_kernel(void)
 	board_init_systick();
 
     /*!< populate device node after initializing hardware */
-    fwk_of_platform_populate_init();
+    if (fwk_of_platform_populate_init())
+        goto fail;
 
     /* platform initcall */
     if (run_platform_initcall())

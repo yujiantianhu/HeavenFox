@@ -30,8 +30,10 @@
 /*!< The defines */
 enum __ERT_DEVICE_TYPE
 {
+	NR_TYPE_NONE = 0,
+
 	/*!< character device */
-	NR_TYPE_CHRDEV	= 0,
+	NR_TYPE_CHRDEV	= 1,
 	/*!< block device */
 	NR_TYPE_BLKDEV,
 	/*!< network device */

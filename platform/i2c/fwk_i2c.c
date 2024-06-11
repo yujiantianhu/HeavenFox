@@ -221,7 +221,7 @@ struct fwk_i2c_client *fwk_i2c_new_device(struct fwk_i2c_adapter *sprt_adap, str
 	sprt_client->sgrt_dev.sprt_type = &sgrt_fwk_i2c_client_type;
 	sprt_client->sgrt_dev.sprt_node = sprt_info->sprt_node;
 	mrt_dev_set_name(&sprt_client->sgrt_dev, "%d-%d", 
-				sprt_adap->nr, sprt_client->addr | (sprt_client->flags & FWK_I2C_M_TEN) ? 0xa000 : 0);
+				sprt_adap->nr, sprt_client->addr | ((sprt_client->flags & FWK_I2C_M_TEN) ? 0xa000 : 0));
 
 	/*!< verify machine address */
 	if (sprt_client->flags & FWK_I2C_M_TEN)
@@ -239,14 +239,16 @@ struct fwk_i2c_client *fwk_i2c_new_device(struct fwk_i2c_adapter *sprt_adap, str
 
 	retval = fwk_device_add(&sprt_client->sgrt_dev);
 	if (retval)
-		return mrt_nullptr;
+		goto fail;
 
 	list_head_add_tail(&sprt_adap->sgrt_clients, &sprt_client->sgrt_link);
 
 	return sprt_client;
 
 fail:
+	mrt_dev_del_name(&sprt_client->sgrt_dev);
 	kfree(sprt_client);
+
 	return mrt_nullptr;
 }
 
@@ -308,11 +310,15 @@ kint32_t fwk_i2c_register_adapter(struct fwk_i2c_adapter *sprt_adap)
 
 	retval = fwk_device_add(&sprt_adap->sgrt_dev);
 	if (retval)
-		return retval;
+		goto fail;
 
 	fwk_of_i2c_register_devices(sprt_adap);
 
 	return ER_NORMAL;
+
+fail:
+	mrt_dev_del_name(&sprt_adap->sgrt_dev);
+	return retval;
 }
 
 kint32_t fwk_i2c_add_adapter(struct fwk_i2c_adapter *sprt_adap)

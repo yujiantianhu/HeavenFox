@@ -49,7 +49,7 @@ static void *tsc_app_entry(void *args)
 
     do 
     {
-        fd = virt_open("/dev/input/event0", O_RDONLY);
+        fd = virt_open("/dev/input/event1", O_RDONLY);
         if (fd < 0)
             schedule_delay_ms(200);
 
@@ -92,7 +92,7 @@ kint32_t tsc_app_init(void)
     /*!< thread stack */
 	real_thread_set_stack(sprt_attr, mrt_nullptr, g_tsc_app_stack, sizeof(g_tsc_app_stack));
     /*!< lowest priority */
-	real_thread_set_priority(sprt_attr, REAL_THREAD_PROTY_DEFAULT);
+	real_thread_set_priority(sprt_attr, __THREAD_HIGHER_DEFAULT(0));
     /*!< default time slice */
     real_thread_set_time_slice(sprt_attr, REAL_THREAD_TIME_DEFUALT);
 

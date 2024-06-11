@@ -41,7 +41,6 @@ kint32_t __plat_init fwk_chrdev_init(void)
 
 	return ER_NORMAL;
 }
-IMPORT_PLATFORM_INIT(fwk_chrdev_init);
 
 /*!
  * @brief   char device exit
@@ -49,7 +48,7 @@ IMPORT_PLATFORM_INIT(fwk_chrdev_init);
  * @retval  errno
  * @note    none
  */
-kint32_t __plat_exit fwk_chrdev_exit(void)
+void __plat_exit fwk_chrdev_exit(void)
 {
 	struct fwk_char_device **sprt_chrdev;
 	struct fwk_char_device *sprt_prev;
@@ -65,10 +64,7 @@ kint32_t __plat_exit fwk_chrdev_exit(void)
 		mrt_list_delete_all(*sprt_chrdev, sprt_prev, sprt_list);
 		*sprt_chrdev = mrt_nullptr;
 	}
-
-	return ER_NORMAL;
 }
-IMPORT_PLATFORM_EXIT(fwk_chrdev_exit);
 
 /*!
  * @brief   register char device

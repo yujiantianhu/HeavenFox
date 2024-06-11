@@ -92,7 +92,7 @@ void fwk_framebuffer_release(struct fwk_fb_info *sprt_fb_info)
 kint32_t fwk_register_framebuffer(struct fwk_fb_info *sprt_fb_info)
 {
 	struct fwk_fb_info **sprt_exsited;
-	kint32_t retval;
+	struct fwk_device *sprt_idev;
 	kuint32_t i;
 
 	if (!isValid(sprt_fb_info))
@@ -115,10 +115,11 @@ kint32_t fwk_register_framebuffer(struct fwk_fb_info *sprt_fb_info)
 	sprt_fb_info->node = i;
 
 	/*!< Create a character device node */
-	retval = fwk_device_create(NR_TYPE_CHRDEV, MKE_DEV_NUM(FWK_FB_DEVICE_MAJOR, i), "fb%d", i);
-	if (retval < 0)
+	sprt_idev = fwk_device_create(NR_TYPE_CHRDEV, MKE_DEV_NUM(FWK_FB_DEVICE_MAJOR, i), "fb%d", i);
+	if (!isValid(sprt_idev))
 		return -ER_UNVALID;
 
+	sprt_fb_info->sprt_idev = sprt_idev;
 	/*!< Register to the global array */
 	sprt_exsited[i] = sprt_fb_info;
 
@@ -139,7 +140,7 @@ void fwk_unregister_framebuffer(struct fwk_fb_info *sprt_fb_info)
 	i = sprt_fb_info->node;
 	sprt_exsited = &sgrt_fwk_registered_fb[0];
 
-	fwk_device_destroy("fb%d", i);
+	fwk_device_destroy(sprt_exsited[i]->sprt_idev);
 	sprt_exsited[i] = mrt_nullptr;
 }
 
@@ -341,7 +342,7 @@ static struct fwk_file_oprts sgrt_fwk_fb_foprts =
  * @retval  none
  * @note    none
  */
-kint32_t __dync_init fwk_fbmem_init(void)
+kint32_t __plat_init fwk_fbmem_init(void)
 {
 	struct fwk_cdev *sprt_cdev;
 	kuint32_t devNum;
@@ -379,7 +380,7 @@ fail1:
  * @retval  none
  * @note    none
  */
-void __dync_exit fwk_fbmem_exit(void)
+void __plat_exit fwk_fbmem_exit(void)
 {
 	struct fwk_cdev *sprt_cdev;
 	kuint32_t devNum;
@@ -391,5 +392,4 @@ void __dync_exit fwk_fbmem_exit(void)
 	fwk_unregister_chrdev(devNum, FWK_FB_DEVICE_MAX);
 }
 
-IMPORT_PATTERN_INIT(fwk_fbmem_init);
-IMPORT_PATTERN_EXIT(fwk_fbmem_exit);
+/*!< end of file */

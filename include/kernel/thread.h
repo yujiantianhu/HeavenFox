@@ -34,14 +34,14 @@ typedef kint32_t real_thread_t;
 #define REAL_THREAD_MAX_NUM						(128)
 
 /*!< minimum space for thread stack (unit: byte) */
-#define REAL_THREAD_STACK8(byte)					(mrt_align4(byte) >> 0)
+#define REAL_THREAD_STACK8(byte)				(mrt_align4(byte) >> 0)
 #define REAL_THREAD_STACK16(half)				(mrt_align4(half) >> 1)
 #define REAL_THREAD_STACK32(word)				(mrt_align4(word) >> 2)
 
 /*!< 1 page = 4 kbytes; half page = (1 / 2) page; quarter = (1 / 4) page */
-#define REAL_THREAD_STACK_PAGE(page)				(REAL_THREAD_STACK32(((kuint32_t)(page)) << 12))
-#define REAL_THREAD_STACK_HALF(page)				(REAL_THREAD_STACK32(((kuint32_t)(page)) << 11))
-#define REAL_THREAD_STACK_QUAR(page)				(REAL_THREAD_STACK32(((kuint32_t)(page)) << 10))
+#define REAL_THREAD_STACK_PAGE(page)			(REAL_THREAD_STACK32(((kuint32_t)(page)) << 12))
+#define REAL_THREAD_STACK_HALF(page)			(REAL_THREAD_STACK32(((kuint32_t)(page)) << 11))
+#define REAL_THREAD_STACK_QUAR(page)			(REAL_THREAD_STACK32(((kuint32_t)(page)) << 10))
 
 #define REAL_THREAD_STACK_MIN					REAL_THREAD_STACK8(1024)
 #define REAL_THREAD_STACK_DEFAULT				REAL_THREAD_STACK8(2056)
@@ -52,27 +52,32 @@ typedef kint32_t real_thread_t;
  */
 #define REAL_THREAD_TID_START					(32)
 
-#define REAL_THREAD_TID_IDLE                     (0)                 /*!< idle thread */
-#define REAL_THREAD_TID_BASE                     (1)                 /*!< kernel thread (parent) */
-#define REAL_THREAD_TID_INIT                     (2)                 /*!< init thread */
-#define REAL_THREAD_TID_TIME                     (3)                 /*!< timer thread */
+#define REAL_THREAD_TID_IDLE                    (0)                 /*!< idle thread */
+#define REAL_THREAD_TID_BASE                    (1)                 /*!< kernel thread (parent) */
+#define REAL_THREAD_TID_INIT                    (2)                 /*!< init thread */
 
 /*!<
  * priority
- * kernel thread requires higher priority (80 ~ 99)
- * The higher the value, the higher the priority
+ * kernel thread requires higher priority (0 ~ 19)
+ * The lower the value, the higher the priority
  */
-#define REAL_THREAD_PROTY_START					(0)
+#define REAL_THREAD_PROTY_START					(99)
 #define REAL_THREAD_PROTY_DEFAULT				(80)
-#define REAL_THREAD_PROTY_MAX					(99)
+#define REAL_THREAD_PROTY_MAX					(0)
 
-#define REAL_THREAD_PROTY_IDLE				    (1)
+#define REAL_THREAD_PROTY_IDLE				    (98)
 #define REAL_THREAD_PROTY_KERNEL				(REAL_THREAD_PROTY_MAX)
-#define REAL_THREAD_PROTY_INIT					(REAL_THREAD_PROTY_KERNEL - 1)
-#define REAL_THREAD_PROTY_KWORKER				(REAL_THREAD_PROTY_KERNEL - 1)
+#define REAL_THREAD_PROTY_INIT					(REAL_THREAD_PROTY_KERNEL + 1)
+#define REAL_THREAD_PROTY_KWORKER				(REAL_THREAD_PROTY_KERNEL + 1)
+
+#define __THREAD_IS_LOW_PRIO(prio, prio2)		((prio2) <= (prio))
+#define __THREAD_HIGHER_DEFAULT(val)			(REAL_THREAD_PROTY_DEFAULT - (val))	
+
+/*!< preempt period */
+#define REAL_THREAD_PREEMPT_PERIOD              (20)                /*!< unit: ms */
 
 /*!< time slice */
-#define REAL_THREAD_TIME_DEFUALT                 (100)               /*!< unit: ms */
+#define REAL_THREAD_TIME_DEFUALT                (40)				/*!< unit: ms */
 
 /*!< policy */
 enum __ERT_REAL_THREAD_DETACH
@@ -173,10 +178,6 @@ TARGET_EXT kint32_t kernel_thread_base_create(struct real_thread_attr *sprt_attr
 TARGET_EXT kint32_t kernel_thread_init_create(struct real_thread_attr *sprt_attr, 
                                                 void *(*pfunc_start_routine) (void *), 
                                                 void *ptr_args);
-                                                
-TARGET_EXT kint32_t kernel_thread_time_create(struct real_thread_attr *sprt_attr, 
-                                                void *(*pfunc_start_routine) (void *), 
-                                                void *ptr_args);
 
 TARGET_EXT void *real_thread_attr_init(struct real_thread_attr *sprt_attr);
 TARGET_EXT void *real_thread_attr_revise(struct real_thread_attr *sprt_attr);
@@ -202,7 +203,7 @@ static inline kuint32_t real_thread_get_priority(struct real_thread_attr *sprt_a
  */
 static inline void real_thread_set_priority(struct real_thread_attr *sprt_attr, kuint32_t priority)
 {
-	sprt_attr->sgrt_param.sched_priority = (priority <= REAL_THREAD_PROTY_MAX) ? priority : REAL_THREAD_PROTY_MAX;
+	sprt_attr->sgrt_param.sched_priority = __THREAD_IS_LOW_PRIO(priority, REAL_THREAD_PROTY_MAX) ? priority : REAL_THREAD_PROTY_MAX;
     sprt_attr->sgrt_param.sched_curpriority = sprt_attr->sgrt_param.sched_priority;
 }
 

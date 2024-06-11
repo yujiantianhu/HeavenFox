@@ -148,7 +148,7 @@ static void *display_app_entry(void *args)
     do {
         fd = virt_open("/dev/fb0", O_RDWR);
         if (fd < 0)
-            continue;
+            schedule_thread();
 
         virt_ioctl(fd, NR_FB_IOGetVScreenInfo, &sgrt_var);
         virt_ioctl(fd, NR_FB_IOGetFScreenInfo, &sgrt_fix);
@@ -157,7 +157,7 @@ static void *display_app_entry(void *args)
         if (!isValid(fbuffer))
         {
             virt_close(fd);
-            continue;
+            schedule_thread();
         }
     
     } while (!isValid(fbuffer));

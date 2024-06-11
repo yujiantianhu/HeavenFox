@@ -23,6 +23,7 @@ real_thread_init_t g_real_thread_init_tables[] =
     button_app_init,
     display_app_init,
     tsc_app_init,
+    env_monitor_init,
     
     mrt_nullptr,
 };

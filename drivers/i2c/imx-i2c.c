@@ -20,6 +20,7 @@
 #include <platform/i2c/fwk_i2c_dev.h>
 #include <platform/i2c/fwk_i2c_core.h>
 #include <platform/i2c/fwk_i2c_algo.h>
+#include <kernel/mutex.h>
 #include <kernel/wait.h>
 
 #include <asm/imx6/imx6ull_pins.h>
@@ -39,6 +40,7 @@ typedef struct imx_i2c_drv_data
     kbool_t is_wake;
 
     struct wait_queue_head sgrt_wqh;
+    struct mutex_lock sgrt_lock;
 
 } srt_imx_i2c_drv_data_t;
 
@@ -296,7 +298,7 @@ static kint32_t imx_i2c_adap_start(struct fwk_i2c_adapter *sprt_adap)
     sprt_i2c->sgrt_icr.ien = true;
     mrt_resetw(&sprt_i2c->sgrt_isr);
 
-    delay_us(50);
+    delay_us(100);
     
     /*!< 设置iic工作在主机模式 */
     sprt_i2c->sgrt_icr.msta = true;
@@ -347,7 +349,7 @@ static kint32_t imx_i2c_adap_restart(struct fwk_i2c_adapter *sprt_adap)
 
     /*!< set restart */
     sprt_i2c->sgrt_icr.rsta = true;
-    delay_us(50);
+    delay_us(100);
 
     return ER_NORMAL;
 }
@@ -569,10 +571,12 @@ static kint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_
 
 	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
 
+    mutex_lock(&sprt_data->sgrt_lock);
+
     /*!< 开始信号 */
     retval = imx_i2c_adap_start(sprt_adap);
     if (retval)
-        return retval;
+        goto out;
 
     for (idx = 0; idx < num; idx++) 
     {
@@ -596,6 +600,8 @@ END:
     imx_i2c_adap_stop(sprt_adap);
     sprt_data->is_lastMsgs = false;
 
+out:
+    mutex_unlock(&sprt_data->sgrt_lock);
     return retval;
 }
 
@@ -625,6 +631,7 @@ static kint32_t imx_i2c_driver_probe(struct fwk_platdev *sprt_pdev)
 
 	sprt_dev = &sprt_pdev->sgrt_dev;
 	sprt_adap = &sprt_data->sgrt_adap;
+    mutex_init(&sprt_data->sgrt_lock);
 
 	reg = fwk_platform_get_address(sprt_pdev, 0);
 	sprt_data->reg = fwk_io_remap((void *)reg);

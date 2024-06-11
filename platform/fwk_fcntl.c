@@ -56,7 +56,7 @@ static struct fwk_file sgrt_fwk_file_stdio[DEVICE_MAJOR_BASE] =
  * @retval  none
  * @note    none
  */
-static kint32_t __plat_init fwk_file_system_init(void)
+kint32_t __plat_init fwk_file_system_init(void)
 {
 	struct fwk_file_table *sprt_table;
 	kusize_t  num_farray;
@@ -86,7 +86,6 @@ static kint32_t __plat_init fwk_file_system_init(void)
 
 	return ER_NORMAL;
 }
-IMPORT_PLATFORM_INIT(fwk_file_system_init);
 
 /*!
  * @brief   fwk_get_expand_fdtable

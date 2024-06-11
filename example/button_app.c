@@ -53,7 +53,7 @@ static void *button_app_entry(void *args)
     mailbox_init(sprt_mb, mrt_current->tid, "button-app-mailbox");
 
     do {
-        fd = virt_open("/dev/extkey", O_RDONLY);
+        fd = virt_open("/dev/input/event0", O_RDONLY);
         if (mrt_unlikely(fd < 0))
             schedule_delay_ms(200);
 
@@ -111,7 +111,7 @@ kint32_t button_app_init(void)
     /*!< thread stack */
 	real_thread_set_stack(sprt_attr, mrt_nullptr, g_button_app_stack, sizeof(g_button_app_stack));
     /*!< lowest priority */
-	real_thread_set_priority(sprt_attr, REAL_THREAD_PROTY_DEFAULT);
+	real_thread_set_priority(sprt_attr, __THREAD_HIGHER_DEFAULT(1));
     /*!< default time slice */
     real_thread_set_time_slice(sprt_attr, REAL_THREAD_TIME_DEFUALT);
 

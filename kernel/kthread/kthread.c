@@ -19,7 +19,6 @@
 #include <kernel/spinlock.h>
 
 /*!< The defines */
-#define KERL_THREAD_PREEMPT_PERIOD                      (20)                        /*!< 20ms */
 #define KERL_THREAD_STACK_SIZE                          REAL_THREAD_STACK_HALF(1)   /*!< 1/2 page (2 kbytes) */
 
 /*!< The globals */
@@ -51,7 +50,7 @@ static void kthread_schedule_timeout(kuint32_t args)
         goto END;
 
     /*!< automatic tracking of time-slice */
-    sprt_work->expires = (JIFFIES_MAX - jiffies) <= KERL_THREAD_PREEMPT_PERIOD ? 0 : jiffies;
+    sprt_work->expires = (JIFFIES_MAX - jiffies) <= REAL_THREAD_PREEMPT_PERIOD ? 0 : jiffies;
     
     /*!< --------------------------------------------------------- */
     /*!< check priority */
@@ -63,14 +62,14 @@ static void kthread_schedule_timeout(kuint32_t args)
     next_prio = real_thread_get_priority(sprt_ready->sprt_attr);
    
     /*!< there is a higher priority thread ready */
-    if (work_prio <= next_prio)
+    if (__THREAD_IS_LOW_PRIO(work_prio, next_prio))
     {
         g_asm_sched_flag = true;
         goto END;
     }
     
 END:
-    mod_timer(sprt_tim, jiffies + msecs_to_jiffies(KERL_THREAD_PREEMPT_PERIOD));
+    mod_timer(sprt_tim, jiffies + msecs_to_jiffies(REAL_THREAD_PREEMPT_PERIOD));
 }
 
 /*!
@@ -109,7 +108,7 @@ static void *kthread_entry(void *args)
 #if CONFIG_PREEMPT
         /*!< start timer */
         if (!sprt_tim->expires)
-            mod_timer(sprt_tim, jiffies + msecs_to_jiffies(KERL_THREAD_PREEMPT_PERIOD));
+            mod_timer(sprt_tim, jiffies + msecs_to_jiffies(REAL_THREAD_PREEMPT_PERIOD));
 #endif
 
         schedule_delay_ms(200);
