@@ -53,15 +53,12 @@ typedef struct at24cxx_drv_info
     kuint32_t page_size;
     kuint32_t total_size;
 
-    struct spin_lock sgrt_lock;
-
 } at24cxx_drv_info_t;
 
 /*!< API function */
 static kint32_t at24cxx_write_eeprom(struct at24cxx_drv_info *sprt_info, kuint8_t *buffer, kssize_t size)
 {
     struct fwk_i2c_msg sgrt_msgs;
-    kint32_t retval;
 
     /*!< keep a certain interval between two writes */
     schedule_delay_ms(100);
@@ -71,11 +68,7 @@ static kint32_t at24cxx_write_eeprom(struct at24cxx_drv_info *sprt_info, kuint8_
     sgrt_msgs.ptr_buf = buffer;
     sgrt_msgs.len = size;
 
-    spin_lock(&sprt_info->sgrt_lock);
-    retval = fwk_i2c_transfer(sprt_info->sprt_client, &sgrt_msgs, 1);
-    spin_unlock(&sprt_info->sgrt_lock);
-
-    return retval;
+    return fwk_i2c_transfer(sprt_info->sprt_client, &sgrt_msgs, 1);
 }
 
 static kint32_t at24cxx_read_eeprom(struct at24cxx_drv_info *sprt_info, kuint8_t *buffer, kssize_t size)
@@ -311,7 +304,6 @@ static kint32_t at24cxx_driver_probe(struct fwk_i2c_client *sprt_client, const s
     sprt_info->devnum = devnum;
     sprt_info->name = "at24cxx";
     sprt_info->sprt_client = sprt_client;
-    spin_lock_init(&sprt_info->sgrt_lock);
     
     if (fwk_of_property_read_u32(sprt_node, "page_size", &page_size))
         page_size = AT24C01_PAGE_SIZE;
