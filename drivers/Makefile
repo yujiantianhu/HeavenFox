@@ -9,6 +9,8 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
+obj-y	+=	base/
+
 obj-y	+=	clk/
 obj-y	+=	pinctrl/
 obj-y	+=	gpio/

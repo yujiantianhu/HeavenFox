@@ -45,7 +45,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 enable_language(C CXX ASM)
 
 # output version whith debug/release
-if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (NOT CMAKE_BUILD_TYPE STREQUAL "debug")
     set(CMAKE_BUILD_TYPE release CACHE STRING "Build Type" FORCE)
 else ()
     set(CMAKE_BUILD_TYPE debug CACHE STRING "Build Type" FORCE)
@@ -107,8 +107,11 @@ set(platform_sources
     ${PROJECT_SOURCE_DIR}/platform/chardev
     ${PROJECT_SOURCE_DIR}/platform/block_device
     ${PROJECT_SOURCE_DIR}/platform/net_device
-    ${PROJECT_SOURCE_DIR}/platform/gpio_desc
+    ${PROJECT_SOURCE_DIR}/platform/clk
+    ${PROJECT_SOURCE_DIR}/platform/pinctrl
+    ${PROJECT_SOURCE_DIR}/platform/gpio
     ${PROJECT_SOURCE_DIR}/platform/framebuffer
+    ${PROJECT_SOURCE_DIR}/platform/i2c
     ${PROJECT_SOURCE_DIR}/platform/usb
     ${PROJECT_SOURCE_DIR}/platform/usb/host
 )
@@ -123,8 +126,12 @@ set(rootfs_sources
 )
 set(drivers_sources
     ${PROJECT_SOURCE_DIR}/drivers/clk
+    ${PROJECT_SOURCE_DIR}/drivers/pinctrl
     ${PROJECT_SOURCE_DIR}/drivers/gpio
     ${PROJECT_SOURCE_DIR}/drivers/video
+    ${PROJECT_SOURCE_DIR}/drivers/i2c
+    ${PROJECT_SOURCE_DIR}/drivers/input
+    ${PROJECT_SOURCE_DIR}/drivers/input/key
     ${PROJECT_SOURCE_DIR}/drivers/usb/gadget
 )
 set(application_sources

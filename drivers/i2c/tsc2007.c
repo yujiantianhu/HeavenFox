@@ -24,7 +24,9 @@
 #include <platform/fwk_chrdev.h>
 #include <platform/fwk_inode.h>
 #include <platform/fwk_fs.h>
+#include <platform/fwk_fcntl.h>
 #include <platform/input/fwk_input.h>
+#include <kernel/wait.h>
 #include <kernel/workqueue.h>
 
 /*!< The defines */
@@ -111,8 +113,10 @@ typedef struct tsc2007_drv_info
 
     kint32_t devnum;
     struct fwk_cdev *sprt_cdev;
+    struct fwk_device *sprt_idev;
 
-    struct workqueue sgrt_wq;
+    struct workqueue sgrt_work;
+    struct wait_queue_head sgrt_wqh;
 
 } tsc2007_drv_info_t;
 
@@ -127,6 +131,7 @@ static kuint16_t tsc2007_read_value(struct tsc2007_drv_info *sprt_info, kuint8_t
 {
     struct fwk_i2c_msg sgrt_msgs[2];
     kuint16_t value = 0;
+    kint32_t retval;
 
     sgrt_msgs[0].addr = sprt_info->sprt_client->addr;
     sgrt_msgs[0].flags = 0;
@@ -138,7 +143,8 @@ static kuint16_t tsc2007_read_value(struct tsc2007_drv_info *sprt_info, kuint8_t
     sgrt_msgs[1].ptr_buf = &value;
     sgrt_msgs[1].len = sizeof(value);
 
-    if (fwk_i2c_transfer(sprt_info->sprt_client, &sgrt_msgs[0], ARRAY_SIZE(sgrt_msgs)))
+    retval = fwk_i2c_transfer(sprt_info->sprt_client, &sgrt_msgs[0], ARRAY_SIZE(sgrt_msgs));
+    if (retval)
         return (TSC_MAX_12BIT + 1);
 
     return (TO_CONVERT_BYTE16(value) >> 4);
@@ -229,7 +235,7 @@ static irq_return_t tsc2007_touch_isr(void *ptrDev)
     struct tsc2007_drv_info *sprt_info;
 
     sprt_info = (struct tsc2007_drv_info *)ptrDev;
-    schedule_work(&sprt_info->sgrt_wq);
+    schedule_work(&sprt_info->sgrt_work);
 
     return 0;
 }
@@ -241,7 +247,7 @@ static void tsc2007_touch_half_isr(struct workqueue *sprt_wq)
     kuint16_t x_value, y_value;
     kuint16_t x_max_value, y_max_value, x_min_value, y_min_value;
 
-    sprt_info = mrt_container_of(sprt_wq, typeof(*sprt_info), sgrt_wq);
+    sprt_info = mrt_container_of(sprt_wq, typeof(*sprt_info), sgrt_work);
     sprt_data = &sprt_info->sgrt_data;
 
     x_value = y_value = x_max_value = y_max_value = 0;
@@ -283,6 +289,7 @@ static void tsc2007_touch_half_isr(struct workqueue *sprt_wq)
     sprt_data->y = y_value;
 
     sprt_info->is_can_read = true;
+    wake_up(&sprt_info->sgrt_wqh);
 
     return;
 
@@ -301,7 +308,7 @@ static kint32_t tsc2007_driver_open(struct fwk_inode *sprt_inode, struct fwk_fil
     fwk_enable_irq(sprt_info->irq);
     tsc2007_initial(&sprt_info->sgrt_data);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 static kint32_t tsc2007_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
@@ -313,7 +320,7 @@ static kint32_t tsc2007_driver_close(struct fwk_inode *sprt_inode, struct fwk_fi
 
     sprt_file->private_data = mrt_nullptr;
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 static kssize_t tsc2007_driver_read(struct fwk_file *sprt_file, kbuffer_t *buffer, kssize_t size)
@@ -324,11 +331,17 @@ static kssize_t tsc2007_driver_read(struct fwk_file *sprt_file, kbuffer_t *buffe
     kusize_t bytes = sizeof(sgrt_event);
 
     sprt_info = sprt_file->private_data;
-    if (!sprt_info->is_can_read)
-        return -NR_IS_NREADY;
+
+	if (!(sprt_file->mode & O_NONBLOCK))
+		wait_event(&sprt_info->sgrt_wqh, sprt_info->is_can_read);
+    else
+    {
+        if (!sprt_info->is_can_read)
+            return -ER_NREADY;
+    }
 
     if (size < bytes)
-        return -NR_IS_UNVALID;
+        return -ER_UNVALID;
 
     sprt_data = &sprt_info->sgrt_data;
 
@@ -361,13 +374,14 @@ static kint32_t tsc2007_driver_probe(struct fwk_i2c_client *sprt_client, const s
 {
     struct tsc2007_drv_info *sprt_info;
     struct fwk_device_node *sprt_node;
+    struct fwk_device *sprt_idev;
     kint32_t devnum;
 
     sprt_node = sprt_client->sgrt_dev.sprt_node;
 
     sprt_info = kzalloc(sizeof(*sprt_info), GFP_KERNEL);
     if (!isValid(sprt_info))
-        return -NR_IS_NOMEM;
+        return -ER_NOMEM;
 
     sprt_info->sprt_gdesc = fwk_gpio_desc_get(&sprt_client->sgrt_dev, "tsc-int", FWK_GPIO_DIR_IN);
     if (!isValid(sprt_info->sprt_gdesc)) 
@@ -384,12 +398,13 @@ static kint32_t tsc2007_driver_probe(struct fwk_i2c_client *sprt_client, const s
     sprt_info->devnum = devnum;
     sprt_info->name = "tsc2007";
     sprt_info->sprt_client = sprt_client;
-    INIT_WORK(&sprt_info->sgrt_wq, tsc2007_touch_half_isr);
+    init_waitqueue_head(&sprt_info->sgrt_wqh);
+    INIT_WORK(&sprt_info->sgrt_work, tsc2007_touch_half_isr);
 
     if (fwk_request_irq(sprt_info->irq, tsc2007_touch_isr, IRQ_TYPE_EDGE_RISING | IRQ_TYPE_EDGE_FALLING, sprt_info->name, sprt_info))
         goto fail2;
 
-//  fwk_disable_irq(sprt_info->irq);
+    fwk_disable_irq(sprt_info->irq);
 
     if (fwk_register_chrdev(devnum, 1, sprt_info->name))
         goto fail3;
@@ -401,16 +416,16 @@ static kint32_t tsc2007_driver_probe(struct fwk_i2c_client *sprt_client, const s
     if (fwk_cdev_add(sprt_info->sprt_cdev, devnum, 1))
         goto fail5;
 
-    if (fwk_device_create(NR_TYPE_CHRDEV, devnum, "input/event0"))
+    sprt_idev = fwk_device_create(NR_TYPE_CHRDEV, devnum, "%s%d", "input/event", 1);
+    if (!isValid(sprt_idev))
         goto fail6;
 
+    sprt_info->sprt_idev = sprt_idev;
     sprt_info->sprt_cdev->privData = sprt_info;
     sprt_info->sgrt_data.sprt_info = sprt_info;
     fwk_i2c_set_client_data(sprt_client, sprt_info);
 
-    tsc2007_initial(&sprt_info->sgrt_data);
-
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
     
 fail6:
     fwk_cdev_del(sprt_info->sprt_cdev);
@@ -425,7 +440,7 @@ fail2:
 fail1:
     kfree(sprt_info);
 
-    return -NR_IS_ERROR;
+    return -ER_ERROR;
 }
 
 /*!
@@ -440,7 +455,7 @@ static kint32_t tsc2007_driver_remove(struct fwk_i2c_client *sprt_client)
 
     sprt_info = fwk_i2c_get_client_data(sprt_client);
 
-    fwk_device_destroy(sprt_info->name);
+    fwk_device_destroy(sprt_info->sprt_idev);
     fwk_cdev_del(sprt_info->sprt_cdev);
     kfree(sprt_info->sprt_cdev);
     fwk_unregister_chrdev(sprt_info->devnum, 0);
@@ -449,7 +464,7 @@ static kint32_t tsc2007_driver_remove(struct fwk_i2c_client *sprt_client)
     kfree(sprt_info);
     fwk_i2c_set_client_data(sprt_client, mrt_nullptr);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 static const struct fwk_i2c_device_id sgrt_tsc2007_driver_ids[] =

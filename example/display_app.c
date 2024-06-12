@@ -29,11 +29,11 @@
 #include "thread_table.h"
 
 /*!< The defines */
-#define DISPLAY_APP_THREAD_STACK_SIZE                       KEL_THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
+#define DISPLAY_APP_THREAD_STACK_SIZE                       REAL_THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
 
 /*!< The globals */
 static real_thread_t g_display_app_tid;
-static struct kel_thread_attr sgrt_display_app_attr;
+static struct real_thread_attr sgrt_display_app_attr;
 static kuint32_t g_display_app_stack[DISPLAY_APP_THREAD_STACK_SIZE];
 static struct mutex_lock sgrt_display_app_lock;
 
@@ -69,6 +69,18 @@ static void display_clear(struct fwk_disp_info *sprt_disp)
 
     if (sprt_disp->sprt_ops->clear)
         sprt_disp->sprt_ops->clear(sprt_disp, sgrt_settings.background);
+}
+
+/*!
+ * @brief  fill display
+ * @param  none
+ * @retval none
+ * @note   do display
+ */
+static void display_fill(struct fwk_disp_info *sprt_disp, kuint32_t color)
+{
+    if (sprt_disp->sprt_ops->clear)
+        sprt_disp->sprt_ops->clear(sprt_disp, color);
 }
 
 /*!
@@ -131,11 +143,12 @@ static void *display_app_entry(void *args)
     struct fwk_disp_info sgrt_disp;
 
     mutex_init(&sgrt_display_app_lock);
+    real_thread_set_name("display_app");
 
     do {
-        fd = virt_open("/dev/fb0", 0);
+        fd = virt_open("/dev/fb0", O_RDWR);
         if (fd < 0)
-            continue;
+            schedule_thread();
 
         virt_ioctl(fd, NR_FB_IOGetVScreenInfo, &sgrt_var);
         virt_ioctl(fd, NR_FB_IOGetFScreenInfo, &sgrt_fix);
@@ -144,17 +157,12 @@ static void *display_app_entry(void *args)
         if (!isValid(fbuffer))
         {
             virt_close(fd);
-            continue;
+            schedule_thread();
         }
     
     } while (!isValid(fbuffer));
 
-    fwk_display_initial_info(&sgrt_disp);
-    sgrt_disp.buffer = fbuffer;
-    sgrt_disp.buf_size = sgrt_fix.smem_len;
-    sgrt_disp.width = sgrt_var.xres;
-    sgrt_disp.height = sgrt_var.yres;
-    sgrt_disp.bpp = FWK_RGB_PIXEL32;
+    fwk_display_initial_info(&sgrt_disp, fbuffer, sgrt_fix.smem_len, sgrt_var.xres, sgrt_var.yres, FWK_RGB_PIXEL32);
 
     display_clear(&sgrt_disp);
     display_graphic(&sgrt_disp, sgrt_disp.width / 4, (sgrt_disp.height * 3) / 8, (sgrt_disp.width * 3) / 4, (sgrt_disp.height * 7) / 8);
@@ -175,19 +183,17 @@ static void *display_app_entry(void *args)
             goto END;
         }
 
-#if 0
-        printk("%s: lenth: %d\n", __FUNCTION__, sgrt_fix.smem_len);
-        memset(fbuffer, 0xff, sgrt_fix.smem_len);
-        schedule_delay_ms(500);
-        memset(fbuffer, 0x00, sgrt_fix.smem_len);
-#else
         sgrt_disp.buffer = fbuffer;
+        
+        display_fill(&sgrt_disp, RGB_BLUE);
         display_word(&sgrt_disp, 140, 80, 
-                                 sgrt_disp.width, 80 + 16, "welcome to use!");
+                                 140 + 20 * 8, 80 + 16, "welcome to use!");
         schedule_delay_ms(500);
+        
+        display_fill(&sgrt_disp, RGB_PURPLE);
         display_word(&sgrt_disp, 140, 80, 
-                                 sgrt_disp.width, 80 + 16, "happly every day!");
-#endif
+                                 140 + 20 * 8, 80 + 16, "happly every day!");
+
         virt_munmap(fbuffer, sgrt_fix.smem_len);
         virt_close(fd);
 
@@ -206,19 +212,19 @@ END:
  */
 kint32_t display_app_init(void)
 {
-    struct kel_thread_attr *sprt_attr = &sgrt_display_app_attr;
+    struct real_thread_attr *sprt_attr = &sgrt_display_app_attr;
     kint32_t retval;
 
-	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
-	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;
-	sprt_attr->schedpolicy = KEL_THREAD_SCHED_FIFO;
+	sprt_attr->detachstate = REAL_THREAD_CREATE_JOINABLE;
+	sprt_attr->inheritsched	= REAL_THREAD_INHERIT_SCHED;
+	sprt_attr->schedpolicy = REAL_THREAD_SCHED_FIFO;
 
     /*!< thread stack */
 	real_thread_set_stack(sprt_attr, mrt_nullptr, &g_display_app_stack[0], sizeof(g_display_app_stack));
     /*!< lowest priority */
-	real_thread_set_priority(sprt_attr, KEL_THREAD_PROTY_DEFAULT);
+	real_thread_set_priority(sprt_attr, REAL_THREAD_PROTY_DEFAULT);
     /*!< default time slice */
-    real_thread_set_time_slice(sprt_attr, KEL_THREAD_TIME_DEFUALT);
+    real_thread_set_time_slice(sprt_attr, REAL_THREAD_TIME_DEFUALT);
 
     /*!< register thread */
     retval = real_thread_create(&g_display_app_tid, sprt_attr, display_app_entry, mrt_nullptr);

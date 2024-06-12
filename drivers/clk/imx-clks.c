@@ -26,8 +26,8 @@ typedef struct fwk_clks srt_fwk_clks_t;
 
 struct imx_clks_data
 {
-    srt_imx_ccm_t *sprt_ccm;
-    srt_imx_ccm_pll_t *sprt_pll;
+    srt_hal_imx_ccm_t *sprt_ccm;
+    srt_hal_imx_ccm_pll_t *sprt_pll;
     struct fwk_device_node *sprt_clks;
     struct fwk_device_node *sprt_anatop;
 };
@@ -87,18 +87,18 @@ static kint32_t imx_clk_init_gate(kuint32_t number, const kchar_t *name,
     struct fwk_clk *sprt_clk;
 
     if (number > sprt_data->sgrt_cell.clks_size)
-        return -NR_IS_FAULT;
+        return -ER_FAULT;
 
     sprt_clk = &sprt_data->sgrt_cell.sprt_clks[number];
     sprt_clk = imx_clk_gate(sprt_clk, name, shift, parent, sprt_data);
 
-    return isValid(sprt_clk) ? 0 : (-NR_IS_NOMEM);
+    return isValid(sprt_clk) ? 0 : (-ER_NOMEM);
 }
 
 static void imx_clks_video_init(struct imx_clks_data *sprt_data)
 {
-	srt_imx_ccm_t *sprt_ccm;
-	srt_imx_ccm_pll_t *sprt_pll;
+	srt_hal_imx_ccm_t *sprt_ccm;
+	srt_hal_imx_ccm_pll_t *sprt_pll;
 
     sprt_ccm = sprt_data->sprt_ccm;
     sprt_pll = sprt_data->sprt_pll;
@@ -209,7 +209,7 @@ static kint32_t imx_clks_gate_enable(struct fwk_clk_hw *sprt_hw)
     sprt_gate = mrt_container_of(sprt_hw, struct fwk_clk_gate, sgrt_hw);
     mrt_setbitl(IMX6UL_CCM_CCGR_BIT(sprt_gate->bit_idx), sprt_gate->reg);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 static void	imx_clks_gate_disable(struct fwk_clk_hw *sprt_hw)
@@ -241,7 +241,7 @@ static const struct fwk_clk_ops sgrt_imx_clks_gate_oprts =
 static kint32_t imx_clks_driver_of_init(struct imx_clks_data *sprt_data)
 {
     struct fwk_clk *sprt_gclk;
-	srt_imx_ccm_t *sprt_ccm;
+	srt_hal_imx_ccm_t *sprt_ccm;
     struct fwk_device_node *sprt_npccm;
     srt_imx_clk_gate_fix_t sgrt_init;
     kuint32_t ret = 0;
@@ -252,7 +252,7 @@ static kint32_t imx_clks_driver_of_init(struct imx_clks_data *sprt_data)
     imx_clk_init_data(&sgrt_init, mrt_nullptr, mrt_nullptr);
     sprt_gclk = sgrt_init.sgrt_cell.sprt_clks;
     if (!sprt_gclk)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     memset(sprt_gclk, 0, sgrt_init.sgrt_cell.clks_size * sizeof(*sprt_gclk));
     memcpy(&sgrt_imx_clk_one_cell_data, &sgrt_init.sgrt_cell, sizeof(sgrt_imx_clk_one_cell_data));
@@ -377,7 +377,7 @@ static kint32_t imx_clks_driver_of_init(struct imx_clks_data *sprt_data)
     ret |= imx_clk_init_gate(IMX6UL_CLK_PWM7, "pwm7", NR_IMX_CCGR6_PWM7, "perclk", &sgrt_init);
 
     if (ret)
-        return -NR_IS_NOMEM;
+        return -ER_NOMEM;
 
     /*!< register clock cell */
     return fwk_clk_add_provider(sprt_npccm, fwk_of_clk_src_onecell_get, &sgrt_imx_clk_one_cell_data);
@@ -391,8 +391,8 @@ static kint32_t imx_clks_driver_of_init(struct imx_clks_data *sprt_data)
  */
 kint32_t __fwk_init imx_clks_driver_init(void)
 {
-	srt_imx_ccm_t *sprt_ccm;
-	srt_imx_ccm_pll_t *sprt_pll;
+	srt_hal_imx_ccm_t *sprt_ccm;
+	srt_hal_imx_ccm_pll_t *sprt_pll;
 	struct fwk_device_node *sprt_clks, *sprt_anatop;
     struct imx_clks_data sgrt_data;
     void *reg;
@@ -400,16 +400,16 @@ kint32_t __fwk_init imx_clks_driver_init(void)
 	sprt_anatop = fwk_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_antop_driver_ids, mrt_nullptr);
     sprt_clks = fwk_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_ccm_driver_ids, mrt_nullptr);
 	if (!isValid(sprt_anatop) || !isValid(sprt_clks))
-		return NR_IS_NORMAL;
+		return ER_NORMAL;
 
     reg = fwk_of_iomap(sprt_anatop, 0);
-    sprt_pll = (srt_imx_ccm_pll_t *)fwk_io_remap(reg);
+    sprt_pll = (srt_hal_imx_ccm_pll_t *)fwk_io_remap(reg);
 
 	reg = fwk_of_iomap(sprt_clks, 0);
-    sprt_ccm = (srt_imx_ccm_t *)fwk_io_remap(reg);
+    sprt_ccm = (srt_hal_imx_ccm_t *)fwk_io_remap(reg);
 
     if (!isValid(sprt_pll) || !isValid(sprt_ccm))
-        return -NR_IS_UNVALID;
+        return -ER_UNVALID;
 
     sgrt_data.sprt_ccm = sprt_ccm;
     sgrt_data.sprt_pll = sprt_pll;
@@ -436,7 +436,7 @@ kint32_t __fwk_init imx_clks_driver_init(void)
     /*!< 2. lcdif */
     imx_clks_video_init(&sgrt_data);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!

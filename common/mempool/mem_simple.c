@@ -33,12 +33,12 @@ kint32_t memory_simple_block_create(struct mem_info *sprt_info, kuaddr_t mem_add
 	header_size	= MEM_BLOCK_HEADER_SIZE;
 
 	if ((!isValid(sprt_info)) || (size <= header_size))
-		return -NR_IS_UNVALID;
+		return -ER_UNVALID;
 
 	/*!< if sprt_mem is exsited, it is not allow to create again */
 	if (isValid(sprt_info->sprt_mem))
 	{
-		return -NR_IS_UNVALID;
+		return -ER_UNVALID;
 	}
 
 	/*!< 4 bytes align */
@@ -57,7 +57,7 @@ kint32_t memory_simple_block_create(struct mem_info *sprt_info, kuaddr_t mem_add
 
 	sprt_info->sprt_mem	= sprt_block;
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!

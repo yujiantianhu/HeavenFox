@@ -19,11 +19,11 @@
 #include <kernel/workqueue.h>
 
 /*!< The defines */
-#define KWORKER_THREAD_STACK_SIZE                       KEL_THREAD_STACK_HALF(1)    /*!< 1/2 page (2 kbytes) */
+#define KWORKER_THREAD_STACK_SIZE                       REAL_THREAD_STACK_HALF(1)    /*!< 1/2 page (2 kbytes) */
 
 /*!< The globals */
 static real_thread_t g_kworker_tid;
-static struct kel_thread_attr sgrt_kworker_attr;
+static struct real_thread_attr sgrt_kworker_attr;
 static kuint32_t g_kworker_stack[KWORKER_THREAD_STACK_SIZE];
 
 static DECLARE_WORKQUEUE(sgrt_kworker_wqh);
@@ -75,18 +75,18 @@ END:
  */
 kint32_t kworker_init(void)
 {
-    struct kel_thread_attr *sprt_attr = &sgrt_kworker_attr;
+    struct real_thread_attr *sprt_attr = &sgrt_kworker_attr;
 
-	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
-	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;
-	sprt_attr->schedpolicy = KEL_THREAD_SCHED_FIFO;
+	sprt_attr->detachstate = REAL_THREAD_CREATE_JOINABLE;
+	sprt_attr->inheritsched	= REAL_THREAD_INHERIT_SCHED;
+	sprt_attr->schedpolicy = REAL_THREAD_SCHED_FIFO;
 
     /*!< thread stack */
 	real_thread_set_stack(sprt_attr, mrt_nullptr, g_kworker_stack, sizeof(g_kworker_stack));
     /*!< lowest priority */
-	real_thread_set_priority(sprt_attr, KEL_THREAD_PROTY_KWORKER);
+	real_thread_set_priority(sprt_attr, REAL_THREAD_PROTY_KWORKER);
     /*!< default time slice */
-    real_thread_set_time_slice(sprt_attr, KEL_THREAD_TIME_DEFUALT);
+    real_thread_set_time_slice(sprt_attr, REAL_THREAD_TIME_DEFUALT);
 
     /*!< register thread */
     return kernel_thread_create(&g_kworker_tid, sprt_attr, kworker_entry, mrt_nullptr);

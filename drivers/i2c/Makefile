@@ -11,5 +11,7 @@
 
 obj-y	+=	imx-i2c.o
 obj-y	+=	tsc2007.o
+obj-y	+=	ap3216c.o
+obj-y	+=	at24cxx.o
 
 # end of file

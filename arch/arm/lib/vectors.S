@@ -163,13 +163,10 @@ _irq_handler:
     b __schedule_before                             @ jump to "context.S"
 
 _fiq_handler:
-    cpsid f
     _exception_save_params                          @ save current context
 
     bl exec_fiq_handler                             @ exception handlers, please jump to interrupt.c
     _exception_restore_params
-
-    cpsie f
 
     /*!< PC will pointer next instruction before calling FIQ; So it must retrun "lr - 4" */
     subs pc, lr, #0x04

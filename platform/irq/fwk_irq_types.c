@@ -28,7 +28,7 @@
  */
 static irq_return_t fwk_default_irqhandler(void *ptrDev)
 {
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -72,18 +72,18 @@ kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, c
 	kuint32_t len = kstrlen(name);
 
 	if ((!name) || (!ptrDev))
-		return -NR_IS_FAULT;
+		return -ER_FAULT;
 
 	if (fwk_find_irq_action(irq, name, ptrDev))
-		return -NR_IS_EXISTED;
+		return -ER_EXISTED;
 
 	sprt_desc = fwk_irq_to_desc(irq);
 	if (!isValid(sprt_desc))
-		return -NR_IS_NOMEM;
+		return -ER_NOMEM;
 
 	sprt_action = (struct fwk_irq_action *)kzalloc(sizeof(*sprt_action), GFP_KERNEL);
 	if (!isValid(sprt_action))
-		return -NR_IS_NOMEM;
+		return -ER_NOMEM;
 
 	sprt_action->handler = handler ? handler : fwk_default_irqhandler;
 	sprt_action->flags = flags;
@@ -99,11 +99,11 @@ kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, c
 
 	fwk_enable_irq(irq);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 
 fail:
 	kfree(sprt_action);
-	return -NR_IS_CHECKERR;
+	return -ER_CHECKERR;
 }
 
 /*!

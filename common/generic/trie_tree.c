@@ -76,7 +76,7 @@ struct trie_node *find_trie_node(struct trie_tree *sprt_tree, const char *name)
         if (IS_STRING_END(offset))
             break;
         else if (IS_STRING_ERR(offset))
-            return ERR_PTR(-NR_IS_FAULT);
+            return ERR_PTR(-ER_FAULT);
     }
 
     if (sprt_node)

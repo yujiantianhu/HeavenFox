@@ -15,5 +15,6 @@ obj-y	+=	light_app.o
 obj-y	+=	button_app.o
 obj-y	+=	display_app.o
 obj-y	+=	tsc_app.o
+obj-y	+=	env_monitor.o
 
 # end of file

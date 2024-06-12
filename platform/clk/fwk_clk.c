@@ -51,7 +51,7 @@ struct fwk_clk *fwk_create_clk(struct fwk_clk_hw *sprt_hw, const kchar_t *dev_id
 
 kint32_t fwk_init_clk(struct fwk_device *sprt_dev, struct fwk_clk *sprt_clk)
 {
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 void fwk_free_clk(struct fwk_clk *sprt_clk)

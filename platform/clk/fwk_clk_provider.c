@@ -50,11 +50,11 @@ kint32_t fwk_clk_add_provider(struct fwk_device_node *sprt_node,
     struct fwk_of_clk_provider *sprt_provider;
 
     if (!sprt_node || !get)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     sprt_provider = kzalloc(sizeof(*sprt_provider), GFP_KERNEL);
     if (!isValid(sprt_provider))
-        return -NR_IS_NOMEM;
+        return -ER_NOMEM;
 
     sprt_provider->sprt_node = sprt_node;
     sprt_provider->get = get;
@@ -62,7 +62,7 @@ kint32_t fwk_clk_add_provider(struct fwk_device_node *sprt_node,
 
     list_head_add_tail(&sgrt_fwk_clk_providers, &sprt_provider->sgrt_link);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 void fwk_clk_del_provider(struct fwk_device_node *sprt_node)

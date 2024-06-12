@@ -18,7 +18,7 @@
 #include <configs/configs.h>
 
 /*!< The defines */
-#define KEL_THREAD_USER									(0x1)	/*!< user thread */
+#define REAL_THREAD_USER									(0x1)	/*!< user thread */
 
 /*!<
  * status move:
@@ -50,6 +50,17 @@ enum __ERT_KEL_BASIC_STATUS
 
 	/*!< numbers */
 	NR_THREAD_STATUS_MAX
+};
+
+enum __ERT_REAL_THREAD_SIGNALS
+{
+	NR_THREAD_SIG_NORMAL = NR_THREAD_STATUS_MAX,
+	NR_THREAD_SIG_WAKEUP,
+	NR_THREAD_SIG_KILL,
+	NR_THREAD_SIG_INTR,
+
+	/*!< NR_THREAD_SIG_MAX <= 32 */
+	NR_THREAD_SIG_MAX,
 };
 
 /*!< The globals */

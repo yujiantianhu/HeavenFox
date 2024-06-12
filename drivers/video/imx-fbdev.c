@@ -216,8 +216,8 @@ static void imx_fbdev_init(void *base, struct imx_fbdev_drv *sprt_drv)
 	mrt_writel(mrt_bit(17) | mrt_bit(0), &sprt_lcdif->CTRL_SET);
 
 	/*!< open backlight */
-	if (sprt_drv->sgrt_blight.sprt_gdesc)
-		fwk_gpio_set_value(sprt_drv->sgrt_blight.sprt_gdesc, 0);
+//	if (sprt_drv->sgrt_blight.sprt_gdesc)
+//		fwk_gpio_set_value(sprt_drv->sgrt_blight.sprt_gdesc, 1);
 }
 
 /*!
@@ -228,12 +228,12 @@ static void imx_fbdev_init(void *base, struct imx_fbdev_drv *sprt_drv)
  */
 static kint32_t imx_fbdev_open(struct fwk_fb_info *sprt_info, kint32_t user)
 {
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 static kint32_t imx_fbdev_close(struct fwk_fb_info *sprt_info, kint32_t user)
 {
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 static const struct fwk_fb_oprts sgrt_fwk_fb_ops =
@@ -253,7 +253,7 @@ static kint32_t imx_fbdev_probe_backlight(struct imx_fbdev_backlight *sprt_bligh
 
 	sprt_dev = kzalloc(sizeof(*sprt_dev), GFP_KERNEL);
 	if (!isValid(sprt_dev))
-		return -NR_IS_NOMEM;
+		return -ER_NOMEM;
 
 	sprt_dev->init_name = sprt_node->full_name;
 	sprt_dev->sprt_node = sprt_node;
@@ -284,16 +284,17 @@ static kint32_t imx_fbdev_probe_backlight(struct imx_fbdev_backlight *sprt_bligh
 	sprt_blight->sprt_pctl = sprt_pctl;
 	sprt_blight->sprt_gdesc = sprt_gdesc;
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 
 fail3:
 	fwk_pinctrl_put(sprt_pctl);
 fail2:
 	fwk_device_del(sprt_dev);
 fail1:
+	mrt_dev_del_name(sprt_dev);
 	kfree(sprt_dev);
 
-	return -NR_IS_ERROR;
+	return -ER_ERROR;
 }
 
 static void imx_fbdev_remove_backlight(struct imx_fbdev_backlight *sprt_blight)
@@ -382,10 +383,10 @@ static kint32_t imx_fbdev_driver_probe_timings(struct fwk_platdev *sprt_pdev)
 		imx_fbdev_probe_backlight(&sprt_drv->sgrt_blight, sprt_blnode);
 	}
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 
 fail:
-	return -NR_IS_FAILD;
+	return -ER_FAILD;
 }
 
 /*!
@@ -403,7 +404,7 @@ static kint32_t imx_fbdev_driver_probe(struct fwk_platdev *sprt_pdev)
 
 	sprt_fb = fwk_framebuffer_alloc(sizeof(*sprt_drv), &sprt_pdev->sgrt_dev);
 	if (!isValid(sprt_fb))
-		return -NR_IS_NOMEM;
+		return -ER_NOMEM;
 
 	base = (void *)fwk_platform_get_address(sprt_pdev, 0);
 	base = fwk_io_remap(base);
@@ -447,7 +448,7 @@ static kint32_t imx_fbdev_driver_probe(struct fwk_platdev *sprt_pdev)
 
 	imx_fbdev_init(base, sprt_drv);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 
 fail6:
 	imx_fbdev_remove_backlight(&sprt_drv->sgrt_blight);
@@ -466,7 +467,7 @@ fail2:
 	fwk_io_unmap(base);
 fail1:
 	kfree(sprt_fb);
-	return -NR_IS_FAILD;
+	return -ER_FAILD;
 }
 
 /*!
@@ -496,7 +497,7 @@ static kint32_t imx_fbdev_driver_remove(struct fwk_platdev *sprt_pdev)
 	fwk_io_unmap(sprt_drv->base);
 	kfree(sprt_fb);
 	
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!< device id for device-tree */

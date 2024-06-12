@@ -37,7 +37,7 @@ struct fwk_fb_bitfield
 /*!< LCD fix parameters */
 struct fwk_fb_fix_screen_info
 {
-	kchar_t id[16];										/*!< LCD identifier in the form of a string */
+	kchar_t id[16];											/*!< LCD identifier in the form of a string */
 	kuaddr_t smem_start;									/*!< The starting physical address of the framebuffer memory */
 	kuint32_t smem_len;										/*!< The length of the framebuffer memory */
 	kuint32_t type;											/*!< The type of frame buffer storage, i.e. the way in which image data is stored in the frame buffer */
@@ -111,6 +111,7 @@ typedef struct fwk_fb_info
 
 	const struct fwk_fb_oprts *sprt_fbops;					/*!< operation API */
 	struct fwk_device *sprt_dev;							/*!< device */
+	struct fwk_device *sprt_idev;
 
 	kuint8_t *ptr_screen_base;								/*!< base address of the virtual memory */
 	kuint32_t screen_size;									/*!< virtual memory size */
@@ -131,6 +132,11 @@ struct fwk_fb_oprts
 };
 
 /*!< The functions */
+/*!< -------------------------------------------------------------- */
+TARGET_EXT kint32_t fwk_fbmem_init(void);
+TARGET_EXT void fwk_fbmem_exit(void);
+
+/*!< -------------------------------------------------------------- */
 TARGET_EXT struct fwk_fb_info *fwk_framebuffer_alloc(kusize_t size, struct fwk_device *sprt_dev);
 TARGET_EXT void fwk_framebuffer_release(struct fwk_fb_info *sprt_fb_info);
 TARGET_EXT kint32_t fwk_register_framebuffer(struct fwk_fb_info *sprt_fb_info);

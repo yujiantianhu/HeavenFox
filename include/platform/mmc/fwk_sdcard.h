@@ -807,7 +807,7 @@ static inline kint32_t fwk_sdcard_initial_command(struct fwk_sdcard_cmd *sprt_cm
     sprt_cmd->args = mrt_be32_to_cpu(args);
     sprt_cmd->respType = response;
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 #endif /* __FWK_SDCARD_H */

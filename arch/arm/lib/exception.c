@@ -39,7 +39,7 @@ void exec_undefined_handler(void)
  */
 void exec_prefetch_abort_handler(void)
 {
-    print_err("lr \'%d\' cause fault\n", prefecth_abort_addr);
+    print_err("lr \'%x\' cause fault\n", prefecth_abort_addr);
     mrt_assert(false);
 }
 
@@ -51,7 +51,7 @@ void exec_prefetch_abort_handler(void)
  */
 void exec_data_abort_handler(void)
 {
-    print_err("lr \'%d\' cause fault\n", data_abort_addr);
+    print_err("lr \'%x\' cause fault\n", data_abort_addr);
     mrt_assert(false);
 }
 

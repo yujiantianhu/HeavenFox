@@ -44,7 +44,7 @@ kint32_t fwk_pinconf_get_by_name(struct fwk_pinctrl_dev *sprt_pctldev, const kch
             return pin;
     }
 
-    return -NR_IS_MORE;
+    return -ER_MORE;
 }
 
 /*!
@@ -60,7 +60,7 @@ kint32_t fwk_pinconf_map_to_setting(struct fwk_pinctrl_map const *sprt_map, stru
     kint32_t pin;
 
     if (sprt_setting->type != NR_FWK_PINCTRL_PIN_CONF)
-        return -NR_IS_FAULT;
+        return -ER_FAULT;
 
     sprt_pctldev = sprt_setting->sprt_pctldev;
     pin = fwk_pinconf_get_by_name(sprt_pctldev, sprt_map->ugrt_data.sgrt_configs.group_or_pin);
@@ -71,7 +71,7 @@ kint32_t fwk_pinconf_map_to_setting(struct fwk_pinctrl_map const *sprt_map, stru
     sprt_setting->ugrt_data.sgrt_configs.configs = sprt_map->ugrt_data.sgrt_configs.configs;
     sprt_setting->ugrt_data.sgrt_configs.num_configs = sprt_map->ugrt_data.sgrt_configs.num_configs;
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!< end of file */

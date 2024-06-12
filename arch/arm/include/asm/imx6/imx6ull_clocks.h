@@ -414,7 +414,7 @@ typedef struct
 
     kuint8_t  RESERVED_2[4];
     kuint32_t CMEOR;                                                /*!< CCM Module Enable Overide Register, offset: 0x88 */
-} srt_imx_ccm_t;
+} srt_hal_imx_ccm_t;
 
 /*!< CCM_ANALOG - Register Layout Typedef */
 typedef struct 
@@ -482,52 +482,54 @@ typedef struct
     kuint32_t MISC2_SET;                                            /*!< Miscellaneous Register 2, offset: 0x174 */
     kuint32_t MISC2_CLR;                                            /*!< Miscellaneous Register 2, offset: 0x178 */
     kuint32_t MISC2_TOG;                                            /*!< Miscellaneous Register 2, offset: 0x17C */
-} srt_imx_ccm_pll_t;
+} srt_hal_imx_ccm_pll_t;
 
 /*!< ------------------------------------------------------------------------- */
 /*!< Register Property Base Address */
 /*!< Peripheral CCM base address */
 #define IMX6UL_CCM_ADDR_BASE                        (0x20C4000u)
-#define IMX6UL_CCM_CCGR0_ADDR_OFFSET 			    mrt_member_offset(srt_imx_ccm_t, CCGR0)
-#define IMX6UL_CCM_CCGR1_ADDR_OFFSET 			    mrt_member_offset(srt_imx_ccm_t, CCGR1)
-#define IMX6UL_CCM_CCGR2_ADDR_OFFSET 			    mrt_member_offset(srt_imx_ccm_t, CCGR2)
-#define IMX6UL_CCM_CCGR3_ADDR_OFFSET 			    mrt_member_offset(srt_imx_ccm_t, CCGR3)
-#define IMX6UL_CCM_CCGR4_ADDR_OFFSET 			    mrt_member_offset(srt_imx_ccm_t, CCGR4)
-#define IMX6UL_CCM_CCGR5_ADDR_OFFSET 			    mrt_member_offset(srt_imx_ccm_t, CCGR5)
-#define IMX6UL_CCM_CCGR6_ADDR_OFFSET 			    mrt_member_offset(srt_imx_ccm_t, CCGR6)
+#define IMX6UL_CCM_CCGR0_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR0)
+#define IMX6UL_CCM_CCGR1_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR1)
+#define IMX6UL_CCM_CCGR2_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR2)
+#define IMX6UL_CCM_CCGR3_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR3)
+#define IMX6UL_CCM_CCGR4_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR4)
+#define IMX6UL_CCM_CCGR5_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR5)
+#define IMX6UL_CCM_CCGR6_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR6)
 #define IMX6UL_CCM_CCGR_CLOCK_ENTRY(x)              (IMX6UL_CCM_ADDR_BASE + IMX6UL_CCM_CCGR##x##_ADDR_OFFSET)
+
 #define mrt_imx_ccm_configure(port, data)   \
-{   \
+do {   \
     *((volatile kuaddr_t *)(IMX6UL_CCM_ADDR_BASE + IMX6UL_CCM_CCGR##port##_ADDR_OFFSET)) = (data);  \
-}
-#define IMX6UL_CCM_PROPERTY_ENTRY()                 (srt_imx_ccm_t      *)IMX6UL_CCM_ADDR_BASE
+} while(0)
+
+#define IMX6UL_CCM_PROPERTY_ENTRY()                 (srt_hal_imx_ccm_t      *)IMX6UL_CCM_ADDR_BASE
 
 /*!< Peripheral CCM_ANALOG base address */
 #define IMX6UL_CCM_ANALOG_BASE                      (0x20C8000u)
-#define IMX6UL_CCM_PLL_PROPERTY_ENTRY()             (srt_imx_ccm_pll_t  *)IMX6UL_CCM_ANALOG_BASE
+#define IMX6UL_CCM_PLL_PROPERTY_ENTRY()             (srt_hal_imx_ccm_pll_t  *)IMX6UL_CCM_ANALOG_BASE
 
 /*!< enable clk */
 #define mrt_imx_ccm_clk_enable(reg, ccgr)    \
-{   \
+do {   \
     urt_imx_ccgr_t ugrt_ccgr;   \
 	mrt_write_urt_data(&ugrt_ccgr, mrt_readl(ccgr));   \
 	mrt_write_urt_bits(&ugrt_ccgr, reg, IMX6UL_CCM_CCGR_ENABLE);  \
 	mrt_writel(mrt_trans_urt_data(&ugrt_ccgr), ccgr);  \
-}
+} while(0)
 
 /*!< disable clk */
 #define mrt_imx_ccm_clk_disable(uprt_ccgr, reg, ccgr)    \
-{   \
+do {   \
     urt_imx_ccgr_t ugrt_ccgr;   \
 	mrt_write_urt_data(&ugrt_ccgr, mrt_readl(ccgr));   \
 	mrt_write_urt_bits(&ugrt_ccgr, reg, IMX6UL_CCM_CCGR_DISABLE);  \
 	mrt_writel(mrt_trans_urt_data(&ugrt_ccgr), ccgr);  \
-}
+} while (0)
 
 /*!< ------------------------------------------------------------------------- */
 /*!< Usual defines */
-#define IMX6UL_SYSCLK_DIVID_FAC1                    ((((srt_imx_ccm_t      *)IMX6UL_CCM_ADDR_BASE)->CACRR & 0x07) + 1)
-#define IMX6UL_SYSCLK_DIVID_FAC2                    (((srt_imx_ccm_pll_t   *)IMX6UL_CCM_ANALOG_BASE)->PLL_ARM & 0x7f)
+#define IMX6UL_SYSCLK_DIVID_FAC1                    ((((srt_hal_imx_ccm_t      *)IMX6UL_CCM_ADDR_BASE)->CACRR & 0x07) + 1)
+#define IMX6UL_SYSCLK_DIVID_FAC2                    (((srt_hal_imx_ccm_pll_t   *)IMX6UL_CCM_ANALOG_BASE)->PLL_ARM & 0x7f)
 
 /*!< Define Sys_Clk by Inline function */
 static inline kuint64_t hal_imx_sysclk_freq_counter(void)

@@ -53,7 +53,7 @@ static kint32_t fwk_i2c_device_match(struct fwk_device *sprt_dev, struct fwk_dri
 	struct fwk_device_node *sprt_np;
 
 	if (sprt_dev->sprt_type != &sgrt_fwk_i2c_client_type)
-		return -NR_IS_CHECKERR;
+		return -ER_CHECKERR;
 
 	sprt_client = mrt_container_of(sprt_dev, struct fwk_i2c_client, sgrt_dev);
 	sprt_driver = mrt_container_of(sprt_drv, struct fwk_i2c_driver, sgrt_driver);
@@ -67,13 +67,13 @@ static kint32_t fwk_i2c_device_match(struct fwk_device *sprt_dev, struct fwk_dri
 	/*!< Match Priority 1: Device Tree */
 	sprt_np = fwk_of_node_try_matches(sprt_dev->sprt_node, sprt_drv->sprt_of_match_table, mrt_nullptr);
 	if (isValid(sprt_np) && (sprt_dev->sprt_node == sprt_np))
-		return NR_IS_NORMAL;
+		return ER_NORMAL;
 
 	/*!< Match Priority 2: idTable */
     if (sprt_driver->sprt_id_table)
-		return fwk_i2c_match_id(sprt_driver->sprt_id_table, sprt_client) ? NR_IS_NORMAL : -NR_IS_NOTFOUND;
+		return fwk_i2c_match_id(sprt_driver->sprt_id_table, sprt_client) ? ER_NORMAL : -ER_NOTFOUND;
 
-	return -NR_IS_NOTFOUND;
+	return -ER_NOTFOUND;
 }
 
 /*!
@@ -91,7 +91,7 @@ static kint32_t fwk_i2c_device_probe(struct fwk_device *sprt_dev)
 
 	sprt_drv = sprt_dev->sprt_driver;
 	if (!sprt_drv)
-		return -NR_IS_FAULT;
+		return -ER_FAULT;
 
 	sprt_client = mrt_container_of(sprt_dev, struct fwk_i2c_client, sgrt_dev);
 	sprt_driver = mrt_container_of(sprt_drv, struct fwk_i2c_driver, sgrt_driver);
@@ -106,9 +106,9 @@ static kint32_t fwk_i2c_device_probe(struct fwk_device *sprt_dev)
 	}
 
 	if (sprt_driver->probe)
-		return sprt_driver->probe(sprt_client, sprt_idTable) ? -NR_IS_PERMIT : NR_IS_NORMAL;
+		return sprt_driver->probe(sprt_client, sprt_idTable) ? -ER_PERMIT : ER_NORMAL;
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -125,15 +125,15 @@ static kint32_t fwk_i2c_device_remove(struct fwk_device *sprt_dev)
 
 	sprt_drv = sprt_dev->sprt_driver;
 	if (!sprt_drv)
-		return -NR_IS_FAULT;
+		return -ER_FAULT;
 
 	sprt_client = mrt_container_of(sprt_dev, struct fwk_i2c_client, sgrt_dev);
 	sprt_driver = mrt_container_of(sprt_drv, struct fwk_i2c_driver, sgrt_driver);
 
 	if ((!sprt_driver->remove) || (0 > sprt_driver->remove(sprt_client)))
-		return -NR_IS_PERMIT;
+		return -ER_PERMIT;
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 static struct fwk_SysPrivate sgrt_fwk_i2c_device_SysPriv =
@@ -221,7 +221,7 @@ struct fwk_i2c_client *fwk_i2c_new_device(struct fwk_i2c_adapter *sprt_adap, str
 	sprt_client->sgrt_dev.sprt_type = &sgrt_fwk_i2c_client_type;
 	sprt_client->sgrt_dev.sprt_node = sprt_info->sprt_node;
 	mrt_dev_set_name(&sprt_client->sgrt_dev, "%d-%d", 
-				sprt_adap->nr, sprt_client->addr | (sprt_client->flags & FWK_I2C_M_TEN) ? 0xa000 : 0);
+				sprt_adap->nr, sprt_client->addr | ((sprt_client->flags & FWK_I2C_M_TEN) ? 0xa000 : 0));
 
 	/*!< verify machine address */
 	if (sprt_client->flags & FWK_I2C_M_TEN)
@@ -239,14 +239,16 @@ struct fwk_i2c_client *fwk_i2c_new_device(struct fwk_i2c_adapter *sprt_adap, str
 
 	retval = fwk_device_add(&sprt_client->sgrt_dev);
 	if (retval)
-		return mrt_nullptr;
+		goto fail;
 
 	list_head_add_tail(&sprt_adap->sgrt_clients, &sprt_client->sgrt_link);
 
 	return sprt_client;
 
 fail:
+	mrt_dev_del_name(&sprt_client->sgrt_dev);
 	kfree(sprt_client);
+
 	return mrt_nullptr;
 }
 
@@ -262,13 +264,13 @@ static struct fwk_i2c_client *fwk_of_i2c_register_device(struct fwk_i2c_adapter 
 	kuint32_t reg = 0;
 
 	if (fwk_of_modalias_node(sprt_node, sgrt_bi.type, sizeof(sgrt_bi.type)))
-		return ERR_PTR(-NR_IS_NOTFOUND);
+		return ERR_PTR(-ER_NOTFOUND);
 
 	if (fwk_of_property_read_u32(sprt_node, "reg", &reg))
-		return ERR_PTR(-NR_IS_NOTFOUND);
+		return ERR_PTR(-ER_NOTFOUND);
 
 	if (!reg)
-		return ERR_PTR(-NR_IS_EMPTY);
+		return ERR_PTR(-ER_EMPTY);
 
 	sgrt_bi.sprt_node = sprt_node;
 	sgrt_bi.addr = (kuint16_t)reg;
@@ -295,7 +297,7 @@ kint32_t fwk_i2c_register_adapter(struct fwk_i2c_adapter *sprt_adap)
 	kint32_t retval;
 
 	if (!sprt_adap->sprt_algo || !(*sprt_adap->name))
-		return -NR_IS_FAULT;
+		return -ER_FAULT;
 
 	if (!sprt_adap->timeout)
 		sprt_adap->timeout = TICK_HZ;
@@ -308,11 +310,15 @@ kint32_t fwk_i2c_register_adapter(struct fwk_i2c_adapter *sprt_adap)
 
 	retval = fwk_device_add(&sprt_adap->sgrt_dev);
 	if (retval)
-		return retval;
+		goto fail;
 
 	fwk_of_i2c_register_devices(sprt_adap);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
+
+fail:
+	mrt_dev_del_name(&sprt_adap->sgrt_dev);
+	return retval;
 }
 
 kint32_t fwk_i2c_add_adapter(struct fwk_i2c_adapter *sprt_adap)
@@ -349,7 +355,7 @@ kint32_t fwk_i2c_transfer(struct fwk_i2c_client *sprt_client, struct fwk_i2c_msg
 	if (sprt_algo->master_xfer)
 		return sprt_algo->master_xfer(sprt_client->sprt_adapter, sprt_msgs, num);
 
-	return -NR_IS_NSUPPORT;
+	return -ER_NSUPPORT;
 }
 
 /*!< end of file */

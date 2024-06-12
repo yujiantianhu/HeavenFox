@@ -65,15 +65,15 @@ kint32_t dync_initcall_run_list(const kuint32_t section)
 	const dync_init_t *pFunc_init;
 
     if (section >= NR_DYNC_SEC_END)
-        return -NR_IS_NOMEM;
+        return -ER_NOMEM;
 
 	for (pFunc_init = dync_init_sections[section]; (*pFunc_init) && (pFunc_init < dync_init_sections[section + 1]); pFunc_init++)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_IS_ERROR;
+			return -ER_ERROR;
 	}
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -112,10 +112,10 @@ kint32_t board_early_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_IS_ERROR;
+			return -ER_ERROR;
 	}
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 #endif
 }
@@ -159,10 +159,10 @@ kint32_t board_late_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_IS_ERROR;
+			return -ER_ERROR;
 	}
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 #endif
 }
@@ -206,10 +206,10 @@ kint32_t system_kernel_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_IS_ERROR;
+			return -ER_ERROR;
 	}
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 #endif
 }
@@ -254,10 +254,10 @@ kint32_t root_filesystem_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_IS_ERROR;
+			return -ER_ERROR;
 	}
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 #endif
 }
@@ -301,10 +301,10 @@ kint32_t platform_built_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_IS_ERROR;
+			return -ER_ERROR;
 	}
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 #endif
 }
@@ -348,10 +348,10 @@ kint32_t platform_reality_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_IS_ERROR;
+			return -ER_ERROR;
 	}
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 #endif
 }
@@ -395,10 +395,10 @@ kint32_t hardware_device_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_IS_ERROR;
+			return -ER_ERROR;
 	}
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 #endif
 }
@@ -442,10 +442,10 @@ kint32_t abstract_driver_initcall(void)
 	mrt_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
-			return -NR_IS_ERROR;
+			return -ER_ERROR;
 	}
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 
 #endif
 }

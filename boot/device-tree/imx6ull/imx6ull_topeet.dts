@@ -10,7 +10,7 @@
 
 /dts-v1/;
 
-#include <dt-bindings/input/input.h>
+#include <dt-bindings/input.h>
 #include "imx6ull.dtsi"
 
 / {
@@ -120,6 +120,27 @@
 	fsl,cpu_pdnscr_iso2sw = <0x1>;
 	fsl,cpu_pdnscr_iso = <0x1>;
 	fsl,ldo-bypass = <0>;
+};
+
+&i2c1 {
+	clock_frequency = <100000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c1>;
+	status = "okay";
+
+	ap3216c: ap3216c@1e {
+		compatible = "liteon,ap3216c";
+		reg = <0x1e>;
+		status = "okay";
+	};
+
+	at24c02: at24c02@50 {
+		compatible = "atmel,at24cxx";
+		reg = <0x50>;
+		page_size = <8>;
+		pages = <32>;
+		status = "okay";
+	};
 };
 
 &i2c2 {

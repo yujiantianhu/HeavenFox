@@ -83,7 +83,7 @@ kint32_t mailbox_init(struct mailbox *sprt_mb, real_thread_t tid, const kchar_t 
 
     sprt_box = mailbox_find(label);
     if (sprt_box)
-        return -NR_IS_EXISTED;
+        return -ER_EXISTED;
 
     sprt_mb->num_mails = 0;
     sprt_mb->tid = tid;
@@ -92,7 +92,7 @@ kint32_t mailbox_init(struct mailbox *sprt_mb, real_thread_t tid, const kchar_t 
     
     mailbox_insert(sprt_mb);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 void mailbox_deinit(struct mailbox *sprt_mb)
@@ -111,7 +111,7 @@ struct mailbox *mailbox_create(real_thread_t tid, const kchar_t *name)
     if (mailbox_init(sprt_mb, tid, name))
     {
         kfree(sprt_mb);
-        return ERR_PTR(-NR_IS_FAILD);
+        return ERR_PTR(-ER_FAILD);
     }
 
     return sprt_mb;
@@ -158,8 +158,8 @@ kint32_t mail_send(const kchar_t *mb_name, struct mail *sprt_mail)
 {
     struct mailbox *sprt_mb;
 
-    if (!sprt_mail || !sprt_mail->sprt_msg)
-        return -NR_IS_NOMEM;
+    if (mrt_unlikely(!sprt_mail) || mrt_unlikely(!sprt_mail->sprt_msg))
+        return -ER_NOMEM;
 
     sprt_mb = mailbox_find(mb_name);
     if (!isValid(sprt_mb))
@@ -173,7 +173,7 @@ kint32_t mail_send(const kchar_t *mb_name, struct mail *sprt_mail)
 
     sprt_mb->num_mails++;
     
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 kint32_t mail_recv(struct mailbox *sprt_mb, struct mail *sprt_mail, kutime_t timeout)
@@ -185,12 +185,12 @@ kint32_t mail_recv(struct mailbox *sprt_mb, struct mail *sprt_mail, kutime_t tim
     kint32_t retval;
 
     if (!sprt_mb || !sprt_mail)
-        return -NR_IS_NOMEM;
+        return -ER_NOMEM;
 
     while (mrt_list_head_empty(&sprt_mb->sgrt_mail))
     {
         if (!timeout)
-            return -NR_IS_EMPTY;
+            return -ER_EMPTY;
 
         schedule_delay_ms(timeout);
     }
@@ -201,7 +201,7 @@ kint32_t mail_recv(struct mailbox *sprt_mb, struct mail *sprt_mail, kutime_t tim
 
     /*!< make sure that sprt_recv is still valid */
     if (mrt_list_head_empty(&sprt_recv->sgrt_link))
-        return -NR_IS_EMPTY;
+        return -ER_EMPTY;
 
     /*!< clear the last status */
     mail_recv_finish(sprt_mail);
@@ -209,7 +209,7 @@ kint32_t mail_recv(struct mailbox *sprt_mb, struct mail *sprt_mail, kutime_t tim
 
     if ((!sprt_recv->num_msgs) || (!sprt_recv->sprt_msg))
     {
-        retval = -NR_IS_EMPTY;
+        retval = -ER_EMPTY;
         sprt_recv->status = NR_MAIL_ERROR;
         goto END;
     }

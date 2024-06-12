@@ -25,7 +25,7 @@ typedef void (*func_work_t) (struct workqueue *);
 typedef struct workqueue
 {
     func_work_t func;
-    kuaddr_t data;
+    kutype_t data;
 
     struct list_head sgrt_link;
 

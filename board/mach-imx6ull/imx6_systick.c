@@ -177,7 +177,7 @@ irq_return_t imx6_systick_handler(void *ptrDev)
 		mrt_setbitl(mrt_bit(0), &sprt_tick->SR);
 	}
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /* end of file*/

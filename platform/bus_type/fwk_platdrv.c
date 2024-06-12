@@ -68,7 +68,7 @@ static kint32_t fwk_driver_attach(struct fwk_driver *sprt_driver, struct fwk_bus
 
 	/*!< First check if the match function is defined */
 	if (!sprt_bus_type->match)
-		return -NR_IS_ERROR;
+		return -ER_ERROR;
 
 	matches	= 0;
 	FWK_INIT_BUS_DEVICE_LIST(sprt_parent, sprt_list, sprt_bus_type);
@@ -84,7 +84,7 @@ static kint32_t fwk_driver_attach(struct fwk_driver *sprt_driver, struct fwk_bus
 		/*!< One driver supports matching multiple devices, and does not exit until the linked list is fully traversed */
 		/*!< However, try not to mount multiple devices with the same driver at the same time to avoid misoperation */
 		retval = (*pFunc_Match)(sprt_dev, sprt_bus_type, sprt_driver);
-		if (!retval || (retval == -NR_IS_PERMIT))
+		if (!retval || (retval == -ER_PERMIT))
 		{
 			/*!< Record the number of matching devices */
 			matches++;
@@ -94,12 +94,12 @@ static kint32_t fwk_driver_attach(struct fwk_driver *sprt_driver, struct fwk_bus
 	sprt_driver->matches += matches;
 
 	/*!<
-	 * NR_IS_NOTFOUND: no device can be matched
-	 * NR_IS_PERMIT: matched already, but probe failed;
-	 * NR_IS_NORMAL: matched already, and probe successfully;
+	 * ER_NOTFOUND: no device can be matched
+	 * ER_PERMIT: matched already, but probe failed;
+	 * ER_NORMAL: matched already, and probe successfully;
 	 * other (retval < 0): error
 	 */
-	return ((retval == (-NR_IS_NOTFOUND)) || matches) ? matches : retval;
+	return ((retval == (-ER_NOTFOUND)) || matches) ? matches : retval;
 }
 
 /*!
@@ -132,7 +132,7 @@ static kint32_t fwk_driver_detach(struct fwk_driver *sprt_driver, struct fwk_bus
 		sprt_driver->matches--;
 	}
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -145,38 +145,13 @@ static kint32_t fwk_driver_find(struct fwk_driver *sprt_driver, struct fwk_bus_t
 {
 	struct fwk_driver *sprt_drv;
 
-	DECLARE_LIST_HEAD_PTR(sprt_list);
-	DECLARE_LIST_HEAD_PTR(sprt_parent);
-	DECLARE_LIST_HEAD_PTR(ptr_left);
-	DECLARE_LIST_HEAD_PTR(ptr_right);
-
-	sprt_list 	= &sprt_driver->sgrt_list;
-	sprt_parent	= FWK_GET_BUS_DRIVER(sprt_bus_type);
-
-	/*!< Two-way search */
-	foreach_list_head(ptr_left, ptr_right, sprt_parent)
+	foreach_list_next_entry(sprt_drv, FWK_GET_BUS_DRIVER(sprt_bus_type), sgrt_link)
 	{
-		/*!< 1. Matching address */
-		if ((ptr_left == sprt_list) || (ptr_right == sprt_list))
-			return NR_IS_NORMAL;
-
-		/*!< 2. Match the device name */
-		sprt_drv = mrt_container_of(ptr_left, struct fwk_driver, sgrt_list);
 		if (!strcmp((char *)sprt_drv->name, (char *)sprt_driver->name))
-			return NR_IS_NORMAL;
-
-		if (ptr_left != ptr_right)
-		{
-			sprt_drv = mrt_container_of(ptr_right, struct fwk_driver, sgrt_list);
-			if (!strcmp((char *)sprt_drv->name, (char *)sprt_driver->name))
-				return NR_IS_NORMAL;
-		}
-		/*!< The search is complete, and there is no same driver */
-		else
-			break;
+			return ER_NORMAL;
 	}
 
-	return -NR_IS_ERROR;
+	return -ER_ERROR;
 }
 
 /*!
@@ -187,14 +162,8 @@ static kint32_t fwk_driver_find(struct fwk_driver *sprt_driver, struct fwk_bus_t
  */
 static kint32_t fwk_driver_to_bus(struct fwk_driver *sprt_driver, struct fwk_bus_type *sprt_bus_type)
 {
-	DECLARE_LIST_HEAD_PTR(sprt_list);
-	DECLARE_LIST_HEAD_PTR(sprt_parent);
-
-	sprt_list 	= &sprt_driver->sgrt_list;
-	sprt_parent	= FWK_GET_BUS_DRIVER(sprt_bus_type);
-
 	/*!< Insert from the tail of the bus */
-	list_head_add_tail(sprt_parent, sprt_list);
+	list_head_add_tail(FWK_GET_BUS_DRIVER(sprt_bus_type), &sprt_driver->sgrt_link);
 
 	/*!< Execute the device driver matching logic */
 	return fwk_driver_attach(sprt_driver, sprt_bus_type, fwk_device_driver_match);
@@ -210,17 +179,11 @@ static kint32_t fwk_bus_del_driver(struct fwk_driver *sprt_driver, struct fwk_bu
 {
 	kint32_t retval;
 
-	DECLARE_LIST_HEAD_PTR(sprt_list);
-	DECLARE_LIST_HEAD_PTR(sprt_parent);
-
-	sprt_list 	= &sprt_driver->sgrt_list;
-	sprt_parent	= FWK_GET_BUS_DRIVER(sprt_bus_type);
-
 	/*!< Perform the device drive separation procedure */
 	retval = fwk_driver_detach(sprt_driver, sprt_bus_type);
 
 	/*!< Remove the driver from the bus */
-	list_head_del_safe(sprt_parent, sprt_list);
+	list_head_del_safe(FWK_GET_BUS_DRIVER(sprt_bus_type), &sprt_driver->sgrt_link);
 
 	return retval;
 }
@@ -258,7 +221,7 @@ kint32_t fwk_driver_register(struct fwk_driver *sprt_driver)
 	return fwk_driver_to_bus(sprt_driver, sprt_bus_type);
 
 fail:
-	return -NR_IS_ERROR;
+	return -ER_ERROR;
 }
 
 /*!
@@ -291,5 +254,5 @@ kint32_t fwk_driver_unregister(struct fwk_driver *sprt_driver)
 	return fwk_bus_del_driver(sprt_driver, sprt_bus_type);
 
 fail:
-	return -NR_IS_ERROR;
+	return -ER_ERROR;
 }

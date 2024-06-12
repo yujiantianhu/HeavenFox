@@ -54,8 +54,8 @@
  */
 static void imx6ull_main_freq_configure(void)
 {
-	srt_imx_ccm_t *sprt_clkRegs;
-	srt_imx_ccm_pll_t *sprt_ccmPll;
+	srt_hal_imx_ccm_t *sprt_clkRegs;
+	srt_hal_imx_ccm_pll_t *sprt_ccmPll;
 
 	sprt_clkRegs = IMX_CCM_PORT_ENTRY();
 	sprt_ccmPll  = IMX_CCM_PLL_PORT_ENTRY();
@@ -120,7 +120,7 @@ static void imx6ull_main_freq_configure(void)
  */
 static void imx6ull_sys_freq_configure(void)
 {
-	srt_imx_ccm_pll_t *sprt_ccmPll;
+	srt_hal_imx_ccm_pll_t *sprt_ccmPll;
 	kuint32_t reg_temp;
 
 	sprt_ccmPll = IMX_CCM_PLL_PORT_ENTRY();
@@ -182,8 +182,8 @@ static void imx6ull_sys_freq_configure(void)
  */
 static void imx6ull_periph_freq_configure(void)
 {
-	srt_imx_ccm_t *sprt_clkRegs;
-	srt_imx_ccm_pll_t *sprt_ccmPll;
+	srt_hal_imx_ccm_t *sprt_clkRegs;
+	srt_hal_imx_ccm_pll_t *sprt_ccmPll;
 	kuint32_t reg_temp;
 
 	sprt_clkRegs = IMX_CCM_PORT_ENTRY();

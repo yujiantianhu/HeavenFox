@@ -29,6 +29,7 @@ typedef struct mutex_lock
 /*!< The functions */
 TARGET_EXT void mutex_init(struct mutex_lock *sprt_lock);
 TARGET_EXT void mutex_lock(struct mutex_lock *sprt_lock);
+TARGET_EXT kint32_t mutex_try_lock(struct mutex_lock *sprt_lock);
 TARGET_EXT void mutex_unlock(struct mutex_lock *sprt_lock);
 
 /*!< API functions */

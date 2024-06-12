@@ -29,5 +29,6 @@ TARGET_EXT kint32_t light_app_init(void);
 TARGET_EXT kint32_t button_app_init(void);
 TARGET_EXT kint32_t display_app_init(void);
 TARGET_EXT kint32_t tsc_app_init(void);
+TARGET_EXT kint32_t env_monitor_init(void);
 
 #endif /* __THREAD_TABLE_H_ */

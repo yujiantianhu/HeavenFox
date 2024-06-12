@@ -53,12 +53,12 @@ static kint32_t fwk_irq_bitmap_find_areas(kuint32_t *bitmap, kint32_t irq_base, 
 	do 
 	{
 		if ((index + nr_irqs) >= total_bits)
-			return -NR_IS_MORE;
+			return -ER_MORE;
 
 		/* 获取第一个非1的bit */
 		index = bitmap_find_first_zero_bit(bitmap, index, total_bits);
 		if (index < 0)
-			return -NR_IS_NOTFOUND;
+			return -ER_NOTFOUND;
 
 		/* 以index为起始, 获取连续nr_irqs个非1的bit, 成功则返回0; 失败返回错误的index */
 		temp = bitmap_find_nr_zero_bit(bitmap, index, total_bits, nr_irqs);
@@ -82,7 +82,7 @@ static kint32_t irq_domain_alloc_irq_data(struct fwk_irq_domain *sprt_domain, ku
 		sprt_data = fwk_irq_get_data(virq + i);
 
 		if (!isValid(sprt_data))
-			return -NR_IS_NOTFOUND;
+			return -ER_NOTFOUND;
 
 		sprt_data->sprt_domain = sprt_domain;
 		sprt_data->irq = virq + i;
@@ -115,7 +115,7 @@ static kint32_t fwk_irq_domain_alloc_descs(kint32_t irq_base, kuint32_t nr_irqs)
 	{
 		sprt_desc = fwk_allocate_irq_desc(GFP_KERNEL);
 		if (!isValid(sprt_desc))
-			return -NR_IS_NOMEM;
+			return -ER_NOMEM;
 
 		sprt_desc->irq = virq + i;
 		radix_tree_add(&sgrt_fwk_irq_radix_tree, virq + i, &sprt_desc->sgrt_radix);
@@ -173,7 +173,7 @@ kint32_t fwk_irq_domain_find_map(struct fwk_irq_domain *sprt_domain, kuint32_t h
 
 	sprt_data = fwk_irq_domain_get_data(sprt_domain, hwirq);
 	if (!isValid(sprt_data))
-		return -NR_IS_UNVALID;
+		return -ER_UNVALID;
 
 	if (!type)
 		goto END;

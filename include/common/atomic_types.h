@@ -28,7 +28,7 @@ struct atomic
 typedef struct atomic srt_atomic_t;
 
 #define DECLARE_ATIMIC(name)			struct atomic name = { .counter = 0 }
-#define ATOMIC_SET(ptr)					do { (ptr)->counter = 0; } while (0)
+#define ATOMIC_SET(ptr, val)			do { (ptr)->counter = (val); } while (0)
 #define ATOMIC_READ(ptr)				((ptr)->counter)
 #define ATOMIC_INIT()					{ .counter = 0 }
 

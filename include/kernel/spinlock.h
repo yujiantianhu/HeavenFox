@@ -35,7 +35,7 @@ typedef struct spin_lock
 TARGET_EXT void spin_lock_init(struct spin_lock *sprt_lock);
 TARGET_EXT void spin_lock(struct spin_lock *sprt_lock);
 TARGET_EXT void spin_unlock(struct spin_lock *sprt_lock);
-TARGET_EXT kint32_t spin_trylock(struct spin_lock *sprt_lock);
+TARGET_EXT kint32_t spin_try_lock(struct spin_lock *sprt_lock);
 TARGET_EXT void spin_lock_irq(struct spin_lock *sprt_lock);
 TARGET_EXT kint32_t spin_try_lock_irq(struct spin_lock *sprt_lock);
 TARGET_EXT void spin_unlock_irq(struct spin_lock *sprt_lock);

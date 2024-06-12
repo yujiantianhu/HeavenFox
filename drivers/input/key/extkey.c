@@ -16,11 +16,13 @@
 #include <platform/fwk_chrdev.h>
 #include <platform/fwk_inode.h>
 #include <platform/fwk_fs.h>
+#include <platform/fwk_fcntl.h>
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_device.h>
 #include <platform/fwk_platdrv.h>
 #include <platform/fwk_uaccess.h>
 #include <platform/gpio/fwk_gpiodesc.h>
+#include <kernel/wait.h>
 
 #include <asm/imx6/imx6ull_periph.h>
 
@@ -33,9 +35,11 @@ struct extkey_drv_data
 	struct fwk_gpio_desc *sprt_gdesc;
 
 	struct fwk_cdev *sprt_cdev;
+	struct fwk_device *sprt_idev;
 	kint32_t irq;
 
 	kbool_t wake;
+	struct wait_queue_head sgrt_wqh;
 
 	void *ptrData;
 };
@@ -49,7 +53,9 @@ static irq_return_t extkey_driver_isr(void *ptrDev)
 	struct extkey_drv_data *sprt_data;
 
 	sprt_data = (struct extkey_drv_data *)ptrDev;
+
 	sprt_data->wake = true;
+	wake_up(&sprt_data->sgrt_wqh);
 
 	return 0;
 }
@@ -67,6 +73,8 @@ static kint32_t extkey_driver_open(struct fwk_inode *sprt_inode, struct fwk_file
 	sprt_data = sprt_inode->sprt_cdev->privData;
 	sprt_file->private_data = sprt_data;
 
+	fwk_enable_irq(sprt_data->irq);
+
 	return 0;
 }
 
@@ -78,6 +86,11 @@ static kint32_t extkey_driver_open(struct fwk_inode *sprt_inode, struct fwk_file
  */
 static kint32_t extkey_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
+	struct extkey_drv_data *sprt_data;
+
+	sprt_data = sprt_file->private_data;
+	fwk_disable_irq(sprt_data->irq);
+	
 	sprt_file->private_data = mrt_nullptr;
 
 	return 0;
@@ -106,13 +119,19 @@ static kssize_t extkey_driver_read(struct fwk_file *sprt_file, kbuffer_t *ptrBuf
 	kuint8_t value;
 
 	sprt_data = (struct extkey_drv_data *)sprt_file->private_data;
-	while (!sprt_data->wake);
+	
+	if (!(sprt_file->mode & O_NONBLOCK))
+		wait_event(&sprt_data->sgrt_wqh, sprt_data->wake);
+	else
+	{
+		if (!sprt_data->wake)
+			return -ER_NREADY;
+	}
 	
 	value = fwk_gpio_get_value(sprt_data->sprt_gdesc);
 	fwk_copy_to_user(ptrBuffer, &value, 1);
 
-	if (!value)
-		sprt_data->wake = false;
+	sprt_data->wake = false;
 	
 	return 0;
 }
@@ -138,13 +157,14 @@ static kint32_t extkey_driver_probe(struct fwk_platdev *sprt_pdev)
 	struct extkey_drv_data *sprt_data;
 	struct fwk_gpio_desc *sprt_gdesc;
 	struct fwk_cdev *sprt_cdev;
+	struct fwk_device *sprt_idev;
 	kuint32_t devnum;
 	kint32_t irq;
 	kint32_t retval;
 
 	sprt_gdesc = fwk_gpio_desc_get(&sprt_pdev->sgrt_dev, "key0", 0);
 	if (!isValid(sprt_gdesc))
-		return -NR_IS_NODEV;
+		return -ER_NODEV;
 
 	fwk_gpio_set_direction_input(sprt_gdesc);
 
@@ -165,8 +185,8 @@ static kint32_t extkey_driver_probe(struct fwk_platdev *sprt_pdev)
 	if (retval < 0)
 		goto fail3;
 
-	retval = fwk_device_create(NR_TYPE_CHRDEV, devnum, KEY_DRIVER_NAME);
-	if (retval < 0)
+	sprt_idev = fwk_device_create(NR_TYPE_CHRDEV, devnum, "%s%d", "input/event", 0);
+	if (!isValid(sprt_idev))
 		goto fail4;
 	
 	sprt_data = (struct extkey_drv_data *)kzalloc(sizeof(struct extkey_drv_data), GFP_KERNEL);
@@ -177,22 +197,24 @@ static kint32_t extkey_driver_probe(struct fwk_platdev *sprt_pdev)
 	sprt_data->major = GET_DEV_MAJOR(devnum);
 	sprt_data->minor = GET_DEV_MINOR(devnum);
 	sprt_data->sprt_cdev = sprt_cdev;
+	sprt_data->sprt_idev = sprt_idev;
 	sprt_data->sprt_gdesc = sprt_gdesc;
 	sprt_data->irq = irq;
 	sprt_cdev->privData = sprt_data;
+	init_waitqueue_head(&sprt_data->sgrt_wqh);
 
-	if (fwk_request_irq(irq, extkey_driver_isr, IRQ_TYPE_EDGE_RISING, KEY_DRIVER_NAME, sprt_data))
+	if (fwk_request_irq(irq, extkey_driver_isr, IRQ_TYPE_EDGE_RISING | IRQ_TYPE_EDGE_FALLING, KEY_DRIVER_NAME, sprt_data))
 		goto fail6;
 
 	fwk_platform_set_drvdata(sprt_pdev, sprt_data);
-//	fwk_disable_irq(irq);
+	fwk_disable_irq(irq);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 
 fail6:
 	kfree(sprt_data);
 fail5:
-	fwk_device_destroy(KEY_DRIVER_NAME);
+	fwk_device_destroy(sprt_idev);
 fail4:
 	fwk_cdev_del(sprt_cdev);
 fail3:
@@ -202,7 +224,7 @@ fail2:
 fail1:
 	fwk_gpio_desc_put(sprt_gdesc);
 
-	return -NR_IS_FAILD;
+	return -ER_FAILD;
 }
 
 /*!
@@ -218,11 +240,11 @@ static kint32_t extkey_driver_remove(struct fwk_platdev *sprt_pdev)
 
 	sprt_data = (struct extkey_drv_data *)fwk_platform_get_drvdata(sprt_pdev);
 	if (!isValid(sprt_data))
-		return -NR_IS_NULLPTR;
+		return -ER_NULLPTR;
 
 	devnum = MKE_DEV_NUM(sprt_data->major, sprt_data->minor);
 
-	fwk_device_destroy(sprt_data->ptrName);
+	fwk_device_destroy(sprt_data->sprt_idev);
 	fwk_cdev_del(sprt_data->sprt_cdev);
 	kfree(sprt_data->sprt_cdev);
 	fwk_unregister_chrdev(devnum, 1);
@@ -232,7 +254,7 @@ static kint32_t extkey_driver_remove(struct fwk_platdev *sprt_pdev)
 	kfree(sprt_data);
 	fwk_platform_set_drvdata(sprt_pdev, mrt_nullptr);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!< device id for device-tree */

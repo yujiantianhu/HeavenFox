@@ -1,7 +1,7 @@
 /*
- * Platform Object Defines
+ * Platform Object Maps Defines
  *
- * File Name:   fwk_kboj.c
+ * File Name:   fwk_kbojmap.c
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2023.05.18
@@ -20,12 +20,12 @@ struct fwk_kobj_map *sprt_fwk_netdev_map;
 
 /*!< API function */
 /*!
- * @brief   fwk_kobj_init
+ * @brief   fwk_kobjmap_init
  * @param   none
  * @retval  none
  * @note    none
  */
-kint32_t __plat_init fwk_kobj_init(void)
+kint32_t __plat_init fwk_kobjmap_init(void)
 {
 	kuint32_t i;
 
@@ -53,7 +53,7 @@ kint32_t __plat_init fwk_kobj_init(void)
 	for (i = 0; i < ARRAY_SIZE(sprt_fwk_netdev_map->sprt_probes); i++)
 		sprt_fwk_netdev_map->sprt_probes[i] = mrt_nullptr;
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 
 fail3:
 	kfree(sprt_fwk_blkdev_map);
@@ -62,17 +62,16 @@ fail2:
 	kfree(sprt_fwk_chrdev_map);
 	sprt_fwk_chrdev_map = mrt_nullptr;
 fail1:
-	return -NR_IS_NOMEM;
+	return -ER_NOMEM;
 }
-IMPORT_PLATFORM_INIT(fwk_kobj_init);
 
 /*!
- * @brief   fwk_kobj_del
+ * @brief   fwk_kobjmap_del
  * @param   none
  * @retval  none
  * @note    none
  */
-void __plat_exit fwk_kobj_del(void)
+void __plat_exit fwk_kobjmap_del(void)
 {
 	struct fwk_probes *sprt_prev;
 	struct fwk_probes *sprt_list;
@@ -112,7 +111,6 @@ void __plat_exit fwk_kobj_del(void)
 	kfree(sprt_fwk_netdev_map);
 	sprt_fwk_netdev_map = mrt_nullptr;
 }
-IMPORT_PLATFORM_EXIT(fwk_kobj_del);
 
 /*!
  * @brief   fwk_kobj_map
@@ -129,7 +127,7 @@ kint32_t fwk_kobj_map(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t r
 	kusize_t probeMax;
 
 	if (!isValid(domain) || (!isValid(data)))
-		return -NR_IS_FAULT;
+		return -ER_FAULT;
 
 	/*!< The maximum number of primary devices that can be supported */
 	probeMax = ARRAY_SIZE(domain->sprt_probes);
@@ -142,7 +140,7 @@ kint32_t fwk_kobj_map(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t r
 
 	sprt_probe = (struct fwk_probes *)kzalloc(sizeof(struct fwk_probes) * majorCnt, GFP_KERNEL);
 	if (!isValid(sprt_probe))
-		return -NR_IS_NOMEM;
+		return -ER_NOMEM;
 
 	for (i = 0; i < majorCnt; i++)
 	{
@@ -177,7 +175,7 @@ kint32_t fwk_kobj_map(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t r
 		*sprt_Dst = sprt_Temp;
 	}
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -195,7 +193,7 @@ kint32_t fwk_kobj_unmap(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t
 	kusize_t probeMax;
 
 	if (!isValid(domain))
-		return -NR_IS_FAULT;
+		return -ER_FAULT;
 
 	/*!< The maximum number of primary devices that can be supported */
 	probeMax = ARRAY_SIZE(domain->sprt_probes);
@@ -234,16 +232,16 @@ kint32_t fwk_kobj_unmap(struct fwk_kobj_map *domain, kuint32_t devNum, kuint32_t
 	if (sprt_Rlt)
 		kfree(sprt_Rlt);
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
- * @brief   fwk_kobj_lookUp
+ * @brief   fwk_kobjmap_lookup
  * @param   none
  * @retval  none
  * @note    none
  */
-void *fwk_kobj_lookUp(struct fwk_kobj_map *domain, kuint32_t devNum)
+void *fwk_kobjmap_lookup(struct fwk_kobj_map *domain, kuint32_t devNum)
 {
 	struct fwk_probes *sprt_Temp;
 	kuint32_t index;

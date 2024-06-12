@@ -24,7 +24,7 @@
 #define FWK_RGB_PIXEL32                             (32 >> 3)           /*!< RGB888 + diaphaneity */
 
 /*!< The number of bits of color actually used: 8/16/24 */
-#define FWK_RGB_PIXELBIT                            (FWK_RGB_PIXEL24)   /*!< RGB888 color chart is used by default */
+#define FWK_RGB_PIXELBIT                            ((CONFIG_LCD_PIXELBIT) >> 3)
 
 /*!< ------------------------------------------------------------------------------- */
 /*!<    English name                                Color pixel         Chinese name */
@@ -112,7 +112,7 @@
 #define RGB_YELLOWGREEN                             ( 0x009ACD32 )      /*!< 黄绿色 */
 #define RGB_OLIVEDRAB                               ( 0x006B8E23 )      /*!< 橄榄褐色 */
 #define RGB_BEIGE                                   ( 0x00F5F5DC )      /*!< 米色/灰棕色 */
-#define RGB_LIGHTGOLDENRODYELLOW                    ( 0x00FAFAD2        /*!< 亮菊黄 */
+#define RGB_LIGHTGOLDENRODYELLOW                    ( 0x00FAFAD2 )      /*!< 亮菊黄 */
 #define RGB_IVORY                                   ( 0x00FFFFF0 )      /*!< 象牙色 */
 #define RGB_LIGHTYELLOW                             ( 0x00FFFFE0 )      /*!< 浅黄色 */
 #define RGB_YELLOW                                  ( 0x00FFFF00 )      /*!< 纯黄 */

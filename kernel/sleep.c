@@ -13,6 +13,7 @@
 /*!< The globals */
 #include <kernel/kernel.h>
 #include <kernel/sched.h>
+#include <kernel/spinlock.h>
 
 /*!< The defines */
 
@@ -29,10 +30,14 @@
  */
 static void real_thread_sleep_timeout(kuint32_t args)
 {
-    struct kel_thread *sprt_thread = (struct kel_thread *)args;
+    struct real_thread *sprt_thread = (struct real_thread *)args;
+    struct spin_lock *sprt_lock = scheduler_lock();
+
+    if (spin_is_locked(sprt_lock))
+		return;
 
     if (sprt_thread->status == NR_THREAD_SUSPEND)
-        kel_sched_thread_wakeup(sprt_thread->tid);
+        schedule_thread_wakeup(sprt_thread->tid);
 }
 
 /*!
@@ -41,22 +46,24 @@ static void real_thread_sleep_timeout(kuint32_t args)
  * @retval  none
  * @note    delay and schedule (current thread may convert to suspend status)
  */
-void schedule_for_timeout(kutime_t count)
+void schedule_timeout(kutime_t count)
 {
     struct timer_list sgrt_tm;
-    struct kel_thread *sprt_thread = mrt_current;
+    struct real_thread *sprt_thread = mrt_current;
+    struct spin_lock *sprt_lock = scheduler_lock();
 	
-	mrt_preempt_disable();
-
+	spin_lock_irqsave(sprt_lock);
     setup_timer(&sgrt_tm, real_thread_sleep_timeout, (kuint32_t)sprt_thread);
     mod_timer(&sgrt_tm, count);
 
-    mrt_preempt_enable();
+    spin_unlock_irqrestore(sprt_lock);
     
     /*!< suspend current thread, and schedule others */
-    kel_sched_self_suspend();
+    schedule_self_suspend();
     
+    spin_lock_irqsave(sprt_lock);
     del_timer(&sgrt_tm);
+    spin_unlock_irqrestore(sprt_lock);
 }
 
 /*!
@@ -69,8 +76,15 @@ void schedule_delay(kuint32_t seconds)
 {
     kutime_t count = jiffies + secs_to_jiffies(seconds);
     
+#if CONFIG_ROLL_POLL
+    while (mrt_time_after(count, jiffies))
+        schedule_thread();
+
+#else
     if (mrt_time_after(count, jiffies))
-        schedule_for_timeout(count);
+        schedule_timeout(count);
+    
+#endif
 }
 
 /*!
@@ -83,8 +97,15 @@ void schedule_delay_ms(kuint32_t milseconds)
 {
     kutime_t count = jiffies + msecs_to_jiffies(milseconds);
     
+#if CONFIG_ROLL_POLL
+    while (mrt_time_after(count, jiffies))
+        schedule_thread();
+
+#else
     if (mrt_time_after(count, jiffies))
-        schedule_for_timeout(count);
+        schedule_timeout(count);
+    
+#endif
 }
 
 /*!
@@ -97,8 +118,15 @@ void schedule_delay_us(kuint32_t useconds)
 {
     kutime_t count = jiffies + usecs_to_jiffies(useconds);
     
+#if CONFIG_ROLL_POLL
+    while (mrt_time_after(count, jiffies))
+        schedule_thread();
+
+#else
     if (mrt_time_after(count, jiffies))
-        schedule_for_timeout(count);
+        schedule_timeout(count);
+    
+#endif
 }
 
 /*!< end of file */

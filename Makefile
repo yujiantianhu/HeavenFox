@@ -93,7 +93,7 @@ obj-y			+=	$(SOURCE_DIRS)
 VPATH			:= 	$(SOURCE_DIRS)
 .PHONY:			all clean distclean dtbs debug
 
-all : $(OBJECT_EXEC)
+all : dtbs $(OBJECT_EXEC)
 	$(Q)$(MAKE) -C $(ARCH_DIRS)
 
 $(OBJECT_EXEC):
@@ -103,11 +103,13 @@ clean:
 	$(Q)$(MAKE) -C $(ARCH_DIRS) clean
 	$(Q)$(MAKE) -f $(BUILD_SCRIPT) clean
 	rm -rf $(OBJECT_EXEC)
+	
+	$(Q)$(MAKE) -C $(OUTPUT_PATH)/device-tree clean
 
 distclean:
-#	$(Q)$(MAKE) -C $(OUTPUT_PATH)/device-tree distclean
 	$(Q)$(MAKE) -C $(ARCH_DIRS) distclean
 	$(Q)$(MAKE) -f $(BUILD_SCRIPT) distclean
+	$(Q)$(MAKE) -C $(OUTPUT_PATH)/device-tree distclean
 
 dtbs:
 	$(Q)$(MAKE) -C $(OUTPUT_PATH)/device-tree

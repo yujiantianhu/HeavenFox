@@ -183,6 +183,8 @@
 TARGET_EXT kutype_t udiv_integer(kutype_t divied, kutype_t div);
 TARGET_EXT kstype_t sdiv_integer(kstype_t divied, kstype_t div);
 TARGET_EXT kutype_t udiv_remainder(kutype_t divied, kutype_t div);
+TARGET_EXT kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kbool_t mode);
+TARGET_EXT kutype_t dec_to_binary(kchar_t *buf, kutype_t number);
 
 #define mrt_udiv(divied, div)	\
 ({	\
@@ -217,7 +219,7 @@ TARGET_EXT kutype_t udiv_remainder(kutype_t divied, kutype_t div);
  */
 __force_inline static inline kbool_t isValid(const void *ptr)
 {
-	return (!!((kuaddr_t)ptr) && !IS_ERR(ptr));
+	return ((!!((kuaddr_t)ptr)) && !IS_ERR(ptr));
 }
 
 /*!

@@ -101,7 +101,7 @@ static srt_imx_usbotg_t *imx6_gadget_get_otg_entry(void)
 static kint32_t imx6_gadget_clk_initial(srt_imx_usbotg_t *sprt_otg, srt_imx_usbphy_t *sprt_phy)
 {
     if ((!sprt_otg) || (!sprt_phy))
-        return -NR_IS_NULLPTR;
+        return -ER_NULLPTR;
 
     /*!< PWD register provides overall control of the PHY power state */
     mrt_resetl(&sprt_phy->PWD);
@@ -134,7 +134,7 @@ static kint32_t imx6_gadget_clk_initial(srt_imx_usbotg_t *sprt_otg, srt_imx_usbp
     mrt_setbitl(mrt_bit(1U), &sprt_otg->USBCMD);
     while (!mrt_isBitResetl(mrt_bit(1U), &sprt_otg->USBCMD));
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!
@@ -146,7 +146,7 @@ static kint32_t imx6_gadget_clk_initial(srt_imx_usbotg_t *sprt_otg, srt_imx_usbp
 static kint32_t imx6_gadget_ehci_phy_initial(srt_imx_usbphy_t *sprt_phy)
 {
     if (!sprt_phy)
-        return -NR_IS_NULLPTR;
+        return -ER_NULLPTR;
 
     /*!< Enables UTMI+ Level2. This should be enabled if needs to support LS device */
     mrt_setbitl(mrt_bit(14U), &sprt_phy->CTRL);
@@ -164,7 +164,7 @@ static kint32_t imx6_gadget_ehci_phy_initial(srt_imx_usbphy_t *sprt_phy)
     /*!< Decode to select a 45-Ohm resistance to the USB_DN output pin */
     mrt_setbitl(IMX_GADGET_PHY_TXCAL45DN, &sprt_phy->TX);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!
@@ -176,7 +176,7 @@ static kint32_t imx6_gadget_ehci_phy_initial(srt_imx_usbphy_t *sprt_phy)
 static kint32_t imx6_gadget_ehci_otg_initial(srt_imx_usbotg_t *sprt_otg)
 {
     if (!sprt_otg)
-        return -NR_IS_NULLPTR;
+        return -ER_NULLPTR;
 
     /*!< 
      * CM: bit[1:0], Controller Mode - R/WO
@@ -231,7 +231,7 @@ static kint32_t imx6_gadget_ehci_otg_initial(srt_imx_usbotg_t *sprt_otg)
      */
     mrt_writel(g_iImx_gadget_queue_head, &sprt_otg->ENDPTLISTADDR);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!
@@ -344,7 +344,7 @@ static void __imx6_gadget_handler(ert_imx_usb_intr_t type, void (*handler)(void 
 irq_return_t imx6_gadget_handler(void *ptrDev)
 {
     if (!ptrDev)
-        return -NR_IS_NULLPTR;
+        return -ER_NULLPTR;
 
     /*!< USB Interrupt Status */
     __imx6_gadget_handler(NR_ImxUsbOtgIntr_UsbIntBit, imx6_gadget_ehci_token_handler, ptrDev);
@@ -361,7 +361,7 @@ irq_return_t imx6_gadget_handler(void *ptrDev)
     /*!< Sleep Interrupt Status */
     __imx6_gadget_handler(NR_ImxUsbOtgIntr_SleepIntBit, imx6_gadget_ehci_sleep_handler, ptrDev);
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!

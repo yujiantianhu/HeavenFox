@@ -34,7 +34,7 @@ static kint32_t fwk_pinmux_get_function_by_name(struct fwk_pinctrl_dev *sprt_pct
     sprt_pmxops = sprt_pctldev->sprt_desc->sprt_pmxops;
     if (!sprt_pmxops->get_functions_count ||
         !sprt_pmxops->get_function_name)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     num_funcs = sprt_pmxops->get_functions_count(sprt_pctldev);
 
@@ -48,7 +48,7 @@ static kint32_t fwk_pinmux_get_function_by_name(struct fwk_pinctrl_dev *sprt_pct
             return i;
     }
 
-    return -NR_IS_MORE;
+    return -ER_MORE;
 }
 
 /*!
@@ -68,7 +68,7 @@ static kint32_t fwk_pinmux_get_group_by_name(struct fwk_pinctrl_dev *sprt_pctlde
     sprt_pctlops = sprt_pctldev->sprt_desc->sprt_pctlops;
     if (!sprt_pctlops->get_groups_count ||
         !sprt_pctlops->get_group_name)
-        return -NR_IS_NODEV;
+        return -ER_NODEV;
 
     /*!< how many groups of this functions */
     num_grps = sprt_pctlops->get_groups_count(sprt_pctldev, func_selector);
@@ -83,7 +83,7 @@ static kint32_t fwk_pinmux_get_group_by_name(struct fwk_pinctrl_dev *sprt_pctlde
             return i;
     }
 
-    return -NR_IS_MORE;
+    return -ER_MORE;
 }
 
 /*!
@@ -99,7 +99,7 @@ kint32_t fwk_pinmux_map_to_setting(struct fwk_pinctrl_map const *sprt_map, struc
     kint32_t func_selector, group_selector;
 
     if (sprt_setting->type != NR_FWK_PINCTRL_PIN_MUX)
-        return -NR_IS_FAULT;
+        return -ER_FAULT;
 
     sprt_pctldev = sprt_setting->sprt_pctldev;
 
@@ -116,7 +116,7 @@ kint32_t fwk_pinmux_map_to_setting(struct fwk_pinctrl_map const *sprt_map, struc
     sprt_setting->ugrt_data.sgrt_mux.func = func_selector;
     sprt_setting->ugrt_data.sgrt_mux.group = group_selector;
 
-    return NR_IS_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!< end of file */

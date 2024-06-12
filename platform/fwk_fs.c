@@ -34,6 +34,7 @@ struct fwk_file *fwk_do_filp_open(kchar_t *name, kuint32_t mode)
 	if (!isValid(sprt_file))
 		goto fail1;
 
+	sprt_file->mode = mode;
 	sprt_file->sprt_inode = sprt_inode;
 	sprt_file->sprt_foprts = sprt_inode->sprt_foprts;
 	if (sprt_file->sprt_foprts->open)

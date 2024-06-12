@@ -49,7 +49,7 @@ kint32_t fwk_of_irq_parse_one(struct fwk_device_node *sprt_node, kuint32_t index
 	kint32_t retval;
 
 	if ((!isValid(sprt_node)) || (!sprt_irq))
-		return -NR_IS_NULLPTR;
+		return -ER_NULLPTR;
 
 	ptr_value = (kuint32_t *)fwk_of_get_property(sprt_node, "interrupts", &lenth);
 	lenth /= sizeof(kuint32_t);
@@ -57,27 +57,27 @@ kint32_t fwk_of_irq_parse_one(struct fwk_device_node *sprt_node, kuint32_t index
 	/* how many value per group */
 	cells = fwk_of_n_irq_cells(sprt_node);
 	if ((!cells) || (cells >= FWK_OF_MAX_PHANDLE_ARGS))
-		return -NR_IS_FAULT;
+		return -ER_FAULT;
 
 	if ((!ptr_value) || (((index + 1) * cells) > lenth))
-		return -NR_IS_FAULT;
+		return -ER_FAULT;
 
 	for (i = 0; i < cells; i++)
 	{
 		retval = fwk_of_property_read_u32_index(sprt_node, "interrupts", (index * cells) + i, &sprt_irq->args[i]);
 		if (retval < 0)
-			return -NR_IS_FAULT;
+			return -ER_FAULT;
 	}
 
 	/* for intc, parent == null; but it should not to be translated */
 	sprt_parent = fwk_of_irq_parent(sprt_node);
 	if (!isValid(sprt_parent))
-		return -NR_IS_FAULT;
+		return -ER_FAULT;
 
 	sprt_irq->args_count = i;
 	sprt_irq->sprt_node = sprt_parent;
 
-	return NR_IS_NORMAL;
+	return ER_NORMAL;
 }
 
 /*!
@@ -105,11 +105,11 @@ kint32_t fwk_irq_create_of_mapping(struct fwk_of_phandle_args *sprt_irq)
 	kint32_t retval;
 
 	if ((!sprt_irq) || !isValid(sprt_irq->sprt_node))
-		return -NR_IS_NOMEM;
+		return -ER_NOMEM;
 	
 	sprt_domain = fwk_of_irq_host(sprt_irq->sprt_node);
 	if (!isValid(sprt_domain) || (!sprt_domain->sprt_ops->xlate))
-		return -NR_IS_NOTFOUND;
+		return -ER_NOTFOUND;
 
 	/* get hwirq/type form sprt_irq->args[] */
 	retval = sprt_domain->sprt_ops->xlate(sprt_domain, sprt_irq->sprt_node, 
@@ -147,7 +147,7 @@ kint32_t fwk_irq_of_parse_and_map(struct fwk_device_node *sprt_node, kuint32_t i
 
 	retval = fwk_of_irq_parse_one(sprt_node, index, &sgrt_old);
 	if (retval < 0)
-		return -NR_IS_FAILD;
+		return -ER_FAILD;
 
 	return fwk_irq_create_of_mapping(&sgrt_old);
 }

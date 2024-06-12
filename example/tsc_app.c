@@ -27,11 +27,11 @@
 #include "thread_table.h"
 
 /*!< The defines */
-#define TSCAPP_THREAD_STACK_SIZE                          KEL_THREAD_STACK_HALF(1)    /*!< 1/2 page (1kbytes) */
+#define TSCAPP_THREAD_STACK_SIZE                          REAL_THREAD_STACK_HALF(1)    /*!< 1/2 page (2kbytes) */
 
 /*!< The globals */
 static real_thread_t g_tsc_app_tid;
-static struct kel_thread_attr sgrt_tsc_app_attr;
+static struct real_thread_attr sgrt_tsc_app_attr;
 static kuint32_t g_tsc_app_stack[TSCAPP_THREAD_STACK_SIZE];
 
 /*!< API functions */
@@ -47,27 +47,30 @@ static void *tsc_app_entry(void *args)
     struct fwk_input_event sgrt_event[4] = {};
     kssize_t retval;
 
+    do 
+    {
+        fd = virt_open("/dev/input/event1", O_RDONLY);
+        if (fd < 0)
+            schedule_delay_ms(200);
+
+    } while (fd < 0);
+
     for (;;)
     {
-        fd = virt_open("/dev/input/event0", 0);
-        if (fd < 0)
-            goto END1;
-
         memset(&sgrt_event[0], 0, sizeof(sgrt_event));
 
         retval = virt_read(fd, &sgrt_event[0], sizeof(sgrt_event));
         if ((retval < 0))
-            goto END2;
+            goto END;
 
         print_info("%s: key: %d, abs_x: %d, abs_y: %d\n", __FUNCTION__, 
                         sgrt_event[0].value, sgrt_event[1].value, sgrt_event[2].value);
         
-END2:
-        virt_close(fd);
-END1:
+END:
         schedule_delay_ms(200);
     }
 
+    virt_close(fd);
     return args;
 }
 
@@ -79,19 +82,19 @@ END1:
  */
 kint32_t tsc_app_init(void)
 {
-    struct kel_thread_attr *sprt_attr = &sgrt_tsc_app_attr;
+    struct real_thread_attr *sprt_attr = &sgrt_tsc_app_attr;
     kint32_t retval;
 
-	sprt_attr->detachstate = KEL_THREAD_CREATE_JOINABLE;
-	sprt_attr->inheritsched	= KEL_THREAD_INHERIT_SCHED;
-	sprt_attr->schedpolicy = KEL_THREAD_SCHED_FIFO;
+	sprt_attr->detachstate = REAL_THREAD_CREATE_JOINABLE;
+	sprt_attr->inheritsched	= REAL_THREAD_INHERIT_SCHED;
+	sprt_attr->schedpolicy = REAL_THREAD_SCHED_FIFO;
 
     /*!< thread stack */
 	real_thread_set_stack(sprt_attr, mrt_nullptr, g_tsc_app_stack, sizeof(g_tsc_app_stack));
     /*!< lowest priority */
-	real_thread_set_priority(sprt_attr, KEL_THREAD_PROTY_DEFAULT);
+	real_thread_set_priority(sprt_attr, __THREAD_HIGHER_DEFAULT(0));
     /*!< default time slice */
-    real_thread_set_time_slice(sprt_attr, KEL_THREAD_TIME_DEFUALT);
+    real_thread_set_time_slice(sprt_attr, REAL_THREAD_TIME_DEFUALT);
 
     /*!< register thread */
     retval = real_thread_create(&g_tsc_app_tid, sprt_attr, tsc_app_entry, mrt_nullptr);

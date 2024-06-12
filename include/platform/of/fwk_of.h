@@ -66,9 +66,9 @@ struct fwk_fdt_header
 /*!< The device tree matches the data structure */
 typedef struct fwk_of_device_id
 {
-    kchar_t   *name;
-    kchar_t   *type;
-    kchar_t	*compatible;
+    const kchar_t *name;
+    const kchar_t *type;
+    const kchar_t *compatible;
 
     const void 	*data;
 	

@@ -16,7 +16,9 @@ obj-y	+=	sleep.o
 obj-y	+=	thread.o
 obj-y	+=	spinlock.o
 obj-y	+=	mutex.o
+obj-y	+=	semaphore.o
 obj-y	+=	mailbox.o
 obj-y	+=	workqueue.o
+obj-y	+=	wait.o
 
 # end of file
