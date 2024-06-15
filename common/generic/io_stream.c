@@ -17,10 +17,9 @@
 #include <common/mem_manage.h>
 #include <kernel/kernel.h>
 #include <kernel/spinlock.h>
+#include <platform/fwk_mempool.h>
 
 /*!< The globals */
-static kubyte_t g_iostream_buffer[1024] = {0};
-static DECLARE_SPIN_LOCK(sgrt_stream_lock);
 
 /*!< API function */
 /*!
@@ -44,23 +43,11 @@ void printk(const kchar_t *ptr_fmt, ...)
 {
 #if defined(CONFIG_PRINT_LEVEL)
 	va_list ptr_list;
-	kubyte_t *ptr_buf, level[2] = {0};
-	kusize_t i, size;
-
-	/*!< pointer to global resource */
-	ptr_buf = &g_iostream_buffer[0];
+	kubyte_t *ptr_buf, level[2] = {};
+	kusize_t i;
 
 	va_start(ptr_list, ptr_fmt);
-
-	spin_lock(&sgrt_stream_lock);
-	size = do_fmt_convert(ptr_buf, level, ptr_fmt, ptr_list, sizeof(g_iostream_buffer));
-	if (size < strlen(ptr_fmt))
-	{
-		/*!< if size greater than sizeof(buf), allocate new memory block for it. */
-
-	}
-	spin_unlock(&sgrt_stream_lock);
-
+	ptr_buf = (kubyte_t *)lv_vasprintk(ptr_fmt, level, ptr_list);
 	va_end(ptr_list);
 
 	/*!< if level is not set, default PRINT_LEVEL_WARNING */
@@ -70,8 +57,10 @@ void printk(const kchar_t *ptr_fmt, ...)
 	if (*(level + 1) > *((kubyte_t *)(CONFIG_PRINT_LEVEL)))
 		return;
 
-	for (i = 0; i < size; i++)
+	for (i = 0; *(ptr_buf + i) != '\0'; i++)
 		io_putc(*(ptr_buf + i));
+
+	kfree(ptr_buf);
 #endif
 }
 

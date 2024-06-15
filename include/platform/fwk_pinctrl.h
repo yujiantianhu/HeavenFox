@@ -240,6 +240,12 @@ TARGET_EXT kint32_t fwk_pinconf_get_by_name(struct fwk_pinctrl_dev *sprt_pctldev
 TARGET_EXT kint32_t fwk_pinconf_map_to_setting(struct fwk_pinctrl_map const *sprt_map, struct fwk_pinctrl_setting *sprt_setting);
 
 /*!< API functions */
+/*!
+ * @brief   get driver data from pinctrl device
+ * @param   sprt_pctldev
+ * @retval  none
+ * @note    none
+ */
 static inline void *fwk_pinctrl_get_drvdata(struct fwk_pinctrl_dev *sprt_pctldev)
 {
 	return sprt_pctldev->driver_data;

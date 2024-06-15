@@ -167,7 +167,7 @@ static inline void atomic_dec(srt_atomic_t *sprt_atomic)
 
 /*!
  * @brief   atomic_set_bit
- * @param   sprt_atomic
+ * @param   nr， ptr_addr
  * @retval  none
  * @note    set bit
  */
@@ -193,7 +193,7 @@ static inline void atomic_set_bit(kint32_t nr, void *ptr_addr)
 
 /*!
  * @brief   atomic_clear_bit
- * @param   sprt_atomic
+ * @param   nr， ptr_addr
  * @retval  none
  * @note    clear bit
  */
@@ -217,6 +217,12 @@ static inline void atomic_clear_bit(kint32_t nr, void *ptr_addr)
 	);
 }
 
+/*!
+ * @brief   verify bit[nr] if is set
+ * @param   nr， ptr_addr
+ * @retval  none
+ * @note    clear bit
+ */
 static inline kbool_t atomic_is_bitset(kint32_t nr, void *ptr_addr)
 {
 	kuint32_t result, bitmask;

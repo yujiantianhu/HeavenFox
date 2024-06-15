@@ -139,6 +139,12 @@ void real_thread_set_state(struct real_thread *sprt_thread, kuint32_t state)
 	__SET_THREAD_STATUS(sprt_thread->tid, state);
 }
 
+/*!
+ * @brief   get the scheduler lock
+ * @param   none
+ * @retval  lock
+ * @note    none
+ */
 struct spin_lock *scheduler_lock(void)
 {
 	return &__SCHED_LOCK;

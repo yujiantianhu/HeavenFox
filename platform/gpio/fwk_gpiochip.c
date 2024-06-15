@@ -18,6 +18,12 @@
 static DECLARE_LIST_HEAD(sgrt_fwk_gpiochip_list);
 
 /*!< API function */
+/*!
+ * @brief   request gpiochip
+ * @param   sprt_chip, offset
+ * @retval  none
+ * @note    none
+ */
 static kint32_t fwk_gpiochip_request(struct fwk_gpio_chip *sprt_chip, kuint32_t offset)
 {
     struct fwk_gpio_desc *sprt_desc;
@@ -37,6 +43,12 @@ static kint32_t fwk_gpiochip_request(struct fwk_gpio_chip *sprt_chip, kuint32_t 
     return offset;
 }
 
+/*!
+ * @brief   release gpiochip
+ * @param   sprt_chip, offset
+ * @retval  none
+ * @note    none
+ */
 static void fwk_gpiochip_free(struct fwk_gpio_chip *sprt_chip, kuint32_t offset)
 {
     struct fwk_gpio_desc *sprt_desc;
@@ -51,6 +63,12 @@ static void fwk_gpiochip_free(struct fwk_gpio_chip *sprt_chip, kuint32_t offset)
     sprt_desc->flags = 0;
 }
 
+/*!
+ * @brief   parse gpiochip
+ * @param   sprt_chip, sprt_spec
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t fwk_gpiochip_of_xlate(struct fwk_gpio_chip *sprt_chip,
 							const struct fwk_of_phandle_args *sprt_spec, kuint32_t *flags)
 {
@@ -72,6 +90,12 @@ static kint32_t fwk_gpiochip_of_xlate(struct fwk_gpio_chip *sprt_chip,
     return sprt_spec->args[base];
 }
 
+/*!
+ * @brief   initialize gpiochip
+ * @param   sprt_chip, sprt_dev
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_gpiochip_init(struct fwk_gpio_chip *sprt_chip, struct fwk_device *sprt_dev, kuint32_t base, kuint32_t size)
 {
     if (!sprt_chip || !sprt_dev)
@@ -97,6 +121,12 @@ kint32_t fwk_gpiochip_init(struct fwk_gpio_chip *sprt_chip, struct fwk_device *s
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   add a new gpiochip to global list
+ * @param   sprt_chip
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_gpiochip_add(struct fwk_gpio_chip *sprt_chip)
 {
     struct fwk_gpio_desc *sprt_desc;
@@ -121,6 +151,12 @@ kint32_t fwk_gpiochip_add(struct fwk_gpio_chip *sprt_chip)
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   delete gpiochip from global list
+ * @param   sprt_chip
+ * @retval  errno
+ * @note    none
+ */
 void fwk_gpiochip_del(struct fwk_gpio_chip *sprt_chip)
 {
     if (!sprt_chip)
@@ -133,6 +169,12 @@ void fwk_gpiochip_del(struct fwk_gpio_chip *sprt_chip)
     list_head_del(&sprt_chip->sgrt_link);
 }
 
+/*!
+ * @brief   find gpiochip and return gpiodesc
+ * @param   sprt_data, sprt_spec
+ * @retval  gpio desc
+ * @note    none
+ */
 struct fwk_gpio_desc *fwk_gpiochip_and_desc_find(struct fwk_gpio_node_prop *sprt_data, struct fwk_of_phandle_args *sprt_spec)
 {
     struct fwk_gpio_chip *sprt_chip;

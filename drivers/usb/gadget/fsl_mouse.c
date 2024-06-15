@@ -156,7 +156,7 @@ static srt_fsl_mouse_desc_t sgrt_fsl_mouse_dt =
  * @retval  error code
  * @note    none
  */
-irq_return_t fsl_mouse_driver_handler(void *ptrDev)
+irq_return_t fsl_mouse_driver_isr(void *ptrDev)
 {
     if (!ptrDev)
         return -ER_NULLPTR;
@@ -236,7 +236,7 @@ static kint32_t fsl_mouse_driver_probe(struct fwk_platdev *sprt_dev)
 	kint32_t retval;
 
     /*!< Register interrupt handler */
-	retval = fwk_request_irq(75, fsl_mouse_driver_handler, 0, FSL_MOUSE_DRIVER_NAME, mrt_nullptr);
+	retval = fwk_request_irq(75, fsl_mouse_driver_isr, 0, FSL_MOUSE_DRIVER_NAME, mrt_nullptr);
 	if (retval < 0)
         return -ER_FAILD;
 

@@ -19,8 +19,8 @@
 #include <platform/fwk_uaccess.h>
 
 /*!< The defines */
-#define RET_INODE_FROM_FILE(file)								(file->sprt_inode)
-#define RET_PRIVATE_DRV_DATA(file)								(file->private_data)
+#define RET_INODE_FROM_FILE(file)								((file)->sprt_inode)
+#define RET_PRIVATE_DRV_DATA(file)								((file)->private_data)
 
 struct fwk_file
 {

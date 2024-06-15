@@ -254,6 +254,12 @@ static inline kuint32_t real_thread_attr_getstacksize(struct real_thread_attr *s
 	return sprt_attr->stacksize;
 }
 
+/*!
+ * @brief	get context
+ * @param  	sprt_attr
+ * @retval 	context structure
+ * @note   	none
+ */
 static inline struct scheduler_context_regs *real_thread_get_context(struct real_thread_attr *sprt_attr)
 {
 	kutype_t base;

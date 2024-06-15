@@ -420,6 +420,12 @@ END:
 	return ER_NORMAL;
 }
 
+/*!
+ * @brief   get the order of match_name in sprt_prop which named list_name
+ * @param   sprt_node, list_name, match_name
+ * @retval  idx
+ * @note    none
+ */
 kint32_t fwk_of_property_match_string(struct fwk_device_node *sprt_node, const kchar_t *list_name, const kchar_t *match_name)
 {
 	struct fwk_of_property *sprt_prop;

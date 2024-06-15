@@ -16,6 +16,13 @@
 #include <platform/clk/fwk_clk_gate.h>
 
 /*!< API function */
+/*!
+ * @brief   create and register a new clk gate
+ * @param   sprt_clk, sprt_ops, ...
+ * @retval  sprt_clk
+ * @note    if sprt_clk is not NULL, it will use sprt_clk and does not create new sprt_clk (sprt_rc = sprt_clk);
+ *          otherwise, a new sprt_rc will be allocated
+ */
 struct fwk_clk *fwk_clk_gate_register(struct fwk_clk *sprt_clk, const struct fwk_clk_ops *sprt_ops,
                                 const kchar_t *name, const kchar_t *parent, void *reg, kuint8_t shift)
 {
@@ -46,6 +53,12 @@ struct fwk_clk *fwk_clk_gate_register(struct fwk_clk *sprt_clk, const struct fwk
     return sprt_rc;
 }
 
+/*!
+ * @brief   unregister and destroy clk gate
+ * @param   sprt_clk
+ * @retval  none
+ * @note    none
+ */
 void fwk_clk_gate_unregister(struct fwk_clk *sprt_clk)
 {
     struct fwk_clk_hw *sprt_hw;

@@ -21,12 +21,12 @@
 
 /*!< API function */
 /*!
- * @brief  fwk_default_irqhandler
+ * @brief  fwk_default_irq_isr
  * @param  none
  * @retval none
  * @note   default irq handler
  */
-static irq_return_t fwk_default_irqhandler(void *ptrDev)
+static irq_return_t fwk_default_irq_isr(void *ptrDev)
 {
 	return ER_NORMAL;
 }
@@ -85,7 +85,7 @@ kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, c
 	if (!isValid(sprt_action))
 		return -ER_NOMEM;
 
-	sprt_action->handler = handler ? handler : fwk_default_irqhandler;
+	sprt_action->handler = handler ? handler : fwk_default_irq_isr;
 	sprt_action->flags = flags;
 	sprt_action->ptrArgs = ptrDev;
 

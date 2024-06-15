@@ -19,9 +19,9 @@
 
 /*!< The defines */
 /*!< Maximum number of fb devices (total number of secondary devices) */
-#define FWK_FB_DEVICE_MAX							(32)
+#define FWK_FB_DEVICE_MAX								(32)
 /*!< The primary device number of the fb device */
-#define FWK_FB_DEVICE_MAJOR							(NR_FBDEV_MAJOR)
+#define FWK_FB_DEVICE_MAJOR								(NR_FBDEV_MAJOR)
 
 /*!< The globals */
 static struct fwk_fb_info *sgrt_fwk_registered_fb[FWK_FB_DEVICE_MAX] = {mrt_nullptr};

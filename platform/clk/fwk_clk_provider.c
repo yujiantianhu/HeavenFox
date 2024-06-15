@@ -30,6 +30,12 @@ typedef struct fwk_of_clk_provider
 static DECLARE_LIST_HEAD(sgrt_fwk_clk_providers);
 
 /*!< API function */
+/*!
+ * @brief   get sprt_clk from data
+ * @param   sprt_args, data
+ * @retval  sprt_clk
+ * @note    none
+ */
 struct fwk_clk *fwk_of_clk_src_onecell_get(struct fwk_of_phandle_args *sprt_args, void *data)
 {
     struct fwk_clk_one_cell *sprt_cell;
@@ -44,6 +50,12 @@ struct fwk_clk *fwk_of_clk_src_onecell_get(struct fwk_of_phandle_args *sprt_args
     return sprt_cell->sprt_clks ? &sprt_cell->sprt_clks[index] : mrt_nullptr;
 }
 
+/*!
+ * @brief   add a new clk provider (data)
+ * @param   sprt_node, data
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_clk_add_provider(struct fwk_device_node *sprt_node, 
                     struct fwk_clk *(*get)(struct fwk_of_phandle_args *, void *), void *data)
 {
@@ -65,6 +77,12 @@ kint32_t fwk_clk_add_provider(struct fwk_device_node *sprt_node,
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   remove and destroy clk a provider
+ * @param   sprt_node
+ * @retval  none
+ * @note    none
+ */
 void fwk_clk_del_provider(struct fwk_device_node *sprt_node)
 {
     struct fwk_of_clk_provider *sprt_provider;
@@ -82,6 +100,12 @@ void fwk_clk_del_provider(struct fwk_device_node *sprt_node)
     }
 }
 
+/*!
+ * @brief   look up a provider
+ * @param   sprt_args
+ * @retval  sprt_clk
+ * @note    none
+ */
 struct fwk_clk *fwk_clk_provider_look_up(struct fwk_of_phandle_args *sprt_args)
 {
     struct fwk_of_clk_provider *sprt_provider;

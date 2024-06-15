@@ -74,7 +74,7 @@ kuint32_t fwk_pixel_rgbform_convert(kint8_t srctype, kuint32_t data)
  * @brief   display one image (with dot matrix)
  * @param   x_start: base position in the x-direction
  * @param   y_start: base position in the y-direction
- * @retval  None
+ * @retval  none
  * @note    none
  */
 void fwk_display_dot_matrix_image(struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start, const kuint8_t *image)
@@ -134,7 +134,7 @@ void fwk_display_dot_matrix_image(struct fwk_disp_info *sprt_disp, kuint32_t x_s
  * @param   x_start: base position in the x-direction
  * @param   y_start: base position in the y-direction
  * @param   image: ram address of bmp
- * @retval  None
+ * @retval  none
  * @note    none
  */
 void fwk_display_bitmap(struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start, const kuint8_t *image)

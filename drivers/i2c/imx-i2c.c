@@ -44,7 +44,7 @@ typedef struct imx_i2c_drv_data
 
 } srt_imx_i2c_drv_data_t;
 
-/*!< 地址寄存器 */
+/*!< address register */
 struct imx_i2c_iar_reg
 {
     __IO kuint16_t rw    : 1;                       /*!< bit 0 */
@@ -52,7 +52,7 @@ struct imx_i2c_iar_reg
     __IO kuint16_t rsvd1 : 8;                       /*!< bit 8:15 */
 };
 
-/*!< 频率寄存器 */
+/*!< frequency register */
 struct imx_i2c_ifr_reg
 {
     __IO kuint16_t freq  : 6;                       /*!< bit 0:5 */
@@ -60,34 +60,34 @@ struct imx_i2c_ifr_reg
     __IO kuint16_t rsvd2 : 8;                       /*!< bit 8:15 */
 };
 
-/*!< 控制寄存器 */
+/*!< control register */
 struct imx_i2c_icr_reg
 {
-    __IO kuint16_t rsvd1 : 2;                       /*!< bit 0:1 保留 */
-    __IO kuint16_t rsta  : 1;                       /*!< bit 2   重复开始信号: 1, 产生信号 */
-    __IO kuint16_t txak  : 1;                       /*!< bit 3   传输应答使能: 0, ack; 1, noack */
-    __IO kuint16_t mtx   : 1;                       /*!< bit 4   传输方向选择: 0, rx;  1, tx */
-    __IO kuint16_t msta  : 1;                       /*!< bit 5   主从模式选择: 0, slave; 1, master */
-    __IO kuint16_t iien  : 1;                       /*!< bit 6   中断使能, 为1有效 */
-    __IO kuint16_t ien   : 1;                       /*!< bit 7   iic使能, 为1有效 */
+    __IO kuint16_t rsvd1 : 2;                       /*!< bit 0:1 reserved */
+    __IO kuint16_t rsta  : 1;                       /*!< bit 2   repeat start: 1, generate signal */
+    __IO kuint16_t txak  : 1;                       /*!< bit 3   transfer(send) ack: 0, ack; 1, noack */
+    __IO kuint16_t mtx   : 1;                       /*!< bit 4   transfer direction: 0, rx;  1, tx */
+    __IO kuint16_t msta  : 1;                       /*!< bit 5   master/slave enable: 0, slave; 1, master */
+    __IO kuint16_t iien  : 1;                       /*!< bit 6   interrupt enable, active high */
+    __IO kuint16_t ien   : 1;                       /*!< bit 7   iic enable, active high */
     __IO kuint16_t rsvd2 : 8;                       /*!< bit 8:15 */
 };
 
-/*!< 状态寄存器 */
+/*!< status register */
 struct imx_i2c_isr_reg
 {
-    __IO kuint16_t rxak  : 1;                       /*!< bit 0   应答信号标志位: 0, ack; 1, noack */
-    __IO kuint16_t iif   : 1;                       /*!< bit 1   iic中断挂起标志位, 为1有效 */
-    __IO kuint16_t rsvd1 : 1;                       /*!< bit 2   保留 */
-    __IO kuint16_t srw   : 1;                       /*!< bit 3   从机读写标志位: 0表示给从机写数据, 1表示读数据 */
-    __IO kuint16_t ial   : 1;                       /*!< bit 4   仲裁丢失位, 为1有效 */
-    __IO kuint16_t ibb   : 1;                       /*!< bit 5   iic总线忙标志位, 为1表示忙, 0表示空闲 */
-    __IO kuint16_t iaas  : 1;                       /*!< bit 6   为1表示iar.addr为从设备地址 */
-    __IO kuint16_t icf   : 1;                       /*!< bit 7   数据传输状态位: 0, 正在传输; 1, 传输完成 */
+    __IO kuint16_t rxak  : 1;                       /*!< bit 0   transfer(recv) ack: 0, ack; 1, noack */
+    __IO kuint16_t iif   : 1;                       /*!< bit 1   iic interrupt suspend, active high */
+    __IO kuint16_t rsvd1 : 1;                       /*!< bit 2   reserved */
+    __IO kuint16_t srw   : 1;                       /*!< bit 3   slave r/w flag: 0: write to slave, 1: read from slave */
+    __IO kuint16_t ial   : 1;                       /*!< bit 4   arbitration loss bit: active high */
+    __IO kuint16_t ibb   : 1;                       /*!< bit 5   iic bus busy flag; 1: busy, 0: idle */
+    __IO kuint16_t iaas  : 1;                       /*!< bit 6   1 indicates that iar.addr is the address of slave */
+    __IO kuint16_t icf   : 1;                       /*!< bit 7   data transmission flag: 0, is transfering; 1, transfer finished */
     __IO kuint16_t rsvd2 : 8;                       /*!< bit 8:15 */
 };
 
-/*!< 数据寄存器 */
+/*!< data register */
 struct imx_i2c_idr_reg
 {
     __IO kuint16_t data  : 8;                       /*!< bit 0:7 */
@@ -121,8 +121,8 @@ enum __ERT_IMX_I2C_ACK_STATUS
 /*!<
  * PLL2 = 528 MHz
  * PLL2_PFD2 = 528 MHz * 18 / 24 = 396 MHz
- * IPG_CLK_ROOT = (PLL2_PFD2 / ahb_podf )/ ipg_podf = (396 MHz/3)/2 = 66MHz
- * PER_CLK_ROOT = IPG_CLK_ROOT/perclk_podf = 66MHz/1 = 66MHz
+ * IPG_CLK_ROOT = (PLL2_PFD2 / ahb_podf) / ipg_podf = (396 MHz / 3) / 2 = 66MHz
+ * PER_CLK_ROOT = IPG_CLK_ROOT / perclk_podf = 66MHz / 1 = 66MHz
  * I2C clock Frequency = (PERCLK_ROOT frequency)/(division factor corresponding to IFDR)
  */
 static const kuint16_t g_imx_i2c_ifdr_field[][2] =
@@ -146,6 +146,12 @@ static const kuint16_t g_imx_i2c_ifdr_field[][2] =
 };
 
 /*!< API function */
+/*!
+ * @brief   find ifdr-field from g_imx_i2c_ifdr_field
+ * @param   freq
+ * @retval  ifdr-field
+ * @note    none
+ */
 static kint16_t imx_i2c_find_frequency(kuint32_t freq)
 {
     kusize_t num_field = ARRAY_SIZE(g_imx_i2c_ifdr_field);
@@ -180,6 +186,12 @@ static kint16_t imx_i2c_find_frequency(kuint32_t freq)
     return -ER_NOTFOUND;
 }
 
+/*!
+ * @brief   send ack/nack after writting
+ * @param   sprt_i2c, ack
+ * @retval  none
+ * @note    none
+ */
 static void imx_i2c_adap_set_ack(struct imx_i2c_reg *sprt_i2c, kuint32_t ack)
 {
     if (ack == NR_I2C_NACK)
@@ -188,21 +200,45 @@ static void imx_i2c_adap_set_ack(struct imx_i2c_reg *sprt_i2c, kuint32_t ack)
         sprt_i2c->sgrt_icr.txak = false;
 }
 
+/*!
+ * @brief   recv ack/nack after reading
+ * @param   sprt_i2c
+ * @retval  none
+ * @note    none
+ */
 static kuint32_t imx_i2c_adap_get_ack(struct imx_i2c_reg *sprt_i2c)
 {
     return sprt_i2c->sgrt_isr.rxak ? NR_I2C_NACK : NR_I2C_ACK;
 }
 
+/*!
+ * @brief   write data to i2c register
+ * @param   sprt_i2c, data
+ * @retval  none
+ * @note    none
+ */
 static void imx_i2c_adap_write_data(struct imx_i2c_reg *sprt_i2c, kuint8_t data)
 {
     sprt_i2c->sgrt_idr.data = data;
 }
 
+/*!
+ * @brief   read data from i2c register
+ * @param   sprt_i2c
+ * @retval  none
+ * @note    none
+ */
 static kuint8_t imx_i2c_adap_read_data(struct imx_i2c_reg *sprt_i2c)
 {
     return sprt_i2c->sgrt_idr.data;
 }
 
+/*!
+ * @brief   wait for transferring finished
+ * @param   sprt_adap, timeout
+ * @retval  none
+ * @note    none
+ */
 static kbool_t imx_i2c_adap_wait_complete(struct fwk_i2c_adapter *sprt_adap, kuint32_t timeout)
 {
     struct imx_i2c_drv_data *sprt_data;
@@ -219,6 +255,12 @@ static kbool_t imx_i2c_adap_wait_complete(struct fwk_i2c_adapter *sprt_adap, kui
     return true;
 }
 
+/*!
+ * @brief   wait for i2c become idle
+ * @param   sprt_i2c, ways
+ * @retval  none
+ * @note    if i2c is busy, schedule to another thread
+ */
 static kint32_t imx_i2c_adap_for_busy(struct imx_i2c_reg *sprt_i2c, kbool_t ways)
 {
     kutime_t expires = jiffies + msecs_to_jiffies(500);
@@ -242,32 +284,38 @@ static kint32_t imx_i2c_adap_for_busy(struct imx_i2c_reg *sprt_i2c, kbool_t ways
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   clear interrupt flag
+ * @param   sprt_i2c
+ * @retval  none
+ * @note    none
+ */
 static void imx_i2c_adap_clear_intr(struct imx_i2c_reg *sprt_i2c)
 {
     sprt_i2c->sgrt_isr.iif = false;
 }
 
 /*!
- * @brief  imx_i2c_adap_check_ack
- * @param  None
- * @retval None
- * @note   iic功能检查
+ * @brief   imx_i2c_adap_check_ack
+ * @param   none
+ * @retval  none
+ * @note    check i2c function
  */
 static kbool_t imx_i2c_adap_check_ack(struct imx_i2c_reg *sprt_i2c)
 {
-    /*!< 1. 仲裁丢失位检查 */
+    /*!< 1. check arbitration loss bit */
     if (sprt_i2c->sgrt_isr.ial)
     {
         sprt_i2c->sgrt_isr.ial = false;
 
-        /*!< 应重启iic */
+        /*!< reboot i2c */
         sprt_i2c->sgrt_icr.ien = false;
         sprt_i2c->sgrt_icr.ien = true;
 
         return false;
     }
 
-    /*!< 2. 无应答 */
+    /*!< 2. no ack */
     if (NR_I2C_NACK == imx_i2c_adap_get_ack(sprt_i2c))
         return false;
 
@@ -275,11 +323,11 @@ static kbool_t imx_i2c_adap_check_ack(struct imx_i2c_reg *sprt_i2c)
 }
 
 /*!
- * @brief  imx_i2c_adap_start
- * @param  None
- * @retval None
- * @note   iic起始位
- * 总线空闲时, SCL & SDA均为高电平, 此时若SDA产生下降沿, 表示iic开始
+ * @brief   imx_i2c_adap_start
+ * @param   none
+ * @retval  none
+ * @note    iic start
+ *          when bus is idle, SCL & SDA are high level, if SDA is falling, indicating that i2c will start
  */
 static kint32_t imx_i2c_adap_start(struct fwk_i2c_adapter *sprt_adap)
 {
@@ -300,10 +348,10 @@ static kint32_t imx_i2c_adap_start(struct fwk_i2c_adapter *sprt_adap)
 
     delay_us(100);
     
-    /*!< 设置iic工作在主机模式 */
+    /*!< configure iic to work on master mode */
     sprt_i2c->sgrt_icr.msta = true;
     
-    /*!< 判断iic总线是否处于忙状态. 空闲: 0, 忙: 1 */
+    /*!< judge if i2c is busy. idle: 0, busy: 1 */
     if (imx_i2c_adap_for_busy(sprt_i2c, true))
         goto fail;
 
@@ -313,7 +361,7 @@ static kint32_t imx_i2c_adap_start(struct fwk_i2c_adapter *sprt_adap)
 
     imx_i2c_adap_set_ack(sprt_i2c, NR_I2C_NACK);
 
-    /*!< 等待传输完成 */
+    /*!< wait for transferring finished */
 //  if (!imx_i2c_adap_wait_complete(sprt_adap, 100))
 //        goto fail;
 
@@ -325,11 +373,11 @@ fail:
 }
 
 /*!
- * @brief  imx_i2c_adap_restart
- * @param  None
- * @retval None
- * @note   iic重新开始信号
- * 总线空闲时, SCL & SDA均为高电平, 此时若SDA产生下降沿, 表示iic开始
+ * @brief   imx_i2c_adap_restart
+ * @param   none
+ * @retval  none
+ * @note    iic repeat start
+ *          when bus is idle, SCL & SDA are high level, if SDA is falling, indicating that i2c will start
  */
 static kint32_t imx_i2c_adap_restart(struct fwk_i2c_adapter *sprt_adap)
 {
@@ -355,12 +403,13 @@ static kint32_t imx_i2c_adap_restart(struct fwk_i2c_adapter *sprt_adap)
 }
 
 /*!
- * @brief  imx_i2c_adap_stop
- * @param  None
- * @retval None
- * @note   iic停止位
- * 总线工作时, SCL低电平时SDA变化; 若SCL高电平时SDA变化(上升沿), 表示iic停止;
- * 此时SCL & SDA回到高电平状态, 总线恢复空闲
+ * @brief   imx_i2c_adap_stop
+ * @param   none
+ * @retval  none
+ * @note    iic stop
+ *          when i2c bus is working, the SDA changes when the SCL is Low; 
+ *          otherwise, if the SDA changes when the SCL is high, it indicate that i2c will be stopped;
+ *          finally, SDA and SCL will stay high level, i2c bus resumes to idle status
  */
 static void imx_i2c_adap_stop(struct fwk_i2c_adapter *sprt_adap)
 {    
@@ -370,12 +419,12 @@ static void imx_i2c_adap_stop(struct fwk_i2c_adapter *sprt_adap)
 	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
 	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
-    /*!< 清除设置 */
+    /*!< clear configuration */
     sprt_i2c->sgrt_icr.msta = false;
     sprt_i2c->sgrt_icr.mtx  = false;
     sprt_i2c->sgrt_icr.txak = false;
 
-    /*!< 等待忙结束: 循环比较费时间 */
+    /*!< wait for becoming not busy */
     imx_i2c_adap_for_busy(sprt_i2c, false);
 
     sprt_i2c->sgrt_icr.ien = false;
@@ -386,9 +435,9 @@ static void imx_i2c_adap_stop(struct fwk_i2c_adapter *sprt_adap)
 
 /*!
  * @brief  imx_i2c_adap_write
- * @param  None
- * @retval None
- * @note   iic写时序
+ * @param  none
+ * @retval none
+ * @note   i2c write
  */
 static kint32_t imx_i2c_adap_write(struct imx_i2c_drv_data *sprt_data, kuint16_t slave, const kubuffer_t *buffer, kusize_t size)
 {
@@ -396,14 +445,14 @@ static kint32_t imx_i2c_adap_write(struct imx_i2c_drv_data *sprt_data, kuint16_t
 
 	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
-    /*!< 设置传输方向为发送 */
+    /*!< configure direction to send */
     sprt_i2c->sgrt_icr.mtx = true;
 
     imx_i2c_adap_write_data(sprt_i2c, slave << 1);
     if (!imx_i2c_adap_wait_complete(&sprt_data->sgrt_adap, 100))
         return -ER_TIMEOUT;
 
-    /* 手动清除中断标志位 */
+    /*!< clear interrupt flag */
     imx_i2c_adap_clear_intr(sprt_i2c);
 
     if (!imx_i2c_adap_check_ack(sprt_i2c))
@@ -413,7 +462,7 @@ static kint32_t imx_i2c_adap_write(struct imx_i2c_drv_data *sprt_data, kuint16_t
     {
         imx_i2c_adap_write_data(sprt_i2c, *buffer++);
 
-        /*!< 等待数据传输完成 */
+        /*!< wait for transmission finished */
         if (!imx_i2c_adap_wait_complete(&sprt_data->sgrt_adap, 100))
             return -ER_TIMEOUT;
 
@@ -428,9 +477,9 @@ static kint32_t imx_i2c_adap_write(struct imx_i2c_drv_data *sprt_data, kuint16_t
 
 /*!
  * @brief  imx_i2c_adap_read
- * @param  None
- * @retval None
- * @note   iic读时序
+ * @param  none
+ * @retval none
+ * @note   i2c read
  */
 static kint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sprt_data, kuint16_t slave, kubuffer_t *buffer, kusize_t size)
 {
@@ -439,14 +488,14 @@ static kint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sprt_data, kuint16_t 
 
 	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
-    /*!< 设置传输方向为发送 */
+    /*!< configure direction to send (write reg at first) */
     sprt_i2c->sgrt_icr.mtx = true;
 
     imx_i2c_adap_write_data(sprt_i2c, (slave << 1) | 0x01);
     if (!imx_i2c_adap_wait_complete(&sprt_data->sgrt_adap, 100))
         return -ER_TIMEOUT;
 
-    /*!< 清除中断标志位 */
+    /*!< clear interrupt flag */
     imx_i2c_adap_clear_intr(sprt_i2c);
 
     if (!imx_i2c_adap_check_ack(sprt_i2c))
@@ -454,28 +503,28 @@ static kint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sprt_data, kuint16_t 
 
     imx_i2c_adap_set_ack(sprt_i2c, (size > 1) ? NR_I2C_ACK : NR_I2C_NACK);
 
-    /*!< 设置传输方向为接收 */
+    /*!< configure direction to recv */
     sprt_i2c->sgrt_icr.mtx = false;
 
-    /*!< 空读数据, 可清除data里面的内容 */
+    /*!< read dummy to clear i2c->idr automatically */
     imx_i2c_adap_read_data(sprt_i2c);
 
     for (count = 0; count < size; count++)
     {
-        /*!< 等待数据传输完成 */
+        /*!< wait for transmission finished */
         if (!imx_i2c_adap_wait_complete(&sprt_data->sgrt_adap, 100))
             return -ER_TIMEOUT;
 
         imx_i2c_adap_clear_intr(sprt_i2c);
 
-        /*!< 当只剩最后一个数据时, 应终止读, 以防i2c时钟错乱 */
+        /*!< when only the last data left, reading should be stopped to prevent i2c clock misaligned */
         if (count == (size - 1))
         {
             if (!sprt_data->is_lastMsgs)
                 sprt_i2c->sgrt_icr.mtx = true;
             else
             {
-                /*!< 停止 */
+                /*!< stop */
                 sprt_i2c->sgrt_icr.mtx = false;
                 sprt_i2c->sgrt_icr.msta = false;
 
@@ -483,7 +532,7 @@ static kint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sprt_data, kuint16_t 
                     return -ER_BUSY;
             }
         }
-        /*!< 倒数第2个数据, 发送nack */
+        /*!< if it is the second to last data, send nack */
         else if (count == (size - 2))
             imx_i2c_adap_set_ack(sprt_i2c, NR_I2C_NACK);
         else
@@ -495,6 +544,12 @@ static kint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sprt_data, kuint16_t 
     return ER_NORMAL;
 }
 
+/*!
+ * @brief  i2c transfer
+ * @param  sprt_adap, sprt_msg
+ * @retval none
+ * @note   read/write
+ */
 static kint32_t __imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msg)
 {
 	struct imx_i2c_drv_data *sprt_data;
@@ -512,6 +567,12 @@ static kint32_t __imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fw
     return ER_NORMAL;
 }
 
+/*!
+ * @brief  i2c transfer finished --- interrupt handler
+ * @param  ptrDev
+ * @retval none
+ * @note   none
+ */
 static irq_return_t imx_i2c_adap_isr(void *ptrDev)
 {
     struct imx_i2c_drv_data *sprt_data;
@@ -533,9 +594,9 @@ static irq_return_t imx_i2c_adap_isr(void *ptrDev)
 
 /*!
  * @brief  imx_i2c_adap_initial
- * @param  None
- * @retval None
- * @note   初始化iic
+ * @param  none
+ * @retval none
+ * @note   i2c initialization
  */
 static void imx_i2c_adap_initial(struct fwk_i2c_adapter *sprt_adap)
 {
@@ -546,7 +607,7 @@ static void imx_i2c_adap_initial(struct fwk_i2c_adapter *sprt_adap)
 	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
 	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
 
-    /*!< 关闭iic */
+    /*!< disable i2c */
     sprt_i2c->sgrt_icr.ien = false;
 
     /*!< write zero to clear */
@@ -559,10 +620,16 @@ static void imx_i2c_adap_initial(struct fwk_i2c_adapter *sprt_adap)
 
     sprt_i2c->sgrt_ifr.freq = field;
 
-    /*!< 启用iic */
+    /*!< enable i2c */
     sprt_i2c->sgrt_icr.ien = true;
 }
 
+/*!
+ * @brief  i2c transfer
+ * @param  sprt_adap, sprt_msgs, num (the number of sprt_msgs)
+ * @retval none
+ * @note   read/write
+ */
 static kint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msgs, kint32_t num)
 {
 	struct imx_i2c_drv_data *sprt_data;
@@ -573,7 +640,7 @@ static kint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_
 
     mutex_lock(&sprt_data->sgrt_lock);
 
-    /*!< 开始信号 */
+    /*!< start */
     retval = imx_i2c_adap_start(sprt_adap);
     if (retval)
         goto out;
@@ -584,7 +651,7 @@ static kint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_
 
         if (idx)
         {
-            /*!< 重新开始 */
+            /*!< repeat */
             retval = imx_i2c_adap_restart(sprt_adap);
             if (retval)
                 goto END;
@@ -596,7 +663,7 @@ static kint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_
     }
 
 END:
-    /*!< 停止信号 */
+    /*!< stop */
     imx_i2c_adap_stop(sprt_adap);
     sprt_data->is_lastMsgs = false;
 
@@ -671,10 +738,13 @@ static kint32_t imx_i2c_driver_probe(struct fwk_platdev *sprt_pdev)
     fwk_clk_disable_unprepare(sprt_data->sprt_clk);
 
     if (fwk_request_irq(sprt_data->irq, imx_i2c_adap_isr, IRQ_TYPE_NONE, "imx,i2c", sprt_adap))
-        goto fail3;
+        goto fail4;
 
 	return ER_NORMAL;
 
+fail4:
+    fwk_platform_set_drvdata(sprt_pdev, mrt_nullptr);
+    fwk_i2c_del_adapter(sprt_adap);
 fail3:
     fwk_clk_put(sprt_data->sprt_clk);
 fail2:

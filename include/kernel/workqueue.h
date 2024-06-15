@@ -68,6 +68,12 @@ typedef struct workqueue_head
 TARGET_EXT void schedule_work(struct workqueue *sprt_wq);
 
 /*!< API functions */
+/*!
+ * @brief   add sprt_wq to the list of sprt_wqh
+ * @param   sprt_wqh, sprt_wq
+ * @retval  none
+ * @note    none
+ */
 static inline void queue_work(struct workqueue_head *sprt_wqh, struct workqueue *sprt_wq)
 {
     if (!sprt_wqh || !sprt_wq)
@@ -79,6 +85,12 @@ static inline void queue_work(struct workqueue_head *sprt_wqh, struct workqueue 
     list_head_add_tail(&sprt_wqh->sgrt_work, &sprt_wq->sgrt_link);
 }
 
+/*!
+ * @brief   del sprt_wq from the list
+ * @param   sprt_wq
+ * @retval  none
+ * @note    none
+ */
 static inline void detach_work(struct workqueue *sprt_wq)
 {
     if (!sprt_wq)
@@ -87,6 +99,12 @@ static inline void detach_work(struct workqueue *sprt_wq)
     list_head_del(&sprt_wq->sgrt_link);
 }
 
+/*!
+ * @brief   add sprt_wq to the list of sprt_wqh
+ * @param   sprt_wqh, sprt_wq
+ * @retval  none
+ * @note    none
+ */
 static inline void detach_work_safe(struct workqueue_head *sprt_wqh, struct workqueue *sprt_wq)
 {
     if (!sprt_wqh || !sprt_wq)
@@ -95,6 +113,12 @@ static inline void detach_work_safe(struct workqueue_head *sprt_wqh, struct work
     list_head_del_safe(&sprt_wqh->sgrt_work, &sprt_wq->sgrt_link);
 }
 
+/*!
+ * @brief   check if the list of sprt_wqh is empty
+ * @param   sprt_wqh
+ * @retval  empty(true) / false
+ * @note    none
+ */
 static inline kbool_t is_workqueue_empty(struct workqueue_head *sprt_wqh)
 {
     return mrt_list_head_empty(&sprt_wqh->sgrt_work);

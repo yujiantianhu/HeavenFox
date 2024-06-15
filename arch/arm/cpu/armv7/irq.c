@@ -152,6 +152,12 @@ static void fwk_gic_initial(srt_ca7_gic_t *sprt_gic)
 //  __set_cp15_vbar(VECTOR_TABLE_BASE);
 }
 
+/*!
+ * @brief   initial GIC
+ * @param   sprt_node: current interrupt-controller
+ * @retval  none
+ * @note    none
+ */
 static void fwk_gic_init_bases(kuint32_t gic_nr, kuint32_t irq_start,
 			                void *dest_base, void *cpu_base,
 			                kuint32_t percpu_offset, struct fwk_device_node *sprt_node)
@@ -207,11 +213,23 @@ kint32_t fwk_gic_of_init(struct fwk_device_node *sprt_node, struct fwk_device_no
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   return gic data
+ * @param   gic_nr
+ * @retval  none
+ * @note    none
+ */
 srt_ca7_gic_t *fwk_get_gic_data(kuint32_t gic_nr)
 {
     return (gic_nr >= CA7_MAX_GIC_NR) ? mrt_nullptr : &sgrt_gic_global_data[gic_nr];
 }
 
+/*!
+ * @brief   convert GIC to GPC
+ * @param   hwirq
+ * @retval  none
+ * @note    none
+ */
 kint32_t fwk_gic_to_gpc_irq(kint32_t hwirq)
 {
     hwirq -= 32;
@@ -221,6 +239,12 @@ kint32_t fwk_gic_to_gpc_irq(kint32_t hwirq)
     return fwk_irq_get_by_domain_name("gpc", hwirq);
 }
 
+/*!
+ * @brief   convert GPC to GIC
+ * @param   virq
+ * @retval  none
+ * @note    none
+ */
 kint32_t fwk_gpc_to_gic_irq(kint32_t virq)
 {
     struct fwk_irq_data *sprt_data;
@@ -256,6 +280,12 @@ static kint32_t gpc_irq_domain_xlate(struct fwk_irq_domain *sprt_domain, struct 
 	return ER_NORMAL;
 }
 
+/*!
+ * @brief   enable IRQ
+ * @param   sprt_data
+ * @retval  none
+ * @note    none
+ */
 static void gpc_irq_chip_enable(struct fwk_irq_data *sprt_data)
 {
     srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
@@ -268,6 +298,12 @@ static void gpc_irq_chip_enable(struct fwk_irq_data *sprt_data)
     mrt_setbit_towords(sprt_data->hwirq + 32, &sprt_dest->D_ISENABLER);
 }
 
+/*!
+ * @brief   disable IRQ
+ * @param   sprt_data
+ * @retval  none
+ * @note    none
+ */
 static void gpc_irq_chip_disable(struct fwk_irq_data *sprt_data)
 {
     srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
@@ -280,6 +316,12 @@ static void gpc_irq_chip_disable(struct fwk_irq_data *sprt_data)
     mrt_setbit_towords(sprt_data->hwirq + 32, &sprt_dest->D_ICENABLER);
 }
 
+/*!
+ * @brief   get IRQ status
+ * @param   sprt_data
+ * @retval  none
+ * @note    none
+ */
 static kbool_t gpc_irq_chip_ack(struct fwk_irq_data *sprt_data)
 {
     srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
@@ -295,6 +337,12 @@ static kbool_t gpc_irq_chip_ack(struct fwk_irq_data *sprt_data)
     return !!(hwirq & mrt_bit(sprt_data->hwirq));
 }
 
+/*!
+ * @brief   check if IRQ is enabled
+ * @param   sprt_data
+ * @retval  none
+ * @note    none
+ */
 static kbool_t gpc_irq_chip_is_enabled(struct fwk_irq_data *sprt_data)
 {
     srt_ca7_gic_t *sprt_gic = fwk_get_gic_data(0);
@@ -307,6 +355,12 @@ static kbool_t gpc_irq_chip_is_enabled(struct fwk_irq_data *sprt_data)
     return !!mrt_getbit_fromwords(sprt_data->hwirq + 32, &sprt_dest->D_ISENABLER);
 }
 
+/*!
+ * @brief   allocate irq_domain for gpc
+ * @param   sprt_domain
+ * @retval  error code
+ * @note    none
+ */
 kint32_t gpc_irq_domain_alloc(struct fwk_irq_domain *sprt_domain, kuint32_t virq, kuint32_t nr_irqs, void *arg)
 {
     struct fwk_irq_generic *sprt_gc;
@@ -328,6 +382,12 @@ kint32_t gpc_irq_domain_alloc(struct fwk_irq_domain *sprt_domain, kuint32_t virq
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   free irq_domain of gpc
+ * @param   sprt_domain
+ * @retval  none
+ * @note    none
+ */
 void gpc_irq_domain_free(struct fwk_irq_domain *sprt_domain, kuint32_t virq, kuint32_t nr_irqs)
 {
     struct fwk_irq_generic *sprt_gc;

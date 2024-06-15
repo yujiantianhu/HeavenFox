@@ -50,7 +50,7 @@ typedef struct imx_gadget
 static kuint8_t g_iImx_gadget_queue_head[IMX_GADGET_CONFIG_ENDPOINTS << 1] __align(2048);
 
 /*!< The functions */
-irq_return_t imx6_gadget_handler(void *ptrDev);
+irq_return_t imx6_gadget_isr(void *ptrDev);
 
 static void imx6_gadget_ehci_token_handler(void *ptrDev);
 static void imx6_gadget_ehci_token_handler(void *ptrDev);
@@ -341,7 +341,7 @@ static void __imx6_gadget_handler(ert_imx_usb_intr_t type, void (*handler)(void 
  * @retval  error code
  * @note    none
  */
-irq_return_t imx6_gadget_handler(void *ptrDev)
+irq_return_t imx6_gadget_isr(void *ptrDev)
 {
     if (!ptrDev)
         return -ER_NULLPTR;

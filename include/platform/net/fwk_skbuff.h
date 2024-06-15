@@ -23,10 +23,10 @@ typedef kuint8_t*			sk_buff_data_t;
 struct fwk_sk_buff
 {
     /*!< These two members must be first. */
-    struct fwk_sk_buff *sprt_next;                                  /*!< doubly list, pointing to the latter sk_buff */
-    struct fwk_sk_buff *sprt_prev;                                  /*!< doubly list, pointing to the previous sk_buff */
+    struct fwk_sk_buff *sprt_next;                                      /*!< doubly list, pointing to the latter sk_buff */
+    struct fwk_sk_buff *sprt_prev;                                      /*!< doubly list, pointing to the previous sk_buff */
 
-    struct fwk_net_device *sprt_netdev;                             /*!< net_device */
+    struct fwk_net_device *sprt_netdev;                                 /*!< net_device */
 
     /*!< 
      * represents the sum of the length of the data area (tail - data) and the length of the data area of the shard structure. 

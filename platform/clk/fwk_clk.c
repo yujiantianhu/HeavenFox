@@ -16,6 +16,12 @@
 #include <platform/clk/fwk_clk_provider.h>
 
 /*!< API function */
+/*!
+ * @brief   initial and record sprt_clk
+ * @param   sprt_clk, sprt_hw
+ * @retval  sprt_clk
+ * @note    none
+ */
 struct fwk_clk *fwk_clk_config(struct fwk_clk *sprt_clk, struct fwk_clk_hw *sprt_hw, const kchar_t *dev_id, const kchar_t *con_id)
 {
     if (!sprt_hw || !sprt_clk)
@@ -32,6 +38,12 @@ struct fwk_clk *fwk_clk_config(struct fwk_clk *sprt_clk, struct fwk_clk_hw *sprt
     return sprt_clk;
 }
 
+/*!
+ * @brief   create and initialize sprt_clk
+ * @param   sprt_hw, dev_id, con_id
+ * @retval  sprt_clk
+ * @note    none
+ */
 struct fwk_clk *fwk_create_clk(struct fwk_clk_hw *sprt_hw, const kchar_t *dev_id, const kchar_t *con_id)
 {
     struct fwk_clk *sprt_clk;
@@ -49,11 +61,23 @@ struct fwk_clk *fwk_create_clk(struct fwk_clk_hw *sprt_hw, const kchar_t *dev_id
     return sprt_clk;
 }
 
+/*!
+ * @brief   initialize sprt_clk
+ * @param   sprt_dev, sprt_clk
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_init_clk(struct fwk_device *sprt_dev, struct fwk_clk *sprt_clk)
 {
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   destroy sprt_clk
+ * @param   sprt_clk
+ * @retval  none
+ * @note    none
+ */
 void fwk_free_clk(struct fwk_clk *sprt_clk)
 {
     if (!sprt_clk)
@@ -65,6 +89,12 @@ void fwk_free_clk(struct fwk_clk *sprt_clk)
         kfree(sprt_clk);
 }
 
+/*!
+ * @brief   register sprt_clk
+ * @param   sprt_dev, sprt_hw
+ * @retval  sprt_clk
+ * @note    none
+ */
 struct fwk_clk *fwk_clk_register(struct fwk_device *sprt_dev, struct fwk_clk_hw *sprt_hw)
 {
     struct fwk_clk_core *sprt_core;
@@ -122,6 +152,12 @@ fail1:
     return mrt_nullptr;
 }
 
+/*!
+ * @brief   unregister sprt_clk
+ * @param   sprt_clk
+ * @retval  none
+ * @note    none
+ */
 void fwk_clk_unregister(struct fwk_clk *sprt_clk)
 {
     struct fwk_clk_hw *sprt_hw;
@@ -139,6 +175,12 @@ void fwk_clk_unregister(struct fwk_clk *sprt_clk)
     sprt_hw->sprt_core = mrt_nullptr;
 }
 
+/*!
+ * @brief   parse clk from device_node
+ * @param   sprt_dev, name
+ * @retval  sprt_clk
+ * @note    none
+ */
 struct fwk_clk *fwk_clk_get(struct fwk_device *sprt_dev, const kchar_t *name)
 {
     struct fwk_clk *sprt_clk;
@@ -165,11 +207,23 @@ struct fwk_clk *fwk_clk_get(struct fwk_device *sprt_dev, const kchar_t *name)
     return fwk_create_clk(fwk_clk_to_hw(sprt_clk), mrt_dev_get_name(sprt_dev), name);
 }
 
+/*!
+ * @brief   release clk
+ * @param   sprt_clk
+ * @retval  none
+ * @note    none
+ */
 void fwk_clk_put(struct fwk_clk *sprt_clk)
 {
     fwk_free_clk(sprt_clk);
 }
 
+/*!
+ * @brief   enable clk
+ * @param   sprt_clk
+ * @retval  none
+ * @note    none
+ */
 void fwk_clk_enable(struct fwk_clk *sprt_clk)
 {
     const struct fwk_clk_ops *sprt_ops;
@@ -180,6 +234,12 @@ void fwk_clk_enable(struct fwk_clk *sprt_clk)
         sprt_ops->enable(fwk_clk_to_hw(sprt_clk));
 }
 
+/*!
+ * @brief   disable clk
+ * @param   sprt_clk
+ * @retval  none
+ * @note    none
+ */
 void fwk_clk_disable(struct fwk_clk *sprt_clk)
 {
     const struct fwk_clk_ops *sprt_ops;
@@ -190,6 +250,12 @@ void fwk_clk_disable(struct fwk_clk *sprt_clk)
         sprt_ops->disable(fwk_clk_to_hw(sprt_clk));
 }
 
+/*!
+ * @brief   prepare clk
+ * @param   sprt_clk
+ * @retval  none
+ * @note    none
+ */
 void fwk_clk_prepare(struct fwk_clk *sprt_clk)
 {
     const struct fwk_clk_ops *sprt_ops;
@@ -200,6 +266,12 @@ void fwk_clk_prepare(struct fwk_clk *sprt_clk)
         sprt_ops->prepare(fwk_clk_to_hw(sprt_clk));
 }
 
+/*!
+ * @brief   unprepare clk
+ * @param   sprt_clk
+ * @retval  none
+ * @note    none
+ */
 void fwk_clk_unprepare(struct fwk_clk *sprt_clk)
 {
     const struct fwk_clk_ops *sprt_ops;
@@ -210,6 +282,12 @@ void fwk_clk_unprepare(struct fwk_clk *sprt_clk)
         sprt_ops->unprepare(fwk_clk_to_hw(sprt_clk));
 }
 
+/*!
+ * @brief   check if clk is enabled
+ * @param   sprt_clk
+ * @retval  enable/disable
+ * @note    none
+ */
 kbool_t fwk_clk_is_enabled(struct fwk_clk *sprt_clk)
 {
     const struct fwk_clk_ops *sprt_ops;
@@ -222,12 +300,24 @@ kbool_t fwk_clk_is_enabled(struct fwk_clk *sprt_clk)
     return false;
 }
 
+/*!
+ * @brief   enable clk
+ * @param   sprt_clk
+ * @retval  none
+ * @note    none
+ */
 void fwk_clk_prepare_enable(struct fwk_clk *sprt_clk)
 {
     fwk_clk_prepare(sprt_clk);
     fwk_clk_enable(sprt_clk);
 }
 
+/*!
+ * @brief   disable clk
+ * @param   sprt_clk
+ * @retval  none
+ * @note    none
+ */
 void fwk_clk_disable_unprepare(struct fwk_clk *sprt_clk)
 {
     fwk_clk_disable(sprt_clk);

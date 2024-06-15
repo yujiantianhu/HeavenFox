@@ -167,15 +167,21 @@ typedef struct list_head srt_list_head_t;
 	     &pos->member != (head);	\
 	     pos = temp, temp = mrt_list_prev_entry(temp, member))
 
-/*!< check if the member is existed in target list */
-static inline kint32_t list_head_for_each(struct list_head *head, struct list_head *list)
+/*!< API functions */
+/*!
+ * @brief   check if the member is existed in target list
+ * @param   sprt_head, sprt_list
+ * @retval  errno
+ * @note    none
+ */
+static inline kint32_t list_head_for_each(struct list_head *sprt_head, struct list_head *sprt_list)
 {
 	struct list_head *ptr_right;
 	struct list_head *ptr_left;
 
-	foreach_list_head(ptr_left, ptr_right, head)
+	foreach_list_head(ptr_left, ptr_right, sprt_head)
 	{
-		if ((ptr_left == list) || (ptr_right == list))
+		if ((ptr_left == sprt_list) || (ptr_right == sprt_list))
 			return ER_NORMAL;
 
 		if (ptr_left == ptr_right)
@@ -185,74 +191,111 @@ static inline kint32_t list_head_for_each(struct list_head *head, struct list_he
 	return -ER_ERROR;
 }
 
-/*!< insert a new member behind list head */
-static inline void list_head_add_head(struct list_head *head, struct list_head *list)
+/*!
+ * @brief   insert a new member behind list head
+ * @param   sprt_head, sprt_list
+ * @retval  none
+ * @note    none
+ */
+static inline void list_head_add_head(struct list_head *sprt_head, struct list_head *sprt_list)
 {
-	struct list_head *ptr_next = head->sprt_next;
+	struct list_head *ptr_next = sprt_head->sprt_next;
 
-	list->sprt_prev		= head;
-	head->sprt_next		= list;
+	sprt_list->sprt_prev = sprt_head;
+	sprt_head->sprt_next = sprt_list;
 
-	list->sprt_next		= ptr_next;
-	ptr_next->sprt_prev	= list;
+	sprt_list->sprt_next = ptr_next;
+	ptr_next->sprt_prev	 = sprt_list;
 }
 
-/*!< insert a new member before list head */
-static inline void list_head_add_tail(struct list_head *head, struct list_head *list)
+/*!
+ * @brief   insert a new member before list head
+ * @param   sprt_head, sprt_list
+ * @retval  none
+ * @note    none
+ */
+static inline void list_head_add_tail(struct list_head *sprt_head, struct list_head *sprt_list)
 {
-	struct list_head *ptr_prev = head->sprt_prev;
+	struct list_head *ptr_prev = sprt_head->sprt_prev;
 
-	list->sprt_prev		= ptr_prev;
-	ptr_prev->sprt_next	= list;
+	sprt_list->sprt_prev = ptr_prev;
+	ptr_prev->sprt_next	 = sprt_list;
 
-	list->sprt_next		= head;
-	head->sprt_prev		= list;
+	sprt_list->sprt_next = sprt_head;
+	sprt_head->sprt_prev = sprt_list;
 }
 
-/*!< delete a member behind list head */
-static inline void list_head_del_head(struct list_head *head)
+/*!
+ * @brief   delete a member behind list head
+ * @param   sprt_head
+ * @retval  none
+ * @note    none
+ */
+static inline void list_head_del_head(struct list_head *sprt_head)
 {
-	struct list_head *ptr_next = head->sprt_next->sprt_next;
+	struct list_head *ptr_next = sprt_head->sprt_next->sprt_next;
 
-	head->sprt_next		= ptr_next;
-	ptr_next->sprt_prev	= head;
+	sprt_head->sprt_next = ptr_next;
+	ptr_next->sprt_prev	 = sprt_head;
 }
 
-/*!< delete a member before list head  */
-static inline void list_head_del_tail(struct list_head *head)
+/*!
+ * @brief   delete a member behind list head
+ * @param   sprt_head
+ * @retval  none
+ * @note    none
+ */
+static inline void list_head_del_tail(struct list_head *sprt_head)
 {
-	struct list_head *ptr_prev = head->sprt_prev->sprt_prev;
+	struct list_head *ptr_prev = sprt_head->sprt_prev->sprt_prev;
 
-	head->sprt_prev		= ptr_prev;
-	ptr_prev->sprt_next	= head;
+	sprt_head->sprt_prev = ptr_prev;
+	ptr_prev->sprt_next	 = sprt_head;
 }
 
-static inline void list_head_del(struct list_head *list)
+/*!
+ * @brief   delete a member
+ * @param   sprt_list
+ * @retval  none
+ * @note    none
+ */
+static inline void list_head_del(struct list_head *sprt_list)
 {
-	struct list_head *ptr_prev = list->sprt_prev;
-	struct list_head *ptr_next = list->sprt_next;
+	struct list_head *ptr_prev = sprt_list->sprt_prev;
+	struct list_head *ptr_next = sprt_list->sprt_next;
 
 	ptr_prev->sprt_next	= ptr_next;
 	ptr_next->sprt_prev	= ptr_prev;
 }
 
-/*!< delete a member which is in the middle of list */
-static inline void list_head_del_safe(struct list_head *head, struct list_head *list)
+/*!
+ * @brief   delete a member which is in the middle of list
+ * @param   sprt_list
+ * @retval  none
+ * @note    none
+ */
+static inline void list_head_del_safe(struct list_head *sprt_head, struct list_head *sprt_list)
 {
-	struct list_head *ptr_prev = list->sprt_prev;
-	struct list_head *ptr_next = list->sprt_next;
+	struct list_head *ptr_prev = sprt_list->sprt_prev;
+	struct list_head *ptr_next = sprt_list->sprt_next;
 
-	if (!list_head_for_each(head, list))
+	if (!list_head_for_each(sprt_head, sprt_list))
 	{
 		ptr_prev->sprt_next	= ptr_next;
 		ptr_next->sprt_prev	= ptr_prev;
 	}
 }
 
-static inline void init_list_head(struct list_head *list)
+/*!
+ * @brief   initialize list
+ * @param   sprt_list
+ * @retval  none
+ * @note    none
+ */
+static inline void init_list_head(struct list_head *sprt_list)
 {
-	list->sprt_next = list;
-	list->sprt_prev = list;
+	sprt_list->sprt_next = sprt_list;
+	sprt_list->sprt_prev = sprt_list;
 }
 
 

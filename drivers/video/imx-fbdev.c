@@ -216,13 +216,13 @@ static void imx_fbdev_init(void *base, struct imx_fbdev_drv *sprt_drv)
 	mrt_writel(mrt_bit(17) | mrt_bit(0), &sprt_lcdif->CTRL_SET);
 
 	/*!< open backlight */
-//	if (sprt_drv->sgrt_blight.sprt_gdesc)
-//		fwk_gpio_set_value(sprt_drv->sgrt_blight.sprt_gdesc, 1);
+	if (sprt_drv->sgrt_blight.sprt_gdesc)
+		fwk_gpio_set_value(sprt_drv->sgrt_blight.sprt_gdesc, 1);
 }
 
 /*!
- * @brief   imx_fbdev_driver_open
- * @param   sprt_inode, sprt_file
+ * @brief   driver open
+ * @param   sprt_inode, user
  * @retval  errno
  * @note    none
  */
@@ -231,6 +231,12 @@ static kint32_t imx_fbdev_open(struct fwk_fb_info *sprt_info, kint32_t user)
 	return ER_NORMAL;
 }
 
+/*!
+ * @brief   driver close
+ * @param   sprt_inode, user
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_fbdev_close(struct fwk_fb_info *sprt_info, kint32_t user)
 {
 	return ER_NORMAL;
@@ -243,6 +249,12 @@ static const struct fwk_fb_oprts sgrt_fwk_fb_ops =
 };
 
 /*!< --------------------------------------------------------------------- */
+/*!
+ * @brief   probe backlight
+ * @param   sprt_blight, sprt_node
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_fbdev_probe_backlight(struct imx_fbdev_backlight *sprt_blight, struct fwk_device_node *sprt_node)
 {
 	struct fwk_device *sprt_dev;
@@ -297,6 +309,12 @@ fail1:
 	return -ER_ERROR;
 }
 
+/*!
+ * @brief   remove backlight
+ * @param   sprt_blight
+ * @retval  none
+ * @note    none
+ */
 static void imx_fbdev_remove_backlight(struct imx_fbdev_backlight *sprt_blight)
 {
 	if (sprt_blight->sprt_gdesc)
@@ -311,8 +329,16 @@ static void imx_fbdev_remove_backlight(struct imx_fbdev_backlight *sprt_blight)
 	fwk_device_del(sprt_blight->sprt_dev);
 	kfree(sprt_blight->sprt_dev);
 	sprt_blight->sprt_dev = mrt_nullptr;
+	sprt_blight->sprt_gdesc = mrt_nullptr;
+	sprt_blight->sprt_pctl = mrt_nullptr;
 }
 
+/*!
+ * @brief   probe display-timings
+ * @param   sprt_pdev
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_fbdev_driver_probe_timings(struct fwk_platdev *sprt_pdev)
 {
 	struct imx_fbdev_drv *sprt_drv;
@@ -346,7 +372,7 @@ static kint32_t imx_fbdev_driver_probe_timings(struct fwk_platdev *sprt_pdev)
 	if (!isValid(sprt_tim))
 		goto fail;
 
-	/* get var info */
+	/*!< get var info */
 	retval = 0;
 	retval |= fwk_of_property_read_u32(sprt_tim, "clock-frequency", &sprt_var->pixclock);
 	retval |= fwk_of_property_read_u32(sprt_tim, "vactive", &sprt_var->yres);
@@ -369,6 +395,7 @@ static kint32_t imx_fbdev_driver_probe_timings(struct fwk_platdev *sprt_pdev)
 	if (retval < 0)
 		goto fail;
 
+	/*!< find device-node of backlight */
 	retval = fwk_of_property_read_u32(sprt_disp, "remote-endpoint", &phandle);
 	sprt_blnode = (retval < 0) ? mrt_nullptr : fwk_of_find_node_by_phandle(mrt_nullptr, phandle);
 	if (!isValid(sprt_blnode))
