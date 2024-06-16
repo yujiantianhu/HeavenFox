@@ -124,6 +124,12 @@ TARGET_EXT struct fwk_device *fwk_device_create(kuint32_t type, kuint32_t devNum
 TARGET_EXT kint32_t fwk_device_destroy(struct fwk_device *sprt_dev);
 
 /*!< API functions */
+/*!
+ * @brief   get device name
+ * @param   sprt_dev
+ * @retval  name
+ * @note    none
+ */
 static inline kchar_t *fwk_dev_get_name(struct fwk_device *sprt_dev)
 {
 	if (sprt_dev->init_name)
@@ -132,6 +138,12 @@ static inline kchar_t *fwk_dev_get_name(struct fwk_device *sprt_dev)
 	return fwk_kobject_get_name(&sprt_dev->sgrt_kobj);
 }
 
+/*!
+ * @brief   set device name
+ * @param   sprt_dev, name
+ * @retval  none
+ * @note    none
+ */
 static inline void fwk_dev_set_name(struct fwk_device *sprt_dev, kchar_t *name, ...)
 {
 	va_list sprt_list;
@@ -141,6 +153,12 @@ static inline void fwk_dev_set_name(struct fwk_device *sprt_dev, kchar_t *name, 
 	va_end(sprt_list);
 }
 
+/*!
+ * @brief   release device name
+ * @param   sprt_dev
+ * @retval  none
+ * @note    none
+ */
 static inline void fwk_dev_del_name(struct fwk_device *sprt_dev)
 {
 	fwk_kobject_del_name(&sprt_dev->sgrt_kobj);

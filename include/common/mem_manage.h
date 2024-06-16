@@ -75,8 +75,6 @@ static inline void memory_set(void *dest, kuint8_t data, kusize_t size)
     start_addr = (kuaddr_t)dest;
     end_addr   = (kuaddr_t)(start_addr + size);
 
-    mrt_preempt_disable();
-
 #if 0
     __asm__ __volatile__ (
         "   push {r7 - r9}      \n\t"
@@ -113,8 +111,6 @@ static inline void memory_set(void *dest, kuint8_t data, kusize_t size)
     );
 
 #endif
-
-    mrt_preempt_enable();
 }
 
 /*!

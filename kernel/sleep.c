@@ -51,13 +51,15 @@ void schedule_timeout(kutime_t count)
     struct timer_list sgrt_tm;
     struct real_thread *sprt_thread = mrt_current;
     struct spin_lock *sprt_lock = scheduler_lock();
+
+    if (!count)
+        schedule_thread();
 	
 	spin_lock_irqsave(sprt_lock);
     setup_timer(&sgrt_tm, real_thread_sleep_timeout, (kuint32_t)sprt_thread);
-    mod_timer(&sgrt_tm, count);
-
     spin_unlock_irqrestore(sprt_lock);
     
+    mod_timer(&sgrt_tm, count);
     /*!< suspend current thread, and schedule others */
     schedule_self_suspend();
     

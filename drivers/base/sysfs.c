@@ -25,6 +25,12 @@ struct fwk_kobject *sprt_kobj_out;
 struct fwk_kobject *sprt_kobj_err;
 
 /*!< API function */
+/*!
+ * @brief   create and initialize /dev/stdin, ...
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 kint32_t devfs_stdio_init(struct fwk_kset *sprt_head)
 {
 	kint32_t retval;
@@ -79,6 +85,12 @@ fail1:
 	return retval;
 }
 
+/*!
+ * @brief   destroy dev
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 void devfs_stdio_destroy(void)
 {
 	fwk_kobject_destroy(sprt_kobj_err);

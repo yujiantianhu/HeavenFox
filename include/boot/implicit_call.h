@@ -154,29 +154,29 @@ TARGET_EXT const dync_exit_t *dync_exit_sections[];
 #define IMPORT_DRIVER_EXIT(x)				        IMPORT_DYNC_EXIT_ENTRY(drv,  x, __DYNC_DRV_EXIT_SEC)
 
 /*!< The functions */
-kint32_t dync_initcall_run_list(const kuint32_t section);
-void dync_exitcall_run_list(const kuint32_t section);
+TARGET_EXT kint32_t dync_initcall_run_list(const kuint32_t section);
+TARGET_EXT void dync_exitcall_run_list(const kuint32_t section);
 
-kint32_t board_early_initcall(void);
-kint32_t board_late_initcall(void);
-kint32_t system_kernel_initcall(void);
-kint32_t root_filesystem_initcall(void);
-kint32_t platform_built_initcall(void);
-kint32_t platform_reality_initcall(void);
-kint32_t hardware_device_initcall(void);
-kint32_t abstract_driver_initcall(void);
+TARGET_EXT kint32_t board_early_initcall(void);
+TARGET_EXT kint32_t board_late_initcall(void);
+TARGET_EXT kint32_t system_kernel_initcall(void);
+TARGET_EXT kint32_t root_filesystem_initcall(void);
+TARGET_EXT kint32_t platform_built_initcall(void);
+TARGET_EXT kint32_t platform_reality_initcall(void);
+TARGET_EXT kint32_t hardware_device_initcall(void);
+TARGET_EXT kint32_t abstract_driver_initcall(void);
 
-void board_early_exitcall(void);
-void board_late_exitcall(void);
-void system_kernel_exitcall(void);
-void root_filesystem_exitcall(void);
-void platform_built_exitcall(void);
-void platform_reality_exitcall(void);
-void hardware_device_exitcall(void);
-void abstract_driver_exitcall(void);
+TARGET_EXT void board_early_exitcall(void);
+TARGET_EXT void board_late_exitcall(void);
+TARGET_EXT void system_kernel_exitcall(void);
+TARGET_EXT void root_filesystem_exitcall(void);
+TARGET_EXT void platform_built_exitcall(void);
+TARGET_EXT void platform_reality_exitcall(void);
+TARGET_EXT void hardware_device_exitcall(void);
+TARGET_EXT void abstract_driver_exitcall(void);
 
-kint32_t run_machine_initcall(void);
-kint32_t run_platform_initcall(void);
+TARGET_EXT kint32_t run_machine_initcall(void);
+TARGET_EXT kint32_t run_platform_initcall(void);
 
 
 #endif /* __IMPLICIT_CALL_H */

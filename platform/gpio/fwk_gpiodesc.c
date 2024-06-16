@@ -15,11 +15,23 @@
 #include <platform/gpio/fwk_gpiodesc.h>
 
 /*!< API function */
+/*!
+ * @brief   gpiodesc ---> gpio number
+ * @param   sprt_chip, sprt_desc
+ * @retval  gpio number
+ * @note    none
+ */
 kuint32_t fwk_gpiodesc_to_hwgpio(struct fwk_gpio_chip *sprt_chip, struct fwk_gpio_desc *sprt_desc)
 {
     return (kuint32_t)(sprt_desc - &sprt_chip->sprt_desc[0]);
 }
 
+/*!
+ * @brief   gpio number ---> gpio desc
+ * @param   sprt_chip, offset
+ * @retval  gpio desc
+ * @note    none
+ */
 struct fwk_gpio_desc *fwk_gpiochip_get_desc(struct fwk_gpio_chip *sprt_chip, kuint32_t offset)
 {
     return (offset < sprt_chip->ngpios) ? &sprt_chip->sprt_desc[offset] : mrt_nullptr;
@@ -76,6 +88,12 @@ kint32_t fwk_of_get_named_gpio_flags(struct fwk_device_node *sprt_node,
     return fwk_gpiodesc_to_hwgpio(sprt_desc->sprt_chip, sprt_desc);
 }
 
+/*!
+ * @brief   request gpio
+ * @param   sprt_desc, label
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_gpio_request(struct fwk_gpio_desc *sprt_desc, const kchar_t *label)
 {
     struct fwk_gpio_chip *sprt_chip;
@@ -101,6 +119,12 @@ kint32_t fwk_gpio_request(struct fwk_gpio_desc *sprt_desc, const kchar_t *label)
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   release gpio
+ * @param   sprt_desc
+ * @retval  none
+ * @note    none
+ */
 void fwk_gpio_free(struct fwk_gpio_desc *sprt_desc)
 {
     struct fwk_gpio_chip *sprt_chip;
@@ -116,6 +140,12 @@ void fwk_gpio_free(struct fwk_gpio_desc *sprt_desc)
     fwk_gpio_desc_set_flags(sprt_desc, NR_FWK_GPIODESC_IS_OUT);
 }
 
+/*!
+ * @brief   check if gpio is requested
+ * @param   sprt_desc
+ * @retval  status
+ * @note    none
+ */
 kbool_t fwk_gpio_is_requested(struct fwk_gpio_desc *sprt_desc)
 {
     return fwk_gpio_desc_check_flags(sprt_desc, NR_FWK_GPIODESC_REQUESTED);
@@ -156,6 +186,12 @@ struct fwk_gpio_desc *fwk_gpio_desc_get(struct fwk_device *sprt_dev, const kchar
     return sprt_desc;
 }
 
+/*!
+ * @brief   release gpio
+ * @param   sprt_desc
+ * @retval  none
+ * @note    none
+ */
 void fwk_gpio_desc_put(struct fwk_gpio_desc *sprt_desc)
 {
     fwk_gpio_free(sprt_desc);
@@ -164,6 +200,12 @@ void fwk_gpio_desc_put(struct fwk_gpio_desc *sprt_desc)
     fwk_gpio_desc_set_flags(sprt_desc, NR_FWK_GPIODESC_ACTIVE_LOW);
 }
 
+/*!
+ * @brief   gpio_desc ---> irq
+ * @param   sprt_desc
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_gpio_desc_to_irq(struct fwk_gpio_desc *sprt_desc)
 {
     struct fwk_gpio_chip *sprt_chip;
@@ -269,11 +311,23 @@ void fwk_gpio_set_direction(struct fwk_gpio_desc *sprt_desc, kuint32_t dir, kint
     }
 }
 
+/*!
+ * @brief   configure gpio direction to input
+ * @param   sprt_desc
+ * @retval  none
+ * @note    none
+ */
 void fwk_gpio_set_direction_input(struct fwk_gpio_desc *sprt_desc)
 {
     fwk_gpio_set_direction(sprt_desc, FWK_GPIO_DIR_IN, 0);
 }
 
+/*!
+ * @brief   configure gpio direction to output
+ * @param   sprt_desc
+ * @retval  none
+ * @note    none
+ */
 void fwk_gpio_set_direction_output(struct fwk_gpio_desc *sprt_desc, kint32_t value)
 {
     if (value && fwk_gpio_desc_check_flags(sprt_desc, NR_FWK_GPIODESC_OPEN_DRAIN))
@@ -322,6 +376,12 @@ kint32_t fwk_gpio_get_direction(struct fwk_gpio_desc *sprt_desc)
     return -ER_IOERR;
 }
 
+/*!
+ * @brief   check if gpio direction is input
+ * @param   sprt_desc
+ * @retval  direction is input ?
+ * @note    none
+ */
 kbool_t fwk_gpio_dir_is_input(struct fwk_gpio_desc *sprt_desc)
 {
     kint32_t retval;

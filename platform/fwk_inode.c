@@ -124,6 +124,12 @@ static struct fwk_file_oprts sgrt_fwk_inode_def_netfoprts =
 	.close	= fwk_netdev_close,
 };
 
+/*!
+ * @brief   set the operation functions to inode
+ * @param   sprt_node, type, devNum
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_inode_set_ops(struct fwk_inode *sprt_inode, kuint32_t type, kint32_t devNum)
 {
 	if (!sprt_inode)

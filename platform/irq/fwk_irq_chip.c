@@ -28,16 +28,34 @@ struct fwk_irq_chip sgrt_fwk_irq_dummy_chip =
 	.irq_set_type = mrt_nullptr,
 };
 
+/*!
+ * @brief   default enable API
+ * @param   sprt_data
+ * @retval  none
+ * @note    none
+ */
 static void fwk_irq_chip_gc_enable(struct fwk_irq_data *sprt_data)
 {
 
 }
 
+/*!
+ * @brief   default disable API
+ * @param   sprt_data
+ * @retval  none
+ * @note    none
+ */
 static void fwk_irq_chip_gc_disable(struct fwk_irq_data *sprt_data)
 {
 
 }
 
+/*!
+ * @brief   irq register enable
+ * @param   sprt_data
+ * @retval  none
+ * @note    none
+ */
 static void fwk_irq_chip_gc_mask(struct fwk_irq_data *sprt_data)
 {
 	struct fwk_irq_generic *sprt_gc;
@@ -51,6 +69,12 @@ static void fwk_irq_chip_gc_mask(struct fwk_irq_data *sprt_data)
 	mrt_setbitl(sprt_data->mask, sprt_gc->status_reg);
 }
 
+/*!
+ * @brief   irq register disable
+ * @param   sprt_data
+ * @retval  none
+ * @note    none
+ */
 static void fwk_irq_chip_gc_unmask(struct fwk_irq_data *sprt_data)
 {
 	struct fwk_irq_generic *sprt_gc;
@@ -62,6 +86,12 @@ static void fwk_irq_chip_gc_unmask(struct fwk_irq_data *sprt_data)
 	mrt_clrbitl(sprt_data->mask, sprt_gc->manage_reg);
 }
 
+/*!
+ * @brief   get irq status register
+ * @param   sprt_data
+ * @retval  1: irq occur; 0: no irq
+ * @note    none
+ */
 static kbool_t fwk_irq_chip_gc_ack(struct fwk_irq_data *sprt_data)
 {
 	struct fwk_irq_generic *sprt_gc;
@@ -73,6 +103,12 @@ static kbool_t fwk_irq_chip_gc_ack(struct fwk_irq_data *sprt_data)
 	return !!mrt_getbitl(sprt_data->mask, sprt_gc->status_reg);
 }
 
+/*!
+ * @brief   check if irq register is enabled
+ * @param   sprt_data
+ * @retval  1: enabled; 0: close
+ * @note    none
+ */
 static kbool_t fwk_irq_chip_gc_is_enabled(struct fwk_irq_data *sprt_data)
 {
 	struct fwk_irq_generic *sprt_gc;
@@ -94,17 +130,35 @@ struct fwk_irq_chip sgrt_fwk_irq_generic_chip =
 	.irq_is_enabled = fwk_irq_chip_gc_is_enabled,
 };
 
+/*!
+ * @brief   save privdata to irq_chip
+ * @param   sprt_data, data
+ * @retval  none
+ * @note    none
+ */
 void fwk_irq_set_chip_data(struct fwk_irq_data *sprt_data, void *data)
 {
 	sprt_data->chip_data = data;
 }
 
+/*!
+ * @brief   save privdata to irq_chip
+ * @param   sprt_data, sprt_chip, data
+ * @retval  none
+ * @note    none
+ */
 void fwk_irq_set_chip_handler(struct fwk_irq_data *sprt_data, struct fwk_irq_chip *sprt_chip, void *data)
 {
 	sprt_data->sprt_chip = sprt_chip;
 	sprt_data->handler_data = data;
 }
 
+/*!
+ * @brief   save data to irq_chip
+ * @param   irq_base, sprt_gc, chip_data
+ * @retval  none
+ * @note    none
+ */
 void fwk_irq_setup_generic_chip(kint32_t irq_base, kuint32_t irq_max, struct fwk_irq_generic *sprt_gc, void *chip_data)
 {
 	struct fwk_irq_data *sprt_data;
@@ -123,6 +177,12 @@ void fwk_irq_setup_generic_chip(kint32_t irq_base, kuint32_t irq_max, struct fwk
 	}
 }
 
+/*!
+ * @brief   delete data in irq_chip
+ * @param   irq_base, irq_max
+ * @retval  none
+ * @note    none
+ */
 void fwk_irq_shutdown_generic_chip(kint32_t irq_base, kuint32_t irq_max)
 {
 	struct fwk_irq_data *sprt_data;
@@ -140,6 +200,12 @@ void fwk_irq_shutdown_generic_chip(kint32_t irq_base, kuint32_t irq_max)
 	}
 }
 
+/*!
+ * @brief   get data
+ * @param   sprt_data
+ * @retval  generic data
+ * @note    none
+ */
 struct fwk_irq_generic *fwk_irq_get_generic_data(struct fwk_irq_data *sprt_data)
 {
 	struct fwk_irq_generic *sprt_gc;
@@ -148,6 +214,12 @@ struct fwk_irq_generic *fwk_irq_get_generic_data(struct fwk_irq_data *sprt_data)
 	return sprt_gc;
 }
 
+/*!
+ * @brief   irq enable
+ * @param   irq
+ * @retval  none
+ * @note    none
+ */
 void fwk_enable_irq(kint32_t irq)
 {
 	struct fwk_irq_data *sprt_data;
@@ -162,6 +234,12 @@ void fwk_enable_irq(kint32_t irq)
 		sprt_data->sprt_chip->irq_mask(sprt_data);
 }
 
+/*!
+ * @brief   irq disable
+ * @param   irq
+ * @retval  none
+ * @note    none
+ */
 void fwk_disable_irq(kint32_t irq)
 {
 	struct fwk_irq_data *sprt_data;
@@ -176,6 +254,12 @@ void fwk_disable_irq(kint32_t irq)
 		sprt_data->sprt_chip->irq_unmask(sprt_data);
 }
 
+/*!
+ * @brief   set irq trigger type
+ * @param   irq, flags
+ * @retval  none
+ * @note    none
+ */
 void fwk_irq_set_type(kint32_t irq, kuint32_t flags)
 {
 	struct fwk_irq_data *sprt_data;
@@ -196,6 +280,12 @@ void fwk_irq_set_type(kint32_t irq, kuint32_t flags)
 		sprt_data->sprt_chip->irq_set_type(sprt_data, type);
 }
 
+/*!
+ * @brief   check if irq is happend
+ * @param   irq
+ * @retval  1: irq occur
+ * @note    none
+ */
 kbool_t fwk_irq_is_acked(kint32_t irq)
 {
 	struct fwk_irq_data *sprt_data;
@@ -210,6 +300,12 @@ kbool_t fwk_irq_is_acked(kint32_t irq)
 	return false;
 }
 
+/*!
+ * @brief   check if irq is enabled
+ * @param   irq
+ * @retval  1: irq enabled
+ * @note    none
+ */
 kbool_t fwk_irq_is_enabled(kint32_t irq)
 {
 	struct fwk_irq_data *sprt_data;

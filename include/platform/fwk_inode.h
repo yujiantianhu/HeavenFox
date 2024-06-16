@@ -20,11 +20,8 @@
 #include <platform/fwk_kobj.h>
 
 /*!< The defines */
-#define INODE_PREX_LEN									5
-#define INODE_ADD_PREX_LEN								(DEVICE_NAME_LEN + INODE_PREX_LEN)
-
-#define RET_INODE_MAJOR(inode)							GET_DEV_MAJOR(inode->r_dev)
-#define RET_INODE_MINOR(inode)							GET_DEV_MINOR(inode->r_dev)
+#define RET_INODE_MAJOR(inode)							GET_DEV_MAJOR((inode)->r_dev)
+#define RET_INODE_MINOR(inode)							GET_DEV_MINOR((inode)->r_dev)
 
 #define INODE_TYPE_FILE									(0)
 #define INODE_TYPE_DIR									(1)

@@ -111,16 +111,34 @@ TARGET_EXT kint32_t fwk_gpio_get_direction(struct fwk_gpio_desc *sprt_desc);
 TARGET_EXT kbool_t fwk_gpio_dir_is_input(struct fwk_gpio_desc *sprt_desc);
 
 /*!< API functions */
+/*!
+ * @brief   set flags
+ * @param   sprt_desc, flag
+ * @retval  none
+ * @note    none
+ */
 static inline void fwk_gpio_desc_set_flags(struct fwk_gpio_desc *sprt_desc, ert_fwk_gpiodesc_flag_t flag)
 {
     sprt_desc->flags |= mrt_bit(flag);
 }
 
+/*!
+ * @brief   check flags
+ * @param   sprt_desc, flag
+ * @retval  is set(true) / is not set(false)
+ * @note    none
+ */
 static inline kbool_t fwk_gpio_desc_check_flags(struct fwk_gpio_desc *sprt_desc, ert_fwk_gpiodesc_flag_t flag)
 {
     return !!(sprt_desc->flags & mrt_bit(flag));
 }
 
+/*!
+ * @brief   clear flags
+ * @param   sprt_desc, flag
+ * @retval  none
+ * @note    none
+ */
 static inline void fwk_gpio_desc_clr_flags(struct fwk_gpio_desc *sprt_desc, ert_fwk_gpiodesc_flag_t flag)
 {
     sprt_desc->flags &= ~mrt_bit(flag);

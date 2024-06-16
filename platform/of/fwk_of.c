@@ -893,7 +893,7 @@ kuint32_t fwk_of_get_child_count(struct fwk_device_node *sprt_node)
 }
 
 /*!
- * @brief   none
+ * @brief   check if device_node is opened
  * @param   none
  * @retval  none
  * @note    retval: [true: ok, okay; false: disable]
@@ -1072,6 +1072,12 @@ fail:
 	return -1;
 }
 
+/*!
+ * @brief   cut the name of compatible's value (from the first ',')
+ * @param   sprt_node, modalias, len
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_of_modalias_node(struct fwk_device_node *sprt_node, kchar_t *modalias, kuint32_t len)
 {
 	const kchar_t *compatible, *p;

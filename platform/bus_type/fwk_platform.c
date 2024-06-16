@@ -213,6 +213,12 @@ kint32_t fwk_device_driver_match(struct fwk_device *sprt_dev, struct fwk_bus_typ
 	return fwk_device_driver_probe(sprt_dev);
 }
 
+/*!
+ * @brief   device initialization
+ * @param   sprt_dev
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_device_initial(struct fwk_device *sprt_dev)
 {
 	struct fwk_kobject *sprt_kobj;

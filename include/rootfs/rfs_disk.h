@@ -64,17 +64,17 @@ typedef struct rfs_disk
 typedef struct rfs_disk_file
 {
 	kint32_t (*init)(struct rfs_disk_file *sprt_this, const kchar_t *ptrName, kuint8_t flags, kuaddr_t addr_base, kuint32_t size);
-	void (*exit)(struct rfs_disk_file *sprt_this);
+	void 	 (*exit)(struct rfs_disk_file *sprt_this);
 
-	void (*set_fileName)(struct rfs_disk_file *sprt_this, const kchar_t *ptrFileName);
-	kbool_t (*is_mounted)(struct rfs_disk_file *sprt_this);
-	kbool_t (*is_opened)(struct rfs_disk_file *sprt_this);
+	void 	 (*set_fileName)(struct rfs_disk_file *sprt_this, const kchar_t *ptrFileName);
+	kbool_t  (*is_mounted)(struct rfs_disk_file *sprt_this);
+	kbool_t  (*is_opened)(struct rfs_disk_file *sprt_this);
 
 	kint32_t (*open)(struct rfs_disk_file *sprt_this, kuint8_t flags);
 	kint32_t (*lseek)(struct rfs_disk_file *sprt_this, kuint32_t offset);
-	kusize_t  (*write)(struct rfs_disk_file *sprt_this, const void *ptrBuffer, kuint32_t size, kuint32_t offset);
-	kusize_t  (*read)(struct rfs_disk_file *sprt_this, void *ptrBuffer, kuint32_t size, kuint32_t offset);
-	kusize_t  (*fsize)(struct rfs_disk_file *sprt_this);
+	kusize_t (*write)(struct rfs_disk_file *sprt_this, const void *ptrBuffer, kuint32_t size, kuint32_t offset);
+	kusize_t (*read)(struct rfs_disk_file *sprt_this, void *ptrBuffer, kuint32_t size, kuint32_t offset);
+	kusize_t (*fsize)(struct rfs_disk_file *sprt_this);
 	kint32_t (*close)(struct rfs_disk_file *sprt_this);
 
 	/*!< common resource */

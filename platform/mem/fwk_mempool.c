@@ -13,13 +13,16 @@
 /*!< The includes */
 #include <boot/boot_text.h>
 #include <platform/fwk_mempool.h>
-#include <kernel/mutex.h>
+#include <kernel/sched.h>
+#include <kernel/wait.h>
+#include <kernel/spinlock.h>
 
 /*!< The globals */
 struct fwk_mempool
 {
 	struct mem_info *sprt_info;
-	struct mutex_lock sgrt_mutex;
+	struct wait_queue_head sgrt_wqh;
+	struct spin_lock sgrt_lock;
 };
 
 static struct mem_info sgrt_kernel_mem_info =
@@ -33,7 +36,6 @@ static struct mem_info sgrt_kernel_mem_info =
 static struct fwk_mempool sgrt_kernel_mempool =
 {
 	.sprt_info = &sgrt_kernel_mem_info,
-	.sgrt_mutex = MUTEX_LOCK_INIT(),
 };
 
 /*!< API function */
@@ -55,7 +57,8 @@ kbool_t fwk_mempool_initial(void)
 							   MEMORY_POOL_BASE, 
 							   MEMORY_POOL_SIZE);
 
-	mutex_init(&sprt_pool->sgrt_mutex);
+	init_waitqueue_head(&sprt_pool->sgrt_wqh);
+	spin_lock_init(&sprt_pool->sgrt_lock);
 
 	return true;
 }
@@ -91,7 +94,8 @@ void memory_block_self_destroy(void)
 	struct mem_info *sprt_info = sprt_pool->sprt_info;
 
 	memory_simple_block_destroy(sprt_info);
-	mutex_init(&sprt_pool->sgrt_mutex);
+	init_waitqueue_head(&sprt_pool->sgrt_wqh);
+	spin_lock_init(&sprt_pool->sgrt_lock);
 }
 
 /*!
@@ -110,7 +114,9 @@ __weak void *kmalloc(size_t __size, ert_fwk_mempool_t flags)
 		return p;
 	
 	if (flags & NR_KMEM_WAIT)
-		mutex_lock(&sprt_pool->sgrt_mutex);
+		wait_event(&sprt_pool->sgrt_wqh, !spin_is_locked(&sprt_pool->sgrt_lock));
+
+	spin_lock_irqsave(&sprt_pool->sgrt_lock);
 
 	p = alloc_spare_simple_memory(sprt_info->sprt_mem, __size);
 	if (!isValid(p))
@@ -123,8 +129,7 @@ __weak void *kmalloc(size_t __size, ert_fwk_mempool_t flags)
 		memory_reset(p, __size);
 
 END:
-	if (flags & NR_KMEM_WAIT)
-		mutex_unlock(&sprt_pool->sgrt_mutex);
+	spin_unlock_irqrestore(&sprt_pool->sgrt_lock);
 
 	return p;
 }
@@ -167,7 +172,9 @@ __weak void kfree(void *__ptr)
 	if (__ptr >= (void *)(sprt_info->base + sprt_info->lenth))
 		return;
 
+	spin_lock_irqsave(&sprt_pool->sgrt_lock);
 	free_employ_simple_memory(sprt_info->sprt_mem, __ptr);
+	spin_unlock_irqrestore(&sprt_pool->sgrt_lock);
 }
 
 /* end of file */

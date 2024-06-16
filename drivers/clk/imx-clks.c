@@ -57,6 +57,13 @@ static struct fwk_of_device_id sgrt_imx_ccm_driver_ids[] =
 	{},
 };
 
+/*!< API function */
+/*!
+ * @brief   fill sprt_data
+ * @param   sprt_data
+ * @retval  none
+ * @note    none
+ */
 static void imx_clk_init_data(srt_imx_clk_gate_fix_t *sprt_data, const struct fwk_clk_ops *sprt_ops, void *reg)
 {
     sprt_data->sgrt_cell.sprt_clks = &sgrt_imx_clks_data[0];
@@ -70,6 +77,12 @@ static void imx_clk_init_data(srt_imx_clk_gate_fix_t *sprt_data, const struct fw
         sprt_data->reg = reg;
 }
 
+/*!
+ * @brief   register clk gate
+ * @param   sprt_clk, sprt_data
+ * @retval  the fwk_clk allocated
+ * @note    none
+ */
 static struct fwk_clk *imx_clk_gate(struct fwk_clk *sprt_clk, const kchar_t *name, 
                             kuint8_t shift, const kchar_t *parent, srt_imx_clk_gate_fix_t *sprt_data)
 {
@@ -81,6 +94,12 @@ static struct fwk_clk *imx_clk_gate(struct fwk_clk *sprt_clk, const kchar_t *nam
                                  shift);
 }
 
+/*!
+ * @brief   register clk gate
+ * @param   number, sprt_data
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_clk_init_gate(kuint32_t number, const kchar_t *name, 
                             kuint8_t shift, const kchar_t *parent, srt_imx_clk_gate_fix_t *sprt_data)
 {
@@ -95,6 +114,12 @@ static kint32_t imx_clk_init_gate(kuint32_t number, const kchar_t *name,
     return isValid(sprt_clk) ? 0 : (-ER_NOMEM);
 }
 
+/*!
+ * @brief   initial video clock
+ * @param   sprt_data
+ * @retval  none
+ * @note    none
+ */
 static void imx_clks_video_init(struct imx_clks_data *sprt_data)
 {
 	srt_hal_imx_ccm_t *sprt_ccm;
@@ -202,6 +227,12 @@ static void imx_clks_video_init(struct imx_clks_data *sprt_data)
 //  mrt_setbitl(IMX6UL_CCM_CCGR_BIT(5), &sprt_ccm->CCGR3);
 }
 
+/*!
+ * @brief   enable clk
+ * @param   sprt_hw
+ * @retval  errono
+ * @note    none
+ */
 static kint32_t imx_clks_gate_enable(struct fwk_clk_hw *sprt_hw)
 {
     struct fwk_clk_gate *sprt_gate;
@@ -212,6 +243,12 @@ static kint32_t imx_clks_gate_enable(struct fwk_clk_hw *sprt_hw)
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   disable clk
+ * @param   sprt_hw
+ * @retval  none
+ * @note    none
+ */
 static void	imx_clks_gate_disable(struct fwk_clk_hw *sprt_hw)
 {
     struct fwk_clk_gate *sprt_gate;
@@ -220,6 +257,12 @@ static void	imx_clks_gate_disable(struct fwk_clk_hw *sprt_hw)
     mrt_clrbitl(IMX6UL_CCM_CCGR_BIT(sprt_gate->bit_idx), sprt_gate->reg);
 }
 
+/*!
+ * @brief   get clk status
+ * @param   sprt_hw
+ * @retval  errono
+ * @note    none
+ */
 static kint32_t imx_clks_gate_is_enabled(struct fwk_clk_hw *sprt_hw)
 {
     struct fwk_clk_gate *sprt_gate;
@@ -238,6 +281,12 @@ static const struct fwk_clk_ops sgrt_imx_clks_gate_oprts =
     .is_enabled = imx_clks_gate_is_enabled,
 };
 
+/*!
+ * @brief   create clk global data from device_tree
+ * @param   sprt_data
+ * @retval  errono
+ * @note    none
+ */
 static kint32_t imx_clks_driver_of_init(struct imx_clks_data *sprt_data)
 {
     struct fwk_clk *sprt_gclk;
@@ -420,7 +469,7 @@ kint32_t __fwk_init imx_clks_driver_init(void)
 
 /*!< ----------------------------------------------------------------------------------
  * Part of the clock has been initialized in boot, and the rest is supplemented here 
- * ----------------------------------------------------------------------------------*/
+ * --------------------------------------------------------------------------------- */
     /*!< 1. gpio */
     /*!< gpio1 */
     mrt_setbitl(IMX6UL_CCM_CCGR_BIT(13), &sprt_ccm->CCGR1);

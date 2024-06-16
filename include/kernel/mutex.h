@@ -33,6 +33,12 @@ TARGET_EXT kint32_t mutex_try_lock(struct mutex_lock *sprt_lock);
 TARGET_EXT void mutex_unlock(struct mutex_lock *sprt_lock);
 
 /*!< API functions */
+/*!
+ * @brief   check if mutex is locked
+ * @param   sprt_lock
+ * @retval  locked(true) / unlocked(false)
+ * @note    none
+ */
 static inline kbool_t mutex_is_locked(struct mutex_lock *sprt_lock)
 {
 	return !!ATOMIC_READ(&sprt_lock->sgrt_atc);

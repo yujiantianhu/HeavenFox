@@ -508,6 +508,34 @@ kchar_t *vasprintk(const kchar_t *ptr_fmt, va_list sprt_list)
 }
 
 /*!
+ * @brief   lv_vasprintk
+ * @param   ptr_buf, ptr_fmt
+ * @retval  none
+ * @note    String format conversion
+ */
+kchar_t *lv_vasprintk(const kchar_t *ptr_fmt, kubyte_t *ptr_lv, va_list sprt_list)
+{
+	va_list sprt_copy;
+	kusize_t size;
+	kchar_t *ptr;
+
+	if (!ptr_fmt)
+		return mrt_nullptr;
+
+	va_copy(sprt_copy, sprt_list);
+	size = do_fmt_convert(mrt_nullptr, mrt_nullptr, ptr_fmt, sprt_copy, (kusize_t)(~0));
+	va_end(sprt_copy);
+
+	ptr = kmalloc(size + 1, GFP_KERNEL);
+	if (!isValid(ptr))
+		return mrt_nullptr;
+
+	do_fmt_convert(ptr, ptr_lv, ptr_fmt, sprt_list, size + 1);
+
+	return ptr;
+}
+
+/*!
  * @brief   sprintk
  * @param   ptr_buf, ptr_fmt
  * @retval  none
@@ -660,6 +688,12 @@ __weak kint32_t kstrncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
 	return do_string_n_compare(__s1, __s2, __n);
 }
 
+/*!
+ * @brief   kstrchr
+ * @param   none
+ * @retval  none
+ * @note    locate where the first "ch" appears
+ */
 __weak kchar_t *kstrchr(const kchar_t *__s1, kchar_t ch)
 {
 	return seek_char_in_string(__s1, ch);

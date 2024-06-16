@@ -47,9 +47,9 @@ kint32_t fwk_unregister_platdriver(struct fwk_platdrv *sprt_platdrv)
 	return fwk_driver_unregister(&sprt_platdrv->sgrt_driver);
 }
 
-/*!< -------------------------------------------------------------------------- */
-/*!<							Device Driver Interface					  	 	*/
-/*!< -------------------------------------------------------------------------- */
+/*!< --------------------------------------------------------------------------
+							Device Driver Interface					  	 
+ --------------------------------------------------------------------------- */
 /*!
  * @brief   Device-driver matching
  * @param   driver, platform-bus, match-callback

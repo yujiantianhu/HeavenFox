@@ -44,6 +44,12 @@ TARGET_EXT kint32_t spin_try_lock_irqsave(struct spin_lock *sprt_lock);
 TARGET_EXT void spin_unlock_irqrestore(struct spin_lock *sprt_lock);
 
 /*!< API functions */
+/*!
+ * @brief   check if spinlock is locked
+ * @param   sprt_lock
+ * @retval  locked(true) / unlocked(false)
+ * @note    none
+ */
 static inline kbool_t spin_is_locked(struct spin_lock *sprt_lock)
 {
 	return !!ATOMIC_READ(&sprt_lock->sgrt_atc);

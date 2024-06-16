@@ -49,7 +49,7 @@ struct fwk_net_device *fwk_alloc_netdev_mq(kint32_t sizeof_priv, const kchar_t *
 	if (setup)
 		setup(sprt_netdev);
 
-	strcpy(sprt_netdev->name, name);
+	kstrcpy(sprt_netdev->name, name);
 
 	return sprt_netdev;
 }
@@ -72,7 +72,4 @@ void fwk_free_netdev(struct fwk_net_device *sprt_dev)
 	kfree(sprt_dev);
 }
 
-
-
-
-
+/*!< end of file */

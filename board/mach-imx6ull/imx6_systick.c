@@ -33,7 +33,7 @@ static const struct fwk_of_device_id sgrt_imx_systick_ids[] =
 };
 
 /*!< The functions */
-irq_return_t imx6_systick_handler(void *ptrDev);
+irq_return_t imx6_systick_isr(void *ptrDev);
 
 /*!< API function */
 /*!
@@ -94,7 +94,7 @@ void imx6ull_systick_init(void)
 	 */
 	mrt_resetl(&sprt_tick->IR);
 
-	retval = fwk_request_irq(irq, imx6_systick_handler, 0, "imx6-systick", sprt_tick);
+	retval = fwk_request_irq(irq, imx6_systick_isr, 0, "imx6-systick", sprt_tick);
 	if (!retval)
 		mrt_setbitl(mrt_bit(0U), &sprt_tick->IR);
 
@@ -163,7 +163,13 @@ void imx6ull_systick_init(void)
 	ptr_systick_counter = (kutime_t *)&sprt_tick->CNT;
 }
 
-irq_return_t imx6_systick_handler(void *ptrDev)
+/*!
+ * @brief   imx6ull_systick irq handler
+ * @param   none
+ * @retval  none
+ * @note    increase jiffies
+ */
+irq_return_t imx6_systick_isr(void *ptrDev)
 {
 	srt_hal_imx_gptimer_t *sprt_tick = (srt_hal_imx_gptimer_t *)ptrDev;
 

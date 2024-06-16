@@ -137,8 +137,8 @@ typedef struct ap3216c_drv_info
 /*!< API function */
 /*!
  * @brief  ap3216c_write_value
- * @param  None
- * @retval None
+ * @param  none
+ * @retval none
  * @note   write data by i2c
  */
 static kuint16_t ap3216c_write_value(struct ap3216c_drv_info *sprt_info, kuint8_t reg, kuint8_t value)
@@ -161,8 +161,8 @@ static kuint16_t ap3216c_write_value(struct ap3216c_drv_info *sprt_info, kuint8_
 
 /*!
  * @brief  ap3216c_read_value
- * @param  None
- * @retval None
+ * @param  none
+ * @retval none
  * @note   read data by i2c
  */
 static kuint16_t ap3216c_read_value(struct ap3216c_drv_info *sprt_info, kuint8_t reg)
@@ -188,6 +188,12 @@ static kuint16_t ap3216c_read_value(struct ap3216c_drv_info *sprt_info, kuint8_t
     return value;
 }
 
+/*!
+ * @brief  read ap3216c's ir register
+ * @param  sprt_info
+ * @retval ir's data
+ * @note   none
+ */
 static kint32_t ap3216c_read_ir(struct ap3216c_drv_info *sprt_info)
 {
     kuint16_t value[2];
@@ -206,6 +212,12 @@ static kint32_t ap3216c_read_ir(struct ap3216c_drv_info *sprt_info)
     return AP3216C_IR_DATA(value[0], value[1]);
 }
 
+/*!
+ * @brief  read ap3216c's als register
+ * @param  sprt_info
+ * @retval als's data
+ * @note   none
+ */
 static kint32_t ap3216c_read_als(struct ap3216c_drv_info *sprt_info)
 {
     kuint16_t value[2];
@@ -221,6 +233,12 @@ static kint32_t ap3216c_read_als(struct ap3216c_drv_info *sprt_info)
     return AP3216C_ALS_DATA(value[0], value[1]);
 }
 
+/*!
+ * @brief  read ap3216c's ps register
+ * @param  sprt_info
+ * @retval ps's data
+ * @note   none
+ */
 static kint32_t ap3216c_read_ps(struct ap3216c_drv_info *sprt_info)
 {
     kuint16_t value[2];
@@ -242,6 +260,12 @@ static kint32_t ap3216c_read_ps(struct ap3216c_drv_info *sprt_info)
     return AP3216C_PS_DATA(value[0], value[1]);
 }
 
+/*!
+ * @brief  initialize ap3216c
+ * @param  sprt_info
+ * @retval errno
+ * @note   none
+ */
 static kint32_t ap3216c_init(struct ap3216c_drv_info *sprt_info)
 {
     kuint16_t value;
@@ -269,6 +293,12 @@ static kint32_t ap3216c_init(struct ap3216c_drv_info *sprt_info)
     return ER_NORMAL;
 }
 
+/*!
+ * @brief  driver open
+ * @param  sprt_inode, sprt_file
+ * @retval errno
+ * @note   none
+ */
 static kint32_t ap3216c_driver_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
     struct ap3216c_drv_info *sprt_info;
@@ -281,6 +311,12 @@ static kint32_t ap3216c_driver_open(struct fwk_inode *sprt_inode, struct fwk_fil
     return ER_NORMAL;
 }
 
+/*!
+ * @brief  driver close
+ * @param  sprt_inode, sprt_file
+ * @retval errno
+ * @note   none
+ */
 static kint32_t ap3216c_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
     sprt_file->private_data = mrt_nullptr;
@@ -288,6 +324,12 @@ static kint32_t ap3216c_driver_close(struct fwk_inode *sprt_inode, struct fwk_fi
     return ER_NORMAL;
 }
 
+/*!
+ * @brief  driver read
+ * @param  sprt_file, buffer, size
+ * @retval size
+ * @note   none
+ */
 static kssize_t ap3216c_driver_read(struct fwk_file *sprt_file, kbuffer_t *buffer, kssize_t size)
 {
     struct ap3216c_drv_info *sprt_info;
@@ -324,8 +366,8 @@ static const struct fwk_file_oprts sgrt_ap3216c_driver_oprts =
 
 /*!< --------------------------------------------------------------------- */
 /*!
- * @brief   imx_i2c_driver_probe
- * @param   sprt_dev
+ * @brief   ap3216c_driver_probe
+ * @param   sprt_client
  * @retval  errno
  * @note    none
  */
@@ -377,8 +419,8 @@ fail1:
 }
 
 /*!
- * @brief   imx_i2c_driver_remove
- * @param   sprt_dev
+ * @brief   ap3216c_driver_remove
+ * @param   sprt_client
  * @retval  errno
  * @note    none
  */

@@ -22,6 +22,12 @@
 #define FWK_IRQ_DESC_MAX					(1024)
 
 /*!< The globals */
+/*!
+ * @brief   malloc for radix_node
+ * @param   size
+ * @retval  none
+ * @note    none
+ */
 static void *fwk_irq_radix_node_malloc(kusize_t size)
 {
 	return kmalloc(size, GFP_KERNEL);
@@ -31,6 +37,12 @@ static DECLARE_RADIX_TREE(sgrt_fwk_irq_radix_tree, fwk_irq_radix_node_malloc, kf
 static kuint32_t g_fwk_allocated_irqs[mrt_num_align(FWK_IRQ_DESC_MAX, RET_BITS_PER_INT) / RET_BITS_PER_INT] = { 0 };
 
 /*!< API functions */
+/*!
+ * @brief   allocate irq_desc
+ * @param   gfp
+ * @retval  none
+ * @note    none
+ */
 static struct fwk_irq_desc *fwk_allocate_irq_desc(ert_fwk_mempool_t gfp)
 {
 	struct fwk_irq_desc *sprt_desc;
@@ -44,6 +56,12 @@ static struct fwk_irq_desc *fwk_allocate_irq_desc(ert_fwk_mempool_t gfp)
 	return sprt_desc;
 }
 
+/*!
+ * @brief   find irq number that is not used from bitmap
+ * @param   bitmap, irq_base, total_bits, nr_irqs
+ * @retval  irq number base
+ * @note    none
+ */
 static kint32_t fwk_irq_bitmap_find_areas(kuint32_t *bitmap, kint32_t irq_base, kuint32_t total_bits, kuint32_t nr_irqs)
 {
 	kuint32_t index = 0, temp = 0;
@@ -55,12 +73,12 @@ static kint32_t fwk_irq_bitmap_find_areas(kuint32_t *bitmap, kint32_t irq_base, 
 		if ((index + nr_irqs) >= total_bits)
 			return -ER_MORE;
 
-		/* 获取第一个非1的bit */
+		/*!< get the first non-zero bit  */
 		index = bitmap_find_first_zero_bit(bitmap, index, total_bits);
 		if (index < 0)
 			return -ER_NOTFOUND;
 
-		/* 以index为起始, 获取连续nr_irqs个非1的bit, 成功则返回0; 失败返回错误的index */
+		/*!< base on index, get nr_irqs consecutive non-zero bits; if success, return 0; otherwise, return index that causing failed */
 		temp = bitmap_find_nr_zero_bit(bitmap, index, total_bits, nr_irqs);
 		if (temp)
 		{
@@ -73,6 +91,12 @@ static kint32_t fwk_irq_bitmap_find_areas(kuint32_t *bitmap, kint32_t irq_base, 
 	return index;
 }
 
+/*!
+ * @brief   allocate and initialize irq_data
+ * @param   sprt_domain, virq, hwirq, nr_irqs
+ * @retval  virtual irq number or errno
+ * @note    none
+ */
 static kint32_t irq_domain_alloc_irq_data(struct fwk_irq_domain *sprt_domain, kuint32_t virq, kuint32_t hwirq, kuint32_t nr_irqs)
 {
 	struct fwk_irq_data *sprt_data;
@@ -110,7 +134,7 @@ static kint32_t fwk_irq_domain_alloc_descs(kint32_t irq_base, kuint32_t nr_irqs)
 	if (virq < 0)
 		return virq;
 
-	/* create desc for every irq */
+	/*!< create desc for every irq */
 	for (kuint32_t i = 0; i < nr_irqs; i++)
 	{
 		sprt_desc = fwk_allocate_irq_desc(GFP_KERNEL);
@@ -127,6 +151,12 @@ static kint32_t fwk_irq_domain_alloc_descs(kint32_t irq_base, kuint32_t nr_irqs)
 }
 
 /*!< ----------------------------------------------------------- */
+/*!
+ * @brief   irq ---> irq_desc
+ * @param   irq
+ * @retval  irq_desc
+ * @note    none
+ */
 struct fwk_irq_desc *fwk_irq_to_desc(kuint32_t virq)
 {
 	if (virq < 0)
@@ -135,17 +165,35 @@ struct fwk_irq_desc *fwk_irq_to_desc(kuint32_t virq)
 	return radix_tree_next_entry(&sgrt_fwk_irq_radix_tree, struct fwk_irq_desc, sgrt_radix, virq);
 }
 
+/*!
+ * @brief   irq_data ---> irq_desc
+ * @param   irq_data
+ * @retval  irq_desc
+ * @note    none
+ */
 struct fwk_irq_desc *fwk_irq_data_to_desc(struct fwk_irq_data *sprt_data)
 {
 	return sprt_data ? mrt_container_of(sprt_data, struct fwk_irq_desc, sgrt_data) : mrt_nullptr;
 }
 
+/*!
+ * @brief   irq ---> irq_data
+ * @param   irq
+ * @retval  irq_data
+ * @note    none
+ */
 struct fwk_irq_data *fwk_irq_get_data(kuint32_t virq)
 {
 	struct fwk_irq_desc *sprt_desc = fwk_irq_to_desc(virq);
 	return (sprt_desc) ? &sprt_desc->sgrt_data : mrt_nullptr;
 }
 
+/*!
+ * @brief   get irq_data by hard irq
+ * @param   sprt_domain, hwirq
+ * @retval  irq_data
+ * @note    none
+ */
 struct fwk_irq_data *fwk_irq_domain_get_data(struct fwk_irq_domain *sprt_domain, kuint32_t hwirq)
 {
 	kint32_t virq;
@@ -166,6 +214,12 @@ fail:
 	return mrt_nullptr;
 }
 
+/*!
+ * @brief   get irq_data by hard irq
+ * @param   sprt_domain, hwirq
+ * @retval  irq_data
+ * @note    none
+ */
 kint32_t fwk_irq_domain_find_map(struct fwk_irq_domain *sprt_domain, kuint32_t hwirq, kuint32_t type)
 {
 	struct fwk_irq_desc *sprt_desc;
@@ -188,6 +242,12 @@ END:
 	return sprt_data->irq;
 }
 
+/*!
+ * @brief   set irq type
+ * @param   virq, type
+ * @retval  none
+ * @note    none
+ */
 void fwk_irq_desc_set_type(kuint32_t virq, kuint32_t type)
 {
 	struct fwk_irq_desc *sprt_desc = fwk_irq_to_desc(virq);
@@ -198,6 +258,12 @@ void fwk_irq_desc_set_type(kuint32_t virq, kuint32_t type)
 	sprt_desc->flags |= type;
 }
 
+/*!
+ * @brief   allocate multiple irq numbers
+ * @param   sprt_domain, irq_base, hwirq, nr_irqs
+ * @retval  irq base allocated
+ * @note    none
+ */
 kint32_t fwk_irq_domain_alloc_irqs(struct fwk_irq_domain *sprt_domain, kint32_t irq_base, kuint32_t hwirq, kuint32_t nr_irqs)
 {
 	kint32_t virq;
@@ -209,6 +275,12 @@ kint32_t fwk_irq_domain_alloc_irqs(struct fwk_irq_domain *sprt_domain, kint32_t 
 	return irq_domain_alloc_irq_data(sprt_domain, virq, hwirq, nr_irqs);
 }
 
+/*!
+ * @brief   release irq
+ * @param   irq
+ * @retval  none
+ * @note    none
+ */
 void fwk_irq_desc_free(kint32_t irq)
 {
 	struct fwk_irq_desc *sprt_desc;
@@ -224,6 +296,12 @@ void fwk_irq_desc_free(kint32_t irq)
 	kfree(sprt_desc);
 }
 
+/*!
+ * @brief   release multiple irq numbers
+ * @param   sprt_domain
+ * @retval  none
+ * @note    none
+ */
 void fwk_irq_domain_free_irqs(struct fwk_irq_domain *sprt_domain)
 {
 	kuint32_t idx;
@@ -238,6 +316,12 @@ void fwk_irq_domain_free_irqs(struct fwk_irq_domain *sprt_domain)
 	}
 }
 
+/*!
+ * @brief   parse and map irq
+ * @param   sprt_node, index
+ * @retval  irq number (hwirq ---> virtual irq)
+ * @note    none
+ */
 kint32_t fwk_of_irq_get(struct fwk_device_node *sprt_node, kuint32_t index)
 {
 	return fwk_irq_of_parse_and_map(sprt_node, index);

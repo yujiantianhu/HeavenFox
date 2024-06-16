@@ -69,10 +69,8 @@ struct mailbox
     struct list_head sgrt_mail;
 
     struct list_head sgrt_link;
+    struct mutex_lock sgrt_lock;
 };
-
-/*!< The globals */
-
 
 /*!< The functions */
 TARGET_EXT struct mailbox *mailbox_find(const kchar_t *name);

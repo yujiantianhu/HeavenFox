@@ -19,6 +19,12 @@
 static DECLARE_LIST_HEAD(sgrt_fwk_irq_domain);
 
 /*!< API function */
+/*!
+ * @brief   get irq domain
+ * @param   sprt_node
+ * @retval  sprt_domain
+ * @note    none
+ */
 struct fwk_irq_domain *fwk_of_irq_host(struct fwk_device_node *sprt_node)
 {
 	struct fwk_irq_domain *sprt_domain, *found = mrt_nullptr;
@@ -202,6 +208,12 @@ struct fwk_irq_domain *fwk_irq_domain_add_hierarchy(struct fwk_irq_domain *sprt_
 	return sprt_domain;
 }
 
+/*!
+ * @brief   delete sprt_domain
+ * @param   sprt_domain
+ * @retval  none
+ * @note    none
+ */
 void fwk_irq_domain_del_hierarchy(struct fwk_irq_domain *sprt_domain)
 {
 	if (!sprt_domain)
@@ -211,6 +223,12 @@ void fwk_irq_domain_del_hierarchy(struct fwk_irq_domain *sprt_domain)
 	list_head_del_tail(&sprt_domain->sgrt_link);
 }
 
+/*!
+ * @brief   find sprt_domain by name
+ * @param   name, hwirq
+ * @retval  sprt_domain
+ * @note    none
+ */
 struct fwk_irq_domain *fwk_irq_get_domain_by_name(kchar_t *name, kint32_t hwirq)
 {
 	struct fwk_irq_domain *sprt_domain;
@@ -226,11 +244,23 @@ struct fwk_irq_domain *fwk_irq_get_domain_by_name(kchar_t *name, kint32_t hwirq)
 	return mrt_nullptr;
 }
 
+/*!
+ * @brief   get virtual irq by hwirq
+ * @param   sprt_domain, hwirq
+ * @retval  virtual irq number
+ * @note    none
+ */
 kint32_t fwk_irq_get_by_domain(struct fwk_irq_domain *sprt_domain, kint32_t hwirq)
 {
 	return sprt_domain ? sprt_domain->revmap[hwirq] : -1;
 }
 
+/*!
+ * @brief   get sprt_domain by name
+ * @param   name, hwirq
+ * @retval  sprt_domain
+ * @note    none
+ */
 kint32_t fwk_irq_get_by_domain_name(kchar_t *name, kint32_t hwirq)
 {
 	struct fwk_irq_domain *sprt_domain;

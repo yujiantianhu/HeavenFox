@@ -32,55 +32,55 @@
 /*!< The defines */
 #define TSC2007_DRVIVER_MAJOR                       (220)
 
-/* tsc2007, index:
+/*!< tsc2007, index:
  * bit0:        X
  * bit1:        M
  * bit2 ~ bit3: PD0 ~ PD1
  * bit4 ~ bit7: C0 ~ C3
  */
-/* C3 ~ C0 */
-#define TSC2007_CTRL_MEASURE_TEMP0		            (0x00 << 4)         /* 0000 */
-#define TSC2007_CTRL_MEASURE_AUX		            (0x02 << 4)         /* 0010 */
-#define TSC2007_CTRL_MEASURE_TEMP1		            (0x04 << 4)         /* 0100 */
-#define TSC2007_CTRL_ACTIVATE_XN		            (0x08 << 4)         /* 1000 */
-#define TSC2007_CTRL_ACTIVATE_YN		            (0x09 << 4)         /* 1001 */
-#define TSC2007_CTRL_ACTIVATE_YP_XN		            (0x0A << 4)         /* 1010 */
-#define TSC2007_CTRL_SETUP			                (0x0B << 4)         /* 1011 */
-#define TSC2007_CTRL_MEASURE_X		                (0x0C << 4)         /* 1100 */
-#define TSC2007_CTRL_MEASURE_Y		                (0x0D << 4)         /* 1101 */
-#define TSC2007_CTRL_MEASURE_Z1		                (0x0E << 4)         /* 1110 */
-#define TSC2007_CTRL_MEASURE_Z2		                (0x0F << 4)         /* 1111 */
+/*!< C3 ~ C0 */
+#define TSC2007_CTRL_MEASURE_TEMP0		            (0x00 << 4)         /*!< 0000 */
+#define TSC2007_CTRL_MEASURE_AUX		            (0x02 << 4)         /*!< 0010 */
+#define TSC2007_CTRL_MEASURE_TEMP1		            (0x04 << 4)         /*!< 0100 */
+#define TSC2007_CTRL_ACTIVATE_XN		            (0x08 << 4)         /*!< 1000 */
+#define TSC2007_CTRL_ACTIVATE_YN		            (0x09 << 4)         /*!< 1001 */
+#define TSC2007_CTRL_ACTIVATE_YP_XN		            (0x0A << 4)         /*!< 1010 */
+#define TSC2007_CTRL_SETUP			                (0x0B << 4)         /*!< 1011 */
+#define TSC2007_CTRL_MEASURE_X		                (0x0C << 4)         /*!< 1100 */
+#define TSC2007_CTRL_MEASURE_Y		                (0x0D << 4)         /*!< 1101 */
+#define TSC2007_CTRL_MEASURE_Z1		                (0x0E << 4)         /*!< 1110 */
+#define TSC2007_CTRL_MEASURE_Z2		                (0x0F << 4)         /*!< 1111 */
 
-/* PD1 ~ PD0 */
-#define TSC2007_PWR_POWER_OFF_IRQ_EN	            (0x00 << 2)         /* 00 */
-#define TSC2007_PWR_ADC_ON_IRQ_DIS0		            (0x01 << 2)         /* 01 */
-#define TSC2007_PWR_ADC_OFF_IRQ_EN		            (0x02 << 2)         /* 10 */
-#define TSC2007_PWR_ADC_ON_IRQ_DIS1		            (0x03 << 2)         /* 11 */
+/*!< PD1 ~ PD0 */
+#define TSC2007_PWR_POWER_OFF_IRQ_EN	            (0x00 << 2)         /*!< 00 */
+#define TSC2007_PWR_ADC_ON_IRQ_DIS0		            (0x01 << 2)         /*!< 01 */
+#define TSC2007_PWR_ADC_OFF_IRQ_EN		            (0x02 << 2)         /*!< 10 */
+#define TSC2007_PWR_ADC_ON_IRQ_DIS1		            (0x03 << 2)         /*!< 11 */
 
-/* M : MODE */
-#define TSC2007_MODE_12BIT			                (0x00 << 1)         /* 0 */
-#define TSC2007_MODE_8BIT			                (0x01 << 1)         /* 1 */
+/*!< M : MODE */
+#define TSC2007_MODE_12BIT			                (0x00 << 1)         /*!< 0 */
+#define TSC2007_MODE_8BIT			                (0x01 << 1)         /*!< 1 */
 
-/* 实际定义 */
-#define	TSC_MAX_12BIT			                    (4095 + 1)          /* max: 4096 - 1 = 4095 */
+/*!< 实际定义 */
+#define	TSC_MAX_12BIT			                    (4095 + 1)          /*!< max: 4096 - 1 = 4095 */
 
 #define TSC_ADC_ON_12BIT    \
-            (TSC2007_MODE_12BIT | TSC2007_PWR_ADC_ON_IRQ_DIS0)          /* 12bit ADC, Disable INT IRQ */
+            (TSC2007_MODE_12BIT | TSC2007_PWR_ADC_ON_IRQ_DIS0)          /*!< 12bit ADC, Disable INT IRQ */
 
 #define TSC_INDEX_READ_X	\
-            (TSC_ADC_ON_12BIT | TSC2007_CTRL_MEASURE_X)                 /* 12bit ADC, Disable IRQ, Reg X */
+            (TSC_ADC_ON_12BIT | TSC2007_CTRL_MEASURE_X)                 /*!< 12bit ADC, Disable IRQ, Reg X */
 
 #define TSC_INDEX_READ_Y	\
-            (TSC_ADC_ON_12BIT | TSC2007_CTRL_MEASURE_Y)                 /* 12bit ADC, Disable IRQ, Reg Y */
+            (TSC_ADC_ON_12BIT | TSC2007_CTRL_MEASURE_Y)                 /*!< 12bit ADC, Disable IRQ, Reg Y */
 
 #define TSC_INDEX_READ_Z1	\
-            (TSC_ADC_ON_12BIT | TSC2007_CTRL_MEASURE_Z1)                /* 12bit ADC, Disable IRQ, Reg Z1 */
+            (TSC_ADC_ON_12BIT | TSC2007_CTRL_MEASURE_Z1)                /*!< 12bit ADC, Disable IRQ, Reg Z1 */
 
 #define TSC_INDEX_READ_Z2	\
-            (TSC_ADC_ON_12BIT | TSC2007_CTRL_MEASURE_Z2)                /* 12bit ADC, Disable IRQ, Reg Z2 */
+            (TSC_ADC_ON_12BIT | TSC2007_CTRL_MEASURE_Z2)                /*!< 12bit ADC, Disable IRQ, Reg Z2 */
 
 #define TSC_INDEX_PWRDOWN	\
-            (TSC2007_MODE_12BIT | TSC2007_PWR_ADC_OFF_IRQ_EN)           /* 12bit ADC, PWR DOWN, Enable IRQ */
+            (TSC2007_MODE_12BIT | TSC2007_PWR_ADC_OFF_IRQ_EN)           /*!< 12bit ADC, PWR DOWN, Enable IRQ */
 
 typedef struct tsc2007_data
 {
@@ -122,10 +122,10 @@ typedef struct tsc2007_drv_info
 
 /*!< API function */
 /*!
- * @brief  tsc2007_read_value
- * @param  None
- * @retval None
- * @note   rtscr读数据
+ * @brief   tsc2007_read_value
+ * @param   none
+ * @retval  none
+ * @note    read tsc2007 with i2c
  */
 static kuint16_t tsc2007_read_value(struct tsc2007_drv_info *sprt_info, kuint8_t reg)
 {
@@ -151,10 +151,10 @@ static kuint16_t tsc2007_read_value(struct tsc2007_drv_info *sprt_info, kuint8_t
 }
 
 /**
- * @brief  tsc2007_pwroff_en_irq
- * @param  None
- * @retval None
- * @note   关闭节能模式, 打开触屏中断
+ * @brief   tsc2007_pwroff_en_irq
+ * @param   none
+ * @retval  none
+ * @note    close power-saving mode, enable tsc2007 irq
 **/
 static kuint16_t tsc2007_pwroff_en_irq(struct tsc2007_drv_info *sprt_info)
 {
@@ -162,10 +162,10 @@ static kuint16_t tsc2007_pwroff_en_irq(struct tsc2007_drv_info *sprt_info)
 }
 
 /**
- * @brief  tsc2007_initial
- * @param  None
- * @retval None
- * @note   tsc2007初始化
+ * @brief   tsc2007_initial
+ * @param   none
+ * @retval  none
+ * @note    initial tsc2007
 **/
 static kuint16_t tsc2007_initial(struct tsc2007_data *sprt_data)
 {
@@ -181,28 +181,24 @@ static kuint16_t tsc2007_initial(struct tsc2007_data *sprt_data)
 }
 
 /*!
- * @brief  tsc2007_read_AD_value
- * @param  None
- * @retval None
- * @note   rtscr读取全部AD值
+ * @brief   tsc2007_read_AD_value
+ * @param   none
+ * @retval  none
+ * @note    read abs-x, abs-y, abs-z
  */
 static kbool_t tsc2007_read_ad_value(struct tsc2007_data *sprt_data)
 {
     struct tsc2007_drv_info *sprt_info;
 
-    /* tsc2007故障: IRQ不断关闭、打开, 将令触屏持续陷入中断循环(关闭(0) ===> 打开(1) ===> 关闭(0)), 直至触屏抬起 */
-
     sprt_info = sprt_data->sprt_info;
 
-    /* 采集数据时关闭IRQ */
     sprt_data->pressure = 0;
-
     sprt_data->x  = tsc2007_read_value(sprt_info, TSC_INDEX_READ_X);
     sprt_data->y  = tsc2007_read_value(sprt_info, TSC_INDEX_READ_Y);
     sprt_data->z1 = tsc2007_read_value(sprt_info, TSC_INDEX_READ_Z1);
     sprt_data->z2 = tsc2007_read_value(sprt_info, TSC_INDEX_READ_Z2);
 
-    /* 停止AD采样, 开启IRQ */
+    /*!< stop adc, enable irq */
     tsc2007_pwroff_en_irq(sprt_info);
 
     if ((sprt_data->x >= TSC_MAX_12BIT) || (sprt_data->y >= TSC_MAX_12BIT))
@@ -230,6 +226,12 @@ static kbool_t tsc2007_read_ad_value(struct tsc2007_data *sprt_data)
     return true;
 }
 
+/*!
+ * @brief   tsc2007 irq handler
+ * @param   ptrDev
+ * @retval  none
+ * @note    upper isr: start half isr
+ */
 static irq_return_t tsc2007_touch_isr(void *ptrDev)
 {
     struct tsc2007_drv_info *sprt_info;
@@ -240,6 +242,12 @@ static irq_return_t tsc2007_touch_isr(void *ptrDev)
     return 0;
 }
 
+/*!
+ * @brief   tsc2007 irq handler
+ * @param   ptrDev
+ * @retval  none
+ * @note    bottom isr: ADC
+ */
 static void tsc2007_touch_half_isr(struct workqueue *sprt_wq)
 {
     struct tsc2007_drv_info *sprt_info;
@@ -254,18 +262,21 @@ static void tsc2007_touch_half_isr(struct workqueue *sprt_wq)
     x_min_value = sprt_data->x_max;
     y_min_value = sprt_data->y_max;
 
-    /* 连续采样六次取平均: 仅用于按压状态下, 抬起时不做此计算 */
+    /*!< 
+     * take the average of six consecutive samples:
+     * Only calculating in the pressed state, and will be not performed when the touch screen is lifted
+     */
     for (kuint8_t sample_cnt = 0; sample_cnt < 6; sample_cnt++)
     {
         sprt_info->is_touch = fwk_gpio_get_value(sprt_info->sprt_gdesc);
         if (!sprt_info->is_touch)
             goto fail;
 
-        /* return false: fail; return true: success */
+        /*!< return false: fail; return true: success */
         if (!tsc2007_read_ad_value(sprt_data))
             goto fail;
 
-        /* 若读取失败或压力值为0, 认定为触屏抬起或误中断, 不做AD采样计算 */
+        /*!< if there is no pressure, touch screen is lifted */
         if (!sprt_data->pressure)
             goto fail;
 
@@ -278,13 +289,13 @@ static void tsc2007_touch_half_isr(struct workqueue *sprt_wq)
         y_min_value = (y_min_value > sprt_data->x) ? sprt_data->x : y_min_value;
     }
 
-    /* 减去最大值和最小值, 剩余四个采样值取平均 */
+    /*!< give up the max and the min */
     x_value  -= (x_max_value + x_min_value);
     y_value  -= (y_max_value + y_min_value);
     x_value >>= 2;
     y_value >>= 2;
 
-    /* 保存最终采样值 */
+    /*!< save the result */
     sprt_data->x = x_value;
     sprt_data->y = y_value;
 
@@ -298,6 +309,12 @@ fail:
     return;
 }
 
+/*!
+ * @brief   driver open
+ * @param   sprt_inode, sprt_file
+ * @retval  errno
+ * @note    initial and enbale irq when driver is opened
+ */
 static kint32_t tsc2007_driver_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
     struct tsc2007_drv_info *sprt_info;
@@ -311,6 +328,12 @@ static kint32_t tsc2007_driver_open(struct fwk_inode *sprt_inode, struct fwk_fil
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   driver close
+ * @param   sprt_inode, sprt_file
+ * @retval  errno
+ * @note    disbale irq when driver is closed
+ */
 static kint32_t tsc2007_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
     struct tsc2007_drv_info *sprt_info;
@@ -323,6 +346,12 @@ static kint32_t tsc2007_driver_close(struct fwk_inode *sprt_inode, struct fwk_fi
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   driver read
+ * @param   sprt_file, buffer, size
+ * @retval  size
+ * @note    none
+ */
 static kssize_t tsc2007_driver_read(struct fwk_file *sprt_file, kbuffer_t *buffer, kssize_t size)
 {
     struct tsc2007_drv_info *sprt_info;
@@ -365,8 +394,8 @@ static const struct fwk_file_oprts sgrt_tsc2007_driver_oprts =
 
 /*!< --------------------------------------------------------------------- */
 /*!
- * @brief   imx_i2c_driver_probe
- * @param   sprt_dev
+ * @brief   driver probe
+ * @param   sprt_client, sprt_id
  * @retval  errno
  * @note    none
  */
@@ -444,8 +473,8 @@ fail1:
 }
 
 /*!
- * @brief   imx_i2c_driver_remove
- * @param   sprt_dev
+ * @brief   driver remove
+ * @param   sprt_client
  * @retval  errno
  * @note    none
  */
@@ -498,7 +527,7 @@ static struct fwk_i2c_driver sgrt_tsc2007_driver =
 
 /*!< --------------------------------------------------------------------- */
 /*!
- * @brief   imx_i2c_driver_init
+ * @brief   driver init
  * @param   none
  * @retval  errno
  * @note    none
@@ -509,7 +538,7 @@ kint32_t __fwk_init tsc2007_driver_init(void)
 }
 
 /*!
- * @brief   imx_i2c_driver_exit
+ * @brief   driver exit
  * @param   none
  * @retval  none
  * @note    none

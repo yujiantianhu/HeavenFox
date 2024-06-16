@@ -22,7 +22,7 @@
 
 /*!< Traverse all child nodes under the head (starting with child, get the sibling nodes of child) */
 #define FOREACH_CHILD_OF_DT_NODE(head, list)	\
-	foreach_list_odd(head->child, list, sibling)
+	foreach_list_odd((head)->child, list, sibling)
 
 /*!< The following node identities are all represented in processor architecture patterns (big-endian/little-endian) */
 /*!< magic number */
@@ -162,7 +162,7 @@ static inline struct fwk_device_node *fwk_of_node_root(void)
 
 /*!< get each node */
 #define foreach_fwk_of_dt_node(np, head)	\
-	for (np = (isValid(head) ? head : fwk_of_node_root()); isValid(np); np = np->allnext)
+	for (np = (isValid(head) ? head : fwk_of_node_root()); isValid(np); np = (np)->allnext)
 
 #define foreach_fwk_of_child(parent, np)	\
 	for (np = fwk_of_get_next_child(parent, mrt_nullptr); np; np = fwk_of_get_next_child(parent, np))

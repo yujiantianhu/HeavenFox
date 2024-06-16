@@ -22,8 +22,6 @@ TARGET_EXT "C" {
 #endif
 
 /*!< The defines */
-typedef kint32_t 	kstatus_t;
-
 /*!< error code */
 enum __ERT_ERROR_CODE
 {
@@ -78,30 +76,48 @@ TARGET_EXT void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__fi
 /*!< The defines */
 #define mrt_void()									((void)(0))
 
-#ifdef	NDEBUG
-#define mrt_assert(x)
+#ifndef	CONFIG_DEBUG_JTAG
+#define mrt_assert(x)								do { } while (0)
 #else
 #define mrt_assert(x)								((x) ? mrt_void() : deal_assert_fail(#x, __FILE__, __LINE__, __ASSERT_FUNCTION))
 #endif
 
 #define mrt_jump_to(label, run_codes)	\
-{	\
-	run_codes;	\
-	goto label;	\
-}
+	do {	\
+		run_codes;	\
+		goto label;	\
+	} while (0)
 
 /*!< API functions */
+/*!
+ * @brief   judge if ptr is valid
+ * @param   ptr
+ * @retval  none
+ * @note    none
+ */
 __force_inline static inline kbool_t IS_ERR(const void *ptr)
 {
 	/*!< the highest 4KB (0xfffff000 ~ 0xffffffff) is used to deal with exceptions */
 	return ((kuaddr_t)ptr >= (kuaddr_t)(-(4UL << 10)));
 }
 
+/*!
+ * @brief   convert error code to address
+ * @param   error code
+ * @retval  ptr
+ * @note    none
+ */
 __force_inline static inline void *ERR_PTR(kstype_t code)
 {
 	return (void *)code;
 }
 
+/*!
+ * @brief   convert ptr to error code
+ * @param   ptr
+ * @retval  error code
+ * @note    none
+ */
 __force_inline static inline kstype_t PTR_ERR(const void *ptr)
 {
 	return ptr ? (kstype_t)ptr : -ER_NOMEM;

@@ -43,11 +43,23 @@ typedef struct fwk_i2c_adapter
 TARGET_EXT kint32_t fwk_i2c_transfer(struct fwk_i2c_client *sprt_client, struct fwk_i2c_msg *sprt_msgs, kint32_t num);
 
 /*!< API functions */
+/*!
+ * @brief   save driver data to i2c device
+ * @param   sprt_adap, data
+ * @retval  none
+ * @note    none
+ */
 static inline void fwk_i2c_adapter_set_drvdata(struct fwk_i2c_adapter *sprt_adap, void *data)
 {
 	sprt_adap->sgrt_dev.privData = data;
 }
 
+/*!
+ * @brief   get driver data from i2c device
+ * @param   sprt_adap
+ * @retval  none
+ * @note    none
+ */
 static inline void *fwk_i2c_adapter_get_drvdata(struct fwk_i2c_adapter *sprt_adap)
 {
 	return sprt_adap->sgrt_dev.privData;

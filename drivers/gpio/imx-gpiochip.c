@@ -45,20 +45,20 @@ static DECLARE_LIST_HEAD(sgrt_imx_gpio_ports_list);
 
 /*!< API function */
 /*!
- * @brief   imx_gpiochip_driver_open
- * @param   sprt_inode, sprt_file
+ * @brief   isr
+ * @param   ptrDev
  * @retval  errno
  * @note    none
  */
-static irq_return_t imx_gpiochip_driver_handler(void *ptrDev)
+static irq_return_t imx_gpiochip_driver_isr(void *ptrDev)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	struct fwk_irq_domain *sprt_domain;
 	srt_hal_imx_gpio_t *sprt_reg;
 	kbool_t irq_ena, irq_sta;
 	kuint32_t idx, irq;
 
-	sprt_port = (srt_imx_gpio_port_t *)ptrDev;
+	sprt_port = (struct imx_gpio_port *)ptrDev;
 	sprt_reg = (srt_hal_imx_gpio_t *)sprt_port->base;
 	sprt_domain = sprt_port->sprt_irqdomain;
 	
@@ -80,9 +80,15 @@ static irq_return_t imx_gpiochip_driver_handler(void *ptrDev)
 	return ER_NORMAL;
 }
 
+/*!
+ * @brief   set the trigger ways of gpio irq
+ * @param   sprt_data, type
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_gpiochip_driver_irq_set_type(struct fwk_irq_data *sprt_data, kuint32_t type)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	struct fwk_irq_generic *sprt_gc;
 	srt_hal_imx_gpio_t *sprt_reg;
 	struct fwk_gpio_desc *sprt_desc;
@@ -187,9 +193,15 @@ static const struct fwk_irq_domain_ops sgrt_imx_gpiochip_hierarchy_ops =
 	.free = mrt_nullptr,
 };
 
+/*!
+ * @brief   gpio chip intc probe
+ * @param   sprt_pdev
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_gpiochip_driver_probe_intc(struct fwk_platdev *sprt_pdev)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	struct fwk_device_node *sprt_node, *sprt_par;
 	struct fwk_irq_domain *sprt_intc;
 	struct fwk_irq_domain *sprt_domain;
@@ -254,9 +266,15 @@ fail1:
 	return -ER_ERROR;
 }
 
+/*!
+ * @brief   gpio chip intc remove
+ * @param   sprt_pdev
+ * @retval  errno
+ * @note    none
+ */
 static void imx_gpiochip_driver_remove_intc(struct fwk_platdev *sprt_pdev)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	struct fwk_irq_domain *sprt_domain;
 
 	sprt_port = fwk_platform_get_drvdata(sprt_pdev);
@@ -272,29 +290,41 @@ static void imx_gpiochip_driver_remove_intc(struct fwk_platdev *sprt_pdev)
 	kfree(sprt_domain);
 }
 
+/*!
+ * @brief   gpio number to irq number
+ * @param   sprt_chip, offset(gpio number)
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_gpiochip_driver_to_irq(struct fwk_gpio_chip *sprt_chip, kuint32_t offset)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	struct fwk_irq_domain *sprt_domain;
 
 	if (!sprt_chip || (offset >= sprt_chip->ngpios))
 		return -ER_NODEV;
 
-	sprt_port = mrt_container_of(sprt_chip, srt_imx_gpio_port_t, sgrt_gpiochip);
+	sprt_port = mrt_container_of(sprt_chip, struct imx_gpio_port, sgrt_gpiochip);
 	sprt_domain = sprt_port->sprt_irqdomain;
 
 	return fwk_irq_domain_find_map(sprt_domain, offset, 0);
 }
 
+/*!
+ * @brief   get gpio direction configuration
+ * @param   sprt_chip, offset(gpio number)
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_gpiochip_driver_get_direction(struct fwk_gpio_chip *sprt_chip, kuint32_t offset)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	srt_hal_imx_gpio_t *sprt_reg;
 
 	if (!sprt_chip || (offset >= sprt_chip->ngpios))
 		return -ER_NODEV;
 
-	sprt_port = mrt_container_of(sprt_chip, srt_imx_gpio_port_t, sgrt_gpiochip);
+	sprt_port = mrt_container_of(sprt_chip, struct imx_gpio_port, sgrt_gpiochip);
 	sprt_reg = (srt_hal_imx_gpio_t *)sprt_port->base;
 	if (!sprt_reg)
 		return -ER_NODEV;
@@ -302,15 +332,21 @@ static kint32_t imx_gpiochip_driver_get_direction(struct fwk_gpio_chip *sprt_chi
     return mrt_getbitl(mrt_bit(offset), &sprt_reg->GDIR) ? FWK_GPIO_DIR_OUT : FWK_GPIO_DIR_IN;
 }
 
+/*!
+ * @brief   set gpio direction to input
+ * @param   sprt_chip, offset(gpio number)
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_gpiochip_driver_direction_input(struct fwk_gpio_chip *sprt_chip, kuint32_t offset)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	srt_hal_imx_gpio_t *sprt_reg;
 
 	if (!sprt_chip || (offset >= sprt_chip->ngpios))
 		return -ER_NODEV;
 
-	sprt_port = mrt_container_of(sprt_chip, srt_imx_gpio_port_t, sgrt_gpiochip);
+	sprt_port = mrt_container_of(sprt_chip, struct imx_gpio_port, sgrt_gpiochip);
 	sprt_reg = (srt_hal_imx_gpio_t *)sprt_port->base;
 	if (!sprt_reg)
 		return -ER_NODEV;
@@ -320,15 +356,21 @@ static kint32_t imx_gpiochip_driver_direction_input(struct fwk_gpio_chip *sprt_c
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   set gpio direction to output
+ * @param   sprt_chip, offset(gpio number)
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_gpiochip_driver_direction_output(struct fwk_gpio_chip *sprt_chip, kuint32_t offset, kint32_t value)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	srt_hal_imx_gpio_t *sprt_reg;
 
 	if (!sprt_chip || (offset >= sprt_chip->ngpios))
 		return -ER_NODEV;
 
-	sprt_port = mrt_container_of(sprt_chip, srt_imx_gpio_port_t, sgrt_gpiochip);
+	sprt_port = mrt_container_of(sprt_chip, struct imx_gpio_port, sgrt_gpiochip);
 	sprt_reg = (srt_hal_imx_gpio_t *)sprt_port->base;
 	if (!sprt_reg)
 		return -ER_NODEV;
@@ -342,15 +384,21 @@ static kint32_t imx_gpiochip_driver_direction_output(struct fwk_gpio_chip *sprt_
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   set gpio direction to input
+ * @param   sprt_chip, offset(gpio number)
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_gpiochip_driver_get(struct fwk_gpio_chip *sprt_chip, kuint32_t offset)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	srt_hal_imx_gpio_t *sprt_reg;
 
 	if (!sprt_chip || (offset >= sprt_chip->ngpios))
 		return -ER_NODEV;
 
-	sprt_port = mrt_container_of(sprt_chip, srt_imx_gpio_port_t, sgrt_gpiochip);
+	sprt_port = mrt_container_of(sprt_chip, struct imx_gpio_port, sgrt_gpiochip);
 	sprt_reg = (srt_hal_imx_gpio_t *)sprt_port->base;
 	if (!sprt_reg)
 		return -ER_NODEV;
@@ -358,15 +406,21 @@ static kint32_t imx_gpiochip_driver_get(struct fwk_gpio_chip *sprt_chip, kuint32
     return !!mrt_getbitl(mrt_bit(offset), &sprt_reg->DR);
 }
 
+/*!
+ * @brief   set gpio velue
+ * @param   sprt_chip, offset(gpio number), value(0 or 1)
+ * @retval  none
+ * @note    none
+ */
 static void imx_gpiochip_driver_set(struct fwk_gpio_chip *sprt_chip, kuint32_t offset, kint32_t value)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	srt_hal_imx_gpio_t *sprt_reg;
 
 	if (!sprt_chip || (offset >= sprt_chip->ngpios) || (value < 0))
 		return;
 
-	sprt_port = mrt_container_of(sprt_chip, srt_imx_gpio_port_t, sgrt_gpiochip);
+	sprt_port = mrt_container_of(sprt_chip, struct imx_gpio_port, sgrt_gpiochip);
 	sprt_reg = (srt_hal_imx_gpio_t *)sprt_port->base;
 	if (!sprt_reg)
 		return;
@@ -377,9 +431,15 @@ static void imx_gpiochip_driver_set(struct fwk_gpio_chip *sprt_chip, kuint32_t o
 		mrt_clrbitl(mrt_bit(offset), &sprt_reg->DR);
 }
 
+/*!
+ * @brief   gpio chip probe
+ * @param   sprt_pdev
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t imx_gpiochip_driver_probe_gc(struct fwk_platdev *sprt_pdev)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	struct fwk_device_node *sprt_node;
 	struct fwk_gpio_chip *sprt_gc;
 	kint32_t gpio_base;
@@ -420,7 +480,7 @@ static kint32_t imx_gpiochip_driver_probe_gc(struct fwk_platdev *sprt_pdev)
  */
 static kint32_t imx_gpiochip_driver_probe(struct fwk_platdev *sprt_pdev)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 	struct fwk_device_node *sprt_node;
 	srt_hal_imx_gpio_t *sprt_reg;
 
@@ -448,13 +508,13 @@ static kint32_t imx_gpiochip_driver_probe(struct fwk_platdev *sprt_pdev)
 	/*!< request irq (the domain is gpc) */
 	if (sprt_port->irq_low >= 0)
 	{
-		if (fwk_request_irq(sprt_port->irq_low, imx_gpiochip_driver_handler, IRQ_TYPE_NONE, "imx-gpio-low", sprt_port))
+		if (fwk_request_irq(sprt_port->irq_low, imx_gpiochip_driver_isr, IRQ_TYPE_NONE, "imx-gpio-low", sprt_port))
 			goto fail2;
 	}
 	
 	if (sprt_port->irq_high >= 0)
 	{
-		if (fwk_request_irq(sprt_port->irq_high, imx_gpiochip_driver_handler, IRQ_TYPE_NONE, "imx-gpio-high", sprt_port))
+		if (fwk_request_irq(sprt_port->irq_high, imx_gpiochip_driver_isr, IRQ_TYPE_NONE, "imx-gpio-high", sprt_port))
 			goto fail3;
 	}
 
@@ -501,7 +561,7 @@ fail1:
  */
 static kint32_t imx_gpiochip_driver_remove(struct fwk_platdev *sprt_pdev)
 {
-	srt_imx_gpio_port_t *sprt_port;
+	struct imx_gpio_port *sprt_port;
 
 	sprt_port = fwk_platform_get_drvdata(sprt_pdev);
 

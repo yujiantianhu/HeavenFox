@@ -14,6 +14,12 @@
 #include <common/generic.h>
 
 /*!< API function */
+/*!
+ * @brief   unsigned divied: "divied / div"
+ * @param   divied, div
+ * @retval  none
+ * @note    none
+ */
 kutype_t udiv_integer(kutype_t divied, kutype_t div)
 {
 	kutype_t count = 0;
@@ -27,6 +33,12 @@ kutype_t udiv_integer(kutype_t divied, kutype_t div)
 	return count;
 }
 
+/*!
+ * @brief   signed divied: "divied / div"
+ * @param   divied, div
+ * @retval  none
+ * @note    none
+ */
 kstype_t sdiv_integer(kstype_t divied, kstype_t div)
 {
 	kstype_t count = 0;
@@ -42,6 +54,12 @@ kstype_t sdiv_integer(kstype_t divied, kstype_t div)
 	return ((divied ^ div) < 0) ? -count : count;
 }
 
+/*!
+ * @brief   get the remainder: "divied % div"
+ * @param   divied, div
+ * @retval  none
+ * @note    none
+ */
 kutype_t udiv_remainder(kutype_t divied, kutype_t div)
 {
 	while (divied >= div)
@@ -50,6 +68,12 @@ kutype_t udiv_remainder(kutype_t divied, kutype_t div)
 	return divied;
 }
 
+/*!
+ * @brief   convert number to hex, and save the result to buf
+ * @param   buf, number
+ * @retval  none
+ * @note    none
+ */
 kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kbool_t mode)
 {
 	kchar_t temp[(sizeof(kutype_t) << 1) + 4];
@@ -83,6 +107,12 @@ END:
 	return (count + 2);
 }
 
+/*!
+ * @brief   convert number to binary, and save the result to buf
+ * @param   buf, number
+ * @retval  none
+ * @note    none
+ */
 kutype_t dec_to_binary(kchar_t *buf, kutype_t number)
 {
 	kchar_t temp[(sizeof(kutype_t) << 3) + 4];

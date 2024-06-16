@@ -127,6 +127,12 @@ TARGET_EXT void schedule_thread(void);
 #define mrt_tid_handle(tid)                     get_thread_handle(tid)
 
 /*!< API functions */
+/*!
+ * @brief   get thread state
+ * @param   sprt_thread
+ * @retval  status
+ * @note    none
+ */
 static inline kbool_t real_thread_state_pending(struct real_thread *sprt_thread)
 {
 	kbool_t is_wakeup, is_killed;
@@ -144,6 +150,12 @@ static inline kbool_t real_thread_state_pending(struct real_thread *sprt_thread)
 	return (is_wakeup || is_killed);
 }
 
+/*!
+ * @brief   set thread state
+ * @param   sprt_thread, state, mode
+ * @retval  none
+ * @note    none
+ */
 static inline void real_thread_state_signal(struct real_thread *sprt_thread, kuint32_t state, kbool_t mode)
 {
 	spin_lock_irqsave(&sprt_thread->sgrt_lock);

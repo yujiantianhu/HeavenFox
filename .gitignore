@@ -1,0 +1,38 @@
+#
+# Git Ignore Configuration
+#
+# File Name:   .gitignore
+# Author:      Yang Yujun
+# E-mail:      <yujiantianhu@163.com>
+# Created on:  2024.04.18
+#
+# Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
+#
+
+# ignore folders
+.vscode/
+.settings/
+.git/
+build/
+objects/
+
+# ignore files
+# .gitignore
+.project
+.cproject
+*.code-workspace
+**/*.o
+**/*.elf
+**/*.dis
+**/*.img
+**/*.bin
+**/*.*.dts*
+**/*.dtb
+
+# not ignore files
+!**/*.a
+!**/*.so
+!.gitignore
+
+# end of file
+
