@@ -12,7 +12,7 @@
     created on: 2023.12.21
     e-mail: <yujiantianhu@163.com>
 
-# Function:
+# Feature:
     01) support multithreading (time slice, priority preemption, and delayed sleep);
     02) support initcall implicit initialization;
     03) support character device driver framework;
@@ -33,6 +33,8 @@
     18) support touchscreen driver of "tsc2007", environment sensor driver "ap3216c", eeprom driver "at24c02"
     
 # Methods:
+    make:           build the whole project;
+    make dtbs:      build device-tree only;
     make clean:     delete all the .o and .d;
     make distclean: delete the ./objects/* and .elf, .dis, .img;
     
@@ -40,10 +42,31 @@
     mkdir -p ./build
     cd ./build
     make distclean
-    cmake -DCMAKE_BUILD_TYPE=Debug ..
+    cmake -DCMAKE_BUILD_TYPE=debug ..
     make
     
     Image path: ./boot/HeavenFox.img
+    Dtbs  path: ./boot/firmware.dtb
+    
+# Folder Instruction:
+    boot/:          containing device-tree, memory resources and OS image;
+    configs/:       optional feature configurations (by setting macro definitions);
+    build/:         for CMake (perhaps you can create it by "mkdir -p ./build";
+    document/:      instuction documents;
+    scripts/:       some tools for compiling or debugging, such as dtc, jlink scripts, ..., and Makefile.build;
+    objects/:       when you build the project, the generated intermediate files will be stored here;
+    
+    application/:   for users (reserved);
+    arch/:          cpu architecture related files, contain chip-startup, vector table and register definitions for each cpu, ...;
+    board/:         specific board related files, contain direct operations on board resources;
+    common/:        the generic definitions and functions, which are applied to all files;
+    drivers/:       the hardware drivers for each chip and board perephral;
+    example/:       application instances;
+    include/:       headers for the whole project;
+    init/:          global initialization, such as "main.c";
+    kernel/:        for multi-thread features, containing scheduler, and generic threading methods;
+    platform/:      the generic abstract framework for system operations, provides methods to standardize programming specifications;
+    rootfs/:        file system related files, such as fatfs, ...
 
 # Readme:
 # -----------------------------------------------------------------------
