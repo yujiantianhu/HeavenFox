@@ -22,6 +22,12 @@
 
 
 /*!< API functions */
+/*!
+ * @brief   add a new sprt_wq to global work_queue_head
+ * @param   sprt_wq
+ * @retval  none
+ * @note    none
+ */
 __weak void schedule_work(struct workqueue *sprt_wq)
 {
 

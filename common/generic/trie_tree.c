@@ -21,6 +21,12 @@
 #define IS_STRING_ERR(offset)           (-2 == (offset))
 
 /*!< API function */
+/*!
+ * @brief   get the branch location of character
+ * @param   ch
+ * @retval  none
+ * @note    for example: ch == '9', the location is 9
+ */
 __weak kint32_t get_trie_node_branch(kint8_t ch)
 {
     if (!ch)
@@ -32,6 +38,12 @@ __weak kint32_t get_trie_node_branch(kint8_t ch)
     return (ch - ' ');
 }
 
+/*!
+ * @brief   create a group of branches of trie_node
+ * @param   sprt_tree, sprt_node
+ * @retval  none
+ * @note    none
+ */
 struct trie_node **create_trie_branch(struct trie_tree *sprt_tree, struct trie_node *sprt_node, kuint32_t size)
 {
     struct trie_node **sprt_branches;
@@ -49,6 +61,12 @@ struct trie_node **create_trie_branch(struct trie_tree *sprt_tree, struct trie_n
     return sprt_branches;
 }
 
+/*!
+ * @brief   allocate a new trie_node
+ * @param   sprt_tree, sprt_par, sprt_branches
+ * @retval  none
+ * @note    none
+ */
 struct trie_node *allocate_trie_node(struct trie_tree *sprt_tree, struct trie_node *sprt_par, struct trie_node **sprt_branches)
 {
     struct trie_node *sprt_node;
@@ -64,13 +82,20 @@ struct trie_node *allocate_trie_node(struct trie_tree *sprt_tree, struct trie_no
     return sprt_node;
 }
 
+/*!
+ * @brief   find a trie_node in sprt_tree
+ * @param   sprt_tree, name
+ * @retval  none
+ * @note    none
+ */
 struct trie_node *find_trie_node(struct trie_tree *sprt_tree, const char *name)
 {
     struct trie_node *sprt_node;
     const kchar_t *str = name;
     kint32_t offset = 0;
 
-    foreach_trie_tree(sprt_node, sprt_tree, offset) {
+    foreach_trie_tree(sprt_node, sprt_tree, offset) 
+    {
         offset = sprt_tree->get(*(str++));
 
         if (IS_STRING_END(offset))
@@ -87,6 +112,12 @@ struct trie_node *find_trie_node(struct trie_tree *sprt_tree, const char *name)
     return mrt_nullptr;
 }
 
+/*!
+ * @brief   find a trie_node in sprt_tree
+ * @param   sprt_tree, name
+ * @retval  none
+ * @note    none
+ */
 struct trie_link *trie_tree_look_up(struct trie_tree *sprt_tree, const kchar_t *name)
 {
     struct trie_node *sprt_node;
@@ -98,6 +129,12 @@ struct trie_link *trie_tree_look_up(struct trie_tree *sprt_tree, const kchar_t *
     return sprt_node->sprt_link;
 }
 
+/*!
+ * @brief   add a new trie_node to sprt_tree
+ * @param   sprt_tree, name
+ * @retval  none
+ * @note    none
+ */
 void trie_node_add(struct trie_tree *sprt_tree, const kchar_t *name, struct trie_link *sprt_link)
 {
     struct trie_node *sprt_node, *sprt_temp;
@@ -115,15 +152,18 @@ void trie_node_add(struct trie_tree *sprt_tree, const kchar_t *name, struct trie
     if (sprt_node)
         return;
 
-    for (i = 0, sprt_node = &sprt_tree->sgrt_node; i < lenth; i++) {
+    for (i = 0, sprt_node = &sprt_tree->sgrt_node; i < lenth; i++) 
+    {
         offset = sprt_tree->get(*(str + i));
 
-        if (!sprt_node->sprt_branches) {
+        if (!sprt_node->sprt_branches) 
+        {
             if (!create_trie_branch(sprt_tree, sprt_node, sprt_tree->size))
                 return;
         }
 
-        if (!sprt_node->sprt_branches[offset]) {
+        if (!sprt_node->sprt_branches[offset]) 
+        {
             sprt_temp = allocate_trie_node(sprt_tree, sprt_node, mrt_nullptr);
             if (!isValid(sprt_temp))
                 return;
@@ -142,6 +182,12 @@ void trie_node_add(struct trie_tree *sprt_tree, const kchar_t *name, struct trie
     print_debug("add new node succeuss, name is: %s\n", name);
 }
 
+/*!
+ * @brief   delete sprt_node from sprt_tree with recursion
+ * @param   sprt_tree, sprt_node
+ * @retval  none
+ * @note    none
+ */
 static void __del_trie_node(struct trie_tree *sprt_tree, struct trie_node *sprt_node, struct trie_node *sprt_child)
 {
     kuint32_t i, count = 0;
@@ -153,9 +199,12 @@ static void __del_trie_node(struct trie_tree *sprt_tree, struct trie_node *sprt_
     if (!sprt_child && sprt_node->sprt_branches)
         return;
 
-    if (sprt_node->sprt_branches) {
-        for (i = 0; i < sprt_tree->size; i++) {
-            if (sprt_node->sprt_branches[i] == sprt_child) {
+    if (sprt_node->sprt_branches) 
+    {
+        for (i = 0; i < sprt_tree->size; i++) 
+        {
+            if (sprt_node->sprt_branches[i] == sprt_child) 
+            {
                 sprt_node->sprt_branches[i] = mrt_nullptr;
 
                 if (count)
@@ -173,7 +222,8 @@ static void __del_trie_node(struct trie_tree *sprt_tree, struct trie_node *sprt_
         sprt_node->sprt_branches = mrt_nullptr;
     }
 
-    if (!sprt_node->sprt_link) {
+    if (!sprt_node->sprt_link) 
+    {
         __del_trie_node(sprt_tree, sprt_node->sprt_parent, sprt_node);
 
         if (sprt_node != &sprt_tree->sgrt_node)
@@ -184,6 +234,12 @@ out:
     return;
 }
 
+/*!
+ * @brief   delete sprt_node from sprt_tree
+ * @param   sprt_tree, name
+ * @retval  none
+ * @note    none
+ */
 void trie_node_del(struct trie_tree *sprt_tree, const kchar_t *name)
 {
     struct trie_node *sprt_node;
@@ -192,7 +248,8 @@ void trie_node_del(struct trie_tree *sprt_tree, const kchar_t *name)
     kuint32_t i;
     kint32_t offset = 0;
 
-    for (i = 0, sprt_node = &sprt_tree->sgrt_node; i < lenth; i++) {
+    for (i = 0, sprt_node = &sprt_tree->sgrt_node; i < lenth; i++) 
+    {
         if (!sprt_node || !sprt_node->sprt_branches)
             return;
         

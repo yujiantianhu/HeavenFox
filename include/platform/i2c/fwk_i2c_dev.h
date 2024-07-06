@@ -43,7 +43,7 @@ struct fwk_i2c_client
 {
 	kuint16_t flags;										/*!< div., see below */
 	kuint16_t addr;											/*!< chip address - NOTE: 7bit */
-					            							/*!< addresses are stored in the _LOWER_ 7 bits */
+															/*!< addresses are stored in the _LOWER_ 7 bits */
 	kint8_t name[FWK_I2C_NAME_SIZE];
 	struct fwk_i2c_adapter *sprt_adapter;					/*!< the adapter we sit on */
 	struct fwk_i2c_driver *sprt_driver;						/*!< and our access routines */
@@ -93,31 +93,67 @@ kint32_t fwk_i2c_register_driver(struct fwk_i2c_driver *sprt_driver);
 kint32_t fwk_i2c_unregister_driver(struct fwk_i2c_driver *sprt_driver);
 
 /*!< API functions */
+/*!
+ * @brief   register i2c client
+ * @param   sprt_client
+ * @retval  errno
+ * @note    none
+ */
 static inline kint32_t fwk_i2c_add_device(struct fwk_i2c_client *sprt_client)
 {
 	return fwk_register_i2c_device(sprt_client);
 }
 
+/*!
+ * @brief   unregister i2c client
+ * @param   sprt_client
+ * @retval  errno
+ * @note    none
+ */
 static inline kint32_t fwk_i2c_del_device(struct fwk_i2c_client *sprt_client)
 {
 	return fwk_unregister_i2c_device(sprt_client);
 }
 
+/*!
+ * @brief   register i2c driver
+ * @param   sprt_driver
+ * @retval  errno
+ * @note    none
+ */
 static inline kint32_t fwk_i2c_add_driver(struct fwk_i2c_driver *sprt_driver)
 {
 	return fwk_i2c_register_driver(sprt_driver);
 }
 
+/*!
+ * @brief   unregister i2c driver
+ * @param   sprt_driver
+ * @retval  errno
+ * @note    none
+ */
 static inline kint32_t fwk_i2c_del_driver(struct fwk_i2c_driver *sprt_driver)
 {
 	return fwk_i2c_unregister_driver(sprt_driver);
 }
 
+/*!
+ * @brief   save driver data to i2c device
+ * @param   sprt_adap, data
+ * @retval  none
+ * @note    none
+ */
 static inline void fwk_i2c_set_client_data(struct fwk_i2c_client *sprt_client, void *data)
 {
 	sprt_client->sgrt_dev.privData = data;
 }
 
+/*!
+ * @brief   get driver data from i2c device
+ * @param   sprt_adap
+ * @retval  none
+ * @note    none
+ */
 static inline void *fwk_i2c_get_client_data(struct fwk_i2c_client *sprt_client)
 {
 	return sprt_client->sgrt_dev.privData;

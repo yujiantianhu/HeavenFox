@@ -54,9 +54,15 @@ kint32_t fwk_unregister_platdevice(struct fwk_platdev *sprt_platdev)
 	return fwk_device_del(&sprt_platdev->sgrt_dev);
 }
 
-/*!< -------------------------------------------------------------------------- */
-/*!<							Device Local Interface							*/
-/*!< -------------------------------------------------------------------------- */
+/*!< --------------------------------------------------------------------------
+							Device Local Interface						
+ --------------------------------------------------------------------------- */
+/*!
+ * @brief   find device from the global list
+ * @param   sprt_dev
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t fwk_device_find(struct fwk_device *sprt_dev)
 {
 	struct fwk_device *sprt_leaf;

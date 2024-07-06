@@ -18,7 +18,6 @@
 
 /*!< The defines */
 
-
 /*!< The functions */
 TARGET_EXT void schedule_timeout(kutime_t count);
 TARGET_EXT void schedule_delay(kuint32_t seconds);

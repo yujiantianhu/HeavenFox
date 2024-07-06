@@ -17,10 +17,9 @@
 #include <common/mem_manage.h>
 #include <kernel/kernel.h>
 #include <kernel/spinlock.h>
+#include <platform/fwk_mempool.h>
 
 /*!< The globals */
-static kubyte_t g_iostream_buffer[1024] = {0};
-static DECLARE_SPIN_LOCK(sgrt_stream_lock);
 
 /*!< API function */
 /*!
@@ -35,6 +34,17 @@ __weak void io_putc(const kubyte_t ch)
 }
 
 /*!
+ * @brief   io_putstr
+ * @param   string
+ * @retval  none
+ * @note    string output
+ */
+__weak void io_putstr(const kubyte_t *msgs, kusize_t size)
+{
+
+}
+
+/*!
  * @brief   printk
  * @param   ptr_fmt
  * @retval  none
@@ -43,35 +53,30 @@ __weak void io_putc(const kubyte_t ch)
 void printk(const kchar_t *ptr_fmt, ...)
 {
 #if defined(CONFIG_PRINT_LEVEL)
-	va_list ptr_list;
-	kubyte_t *ptr_buf, level[2] = {0};
-	kusize_t i, size;
+    va_list ptr_list;
+    kubyte_t *ptr_buf, level[2] = {};
+    kusize_t size;
+//  kuint32_t i;
 
-	/*!< pointer to global resource */
-	ptr_buf = &g_iostream_buffer[0];
+    va_start(ptr_list, ptr_fmt);
+    ptr_buf = (kubyte_t *)lv_vasprintk(ptr_fmt, &size, level, ptr_list);
+    va_end(ptr_list);
 
-	va_start(ptr_list, ptr_fmt);
+    if (!isValid(ptr_buf))
+        return;
 
-	spin_lock(&sgrt_stream_lock);
-	size = do_fmt_convert(ptr_buf, level, ptr_fmt, ptr_list, sizeof(g_iostream_buffer));
-	if (size < strlen(ptr_fmt))
-	{
-		/*!< if size greater than sizeof(buf), allocate new memory block for it. */
+    /*!< if level is not set, default PRINT_LEVEL_WARNING */
+    if (*(PRINT_LEVEL_SOH) != *level)
+        memcpy(level, PRINT_LEVEL_WARNING, sizeof(level));
 
-	}
-	spin_unlock(&sgrt_stream_lock);
+    if (*(level + 1) > *((kubyte_t *)(CONFIG_PRINT_LEVEL)))
+        return;
 
-	va_end(ptr_list);
+//	for (i = 0; i < size; i++)
+//		io_putc(*(ptr_buf + i));
 
-	/*!< if level is not set, default PRINT_LEVEL_WARNING */
-	if (*(PRINT_LEVEL_SOH) != *level)
-		memcpy(level, PRINT_LEVEL_WARNING, sizeof(level));
-
-	if (*(level + 1) > *((kubyte_t *)(CONFIG_PRINT_LEVEL)))
-		return;
-
-	for (i = 0; i < size; i++)
-		io_putc(*(ptr_buf + i));
+    io_putstr(ptr_buf, size);
+    kfree(ptr_buf);
 #endif
 }
 
@@ -86,20 +91,20 @@ void printk(const kchar_t *ptr_fmt, ...)
  */
 static kint32_t bitmap_find_first_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_bits, kbool_t value)
 {
-	kuint32_t index, bit_mask, area_mask;
-	kuint32_t bit_per_map = sizeof(*bitmap) << 3;
+    kuint32_t index, bit_mask, area_mask;
+    kuint32_t bit_per_map = sizeof(*bitmap) << 3;
 
-	/*!< search by per 8 bits */
-	for (index = start; index < total_bits; index++)
-	{
-		area_mask = mrt_udiv(index, bit_per_map);
-		bit_mask = mrt_urem(index, bit_per_map);
+    /*!< search by per 8 bits */
+    for (index = start; index < total_bits; index++)
+    {
+        area_mask = mrt_udiv(index, bit_per_map);
+        bit_mask = mrt_urem(index, bit_per_map);
 
-		if ((!!(*(bitmap + area_mask) & (1 << bit_mask))) == value)
-			break;
-	}
+        if ((!!(*(bitmap + area_mask) & (1 << bit_mask))) == value)
+            break;
+    }
 
-	return (index >= total_bits) ? -1 : index;
+    return (index >= total_bits) ? -1 : index;
 }
 
 /*!
@@ -114,18 +119,18 @@ static kint32_t bitmap_find_first_bit(kuint8_t *bitmap, kuint32_t start, kusize_
  */
 static kint32_t bitmap_find_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr, kbool_t value)
 {
-	kuint32_t end = start + nr;
-	kint32_t index;
+    kuint32_t end = start + nr;
+    kint32_t index;
 
-	if (end >= total_bits)
-		return -1;
-	
-	/*!<
-	 * found (!value), return current index (the first bit that does not meet the condition)
-	 * indicate that no consecutive bits are avaliable, i.e request nr bits failed
-	 */
-	index = bitmap_find_first_bit((kuint8_t *)bitmap, start, end, !value);
-	return (index < 0) ? 0 : index;
+    if (end >= total_bits)
+        return -1;
+    
+    /*!<
+     * found (!value), return current index (the first bit that does not meet the condition)
+     * indicate that no consecutive bits are avaliable, i.e request nr bits failed
+     */
+    index = bitmap_find_first_bit((kuint8_t *)bitmap, start, end, !value);
+    return (index < 0) ? 0 : index;
 }
 
 /*!
@@ -136,23 +141,23 @@ static kint32_t bitmap_find_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t t
  */
 static void bitmap_set_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr, kbool_t value)
 {
-	kuint32_t end = start + nr;
-	kuint32_t index, bit_mask, area_mask;
-	kuint32_t bit_per_map = sizeof(*bitmap) << 3;
+    kuint32_t end = start + nr;
+    kuint32_t index, bit_mask, area_mask;
+    kuint32_t bit_per_map = sizeof(*bitmap) << 3;
 
-	if (end >= total_bits)
-		return;
+    if (end >= total_bits)
+        return;
 
-	for (index = start; index < end; index++)
-	{
-		area_mask = mrt_udiv(index, bit_per_map);
-		bit_mask = mrt_urem(index, bit_per_map);
+    for (index = start; index < end; index++)
+    {
+        area_mask = mrt_udiv(index, bit_per_map);
+        bit_mask = mrt_urem(index, bit_per_map);
 
-		if (value)
-			*(bitmap + area_mask) |= (1 << bit_mask);
-		else
-			*(bitmap + area_mask) &= ~(1 << bit_mask);
-	}
+        if (value)
+            *(bitmap + area_mask) |= (1 << bit_mask);
+        else
+            *(bitmap + area_mask) &= ~(1 << bit_mask);
+    }
 }
 
 /*!
@@ -163,7 +168,7 @@ static void bitmap_set_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_
  */
 kint32_t bitmap_find_first_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits)
 {
-	return bitmap_find_first_bit((kuint8_t *)bitmap, start, total_bits, false);
+    return bitmap_find_first_bit((kuint8_t *)bitmap, start, total_bits, false);
 }
 
 /*!
@@ -174,7 +179,7 @@ kint32_t bitmap_find_first_zero_bit(void *bitmap, kuint32_t start, kusize_t tota
  */
 kint32_t bitmap_find_first_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits)
 {
-	return bitmap_find_first_bit((kuint8_t *)bitmap, start, total_bits, true);
+    return bitmap_find_first_bit((kuint8_t *)bitmap, start, total_bits, true);
 }
 
 /*!
@@ -185,7 +190,7 @@ kint32_t bitmap_find_first_valid_bit(void *bitmap, kuint32_t start, kusize_t tot
  */
 kint32_t bitmap_find_nr_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr)
 {
-	return bitmap_find_nr_bit((kuint8_t *)bitmap, start, total_bits, nr, false);
+    return bitmap_find_nr_bit((kuint8_t *)bitmap, start, total_bits, nr, false);
 }
 
 /*!
@@ -196,7 +201,7 @@ kint32_t bitmap_find_nr_zero_bit(void *bitmap, kuint32_t start, kusize_t total_b
  */
 kint32_t bitmap_find_nr_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr)
 {
-	return bitmap_find_nr_bit((kuint8_t *)bitmap, start, total_bits, nr, true);
+    return bitmap_find_nr_bit((kuint8_t *)bitmap, start, total_bits, nr, true);
 }
 
 /*!
@@ -207,7 +212,7 @@ kint32_t bitmap_find_nr_valid_bit(void *bitmap, kuint32_t start, kusize_t total_
  */
 void bitmap_set_nr_bit_zero(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr)
 {
-	bitmap_set_nr_bit((kuint8_t *)bitmap, start, total_bits, nr, false);
+    bitmap_set_nr_bit((kuint8_t *)bitmap, start, total_bits, nr, false);
 }
 
 /*!
@@ -218,7 +223,7 @@ void bitmap_set_nr_bit_zero(void *bitmap, kuint32_t start, kusize_t total_bits, 
  */
 void bitmap_set_nr_bit_valid(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr)
 {
-	bitmap_set_nr_bit((kuint8_t *)bitmap, start, total_bits, nr, true);
+    bitmap_set_nr_bit((kuint8_t *)bitmap, start, total_bits, nr, true);
 }
 
 /* end of file */

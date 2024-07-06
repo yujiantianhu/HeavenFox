@@ -315,12 +315,7 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_f
 	{
 		ch = *(ptr_fmt + i);
 
-		if (ch == '\n')
-		{
-			/*!< jump over */
-		}
-
-		else if (ch == *(PRINT_LEVEL_SOH))
+		if (!i && (ch == *(PRINT_LEVEL_SOH)))
 		{
 			i++;
 
@@ -331,6 +326,11 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_f
 			}
 
 			continue;
+		}
+
+		if (ch == '\n')
+		{
+			/*!< jump over */
 		}
 
 		/*!< ------------------------------------------------------------------ */
@@ -485,24 +485,56 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_f
  * @retval  none
  * @note    String format conversion
  */
-kchar_t *vasprintk(const kchar_t *ptr_fmt, va_list sprt_list)
+kchar_t *vasprintk(const kchar_t *ptr_fmt, kusize_t *size, va_list sprt_list)
 {
 	va_list sprt_copy;
-	kusize_t size;
 	kchar_t *ptr;
+	kusize_t lenth;
 
 	if (!ptr_fmt)
 		return mrt_nullptr;
 
 	va_copy(sprt_copy, sprt_list);
-	size = do_fmt_convert(mrt_nullptr, mrt_nullptr, ptr_fmt, sprt_copy, (kusize_t)(~0));
+	lenth = do_fmt_convert(mrt_nullptr, mrt_nullptr, ptr_fmt, sprt_copy, (kusize_t)(~0));
 	va_end(sprt_copy);
 
-	ptr = kmalloc(size + 1, GFP_KERNEL);
+	ptr = kmalloc(lenth + 1, GFP_KERNEL);
 	if (!isValid(ptr))
 		return mrt_nullptr;
 
-	do_fmt_convert(ptr, mrt_nullptr, ptr_fmt, sprt_list, size + 1);
+	do_fmt_convert(ptr, mrt_nullptr, ptr_fmt, sprt_list, lenth + 1);
+	if (size)
+		*size = lenth;
+
+	return ptr;
+}
+
+/*!
+ * @brief   lv_vasprintk
+ * @param   ptr_fmt, size
+ * @retval  none
+ * @note    String format conversion
+ */
+kchar_t *lv_vasprintk(const kchar_t *ptr_fmt, kusize_t *size, kubyte_t *ptr_lv, va_list sprt_list)
+{
+	va_list sprt_copy;
+	kchar_t *ptr;
+	kusize_t lenth;
+
+	if (!ptr_fmt)
+		return mrt_nullptr;
+
+	va_copy(sprt_copy, sprt_list);
+	lenth = do_fmt_convert(mrt_nullptr, mrt_nullptr, ptr_fmt, sprt_copy, (kusize_t)(~0));
+	va_end(sprt_copy);
+
+	ptr = kmalloc(lenth + 1, GFP_KERNEL);
+	if (!isValid(ptr))
+		return mrt_nullptr;
+
+	do_fmt_convert(ptr, ptr_lv, ptr_fmt, sprt_list, lenth + 1);
+	if (size)
+		*size = lenth;
 
 	return ptr;
 }
@@ -660,6 +692,12 @@ __weak kint32_t kstrncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
 	return do_string_n_compare(__s1, __s2, __n);
 }
 
+/*!
+ * @brief   kstrchr
+ * @param   none
+ * @retval  none
+ * @note    locate where the first "ch" appears
+ */
 __weak kchar_t *kstrchr(const kchar_t *__s1, kchar_t ch)
 {
 	return seek_char_in_string(__s1, ch);

@@ -22,12 +22,14 @@
 /*!< The defines */
 #define MAX_BRANCH                                      (3)
 
-typedef struct radix_link {
+typedef struct radix_link 
+{
     kuint32_t depth;
 
 } srt_radix_link_t;
 
-typedef struct radix_node {
+typedef struct radix_node 
+{
     struct radix_node *sprt_parent;
     struct radix_node *sgrt_branches[1 << MAX_BRANCH];  /*!< 00, 01, 10, 11 */
 
@@ -35,7 +37,8 @@ typedef struct radix_node {
 
 } srt_radix_node_t;
 
-typedef struct radix_tree {
+typedef struct radix_tree 
+{
     kuint16_t (*get) (kuint32_t);
     void *(*alloc) (kusize_t size);
     void (*free) (void *ptr);

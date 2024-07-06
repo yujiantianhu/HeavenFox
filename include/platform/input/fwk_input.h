@@ -184,6 +184,13 @@ enum __ERT_FWK_INPUT_ABS_CODE
 	NR_INPUT_ABS_CNT = NR_INPUT_ABS_MAX
 };
 
+/*!< API functions */
+/*!
+ * @brief   fill sprt_event
+ * @param   sprt_event, type, code, and value
+ * @retval  none
+ * @note    none
+ */
 static inline void fwk_input_set_event(struct fwk_input_event *sprt_event, kuint32_t type, kuint32_t code, kint32_t value)
 {
 	sprt_event->type = type;

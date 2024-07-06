@@ -50,7 +50,7 @@ struct fwk_netdev_stats
 
 struct fwk_netdev_queue
 {
-	struct fwk_net_device *sprt_netdev;							/*!< destination/source network device */
+	struct fwk_net_device *sprt_netdev;								/*!< destination/source network device */
 	kuint64_t tx_maxrate;
 	kuint64_t trans_timeout;										/*!< statistics on the number of times the queue times out */
 	kuint64_t trans_start;											/*!< The time of the last sent */
@@ -59,16 +59,16 @@ struct fwk_netdev_queue
 
 struct fwk_net_device
 {
-	kchar_t name[NET_IFNAME_SIZE];								/*!< network device name */
+	kchar_t name[NET_IFNAME_SIZE];									/*!< network device name */
 	kchar_t *ptr_ifalias;											/*!< network device aliases */
 
 	kuint64_t state;												/*!< network device interface state */
 	kint32_t ifindex;												/*!< network Device Interface Index Value: Network device identifier */
 
-	struct list_head sgrt_netdev;								/*!< network device list */
-	struct fwk_netdev_stats sgrt_states;						/*!< statistics on network device interfaces */
-	const struct fwk_netdev_ops *sprt_netdev_oprts;				/*!< network device operation API */
-	const struct fwk_ethtool_ops *sprt_ethtool_oprts;			/*!< ether tool operation API */
+	struct list_head sgrt_netdev;									/*!< network device list */
+	struct fwk_netdev_stats sgrt_states;							/*!< statistics on network device interfaces */
+	const struct fwk_netdev_ops *sprt_netdev_oprts;					/*!< network device operation API */
+	const struct fwk_ethtool_ops *sprt_ethtool_oprts;				/*!< ether tool operation API */
 
 	kuint32_t flags;												/*!< Network device Interface identifier */
 	kuint16_t priv_flags;											/*!< Network device Interface identifier; However, it is not visible to user space */
@@ -85,8 +85,8 @@ struct fwk_net_device
 	kuint8_t *ptr_dev_addr;											/*!< MAC address of the network device interface */
 
 	kuint8_t broadcast[NET_MAX_ADDR_LEN];							/*!< hardware broadcast address */
-	struct fwk_netdev_queue sgrt_rcu;							/*!< packet receive queue for network device interfaces */
-	struct fwk_netdev_queue *sprt_tx;							/*!< packet send queue for network device interfaces */
+	struct fwk_netdev_queue sgrt_rcu;								/*!< packet receive queue for network device interfaces */
+	struct fwk_netdev_queue *sprt_tx;								/*!< packet send queue for network device interfaces */
 
 	kuint32_t num_tx_queues;										/*!< number of TX queues allocated at alloc_netdev_mq() time */
 	kuint32_t real_num_tx_queues;									/*!< number of TX queues currently active in device */

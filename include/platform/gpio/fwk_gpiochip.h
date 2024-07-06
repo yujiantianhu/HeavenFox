@@ -34,12 +34,12 @@ typedef struct fwk_gpio_chip
 	struct list_head sgrt_pin_ranges;
 
 	kint32_t   (*request) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
-	void        (*free) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
+	void       (*free) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
 	kint32_t   (*get_direction) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
 	kint32_t   (*direction_input) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
 	kint32_t   (*direction_output) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset, kint32_t value);
 	kint32_t   (*get) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
-	void        (*set) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset, kint32_t value);
+	void       (*set) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset, kint32_t value);
 
 	kint32_t   (*to_irq) (struct fwk_gpio_chip *sprt_chip, kuint32_t offset);
 

@@ -128,7 +128,7 @@ board_init_t board_init_sequence_r[] =
     system_boot_initial,
 
     /*!< peripheral initial*/
-//  board_init_light,
+	board_init_light,
 
     /*!< boot main loop */
     boot_main_loop,

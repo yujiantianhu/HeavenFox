@@ -29,45 +29,45 @@
  */
 struct fwk_fb_bitfield
 {
-	kuint32_t offset;        								/*!< Bitfield offset: red = 11, green = 5, blue = 0 */
-	kuint32_t length;       								/*!< Bitfield lenth: red = 5,  green = 6, blue = 5 */
-	kuint32_t msb_right; 									/*!< (msb_right != 0) ===> MSB on the right. Generally, this value is set to 0 */
+	kuint32_t offset;        							/*!< Bitfield offset: red = 11, green = 5, blue = 0 */
+	kuint32_t length;       							/*!< Bitfield lenth: red = 5,  green = 6, blue = 5 */
+	kuint32_t msb_right; 								/*!< (msb_right != 0) ===> MSB on the right. Generally, this value is set to 0 */
 };
 
 /*!< LCD fix parameters */
 struct fwk_fb_fix_screen_info
 {
-	kchar_t id[16];											/*!< LCD identifier in the form of a string */
-	kuaddr_t smem_start;									/*!< The starting physical address of the framebuffer memory */
-	kuint32_t smem_len;										/*!< The length of the framebuffer memory */
-	kuint32_t type;											/*!< The type of frame buffer storage, i.e. the way in which image data is stored in the frame buffer */
-	kuint32_t type_aux;										/*!< Subtype of the framebuffer store */
-	kuint32_t visual;										/*!< Screen color mode, such as black and white mode, true color mode, etc */
+	kchar_t id[16];										/*!< LCD identifier in the form of a string */
+	kuaddr_t smem_start;								/*!< The starting physical address of the framebuffer memory */
+	kuint32_t smem_len;									/*!< The length of the framebuffer memory */
+	kuint32_t type;										/*!< The type of frame buffer storage, i.e. the way in which image data is stored in the frame buffer */
+	kuint32_t type_aux;									/*!< Subtype of the framebuffer store */
+	kuint32_t visual;									/*!< Screen color mode, such as black and white mode, true color mode, etc */
 
-	kuint32_t line_lenth;									/*!< The number of bytes in a row */
+	kuint32_t line_lenth;								/*!< The number of bytes in a row */
 };
 
 /*!< LCD variable parameters */
 struct fwk_fb_var_screen_info
 {
-	kuint32_t xres;											/*!< Visual screen resolution: x-direction width */
-	kuint32_t yres;											/*!< Visual screen resolution: y-direction width */
-	kuint32_t xres_virtual;									/*!< Virtual screen resolution: x-direction width */
-	kuint32_t yres_virtual;									/*!< Virtual screen resolution: y-direction width */
-	kuint32_t xoffset;										/*!< X-Direction: The offset between the virtual screen and the visual screen */
-	kuint32_t yoffset;										/*!< Y-Direction: The offset between the virtual screen and the visual screen */
+	kuint32_t xres;										/*!< Visual screen resolution: x-direction width */
+	kuint32_t yres;										/*!< Visual screen resolution: y-direction width */
+	kuint32_t xres_virtual;								/*!< Virtual screen resolution: x-direction width */
+	kuint32_t yres_virtual;								/*!< Virtual screen resolution: y-direction width */
+	kuint32_t xoffset;									/*!< X-Direction: The offset between the virtual screen and the visual screen */
+	kuint32_t yoffset;									/*!< Y-Direction: The offset between the virtual screen and the visual screen */
 
-	kuint32_t bits_per_pixel;								/*!< bpp, The number of bits required per pixel, such as 16, 24, 32, ... */
+	kuint32_t bits_per_pixel;							/*!< bpp, The number of bits required per pixel, such as 16, 24, 32, ... */
 
-	struct fwk_fb_bitfield red;								/*!< RGB red bit field */
-	struct fwk_fb_bitfield green;							/*!< RGB green bit field */
-	struct fwk_fb_bitfield blue;							/*!< RGB blue bit field */
-	struct fwk_fb_bitfield transp;							/*!< RGB deaphaneity bit field, which is only present when (bpp == 32) */
+	struct fwk_fb_bitfield red;							/*!< RGB red bit field */
+	struct fwk_fb_bitfield green;						/*!< RGB green bit field */
+	struct fwk_fb_bitfield blue;						/*!< RGB blue bit field */
+	struct fwk_fb_bitfield transp;						/*!< RGB deaphaneity bit field, which is only present when (bpp == 32) */
 
-	kuint32_t height;										/*!< Screen height (unit: ms) */
-	kuint32_t width;										/*!< Screen width (unit: ms) */
+	kuint32_t height;									/*!< Screen height (unit: ms) */
+	kuint32_t width;									/*!< Screen width (unit: ms) */
 
-	kuint32_t pixclock;										/*!< Pixel clock, unit: ps(picoseconds) */
+	kuint32_t pixclock;									/*!< Pixel clock, unit: ps(picoseconds) */
 
 	/*!<
 	 * The time (unit: pixclock) from the end of the line synchronization signal hsync to the start of drawing a new line image is actually HBP, 
@@ -90,8 +90,8 @@ struct fwk_fb_var_screen_info
 	 */
 	kuint32_t lower_margin;
 
-	kuint32_t hsync_len;									/*!< The pulse width (unit: pixclock) of the horizontal synchronization signal hsync, i.e. hpw */
-	kuint32_t vsync_len;									/*!< The pulse width (unit: PixClock) of the V-sync signal vsync, i.e. VPW */
+	kuint32_t hsync_len;								/*!< The pulse width (unit: pixclock) of the horizontal synchronization signal hsync, i.e. hpw */
+	kuint32_t vsync_len;								/*!< The pulse width (unit: PixClock) of the V-sync signal vsync, i.e. VPW */
 };
 
 enum __ERT_FB_IOCTL_CMD
@@ -103,20 +103,20 @@ enum __ERT_FB_IOCTL_CMD
 
 typedef struct fwk_fb_info
 {
-	kint32_t node;											/*!< minor */
+	kint32_t node;										/*!< minor */
 	kint32_t flags;
 
-	struct fwk_fb_fix_screen_info sgrt_fix;					/*!< fix parameters */
-	struct fwk_fb_var_screen_info sgrt_var;					/*!< variadics */
+	struct fwk_fb_fix_screen_info sgrt_fix;				/*!< fix parameters */
+	struct fwk_fb_var_screen_info sgrt_var;				/*!< variadics */
 
-	const struct fwk_fb_oprts *sprt_fbops;					/*!< operation API */
-	struct fwk_device *sprt_dev;							/*!< device */
+	const struct fwk_fb_oprts *sprt_fbops;				/*!< operation API */
+	struct fwk_device *sprt_dev;						/*!< device */
 	struct fwk_device *sprt_idev;
 
-	kuint8_t *ptr_screen_base;								/*!< base address of the virtual memory */
-	kuint32_t screen_size;									/*!< virtual memory size */
+	kuint8_t *ptr_screen_base;							/*!< base address of the virtual memory */
+	kuint32_t screen_size;								/*!< virtual memory size */
 
-	void *ptr_par;											/*!< private data of the framebuffer device */
+	void *ptr_par;										/*!< private data of the framebuffer device */
 	
 } srt_fwk_fb_info_t;
 
@@ -144,6 +144,13 @@ TARGET_EXT void fwk_unregister_framebuffer(struct fwk_fb_info *sprt_fb_info);
 TARGET_EXT struct fwk_fb_info *fwk_get_fb_info(kuint32_t idx);
 TARGET_EXT struct fwk_fb_info *fwk_file_fb_info(struct fwk_file *sprt_file);
 
+/*!< API functions */
+/*!
+ * @brief   get driver data from fb device
+ * @param   sprt_fb_info
+ * @retval  ptr_par
+ * @note    none
+ */
 static inline void *fwk_fb_get_drvdata(struct fwk_fb_info *sprt_fb_info)
 {
 	return sprt_fb_info ? sprt_fb_info->ptr_par : mrt_nullptr;

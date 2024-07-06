@@ -84,12 +84,24 @@ kint32_t spin_try_lock(struct spin_lock *sprt_lock)
 }
 
 /*!< for SMP (if is single core, do not need to use them) */
+/*!
+ * @brief   spin lock and disable irq
+ * @param   sprt_lock
+ * @retval  none
+ * @note    none
+ */
 void spin_lock_irq(struct spin_lock *sprt_lock)
 {
     spin_lock(sprt_lock);
     mrt_disable_cpu_irq();
 }
 
+/*!
+ * @brief   try spin lock and disable irq
+ * @param   sprt_lock
+ * @retval  1: lock success; 0: lock fail
+ * @note    none
+ */
 kint32_t spin_try_lock_irq(struct spin_lock *sprt_lock)
 {
     if (spin_try_lock(sprt_lock))
@@ -100,6 +112,12 @@ kint32_t spin_try_lock_irq(struct spin_lock *sprt_lock)
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   spin unlock and enable irq
+ * @param   sprt_lock
+ * @retval  none
+ * @note    none
+ */
 void spin_unlock_irq(struct spin_lock *sprt_lock)
 {
     if (!spin_is_locked(sprt_lock))
@@ -110,6 +128,12 @@ void spin_unlock_irq(struct spin_lock *sprt_lock)
     mrt_enable_cpu_irq();
 }
 
+/*!
+ * @brief   spin lock and save current irq status
+ * @param   sprt_lock
+ * @retval  none
+ * @note    none
+ */
 void spin_lock_irqsave(struct spin_lock *sprt_lock)
 {
     spin_lock(sprt_lock);
@@ -117,6 +141,12 @@ void spin_lock_irqsave(struct spin_lock *sprt_lock)
     mrt_disable_cpu_irq();
 }
 
+/*!
+ * @brief   try spin lock and save current irq status
+ * @param   sprt_lock
+ * @retval  1: lock success; 0: lock fail
+ * @note    none
+ */
 kint32_t spin_try_lock_irqsave(struct spin_lock *sprt_lock)
 {
     if (spin_try_lock(sprt_lock))
@@ -131,6 +161,12 @@ kint32_t spin_try_lock_irqsave(struct spin_lock *sprt_lock)
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   spin unlock and restore irq status
+ * @param   sprt_lock
+ * @retval  none
+ * @note    none
+ */
 void spin_unlock_irqrestore(struct spin_lock *sprt_lock)
 {
     if (!spin_is_locked(sprt_lock))

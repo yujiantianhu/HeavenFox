@@ -56,6 +56,12 @@ typedef struct at24cxx_drv_info
 } at24cxx_drv_info_t;
 
 /*!< API function */
+/*!
+ * @brief   at24cxx write
+ * @param   sprt_info
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t at24cxx_write_eeprom(struct at24cxx_drv_info *sprt_info, kuint8_t *buffer, kssize_t size)
 {
     struct fwk_i2c_msg sgrt_msgs;
@@ -71,6 +77,12 @@ static kint32_t at24cxx_write_eeprom(struct at24cxx_drv_info *sprt_info, kuint8_
     return fwk_i2c_transfer(sprt_info->sprt_client, &sgrt_msgs, 1);
 }
 
+/*!
+ * @brief   at24cxx read
+ * @param   sprt_info
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t at24cxx_read_eeprom(struct at24cxx_drv_info *sprt_info, kuint8_t *buffer, kssize_t size)
 {
     struct fwk_i2c_msg sgrt_msgs[2];
@@ -88,6 +100,12 @@ static kint32_t at24cxx_read_eeprom(struct at24cxx_drv_info *sprt_info, kuint8_t
     return fwk_i2c_transfer(sprt_info->sprt_client, &sgrt_msgs[0], ARRAY_SIZE(sgrt_msgs));
 }
 
+/*!
+ * @brief   at24cxx write
+ * @param   sprt_info
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t __at24cxx_driver_write(struct at24cxx_drv_info *sprt_info, struct fwk_eeprom *sprt_eep)
 {
     kuint8_t *buffer, *ptr_from;
@@ -159,6 +177,12 @@ END:
     return retval ? retval : sprt_eep->size;
 }
 
+/*!
+ * @brief   at24cxx read
+ * @param   sprt_info
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t __at24cxx_driver_read(struct at24cxx_drv_info *sprt_info, struct fwk_eeprom *sprt_eep)
 {
     kuint8_t *buffer, *ptr_to;
@@ -230,6 +254,12 @@ END:
     return retval ? retval : sprt_eep->size;
 }
 
+/*!
+ * @brief   driver open
+ * @param   sprt_inode, sprt_file
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t at24cxx_driver_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
     struct at24cxx_drv_info *sprt_info;
@@ -240,6 +270,12 @@ static kint32_t at24cxx_driver_open(struct fwk_inode *sprt_inode, struct fwk_fil
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   driver close
+ * @param   sprt_inode, sprt_file
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t at24cxx_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
     sprt_file->private_data = mrt_nullptr;
@@ -247,6 +283,12 @@ static kint32_t at24cxx_driver_close(struct fwk_inode *sprt_inode, struct fwk_fi
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   driver ioctl
+ * @param   sprt_file, cmd, args
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t at24cxx_driver_ioctl(struct fwk_file *sprt_file, kuint32_t cmd, kuaddr_t args)
 {
     struct at24cxx_drv_info *sprt_info;
@@ -281,8 +323,8 @@ static const struct fwk_file_oprts sgrt_at24cxx_driver_oprts =
 
 /*!< --------------------------------------------------------------------- */
 /*!
- * @brief   imx_i2c_driver_probe
- * @param   sprt_dev
+ * @brief   at24cxx_driver_probe
+ * @param   sprt_client, sprt_id
  * @retval  errno
  * @note    none
  */
@@ -347,8 +389,8 @@ fail1:
 }
 
 /*!
- * @brief   imx_i2c_driver_remove
- * @param   sprt_dev
+ * @brief   at24cxx_driver_remove
+ * @param   sprt_client
  * @retval  errno
  * @note    none
  */

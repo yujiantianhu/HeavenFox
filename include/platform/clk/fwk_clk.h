@@ -122,6 +122,12 @@ TARGET_EXT void fwk_clk_prepare_enable(struct fwk_clk *sprt_clk);
 TARGET_EXT void fwk_clk_disable_unprepare(struct fwk_clk *sprt_clk);
 
 /*!< API functions */
+/*!
+ * @brief   sprt_clk ---> fwk_clk_hw
+ * @param   sprt_clk
+ * @retval  sprt_hw
+ * @note    none
+ */
 static inline struct fwk_clk_hw *fwk_clk_to_hw(struct fwk_clk *sprt_clk)
 {
     return sprt_clk ? sprt_clk->sprt_core->sprt_hw : mrt_nullptr;

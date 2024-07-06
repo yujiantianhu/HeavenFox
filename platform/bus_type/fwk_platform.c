@@ -213,6 +213,12 @@ kint32_t fwk_device_driver_match(struct fwk_device *sprt_dev, struct fwk_bus_typ
 	return fwk_device_driver_probe(sprt_dev);
 }
 
+/*!
+ * @brief   device initialization
+ * @param   sprt_dev
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_device_initial(struct fwk_device *sprt_dev)
 {
 	struct fwk_kobject *sprt_kobj;
@@ -254,7 +260,7 @@ struct fwk_device *fwk_device_create(kuint32_t type, kuint32_t devNum, kchar_t *
 		return ERR_PTR(-ER_NOTFOUND);
 
 	va_start(sprt_valist, fmt);
-	name = vasprintk(fmt, sprt_valist);
+	name = vasprintk(fmt, mrt_nullptr, sprt_valist);
 	va_end(sprt_valist);
 
 	if (!name)

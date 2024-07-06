@@ -36,6 +36,12 @@ TARGET_EXT kint32_t sema_down_try_lock(struct semaphore *sprt_sem);
 TARGET_EXT void sema_up(struct semaphore *sprt_sem);
 
 /*!< API functions */
+/*!
+ * @brief   check if semaphore is locked
+ * @param   sprt_sem
+ * @retval  locked(true) / unlocked(false)
+ * @note    none
+ */
 static inline kbool_t sema_is_locked(struct semaphore *sprt_sem)
 {
 	return (0 == ATOMIC_READ(&sprt_sem->sgrt_atc));

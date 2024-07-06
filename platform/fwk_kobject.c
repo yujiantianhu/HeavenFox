@@ -19,6 +19,12 @@
 static struct fwk_kset sgrt_fwk_kset_root;
 
 /*!< API function */
+/*!
+ * @brief   join the new kobject to kset
+ * @param   sprt_kobj
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t fwk_kobject_join_to_kset(struct fwk_kobject *sprt_kobj)
 {
 	struct fwk_kobject *sprt_parent;
@@ -60,6 +66,12 @@ fail:
 	return retval;
 }
 
+/*!
+ * @brief   delete the kobject from kset
+ * @param   sprt_kobj
+ * @retval  none
+ * @note    none
+ */
 static void fwk_kobject_detach_from_kset(struct fwk_kobject *sprt_kobj)
 {
 	if (!sprt_kobj->sprt_kset)
@@ -70,6 +82,12 @@ static void fwk_kobject_detach_from_kset(struct fwk_kobject *sprt_kobj)
 	spin_unlock(&sprt_kobj->sgrt_lock);
 }
 
+/*!
+ * @brief   join the new kobject to kset, and create inode
+ * @param   sprt_kobj
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t fwk_kobject_build_inode(struct fwk_kobject *sprt_kobj)
 {
 	struct fwk_inode *sprt_inode;
@@ -91,6 +109,12 @@ static kint32_t fwk_kobject_build_inode(struct fwk_kobject *sprt_kobj)
 	return ER_NORMAL;
 }
 
+/*!
+ * @brief   initialize kobject
+ * @param   sprt_kobj
+ * @retval  none
+ * @note    none
+ */
 void fwk_kobject_init(struct fwk_kobject *sprt_kobj)
 {
 	fwk_kref_init(&sprt_kobj->sgrt_ref);
@@ -100,6 +124,12 @@ void fwk_kobject_init(struct fwk_kobject *sprt_kobj)
 	sprt_kobj->sprt_kset = mrt_nullptr;
 }
 
+/*!
+ * @brief   create a new kobject
+ * @param   none
+ * @retval  kobject
+ * @note    none
+ */
 struct fwk_kobject *fwk_kobject_create(void)
 {
 	struct fwk_kobject *sprt_kobj;
@@ -113,6 +143,12 @@ struct fwk_kobject *fwk_kobject_create(void)
 	return sprt_kobj;
 }
 
+/*!
+ * @brief   add a new kobject
+ * @param   sprt_kobj, sprt_parent, fmt (name)
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_kobject_add(struct fwk_kobject *sprt_kobj, struct fwk_kobject *sprt_parent, const kchar_t *fmt, ...)
 {
 	va_list sprt_list;
@@ -137,6 +173,12 @@ kint32_t fwk_kobject_add(struct fwk_kobject *sprt_kobj, struct fwk_kobject *sprt
 	return retval;
 }
 
+/*!
+ * @brief   add a new kobject
+ * @param   sprt_kobj, sprt_parent, fmt (unformatted name)
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_kobject_add_vargs(struct fwk_kobject *sprt_kobj, struct fwk_kobject *sprt_parent, const kchar_t *fmt, va_list sprt_list)
 {
 	kint32_t retval;
@@ -157,6 +199,12 @@ kint32_t fwk_kobject_add_vargs(struct fwk_kobject *sprt_kobj, struct fwk_kobject
 	return retval;
 }
 
+/*!
+ * @brief   delete kobject
+ * @param   sprt_kobj
+ * @retval  none
+ * @note    none
+ */
 void fwk_kobject_del(struct fwk_kobject *sprt_kobj)
 {
 	fwk_rm_inode(sprt_kobj->sprt_inode);
@@ -166,13 +214,24 @@ void fwk_kobject_del(struct fwk_kobject *sprt_kobj)
 	sprt_kobj->sprt_inode = mrt_nullptr;
 }
 
+/*!
+ * @brief   release kobject
+ * @param   sprt_kobj
+ * @retval  none
+ * @note    none
+ */
 void fwk_kobject_destroy(struct fwk_kobject *sprt_kobj)
 {
 	fwk_kobject_del(sprt_kobj);
 	kfree(sprt_kobj);
 }
 
-/*!< dir: the format of name is "xxx/xxx", such as "dev/"; file: '/' should be moved, such as "dev" */
+/*!
+ * @brief   create directory or file
+ * @param   sprt_parent, name
+ * @retval  kobject created
+ * @note    dir: the format of name is "xxx/xxx", such as "dev/"; file: '/' should be moved, such as "dev"
+ */
 static struct fwk_kobject *__fwk_kobject_populate_dir(struct fwk_kobject *sprt_parent, const kchar_t *name)
 {
     struct fwk_kset *sprt_kset;
@@ -232,6 +291,12 @@ fail:
     return mrt_nullptr;
 }
 
+/*!
+ * @brief   populate directory or file
+ * @param   sprt_head, name
+ * @retval  kobject created
+ * @note    dir: the format of name is "xxx/xxx", such as "dev/"; file: '/' should be moved, such as "dev"
+ */
 struct fwk_kobject *fwk_kobject_populate(struct fwk_kobject *sprt_head, const kchar_t *name)
 {
 	kchar_t *str_start, *str_end;
@@ -326,6 +391,12 @@ fail:
 	return ERR_PTR(-ER_ERROR);
 }
 
+/*!
+ * @brief   find kobject by directory path (name)
+ * @param   sprt_head, name
+ * @retval  kobject found
+ * @note    dir: the format of name is "xxx/xxx", such as "dev/"; file: '/' should be moved, such as "dev"
+ */
 struct fwk_kobject *fwk_find_kobject_by_path(struct fwk_kobject *sprt_head, const kchar_t *name)
 {
 	kchar_t *str_start, *str_end;
@@ -412,6 +483,12 @@ out:
 	return mrt_nullptr;
 }
 
+/*!
+ * @brief   set kobject's name (unformatted)
+ * @param   sprt_kobj, fmt
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_kobject_set_name_args(struct fwk_kobject *sprt_kobj, const kchar_t *fmt, va_list sprt_list)
 {
 	kchar_t *ptr;
@@ -420,7 +497,7 @@ kint32_t fwk_kobject_set_name_args(struct fwk_kobject *sprt_kobj, const kchar_t 
 	if (sprt_kobj->name && !fmt)
 		return ER_NORMAL;
 
-	ptr = vasprintk(fmt, sprt_list);
+	ptr = vasprintk(fmt, mrt_nullptr, sprt_list);
 	if (!isValid(ptr))
 		return -ER_NOMEM;
 
@@ -431,6 +508,12 @@ kint32_t fwk_kobject_set_name_args(struct fwk_kobject *sprt_kobj, const kchar_t 
 	return ER_NORMAL;
 }
 
+/*!
+ * @brief   set kobject's name (unformatted)
+ * @param   sprt_kobj, fmt
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_kobject_set_name(struct fwk_kobject *sprt_kobj, const kchar_t *fmt, ...)
 {
 	va_list sprt_list;
@@ -443,6 +526,12 @@ kint32_t fwk_kobject_set_name(struct fwk_kobject *sprt_kobj, const kchar_t *fmt,
 	return retval;
 }
 
+/*!
+ * @brief   re-set kobject's name (unformatted)
+ * @param   sprt_kobj, fmt
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_kobject_rename(struct fwk_kobject *sprt_kobj, const kchar_t *fmt, ...)
 {
 	va_list sprt_list;
@@ -455,6 +544,12 @@ kint32_t fwk_kobject_rename(struct fwk_kobject *sprt_kobj, const kchar_t *fmt, .
 	return retval;
 }
 
+/*!
+ * @brief   delete kobject's name
+ * @param   sprt_kobj
+ * @retval  none
+ * @note    none
+ */
 void fwk_kobject_del_name(struct fwk_kobject *sprt_kobj)
 {
 	if (sprt_kobj->name)
@@ -463,32 +558,69 @@ void fwk_kobject_del_name(struct fwk_kobject *sprt_kobj)
 	sprt_kobj->name = mrt_nullptr;
 }
 
+/*!
+ * @brief   get kobject's name
+ * @param   sprt_kobj
+ * @retval  name
+ * @note    none
+ */
 kchar_t *fwk_kobject_get_name(struct fwk_kobject *sprt_kobj)
 {
 	return sprt_kobj->name;
 }
 
-void fwk_kobject_get(struct fwk_kobject *sprt_kobj)
+/*!
+ * @brief   kobject get
+ * @param   sprt_kobj
+ * @retval  kobject
+ * @note    none
+ */
+struct fwk_kobject *fwk_kobject_get(struct fwk_kobject *sprt_kobj)
 {
 	fwk_kref_get(&sprt_kobj->sgrt_ref);
+	return sprt_kobj;
 }
 
+/*!
+ * @brief   kobject put
+ * @param   sprt_kobj
+ * @retval  none
+ * @note    none
+ */
 void fwk_kobject_put(struct fwk_kobject *sprt_kobj)
 {
 	fwk_kref_put(&sprt_kobj->sgrt_ref);
 }
 
+/*!
+ * @brief   check if kobject is using now
+ * @param   sprt_kobj
+ * @retval  non-zero: using; 0: closed
+ * @note    none
+ */
 kbool_t fwk_kobject_is_referrd(struct fwk_kobject *sprt_kobj)
 {
 	return !fwk_kref_is_zero(&sprt_kobj->sgrt_ref);
 }
 
+/*!
+ * @brief   initialize kset
+ * @param   sprt_kset
+ * @retval  none
+ * @note    none
+ */
 void fwk_kset_init(struct fwk_kset *sprt_kset)
 {
 	init_list_head(&sprt_kset->sgrt_list);
 	fwk_kobject_init(&sprt_kset->sgrt_kobj);
 }
 
+/*!
+ * @brief   create kset
+ * @param   name, sprt_parent
+ * @retval  kset created
+ * @note    none
+ */
 struct fwk_kset *fwk_kset_create(const kchar_t *name, struct fwk_kobject *sprt_parent)
 {
 	struct fwk_kset *sprt_kset;
@@ -509,6 +641,12 @@ struct fwk_kset *fwk_kset_create(const kchar_t *name, struct fwk_kobject *sprt_p
 	return sprt_kset;
 }
 
+/*!
+ * @brief   register kset
+ * @param   sprt_kset
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_kset_register(struct fwk_kset *sprt_kset)
 {
 	struct fwk_kobject *sprt_kobj;
@@ -527,6 +665,12 @@ kint32_t fwk_kset_register(struct fwk_kset *sprt_kset)
 	return fwk_kobject_build_inode(&sprt_kset->sgrt_kobj);
 }
 
+/*!
+ * @brief   create and register kset
+ * @param   name, sprt_parent
+ * @retval  kset created
+ * @note    none
+ */
 struct fwk_kset *fwk_kset_create_and_register(const kchar_t *name, struct fwk_kobject *sprt_parent)
 {
 	struct fwk_kset *sprt_kset;
@@ -546,6 +690,12 @@ struct fwk_kset *fwk_kset_create_and_register(const kchar_t *name, struct fwk_ko
 	return sprt_kset;
 }
 
+/*!
+ * @brief   unregister kset
+ * @param   sprt_kset
+ * @retval  none
+ * @note    none
+ */
 void fwk_kset_unregister(struct fwk_kset *sprt_kset)
 {
 	if (!mrt_list_head_empty(&sprt_kset->sgrt_list))
@@ -555,6 +705,12 @@ void fwk_kset_unregister(struct fwk_kset *sprt_kset)
 	fwk_kset_init(sprt_kset);
 }
 
+/*!
+ * @brief   unregister kset and kobject
+ * @param   sprt_kobj
+ * @retval  none
+ * @note    none
+ */
 void fwk_kset_kobject_remove(struct fwk_kobject *sprt_kobj)
 {
 	if (!sprt_kobj->is_dir)
@@ -568,6 +724,13 @@ void fwk_kset_kobject_remove(struct fwk_kobject *sprt_kobj)
 	}
 }
 
+/*!< ------------------------------------------------------- */
+/*!
+ * @brief   root directory init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
 kint32_t __plat_init fwk_kobject_root_init(void)
 {
 	struct fwk_kset *sprt_kset = &sgrt_fwk_kset_root;

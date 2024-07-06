@@ -28,6 +28,12 @@
 static DECLARE_LIST_HEAD(sgrt_kernel_mailboxs);
 
 /*!< API functions */
+/*!
+ * @brief   find mailbox which named "name"
+ * @param   name
+ * @retval  sprt_mb
+ * @note    none
+ */
 struct mailbox *mailbox_find(const kchar_t *name)
 {
     struct mailbox *sprt_mb;
@@ -44,6 +50,12 @@ struct mailbox *mailbox_find(const kchar_t *name)
     return mrt_nullptr;
 }
 
+/*!
+ * @brief   add new mailbox to global list
+ * @param   sprt_mb
+ * @retval  none
+ * @note    none
+ */
 void mailbox_insert(struct mailbox *sprt_mb)
 {
     struct mailbox *sprt_box;
@@ -71,6 +83,12 @@ END:
     list_head_add_tail(&sgrt_kernel_mailboxs, &sprt_mb->sgrt_link);
 }
 
+/*!
+ * @brief   initial mailbox
+ * @param   sprt_mb, tid, name
+ * @retval  none
+ * @note    none
+ */
 kint32_t mailbox_init(struct mailbox *sprt_mb, real_thread_t tid, const kchar_t *name)
 {
     struct mailbox *sprt_box;
@@ -81,6 +99,7 @@ kint32_t mailbox_init(struct mailbox *sprt_mb, real_thread_t tid, const kchar_t 
     else
         sprintk(label, "mailbox-tid-%d", tid);
 
+    /*!< if name is registered */
     sprt_box = mailbox_find(label);
     if (sprt_box)
         return -ER_EXISTED;
@@ -89,17 +108,31 @@ kint32_t mailbox_init(struct mailbox *sprt_mb, real_thread_t tid, const kchar_t 
     sprt_mb->tid = tid;
     kstrlcpy(sprt_mb->name, label, MAILBOX_NAME_LEN);
     init_list_head(&sprt_mb->sgrt_mail);
+    mutex_init(&sprt_mb->sgrt_lock);
     
     mailbox_insert(sprt_mb);
 
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   delete mailbox
+ * @param   sprt_mb
+ * @retval  none
+ * @note    none
+ */
 void mailbox_deinit(struct mailbox *sprt_mb)
 {
     list_head_del(&sprt_mb->sgrt_link);
+    mutex_init(&sprt_mb->sgrt_lock);
 }
 
+/*!
+ * @brief   create mailbox
+ * @param   tid, name
+ * @retval  mailbox created
+ * @note    none
+ */
 struct mailbox *mailbox_create(real_thread_t tid, const kchar_t *name)
 {
     struct mailbox *sprt_mb;
@@ -117,6 +150,12 @@ struct mailbox *mailbox_create(real_thread_t tid, const kchar_t *name)
     return sprt_mb;
 }
 
+/*!
+ * @brief   destroy mailbox
+ * @param   sprt_mb
+ * @retval  none
+ * @note    none
+ */
 void mailbox_destroy(struct mailbox *sprt_mb)
 {
     if (!sprt_mb)
@@ -126,6 +165,13 @@ void mailbox_destroy(struct mailbox *sprt_mb)
     kfree(sprt_mb);
 }
 
+/*!< ------------------------------------------------------------- */
+/*!
+ * @brief   create mail
+ * @param   sprt_mb
+ * @retval  mail created
+ * @note    none
+ */
 struct mail *mail_create(struct mailbox *sprt_mb)
 {
     struct mail *sprt_mail;
@@ -140,6 +186,12 @@ struct mail *mail_create(struct mailbox *sprt_mb)
     return sprt_mail;
 }
 
+/*!
+ * @brief   destroy mail
+ * @param   sprt_mb, sprt_mail
+ * @retval  none
+ * @note    none
+ */
 void mail_destroy(struct mailbox *sprt_mb, struct mail *sprt_mail)
 {
     if (!sprt_mail)
@@ -154,6 +206,12 @@ void mail_destroy(struct mailbox *sprt_mb, struct mail *sprt_mail)
         mutex_unlock(&sprt_mail->sgrt_lock);
 }
 
+/*!
+ * @brief   send mail
+ * @param   mb_name, sprt_mail
+ * @retval  errno
+ * @note    none
+ */
 kint32_t mail_send(const kchar_t *mb_name, struct mail *sprt_mail)
 {
     struct mailbox *sprt_mb;
@@ -167,15 +225,24 @@ kint32_t mail_send(const kchar_t *mb_name, struct mail *sprt_mail)
 
     /*!< if the last mail with the same address is being read, you should wait a while before sending new */
     mutex_lock(&sprt_mail->sgrt_lock);
+
+    mutex_lock(&sprt_mb->sgrt_lock);
     list_head_add_tail(&sprt_mb->sgrt_mail, &sprt_mail->sgrt_link);
+    sprt_mb->num_mails++;
+    mutex_unlock(&sprt_mb->sgrt_lock);
+
     sprt_mail->status = NR_MAIL_NONE;
     mutex_unlock(&sprt_mail->sgrt_lock);
 
-    sprt_mb->num_mails++;
-    
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   recieve mail
+ * @param   sprt_mb, sprt_mail, timeout
+ * @retval  errno
+ * @note    none
+ */
 kint32_t mail_recv(struct mailbox *sprt_mb, struct mail *sprt_mail, kutime_t timeout)
 {
     struct mail *sprt_recv;
@@ -196,7 +263,10 @@ kint32_t mail_recv(struct mailbox *sprt_mb, struct mail *sprt_mail, kutime_t tim
     }
 
     /*!< get each mail */
+    mutex_lock(&sprt_mb->sgrt_lock);
     sprt_recv = mrt_list_first_entry(&sprt_mb->sgrt_mail, typeof(*sprt_recv), sgrt_link);
+    mutex_unlock(&sprt_mb->sgrt_lock);
+
     mutex_lock(&sprt_recv->sgrt_lock);
 
     /*!< make sure that sprt_recv is still valid */
@@ -253,6 +323,12 @@ END:
     return retval;
 }
 
+/*!
+ * @brief   deal with the aftermath
+ * @param   sprt_mail
+ * @retval  none
+ * @note    none
+ */
 void mail_recv_finish(struct mail *sprt_mail)
 {
     kuint32_t idx;

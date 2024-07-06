@@ -175,27 +175,21 @@
 			>;
 		};
 
-		pinctrl_gpio_backlight: gpio_backlightgrp {
-			fsl,pins = <
-				MX6UL_PAD_GPIO1_IO08__GPIO1_IO08		0x10B0
-			>;
-		};
-
         pinctrl_ledgpio: ledgpiogrp {
             fsl,pins = <
-                MX6UL_PAD_GPIO1_IO03__GPIO1_IO03    	0x10B0
+                MX6UL_PAD_GPIO1_IO03__GPIO1_IO03    	0x10b0
             >;
         };
 
         pinctrl_extkey: extkeygrp {
             fsl,pins = <
-                MX6UL_PAD_UART1_CTS_B__GPIO1_IO18    	0xF080
+                MX6UL_PAD_UART1_CTS_B__GPIO1_IO18    	0xf080
             >;
         };
 
         pinctrl_tsc_int: tsc_intgrp {
             fsl,pins = <
-                MX6UL_PAD_GPIO1_IO09__GPIO1_IO09    	0xF080
+                MX6UL_PAD_GPIO1_IO09__GPIO1_IO09    	0xf080
             >;
         };
 
@@ -248,6 +242,12 @@
 				MX6UL_PAD_LCD_ENABLE__LCDIF_ENABLE  	0x79
 				MX6UL_PAD_LCD_HSYNC__LCDIF_HSYNC    	0x79
 				MX6UL_PAD_LCD_VSYNC__LCDIF_VSYNC    	0x79
+			>;
+		};
+
+		pinctrl_gpio_backlight: gpio_backlightgrp {
+			fsl,pins = <
+				MX6UL_PAD_GPIO1_IO08__GPIO1_IO08		0x10b0
 			>;
 		};
 

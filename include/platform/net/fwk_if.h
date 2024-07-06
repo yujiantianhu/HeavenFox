@@ -17,22 +17,22 @@
 #include <platform/fwk_basic.h>
 
 /*!< The defines */
-#define NET_UAPI_DEF_IF_IFREQ										1
-#define NET_UAPI_DEF_IF_IFMAP										1
+#define NET_UAPI_DEF_IF_IFREQ									1
+#define NET_UAPI_DEF_IF_IFMAP									1
 
-#define NET_IFNAME_SIZE												(32)
-#define NET_MAX_ADDR_LEN											(32)
+#define NET_IFNAME_SIZE											(32)
+#define NET_MAX_ADDR_LEN										(32)
 
-#define NET_MAC_ETH_ALEN											(6)
+#define NET_MAC_ETH_ALEN										(6)
 
-#define NET_PROTO_ETH_P_IP    										0x0800		/*!< IP Protocol */
-#define NET_PROTO_ETH_P_ARP   										0x0806		/*!< Address Resolution Protocol */
-#define NET_PROTO_ETH_P_RARP  										0x8035		/*!< Reverse Address Resolution Protocol */
-#define NET_PROTO_ETH_P_IPV6  										0x86DD		/*!< IPV6 Protocol */
+#define NET_PROTO_ETH_P_IP    									0x0800		/*!< IP Protocol */
+#define NET_PROTO_ETH_P_ARP   									0x0806		/*!< Address Resolution Protocol */
+#define NET_PROTO_ETH_P_RARP  									0x8035		/*!< Reverse Address Resolution Protocol */
+#define NET_PROTO_ETH_P_IPV6  									0x86DD		/*!< IPV6 Protocol */
 
 struct fwk_sockaddr
 {
-	kint8_t sa_data[14];														/*!< Address data.  */
+	kint8_t sa_data[14];													/*!< Address data.  */
 };
 
 #if NET_UAPI_DEF_IF_IFMAP
@@ -54,7 +54,7 @@ struct fwk_ifreq
 #define IFHWADDRLEN	6
 	union
 	{
-		kint8_t ifrn_name[NET_IFNAME_SIZE];										/*!< if name, e.g. "en0" */
+		kint8_t ifrn_name[NET_IFNAME_SIZE];									/*!< if name, e.g. "en0" */
 
 	} urt_fwk_ifr_ifrn;
 
@@ -69,7 +69,7 @@ struct fwk_ifreq
 		kint32_t ifru_ivalue;
 		kint32_t ifru_mtu;
 		struct fwk_ifmap ifru_map;
-		kint8_t ifru_slave[NET_IFNAME_SIZE];									/*!< Just fits the size */
+		kint8_t ifru_slave[NET_IFNAME_SIZE];								/*!< Just fits the size */
 		kint8_t ifru_newname[NET_IFNAME_SIZE];
 		void *ifru_data;
 //		struct if_settings ifru_settings;

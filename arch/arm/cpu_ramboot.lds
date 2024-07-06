@@ -14,7 +14,21 @@ OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 
 /*!< Program base address */
+/*!< 1. Imx6ull */
+/*!<
+ * DDR: size = 512MB = 536870912(Bytes), origin = 0x80000000, end = 0xA0000000
+ * 0x80000000 ~ 0x87ffffff is used as memory space, and program basic address needs to be after 0x88000000
+ * lenth = (0xA0000000 - 0x88000000) = 0x18000000
+ */
+/*!!!
 _PROGRAM_START = DEFINED(CONFIG_PROGRAM_BASE) ? CONFIG_PROGRAM_BASE : 0x88000000;
+_PROGRAM_SIZE  = DEFINED(CONFIG_PROGRAM_SIZE) ? CONFIG_PROGRAM_SIZE : 0x18000000;
+*/
+
+/*!< xc7z010 (core 0): 256MB */
+/*!< 0x00100000 ~ 0x040fffff is used as memory space and dtb */
+_PROGRAM_START = DEFINED(CONFIG_PROGRAM_BASE) ? CONFIG_PROGRAM_BASE : 0x04100000;
+_PROGRAM_SIZE  = DEFINED(CONFIG_PROGRAM_SIZE) ? CONFIG_PROGRAM_SIZE : 0x0FF00000;
 
 /*!< Heap and Stack size */
 _HEAP_SIZE = DEFINED(CONFIG_HEAP_SIZE) ? CONFIG_HEAP_SIZE : (8 * 1024 * 1024);
@@ -30,12 +44,11 @@ _MEM_POOL_SIZE  = DEFINED(CONFIG_MEM_POOL_SIZE) ? CONFIG_MEM_POOL_SIZE : (32 * 1
 
 MEMORY
 {
-    /*!<
-     * DDR: size = 512MB = 536870912(Bytes), origin = 0x80000000, end = 0xA0000000
-     * 0x80000000 ~ 0x88000000 is used as memory space, and program basic address needs to be after 0x88000000
-     * lenth = (0xA0000000 - 0x88000000) = 0x18000000
-     */
-    ram_ddr_0 : ORIGIN = 0x88000000, LENGTH = 0x18000000
+/*!!! imx6ull
+    ram_ddr_0 : ORIGIN = 0x88000000, LENGTH = 0x18000000 */
+
+/*!!! xc7z010 */
+    ram_ddr_0 : ORIGIN = 0x04100000, LENGTH = 0x0FF00000
 }
 
 ENTRY(_start)

@@ -27,6 +27,12 @@ TARGET_EXT struct fwk_device_type sgrt_fwk_i2c_adapter_type;
 TARGET_EXT struct fwk_device_type sgrt_fwk_i2c_client_type;
 
 /*!< API function */
+/*!
+ * @brief   get the id_table that is matched
+ * @param   sprt_idTable, sprt_client
+ * @retval  id_table
+ * @note    none
+ */
 static const struct fwk_i2c_device_id *fwk_i2c_match_id(const struct fwk_i2c_device_id *sprt_idTable, struct fwk_i2c_client *sprt_client)
 {
 	while (sprt_idTable->name && *(sprt_idTable->name))
@@ -166,10 +172,10 @@ struct fwk_device_type sgrt_fwk_i2c_client_type =
 };
 
 /*!
- * @brief   Register Platform Device
- * @param   sprt_platdev
- * @retval  Register Result
- * @note    Should be used at initcall
+ * @brief   register i2c client
+ * @param   sprt_client
+ * @retval  errno
+ * @note    none
  */
 kint32_t fwk_register_i2c_device(struct fwk_i2c_client *sprt_client)
 {
@@ -179,16 +185,22 @@ kint32_t fwk_register_i2c_device(struct fwk_i2c_client *sprt_client)
 }
 
 /*!
- * @brief   Unregister Platform Device
- * @param   sprt_platdev
- * @retval  Unregister Result
- * @note    Should be used at exitcall
+ * @brief   unregister i2c client
+ * @param   sprt_client
+ * @retval  errno
+ * @note    none
  */
 kint32_t fwk_unregister_i2c_device(struct fwk_i2c_client *sprt_client)
 {
 	return fwk_device_del(&sprt_client->sgrt_dev);
 }
 
+/*!
+ * @brief   register i2c driver
+ * @param   sprt_driver
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_i2c_register_driver(struct fwk_i2c_driver *sprt_driver)
 {
 	sprt_driver->sgrt_driver.sprt_bus = &sgrt_fwk_i2c_bus_type;
@@ -196,11 +208,23 @@ kint32_t fwk_i2c_register_driver(struct fwk_i2c_driver *sprt_driver)
 	return fwk_driver_register(&sprt_driver->sgrt_driver);
 }
 
+/*!
+ * @brief   unregister i2c driver
+ * @param   sprt_driver
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_i2c_unregister_driver(struct fwk_i2c_driver *sprt_driver)
 {
 	return fwk_driver_unregister(&sprt_driver->sgrt_driver);
 }
 
+/*!
+ * @brief   create and register i2c client
+ * @param   sprt_adap, sprt_info
+ * @retval  sprt_client
+ * @note    none
+ */
 struct fwk_i2c_client *fwk_i2c_new_device(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_board_info const *sprt_info)
 {
 	struct fwk_i2c_client *sprt_client;
@@ -252,12 +276,24 @@ fail:
 	return mrt_nullptr;
 }
 
+/*!
+ * @brief   unregister i2c client
+ * @param   sprt_client
+ * @retval  errno
+ * @note    none
+ */
 void fwk_i2c_unregister_device(struct fwk_i2c_client *sprt_client)
 {
 	list_head_del(&sprt_client->sgrt_link);
 	fwk_device_del(&sprt_client->sgrt_dev);
 }
 
+/*!
+ * @brief   register the i2c client in sprt_adap
+ * @param   sprt_adap, sprt_node
+ * @retval  sprt_client
+ * @note    none
+ */
 static struct fwk_i2c_client *fwk_of_i2c_register_device(struct fwk_i2c_adapter *sprt_adap, struct fwk_device_node *sprt_node)
 {
 	struct fwk_i2c_board_info sgrt_bi = {};
@@ -278,6 +314,12 @@ static struct fwk_i2c_client *fwk_of_i2c_register_device(struct fwk_i2c_adapter 
 	return fwk_i2c_new_device(sprt_adap, &sgrt_bi);
 }
 
+/*!
+ * @brief   register all i2c clients in sprt_adap
+ * @param   sprt_adap
+ * @retval  none
+ * @note    none
+ */
 void fwk_of_i2c_register_devices(struct fwk_i2c_adapter *sprt_adap)
 {
 	struct fwk_device_node *sprt_node;
@@ -292,6 +334,12 @@ void fwk_of_i2c_register_devices(struct fwk_i2c_adapter *sprt_adap)
 	}
 }
 
+/*!
+ * @brief   register i2c adapter
+ * @param   sprt_adap
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_i2c_register_adapter(struct fwk_i2c_adapter *sprt_adap)
 {
 	kint32_t retval;
@@ -321,6 +369,12 @@ fail:
 	return retval;
 }
 
+/*!
+ * @brief   register i2c adapter
+ * @param   sprt_adap
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_i2c_add_adapter(struct fwk_i2c_adapter *sprt_adap)
 {
 	if (sprt_adap->id < 0)
@@ -335,6 +389,12 @@ kint32_t fwk_i2c_add_adapter(struct fwk_i2c_adapter *sprt_adap)
 	return fwk_i2c_register_adapter(sprt_adap);
 }
 
+/*!
+ * @brief   unregister i2c adapter
+ * @param   sprt_adap
+ * @retval  none
+ * @note    none
+ */
 void fwk_i2c_del_adapter(struct fwk_i2c_adapter *sprt_adap)
 {
 	struct fwk_i2c_client *sprt_client, *sprt_temp;
@@ -348,6 +408,12 @@ void fwk_i2c_del_adapter(struct fwk_i2c_adapter *sprt_adap)
 	fwk_device_del(&sprt_adap->sgrt_dev);
 }
 
+/*!
+ * @brief   i2c transfer
+ * @param   sprt_client, sprt_msgs, num (the number of sprt_msgs)
+ * @retval  errno
+ * @note    none
+ */
 kint32_t fwk_i2c_transfer(struct fwk_i2c_client *sprt_client, struct fwk_i2c_msg *sprt_msgs, kint32_t num)
 {
 	const struct fwk_i2c_algo *sprt_algo = sprt_client->sprt_adapter->sprt_algo;

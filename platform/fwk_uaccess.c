@@ -39,3 +39,5 @@ kusize_t fwk_copy_to_user(void *ptr_user, void *ptr_Src, kusize_t size)
 
 	return size;
 }
+
+/*!< end of file */

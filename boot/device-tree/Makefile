@@ -9,12 +9,16 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-TARGET			:=	imx6ull_topeet
+dtb-y 			:=
+
+include $(VENDOR)/Makefile
+
+TARGET			:=	$(dtb-y)
 DT_DIRS			:=	$(shell pwd)
-DT_FILE			:=	$(DT_DIRS)/imx6ull
+DT_FILE			:=	$(DT_DIRS)/$(VENDOR)
 
 INCLUDES		:=	$(DT_DIRS)/	\
-					$(DT_DIRS)/imx6ull/	\
+					$(DT_DIRS)/$(VENDOR)/	\
 					$(DT_DIRS)/dt-bindings/
 
 DTC_INCLUDES	:= 	$(patsubst %, -i %, $(INCLUDES))
