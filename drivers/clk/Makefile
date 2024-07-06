@@ -10,5 +10,6 @@
 #
 
 obj-y	+=	imx-clks.o
+obj-y	+=	zynq7-clks.o
 
 # end of file

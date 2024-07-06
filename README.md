@@ -71,6 +71,10 @@
 # Readme:
 # -----------------------------------------------------------------------
 
+# 2024.07.02
+    author: Yang Yujun
+    commit: support cpu "xc7z010" (initial SD Card, and copy dtb to DDR; then booting to "start_kernel")
+
 # 2024.06.12
     author: Yang Yujun
     commit: 

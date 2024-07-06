@@ -58,7 +58,6 @@
 
 /*!< kernel */
 #define CONFIG_FDT_MAX_SIZE                     __ALIGN_INC_8(__BYTES_UNIT_MB(32))
-#define CONFIG_HEAP_SIZE                        __ALIGN_INC_8(__BYTES_UNIT_MB(8))
 #define CONFIG_SYS_STACK_SIZE                   __ALIGN_INC_8(__BYTES_UNIT_MB(2))
 #define CONFIG_SVC_STACK_SIZE                   __ALIGN_INC_8(__BYTES_UNIT_MB(2))
 #define CONFIG_ABT_STACK_SIZE                   __ALIGN_INC_8(__BYTES_UNIT_KB(1))
@@ -74,10 +73,6 @@
 #define CONFIG_ABT_STACK_BASE                   (CONFIG_IRQ_STACK_BASE  + CONFIG_ABT_STACK_SIZE)
 #define CONFIG_SVC_STACK_BASE                   (CONFIG_ABT_STACK_BASE  + CONFIG_SVC_STACK_SIZE)
 #define CONFIG_SYS_STACK_BASE                   (CONFIG_SVC_STACK_BASE  + CONFIG_SYS_STACK_SIZE)
-
-#define CONFIG_KERNEL_MEM_BASE                  (CONFIG_MEMORY_BASE)
-#define CONFIG_HEAP_STACK_BASE                  (CONFIG_SYS_STACK_BASE)
-#define CONFIG_MEMORY_POOL_BASE                 (CONFIG_HEAP_STACK_BASE + CONFIG_MEMPOOL_SIZE)
 
 /*!< Board */
 #define CONFIG_LCD_PIXELBIT                     (24)

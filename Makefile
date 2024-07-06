@@ -15,7 +15,8 @@ MAKE			:=	make
 Q				:=	
 ARCH			:= 	arm
 TYPE			:=	armv7
-VENDOR			:=	imx6ull
+# VENDOR		:=	imx6ull
+VENDOR			:=	xc7z010
 COMPILER_VER	:=	gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf
 
 COMPILER_BIN	:=  
@@ -47,7 +48,7 @@ BUILD_CFLAGS   	:=  -g3 -O0 -Wall -nostdlib	\
                     -fno-tree-scev-cprop
 
 MACROS			:=	-DCONFIG_DEBUG_JTAG	\
-					-DCONFIG_MACH_IMX6ULL_TOPPET
+					-DCONFIG_MACH_XC7Z010_MICROPHASE
 
 PROJECT_DIR		:=	$(shell pwd)
 OBJECT_PATH		:=	$(PROJECT_DIR)/objects

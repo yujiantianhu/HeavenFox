@@ -43,8 +43,8 @@ TARGET_EXT kusize_t convert_number_to_string(void *ptr_dst, kuint64_t value);
 TARGET_EXT kchar_t *seek_char_in_string(const void *ptr_src, kchar_t ch);
 TARGET_EXT kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_fmt, va_list ptr_list, kusize_t size);
 
-TARGET_EXT kchar_t *vasprintk(const kchar_t *ptr_fmt, va_list sprt_list);
-TARGET_EXT kchar_t *lv_vasprintk(const kchar_t *ptr_fmt, kubyte_t *ptr_lv, va_list sprt_list);
+TARGET_EXT kchar_t *vasprintk(const kchar_t *ptr_fmt, kusize_t *size, va_list sprt_list);
+TARGET_EXT kchar_t *lv_vasprintk(const kchar_t *ptr_fmt, kusize_t *size, kubyte_t *ptr_lv, va_list sprt_list);
 TARGET_EXT kint32_t sprintk(void *ptr_buf, const kchar_t *ptr_fmt, ...);
 TARGET_EXT kuint32_t kstrlen(const kchar_t *__s);
 TARGET_EXT kchar_t *kstrcpy(kchar_t *__dest, const kchar_t *__src);
