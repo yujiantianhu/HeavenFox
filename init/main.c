@@ -58,7 +58,7 @@ void start_kernel(void)
     initIRQ();
 
     /*!< systick init */
-	board_init_systick();
+    board_init_systick();
 
     /*!< populate device node after initializing hardware */
     if (fwk_of_platform_populate_init())

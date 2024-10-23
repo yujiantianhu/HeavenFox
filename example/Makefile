@@ -11,10 +11,10 @@
 
 obj-y	+=	thread_table.o
 
-obj-y	+=	light_app.o
-obj-y	+=	button_app.o
-obj-y	+=	display_app.o
-obj-y	+=	tsc_app.o
-obj-y	+=	env_monitor.o
+obj-$(CONFIG_LIGHT_APP)			+=	light_app.o
+obj-$(CONFIG_BUTTON_APP)		+=	button_app.o
+obj-$(CONFIG_DISPLAY_APP)		+=	display_app.o
+obj-$(CONFIG_TSC_APP)			+=	tsc_app.o
+obj-$(CONFIG_ENV_MONITOR_APP)	+=	env_monitor.o
 
 # end of file
