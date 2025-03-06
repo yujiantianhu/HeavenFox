@@ -84,6 +84,7 @@ typedef kint32_t tid_t;
 
 #define THREAD_PROTY_SOCKRX                 (19)
 #define THREAD_PROTY_SOCKTX                 (20)
+#define THREAD_PROTY_IRQ                    (THREAD_PROTY_KERNEL + 1)
 
 #define __THREAD_IS_LOW_PRIO(prio, prio2)	((prio2) <= (prio))
 #define __THREAD_HIGHER_DEFAULT(val)		(THREAD_PROTY_DEFAULT - (val))	

@@ -99,7 +99,7 @@ static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sprt_upcb, struct pbu
 
     sprt_data->sprt_upcb = sprt_upcb;
     sprt_data->sprt_ipaddr = (ip_addr_t *)sprt_ipaddr;
-    sprt_data->port = mrt_htons(port);
+    sprt_data->port = mrt_ntohs(port);
     sprt_data->sprt_buf = sprt_buf;
 
     sprt_data->sgrt_pqd.release = lwip_udp_raw_free;
@@ -166,15 +166,17 @@ kssize_t lwip_udp_raw_sendto(struct udp_pcb *sprt_upcb, const ip_addr_t *sprt_de
     sprt_buf = pbuf_alloc(PBUF_TRANSPORT, size, PBUF_POOL);
     if (!sprt_buf)
     {
-        print_err("allocate lwip pbuf failed!\n");
+        print_err("%s: allocate lwip pbuf failed!\n", __func__);
         return -ER_NOMEM;
     }
 
     memcpy(sprt_buf->payload, buf, size);
-    err = udp_sendto(sprt_upcb, sprt_buf, sprt_dest, dest_port);
+    err = udp_sendto(sprt_upcb, sprt_buf, sprt_dest, mrt_ntohs(dest_port));
     if (err != ERR_OK)
     {
         pbuf_free(sprt_buf);
+        print_err("%s: udp send lwip pbuf failed!\n", __func__);
+
         return -ER_SDATA_FAILD;
     }
 
@@ -201,7 +203,11 @@ struct udp_pcb *lwip_udp_raw_bind(const ip_addr_t *sprt_ip, u16_t port)
     if (!sprt_upcb)
         goto fail;
 
-    err = udp_bind(sprt_upcb, sprt_ip, port);
+    /*!< 
+     * API function "socket_bind" will get "mrt_htons(port)", but "udp_bind" will convert port again with "lwip_htons";
+     * therefore, port must be convert to it's original format
+     */
+    err = udp_bind(sprt_upcb, sprt_ip, mrt_ntohs(port));
     if (err == ERR_OK) 
     {
         udp_recv(sprt_upcb, __lwip_udp_raw_recv, sprt_pq);

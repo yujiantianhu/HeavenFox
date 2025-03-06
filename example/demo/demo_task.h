@@ -34,7 +34,7 @@
 /*!< The globals */
 
 /*!< The functions */
-extern kint32_t lwip_task_init(void);
+extern kint32_t network_task_init(void);
 extern kint32_t lvgl_task_init(void);
 
 #endif

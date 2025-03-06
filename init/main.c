@@ -102,7 +102,7 @@ void start_kernel(void)
     /*!< initial memory pool */
     fwk_mempool_initial();
     iostream_init();
-    print_info("\nstart kernel ...... \n");
+    print_info("\nStart kernel ...... \n");
 
     /*!< populate params from bootloader */
     setup_machine(sprt_tag_params);

@@ -263,6 +263,9 @@ static void fwk_gic_initial(srt_gic_t *sprt_gic)
     sprt_dest = mrt_get_gic_distributor(sprt_gic);
     sprt_cpu = mrt_get_gic_interface(sprt_gic);
 
+    /*!< Disable group0 distribution */
+    mrt_writel(0U, &sprt_dest->D_CTLR);
+
     irqRegs = mrt_mask(sprt_dest->D_TYPER, 0x1fU) + 1;
 
     if (isValid(sprt_gic))
@@ -278,6 +281,45 @@ static void fwk_gic_initial(srt_gic_t *sprt_gic)
     /*!< Disable all PPI, SGI and SPI */
     for (i = 0; i < irqRegs; i++)
         mrt_writel(0xffffffffU, &sprt_dest->D_ICENABLER[i]);
+
+	/*!< The trigger mode in the int_config register, only write to the SPI interrupts, so start at 32 */
+    for (i = 32U; i < __GIC_MAX_SPI_IRQS; i += 16U)
+    {
+		/*!<
+		 * Each INT_ID uses two bits, or 16 INT_ID per register
+		 * Set them all to be level sensitive, active HIGH.
+         * 
+         * 00: Reserved
+         * 01: Edge triggered
+         * 10: Reserved
+         * 11: Level triggered
+         * 
+         * D_ICFGR[0]: irq0 ~ irq15
+         * ...
+         * D_ICFGR[2]: irq32 ~ irq47
+		 */
+        mrt_writel(0U, &sprt_dest->D_ICFGR[i >> 4]);
+    }
+
+    for (i = 0; i < __GIC_MAX_IRQS; i++)
+    {
+		/*!<
+		 * The priority using int the priority_level register
+		 * The priority_level and spi_target registers use one byte per
+		 * INT_ID.
+		 * Write a default value that can be changed elsewhere.
+		 */
+        mrt_writeb(0xa0U, &sprt_dest->D_IPRIORITYR[i]);
+    }
+
+    for (i = 32U; i < __GIC_MAX_SPI_IRQS; i++)
+    {
+		/*!<
+		 * The CPU interface in the spi_target register
+		 * Only write to the SPI interrupts, so start at 32
+		 */
+        mrt_writeb(0x01U, &sprt_dest->D_ITARGETSR[i]);
+    }
 
     /*!< Make all interrupts have higher priority */
     mrt_writel(mrt_bit_mask(0xffU, 0xffU, 8 - __GIC_PRIO_BITS), &sprt_cpu->C_PMR);

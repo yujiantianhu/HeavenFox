@@ -33,15 +33,12 @@
 #define	_SWI_EVENT_SYSCALL						" swi 0x00000002 "
 
 #define mrt_rasie_schedule_event()	\
-	do {	\
-		__asm__ __volatile__ (	\
-			_SWI_EVENT_SCHEDULED : : );	\
-	} while (0)
+    do {	\
+        __asm__ __volatile__ (	\
+            _SWI_EVENT_SCHEDULED : : );	\
+    } while (0)
 
 #define FWK_IRQ_DESC_NAME_LENTH					(16)
-
-typedef	kint32_t irq_return_t;
-typedef kint32_t (*irq_handler_t)(void *ptrDev);
 
 #define IRQ_TYPE_NONE							0x00000000
 #define IRQ_TYPE_EDGE_RISING					0x00000001
@@ -54,45 +51,55 @@ typedef kint32_t (*irq_handler_t)(void *ptrDev);
 
 typedef struct fwk_irq_data
 {
-	unsigned int irq;
-	unsigned long hwirq;
-	unsigned int node;
-	struct fwk_irq_chip *sprt_chip;
-	struct fwk_irq_domain *sprt_domain;
+    unsigned int irq;
+    unsigned long hwirq;
+    unsigned int node;
+    struct fwk_irq_chip *sprt_chip;
+    struct fwk_irq_domain *sprt_domain;
 
-	struct fwk_irq_data *sprt_parent;
-	void *handler_data;
-	void *chip_data;
+    struct fwk_irq_data *sprt_parent;
+    void *handler_data;
+    void *chip_data;
 
-	kuint32_t mask;
+    kuint32_t mask;
 
 } srt_fwk_irq_data_t;
 
+enum __ER_IRQ_RETURN_VAL
+{
+    NR_IRQ_NONE = 0,
+    NR_IRQ_HANDLED = mrt_bit(0),
+    NR_IRQ_WAKE_THREAD = mrt_bit(1),
+};
+
+typedef enum __ER_IRQ_RETURN_VAL irq_return_t;
+typedef irq_return_t (*irq_handler_t)(void *ptrDev);
+
 typedef struct fwk_irq_action
 {
-	kchar_t name[FWK_IRQ_DESC_NAME_LENTH];
-	irq_handler_t handler;
-	kuint32_t flags;
-	void *ptrArgs;
+    kchar_t name[FWK_IRQ_DESC_NAME_LENTH];
+    irq_handler_t handler;
+    kuint32_t flags;
+    void *ptrArgs;
 
-	struct list_head sgrt_link;
+    struct list_head sgrt_link;
 
 } srt_fwk_irq_action_t;
 
 typedef struct fwk_irq_desc
 {
-	kint32_t irq;
+    kint32_t irq;
 
-	kuint32_t flags;
-	kchar_t irq_name[FWK_IRQ_DESC_NAME_LENTH];
-	struct list_head sgrt_action;;
+    kuint32_t flags;
+    kchar_t irq_name[FWK_IRQ_DESC_NAME_LENTH];
+    struct list_head sgrt_action;;
 
-	struct list_head sgrt_link;
-	struct radix_link sgrt_radix;
+    struct list_head sgrt_link;
+    struct radix_link sgrt_radix;
 
-	struct spin_lock sgrt_lock;
-	
-	struct fwk_irq_data sgrt_data;
+    struct spin_lock sgrt_lock;
+    
+    struct fwk_irq_data sgrt_data;
 
 } srt_fwk_irq_desc_t;
 
@@ -109,6 +116,8 @@ extern void fwk_irq_domain_free_irqs(struct fwk_irq_domain *sprt_domain);
 extern kint32_t fwk_of_irq_get(struct fwk_device_node *sprt_node, kuint32_t index);
 
 extern void *fwk_find_irq_action(kint32_t irq, const kchar_t *name, void *ptrDev);
+extern kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
+                                kuint32_t flags, const kchar_t *name, void *ptrDev);
 extern kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, const kchar_t *name, void *ptrDev);
 extern void fwk_free_irq(kint32_t irq, void *ptrDev);
 extern void fwk_destroy_irq_action(kint32_t irq);
@@ -116,7 +125,7 @@ extern void fwk_do_irq_handler(kint32_t softIrq);
 extern void fwk_handle_softirq(kint32_t softIrq, kuint32_t event);
 
 #ifdef __cplusplus
-	}
+    }
 #endif
 
 #endif /* __FWK_IRQ_TYPES_H */

@@ -1,7 +1,7 @@
 /*
  * Template of Character Device (Use Xilinx SDK): LED
  *
- * File Name:   xsdk_led.c
+ * File Name:   xsdk_key.c
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2024.10.27
@@ -26,7 +26,7 @@
 #include <zynq7/xparameters.h>
 
 /*!< The defines */
-struct xsdk_led_drv_data
+struct xsdk_key_drv_data
 {
     kchar_t *ptrName;
     kuint32_t major;
@@ -41,22 +41,22 @@ struct xsdk_led_drv_data
     void *ptrData;
 };
 
-#define xsdk_led_DRIVER_NAME							"ledgpio"
-#define xsdk_led_DRIVER_MAJOR							(NR_LED_MAJOR)
+#define XSDK_KEY_DRIVER_NAME							"key0"
+#define XSDK_KEY_DRIVER_MAJOR							(NR_KEY_MAJOR)
 
 /*!< The functions */
-static void xsdk_led_set_value(struct xsdk_led_drv_data *sprt_data, kbool_t value);
+static void xsdk_key_get_value(struct xsdk_key_drv_data *sprt_data, kbool_t *value);
 
 /*!< API function */
 /*!
- * @brief   xsdk_led_driver_open
+ * @brief   xsdk_key_driver_open
  * @param   sprt_inode, sprt_file
  * @retval  errno
  * @note    none
  */
-static kint32_t xsdk_led_driver_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t xsdk_key_driver_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
-    struct xsdk_led_drv_data *sprt_data;
+    struct xsdk_key_drv_data *sprt_data;
 
     sprt_data = sprt_inode->sprt_cdev->privData;
     sprt_file->private_data = sprt_data;
@@ -65,12 +65,12 @@ static kint32_t xsdk_led_driver_open(struct fwk_inode *sprt_inode, struct fwk_fi
 }
 
 /*!
- * @brief   xsdk_led_driver_close
+ * @brief   xsdk_key_driver_close
  * @param   sprt_inode, sprt_file
  * @retval  errno
  * @note    none
  */
-static kint32_t xsdk_led_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t xsdk_key_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
 {
     sprt_file->private_data = mrt_nullptr;
 
@@ -78,42 +78,42 @@ static kint32_t xsdk_led_driver_close(struct fwk_inode *sprt_inode, struct fwk_f
 }
 
 /*!
- * @brief   xsdk_led_driver_write
+ * @brief   xsdk_key_driver_write
  * @param   sprt_file, ptrBuffer, size
  * @retval  errno
  * @note    none
  */
-static kssize_t xsdk_led_driver_write(struct fwk_file *sprt_file, const kbuffer_t *ptrBuffer, kssize_t size)
+static kssize_t xsdk_key_driver_write(struct fwk_file *sprt_file, const kbuffer_t *ptrBuffer, kssize_t size)
 {
-    struct xsdk_led_drv_data *sprt_data;
-    kuint8_t value;
-
-    sprt_data = (struct xsdk_led_drv_data *)sprt_file->private_data;
-
-    fwk_copy_from_user(&value, ptrBuffer, 1);
-    xsdk_led_set_value(sprt_data, !!value);
-
     return 0;
 }
 
 /*!
- * @brief   xsdk_led_driver_read
+ * @brief   xsdk_key_driver_read
  * @param   sprt_file, ptrBuffer, size
  * @retval  errno
  * @note    none
  */
-static kssize_t xsdk_led_driver_read(struct fwk_file *sprt_file, kbuffer_t *ptrBuffer, kssize_t size)
+static kssize_t xsdk_key_driver_read(struct fwk_file *sprt_file, kbuffer_t *ptrBuffer, kssize_t size)
 {
-    return 0;
+    struct xsdk_key_drv_data *sprt_data;
+    kbool_t value;
+
+    sprt_data = (struct xsdk_key_drv_data *)sprt_file->private_data;
+
+    xsdk_key_get_value(sprt_data, &value);
+    fwk_copy_to_user(ptrBuffer, &value, 1);
+
+    return 1;
 }
 
 /*!< led-template driver operation */
-const struct fwk_file_oprts sgrt_xsdk_led_driver_oprts =
+const struct fwk_file_oprts sgrt_xsdk_key_driver_oprts =
 {
-    .open	= xsdk_led_driver_open,
-    .close	= xsdk_led_driver_close,
-    .write	= xsdk_led_driver_write,
-    .read	= xsdk_led_driver_read,
+    .open	= xsdk_key_driver_open,
+    .close	= xsdk_key_driver_close,
+    .write	= xsdk_key_driver_write,
+    .read	= xsdk_key_driver_read,
 };
 
 /*!
@@ -122,11 +122,15 @@ const struct fwk_file_oprts sgrt_xsdk_led_driver_oprts =
  * @retval  errno
  * @note    none
  */
-static void xsdk_led_set_value(struct xsdk_led_drv_data *sprt_data, kbool_t value)
+static void xsdk_key_get_value(struct xsdk_key_drv_data *sprt_data, kbool_t *value)
 {
-    XGpioPs_WritePin(&sprt_data->sgrt_gpio, 
-                    XGPIOPS_BANK_PIN(0, sprt_data->pin), 
-                    sprt_data->isActiveL ? (!value) : value);
+    kint32_t retval;
+
+    retval = XGpioPs_ReadPin(&sprt_data->sgrt_gpio, XGPIOPS_BANK_PIN(0, sprt_data->pin));
+    if (retval < 0)
+        *value = false;
+    else
+        *value = sprt_data->isActiveL ? (!retval) : retval;
 }
 
 /*!
@@ -135,7 +139,7 @@ static void xsdk_led_set_value(struct xsdk_led_drv_data *sprt_data, kbool_t valu
  * @retval  errno
  * @note    none
  */
-static kint32_t xsdk_led_configure(struct fwk_platdev *sprt_pdev, struct xsdk_led_drv_data *sprt_data)
+static kint32_t xsdk_key_configure(struct fwk_platdev *sprt_pdev, struct xsdk_key_drv_data *sprt_data)
 {
     struct fwk_device_node *sprt_node, *sprt_parent;
     struct fwk_of_phandle_args sgrt_args;
@@ -150,7 +154,7 @@ static kint32_t xsdk_led_configure(struct fwk_platdev *sprt_pdev, struct xsdk_le
         return PTR_ERR(sprt_node);
 
     retval = fwk_of_parse_phandle_with_args(sprt_node, 
-                                    "led-gpios", "#gpio-cells", 2, 0, &sgrt_args); 
+                                    "key-gpios", "#gpio-cells", 2, 0, &sgrt_args); 
     if (retval || (!isValid(sgrt_args.sprt_node)))
         return retval;
 
@@ -165,36 +169,32 @@ static kint32_t xsdk_led_configure(struct fwk_platdev *sprt_pdev, struct xsdk_le
 
     /*!< config */
     XGpioPs_CfgInitialize(sprt_gpio, &sgrt_cfg, sgrt_cfg.BaseAddr);
-    XGpioPs_SetDirectionPin(sprt_gpio, XGPIOPS_BANK_PIN(0, sprt_data->pin), XGPIOPS_PIN_DIR_OUTPUT);
-    XGpioPs_SetOutputEnablePin(sprt_gpio, XGPIOPS_BANK_PIN(0, sprt_data->pin), true);
-
-    /*!< set default level */
-    xsdk_led_set_value(sprt_data, false);
+    XGpioPs_SetDirectionPin(sprt_gpio, XGPIOPS_BANK_PIN(0, sprt_data->pin), XGPIOPS_PIN_DIR_INPUT);
 
     return 0;
 }
 
 /*!< --------------------------------------------------------------------- */
 /*!
- * @brief   xsdk_led_driver_probe
+ * @brief   xsdk_key_driver_probe
  * @param   sprt_dev
  * @retval  errno
  * @note    none
  */
-static kint32_t xsdk_led_driver_probe(struct fwk_platdev *sprt_pdev)
+static kint32_t xsdk_key_driver_probe(struct fwk_platdev *sprt_pdev)
 {
-    struct xsdk_led_drv_data *sprt_data;
+    struct xsdk_key_drv_data *sprt_data;
     struct fwk_cdev *sprt_cdev;
     struct fwk_device *sprt_idev;
     kuint32_t devnum;
     kint32_t retval;
 
-    devnum = MKE_DEV_NUM(xsdk_led_DRIVER_MAJOR, 0);
-    retval = fwk_register_chrdev(devnum, 1, xsdk_led_DRIVER_NAME);
+    devnum = MKE_DEV_NUM(XSDK_KEY_DRIVER_MAJOR, 0);
+    retval = fwk_register_chrdev(devnum, 1, XSDK_KEY_DRIVER_NAME);
     if (retval < 0)
         return -ER_FAILD;
 
-    sprt_cdev = fwk_cdev_alloc(&sgrt_xsdk_led_driver_oprts);
+    sprt_cdev = fwk_cdev_alloc(&sgrt_xsdk_key_driver_oprts);
     if (!isValid(sprt_cdev))
         goto fail1;
 
@@ -202,18 +202,18 @@ static kint32_t xsdk_led_driver_probe(struct fwk_platdev *sprt_pdev)
     if (retval < 0)
         goto fail2;
 
-    sprt_idev = fwk_device_create(NR_TYPE_CHRDEV, devnum, xsdk_led_DRIVER_NAME);
+    sprt_idev = fwk_device_create(NR_TYPE_CHRDEV, devnum, XSDK_KEY_DRIVER_NAME);
     if (!isValid(sprt_idev))
         goto fail3;
     
-    sprt_data = (struct xsdk_led_drv_data *)kzalloc(sizeof(struct xsdk_led_drv_data), GFP_KERNEL);
+    sprt_data = (struct xsdk_key_drv_data *)kzalloc(sizeof(struct xsdk_key_drv_data), GFP_KERNEL);
     if (!isValid(sprt_data))
         goto fail4;
 
-    if (xsdk_led_configure(sprt_pdev, sprt_data))
+    if (xsdk_key_configure(sprt_pdev, sprt_data))
         goto fail5;
 
-    sprt_data->ptrName = xsdk_led_DRIVER_NAME;
+    sprt_data->ptrName = XSDK_KEY_DRIVER_NAME;
     sprt_data->major = GET_DEV_MAJOR(devnum);
     sprt_data->minor = GET_DEV_MINOR(devnum);
     sprt_data->sprt_cdev = sprt_cdev;
@@ -223,7 +223,7 @@ static kint32_t xsdk_led_driver_probe(struct fwk_platdev *sprt_pdev)
     sprt_cdev->privData = sprt_data;
     fwk_platform_set_drvdata(sprt_pdev, sprt_data);
 
-    print_info("register a new chardevice (LED)\n");
+    print_info("register a new chardevice (KEY)\n");
 
     return ER_NORMAL;
 
@@ -242,17 +242,17 @@ fail1:
 }
 
 /*!
- * @brief   xsdk_led_driver_remove
+ * @brief   xsdk_key_driver_remove
  * @param   sprt_dev
  * @retval  errno
  * @note    none
  */
-static kint32_t xsdk_led_driver_remove(struct fwk_platdev *sprt_pdev)
+static kint32_t xsdk_key_driver_remove(struct fwk_platdev *sprt_pdev)
 {
-    struct xsdk_led_drv_data *sprt_data;
+    struct xsdk_key_drv_data *sprt_data;
     kuint32_t devnum;
 
-    sprt_data = (struct xsdk_led_drv_data *)fwk_platform_get_drvdata(sprt_pdev);
+    sprt_data = (struct xsdk_key_drv_data *)fwk_platform_get_drvdata(sprt_pdev);
     if (!isValid(sprt_data))
         return -ER_NULLPTR;
 
@@ -270,50 +270,50 @@ static kint32_t xsdk_led_driver_remove(struct fwk_platdev *sprt_pdev)
 }
 
 /*!< device id for device-tree */
-static const struct fwk_of_device_id sgrt_xsdk_led_driver_id[] =
+static const struct fwk_of_device_id sgrt_xsdk_key_driver_id[] =
 {
-    { .compatible = "xlnx,z7-lite,ledgpio", },
+    { .compatible = "xlnx,z7-lite,extkey", },
     {},
 };
 
 /*!< platform instance */
-static struct fwk_platdrv sgrt_xsdk_led_platdriver =
+static struct fwk_platdrv sgrt_xsdk_key_platdriver =
 {
-    .probe	= xsdk_led_driver_probe,
-    .remove	= xsdk_led_driver_remove,
+    .probe	= xsdk_key_driver_probe,
+    .remove	= xsdk_key_driver_remove,
     
     .sgrt_driver =
     {
-        .name 	= xsdk_led_DRIVER_NAME,
+        .name 	= XSDK_KEY_DRIVER_NAME,
         .id 	= -1,
-        .sprt_of_match_table = sgrt_xsdk_led_driver_id,
+        .sprt_of_match_table = sgrt_xsdk_key_driver_id,
     },
 };
 
 /*!< --------------------------------------------------------------------- */
 /*!
- * @brief   xsdk_led_driver_init
+ * @brief   xsdk_key_driver_init
  * @param   none
  * @retval  errno
  * @note    none
  */
-kint32_t __fwk_init xsdk_led_driver_init(void)
+kint32_t __fwk_init xsdk_key_driver_init(void)
 {
-    return fwk_register_platdriver(&sgrt_xsdk_led_platdriver);
+    return fwk_register_platdriver(&sgrt_xsdk_key_platdriver);
 }
 
 /*!
- * @brief   xsdk_led_driver_exit
+ * @brief   xsdk_key_driver_exit
  * @param   none
  * @retval  none
  * @note    none
  */
-void __fwk_exit xsdk_led_driver_exit(void)
+void __fwk_exit xsdk_key_driver_exit(void)
 {
-    fwk_unregister_platdriver(&sgrt_xsdk_led_platdriver);
+    fwk_unregister_platdriver(&sgrt_xsdk_key_platdriver);
 }
 
-IMPORT_DRIVER_INIT(xsdk_led_driver_init);
-IMPORT_DRIVER_EXIT(xsdk_led_driver_exit);
+IMPORT_DRIVER_INIT(xsdk_key_driver_init);
+IMPORT_DRIVER_EXIT(xsdk_key_driver_exit);
 
 /*!< end of file */

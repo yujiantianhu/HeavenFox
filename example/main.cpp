@@ -51,8 +51,8 @@ const thread_init_t proc_table::g_test_tables[] =
 const thread_init_t proc_table::g_demo_tables[] =
 {   
     /*!< applications */
-    lvgl_task_init,
-    lwip_task_init,
+//  lvgl_task_init,
+    network_task_init,
     
     /*!< end */
     mrt_nullptr,

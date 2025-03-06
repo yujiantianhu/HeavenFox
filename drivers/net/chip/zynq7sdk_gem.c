@@ -57,18 +57,31 @@ typedef enum {
 
 struct xsdk_gem_phy {
     kint32_t link_speed;
-    kuint32_t phymapemac0[32];
-    kuint32_t phymapemac1[32];
+    kuint32_t phymapemac[32];
     kuint32_t phyaddrforemac;
 
     nrt_link_status_t eth_link_status;
 };
 
+typedef enum __ERT_GEM_IRQ_STATUS
+{
+    NR_GEM_IRQ_TXE = 0,
+    NR_GEM_IRQ_RXE = 1,
+    NR_GEM_IRQ_NUM,
+
+    NR_GEM_IRQ_RX_BIT = mrt_bit(0),
+    NR_GEM_IRQ_TX_BIT = mrt_bit(1),
+    NR_GEM_IRQ_TXE_BIT = mrt_bit(2),
+    NR_GEM_IRQ_RXE_BIT = mrt_bit(3),
+    NR_GEM_IRQ_ERR_BIT = NR_GEM_IRQ_TXE_BIT | NR_GEM_IRQ_RXE_BIT,
+
+} nrt_gem_irq_stat_t;
+
 struct xsdk_gem_drv_data {
     void *base;
     kint32_t irq;
 
-    kuint16_t hwaddr[NET_MAC_ETH_ALEN];
+    kuint8_t hwaddr[NET_MAC_ETH_ALEN];
     struct fwk_net_device *sprt_ndev;
 
     xemacpsif_s sgrt_xemacif;
@@ -76,8 +89,15 @@ struct xsdk_gem_drv_data {
 
     struct xsdk_gem_phy sgrt_phy;
 
+    /*!< 4-bytes alignment */
     struct fwk_sk_buff *sprt_rxskbs[XNET_RX_DESC_NUM];
     struct fwk_sk_buff *sprt_txskbs[XNET_TX_DESC_NUM];
+
+    XEmacPs_Bd *bd_rxterminate;
+    XEmacPs_Bd *bd_txterminate;
+
+    nrt_gem_irq_stat_t status;
+    kuint32_t reg_value[NR_GEM_IRQ_NUM];
 };
 
 #define XSDK_GEM_DRIVER_NAME                    "gem0"
@@ -111,6 +131,13 @@ struct xsdk_gem_drv_data {
 /*!< The functions */
 
 /*!< API function */
+/*!
+ * @brief   if phy is producted by ti, ...
+ * @param   sprt_xemacps: emac structure pointer
+ * @param   phy_addr: index of phy
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sprt_xemacps, kuint32_t phy_addr)
 {
     kuint16_t control;
@@ -254,6 +281,13 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sprt_xemacps, kuint32_t phy_addr)
     return 10;
 }
 
+/*!
+ * @brief   if phy is producted by realtek, ...
+ * @param   sprt_xemacps: emac structure pointer
+ * @param   phy_addr: index of phy
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t xsdk_get_realtek_phy_speed(XEmacPs *sprt_xemacps, kuint32_t phy_addr)
 {
     kuint16_t control;
@@ -322,6 +356,13 @@ static kint32_t xsdk_get_realtek_phy_speed(XEmacPs *sprt_xemacps, kuint32_t phy_
     return -ER_ERROR;
 }
 
+/*!
+ * @brief   if phy is producted by marvell, ...
+ * @param   sprt_xemacps: emac structure pointer
+ * @param   phy_addr: index of phy
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t xsdk_get_marvell_phy_speed(XEmacPs *sprt_xemacps, kuint32_t phy_addr)
 {
     kuint16_t temp;
@@ -408,6 +449,13 @@ static kint32_t xsdk_get_marvell_phy_speed(XEmacPs *sprt_xemacps, kuint32_t phy_
     return -ER_ERROR;
 }
 
+/*!
+ * @brief   identitify phy id and get speed
+ * @param   sprt_xemacps: emac structure pointer
+ * @param   phy_addr: index of phy
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t xsdk_gem_phy_ieee_speed(XEmacPs *sprt_emacps, kuint32_t phy_addr)
 {
     kuint16_t phy_identity;
@@ -425,13 +473,17 @@ static kint32_t xsdk_gem_phy_ieee_speed(XEmacPs *sprt_emacps, kuint32_t phy_addr
     return RetStatus;
 }
 
-static void xsdk_gem_phy_detect(XEmacPs *sprt_emacps, kuint32_t *phymapemac0, kuint32_t *phymapemac1)
+/*!
+ * @brief   identitify phy id and get speed
+ * @param   sprt_xemacps: emac structure pointer
+ * @param   phy_addr: index of phy
+ * @retval  errno
+ * @note    none
+ */
+static void xsdk_gem_phy_detect(XEmacPs *sprt_emacps, kuint32_t *phymapemac)
 {
     kuint16_t phy_reg;
     kuint32_t phy_addr;
-    kuint32_t *phymapemac;
-
-    phymapemac = XEMACPS_IS_ETH_0(sprt_emacps) ? phymapemac0 : phymapemac1;
 
     for (phy_addr = 31; phy_addr > 0; phy_addr--) {
         XEmacPs_PhyRead(sprt_emacps, phy_addr, PHY_DETECT_REG, &phy_reg);
@@ -453,7 +505,13 @@ static void xsdk_gem_phy_detect(XEmacPs *sprt_emacps, kuint32_t *phymapemac0, ku
     }
 }
 
-static void xsdk_gem_start_xmit(xemacpsif_s *sprt_xemacif)
+/*!
+ * @brief   enable transfer
+ * @param   sprt_xemacps: emac structure pointer
+ * @retval  none
+ * @note    none
+ */
+static void xsdk_gem_xmit_trigger(xemacpsif_s *sprt_xemacif)
 {
     kuint32_t reg;
 
@@ -463,63 +521,51 @@ static void xsdk_gem_start_xmit(xemacpsif_s *sprt_xemacif)
     XEmacPs_WriteReg(sprt_xemacif->sgrt_emacps.Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, reg);
 }
 
+/*!
+ * @brief   initialize emac
+ * @param   sprt_data: driver data structure pointer
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_emac_init(struct xsdk_gem_drv_data *sprt_data)
 {
+    struct fwk_net_device *sprt_ndev = sprt_data->sprt_ndev;
     XEmacPs *sprt_emacps;
     struct xsdk_gem_phy *sprt_phy;
     kint32_t status;
     kuint32_t i;
-    kbool_t phyfoundforemac0 = false;
-    kbool_t phyfoundforemac1 = false;
+    kbool_t phyfoundforemac = false;
     kuint32_t link_speed;
 
     sprt_emacps = &sprt_data->sgrt_xemacif.sgrt_emacps;
     sprt_phy = &sprt_data->sgrt_phy;
 
     /*!< set mac address */
-    status = XEmacPs_SetMacAddress(sprt_emacps, sprt_data->hwaddr, 1);
+    status = XEmacPs_SetMacAddress(sprt_emacps, sprt_ndev->dev_addr, 1);
     if (status)
         print_debug("In %s: Emac Mac Address set failed...\r\n", __func__);
 
     XEmacPs_SetMdioDivisor(sprt_emacps, MDC_DIV_224);
-    xsdk_gem_phy_detect(sprt_emacps, &sprt_phy->phymapemac0[0], &sprt_phy->phymapemac1[0]);
+    xsdk_gem_phy_detect(sprt_emacps, &sprt_phy->phymapemac[0]);
 
     for (i = 31; i > 0; i--) {
-        if (XEMACPS_IS_ETH_0(sprt_emacps)) {
-            if (sprt_phy->phymapemac0[i] == true) {
-                link_speed = xsdk_gem_phy_ieee_speed(sprt_emacps, i);
-                sprt_phy->link_speed = XEmacPs_PhySetup(sprt_emacps, i, link_speed);
-                phyfoundforemac0 = true;
-                sprt_phy->phyaddrforemac = i;
-            }
-        } 
-        else {
-            if (sprt_phy->phymapemac1[i] == true) {
-                link_speed = xsdk_gem_phy_ieee_speed(sprt_emacps, i);
-                sprt_phy->link_speed = XEmacPs_PhySetup(sprt_emacps, i, link_speed);
-                phyfoundforemac1 = true;
-                sprt_phy->phyaddrforemac = i;
-            }
+        if (sprt_phy->phymapemac[i] == true) {
+            link_speed = xsdk_gem_phy_ieee_speed(sprt_emacps, i);
+            sprt_phy->link_speed = XEmacPs_PhySetup(sprt_emacps, i, link_speed);
+            phyfoundforemac = true;
+            sprt_phy->phyaddrforemac = i;
         }
     }
 
     /*!< If no PHY was detected, use broadcast PHY address of 0 */
-    if (XEMACPS_IS_ETH_0(sprt_emacps)) {
-        if (phyfoundforemac0 == false) {
-            link_speed = xsdk_gem_phy_ieee_speed(sprt_emacps, 0);
-            sprt_phy->link_speed = XEmacPs_PhySetup(sprt_emacps, 0, link_speed);
-        }
-    }
-    else {
-        if (phyfoundforemac1 == false) {
-            link_speed = xsdk_gem_phy_ieee_speed(sprt_emacps, 0);
-            sprt_phy->link_speed = XEmacPs_PhySetup(sprt_emacps, 0, link_speed);
-        }
+    if (phyfoundforemac == false) {
+        link_speed = xsdk_gem_phy_ieee_speed(sprt_emacps, 0);
+        sprt_phy->link_speed = XEmacPs_PhySetup(sprt_emacps, 0, link_speed);
     }
 
     if (sprt_phy->link_speed < 0) {
         sprt_phy->eth_link_status = NR_ETH_LINK_DOWN;
-        print_debug("Assert due to phy setup failure \n\r", __func__);
+        print_err("Assert due to phy setup failure \n\r", __func__);
     } 
     else {
         sprt_phy->eth_link_status = NR_ETH_LINK_UP;
@@ -528,9 +574,15 @@ static void xsdk_gem_emac_init(struct xsdk_gem_drv_data *sprt_data)
     XEmacPs_SetOperatingSpeed(sprt_emacps, sprt_phy->link_speed);
 
     /*!< Setting the operating speed of the MAC needs a delay. */
+    usleep(100);
 }
 
-/*!<  */
+/*!
+ * @brief   clear and build tx-dma buffer again
+ * @param   sprt_data: driver data structure pointer
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_dma_tx_descs_clean(struct xsdk_gem_drv_data *sprt_data)
 {
     XEmacPs_Bd sgrt_bd;
@@ -548,45 +600,58 @@ static void xsdk_gem_dma_tx_descs_clean(struct xsdk_gem_drv_data *sprt_data)
     XEmacPs_BdRingClone(sprt_txbdring, &sgrt_bd, XEMACPS_SEND);
 }
 
+/*!
+ * @brief   get current number of freeBDs
+ * @param   sprt_data: driver data structure pointer
+ * @retval  count
+ * @note    none
+ */
 static kint32_t xsdk_gem_get_tx_freecnt(struct xsdk_gem_drv_data *sprt_data)
 {
     xemacpsif_s *sprt_xemacif = &sprt_data->sgrt_xemacif;
     XEmacPs_BdRing *sprt_txbdring;
-    kint32_t freecnt = 0;
 
     sprt_txbdring = &XEmacPs_GetTxRing(&sprt_xemacif->sgrt_emacps);
 
     /*!< tx space is available as long as there are valid BD's */
-    freecnt = XEmacPs_BdRingGetFreeCnt(sprt_txbdring);
-    return freecnt;
+    return XEmacPs_BdRingGetFreeCnt(sprt_txbdring);
 }
 
+/*!
+ * @brief   build rx-dma buffer BDs
+ * @param   sprt_data: driver data structure pointer
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t xsdk_gem_setup_rxbd(struct xsdk_gem_drv_data *sprt_data, nrt_gfp_t mask)
 {
     xemacpsif_s *sprt_xemacif = &sprt_data->sgrt_xemacif;
     XEmacPs_BdRing *sprt_rxring;
     struct fwk_sk_buff *sprt_skb;
+    void *buffer;
     kuint32_t freebds;
     kuint32_t bdindex;
     XEmacPs_Bd *sprt_rxbd;
     kuint32_t *temp;
-    void *buffer;
     kint32_t status;
 
     sprt_rxring = &XEmacPs_GetRxRing(&sprt_xemacif->sgrt_emacps);
     freebds = XEmacPs_BdRingGetFreeCnt(sprt_rxring);
 
     while (freebds--) {
-        sprt_skb = fwk_alloc_skb(XEMACPS_MAX_FRAME_SIZE + SKB_DATA_HEAD_LEN(NET_ETHER_HDR_LEN), mask);
+        sprt_skb = fwk_alloc_skb(XEMACPS_MAX_FRAME_SIZE + 2 * ARCH_PER_SIZE, mask);
         if (!isValid(sprt_skb)) {
             print_err("%s: unable to alloc sk_buff\n", __func__);
             return -ER_NOMEM;
         }
 
-        fwk_skb_reserve(sprt_skb, SKB_DATA_HEAD_LEN(NET_ETHER_HDR_LEN));
+        /*!< DMA Rx Buffer (e.g sprt_skb->data) must be 4-bytes alignment */
+        fwk_skb_reserve(sprt_skb, ARCH_PER_SIZE);
         buffer = fwk_skb_put(sprt_skb, XEMACPS_MAX_FRAME_SIZE);
         if (!isValid(buffer)) {
             fwk_free_skb(sprt_skb);
+            print_err("%s: unable to build rx buffer\n", __func__);
+
             return -ER_NOMEM;
         }
 
@@ -619,7 +684,7 @@ static kint32_t xsdk_gem_setup_rxbd(struct xsdk_gem_drv_data *sprt_data, nrt_gfp
         mrt_dsb();
 
         if (!sprt_xemacif->sgrt_emacps.Config.IsCacheCoherent)
-            Xil_DCacheInvalidateRange((kuaddr_t)buffer, XEMACPS_MAX_FRAME_SIZE);
+            Xil_DCacheInvalidateRange((kuaddr_t)buffer, sprt_skb->len);
 
         XEmacPs_BdSetAddressRx(sprt_rxbd, buffer);
         sprt_data->sprt_rxskbs[bdindex] = sprt_skb;
@@ -628,6 +693,12 @@ static kint32_t xsdk_gem_setup_rxbd(struct xsdk_gem_drv_data *sprt_data, nrt_gfp
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   initialize dma
+ * @param   sprt_data: driver data structure pointer
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t xsdk_gem_dma_init(struct xsdk_gem_drv_data *sprt_data)
 {
     xemacpsif_s *sprt_xemacif = &sprt_data->sgrt_xemacif;
@@ -718,12 +789,15 @@ static kint32_t xsdk_gem_dma_init(struct xsdk_gem_drv_data *sprt_data)
          * from these queues.
          */
         XEmacPs_BdClear(sprt_rxbd_terminate);
-        XEmacPs_BdSetAddressRx(sprt_rxbd_terminate, (XEMACPS_RXBUF_NEW_MASK | XEMACPS_RXBUF_WRAP_MASK));
+        XEmacPs_BdSetAddressRx(sprt_rxbd_terminate, XEMACPS_RXBUF_NEW_MASK | XEMACPS_RXBUF_WRAP_MASK);
         XEmacPs_WriteReg(sprt_xemacif->sgrt_emacps.Config.BaseAddress, XEMACPS_RXQ1BASE_OFFSET, (kuint32_t)sprt_rxbd_terminate);
 
         XEmacPs_BdClear(sprt_txbd_terminate);
-        XEmacPs_BdSetStatus(sprt_txbd_terminate, (XEMACPS_TXBUF_USED_MASK | XEMACPS_TXBUF_WRAP_MASK));
+        XEmacPs_BdSetStatus(sprt_txbd_terminate, XEMACPS_TXBUF_USED_MASK | XEMACPS_TXBUF_WRAP_MASK);
         XEmacPs_WriteReg(sprt_xemacif->sgrt_emacps.Config.BaseAddress, XEMACPS_TXQBASE_OFFSET, (kuint32_t)sprt_txbd_terminate);
+    
+        sprt_data->bd_rxterminate = sprt_rxbd_terminate;
+        sprt_data->bd_txterminate = sprt_txbd_terminate;
     }
     else {
         XEmacPs_SetQueuePtr(&sprt_xemacif->sgrt_emacps, sprt_xemacif->sgrt_emacps.TxBdRing.BaseBdAddr, 0, XEMACPS_SEND);
@@ -741,6 +815,13 @@ fail:
     return -ER_FAILD;
 }
 
+/*!
+ * @brief   send BD
+ * @param   sprt_data: driver data structure pointer
+ * @param   sprt_skb: data needed to be sent
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_send_bd(struct xsdk_gem_drv_data *sprt_data, struct fwk_sk_buff *sprt_skb)
 {
     struct fwk_net_device *sprt_ndev = sprt_data->sprt_ndev;
@@ -786,18 +867,24 @@ static void xsdk_gem_send_bd(struct xsdk_gem_drv_data *sprt_data, struct fwk_sk_
 
     status = XEmacPs_BdRingToHw(sprt_txring, 1, sprt_txbd);
     if (status) {
-        print_debug("sgsend: Error submitting TxBD\r\n");
+        print_err("%s: Error submitting TxBD\r\n", __func__);
         goto fail;
     }
 
     /*!< Start transmit */
-    xsdk_gem_start_xmit(sprt_xemacif);
+    xsdk_gem_xmit_trigger(sprt_xemacif);
     return;
 
 fail:
     return;
 }
 
+/*!
+ * @brief   aftercare after sending data
+ * @param   sprt_data: driver data structure pointer
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_sent_complete(struct xsdk_gem_drv_data *sprt_data)
 {
     xemacpsif_s *sprt_xemacif = &sprt_data->sgrt_xemacif;
@@ -843,10 +930,16 @@ static void xsdk_gem_sent_complete(struct xsdk_gem_drv_data *sprt_data)
 
         status = XEmacPs_BdRingFree(sprt_txring, n_bds, sprt_txbd);
         if (status)
-            print_debug("Failure while freeing in Tx Done ISR\r\n");
+            print_err("Failure while freeing in Tx Done ISR\r\n");
     }
 }
 
+/*!
+ * @brief   release tx buffer
+ * @param   sprt_data: driver data structure pointer
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_free_txbuf_any(struct xsdk_gem_drv_data *sprt_data)
 {
     struct fwk_sk_buff **sprt_skb;
@@ -862,6 +955,12 @@ static void xsdk_gem_free_txbuf_any(struct xsdk_gem_drv_data *sprt_data)
     }
 }
 
+/*!
+ * @brief   release rx buffer
+ * @param   sprt_data: driver data structure pointer
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_free_rxbuf_any(struct xsdk_gem_drv_data *sprt_data)
 {
     struct fwk_sk_buff **sprt_skb;
@@ -877,6 +976,12 @@ static void xsdk_gem_free_rxbuf_any(struct xsdk_gem_drv_data *sprt_data)
     }
 }
 
+/*!
+ * @brief   sending irq hander
+ * @param   sprt_data: driver data structure pointer
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_send_handler(struct xsdk_gem_drv_data *sprt_data)
 {
     xemacpsif_s *sprt_xemacif = &sprt_data->sgrt_xemacif;
@@ -890,6 +995,12 @@ static void xsdk_gem_send_handler(struct xsdk_gem_drv_data *sprt_data)
     xsdk_gem_sent_complete(sprt_data);
 }
 
+/*!
+ * @brief   recieving irq hander
+ * @param   sprt_data: driver data structure pointer
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_recv_handler(struct xsdk_gem_drv_data *sprt_data)
 {
     xemacpsif_s *sprt_xemacif = &sprt_data->sgrt_xemacif;
@@ -944,12 +1055,14 @@ static void xsdk_gem_recv_handler(struct xsdk_gem_drv_data *sprt_data)
             sprt_skb->protocol = fwk_eth_type_trans(sprt_skb, sprt_ndev);
             sprt_skb->sprt_ndev = sprt_ndev;
 
+            fwk_skb_set_mac_header(sprt_skb, 0);
+            fwk_skb_set_network_header(sprt_skb, NET_ETHER_HDR_LEN);
+
             sprt_ndev->sgrt_stats.rx_packets++;
             sprt_ndev->sgrt_stats.rx_bytes += sprt_skb->len;
-
             fwk_netif_rx(sprt_skb);
-            sprt_data->sprt_rxskbs[bdindex] = mrt_nullptr;
 
+            sprt_data->sprt_rxskbs[bdindex] = mrt_nullptr;
             sprt_curbd = XEmacPs_BdRingNext(sprt_rxring, sprt_curbd);
         }
 
@@ -959,8 +1072,15 @@ static void xsdk_gem_recv_handler(struct xsdk_gem_drv_data *sprt_data)
     }
 }
 
+/*!
+ * @brief   error irq hander
+ * @param   sprt_data: driver data structure pointer
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_error_handler(struct xsdk_gem_drv_data *sprt_data)
 {
+    struct fwk_net_device *sprt_ndev = sprt_data->sprt_ndev;
     xemacpsif_s *sprt_xemacif = &sprt_data->sgrt_xemacif;
     kuint32_t reg;
     kint32_t retval;
@@ -974,7 +1094,7 @@ static void xsdk_gem_error_handler(struct xsdk_gem_drv_data *sprt_data)
         print_err("%s: EmacPs Configuration Failed....\r\n", __func__);
 
     /*!< set mac address */
-    retval = XEmacPs_SetMacAddress(&sprt_xemacif->sgrt_emacps, sprt_data->hwaddr, 1);
+    retval = XEmacPs_SetMacAddress(&sprt_xemacif->sgrt_emacps, sprt_ndev->dev_addr, 1);
     if (retval)
         print_err("%s: Emac Mac Address set failed...\r\n",__func__);
 
@@ -984,13 +1104,18 @@ static void xsdk_gem_error_handler(struct xsdk_gem_drv_data *sprt_data)
 //  sleep(2);
 
     reg = XEmacPs_ReadReg(sprt_xemacif->sgrt_emacps.Config.BaseAddress, XEMACPS_DMACR_OFFSET);
-    reg |= 0x01000000;
-    XEmacPs_WriteReg(sprt_xemacif->sgrt_emacps.Config.BaseAddress, XEMACPS_DMACR_OFFSET, reg);
+    XEmacPs_WriteReg(sprt_xemacif->sgrt_emacps.Config.BaseAddress, XEMACPS_DMACR_OFFSET, reg | 0x01000000);
 
     xsdk_gem_dma_init(sprt_data);
     XEmacPs_Start(&sprt_xemacif->sgrt_emacps);
 }
 
+/*!
+ * @brief   sending error irq hander
+ * @param   sprt_data: driver data structure pointer
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_send_error(struct xsdk_gem_drv_data *sprt_data)
 {
     xemacpsif_s *sprt_xemacif = &sprt_data->sgrt_xemacif;
@@ -1008,6 +1133,13 @@ static void xsdk_gem_send_error(struct xsdk_gem_drv_data *sprt_data)
     XEmacPs_WriteReg(sprt_xemacif->sgrt_emacps.Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, reg);
 }
 
+/*!
+ * @brief   tx error irq hander
+ * @param   sprt_data: driver data structure pointer
+ * @param   regVal: TxSR register value
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_tx_error_handler(struct xsdk_gem_drv_data *sprt_data, kuint32_t regVal)
 {
     if (!regVal)
@@ -1039,6 +1171,13 @@ static void xsdk_gem_tx_error_handler(struct xsdk_gem_drv_data *sprt_data, kuint
     }
 }
 
+/*!
+ * @brief   rx error irq hander
+ * @param   sprt_data: driver data structure pointer
+ * @param   regVal: RxSR register value
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_rx_error_handler(struct xsdk_gem_drv_data *sprt_data, kuint32_t regVal)
 {
     if (!regVal)
@@ -1062,6 +1201,15 @@ static void xsdk_gem_rx_error_handler(struct xsdk_gem_drv_data *sprt_data, kuint
     }
 }
 
+/*!< ------------------------------------------------------------------------ */
+/*!<                            net_device_ops                                */
+/*!< ------------------------------------------------------------------------ */
+/*!
+ * @brief   gem init
+ * @param   sprt_ndev: net_device structure pointer
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t xsdk_gem_ndo_init(struct fwk_net_device *sprt_ndev)
 {
     struct xsdk_gem_drv_data *sprt_data;
@@ -1089,8 +1237,10 @@ static kint32_t xsdk_gem_ndo_init(struct fwk_net_device *sprt_ndev)
     sprt_phy->link_speed = 100;
     sprt_phy->eth_link_status = NR_ETH_LINK_UNDEFINED;
     sprt_phy->phyaddrforemac = 0;
-    memset(&sprt_phy->phymapemac0[0], 0, sizeof(sprt_phy->phymapemac0));
-    memset(&sprt_phy->phymapemac1[0], 0, sizeof(sprt_phy->phymapemac1));
+    memset(&sprt_phy->phymapemac[0], 0, sizeof(sprt_phy->phymapemac));
+
+    for (kint32_t index = 0; index < NET_MAC_ETH_ALEN; index++)
+        sprt_ndev->dev_addr[index] = (kuint8_t)sprt_data->hwaddr[index];
 
     xsdk_gem_emac_init(sprt_data);
     xsdk_gem_dma_init(sprt_data);
@@ -1098,11 +1248,30 @@ static kint32_t xsdk_gem_ndo_init(struct fwk_net_device *sprt_ndev)
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   gem deinit
+ * @param   sprt_ndev: net_device structure pointer
+ * @retval  none
+ * @note    none
+ */
 static void xsdk_gem_ndo_uninit(struct fwk_net_device *sprt_ndev)
 {
+    struct xsdk_gem_drv_data *sprt_data;
+    xemacpsif_s *sprt_xemacif;
 
+    sprt_data = (struct xsdk_gem_drv_data *)fwk_netdev_priv(sprt_ndev);
+    sprt_xemacif = &sprt_data->sgrt_xemacif;
+    
+    fwk_disable_irq(sprt_data->irq);
+    XEmacPs_Stop(&sprt_xemacif->sgrt_emacps);
 }
 
+/*!
+ * @brief   gem open
+ * @param   sprt_ndev: net_device structure pointer
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t xsdk_gem_ndo_open(struct fwk_net_device *sprt_ndev)
 {
     struct xsdk_gem_drv_data *sprt_data;
@@ -1118,16 +1287,33 @@ static kint32_t xsdk_gem_ndo_open(struct fwk_net_device *sprt_ndev)
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   gem close
+ * @param   sprt_ndev: net_device structure pointer
+ * @retval  errno
+ * @note    none
+ */
 static kint32_t xsdk_gem_ndo_stop(struct fwk_net_device *sprt_ndev)
 {
     struct xsdk_gem_drv_data *sprt_data;
+    xemacpsif_s *sprt_xemacif;
 
     sprt_data = (struct xsdk_gem_drv_data *)fwk_netdev_priv(sprt_ndev);
+    sprt_xemacif = &sprt_data->sgrt_xemacif;
+    
     fwk_disable_irq(sprt_data->irq);
+    XEmacPs_Stop(&sprt_xemacif->sgrt_emacps);
 
     return ER_NORMAL;
 }
 
+/*!
+ * @brief   gem start transmission (for sending skb)
+ * @param   sprt_skb: data will be sent
+ * @param   sprt_ndev: net_device structure pointer
+ * @retval  tx_bytes
+ * @note    none
+ */
 static netdev_tx_t xsdk_gem_ndo_start_xmit(struct fwk_sk_buff *sprt_skb, struct fwk_net_device *sprt_ndev)
 {
     struct xsdk_gem_drv_data *sprt_data;
@@ -1155,6 +1341,7 @@ static netdev_tx_t xsdk_gem_ndo_start_xmit(struct fwk_sk_buff *sprt_skb, struct 
     return size;
 }
 
+/*!< the global netdev_ops */
 static const struct fwk_netdev_ops sgrt_xsdk_gem_drv_oprts =
 {
     .ndo_init = xsdk_gem_ndo_init,
@@ -1164,6 +1351,15 @@ static const struct fwk_netdev_ops sgrt_xsdk_gem_drv_oprts =
     .ndo_start_xmit = xsdk_gem_ndo_start_xmit,
 };
 
+/*!< ------------------------------------------------------------------------ */
+/*!<                            net_device                                    */
+/*!< ------------------------------------------------------------------------ */
+/*!
+ * @brief   net device int
+ * @param   sprt_ndev: net_device structure pointer
+ * @retval  none
+ * @note    initialize sprt_ndev
+ */
 static void xsdk_gem_driver_setup(struct fwk_net_device *sprt_ndev)
 {
     struct xsdk_gem_drv_data *sprt_data;
@@ -1181,6 +1377,12 @@ static void xsdk_gem_driver_setup(struct fwk_net_device *sprt_ndev)
     sprt_ndev->min_header_len = NET_ETHER_HDR_LEN;
 }
 
+/*!
+ * @brief   net device irq handler (upper irq)
+ * @param   args: sprt_data
+ * @retval  irq enum
+ * @note    none
+ */
 static irq_return_t xsdk_gem_driver_isr(void *args)
 {
     struct xsdk_gem_drv_data *sprt_data;
@@ -1205,6 +1407,9 @@ static irq_return_t xsdk_gem_driver_isr(void *args)
     if (sprt_emacps->Version > 2)
         RegQ1ISR = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_INTQ1_STS_OFFSET);
 
+	/* Clear the interrupt status register */
+    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_ISR_OFFSET, RegISR);
+
     /*!< ---------------------------------------------------------------------------- */
     /*!< Receive complete interrupt */
     if (RegISR & XEMACPS_IXR_FRAMERX_MASK) {
@@ -1214,7 +1419,8 @@ static irq_return_t xsdk_gem_driver_isr(void *args)
          */
         XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_RXSR_OFFSET,
                    ((kuint32_t)XEMACPS_RXSR_FRAMERX_MASK | (kuint32_t)XEMACPS_RXSR_BUFFNA_MASK));
-        xsdk_gem_recv_handler(sprt_data);
+        
+        sprt_data->status |= NR_GEM_IRQ_RX_BIT;
     }
 
     /*!< Receive error conditions interrupt */
@@ -1236,7 +1442,10 @@ static irq_return_t xsdk_gem_driver_isr(void *args)
         }
 
         if (RegSR)
-            xsdk_gem_rx_error_handler(sprt_data, RegSR);
+        {
+            sprt_data->reg_value[NR_GEM_IRQ_RXE] = RegISR;
+            sprt_data->status |= NR_GEM_IRQ_RXE_BIT;
+        }
     }
 
     /*!< ---------------------------------------------------------------------------- */
@@ -1250,14 +1459,16 @@ static irq_return_t xsdk_gem_driver_isr(void *args)
             XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_TXSR_OFFSET,
                     ((kuint32_t)XEMACPS_TXSR_TXCOMPL_MASK | (kuint32_t)XEMACPS_TXSR_USEDREAD_MASK));
             
-            xsdk_gem_send_handler(sprt_data);
+            mrt_setbit(sprt_data->status, NR_GEM_IRQ_TX_BIT);
 
             /*!< Transmit Q1 error conditions interrupt */
             if (RegQ1ISR & XEMACPS_INTQ1SR_TXERR_MASK) {
 
                 /*!< Clear Interrupt Q1 status register */
                 XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_INTQ1_STS_OFFSET, RegQ1ISR);
-                xsdk_gem_tx_error_handler(sprt_data, RegQ1ISR);
+
+                sprt_data->reg_value[NR_GEM_IRQ_TXE] = RegQ1ISR;
+                sprt_data->status |= NR_GEM_IRQ_TXE_BIT;
             }
         }
     }
@@ -1271,21 +1482,58 @@ static irq_return_t xsdk_gem_driver_isr(void *args)
         XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_TXSR_OFFSET,
                    ((kuint32_t)XEMACPS_TXSR_TXCOMPL_MASK | (kuint32_t)XEMACPS_TXSR_USEDREAD_MASK));
         
-        xsdk_gem_send_handler(sprt_data);
+        sprt_data->status |= NR_GEM_IRQ_TX_BIT;
     }
     else if (RegISR & XEMACPS_IXR_TX_ERR_MASK) {
         /*!< Clear TX status register */
         RegSR = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_TXSR_OFFSET);
         XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_TXSR_OFFSET, RegSR);
 
-        xsdk_gem_tx_error_handler(sprt_data, RegSR);
+        sprt_data->reg_value[NR_GEM_IRQ_TXE] = RegISR;
+        sprt_data->status |= NR_GEM_IRQ_TXE_BIT;
     }
 
-    return 0;
+    if (sprt_data->status & NR_GEM_IRQ_ERR_BIT)
+        fwk_disable_irq(sprt_data->irq);
+
+    return NR_IRQ_WAKE_THREAD;
 }
 
 /*!
- * @brief   configure property
+ * @brief   net device irq handler (bottom irq)
+ * @param   args: sprt_data
+ * @retval  irq enum
+ * @note    none
+ */
+static irq_return_t xsdk_gem_driver_bottom_isr(void *args)
+{
+    struct xsdk_gem_drv_data *sprt_data;
+    nrt_gem_irq_stat_t status;
+
+    sprt_data = (struct xsdk_gem_drv_data *)args;
+    status = sprt_data->status;
+    sprt_data->status = 0;
+
+    if (status & NR_GEM_IRQ_RX_BIT)
+        xsdk_gem_recv_handler(sprt_data);
+    if (status & NR_GEM_IRQ_TX_BIT)
+        xsdk_gem_send_handler(sprt_data);
+    
+    if (status & NR_GEM_IRQ_ERR_BIT) {
+        if (status & NR_GEM_IRQ_RXE_BIT)
+            xsdk_gem_rx_error_handler(sprt_data, sprt_data->reg_value[NR_GEM_IRQ_RXE]);
+        if (status & NR_GEM_IRQ_TXE_BIT)
+            xsdk_gem_tx_error_handler(sprt_data, sprt_data->reg_value[NR_GEM_IRQ_TXE]);
+
+        memset(sprt_data->reg_value, 0, sizeof(sprt_data->reg_value));
+        fwk_enable_irq(sprt_data->irq);
+    }
+
+    return NR_IRQ_HANDLED;
+}
+
+/*!
+ * @brief   get and set property
  * @param   sprt_pdev, sprt_data
  * @retval  errno
  * @note    none
@@ -1309,7 +1557,7 @@ static kint32_t xsdk_gem_driver_probe_dt(struct fwk_platdev *sprt_pdev, struct x
     sprt_data->base = fwk_io_remap(base, ARCH_PER_SIZE);
     sprt_data->irq = fwk_platform_get_irq(sprt_pdev, 0);
 
-    fwk_of_property_read_u16_array(sprt_phy, "local-mac-address", sprt_data->hwaddr, NET_MAC_ETH_ALEN);
+    fwk_of_property_read_u8_array(sprt_phy, "local-mac-address", sprt_data->hwaddr, NET_MAC_ETH_ALEN);
     return ER_NORMAL;
 }
 
@@ -1337,7 +1585,8 @@ static kint32_t xsdk_gem_driver_probe(struct fwk_platdev *sprt_pdev)
         goto fail1;
 
     fwk_platform_set_drvdata(sprt_pdev, sprt_data);
-    retval = fwk_request_irq(sprt_data->irq, xsdk_gem_driver_isr, 0, XSDK_GEM_DRIVER_NAME, sprt_data);
+    retval = fwk_request_threaded_irq(sprt_data->irq, xsdk_gem_driver_isr, 
+                            xsdk_gem_driver_bottom_isr, 0, XSDK_GEM_DRIVER_NAME, sprt_data);
     if (retval)
         goto fail2;
 
@@ -1350,7 +1599,7 @@ static kint32_t xsdk_gem_driver_probe(struct fwk_platdev *sprt_pdev)
     return ER_NORMAL;
 
 fail3:
-    fwk_free_irq(sprt_data->irq, sprt_ndev);
+    fwk_free_irq(sprt_data->irq, sprt_data);
 fail2:
     fwk_platform_set_drvdata(sprt_pdev, mrt_nullptr);
 fail1:
@@ -1376,7 +1625,7 @@ static kint32_t xsdk_gem_driver_remove(struct fwk_platdev *sprt_pdev)
     sprt_data = (struct xsdk_gem_drv_data *)fwk_netdev_priv(sprt_ndev);
 
     fwk_unregister_netdevice(sprt_ndev);
-    fwk_free_irq(sprt_data->irq, sprt_ndev);
+    fwk_free_irq(sprt_data->irq, sprt_data);
     fwk_platform_set_drvdata(sprt_pdev, mrt_nullptr);
     fwk_free_netdev(sprt_ndev);
 

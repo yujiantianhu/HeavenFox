@@ -10,6 +10,6 @@
 #
 
 obj-y   +=  lvgl/
-obj-y   +=  lwip/
+obj-y   +=  network/
 
 # end of file

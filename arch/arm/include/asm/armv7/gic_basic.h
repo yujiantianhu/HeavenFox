@@ -44,6 +44,7 @@ typedef struct gic_common
 /*!< Number of Bits used for Priority Levels */
 #define __GIC_PRIO_BITS                             5   
 #define __GIC_MAX_IRQS                              1020
+#define __GIC_MAX_SPI_IRQS                          95
 
 typedef struct gic_dist
 {

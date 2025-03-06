@@ -45,7 +45,7 @@ static kint32_t fwk_net_validate_name(struct fwk_net_device *sprt_ndev)
         return ER_NORMAL;
 
     *(name + (kuint32_t)(p - name)) = '\0';
-    if (!(*(name + 1)) || ((*(name + 1)) != 'd'))
+    if (!(*(p + 1)) || ((*(p + 1)) != 'd'))
         goto END;
 
     if (index < 0)

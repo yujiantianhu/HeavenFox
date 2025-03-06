@@ -23,9 +23,22 @@ using namespace bsc;
 using namespace tsk;
 
 /*!< The defines */
-#define DEFAULT_IP_ADDRESS          "192.168.253.206"
-#define DEFAULT_IP_MASK             "255.255.255.0"
-#define DEFAULT_GW_ADDRESS          "192.168.253.1"
+#define LOCAL_IP_ADDRESS            "192.168.253.206"
+#define LOCAL_IP_MASK               "255.255.255.0"
+#define LCOAL_GW_ADDRESS            "192.168.253.1"
+#define LOCAL_IP_PORT               2560
+
+#define REMOTE_IP_ADDRESS           "192.168.253.231"
+#define REMOTE_IP_MASK              "255.255.255.0"
+#define REMOTE_GW_ADDRESS           "192.168.253.1"
+#define REMOTE_IP_PORT              3050
+
+//#define REMOTE_IP_ADDRESS           LOCAL_IP_ADDRESS
+//#define REMOTE_IP_MASK              LOCAL_IP_MASK
+//#define REMOTE_GW_ADDRESS           LCOAL_GW_ADDRESS
+//#define REMOTE_IP_PORT              LOCAL_IP_PORT
+
+#define NETIF_NAME                  "eth0"
 
 /*!< The globals */
 
@@ -43,11 +56,11 @@ void crt_lwip_data_t::startup(void)
     kint32_t sockfd;
     kint32_t retval;
 
-    sgrt_ip.sin_addr.s_addr = fwk_inet_addr(DEFAULT_IP_ADDRESS);
-    sgrt_gw.sin_addr.s_addr = fwk_inet_addr(DEFAULT_GW_ADDRESS);
-    sgrt_netmask.sin_addr.s_addr = fwk_inet_addr(DEFAULT_IP_MASK);
+    sgrt_ip.sin_addr.s_addr = fwk_inet_addr(LOCAL_IP_ADDRESS);
+    sgrt_gw.sin_addr.s_addr = fwk_inet_addr(LCOAL_GW_ADDRESS);
+    sgrt_netmask.sin_addr.s_addr = fwk_inet_addr(LOCAL_IP_MASK);
 
-    retval = net_link_up("lo", &sgrt_ip, &sgrt_gw, &sgrt_netmask);
+    retval = net_link_up(NETIF_NAME, &sgrt_ip, &sgrt_gw, &sgrt_netmask);
     if (retval)
         return;
 
@@ -55,9 +68,9 @@ void crt_lwip_data_t::startup(void)
     if (sockfd < 0)
         goto fail1;
 
-    sgrt_local.sin_port = mrt_htons(7);
+    sgrt_local.sin_port = mrt_htons(LOCAL_IP_PORT);
     sgrt_local.sin_family = NET_AF_INET;
-    sgrt_local.sin_addr.s_addr = fwk_inet_addr(DEFAULT_IP_ADDRESS);
+    sgrt_local.sin_addr.s_addr = fwk_inet_addr(LOCAL_IP_ADDRESS);
     memset(sgrt_local.zero, 0, sizeof(sgrt_local.zero));
 
     retval = socket_bind(sockfd, (struct fwk_sockaddr *)&sgrt_local, sizeof(struct fwk_sockaddr));
@@ -70,7 +83,7 @@ void crt_lwip_data_t::startup(void)
 fail2:
     virt_close(sockfd);
 fail1:
-    net_link_down("lo");
+    net_link_down(NETIF_NAME);
 }
 
 /*!
@@ -92,19 +105,20 @@ void crt_lwip_data_t::excute(void)
     if (this->fd < 0)
         return;
 
-    sgrt_remote.sin_port = mrt_htons(7);
+    sgrt_remote.sin_port = mrt_htons(REMOTE_IP_PORT);
     sgrt_remote.sin_family = NET_AF_INET;
-    sgrt_remote.sin_addr.s_addr = fwk_inet_addr(DEFAULT_IP_ADDRESS);
+    sgrt_remote.sin_addr.s_addr = fwk_inet_addr(REMOTE_IP_ADDRESS);
     memset(sgrt_remote.zero, 0, sizeof(sgrt_remote.zero));
 
     len = socket_sendto(this->fd, msg, strlen(msg) + 1, 0, 
                     (struct fwk_sockaddr *)&sgrt_remote, sizeof(struct fwk_sockaddr));
     if (len <= 0)
     {
-        cout << "send msg failed!" << endl;
+        cout << __func__ << ": send msg failed!" << endl;
         return;
     }
 
+#if 1
     /*!< blocking */
     len = socket_recvfrom(this->fd, this->rx_buffer, 128, 0, 
                     (struct fwk_sockaddr *)&sgrt_remote, &addrlen);
@@ -134,8 +148,11 @@ END:
     if (this->echo_cnt)
     {
         this->echo_cnt--;
-        cout << "recv data is: " << this->rx_buffer << endl;
+//        cout << "recv data is: " << this->rx_buffer << endl;
     }
+
+    cout << "recv data is: " << this->rx_buffer << endl;
+#endif
 }
 
 /*!< end of file */

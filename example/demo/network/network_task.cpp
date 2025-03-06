@@ -1,7 +1,7 @@
 /*
  * User Thread Instance (net task) Interface
  *
- * File Name:   lwip_task.c
+ * File Name:   network_task.c
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2024.11.21
@@ -31,10 +31,10 @@
 using namespace tsk;
 
 /*!< The defines */
-#define LWIP_TASK_STACK_SIZE                        THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
+#define NETWORK_TASK_STACK_SIZE                        THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
 
 /*!< The globals */
-static crt_lwip_data_t sgrt_lwip_task_data;
+static crt_lwip_data_t sgrt_network_task_data;
 
 /*!< API functions */
 /*!
@@ -43,9 +43,9 @@ static crt_lwip_data_t sgrt_lwip_task_data;
  * @retval none
  * @note   do display
  */
-static void *lwip_task_entry(void *args)
+static void *network_task_entry(void *args)
 {
-    crt_lwip_data_t &cgrt_data = sgrt_lwip_task_data;
+    crt_lwip_data_t &cgrt_data = sgrt_network_task_data;
 
     cgrt_data.args = args;
     cgrt_data.echo_cnt = 0;
@@ -55,7 +55,7 @@ static void *lwip_task_entry(void *args)
     for (;;)
     {
         cgrt_data.excute();
-        msleep(200);
+        sleep(1);
     }
 
     return args;
@@ -67,21 +67,21 @@ static void *lwip_task_entry(void *args)
  * @retval 	error code
  * @note   	none
  */
-kint32_t lwip_task_init(void)
+kint32_t network_task_init(void)
 {
-    static kuint8_t g_lwip_task_stack[LWIP_TASK_STACK_SIZE];
+    static kuint8_t g_network_task_stack[NETWORK_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("lwip task", 
-                                            lwip_task_entry, 
-                                            g_lwip_task_stack, 
-                                            sizeof(g_lwip_task_stack),
+    crt_task_t *cprt_task = new crt_task_t("network task", 
+                                            network_task_entry, 
+                                            g_network_task_stack, 
+                                            sizeof(g_network_task_stack),
                                             THREAD_PROTY_DEFAULT,
                                             100);
     if (!cprt_task)
         return -ER_FAILD;
 
     struct mailbox &sgrt_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgrt_mb, cprt_task->get_self(), "lwip-task-mailbox");
+    mailbox_init(&sgrt_mb, cprt_task->get_self(), "network-task-mailbox");
 
     return ER_NORMAL;
 }
