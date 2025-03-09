@@ -1,302 +1,414 @@
 /*
- * Copyright (c) 2001-2004 Swedish Institute of Computer Science.
- * All rights reserved. 
- * 
- * Redistribution and use in source and binary forms, with or without modification, 
- * are permitted provided that the following conditions are met:
+ * NetWork Tcp Interface
  *
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software without specific prior written permission. 
+ * File Name:   fwk_tcp.c
+ * Author:      Yang Yujun
+ * E-mail:      <yujiantianhu@163.com>
+ * Created on:  2024.12.13
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
- * OF SUCH DAMAGE.
- *
- * This file is part of and a contribution to the lwIP TCP/IP stack.
- *
- * Credits go to Adam Dunkels (and the current maintainers) of this software.
- *
- * Christiaan Simons rewrote this file to get a more stable echo example.
- */
-
-/**
- * @file
- * TCP echo server example using raw API.
- *
- * Echos all bytes sent by connecting client,
- * and passively closes when client is done.
+ * Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
  *
  */
 
-#include "lwip/opt.h"
-#include "lwip/debug.h"
-#include "lwip/stats.h"
-#include "lwip/tcp.h"
+/*!< The includes */
+#include <common/queue.h>
+#include <platform/fwk_mempool.h>
+#include <platform/fwk_uaccess.h>
+#include <platform/net/fwk_lwip.h>
+#include <platform/net/fwk_netif.h>
 
-#if LWIP_TCP
-
-static struct tcp_pcb *lwip_tcp_raw_pcb;
-
-enum lwip_tcp_raw_states
+/*!< The globals */
+typedef enum __ERT_TCP_RAW_STATE
 {
-  ES_NONE = 0,
-  ES_ACCEPTED,
-  ES_RECEIVED,
-  ES_CLOSING
+    NR_TCP_RAW_NONE = 0,
+    NR_TCP_RAW_ACCEPTED,
+    NR_TCP_RAW_RECEIVED,
+    NR_TCP_RAW_CONNECTING,
+    NR_TCP_RAW_CONNECTED,
+    NR_TCP_RAW_CLOSING
+
+} nrt_tpcb_state_t;
+
+struct lwip_tcp_group
+{
+    struct tcp_pcb *sprt_tpcb;
+    struct pq_queue *sprt_pq;
+
+    nrt_tpcb_state_t state;
 };
 
-struct lwip_tcp_raw_state
+struct lwip_tcp_data
 {
-  u8_t state;
-  u8_t retries;
-  struct tcp_pcb *pcb;
-  /* pbuf (chain) to recycle */
-  struct pbuf *p;
+    struct tcp_pcb *sprt_tpcb;
+    struct pbuf *sprt_buf;
+
+    struct pq_data sgrt_pqd;
 };
 
-static void
-lwip_tcp_raw_free(struct lwip_tcp_raw_state *es)
+/*!< API functions */
+/*!
+ * @brief   release lwip_tcp_data
+ * @param   sprt_pqd (member of ring queue)
+ * @retval  none
+ * @note    none
+ */
+static void lwip_tcp_data_free(struct pq_data *sprt_pqd)
 {
-  if (es != NULL) {
-    if (es->p) {
-      /* free the buffer chain if present */
-      pbuf_free(es->p);
-    }
+    struct lwip_tcp_data *sprt_data;
 
-    mem_free(es);
-  }  
+    sprt_data = mrt_container_of(sprt_pqd, struct lwip_tcp_data, sgrt_pqd);
+    pbuf_free(sprt_data->sprt_buf);
+    kfree(sprt_data);
 }
 
-static void
-lwip_tcp_raw_close(struct tcp_pcb *tpcb, struct lwip_tcp_raw_state *es)
+/*!
+ * @brief   check the size of recv buffer is enough
+ * @param   sprt_pqd (member of ring queue)
+ * @param   limit (size of recv buffer)
+ * @retval  1: enough; 0: no
+ * @note    none
+ */
+static kbool_t lwip_tcp_data_check(struct pq_data *sprt_pqd, kusize_t limit)
 {
-  tcp_arg(tpcb, NULL);
-  tcp_sent(tpcb, NULL);
-  tcp_recv(tpcb, NULL);
-  tcp_err(tpcb, NULL);
-  tcp_poll(tpcb, NULL, 0);
+    struct lwip_tcp_data *sprt_data;
 
-  lwip_tcp_raw_free(es);
-
-  tcp_close(tpcb);
+    sprt_data = mrt_container_of(sprt_pqd, struct lwip_tcp_data, sgrt_pqd);
+    return !!(sprt_data->sprt_buf->len <= limit);
 }
 
-static void
-lwip_tcp_raw_send(struct tcp_pcb *tpcb, struct lwip_tcp_raw_state *es)
+/*!
+ * @brief   get every rx data from queue with poll ways
+ * @param   sprt_tpcb, len (buffer's length)
+ * @retval  tcp data
+ * @note    none
+ */
+static struct lwip_tcp_data *lwip_tcp_raw_poll(struct tcp_pcb *sprt_tpcb, kusize_t len)
 {
-  struct pbuf *ptr;
-  err_t wr_err = ERR_OK;
- 
-  while ((wr_err == ERR_OK) &&
-         (es->p != NULL) && 
-         (es->p->len <= tcp_sndbuf(tpcb))) {
-    ptr = es->p;
+    struct lwip_tcp_group *sprt_tgrp;
+    struct pq_queue *sprt_pq;
+    struct pq_data *sprt_pqd;
 
-    /* enqueue data for transmission */
-    wr_err = tcp_write(tpcb, ptr->payload, ptr->len, 1);
-    if (wr_err == ERR_OK) {
-      u16_t plen;
+    sprt_tgrp = (struct lwip_tcp_group *)sprt_tpcb->callback_arg;
+    if (!sprt_tgrp)
+        return mrt_nullptr;
 
-      plen = ptr->len;
-      /* continue with next pbuf in chain (if any) */
-      es->p = ptr->next;
-      if(es->p != NULL) {
-        /* new reference! */
-        pbuf_ref(es->p);
-      }
-      /* chop first pbuf from chain */
-      pbuf_free(ptr);
-      /* we can read more data now */
-      tcp_recved(tpcb, plen);
-    } else if(wr_err == ERR_MEM) {
-      /* we are low on memory, try later / harder, defer to poll */
-      es->p = ptr;
-    } else {
-      /* other problem ?? */
-    }
-  }
+    sprt_pq = sprt_tgrp->sprt_pq;
+    sprt_pqd = pq_dequeue_with_chk(sprt_pq, len);
+    if (isValid(sprt_pqd))
+        return mrt_container_of(sprt_pqd, struct lwip_tcp_data, sgrt_pqd);
+
+    return sprt_pqd ? ERR_PTR(-ER_LACK) : mrt_nullptr;
 }
 
-static void
-lwip_tcp_raw_error(void *arg, err_t err)
+/*!
+ * @brief   called by socket_recvfrom
+ * @param   sprt_tpcb, buf, ...
+ * @retval  size
+ * @note    read with blocking
+ */
+kssize_t lwip_tcp_raw_recv(struct tcp_pcb *sprt_tpcb, void *buf, kusize_t size)
 {
-  struct lwip_tcp_raw_state *es;
+    struct lwip_tcp_data *sprt_data;
+    void *payload;
+    kssize_t len;
 
-  LWIP_UNUSED_ARG(err);
+    if (!size)
+        return -ER_LACK;
 
-  es = (struct lwip_tcp_raw_state *)arg;
+    /*!< read one frame */
+    do {
+        sprt_data = lwip_tcp_raw_poll(sprt_tpcb, size);
+        if (PTR_ERR(sprt_data) == (-ER_LACK))
+        {
+            print_err("%s: recv buffer is too small\n", __FUNCTION__);
+            return -ER_LACK;
+        }
+        if (!sprt_data)
+            continue;
 
-  lwip_tcp_raw_free(es);
+        payload = sprt_data->sprt_buf->payload;
+        len = sprt_data->sprt_buf->len;
+        if (len)
+            fwk_copy_to_user(buf, payload, len);
+
+        lwip_tcp_data_free(&sprt_data->sgrt_pqd);
+        break;
+
+    } while (1);
+
+    return len;
 }
 
-static err_t
-lwip_tcp_raw_poll(void *arg, struct tcp_pcb *tpcb)
+/*!
+ * @brief   called by socket_sendto
+ * @param   sprt_tpcb, buf, ...
+ * @retval  size
+ * @note    send (application layer ---> lwip ---> drivers)
+ */
+kssize_t lwip_tcp_raw_send(struct tcp_pcb *sprt_tpcb, const void *buf, kusize_t size)
 {
-  err_t ret_err;
-  struct lwip_tcp_raw_state *es;
-
-  es = (struct lwip_tcp_raw_state *)arg;
-  if (es != NULL) {
-    if (es->p != NULL) {
-      /* there is a remaining pbuf (chain)  */
-      lwip_tcp_raw_send(tpcb, es);
-    } else {
-      /* no remaining pbuf (chain)  */
-      if(es->state == ES_CLOSING) {
-        lwip_tcp_raw_close(tpcb, es);
-      }
-    }
-    ret_err = ERR_OK;
-  } else {
-    /* nothing to be done */
-    tcp_abort(tpcb);
-    ret_err = ERR_ABRT;
-  }
-  return ret_err;
-}
-
-static err_t
-lwip_tcp_raw_sent(void *arg, struct tcp_pcb *tpcb, u16_t len)
-{
-  struct lwip_tcp_raw_state *es;
-
-  LWIP_UNUSED_ARG(len);
-
-  es = (struct lwip_tcp_raw_state *)arg;
-  es->retries = 0;
-  
-  if(es->p != NULL) {
-    /* still got pbufs to send */
-    tcp_sent(tpcb, lwip_tcp_raw_sent);
-    lwip_tcp_raw_send(tpcb, es);
-  } else {
-    /* no more pbufs to send */
-    if(es->state == ES_CLOSING) {
-      lwip_tcp_raw_close(tpcb, es);
-    }
-  }
-  return ERR_OK;
-}
-
-static err_t
-lwip_tcp_raw_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
-{
-  struct lwip_tcp_raw_state *es;
-  err_t ret_err;
-
-  LWIP_ASSERT("arg != NULL",arg != NULL);
-  es = (struct lwip_tcp_raw_state *)arg;
-  if (p == NULL) {
-    /* remote host closed connection */
-    es->state = ES_CLOSING;
-    if(es->p == NULL) {
-      /* we're done sending, close it */
-      lwip_tcp_raw_close(tpcb, es);
-    } else {
-      /* we're not done yet */
-      lwip_tcp_raw_send(tpcb, es);
-    }
-    ret_err = ERR_OK;
-  } else if(err != ERR_OK) {
-    /* cleanup, for unknown reason */
-    if (p != NULL) {
-      pbuf_free(p);
-    }
-    ret_err = err;
-  }
-  else if(es->state == ES_ACCEPTED) {
-    /* first data chunk in p->payload */
-    es->state = ES_RECEIVED;
-    /* store reference to incoming pbuf (chain) */
-    es->p = p;
-    lwip_tcp_raw_send(tpcb, es);
-    ret_err = ERR_OK;
-  } else if (es->state == ES_RECEIVED) {
-    /* read some more data */
-    if(es->p == NULL) {
-      es->p = p;
-      lwip_tcp_raw_send(tpcb, es);
-    } else {
-      struct pbuf *ptr;
-
-      /* chain pbufs to the end of what we recv'ed previously  */
-      ptr = es->p;
-      pbuf_cat(ptr,p);
-    }
-    ret_err = ERR_OK;
-  } else {
-    /* unkown es->state, trash data  */
-    tcp_recved(tpcb, p->tot_len);
-    pbuf_free(p);
-    ret_err = ERR_OK;
-  }
-  return ret_err;
-}
-
-static err_t
-lwip_tcp_raw_accept(void *arg, struct tcp_pcb *newpcb, err_t err)
-{
-  err_t ret_err;
-  struct lwip_tcp_raw_state *es;
-
-  LWIP_UNUSED_ARG(arg);
-  if ((err != ERR_OK) || (newpcb == NULL)) {
-    return ERR_VAL;
-  }
-
-  /* Unless this pcb should have NORMAL priority, set its priority now.
-     When running out of pcbs, low priority pcbs can be aborted to create
-     new pcbs of higher priority. */
-  tcp_setprio(newpcb, TCP_PRIO_MIN);
-
-  es = (struct lwip_tcp_raw_state *)mem_malloc(sizeof(struct lwip_tcp_raw_state));
-  if (es != NULL) {
-    es->state = ES_ACCEPTED;
-    es->pcb = newpcb;
-    es->retries = 0;
-    es->p = NULL;
-    /* pass newly allocated es to our callbacks */
-    tcp_arg(newpcb, es);
-    tcp_recv(newpcb, lwip_tcp_raw_recv);
-    tcp_err(newpcb, lwip_tcp_raw_error);
-    tcp_poll(newpcb, lwip_tcp_raw_poll, 0);
-    tcp_sent(newpcb, lwip_tcp_raw_sent);
-    ret_err = ERR_OK;
-  } else {
-    ret_err = ERR_MEM;
-  }
-  return ret_err;
-}
-
-void
-lwip_tcp_raw_init(void)
-{
-  lwip_tcp_raw_pcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
-  if (lwip_tcp_raw_pcb != NULL) {
+    struct lwip_tcp_group *sprt_tgrp;
     err_t err;
 
-    err = tcp_bind(lwip_tcp_raw_pcb, IP_ANY_TYPE, 7);
-    if (err == ERR_OK) {
-      lwip_tcp_raw_pcb = tcp_listen(lwip_tcp_raw_pcb);
-      tcp_accept(lwip_tcp_raw_pcb, lwip_tcp_raw_accept);
-    } else {
-      /* abort? output diagnostic? */
+    sprt_tgrp = (struct lwip_tcp_group *)sprt_tpcb->callback_arg;
+    if (!sprt_tgrp ||
+        (sprt_tgrp->state == NR_TCP_RAW_CLOSING))
+        return -ER_TRXERR;
+
+    if (size > tcp_sndbuf(sprt_tpcb))
+        size = tcp_sndbuf(sprt_tpcb);
+
+    err = tcp_write(sprt_tpcb, buf, size, TCP_WRITE_FLAG_COPY);
+    if (err != ERR_OK)
+    {
+        print_err("%s: tcp send data to buffer failed!\n", __func__);
+        return -ER_SDATA_FAILD;
     }
-  } else {
-    /* abort? output diagnostic? */
-  }
+
+    err = tcp_output(sprt_tpcb);
+    if (err != ERR_OK)
+    {
+        print_err("%s: tcp send data to hardware failed!\n", __func__);
+        return -ER_SDATA_FAILD;
+    }
+
+    return size;
 }
 
-#endif /* LWIP_TCP */
+/*!
+ * @brief   destroy tcp
+ * @param   sprt_tpcb
+ * @retval  none
+ * @note    none
+ */
+static void __lwip_tcp_raw_close(struct lwip_tcp_group *sprt_tgrp)
+{
+    struct tcp_pcb *sprt_tpcb;
+
+    if (!sprt_tgrp)
+        return;
+
+    sprt_tpcb = sprt_tgrp->sprt_tpcb;
+
+    tcp_arg(sprt_tpcb, NULL);
+    tcp_sent(sprt_tpcb, NULL);
+    tcp_recv(sprt_tpcb, NULL);
+    tcp_err(sprt_tpcb, NULL);
+    tcp_poll(sprt_tpcb, NULL, 0);
+    tcp_close(sprt_tpcb);
+
+    pq_queue_destroy(sprt_tgrp->sprt_pq);
+    kfree(sprt_tgrp);
+}
+
+/*!
+ * @brief   error callback
+ * @param   sprt_tpcb
+ * @retval  none
+ * @note    none
+ */
+static void __lwip_tcp_raw_error(void *arg, err_t err)
+{
+    struct lwip_tcp_group *sprt_tgrp;
+
+    LWIP_UNUSED_ARG(err);
+
+    sprt_tgrp = (struct lwip_tcp_group *)arg;
+
+    pq_queue_destroy(sprt_tgrp->sprt_pq);
+    kfree(sprt_tgrp);
+}
+
+/*!
+ * @brief   poll callback
+ * @param   sprt_tpcb
+ * @retval  none
+ * @note    none
+ */
+static err_t __lwip_tcp_raw_poll(void *arg, struct tcp_pcb *sprt_tpcb)
+{
+    struct lwip_tcp_group *sprt_tgrp;
+
+    sprt_tgrp = (struct lwip_tcp_group *)arg;
+    if (!sprt_tgrp)
+    {
+        /* nothing to be done */
+        tcp_abort(sprt_tpcb);
+        return ERR_ABRT; 
+    }
+
+    if (sprt_tgrp->state == NR_TCP_RAW_CLOSING)
+        __lwip_tcp_raw_close(sprt_tgrp);
+
+    return ERR_OK;
+}
+
+/*!
+ * @brief   sent callback
+ * @param   sprt_tpcb
+ * @retval  none
+ * @note    none
+ */
+static err_t __lwip_tcp_raw_sent(void *arg, struct tcp_pcb *sprt_tpcb, u16_t len)
+{
+    struct lwip_tcp_group *sprt_tgrp;
+
+    sprt_tgrp = (struct lwip_tcp_group *)arg;
+    if (sprt_tgrp->state == NR_TCP_RAW_CLOSING)
+        __lwip_tcp_raw_close(sprt_tgrp);
+
+    return ERR_OK;
+}
+
+/*!
+ * @brief   recv callback
+ * @param   sprt_tpcb, arg, ...
+ * @retval  none
+ * @note    none
+ */
+static err_t __lwip_tcp_raw_recv(void *arg, struct tcp_pcb *sprt_tpcb, struct pbuf *sprt_buf, err_t err)
+{
+    struct lwip_tcp_group *sprt_tgrp;
+    struct lwip_tcp_data *sprt_data;
+
+    sprt_tgrp = (struct lwip_tcp_group *)arg;
+
+    if (!sprt_tgrp->sprt_pq)
+        return ERR_MEM;
+
+    /*!< remote host closed connection */
+    if (!sprt_buf)
+    {
+        sprt_tgrp->state = NR_TCP_RAW_CLOSING;
+        __lwip_tcp_raw_close(sprt_tgrp);
+        return ERR_OK;
+    }
+
+    if (err != ERR_OK)
+    {
+        pbuf_free(sprt_buf);
+        return err;
+    }
+
+    sprt_data = kmalloc(sizeof(*sprt_data), GFP_KERNEL);
+    if (!isValid(sprt_data))
+    {
+        tcp_recved(sprt_tpcb, sprt_buf->tot_len);
+        pbuf_free(sprt_buf);
+
+        return ERR_MEM;
+    }
+
+    sprt_data->sprt_tpcb = sprt_tpcb;
+    sprt_data->sprt_buf = sprt_buf;
+
+    sprt_data->sgrt_pqd.release = lwip_tcp_data_free;
+    sprt_data->sgrt_pqd.dequeue_chk = lwip_tcp_data_check;
+
+    pq_enqueue(sprt_tgrp->sprt_pq, &sprt_data->sgrt_pqd);
+    tcp_recved(sprt_tpcb, sprt_buf->tot_len);
+
+    return ERR_OK;
+}
+
+/*!
+ * @brief   accept callback
+ * @param   sprt_tpcb
+ * @retval  none
+ * @note    none
+ */
+static err_t __lwip_tcp_raw_accept(void *arg, struct tcp_pcb *sprt_tpcb, err_t err)
+{
+    struct lwip_tcp_group *sprt_tgrp;
+    struct pq_queue *sprt_pq;
+
+    if ((err != ERR_OK) || (sprt_tpcb == NULL))
+        return ERR_VAL;
+
+    sprt_tgrp = kmalloc(sizeof(*sprt_tgrp), GFP_KERNEL);
+    if (!isValid(sprt_tgrp))
+        return ERR_MEM;
+    
+    sprt_pq = pq_queue_create(NR_PQ_RING, 1024);
+    if (!isValid(sprt_pq))
+    {
+        kfree(sprt_tgrp);
+        return ERR_MEM;
+    }
+
+    /*!<
+     * Unless this pcb should have NORMAL priority, set its priority now.
+     * When running out of pcbs, low priority pcbs can be aborted to create
+     * new pcbs of higher priority. 
+     */
+    tcp_setprio(sprt_tpcb, TCP_PRIO_MIN);
+    
+    sprt_tgrp->sprt_tpcb = sprt_tpcb;
+    sprt_tgrp->sprt_pq = sprt_pq;
+    sprt_tgrp->state = NR_TCP_RAW_ACCEPTED;
+
+    tcp_arg(sprt_tpcb, sprt_tgrp);
+    tcp_recv(sprt_tpcb, __lwip_tcp_raw_recv);
+    tcp_err(sprt_tpcb, __lwip_tcp_raw_error);
+    tcp_poll(sprt_tpcb, __lwip_tcp_raw_poll, 0);
+    tcp_sent(sprt_tpcb, __lwip_tcp_raw_sent);
+
+    return ERR_OK;
+}
+
+/*!
+ * @brief   tcp pcb init
+ * @param   sprt_ip, port
+ * @retval  tcp_pcb
+ * @note    create rx ring queue for application layer
+ */
+struct tcp_pcb *lwip_tcp_raw_bind(const ip_addr_t *sprt_ip, u16_t port)
+{
+    struct tcp_pcb *sprt_tpcb;
+    err_t err;
+
+    sprt_tpcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
+    if (!sprt_tpcb)
+        goto fail;
+
+    /*!< 
+     * API function "socket_bind" will get "mrt_htons(port)", but "tcp_bind" will convert port again with "lwip_htons";
+     * therefore, port must be convert to it's original format
+     */
+    err = tcp_bind(sprt_tpcb, sprt_ip, mrt_ntohs(port));
+    if (err == ERR_OK)
+        return sprt_tpcb;
+
+    tcp_close(sprt_tpcb);
+
+fail:
+    return ERR_PTR(-ER_FAILD);
+}
+
+/*!
+ * @brief   tcp listen
+ * @param   sprt_tpcb
+ * @retval  none
+ * @note    none
+ */
+struct tcp_pcb *lwip_tcp_raw_listen(struct tcp_pcb *sprt_tpcb)
+{
+    if (!sprt_tpcb)
+        return mrt_nullptr;
+
+    return tcp_listen(sprt_tpcb);
+}
+
+/*!
+ * @brief   tcp accept
+ * @param   sprt_tpcb
+ * @retval  none
+ * @note    none
+ */
+kint32_t lwip_tcp_raw_accept(struct tcp_pcb *sprt_tpcb)
+{
+    tcp_accept(sprt_tpcb, __lwip_tcp_raw_accept);
+    return ER_NORMAL;
+}
+
+/* end of file */

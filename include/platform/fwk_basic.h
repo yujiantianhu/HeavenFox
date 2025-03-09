@@ -26,6 +26,7 @@
 #include <common/api_string.h>
 #include <common/io_stream.h>
 #include <common/time.h>
+#include <common/queue.h>
 #include <board/board.h>
 #include <boot/boot_text.h>
 #include <boot/implicit_call.h>

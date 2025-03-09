@@ -206,6 +206,31 @@ kint32_t kernel_thread_init_create(struct thread_attr *sprt_attr,
 }
 
 /*!
+ * @brief	destroy thread
+ * @param  	tid
+ * @retval 	err code
+ * @note   	none
+ */
+kint32_t thread_destory(tid_t tid)
+{
+    struct thread *sprt_thread;
+
+    sprt_thread = unregister_thread(tid);
+    if (IS_ERR(sprt_thread))
+        return PTR_ERR(sprt_thread);
+
+    if (mrt_nullptr == sprt_thread)
+        return ER_NORMAL;
+
+    print_info("\nthread \'%s\' (tid: %d) is be destroyed\n", sprt_thread->name, sprt_thread->tid);
+
+    kfree(sprt_thread->sprt_attr);
+    kfree(sprt_thread);
+
+    return ER_NORMAL;
+}
+
+/*!
  * @brief	initial attribute
  * @param  	sprt_attr: attr
  * @retval 	none

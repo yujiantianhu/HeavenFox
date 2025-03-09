@@ -970,6 +970,34 @@ kint32_t register_new_thread(struct thread *sprt_thread, tid_t tid)
 }
 
 /*!
+ * @brief	unregister a thread, which will be deleted
+ * @param	tid: global tcb index
+ * @retval 	sprt_thread
+ * @note   	all threads should be deleted from sleep list
+ */
+struct thread *unregister_thread(tid_t tid)
+{
+    struct thread *sprt_thread;
+
+    if ((tid < 0) || (tid == mrt_current->tid))
+        return ERR_PTR(-ER_LOCKED);
+
+    sprt_thread = SCHED_THREAD_HANDLER(tid);
+    if (!sprt_thread)
+        return mrt_nullptr;
+
+    if (sprt_thread->status != NR_THREAD_SLEEP)
+        return ERR_PTR(-ER_BUSY);
+
+    spin_lock_irqsave(&__SCHED_LOCK);
+    schedule_detach_sleep_list(tid);
+    SCHED_THREAD_HANDLER(tid) = mrt_nullptr;
+    spin_unlock_irqrestore(&__SCHED_LOCK);
+
+    return sprt_thread;
+}
+
+/*!
  * @brief	init thread (ready to running)
  * @param  	none
  * @retval 	none

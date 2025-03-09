@@ -93,6 +93,10 @@
 #define CHAR_ASC_TILDE                      126     /*!< '~' */
 #define CHAR_ASC_DEL                        127     /*!< Delete */
 
+/*!< super (ANSI) */
+#define ANSI_ASC_UP                         4283163
+#define ANSI_ASC_DOWN                       4348699
+
 /*!< The functions */
 
 

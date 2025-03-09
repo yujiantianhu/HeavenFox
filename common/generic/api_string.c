@@ -476,12 +476,12 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_f
             case 'x':
             case 'p':
                 num = (kutype_t)va_arg(ptr_list, kutype_t);
-                count = dec_to_hex(mrt_nullptr, num, false);
+                count = dec_to_hex(mrt_nullptr, num, -1);
 
                 if ((lenth + count) > size)
                     break;
 
-                dec_to_hex(ptr_data, num, false);
+                dec_to_hex(ptr_data, num, -1);
 
                 if (isValid(ptr_buf))
                     ptr_data += count;
@@ -491,12 +491,12 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_f
 
             case 'b':
                 num = (kutype_t)va_arg(ptr_list, kutype_t);
-                count = dec_to_binary(mrt_nullptr, num);
+                count = dec_to_binary(mrt_nullptr, num, -1);
 
                 if ((lenth + count) > size)
                     break;
 
-                dec_to_binary(ptr_data, num);
+                dec_to_binary(ptr_data, num, -1);
 
                 if (isValid(ptr_buf))
                     ptr_data += count;

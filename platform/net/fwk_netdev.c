@@ -28,6 +28,22 @@ static kuint32_t g_fwk_allocated_ins[mrt_num_align(NETDEV_IF_INS_MAX, RET_BITS_P
 
 /*!< API function */
 /*!
+ * @brief   get next sprt_ndev from list
+ * @param   sprt_ndev (base)
+ * @retval  sprt_ndev
+ * @note    none
+ */
+struct fwk_net_device *next_netdevice(struct fwk_net_device *sprt_ndev)
+{
+    if (!sprt_ndev)
+        return mrt_list_first_valid_entry(&sgrt_fwk_net_device_list, struct fwk_net_device, sgrt_link);
+    if (mrt_list_head_until(sprt_ndev, &sgrt_fwk_net_device_list, sgrt_link))
+        return mrt_nullptr;
+
+    return mrt_list_next_entry(sprt_ndev, sgrt_link);
+}
+
+/*!
  * @brief   net name refactoring
  * @param   sprt_ndev
  * @retval  errno

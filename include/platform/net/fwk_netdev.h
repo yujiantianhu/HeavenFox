@@ -139,6 +139,7 @@ extern void fwk_free_netdev(struct fwk_net_device *sprt_ndev);
 extern struct fwk_net_device *fwk_ifname_to_ndev(const kchar_t *name);
 extern kint32_t fwk_register_netdevice(struct fwk_net_device *sprt_ndev);
 extern kint32_t fwk_unregister_netdevice(struct fwk_net_device *sprt_ndev);
+extern struct fwk_net_device *next_netdevice(struct fwk_net_device *sprt_ndev);
 
 #define fwk_alloc_netdev(sizeof_priv, name, setup)	\
                 fwk_alloc_netdev_mq(sizeof_priv, name, setup, 1)

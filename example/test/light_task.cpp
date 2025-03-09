@@ -94,7 +94,7 @@ kint32_t light_task_init(void)
 {
     static kuint8_t g_light_task_stack[LIGHT_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("light task", 
+    crt_task_t *cprt_task = new crt_task_t("light_task", 
                                             light_task_entry, 
                                             g_light_task_stack, 
                                             sizeof(g_light_task_stack));

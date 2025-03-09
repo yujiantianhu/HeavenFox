@@ -22,7 +22,7 @@
 /*!< The defines */
 struct term_kbd_priv;
 
-#define TERM_TASK_THREAD_STACK_SIZE             THREAD_STACK_HALF(1)    /*!< 1/2 page (1kbytes) */
+#define TERM_TASK_THREAD_STACK_SIZE             THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
 
 struct term_kbd_handle
 {
@@ -41,11 +41,14 @@ struct term_kbd_priv
 /*!< The globals */
 static tid_t g_term_task_tid;
 static struct thread_attr sgrt_term_task_attr;
-static kuint32_t g_term_task_stack[TERM_TASK_THREAD_STACK_SIZE];
+static kuint8_t g_term_task_stack[TERM_TASK_THREAD_STACK_SIZE];
 static struct mailbox sgrt_term_task_mailbox;
 
 static kubyte_t g_term_cmdline[TERM_MSG_RECV_LEN];
 static kuint32_t g_term_inc;
+
+static struct pq_queue *sprt_term_cmd_queue;
+static kint32_t g_term_cmd_queue_cur = -1;
 
 /*!< API functions */
 /*!
@@ -57,6 +60,45 @@ static kuint32_t g_term_inc;
 kchar_t *term_cmdline_get(void)
 {
     return (kchar_t *)&g_term_cmdline[0];
+}
+
+/*!
+ * @brief   get cmdline queue
+ * @param   none
+ * @retval  sprt_term_cmd_queue
+ * @note    none
+ */
+struct pq_queue *term_cmd_queue_get(void)
+{
+    return sprt_term_cmd_queue;
+}
+
+/*!
+ * @brief   queue release API
+ * @param   sprt_pqd
+ * @retval  none
+ * @note    none
+ */
+static void term_cmd_queue_free(struct pq_data *sprt_pqd)
+{
+    struct term_cmd_his *sprt_his;
+
+    sprt_his = mrt_container_of(sprt_pqd, struct term_cmd_his, sgrt_pqd);
+    kfree(sprt_his);
+}
+
+/*!
+ * @brief   cursor move left
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+static void term_cursor_toleft(void)
+{
+    // io_putc(0x1b);
+    // io_putc(0x5b);
+    // io_putc(0x44);
+    io_putc('\b');
 }
 
 /*!
@@ -111,6 +153,8 @@ static void term_kbd_enter(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
 {
     kuint32_t cur_idx = *offset;
     kubyte_t *msg = sprt_priv->msg;
+    struct term_cmd_his *sprt_his;
+    kuint32_t align_size;
 
     *(msg + cur_idx) = '\0';
     if (*offset)
@@ -120,6 +164,24 @@ static void term_kbd_enter(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
 
         /*!< call function */
         term_cmdline_distribute((const kchar_t *)msg);
+
+        /*!< save current command to history queue */
+        if (sprt_term_cmd_queue)
+        {
+            align_size = mrt_align(sizeof(*sprt_his), ARCH_PER_SIZE);
+
+            sprt_his = (struct term_cmd_his *)kmalloc(align_size + (*offset), GFP_KERNEL);
+            if (isValid(sprt_his))
+            {
+                sprt_his->length = *offset;
+                sprt_his->cmd = ((void *)sprt_his) + align_size;
+                sprt_his->sgrt_pqd.release = term_cmd_queue_free;
+                sprt_his->sgrt_pqd.dequeue_chk = mrt_nullptr;
+
+                memcpy(sprt_his->cmd, msg, sprt_his->length);
+                pq_enqueue(sprt_term_cmd_queue, &sprt_his->sgrt_pqd);
+            }
+        }
     }
 
     term_cmd_print_login();
@@ -134,22 +196,108 @@ static void term_kbd_enter(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
  */
 static void term_kbd_tab(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
 {
+
+}
+
+/*!
+ * @brief   Backspace
+ * @param   sprt_priv, *offset (size of cmdline)
+ * @retval  none
+ * @note    none
+ */
+static void term_kbd_bs(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
+{
     kubyte_t *msg = sprt_priv->msg;
 
-    *offset = 0;
+    /*!< cursor move left */
+    term_cursor_toleft();
+    /*!< send space to hide (*cursor) */
+    io_putc(' ');
+    /*!< cursor move left */
+    term_cursor_toleft();
+
+    if (*offset)
+    {
+        (*offset)--;
+        *(msg + *offset) = '\0';
+    }
+}
+
+/*!
+ * @brief   direction-up key
+ * @param   sprt_priv, *offset (size of cmdline)
+ * @retval  none
+ * @note    none
+ */
+static void term_kbd_dir_up(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
+{
+    kubyte_t *msg = sprt_priv->msg;
+    struct term_cmd_his *sprt_his;
+    struct pq_data *sprt_pqd;
+
+    if (!sprt_term_cmd_queue)
+        return;
+
+    sprt_pqd = pq_lookback(sprt_term_cmd_queue, &g_term_cmd_queue_cur);
+    if (!sprt_pqd)
+        return;
+
+    sprt_his = mrt_container_of(sprt_pqd, struct term_cmd_his, sgrt_pqd);
+    memcpy(msg, sprt_his->cmd, sprt_his->length);
+    *offset = sprt_his->length;
     *(msg + *offset) = '\0';
+
+    io_putc(CHAR_ASC_CR);
+    /*!< echo is the first task */
+    term_cmd_print_login();
+
+    io_putstr(msg, sprt_his->length);
+}
+
+/*!
+ * @brief   direction-down key
+ * @param   sprt_priv, *offset (size of cmdline)
+ * @retval  none
+ * @note    none
+ */
+static void term_kbd_dir_down(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
+{
+    kubyte_t *msg = sprt_priv->msg;
+    struct term_cmd_his *sprt_his;
+    struct pq_data *sprt_pqd;
+
+    if (!sprt_term_cmd_queue)
+        return;
+
+    sprt_pqd = pq_lookfront(sprt_term_cmd_queue, &g_term_cmd_queue_cur);
+    if (!sprt_pqd)
+        return;
+
+    sprt_his = mrt_container_of(sprt_pqd, struct term_cmd_his, sgrt_pqd);
+    memcpy(msg, sprt_his->cmd, sprt_his->length);
+    *offset = sprt_his->length;
+    *(msg + *offset) = '\0';
+
+    io_putc(CHAR_ASC_CR);
+    /*!< echo is the first task */
+    term_cmd_print_login();
+
+    io_putstr(msg, sprt_his->length);
 }
 
 /*!< super key */
 static struct term_kbd_handle sgrt_term_kbd_handles[] =
 {
-    { CHAR_ASC_SPACE, term_kbd_repeat },
+    { CHAR_ASC_SPACE, term_kbd_repeat },                /*!< space */
 
-    { CHAR_ASC_CR, term_kbd_enter },                      /*!< enter */
-    { CHAR_ASC_ETX, term_kbd_pause },                     /*!< ctrl + c */
-    { CHAR_ASC_BS, mrt_nullptr },                         /*!< backspace (ctrl + b) */
-    { CHAR_ASC_DEL, mrt_nullptr },                        /*!< delete */
-    { CHAR_ASC_HT, term_kbd_tab },                        /*!< tab */
+    { CHAR_ASC_CR, term_kbd_enter },                    /*!< enter */
+    { CHAR_ASC_ETX, term_kbd_pause },                   /*!< ctrl + c */
+    { CHAR_ASC_BS, term_kbd_bs },                       /*!< backspace (ctrl + b) */
+    { CHAR_ASC_DEL, term_kbd_bs },                      /*!< delete */
+    { CHAR_ASC_HT, term_kbd_tab },                      /*!< tab */
+
+    { ANSI_ASC_UP, term_kbd_dir_up },
+    { ANSI_ASC_DOWN, term_kbd_dir_down },
 };
 
 /*!
@@ -169,6 +317,10 @@ static void term_echo(kint32_t msg)
         case CHAR_ASC_CR:
         case CHAR_ASC_ETX:
             io_putc(CHAR_ASC_CR);
+            g_term_cmd_queue_cur = -1;
+            break;
+
+        case ANSI_ASC_UP:
             break;
 
         default: break;
@@ -226,6 +378,7 @@ static const term_cmd_fn_t g_term_cmd_fn[] =
     term_cmd_add_ttc,
     term_cmd_add_user,
     term_cmd_add_kill,
+    term_cmd_add_history,
 
     mrt_nullptr,
 };
@@ -269,9 +422,18 @@ static void *term_entry(void *args)
     /*!< system command */
     term_new_command(g_term_cmd_fn);
 
+    /*!< create ring buffer to save history commands */
+    sprt_term_cmd_queue = pq_queue_create(NR_PQ_RING, TERM_MSG_RECV_LEN);
+
     for (;;)
     {
         msg = 0;
+
+        /*!< 
+         * Each character entered by the Terminal will be immediately sent to receiver,
+         * even if you do not press Enter Key;
+         * As a receiver, the character needs to be read immediately.
+         */
         length = io_getstr((kubyte_t *)&msg, sizeof(msg));
         if (length <= 0)
             continue;

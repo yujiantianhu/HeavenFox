@@ -148,6 +148,90 @@ void *pq_dequeue_with_chk(struct pq_queue *sprt_pq, kusize_t limit)
 }
 
 /*!
+ * @brief   just read member in queue
+ * @param   sprt_pq
+ * @retval  member
+ * @note    none
+ */
+void *pq_lookback(struct pq_queue *sprt_pq, kint32_t *base)
+{
+    kuint32_t cur_index = 0;
+
+    if (!sprt_pq->len)
+        return mrt_nullptr;
+
+    if (*base < 0)
+        cur_index = (sprt_pq->head + sprt_pq->tot_len - 1) % sprt_pq->tot_len;
+    else
+    {
+        cur_index = ((*base) + sprt_pq->tot_len - 1) % sprt_pq->tot_len;
+
+        if (sprt_pq->head < sprt_pq->tail)
+        {
+            if ((cur_index < sprt_pq->tail) &&
+                (cur_index >= sprt_pq->head))
+                goto fail;
+        }
+        else
+        {
+            if ((cur_index < sprt_pq->tail) ||
+                (cur_index >= sprt_pq->head))
+                goto fail;
+        }
+    }
+
+    *base = cur_index;
+    return sprt_pq->sprt_data[cur_index];
+
+fail:
+    return mrt_nullptr;
+}
+
+/*!
+ * @brief   just read member in queue
+ * @param   sprt_pq
+ * @retval  member
+ * @note    none
+ */
+void *pq_lookfront(struct pq_queue *sprt_pq, kint32_t *base)
+{
+    kuint32_t cur_index = 0;
+
+    if (!sprt_pq->len)
+        return mrt_nullptr;
+
+    if (*base < 0)
+    {
+//      cur_index = sprt_pq->tail % sprt_pq->tot_len;
+        return mrt_nullptr;
+    }
+
+//  else
+//  {
+        cur_index = ((*base) + 1) % sprt_pq->tot_len;
+
+        if (sprt_pq->head < sprt_pq->tail)
+        {
+            if ((cur_index < sprt_pq->tail) &&
+                (cur_index >= sprt_pq->head))
+                goto fail;
+        }
+        else
+        {
+            if ((cur_index < sprt_pq->tail) ||
+                (cur_index >= sprt_pq->head))
+                goto fail;
+        }
+//  }
+
+    *base = cur_index;
+    return sprt_pq->sprt_data[cur_index];
+
+fail:
+    return mrt_nullptr;
+}
+
+/*!
  * @brief   get current number of members
  * @param   sprt_pq
  * @retval  lenth

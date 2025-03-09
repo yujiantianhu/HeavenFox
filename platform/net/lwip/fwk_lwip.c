@@ -263,8 +263,11 @@ static kint32_t fwk_lwip_link_up(struct fwk_network_if *sprt_if)
             &sgrt_ip, &sgrt_mask, &sgrt_gw, 
             sprt_if, lwip_enet_init, ethernet_input);
 
-    /*!< the global variable "netif_default = sprt_netif" */
-    netif_set_default(&sprt_data->sgrt_netif);
+    if (!netif_default)
+    {
+        /*!< the global variable "netif_default = sprt_netif" */
+        netif_set_default(&sprt_data->sgrt_netif);
+    }
 
 	/*!< specify that the network if is up */
 	netif_set_up(&sprt_data->sgrt_netif);
@@ -287,7 +290,20 @@ fail:
  */
 static kint32_t fwk_lwip_link_down(struct fwk_network_if *sprt_if)
 {
-    fwk_netif_close(sprt_if->ifname);
+    struct fwk_lwip_data *sprt_data;
+
+    sprt_data = (struct fwk_lwip_data *)sprt_if->private_data;
+
+    if (netif_default == &sprt_data->sgrt_netif)
+        netif_set_default(mrt_nullptr);
+
+    netif_set_down(&sprt_data->sgrt_netif);
+    netif_remove(&sprt_data->sgrt_netif);
+
+    schedule_thread_sleep(sprt_data->txd);
+    kfree(sprt_data);
+    sprt_if->private_data = mrt_nullptr;
+
     return ER_NORMAL;
 }
 

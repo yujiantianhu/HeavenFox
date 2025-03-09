@@ -991,7 +991,7 @@ static kint32_t fwk_sdcard_send_app_command(struct fwk_sdcard *sprt_card,
             iRetval = fwk_sdcard_send_command(sprt_card, cmd_controller, args);
         }
 
-        delay_us(100);
+        delay_ms(500);
 
     } while ((-ER_RETRY == iRetval) && (--iRetry));
 

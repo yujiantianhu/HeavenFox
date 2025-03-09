@@ -97,6 +97,44 @@ fail:
 }
 
 /*!
+ * @brief   convert integer to ip string
+ * @param   ip 
+ * @retval  ip str
+ * @note    example:
+ *          input format can be: 
+ *              (192 << 24) | (168 << 16) | (253 << 8) | 231
+ *          output format:
+ *              "192.168.253.231"
+ */
+kchar_t *fwk_inet_ntoa(kchar_t *inet_str, kuint32_t addr)
+{
+    kuint32_t inet_addr;
+    kuint32_t val;
+    kuint32_t len, offset = 0;
+    kuint32_t idx;
+
+#define INET_IP_BYTES                   4
+
+    inet_addr = mrt_ntohl(addr);
+
+    for (idx = 0; idx < INET_IP_BYTES; idx++)
+    {
+        val = (inet_addr >> (((INET_IP_BYTES - 1) - idx) << 3)) & 0xff;
+        len = convert_number_to_string(&inet_str[offset], val);
+
+        offset += len;
+        if (idx != (INET_IP_BYTES - 1))
+            inet_str[offset++] = '.';
+        else
+            inet_str[offset] = '\0';
+    }
+
+    return inet_str;
+
+#undef INET_IP_BYTES
+}
+
+/*!
  * @brief   set random value
  * @param   buf (destination value)
  * @retval  none
@@ -470,6 +508,9 @@ void fwk_netif_init(void (*pfunc_rx)(void *rxq, void *args), void *args)
 
     kernel_thread_create(THREAD_TID_SOCKRX, mrt_nullptr, fwk_netif_rx_entry, sprt_tcb);
     thread_set_priority(mrt_tid_attr(THREAD_TID_SOCKRX), THREAD_PROTY_SOCKRX);
+
+    /*!< register command */
+    term_cmd_add_ifconfig();
 }
 
 /*!< end of file */

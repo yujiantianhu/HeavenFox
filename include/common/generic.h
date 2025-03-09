@@ -201,8 +201,8 @@
 extern kutype_t udiv_integer(kutype_t divied, kutype_t div);
 extern kstype_t sdiv_integer(kstype_t divied, kstype_t div);
 extern kutype_t udiv_remainder(kutype_t divied, kutype_t div);
-extern kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kbool_t mode);
-extern kutype_t dec_to_binary(kchar_t *buf, kutype_t number);
+extern kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kint32_t mode);
+extern kutype_t dec_to_binary(kchar_t *buf, kutype_t number, kint32_t mode);
 extern kint32_t ascii_to_dec(const kchar_t *str);
 extern kutype_t random_val(void);
 

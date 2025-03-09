@@ -54,6 +54,8 @@ extern void pq_queue_destroy(struct pq_queue *sprt_pq);
 extern kint32_t pq_enqueue(struct pq_queue *sprt_pq, struct pq_data *sprt_data);
 extern void *pq_dequeue(struct pq_queue *sprt_pq);
 extern void *pq_dequeue_with_chk(struct pq_queue *sprt_pq, kusize_t limit);
+extern void *pq_lookback(struct pq_queue *sprt_pq, kint32_t *base);
+extern void *pq_lookfront(struct pq_queue *sprt_pq, kint32_t *base);
 extern kint32_t pq_queue_get_size(struct pq_queue *sprt_pq);
 
 #ifdef __cplusplus

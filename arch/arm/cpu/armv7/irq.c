@@ -301,7 +301,7 @@ static void fwk_gic_initial(srt_gic_t *sprt_gic)
         mrt_writel(0U, &sprt_dest->D_ICFGR[i >> 4]);
     }
 
-    for (i = 0; i < __GIC_MAX_IRQS; i++)
+    for (i = 0; i < 512; i++)
     {
 		/*!<
 		 * The priority using int the priority_level register
@@ -309,16 +309,16 @@ static void fwk_gic_initial(srt_gic_t *sprt_gic)
 		 * INT_ID.
 		 * Write a default value that can be changed elsewhere.
 		 */
-        mrt_writeb(0xa0U, &sprt_dest->D_IPRIORITYR[i]);
+        mrt_writeb(0xa0, &sprt_dest->D_IPRIORITYR[i]);
     }
 
-    for (i = 32U; i < __GIC_MAX_SPI_IRQS; i++)
+    for (i = 32U; i < 512; i++)
     {
 		/*!<
 		 * The CPU interface in the spi_target register
 		 * Only write to the SPI interrupts, so start at 32
 		 */
-        mrt_writeb(0x01U, &sprt_dest->D_ITARGETSR[i]);
+        mrt_writeb(0x01, &sprt_dest->D_ITARGETSR[i]);
     }
 
     /*!< Make all interrupts have higher priority */

@@ -93,14 +93,16 @@ kutype_t udiv_remainder(kutype_t divied, kutype_t div)
 /*!
  * @brief   convert number to hex, and save the result to buf
  * @param   buf, number
+ * @param   mode: -1, exinlcude '0x'; 0, 0xabc; 1, 0XABC
  * @retval  none
  * @note    none
  */
-kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kbool_t mode)
+kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kint32_t mode)
 {
     kchar_t temp[(sizeof(kutype_t) << 1) + 4];
     kchar_t result = 0;
     kint16_t count = 0, idx;
+    kuint32_t offset = 0;
 
     do
     {
@@ -108,7 +110,7 @@ kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kbool_t mode)
         number = number >> 4;
 
         if (result >= 10)
-            temp[count] = result - 10 + (mode ? 'A' : 'a');
+            temp[count] = result - 10 + ((mode == 1) ? 'A' : 'a');
         else
             temp[count] = result + '0';
 
@@ -119,27 +121,34 @@ kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kbool_t mode)
     if (!buf)
         goto END;
     
-    *buf = '0';
-    *(buf + 1) = mode ? 'X' : 'x';
+    if (mode != (-1))
+    {
+        *buf = '0';
+        *(buf + 1) = (mode == 1) ? 'X' : 'x';
+
+        offset = 2;
+    }
 
     for (idx = 0; idx < count; idx++)
-        *(buf + idx + 2) = temp[count - idx - 1];
+        *(buf + idx + offset) = temp[count - idx - 1];
     
 END:
-    return (count + 2);
+    return (count + offset);
 }
 
 /*!
  * @brief   convert number to binary, and save the result to buf
  * @param   buf, number
+ * @param   mode: -1, exinlcude '0b'; 0, 0b110; 1, 0B110
  * @retval  none
  * @note    none
  */
-kutype_t dec_to_binary(kchar_t *buf, kutype_t number)
+kutype_t dec_to_binary(kchar_t *buf, kutype_t number, kint32_t mode)
 {
     kchar_t temp[(sizeof(kutype_t) << 3) + 4];
     kchar_t result = 0;
     kint16_t count = 0, idx;
+    kuint32_t offset = 0;
 
     do
     {
@@ -153,14 +162,19 @@ kutype_t dec_to_binary(kchar_t *buf, kutype_t number)
     if (!buf)
         goto END;
     
-    *buf = '0';
-    *(buf + 1) = 'b';
+    if (mode != (-1))
+    {
+        *buf = '0';
+        *(buf + 1) = 'b';
+
+        offset = 2;
+    }
 
     for (idx = 0; idx < count; idx++)
-        *(buf + idx + 2) = temp[count - idx - 1];
+        *(buf + idx + offset) = temp[count - idx - 1];
     
 END:
-    return (count + 2);
+    return (count + offset);
 }
 
 /*!

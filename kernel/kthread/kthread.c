@@ -87,6 +87,20 @@ static void kthread_systime_record(void)
 }
 
 /*!
+ * @brief	manage zombie thread
+ * @param  	none
+ * @retval 	none
+ * @note   	none
+ */
+static void kthread_kill_zombie(void)
+{
+    struct thread *sprt_thread = mrt_nullptr;
+
+    while ((sprt_thread = next_sleep_thread(sprt_thread)))
+        thread_destory(sprt_thread->tid);
+}
+
+/*!
  * @brief	kernel thread entry
  * @param  	args: NULL normally
  * @retval 	none
@@ -125,6 +139,7 @@ static void *kthread_entry(void *args)
     for (;;)
     {        
         kthread_systime_record();
+        kthread_kill_zombie();              /*!< kill zombie thread */
         msleep(200);
     }
 

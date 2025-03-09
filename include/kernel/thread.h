@@ -197,6 +197,7 @@ extern kint32_t kernel_thread_init_create(struct thread_attr *sprt_attr,
                                         void *(*pfunc_start_routine) (void *), 
                                         void *ptr_args);
 
+extern kint32_t thread_destory(tid_t tid);
 extern void *thread_attr_init(struct thread_attr *sprt_attr);
 extern void *thread_attr_revise(struct thread_attr *sprt_attr);
 extern void thread_attr_destroy(struct thread_attr *sprt_attr);

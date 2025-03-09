@@ -51,7 +51,7 @@ const thread_init_t proc_table::g_test_tables[] =
 const thread_init_t proc_table::g_demo_tables[] =
 {   
     /*!< applications */
-//  lvgl_task_init,
+    lvgl_task_init,
     network_task_init,
     
     /*!< end */
@@ -76,6 +76,8 @@ crt_task_t::crt_task_t(const kchar_t *name, void *(*task_entry)(void *),
 
     if (!name || !(*name) || !task_entry)
         return;
+
+    memset(&this->sgrt_attr, 0, sizeof(this->sgrt_attr));
 
     this->sgrt_attr.detachstate = THREAD_CREATE_JOINABLE;
     this->sgrt_attr.inheritsched = THREAD_INHERIT_SCHED;

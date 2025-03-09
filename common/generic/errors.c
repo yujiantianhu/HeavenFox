@@ -47,16 +47,16 @@ void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
         for (kint32_t idx = 0; idx < 9; idx++)
         {
             if (idx < 10)
-                print_err("r%d:    %x\n\t", idx, *((kuaddr_t *)(&sprt_regs->r0) + idx));
+                print_err("r%d:    0x%x\n\t", idx, *((kuaddr_t *)(&sprt_regs->r0) + idx));
             else
-                print_err("r%d:   %x\n\t",  idx, *((kuaddr_t *)(&sprt_regs->r0) + idx));
+                print_err("r%d:   0x%x\n\t",  idx, *((kuaddr_t *)(&sprt_regs->r0) + idx));
         }
 
-        print_err(	"lr:    %x\n\t"
-                    "sp:    %x\n\t"
-                    "pc:    %x\n\t"
-                    "spsr:  %x\n\t"
-                    "flag:  %x\n\t",
+        print_err(	"lr:    0x%x\n\t"
+                    "sp:    0x%x\n\t"
+                    "pc:    0x%x\n\t"
+                    "spsr:  0x%x\n\t"
+                    "flag:  0x%x\n\t",
                     sprt_regs->lr, sprt_regs->sp, sprt_regs->pc, sprt_regs->psr, sprt_regs->flags);
     }
 

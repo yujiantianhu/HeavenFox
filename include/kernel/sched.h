@@ -134,6 +134,7 @@ extern struct thread *next_sleep_thread(struct thread *sprt_prev);
 
 extern kint32_t schedule_thread_switch(tid_t tid);
 extern kint32_t register_new_thread(struct thread *sprt_thread, tid_t tid);
+extern struct thread *unregister_thread(tid_t tid);
 extern void __thread_init_before(void);
 extern struct scheduler_context *__schedule_thread(void);
 extern void schedule_thread(void);

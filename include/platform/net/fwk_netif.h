@@ -33,6 +33,7 @@ struct fwk_ip_hdr;
 
 /*!< The functions */
 extern kuint32_t fwk_inet_addr(const kchar_t *addr);
+extern kchar_t *fwk_inet_ntoa(kchar_t *inet_str, kuint32_t addr);
 extern void fwk_inet_random_addr(kuint8_t *buf, kusize_t lenth);
 extern kuint16_t fwk_ip_network_csum(struct fwk_ip_hdr *sprt_iphdr);
 extern kuint16_t fwk_ip_transport_csum(struct fwk_ip_hdr *sprt_iphdr, kuint8_t *msg);
@@ -47,6 +48,9 @@ extern kint32_t fwk_netif_rx(struct fwk_sk_buff *sprt_skb);
 extern kint32_t fwk_dev_queue_xmit(struct fwk_sk_buff *sprt_skb);
 
 extern void fwk_netif_init(void (*pfunc_rx)(void *rxq, void *args), void *args);
+
+/*!< netif command */
+extern void term_cmd_add_ifconfig(void);
 
 /*!< API functions */
 /*!

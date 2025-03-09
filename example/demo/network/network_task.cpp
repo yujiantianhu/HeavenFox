@@ -71,7 +71,7 @@ kint32_t network_task_init(void)
 {
     static kuint8_t g_network_task_stack[NETWORK_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("network task", 
+    crt_task_t *cprt_task = new crt_task_t("network_task", 
                                             network_task_entry, 
                                             g_network_task_stack, 
                                             sizeof(g_network_task_stack),

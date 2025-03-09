@@ -39,6 +39,14 @@ struct term_cmd
     struct list_head sgrt_link;
 };
 
+struct term_cmd_his
+{
+    kuint32_t length;
+    struct pq_data sgrt_pqd;
+
+    void *cmd;
+};
+
 /*!< The functions */
 extern struct term_cmd *term_cmd_allocate(const kchar_t *name, nrt_gfp_t gfp_mask);
 extern void term_cmd_free(struct term_cmd *sprt_cmd);
@@ -48,6 +56,7 @@ extern kint32_t term_cmd_add(struct term_cmd *sprt_cmd);
 extern void term_cmd_del(struct term_cmd *sprt_cmd);
 
 extern kchar_t *term_cmdline_get(void);
+extern struct pq_queue *term_cmd_queue_get(void);
 extern void term_cmdline_excute(kint32_t argc, kchar_t **argv);
 extern void term_cmdline_distribute(const kchar_t *cmdline);
 
@@ -63,6 +72,7 @@ extern void term_cmd_add_ts(void);
 extern void term_cmd_add_ttc(void);
 extern void term_cmd_add_user(void);
 extern void term_cmd_add_kill(void);
+extern void term_cmd_add_history(void);
 
 #ifdef __cplusplus
     }

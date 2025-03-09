@@ -16,5 +16,6 @@ obj-y	+=	fwk_skbuff.o
 obj-y	+=	fwk_ether.o
 
 obj-y	+=	lwip/
+obj-y	+=	cmd/
 
 # end of file
