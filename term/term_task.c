@@ -95,10 +95,11 @@ static void term_cmd_queue_free(struct pq_data *sprt_pqd)
  */
 static void term_cursor_toleft(void)
 {
-    // io_putc(0x1b);
-    // io_putc(0x5b);
-    // io_putc(0x44);
-    io_putc('\b');
+//  io_putc(0x1b);
+//  io_putc(0x5b);
+//  io_putc(0x44);
+
+    io_putc(CHAR_ASC_BS);
 }
 
 /*!
@@ -209,15 +210,15 @@ static void term_kbd_bs(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
 {
     kubyte_t *msg = sprt_priv->msg;
 
-    /*!< cursor move left */
-    term_cursor_toleft();
-    /*!< send space to hide (*cursor) */
-    io_putc(' ');
-    /*!< cursor move left */
-    term_cursor_toleft();
-
     if (*offset)
     {
+        /*!< cursor move left */
+        term_cursor_toleft();
+        /*!< send space to hide (*cursor) */
+        io_putc(' ');
+        /*!< cursor move left */
+        term_cursor_toleft();
+
         (*offset)--;
         *(msg + *offset) = '\0';
     }
