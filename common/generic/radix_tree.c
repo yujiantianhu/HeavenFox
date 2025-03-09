@@ -123,7 +123,7 @@ struct radix_node *find_radix_node(struct radix_tree *sprt_tree, kuint32_t numbe
     if (sprt_node)
         return sprt_node->sprt_link ? sprt_node : mrt_nullptr;
 
-//  print_debug("find node failed, index is: 0x%x\n", number);
+//  print_debug("find node failed, index is: 0x%x\r\n", number);
 
     return mrt_nullptr;
 }
@@ -178,7 +178,7 @@ void radix_tree_add(struct radix_tree *sprt_tree, kuint32_t number, struct radix
             sprt_node->sgrt_branches[offset] = sprt_temp;
         }
 
-//      print_debug("%s: lenth: %d, i = %d, sprt_node: %p, offset: 0x%x\n", __FUNCTION__, lenth, i, sprt_node->sgrt_branches[offset], offset);
+//      print_debug("%s: lenth: %d, i = %d, sprt_node: %p, offset: 0x%x\r\n", __FUNCTION__, lenth, i, sprt_node->sgrt_branches[offset], offset);
 
         sprt_link->depth = i;
         sprt_node = sprt_node->sgrt_branches[offset];
@@ -187,7 +187,7 @@ void radix_tree_add(struct radix_tree *sprt_tree, kuint32_t number, struct radix
     if (sprt_node != &sprt_tree->sgrt_node)
         sprt_node->sprt_link = sprt_link;
 
-//  print_debug("add new node successfully, index is: 0x%x\n", number);
+//  print_debug("add new node successfully, index is: 0x%x\r\n", number);
 }
 
 /*!
@@ -259,7 +259,7 @@ void radix_tree_del(struct radix_tree *sprt_tree, kuint32_t number)
         !sprt_node->sprt_link ||
         (sprt_node == &sprt_tree->sgrt_node)) 
     {
-        print_debug("nothing needs to delete\n");
+        print_debug("nothing needs to delete\r\n");
         return;
     }
 

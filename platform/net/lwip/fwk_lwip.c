@@ -98,7 +98,7 @@ static err_t lwip_lowlevel_output(struct netif *sprt_netif, struct pbuf *sprt_bu
         sprt_skb = fwk_alloc_skb(sprt_per->len + 2 * head_len, GFP_KERNEL);
         if (!isValid(sprt_skb))
         {
-            print_err("%s: allocate skb failed!\n", __FUNCTION__);
+            print_err("%s: allocate skb failed!\r\n", __FUNCTION__);
             goto END;
         }
 
@@ -126,7 +126,7 @@ static err_t lwip_lowlevel_output(struct netif *sprt_netif, struct pbuf *sprt_bu
                 break;
 
             default: 
-                print_err("%s: unable to recognize network layer protocol (%d)!\n", 
+                print_err("%s: unable to recognize network layer protocol (%d)!\r\n", 
                         __FUNCTION__, mrt_htons(sprt_ethhdr->h_proto));
                 goto fail;
         }
@@ -465,7 +465,7 @@ static err_t lwip_lowlevel_input(struct netif *sprt_netif, struct fwk_sk_buff *s
     sprt_buf = pbuf_alloc(PBUF_RAW, sprt_skb->len + head_len, PBUF_POOL);
     if (!sprt_buf)
     {
-        print_err("%s: allocate lwip pbuf failed!\n", __FUNCTION__);
+        print_err("%s: allocate lwip pbuf failed!\r\n", __FUNCTION__);
         goto END;
     }
 

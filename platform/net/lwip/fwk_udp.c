@@ -129,7 +129,7 @@ kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sprt_upcb, void *buf,
         sprt_data = lwip_udp_raw_poll(sprt_upcb, size);
         if (PTR_ERR(sprt_data) == (-ER_LACK))
         {
-            print_err("%s: recv buffer is too small\n", __FUNCTION__);
+            print_err("%s: recv buffer is too small\r\n", __FUNCTION__);
             return -ER_LACK;
         }
         if (!sprt_data)
@@ -166,7 +166,7 @@ kssize_t lwip_udp_raw_sendto(struct udp_pcb *sprt_upcb, const ip_addr_t *sprt_de
     sprt_buf = pbuf_alloc(PBUF_TRANSPORT, size, PBUF_POOL);
     if (!sprt_buf)
     {
-        print_err("%s: allocate lwip pbuf failed!\n", __func__);
+        print_err("%s: allocate lwip pbuf failed!\r\n", __func__);
         return -ER_NOMEM;
     }
 
@@ -175,7 +175,7 @@ kssize_t lwip_udp_raw_sendto(struct udp_pcb *sprt_upcb, const ip_addr_t *sprt_de
     if (err != ERR_OK)
     {
         pbuf_free(sprt_buf);
-        print_err("%s: udp send lwip pbuf failed!\n", __func__);
+        print_err("%s: udp send lwip pbuf failed!\r\n", __func__);
 
         return -ER_SDATA_FAILD;
     }

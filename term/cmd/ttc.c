@@ -55,14 +55,14 @@ static kint32_t term_cmd_ttc_mail(struct term_cmd *sprt_cmd, kint32_t argc, kcha
             tid = ascii_to_dec(argv[1]);
             if (tid < 0)
             {
-                printk("tid is not correct!\n");
+                printk("tid is not correct!\r\n");
                 return -ER_FAULT;
             }
 
             sprt_thread = get_thread_handle(tid);
             if (!isValid(sprt_thread))
             {
-                printk("can not find thread, check the tid please\n");
+                printk("can not find thread, check the tid please\r\n");
                 return -ER_UNVALID;
             }
 
@@ -91,7 +91,7 @@ static kint32_t term_cmd_ttc_mail(struct term_cmd *sprt_cmd, kint32_t argc, kcha
     return ER_NORMAL;
 
 fail:
-    printk("argument error, try entering \'%s --help\' to get usage\n", argv[0]);
+    printk("argument error, try entering \'%s --help\' to get usage\r\n", argv[0]);
     return -ER_FAULT;
 }
 
@@ -103,7 +103,7 @@ fail:
  */
 static void term_cmd_ttc_help(void)
 {
-    printk("usage: ttc [tid] [op]\n");
+    printk("usage: ttc [tid] [op]\r\n");
 }
 
 /*!

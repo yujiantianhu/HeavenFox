@@ -134,7 +134,7 @@ kint32_t fwk_register_blkdev(kuint32_t major, const kchar_t *name)
     if (!isValid(sprt_blkdev))
     {
         mutex_unlock(&sgrt_blkdev_mutex);
-        print_err("register block device \"%s\" failed!\n", name);
+        print_err("register block device \"%s\" failed!\r\n", name);
 
         return -ER_FAILD;
     }

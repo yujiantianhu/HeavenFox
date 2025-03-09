@@ -92,7 +92,7 @@ kuint32_t fwk_inet_addr(const kchar_t *addr)
     return mrt_htonl(val);
 
 fail:
-    print_err("%s: input argument error!\n", __FUNCTION__);
+    print_err("%s: input argument error!\r\n", __FUNCTION__);
     return 0;
 }
 

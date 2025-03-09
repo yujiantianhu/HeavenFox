@@ -60,7 +60,7 @@ void __plat_init initIRQ(void)
 
 #endif
 
-    print_info("initial irq finished\n");
+    print_info("initial irq finished\r\n");
 }
 
 /*!
@@ -362,7 +362,7 @@ static void fwk_gic_init_bases(kuint32_t gic_nr, kuint32_t irq_start,
 
     /*!< sprt_gic->gic_irqs will be get on local_irq_initial */
     if (!sprt_gic->gic_irqs)
-        print_err("Get IRQ Controller Number failed!\n");
+        print_err("Get IRQ Controller Number failed\r\n");
 
     if (!isValid(sprt_node))
         return;

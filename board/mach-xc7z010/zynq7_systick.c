@@ -87,7 +87,7 @@ void zynq7_systick_init(void)
     XScuTimer_EnableAutoReload(sprt_timer);
     XScuTimer_Start(sprt_timer);
 
-    print_info("System Tick start to run, frequency is: %d\n", TICK_HZ);
+    print_info("System Tick start to run, frequency is: %d\r\n", TICK_HZ);
 }
 
 /*!

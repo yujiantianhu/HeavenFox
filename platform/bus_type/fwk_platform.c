@@ -95,7 +95,7 @@ static kint32_t fwk_platform_probe(struct fwk_device *sprt_dev)
 
     if ((!sprt_platdrv->probe) || (0 > sprt_platdrv->probe(sprt_platdev)))
     {
-        print_warn("device driver probe anomaly, driver is: %s\n", sprt_platdrv->sgrt_driver.name);
+        print_warn("device driver probe anomaly, driver is: %s\r\n", sprt_platdrv->sgrt_driver.name);
         return -ER_PERMIT;
     }
 
@@ -164,7 +164,7 @@ kint32_t fwk_device_driver_probe(struct fwk_device *sprt_dev)
 
     /*!< bind pinctrl before probe */
     if (fwk_pinctrl_bind_pins(sprt_dev))
-        print_warn("bind pinctrl faild, device is: %s\n", mrt_dev_get_name(sprt_dev));
+        print_warn("bind pinctrl faild, device is: %s\r\n", mrt_dev_get_name(sprt_dev));
 
     if (sprt_bus_type->probe)
     {
@@ -172,7 +172,7 @@ kint32_t fwk_device_driver_probe(struct fwk_device *sprt_dev)
         if (retval)
         {
             fwk_pinctrl_unbind_pins(sprt_dev);
-            print_err("probe device and driver failed! device is: %s\n", sprt_dev->init_name);
+            print_err("probe device and driver failed! device is: %s\r\n", sprt_dev->init_name);
 
             return retval;
         }

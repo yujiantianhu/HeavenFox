@@ -245,7 +245,7 @@ kint32_t ascii_to_dec(const kchar_t *str)
     return val;
 
 fail:
-    print_err("%s: input argument error!\n", __FUNCTION__);
+    print_err("%s: input argument error!\r\n", __FUNCTION__);
     return -1;
 }
 

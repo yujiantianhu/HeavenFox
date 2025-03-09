@@ -223,7 +223,7 @@ static kint32_t xsdk_key_driver_probe(struct fwk_platdev *sprt_pdev)
     sprt_cdev->privData = sprt_data;
     fwk_platform_set_drvdata(sprt_pdev, sprt_data);
 
-    print_info("register a new chardevice (KEY)\n");
+    print_info("register a new chardevice (KEY)\r\n");
 
     return ER_NORMAL;
 

@@ -46,7 +46,7 @@ static void *init_proc_entry(void *args)
 {
     thread_set_self_name(__FUNCTION__);
 
-    print_info("%s is enter, which tid is: %d\n", __FUNCTION__, mrt_current->tid);
+    print_info("%s is enter, which tid is: %d\r\n", __FUNCTION__, mrt_current->tid);
 
     /*!< create application: at the end of "init_proc_entry" */
     main(0, mrt_nullptr);

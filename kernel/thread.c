@@ -222,7 +222,7 @@ kint32_t thread_destory(tid_t tid)
     if (mrt_nullptr == sprt_thread)
         return ER_NORMAL;
 
-    print_info("\nthread \'%s\' (tid: %d) is be destroyed\n", sprt_thread->name, sprt_thread->tid);
+    print_info("\r\nthread \'%s\' (tid: %d) is be destroyed\r\n", sprt_thread->name, sprt_thread->tid);
 
     kfree(sprt_thread->sprt_attr);
     kfree(sprt_thread);

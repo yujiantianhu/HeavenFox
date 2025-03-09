@@ -189,17 +189,17 @@ kint32_t __plat_init fs_sdfatfs_init(void)
 
         if (fwk_sdcard_is_insert(sprt_card))
         {
-            print_err("sd card detected, but initialize fatfs failed!\n");
+            print_err("sd card detected, but initialize fatfs failed!\r\n");
             goto fail;
         }
 
-        print_warn("sd card not detected, please insert your card\n");
+        print_warn("sd card not detected, please insert your card\r\n");
         return ER_NORMAL;
     }
 
     sprt_fatfs_sddisk = sprt_fdisk;
 
-    print_info("sd card detected, and initialize fatfs successfully!\n");
+    print_info("sd card detected, and initialize fatfs successfully!\r\n");
     return ER_NORMAL;
 
 fail:

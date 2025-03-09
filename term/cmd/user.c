@@ -161,7 +161,7 @@ static kint32_t term_cmd_set_user(struct term_cmd *sprt_cmd, kint32_t argc, kcha
     return ER_NORMAL;
 
 fail:
-    printk("argument error, try entering \'%s --help\' to get usage\n", argv[0]);
+    printk("argument error, try entering \'%s --help\' to get usage\r\n", argv[0]);
     return -ER_FAULT;
 }
 
@@ -173,7 +173,7 @@ fail:
  */
 static void term_cmd_user_help(void)
 {
-    printk("usage: user [login/host] [name]\n");
+    printk("usage: user [login/host] [name]\r\n");
 }
 
 /*!

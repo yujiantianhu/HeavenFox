@@ -34,13 +34,13 @@ static kint32_t term_cmd_show_info(struct term_cmd *sprt_cmd, kint32_t argc, kch
     switch (argc)
     {
         case 1:
-            printk("----------------------------------------------------\n");
-            printk("        Kernel:     HeavenFox OS                    \n");
-            printk("        Author:     Yang Yujun                      \n");
-            printk("        Country:    China                           \n");
-            printk("        Province:   GuangXi                         \n");
-            printk("        E-mail:     <yujiantianhu@163.com>          \n");
-            printk("----------------------------------------------------\n");
+            printk("----------------------------------------------------\r\n");
+            printk("        Kernel:     HeavenFox OS                    \r\n");
+            printk("        Author:     Yang Yujun                      \r\n");
+            printk("        Country:    China                           \r\n");
+            printk("        Province:   GuangXi                         \r\n");
+            printk("        E-mail:     <yujiantianhu@163.com>          \r\n");
+            printk("----------------------------------------------------\r\n");
 
             break;
 
@@ -59,7 +59,7 @@ static kint32_t term_cmd_show_info(struct term_cmd *sprt_cmd, kint32_t argc, kch
     return ER_NORMAL;
 
 fail:
-    printk("argument error, try entering \'%s --help\' to get usage\n", argv[0]);
+    printk("argument error, try entering \'%s --help\' to get usage\r\n", argv[0]);
     return -ER_FAULT;
 }
 
@@ -71,7 +71,7 @@ fail:
  */
 static void term_cmd_info_help(void)
 {
-    printk("usage: info\n");
+    printk("usage: info\r\n");
 }
 
 /*!

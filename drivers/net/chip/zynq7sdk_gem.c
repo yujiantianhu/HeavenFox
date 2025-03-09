@@ -641,7 +641,7 @@ static kint32_t xsdk_gem_setup_rxbd(struct xsdk_gem_drv_data *sprt_data, nrt_gfp
     while (freebds--) {
         sprt_skb = fwk_alloc_skb(XEMACPS_MAX_FRAME_SIZE + 2 * ARCH_PER_SIZE, mask);
         if (!isValid(sprt_skb)) {
-            print_err("%s: unable to alloc sk_buff\n", __func__);
+            print_err("%s: unable to alloc sk_buff\r\n", __func__);
             return -ER_NOMEM;
         }
 
@@ -650,7 +650,7 @@ static kint32_t xsdk_gem_setup_rxbd(struct xsdk_gem_drv_data *sprt_data, nrt_gfp
         buffer = fwk_skb_put(sprt_skb, XEMACPS_MAX_FRAME_SIZE);
         if (!isValid(buffer)) {
             fwk_free_skb(sprt_skb);
-            print_err("%s: unable to build rx buffer\n", __func__);
+            print_err("%s: unable to build rx buffer\r\n", __func__);
 
             return -ER_NOMEM;
         }
@@ -659,7 +659,7 @@ static kint32_t xsdk_gem_setup_rxbd(struct xsdk_gem_drv_data *sprt_data, nrt_gfp
         status = XEmacPs_BdRingAlloc(sprt_rxring, 1, &sprt_rxbd);
         if (status) {
             fwk_free_skb(sprt_skb);
-            print_err("%s: Error allocating RxBD\n", __FUNCTION__);
+            print_err("%s: Error allocating RxBD\r\n", __FUNCTION__);
 
             return -ER_BUSY;
         }
@@ -669,7 +669,7 @@ static kint32_t xsdk_gem_setup_rxbd(struct xsdk_gem_drv_data *sprt_data, nrt_gfp
         if (status) {
             fwk_free_skb(sprt_skb);
             XEmacPs_BdRingUnAlloc(sprt_rxring, 1, sprt_rxbd);
-            print_err("%s: Error: committing RxBD to HW\n", __FUNCTION__);
+            print_err("%s: Error: committing RxBD to HW\r\n", __FUNCTION__);
 
             return -ER_BUSY;
         }
@@ -842,7 +842,7 @@ static void xsdk_gem_send_bd(struct xsdk_gem_drv_data *sprt_data, struct fwk_sk_
 
     bdindex = XEMACPS_BD_TO_INDEX(sprt_txring, sprt_txbd);
     if (sprt_data->sprt_txskbs[bdindex]) {
-        print_err("%s: last skb is still existed! bdindex is invalid\n", __func__);
+        print_err("%s: last skb is still existed! bdindex is invalid\r\n", __func__);
         goto fail;
     }
 
@@ -1595,7 +1595,7 @@ static kint32_t xsdk_gem_driver_probe(struct fwk_platdev *sprt_pdev)
     if (retval)
         goto fail3;
 
-    print_info("register a new netdevice (GEM)\n");
+    print_info("register a new netdevice (GEM)\r\n");
     return ER_NORMAL;
 
 fail3:

@@ -64,7 +64,7 @@ static kint32_t fatfs_disk_mount(struct fwk_gendisk *sprt_gdisk)
         goto fail;
 #endif
 
-    print_info("mount fatfs disk \"%s\" successfully\n", sprt_fdisk->diskPath);
+    print_info("mount fatfs disk \"%s\" successfully\r\n", sprt_fdisk->diskPath);
 
     lenth = sprintk(name, "/media/FAT32_%d/\0", sprt_fdisk->disk_number);
     sprt_kobj = fwk_kobject_populate(mrt_nullptr, (const kchar_t *)name);
@@ -72,7 +72,7 @@ static kint32_t fatfs_disk_mount(struct fwk_gendisk *sprt_gdisk)
     {
         if (PTR_ERR(sprt_kobj) != (-ER_FORBID))
         {
-            print_err("populate disk path \"%s\" failed!\n", name);
+            print_err("populate disk path \"%s\" failed!\r\n", name);
             goto fail;
         }
 
@@ -115,7 +115,7 @@ static kint32_t fatfs_disk_unmount(struct fwk_gendisk *sprt_gdisk)
     /*!< FRESULT f_mount (FATFS* fs, const TCHAR* path, BYTE opt) */
     if (FR_OK != f_mount(mrt_nullptr, sprt_fdisk->diskPath, 0))
     {
-        print_err("unmount fatfs disk \"%s\" failed!\n", sprt_fdisk->diskPath);
+        print_err("unmount fatfs disk \"%s\" failed!\r\n", sprt_fdisk->diskPath);
         return -ER_FAILD;
     }
 
@@ -126,7 +126,7 @@ static kint32_t fatfs_disk_unmount(struct fwk_gendisk *sprt_gdisk)
     sprt_fdisk->path_lenth = 0;
 
     memset(&sprt_fdisk->sgrt_fatfs, 0, sizeof(sprt_fdisk->sgrt_fatfs));
-    print_info("unmount fatfs disk \"%s\"\n", sprt_fdisk->diskPath);
+    print_info("unmount fatfs disk \"%s\"\r\n", sprt_fdisk->diskPath);
 
     return ER_NORMAL;
 }
@@ -450,7 +450,7 @@ kint32_t fs_register_fatfs(struct fatfs_disk *sprt_fdisk)
     retval = fwk_add_gendisk(sprt_gdisk);
     if (retval)
     {
-        print_err("add new gendisk mmc \"%s\" failed\n", sprt_fdisk->diskPath);
+        print_err("add new gendisk mmc \"%s\" failed\r\n", sprt_fdisk->diskPath);
         return -ER_FAILD;
     }
 
@@ -485,11 +485,11 @@ kint32_t __plat_init fs_fatfs_init(void)
     retval = fwk_register_blkdev(FATFS_BLK_DEVICE_MAJOR, "mmc");
     if (retval)
     {
-        print_err("register mmc fatfs block device failed!\n");
+        print_err("register mmc fatfs block device failed!\r\n");
         return retval;
     }
 
-    print_info("register mmc fatfs block device successfully\n");
+    print_info("register mmc fatfs block device successfully\r\n");
     return ER_NORMAL;
 }
 
@@ -504,7 +504,7 @@ void __plat_exit fs_fatfs_exit(void)
     struct fatfs_disk *sprt_fdisk, *sprt_temp;
 
     fwk_unregister_blkdev(FATFS_BLK_DEVICE_MAJOR, "mmc");
-    print_info("unregistered mmc fatfs block device\n");
+    print_info("unregistered mmc fatfs block device\r\n");
 
     foreach_list_next_entry_safe(sprt_fdisk, sprt_temp, &sgrt_fatfs_drvList, sgrt_link)
         fs_unregister_fatfs(sprt_fdisk);

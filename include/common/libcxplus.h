@@ -66,7 +66,7 @@ private:
 
 static inline void endl(void)
 {
-    io_putc('\n');
+    io_putstr((const kubyte_t *)"\r\n", 2);
 }
 
 class ostream {

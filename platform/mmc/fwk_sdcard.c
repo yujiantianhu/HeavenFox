@@ -1424,7 +1424,7 @@ kint32_t fwk_sdcard_initial_device(struct fwk_sdcard *sprt_card)
     blRetval = fwk_sdcard_detect(sprt_card);
     if (!blRetval)
     {
-        print_debug("Can not detect SD Card! Please check if card is inserted ...\n");
+        print_debug("Can not detect SD Card! Please check if card is inserted ...\r\n");
         return -ER_NREADY;
     }
 
@@ -1433,7 +1433,7 @@ kint32_t fwk_sdcard_initial_device(struct fwk_sdcard *sprt_card)
     blRetval = fwk_sdcard_to_normal(sprt_card);
     if (!blRetval)
     {
-        print_debug("Can not configure SD Card! Please check if card is avaliable ...\n");
+        print_debug("Can not configure SD Card! Please check if card is avaliable ...\r\n");
         return -ER_FAILD;
     }
 

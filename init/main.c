@@ -104,7 +104,7 @@ void start_kernel(void)
     /*!< initial memory pool */
     fwk_mempool_initial();
     iostream_init();
-    print_info("\nStart kernel ...... \n");
+    print_info("\r\nStart kernel ...... \r\n");
 
     /*!< populate params from bootloader */
     setup_machine(sprt_tag_params);
@@ -136,7 +136,7 @@ void start_kernel(void)
         goto fail;
 
     rest_init();
-    print_info("initial system finished, start scheduler now\n");
+    print_info("initial system finished, start scheduler now\r\n");
 
     /*!< start */
     schedule_thread();
@@ -144,7 +144,7 @@ void start_kernel(void)
 #endif
 
 fail:
-    print_info("start kernel failed!\n");
+    print_info("start kernel failed!\r\n");
     mrt_assert(false);
 }
 

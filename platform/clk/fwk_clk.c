@@ -125,7 +125,7 @@ struct fwk_clk *fwk_clk_register(struct fwk_device *sprt_dev, struct fwk_clk_hw 
     {
         sprt_core->parent_names[i] = sprt_init->parent_names[i];
 
-        ERR_OUT(!sprt_core->parent_names[i], "parent names is empty!\n");
+        ERR_OUT(!sprt_core->parent_names[i], "parent names is empty!\r\n");
         if (!sprt_core->parent_names[i])
             goto fail2;
     }

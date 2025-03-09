@@ -247,7 +247,7 @@ static void term_kbd_dir_up(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
     *offset = sprt_his->length;
     *(msg + *offset) = '\0';
 
-    io_putc(CHAR_ASC_CR);
+    printk("\r\n");
     /*!< echo is the first task */
     term_cmd_print_login();
 
@@ -278,7 +278,7 @@ static void term_kbd_dir_down(struct term_kbd_priv *sprt_priv, kuint32_t *offset
     *offset = sprt_his->length;
     *(msg + *offset) = '\0';
 
-    io_putc(CHAR_ASC_CR);
+    printk("\r\n");
     /*!< echo is the first task */
     term_cmd_print_login();
 
@@ -316,7 +316,7 @@ static void term_echo(kint32_t msg)
 
         case CHAR_ASC_CR:
         case CHAR_ASC_ETX:
-            io_putc(CHAR_ASC_CR);
+            printk("\r\n");
             g_term_cmd_queue_cur = -1;
             break;
 
@@ -412,9 +412,9 @@ static void *term_entry(void *args)
 
     term_cmd_login_init(CONFIG_DEFAULT_LOGIN, CONFIG_DEFAULT_HOST);
 
-    printk("\n");
-    printk("Press Enter and use HeavenFox now\n");
-    printk("\n");
+    printk("\r\n");
+    printk("Press Enter and use HeavenFox now\r\n");
+    printk("\r\n");
     printk("%s", g_term_cmdline);
 
     mailbox_init(sprt_mb, mrt_current->tid, "term-task-mailbox");

@@ -51,7 +51,7 @@ static void *kworker_entry(void *args)
     struct workqueue *sprt_wq;
     struct workqueue *sprt_temp;
 
-    print_info("%s is enter, which tid is: %d\n", __FUNCTION__, mrt_current->tid);
+    print_info("%s is enter, which tid is: %d\r\n", __FUNCTION__, mrt_current->tid);
 
     for (;;)
     {

@@ -307,7 +307,7 @@ static kint32_t loopback_driver_probe(struct loopback_drv_data *sprt_data)
     if (retval)
         goto fail;
 
-    print_info("register a new netdevice (Loopback)\n");
+    print_info("register a new netdevice (Loopback)\r\n");
     return ER_NORMAL;
 
 fail:

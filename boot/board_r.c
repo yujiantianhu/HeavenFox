@@ -256,7 +256,7 @@ kint32_t fdt_boot_initial(struct boot_images *sprt_image)
 
     if (size <= 0)
     {
-        print_err("can not read device-tree file!\n");
+        print_err("can not read device-tree file!\r\n");
         return RET_BOOT_ERR;
     }
 

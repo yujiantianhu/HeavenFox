@@ -82,7 +82,7 @@ static kint32_t term_cmd_kill_signal(struct term_cmd *sprt_cmd, kint32_t argc, k
     return ER_NORMAL;
 
 fail:
-    printk("argument error, try entering \'%s --help\' to get usage\n", argv[0]);
+    printk("argument error, try entering \'%s --help\' to get usage\r\n", argv[0]);
     return -ER_FAULT;
 }
 
@@ -94,7 +94,7 @@ fail:
  */
 static void term_cmd_kill_help(void)
 {
-    printk("usage: kill -[signal] [tid]\n");
+    printk("usage: kill -[signal] [tid]\r\n");
 }
 
 /*!

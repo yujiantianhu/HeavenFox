@@ -584,13 +584,13 @@ kint32_t schedule_thread_switch(tid_t tid)
 
     if (retval < 0)
     {
-        print_warn("switch thread failed ! current and target status is : %d, %d\n", src, dst);
+        print_warn("switch thread failed ! current and target status is : %d, %d\r\n", src, dst);
         goto fail;
     }
 
     if (!SCHED_RUNNING_THREAD)
     {
-        print_err("no thread is running !!! dangerous action !!!\n");
+        print_err("no thread is running !!! dangerous action !!!\r\n");
         goto fail;
     }
 

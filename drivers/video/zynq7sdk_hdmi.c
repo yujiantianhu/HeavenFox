@@ -116,8 +116,8 @@ static kint32_t xsdk_hdmi_init(void *base, struct xsdk_hdmi_drv *sprt_drv)
     if (retval)
         return retval;
 
-    print_info("axivdma and vtc initialize successfully\n");
-    print_info("screen's xres is %d, yres is: %d, pixel-width is: %d\n", 
+    print_info("axivdma and vtc initialize successfully\r\n");
+    print_info("screen's xres is %d, yres is: %d, pixel-width is: %d\r\n", 
                 sprt_var->xres, sprt_var->yres, sprt_var->bits_per_pixel);
 
     retval = XVtc_CfgInitialize(&(sprt_drv->sgrt_dctrl.vtc), sprt_vcfg, sprt_vcfg->BaseAddress);
@@ -143,10 +143,10 @@ static kint32_t xsdk_hdmi_open(struct fwk_fb_info *sprt_info, kint32_t user)
     if (retval)
         return -ER_FAILD;
 
-    print_info("hdmi device is opened\n");
+    print_info("hdmi device is opened\r\n");
 
     memset_ex(sprt_info->screen_base, 0x00000000, sprt_info->screen_size);
-    print_info("clear full screen with black color\n");
+    print_info("clear full screen with black color\r\n");
 
     return ER_NORMAL;
 }
@@ -167,7 +167,7 @@ static kint32_t xsdk_hdmi_close(struct fwk_fb_info *sprt_info, kint32_t user)
     memset_ex(sprt_info->screen_base, 0x00000000, sprt_info->screen_size);
     retval = DisplayStop(&sprt_drv->sgrt_dctrl);
     if (!retval)
-        print_info("hdmi device is closed\n");
+        print_info("hdmi device is closed\r\n");
 
     return retval;
 }
@@ -490,7 +490,7 @@ static kint32_t xsdk_hdmi_driver_probe(struct fwk_platdev *sprt_pdev)
     if (retval < 0)
         goto fail3;
 
-    print_info("register a new framebuffer (hdmi)\n");
+    print_info("register a new framebuffer (hdmi)\r\n");
 
     retval = xsdk_hdmi_init(base, sprt_drv);
     if (retval)

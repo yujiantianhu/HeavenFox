@@ -34,10 +34,10 @@
  */
 static void term_cmd_ts_title(void)
 {
-    printk("tid     stack_size     priority  slice   status      name\n");
-    printk("----------------------------------------------------------\n");
-    printk("status: (1)running, (2)ready, (3)suspend, (4)sleep\n");
-    printk("----------------------------------------------------------\n");
+    printk("tid     stack_size     priority  slice   status      name\r\n");
+    printk("----------------------------------------------------------\r\n");
+    printk("status: (1)running, (2)ready, (3)suspend, (4)sleep\r\n");
+    printk("----------------------------------------------------------\r\n");
 }
 
 /*!
@@ -51,7 +51,7 @@ static void term_cmd_ts_format(tid_t tid, kuint32_t stack_size, kuint32_t prio,
 {
     printk("%d      %d (Bytes)      %d      %d (ms)", 
             tid,    stack_size,     prio,   expires);
-    printk("    %d      %s\n", status,  name);
+    printk("    %d      %s\r\n", status,  name);
 }
 
 /*!
@@ -125,7 +125,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sprt_cmd, kint32_t argc, kch
     return ER_NORMAL;
 
 fail:
-    printk("argument error, try entering \'%s --help\' to get usage\n", argv[0]);
+    printk("argument error, try entering \'%s --help\' to get usage\r\n", argv[0]);
     return -ER_FAULT;
 }
 
@@ -137,7 +137,7 @@ fail:
  */
 static void term_cmd_ts_help(void)
 {
-    printk("usage: ts\n");
+    printk("usage: ts\r\n");
 }
 
 /*!

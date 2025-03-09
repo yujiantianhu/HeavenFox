@@ -51,24 +51,24 @@ static kint32_t term_cmd_ifconfig(struct term_cmd *sprt_cmd, kint32_t argc, kcha
                     fwk_inet_ntoa(ip_addr, sprt_if->sgrt_ip.sin_addr.s_addr);
                     fwk_inet_ntoa(netmask, sprt_if->sgrt_netmask.sin_addr.s_addr);
 
-                    printk("%s: <UP RUNNING> mtu %d\n", sprt_if->ifname, sprt_ndev->mtu);
+                    printk("%s: <UP RUNNING> mtu %d\r\n", sprt_if->ifname, sprt_ndev->mtu);
                 }
                 else
                 {
                     fwk_inet_ntoa(ip_addr, 0);
                     fwk_inet_ntoa(netmask, 0);
 
-                    printk("%s: <DOWN SLEEPING> mtu %d\n", sprt_ndev->name, sprt_ndev->mtu);
+                    printk("%s: <DOWN SLEEPING> mtu %d\r\n", sprt_ndev->name, sprt_ndev->mtu);
                 }
 
-                printk("        inet: %s netmask: %s\n", ip_addr, netmask);
-                printk("        ether: %x:%x:%x:%x:%x:%x\n",
+                printk("        inet: %s netmask: %s\r\n", ip_addr, netmask);
+                printk("        ether: %x:%x:%x:%x:%x:%x\r\n",
                                 sprt_ndev->dev_addr[0], sprt_ndev->dev_addr[1], sprt_ndev->dev_addr[2],
                                 sprt_ndev->dev_addr[3], sprt_ndev->dev_addr[4], sprt_ndev->dev_addr[5]);
 
-                printk("        Rx Packet %ld bytes %ld\n", sprt_ndev->sgrt_stats.rx_packets, sprt_ndev->sgrt_stats.rx_bytes);
-                printk("        Tx Packet %ld bytes %ld\n", sprt_ndev->sgrt_stats.tx_packets, sprt_ndev->sgrt_stats.tx_bytes);
-                io_putc('\n');
+                printk("        Rx Packet %ld bytes %ld\r\n", sprt_ndev->sgrt_stats.rx_packets, sprt_ndev->sgrt_stats.rx_bytes);
+                printk("        Tx Packet %ld bytes %ld\r\n", sprt_ndev->sgrt_stats.tx_packets, sprt_ndev->sgrt_stats.tx_bytes);
+                printk("\r\n");
             }
 
             break;
@@ -88,7 +88,7 @@ static kint32_t term_cmd_ifconfig(struct term_cmd *sprt_cmd, kint32_t argc, kcha
     return ER_NORMAL;
 
 fail:
-    printk("argument error, try entering \'%s --help\' to get usage\n", argv[0]);
+    printk("argument error, try entering \'%s --help\' to get usage\r\n", argv[0]);
     return -ER_FAULT;
 }
 
@@ -100,7 +100,7 @@ fail:
  */
 static void term_cmd_ifconfig_help(void)
 {
-    printk("usage: ifconfig\n");
+    printk("usage: ifconfig\r\n");
 }
 
 /*!

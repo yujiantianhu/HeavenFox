@@ -138,7 +138,7 @@ void term_cmdline_excute(kint32_t argc, kchar_t **argv)
             goto succ;
     }
 
-    printk("can not access the command!\n");
+    printk("can not access the command!\r\n");
     return;
 
 succ:
@@ -192,7 +192,7 @@ static kint32_t term_cmd_show_help(struct term_cmd *sprt_cmd, kint32_t argc, kch
     if (argc != 1)
         goto fail;
 
-    printk("command list: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+    printk("command list: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n");
     foreach_list_next_entry(sprt_per, &sgrt_term_cmd_lists, sgrt_link)
     {
         if (sprt_per->help)
@@ -205,7 +205,7 @@ static kint32_t term_cmd_show_help(struct term_cmd *sprt_cmd, kint32_t argc, kch
     return ER_NORMAL;
 
 fail:
-    printk("argument is too many\n");
+    printk("argument is too many\r\n");
     return -ER_FAULT;
 }
 

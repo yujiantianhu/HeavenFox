@@ -113,7 +113,7 @@ void fwk_of_irq_init(const struct fwk_of_device_id *sprt_matches)
             retval = ((func_fwk_irq_init_cb_t)sprt_match->data)(sprt_desc->sprt_np, sprt_desc->sprt_parent);
             if (retval < 0)
             {
-                print_err("Initial IRQ Controller: %s failed!\n", sprt_match->compatible);
+                print_err("Initial IRQ Controller: %s failed!\r\n", sprt_match->compatible);
                 kfree(sprt_desc);
                 continue;
             }
@@ -124,7 +124,7 @@ void fwk_of_irq_init(const struct fwk_of_device_id *sprt_matches)
         sprt_desc = mrt_list_first_valid_entry(&sgrt_intc_parent_list, typeof(*sprt_desc), sgrt_link);
         if (!isValid(sprt_desc))
         {
-            print_err("List is already empty, can not get any desc\n");
+            print_err("List is already empty, can not get any desc\r\n");
             break;
         }
 

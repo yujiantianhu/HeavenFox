@@ -107,7 +107,7 @@ struct trie_node *find_trie_node(struct trie_tree *sprt_tree, const char *name)
     if (sprt_node)
         return sprt_node->sprt_link ? sprt_node : mrt_nullptr;
 
-    print_debug("find node failed, name is: %s\n", name);
+    print_debug("find node failed, name is: %s\r\n", name);
 
     return mrt_nullptr;
 }
@@ -171,7 +171,7 @@ void trie_node_add(struct trie_tree *sprt_tree, const kchar_t *name, struct trie
             sprt_node->sprt_branches[offset] = sprt_temp;
         }
 
-        print_debug("%s: i = %d, sprt_node: %p, offset: %c\n", __FUNCTION__, i, sprt_node->sprt_branches[offset], offset + 'a');
+        print_debug("%s: i = %d, sprt_node: %p, offset: %c\r\n", __FUNCTION__, i, sprt_node->sprt_branches[offset], offset + 'a');
 
         sprt_link->depth = i;
         sprt_node = sprt_node->sprt_branches[offset];
@@ -179,7 +179,7 @@ void trie_node_add(struct trie_tree *sprt_tree, const kchar_t *name, struct trie
 
     sprt_node->sprt_link = sprt_link;
 
-    print_debug("add new node succeuss, name is: %s\n", name);
+    print_debug("add new node succeuss, name is: %s\r\n", name);
 }
 
 /*!

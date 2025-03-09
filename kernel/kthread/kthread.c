@@ -124,12 +124,12 @@ static void *kthread_entry(void *args)
 
     kworker_init();                         /*!< create kworker task */
 
-    print_info("%s is enter, which tid is: %d\n", __FUNCTION__, tid);
+    print_info("%s is enter, which tid is: %d\r\n", __FUNCTION__, tid);
     mrt_preempt_enable();
 
     /* platform initcall */
     run_platform_initcall();
-    print_info("platform initialization finished\n");
+    print_info("platform initialization finished\r\n");
 
     term_init();                            /*!< create term task */
 

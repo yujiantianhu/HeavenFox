@@ -120,7 +120,7 @@ kssize_t lwip_tcp_raw_recv(struct tcp_pcb *sprt_tpcb, void *buf, kusize_t size)
         sprt_data = lwip_tcp_raw_poll(sprt_tpcb, size);
         if (PTR_ERR(sprt_data) == (-ER_LACK))
         {
-            print_err("%s: recv buffer is too small\n", __FUNCTION__);
+            print_err("%s: recv buffer is too small\r\n", __FUNCTION__);
             return -ER_LACK;
         }
         if (!sprt_data)
@@ -161,14 +161,14 @@ kssize_t lwip_tcp_raw_send(struct tcp_pcb *sprt_tpcb, const void *buf, kusize_t 
     err = tcp_write(sprt_tpcb, buf, size, TCP_WRITE_FLAG_COPY);
     if (err != ERR_OK)
     {
-        print_err("%s: tcp send data to buffer failed!\n", __func__);
+        print_err("%s: tcp send data to buffer failed!\r\n", __func__);
         return -ER_SDATA_FAILD;
     }
 
     err = tcp_output(sprt_tpcb);
     if (err != ERR_OK)
     {
-        print_err("%s: tcp send data to hardware failed!\n", __func__);
+        print_err("%s: tcp send data to hardware failed!\r\n", __func__);
         return -ER_SDATA_FAILD;
     }
 

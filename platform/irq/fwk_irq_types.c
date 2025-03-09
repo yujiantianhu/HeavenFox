@@ -313,11 +313,11 @@ void fwk_handle_softirq(kint32_t softIrq, kuint32_t event)
     switch (event)
     {
         case SWI_EVENT_SCHEDULED:
-            print_info("trigger NR_EVENT_SCHEDULED \n");
+            print_info("trigger NR_EVENT_SCHEDULED \r\n");
             break;
         
         case SWI_EVENT_SYSCALL:
-            print_info("trigger NR_EVENT_SYSCALL \n");
+            print_info("trigger NR_EVENT_SYSCALL \r\n");
             break;
 
         default: break;

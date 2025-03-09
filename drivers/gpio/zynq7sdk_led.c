@@ -223,7 +223,7 @@ static kint32_t xsdk_led_driver_probe(struct fwk_platdev *sprt_pdev)
     sprt_cdev->privData = sprt_data;
     fwk_platform_set_drvdata(sprt_pdev, sprt_data);
 
-    print_info("register a new chardevice (LED)\n");
+    print_info("register a new chardevice (LED)\r\n");
 
     return ER_NORMAL;
 

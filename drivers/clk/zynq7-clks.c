@@ -226,7 +226,7 @@ kint32_t __fwk_init zynq7_clks_driver_init(void)
     {
         if (index != sprt_grps[index].number)
         {
-            print_err("array sgrt_zynq7_clks_gate_name[%d] is unvalid!\n", index);
+            print_err("array sgrt_zynq7_clks_gate_name[%d] is unvalid!\r\n", index);
             return -ER_UNVALID;
         }
     }
