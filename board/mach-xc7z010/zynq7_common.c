@@ -15,7 +15,8 @@
 #include "zynq7_common.h"
 
 /*!< The defines */
-#define SYSTEM_CLK_FREQ_CNT_PER_MS                          (0x7ffU)
+/*!< 1GHz = (10 ^ 9)Hz ===> 1ms = (10 ^ 6)Hz */
+#define SYSTEM_CLK_FREQ_CNT_PER_MS                          (1000000)
 #define SYSTEM_CLK_FREQ_CNT_PER_S                          	(SYSTEM_CLK_FREQ_CNT_PER_MS * 1000)
 #define SYSTEM_CLK_FREQ_CNT_PER_US                          (SYSTEM_CLK_FREQ_CNT_PER_MS / 1000)
 

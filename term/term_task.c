@@ -74,6 +74,17 @@ struct pq_queue *term_cmd_queue_get(void)
 }
 
 /*!
+ * @brief   to next line
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void term_cmd_wrap_line(void)
+{
+    io_putstr((const kubyte_t *)"\r\n", 3);
+}
+
+/*!
  * @brief   queue release API
  * @param   sprt_pqd
  * @retval  none
@@ -95,11 +106,43 @@ static void term_cmd_queue_free(struct pq_data *sprt_pqd)
  */
 static void term_cursor_toleft(void)
 {
-//  io_putc(0x1b);
-//  io_putc(0x5b);
-//  io_putc(0x44);
-
+//  io_putstr((const kubyte_t *)"\033[1C", 5);
     io_putc(CHAR_ASC_BS);
+}
+
+/*!
+ * @brief   cursor move right
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+static __unused
+void term_cursor_toright(void)
+{
+    io_putstr((const kubyte_t *)"\033[1D", 5);
+}
+
+/*!
+ * @brief   delete one line
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+static void term_clear_line(void)
+{
+    io_putstr((const kubyte_t *)"\033[2K\r", 6);
+}
+
+/*!
+ * @brief   delete all
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+static __unused
+void term_clear_screen(void)
+{
+    io_putstr((const kubyte_t *)"\033[2J\r", 6);
 }
 
 /*!
@@ -248,7 +291,9 @@ static void term_kbd_dir_up(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
     *offset = sprt_his->length;
     *(msg + *offset) = '\0';
 
-    printk("\r\n");
+    term_clear_line();
+//  term_cmd_wrap_line();
+
     /*!< echo is the first task */
     term_cmd_print_login();
 
@@ -279,7 +324,9 @@ static void term_kbd_dir_down(struct term_kbd_priv *sprt_priv, kuint32_t *offset
     *offset = sprt_his->length;
     *(msg + *offset) = '\0';
 
-    printk("\r\n");
+    term_clear_line();
+//  term_cmd_wrap_line();
+
     /*!< echo is the first task */
     term_cmd_print_login();
 
@@ -317,7 +364,7 @@ static void term_echo(kint32_t msg)
 
         case CHAR_ASC_CR:
         case CHAR_ASC_ETX:
-            printk("\r\n");
+            term_cmd_wrap_line();
             g_term_cmd_queue_cur = -1;
             break;
 
@@ -437,7 +484,10 @@ static void *term_entry(void *args)
          */
         length = io_getstr((kubyte_t *)&msg, sizeof(msg));
         if (length <= 0)
+        {
+            schedule_thread();
             continue;
+        }
 
         term_echo(msg);
         term_cmdline(msg, (kuint8_t)length);

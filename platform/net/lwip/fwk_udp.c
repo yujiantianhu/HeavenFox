@@ -16,6 +16,7 @@
 #include <platform/fwk_uaccess.h>
 #include <platform/net/fwk_lwip.h>
 #include <platform/net/fwk_netif.h>
+#include <kernel/wait.h>
 
 /*!< The globals */
 struct lwip_udp_data
@@ -27,6 +28,13 @@ struct lwip_udp_data
     kuint16_t port;
 
     struct pq_data sgrt_pqd;
+};
+
+struct lwip_udp_priv
+{
+    struct pq_queue *sprt_pq;
+    struct wait_queue_head sgrt_wqh;
+    kbool_t isComing;
 };
 
 /*!< API functions */
@@ -68,7 +76,8 @@ static kbool_t lwip_udp_raw_check(struct pq_data *sprt_pqd, kusize_t limit)
  */
 static struct lwip_udp_data *lwip_udp_raw_poll(struct udp_pcb *sprt_upcb, kusize_t len)
 {
-    struct pq_queue *sprt_pq = (struct pq_queue *)sprt_upcb->recv_arg;
+    struct lwip_udp_priv *sprt_priv = (struct lwip_udp_priv *)sprt_upcb->recv_arg;
+    struct pq_queue *sprt_pq = sprt_priv->sprt_pq;
     struct pq_data *sprt_pqd;
 
     sprt_pqd = pq_dequeue_with_chk(sprt_pq, len);
@@ -87,7 +96,8 @@ static struct lwip_udp_data *lwip_udp_raw_poll(struct udp_pcb *sprt_upcb, kusize
 static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sprt_upcb, struct pbuf *sprt_buf,
                             const ip_addr_t *sprt_ipaddr, u16_t port)
 {
-    struct pq_queue *sprt_pq = (struct pq_queue *)arg;
+    struct lwip_udp_priv *sprt_priv = (struct lwip_udp_priv *)arg;
+    struct pq_queue *sprt_pq = sprt_priv->sprt_pq;
     struct lwip_udp_data *sprt_data;
 
     if (!sprt_buf || !sprt_pq)
@@ -106,6 +116,9 @@ static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sprt_upcb, struct pbu
     sprt_data->sgrt_pqd.dequeue_chk = lwip_udp_raw_check;
 
     pq_enqueue(sprt_pq, &sprt_data->sgrt_pqd);
+
+    sprt_priv->isComing = true;
+    wake_up_interruptible(&sprt_priv->sgrt_wqh);
 }
 
 /*!
@@ -117,6 +130,7 @@ static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sprt_upcb, struct pbu
 kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sprt_upcb, void *buf, 
                             kusize_t size, ip_addr_t *sprt_src, u16_t *port)
 {
+    struct lwip_udp_priv *sprt_priv = (struct lwip_udp_priv *)sprt_upcb->recv_arg;
     struct lwip_udp_data *sprt_data;
     void *payload;
     kssize_t len;
@@ -126,6 +140,9 @@ kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sprt_upcb, void *buf,
 
     /*!< read one frame */
     do {
+        wait_event_interruptible(&sprt_priv->sgrt_wqh, sprt_priv->isComing);
+        sprt_priv->isComing = false;
+
         sprt_data = lwip_udp_raw_poll(sprt_upcb, size);
         if (PTR_ERR(sprt_data) == (-ER_LACK))
         {
@@ -193,11 +210,19 @@ struct udp_pcb *lwip_udp_raw_bind(const ip_addr_t *sprt_ip, u16_t port)
 {
     struct udp_pcb *sprt_upcb;
     struct pq_queue *sprt_pq;
+    struct lwip_udp_priv *sprt_priv;
     err_t err;
+
+    sprt_priv = (struct lwip_udp_priv *)kmalloc(sizeof(*sprt_priv), GFP_KERNEL);
+    if (!isValid(sprt_priv))
+        return ERR_PTR(-ER_NOMEM);
     
     sprt_pq = pq_queue_create(NR_PQ_RING, 1024);
     if (!isValid(sprt_pq))
+    {
+        kfree(sprt_priv);
         return ERR_PTR(-ER_NOMEM);
+    }
 
     sprt_upcb = udp_new_ip_type(IPADDR_TYPE_ANY);
     if (!sprt_upcb)
@@ -210,14 +235,20 @@ struct udp_pcb *lwip_udp_raw_bind(const ip_addr_t *sprt_ip, u16_t port)
     err = udp_bind(sprt_upcb, sprt_ip, mrt_ntohs(port));
     if (err == ERR_OK) 
     {
-        udp_recv(sprt_upcb, __lwip_udp_raw_recv, sprt_pq);
+        sprt_priv->sprt_pq = sprt_pq;
+        sprt_priv->isComing = false;
+        init_waitqueue_head(&sprt_priv->sgrt_wqh);
+
+        udp_recv(sprt_upcb, __lwip_udp_raw_recv, sprt_priv);
         return sprt_upcb;
     }
 
     udp_remove(sprt_upcb);
 
 fail:
+    kfree(sprt_priv);
     pq_queue_destroy(sprt_pq);
+
     return ERR_PTR(-ER_FAILD);
 }
 

@@ -57,6 +57,9 @@ extern void term_cmd_del(struct term_cmd *sprt_cmd);
 
 extern kchar_t *term_cmdline_get(void);
 extern struct pq_queue *term_cmd_queue_get(void);
+
+extern void term_cmd_wrap_line(void);
+
 extern void term_cmdline_excute(kint32_t argc, kchar_t **argv);
 extern void term_cmdline_distribute(const kchar_t *cmdline);
 

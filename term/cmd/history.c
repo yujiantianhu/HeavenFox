@@ -35,16 +35,26 @@ static kint32_t term_cmd_show_history(struct term_cmd *sprt_cmd, kint32_t argc, 
     struct pq_data *sprt_pqd;
     struct pq_queue *sprt_pq = term_cmd_queue_get();
     kint32_t queue_cur = -1;
+    kuint8_t cur_index[16];
+    kuint32_t count, size;
 
     switch (argc)
     {
         case 1:
+            count = 0;
+
             while ((sprt_pqd = pq_lookback(sprt_pq, &queue_cur)))
             {
                 sprt_his = mrt_container_of(sprt_pqd, struct term_cmd_his, sgrt_pqd);
 
+                size = convert_number_to_string(cur_index, ++count);
+                cur_index[size] = '.';
+                cur_index[size + 1] = ' ';
+                cur_index[size + 2] = '\0';
+
+                io_putstr(cur_index, size + 2);
                 io_putstr(sprt_his->cmd, sprt_his->length);
-                io_putc(CHAR_ASC_CR);
+                term_cmd_wrap_line();
             }
 
             break;

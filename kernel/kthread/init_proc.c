@@ -53,7 +53,7 @@ static void *init_proc_entry(void *args)
 
     for (;;)
     {  
-        msleep(200);
+        sleep(1);
     }
 
     return args;

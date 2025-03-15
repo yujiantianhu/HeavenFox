@@ -180,6 +180,8 @@ void lv_port_disp_logo(struct fwk_disp_ctrl *sprt_dctrl)
     if (file_read(sprt_file, buffer, size) <= 0)
         goto END2;
 
+    print_info("Watting...\r\n");
+
     fwk_bitmap_ctrl_init(&sgrt_bctl, sprt_disp, 0, 0);
     fwk_display_whole_bitmap(&sgrt_bctl, buffer);
 
