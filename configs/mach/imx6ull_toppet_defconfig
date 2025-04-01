@@ -20,6 +20,12 @@ CONFIG_ARCH_ARMV7 = y
 CONFIG_LITTILE_ENDIAN = y
 
 CONFIG_VFP = y
+
+# debug or release
+CONFIG_BUILD_TYPE = debug
+
+# -O0, -O1, -O2
+CONFIG_OPTIMIZE_CLASS = 2
 # ---------------------------------------------------------------
 
 # Clock */
@@ -37,6 +43,9 @@ CONFIG_RAM_DDR_LENTH = (0x20000000)
 
 # boot
 # ---------------------------------------------------------------
+# 128MB
+CONFIG_PROGRAM_OFFSET = (0x08000000)
+
 # RAM(->DDR) Configuration
 # ---------------------------------------------------------------
 # 0x80000000 ~ 0x801FFFFF: 2MB, reserved
@@ -50,7 +59,7 @@ CONFIG_RAM_DDR_LENTH = (0x20000000)
 # 0x82080800 ~ 0x822807FF: 2MB, SVC, stack
 # 0x82280800 ~ 0x824807FF: 2MB, SYS, stack
 # 0x82480800 ~ 0x82C807FF: 8MB, heap
-# 0x82C80800 ~ 0x83C807FF: 16MB, memory pool
+# 0x82C80800 ~ 0x83C807FF: 16MB, reserved
 # 0x83C80700 ~ 0x85FFFFFF: reserved
 # 0x86000000 ~ 0x863FFFFF: 4MB, device tree
 # 0x86400000 ~ 0x87BFFFFF: 24MB, fixed data (such as fontlib, logo, ...)
@@ -73,6 +82,9 @@ CONFIG_B2K_FIXDATA_SIZE = (24 * 1024 * 1024)
 
 # kernel
 # ---------------------------------------------------------------
+# configure stack by .lds
+CONFIG_STACK_WITH_LDS = y
+
 CONFIG_SYS_STACK_SIZE = (2 * 1024 * 1024)
 CONFIG_SVC_STACK_SIZE = (2 * 1024 * 1024)
 CONFIG_ABT_STACK_SIZE = (1 * 1024)
@@ -91,7 +103,7 @@ CONFIG_SYS_STACK_BASE = (CONFIG_SVC_STACK_BASE  + CONFIG_SYS_STACK_SIZE)
 
 # Board
 # ---------------------------------------------------------------
-CONFIG_LCD_PIXELBIT = (24)
+CONFIG_LCD_PIXELBIT = (32)
 # ---------------------------------------------------------------
 
 # platform
@@ -105,7 +117,9 @@ CONFIG_INPUTDEV = y
 CONFIG_VIDEO = y
 CONFIG_USB = y
 
+# support multi framebuffer
 CONFIG_FB_MULTI_SUPPORT = n
+CONFIG_FBUFFER_NUM = 2
 # ---------------------------------------------------------------
 
 # drivers
