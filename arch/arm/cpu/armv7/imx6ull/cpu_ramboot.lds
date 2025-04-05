@@ -67,6 +67,7 @@ SECTIONS
 
     .text :
     {
+        . = ALIGN(16);
         __vector_table = .;
 
         KEEP(*(.vectors))

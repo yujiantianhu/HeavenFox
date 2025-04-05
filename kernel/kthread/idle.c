@@ -42,9 +42,9 @@ static void *rest_entry(void *args)
         struct thread *sprt_ready = get_first_ready_thread();
         if (!sprt_ready || (sprt_ready == mrt_current))
             continue;
+#endif
 
         schedule_thread();
-#endif
     }
 
     return args;

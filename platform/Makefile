@@ -12,6 +12,7 @@
 obj-y	+=	mem/
 obj-y	+=	bus_type/
 obj-y	+=	of/
+obj-y	+=	notifier/
 
 obj-y	+=	fwk_uaccess.o
 obj-y	+=	fwk_fcntl.o

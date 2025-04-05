@@ -9,7 +9,8 @@
 #ifndef __DTS_IMX6ULL_PINFUNC_H
 #define __DTS_IMX6ULL_PINFUNC_H
 
-#include "imx6ul-pinfunc.h"
+#include <dt-bindings/imx6ul/imx6ul-pinfunc.h>
+
 /*
  * The pin function ID is a tuple of
  * <mux_reg conf_reg input_reg mux_mode input_val>

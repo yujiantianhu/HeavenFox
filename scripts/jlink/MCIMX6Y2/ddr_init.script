@@ -4,14 +4,14 @@
 # Revision History			
 # v01			
 #			
-			
+
 monitor reset
-		
+
 #			
 # Disable	WDOG		
 #			
 monitor MemU16	0x020bc000 	0x30	
-			
+
 #			
 # Enable all clocks (they are disabled by ROM code)			
 #			
@@ -22,8 +22,8 @@ monitor MemU32	0x020c4074 	0xffffffff
 monitor MemU32	0x020c4078 	0xffffffff	
 monitor MemU32	0x020c407c 	0xffffffff	
 monitor MemU32	0x020c4080 	0xffffffff	
-			
-		
+
+
 #			
 # IOMUX			
 #			
@@ -151,58 +151,7 @@ monitor MemU32	0x021b0004 	0x0002556D	# MMDC0_MDPDC now SDCTL power down enabled
 monitor MemU32	0x021b0404 	0x00011006	# MMDC0_MAPSR ADOPT power down enabled, MMDC will enter automatically to self-refresh while the number of idle cycle reached.
 			
 monitor MemU32	0x021b001c 	0x00000000	# MMDC0_MDSCR, clear this register (especially the configuration bit as initialization is complete)
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
+
+monitor Exec SetARM = 1
+monitor Exec SetAutoDetect = 0
+monitor Exec SetBPType = Software

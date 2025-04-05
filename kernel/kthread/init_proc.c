@@ -34,6 +34,7 @@ static kuint32_t g_init_proc_stack[INIT_THREAD_STACK_SIZE];
 __weak kint32_t main(kint32_t argc, kchar_t **argv)
 {
     /*!< dummy */
+    return 0;
 }
 
 /*!

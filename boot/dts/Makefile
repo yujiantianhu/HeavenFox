@@ -9,19 +9,25 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
+DT_DIRS			:=	$(shell pwd)
+
 dtb-y 			:=
+inc-y			:=
 
 include $(CONF_MAKEFILE)
 include $(CPU)/Makefile
 
 TARGET			:=	$(dtb-y)
-DT_DIRS			:=	$(shell pwd)
+
 DT_NAME			:=	$(DT_DIRS)/$(CPU)
 DT_FILE			:=	$(DT_NAME)/$(TARGET).dts
 
 INCLUDES		:=	$(DT_DIRS)/	\
 					$(DT_DIRS)/$(CPU)/	\
 					$(DT_DIRS)/dt-bindings/
+ifneq ($(inc-y),)
+INCLUDES		+=	$(inc-y)
+endif
 
 DTC_INCLUDES	:= 	$(patsubst %, -i%, $(INCLUDES))
 CXX_INCLUDES	:=	$(patsubst %, -I%, $(INCLUDES))

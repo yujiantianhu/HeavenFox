@@ -1628,29 +1628,33 @@ kbool_t fwk_sdcard_to_normal(struct fwk_sdcard *sprt_card)
         goto fail2;
 
     /*!< check if card and host support 4bits width */
-    if (!mrt_isBitSetb(0x4U, &sprt_card->sgrt_scr.sdBusWidths) || mrt_isBitResetl(NR_SdCard_Support4BitWidth, &sprt_host->flagBit))
+    if (!mrt_isBitSetb(0x4U, &sprt_card->sgrt_scr.sdBusWidths) || 
+         mrt_isBitResetl(NR_SdCard_Support4BitWidth, &sprt_host->flagBit))
         goto fail2;
 
-    /*!<
-     * for imx6ull:
-     *  ֻ���Ŀ���������λ��, CMD6�ɻظ�DATA, ������, �ҽ����ȷ;
-     *  ֻ���Ŀ���λ��, CMD17���������(�����ݿɶ�), ����ȡ�������;
-     *  ֻ��������λ��, CMD17����������(�����ݿɶ�)
-     * 
-     *  ����: �����������������
-     */
+    /*!< set bus width */
+#if defined(CONFIG_SDMMC_BUS_WIDTH) && (CONFIG_SDMMC_BUS_WIDTH == 1)
+    /*!< set card DATA bus width = 1bit */
+	iRetval = fwk_sdcard_send_app_command(sprt_card, fwk_sdcard_command_set_buswidth, FWK_SDCARD_ACMD6_BUS_WIDTH_1);
+	if (iRetval)
+		goto fail2;
+
+    /*!< set host DATA bus width = 1bit */
+	sprt_if->setBusWidth(sprt_host, NR_SdCard_BusWidth_1Bit);
+#else
     /*!< set card DATA bus width = 4bit */
 	iRetval = fwk_sdcard_send_app_command(sprt_card, fwk_sdcard_command_set_buswidth, FWK_SDCARD_ACMD6_BUS_WIDTH_4);
 	if (iRetval)
 		goto fail2;
-    
-    /*!< set host DATA bus width = 4bit */
+
+    /*!< set host DATA bus width = 1bit */
 	sprt_if->setBusWidth(sprt_host, NR_SdCard_BusWidth_4Bit);
 
     /*!< set card with high speed */
     iRetval = fwk_sdcard_command_select_function(sprt_card, NR_SdCard_Cmd6GroupAccess, NR_SdCard_Cmd6SpeedHigh);
     if (iRetval)
         goto fail2;
+#endif
 
     /*!< set card drive strenth */
     iRetval = fwk_sdcard_command_select_function(sprt_card, NR_SdCard_Cmd6GroupDrvStrenth, NR_SdCard_Cmd6DriverDefault);

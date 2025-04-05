@@ -111,6 +111,12 @@ LIBS_PATH		:=  -L $(COMPILER_LIBC)/usr/lib	\
 LIBS			:=	--static -lc -lgcc -lstdc++ -lm
 EXTRA_FLAGS		:=  -fexec-charset=GB2312
 
+ifeq ($(CONFIG_INSTRUCTION),thumb)
+EXTRA_FLAGS		+=	-mthumb
+else ifeq ($(CONFIG_INSTRUCTION),arm)
+EXTRA_FLAGS		+=	-marm
+endif
+
 ifeq ($(CONFIG_VFP),y)
 EXTRA_FLAGS     +=	-mcpu=$(CLASS)	\
 					-mfpu=vfpv3	\

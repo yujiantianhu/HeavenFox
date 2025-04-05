@@ -9,7 +9,6 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-obj-y	+=	loopback.o
-obj-$(CONFIG_SDK_GEM_ZYNQ)	+=	zynq7sdk_gem.o
+obj-y	+=	fwk_notifier.o
 
 # end of file

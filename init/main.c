@@ -97,8 +97,6 @@ void setup_machine(struct tag_params *sprt_params)
  */
 void start_kernel(void)
 {
-    /*!< disable interrupt */
-    mrt_disable_cpu_irq();
     sprt_tag_params = mrt_tag_params_get();
 
     /*!< initial memory pool */

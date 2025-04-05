@@ -276,7 +276,35 @@ void io_putc(const kubyte_t ch)
 void io_putstr(const kubyte_t *msgs, kusize_t size)
 {
 	for (kusize_t i = 0; i < size; i++)
-		imx_console_putc(msgs + i);
+		imx_console_putc(*(msgs + i));
+}
+
+/*!
+ * @brief   io_getc
+ * @param   ch
+ * @retval  none
+ * @note    character read
+ */
+kubyte_t io_getc(kubyte_t *ch)
+{
+	kubyte_t val;
+
+	val = imx_console_getc();
+	if (*ch)
+		*ch = val;
+
+	return val;
+}
+
+/*!
+ * @brief   io_getstr
+ * @param   string
+ * @retval  none
+ * @note    string read
+ */
+kssize_t io_getstr(kubyte_t *msgs, kusize_t size)
+{
+	return 0;
 }
 
 /* end of file */

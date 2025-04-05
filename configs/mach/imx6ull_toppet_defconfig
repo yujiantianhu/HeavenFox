@@ -19,13 +19,16 @@ CONFIG_COMPILER_PATH = "/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-g
 CONFIG_ARCH_ARMV7 = y
 CONFIG_LITTILE_ENDIAN = y
 
+# float with hardware
 CONFIG_VFP = y
+# instruction: thumb or arm
+CONFIG_INSTRUCTION = arm
 
 # debug or release
 CONFIG_BUILD_TYPE = debug
 
 # -O0, -O1, -O2
-CONFIG_OPTIMIZE_CLASS = 2
+CONFIG_OPTIMIZE_CLASS = 0
 # ---------------------------------------------------------------
 
 # Clock */
@@ -143,6 +146,12 @@ CONFIG_I2C_AP3216C = y
 CONFIG_I2C_AT24CXX = y
 CONFIG_I2C_TSC2007 = y
 
+# hdmi
+CONFIG_HDMI_SIL9022A = y
+
+# sd card
+# for imx6ull, there are some errors with 4 bus width 
+CONFIG_SDMMC_BUS_WIDTH = 1
 # video
 CONFIG_VIDEO_FB_IMX6 = y
 

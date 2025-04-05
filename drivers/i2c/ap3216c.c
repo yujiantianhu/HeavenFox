@@ -25,6 +25,7 @@
 #include <platform/fwk_inode.h>
 #include <platform/fwk_fs.h>
 #include <platform/fwk_fcntl.h>
+#include <kernel/sleep.h>
 
 /*!< The defines */
 #define AP3216C_DRVIVER_MAJOR                       (221)
@@ -276,7 +277,7 @@ static kint32_t ap3216c_init(struct ap3216c_drv_info *sprt_info)
         return -ER_FAILD;
 
     /*!< wait for ap3216c reset finished */
-	delay_ms(50);
+	msleep(50);
     
     /*!< configure ap3216c, enable als, ps and ir */
 	value = ap3216c_write_value(sprt_info, AP3216C_REG_SYSCONFIG, AP3216C_ALS_IR_PS_ACTIVE);

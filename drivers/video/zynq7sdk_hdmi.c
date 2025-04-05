@@ -208,6 +208,8 @@ kint32_t xsdk_hdmi_ioctl(struct fwk_fb_info *sprt_info, kuint32_t cmd, kuaddr_t 
             if (DisplayChangeFrameBuffer(&sprt_drv->sgrt_dctrl, new_smem, sprt_info->sgrt_fix.smem_len))
                 return -ER_FAILD;
 
+            break;
+
         default:
             break;
     }
@@ -494,12 +496,14 @@ static kint32_t xsdk_hdmi_driver_probe(struct fwk_platdev *sprt_pdev)
 
     retval = xsdk_hdmi_init(base, sprt_drv);
     if (retval)
-        goto fail4;
+        goto fail5;
 
     return ER_NORMAL;
 
-fail4:
+fail5:
     fwk_unregister_framebuffer(sprt_fb);
+fail4:
+    kfree(buffer);
 fail3:
     xsdk_hdmi_driver_remove_axivdma(sprt_pdev);
 fail2:

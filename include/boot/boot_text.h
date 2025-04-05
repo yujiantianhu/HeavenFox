@@ -77,6 +77,7 @@ extern kuaddr_t __heap_end;
 /*!< Macro */
 #define MEMORY_HEAP_START                   ((kuaddr_t)(&__heap_start))
 #define MEMORY_HEAP_END                     ((kuaddr_t)(&__heap_end))
+#define MEMORY_HEAP_SIZE                    (MEMORY_HEAP_END - MEMORY_HEAP_START)
 
 /*!< stack */
 extern kuaddr_t __stack_start;
@@ -160,7 +161,7 @@ static inline void boot_text_print(void)
     print_info("und stack   top  address: 0x%x, size = %d KB\r\n", UND_MODE_STACK_BASE, __BYTES_TO_KB(UND_MODE_STACK_SIZE));
 
     /*!< heap */
-    print_info("__brk heap  base address: 0x%x, size = %d KB\r\n", MEMORY_HEAP_START, __BYTES_TO_KB(MEMORY_HEAP_END));
+    print_info("__brk heap  base address: 0x%x, size = %d KB\r\n", MEMORY_HEAP_START, __BYTES_TO_KB(MEMORY_HEAP_SIZE));
 }
 
 #ifdef __cplusplus

@@ -14,5 +14,6 @@ obj-$(CONFIG_I2C_IMX6)	+=	imx-i2c.o
 obj-$(CONFIG_I2C_TSC2007)	+=	tsc2007.o
 obj-$(CONFIG_I2C_AP3216C)	+=	ap3216c.o
 obj-$(CONFIG_I2C_AT24CXX)	+=	at24cxx.o
+obj-$(CONFIG_HDMI_SIL9022A)	+=	sil9022a.o
 
 # end of file

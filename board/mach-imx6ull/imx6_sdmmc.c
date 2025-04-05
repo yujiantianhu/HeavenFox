@@ -764,7 +764,6 @@ static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk
     kuint32_t *ptrTxBuffer;
     kuint32_t iDataWords, iTransWords, iTransCnt;
     kuint32_t iRetry = 4096U;
-    kint32_t iRetval;
     kbool_t blRetval;
 
     if ((!sprt_data) || (!sprt_usdhc))
@@ -808,11 +807,11 @@ static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk
             return -ER_BUSY;
         }
 
-        /*!< iRetval = (no error) ? true : false */
-        iRetval = mrt_isBitResetl(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS);
+        /*!< blRetval = (no error) ? true : false */
+        blRetval = mrt_isBitResetl(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS);
         mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc);
 
-        if (iRetval)
+        if (blRetval)
         {
             iDataWords -= iTransWords;
 
@@ -835,9 +834,9 @@ static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk
     }
 
     if (mrt_isBitSetl(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS))
-        iRetval = -ER_SDATA_FAILD;
+        return -ER_SDATA_FAILD;
 
-    return iRetval;
+    return ER_NORMAL;
 }
 
 /*!
@@ -896,11 +895,11 @@ static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_
             return -ER_BUSY;
         }
 
-        /*!< iRetval = (no error) ? true : false */
-        iRetval = mrt_isBitResetl(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS);
+        /*!< blRetval = (no error) ? true : false */
+        blRetval = mrt_isBitResetl(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS);
         mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc);
 
-        if (iRetval)
+        if (blRetval)
         {
             iDataWords -= iTransWords;
 

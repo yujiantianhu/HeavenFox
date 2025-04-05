@@ -140,7 +140,8 @@ static const struct fwk_usb_hid_desc sgrt_fsl_mouse_hid_dt =
 };
 
 /*!< Gather all */
-static srt_fsl_mouse_desc_t sgrt_fsl_mouse_dt =
+static __unused
+srt_fsl_mouse_desc_t sgrt_fsl_mouse_dt =
 {
     .sprt_ep_dt = &sgrt_fsl_mouse_ep_dt[0],
     .sprt_if_dt = &sgrt_fsl_mouse_if_dt[0],

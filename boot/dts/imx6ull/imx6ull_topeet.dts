@@ -160,6 +160,12 @@
         ti,x-plate-ohms = <660>;
         status = "okay";
     };
+
+	sil9022a: sil9022a@72 {
+		compatible = "silicon,sil9022a";
+		reg = <0x72>;
+		status = "okay";
+	};
 };
 
 &iomuxc {
@@ -435,15 +441,19 @@
 	status = "okay";
 
 	display0: display {
-		bits-per-pixel = <16>;
+		bits-per-pixel = <24>;
 		bus-width = <24>;
 
 		remote-endpoint = <&backlight0>;
 		backlight-ways = "gpio";
 
+		/*!< is hdmi */
+		hdmi-endpoint = <&sil9022a>;
+
 		display-timings {
-			native-mode = <&timing0>;
-			timing0: timing0 {
+			native-mode = <&timing_1920x1080>;
+
+			timing_480x272: timing-272 {
 				clock-frequency = <9200000>;
 				hactive = <480>;
 				vactive = <272>;
@@ -459,6 +469,75 @@
 				de-active = <1>;
 				pixelclk-active = <0>;
 			};
+
+			timing_800x400: timing-400 {
+				clock-frequency = <33201000>;
+				hactive = <800>;
+				vactive = <480>;
+				hfront-porch = <210>;
+				hback-porch = <1>;
+				hsync-len = <43>;
+				vback-porch = <1>;
+				vfront-porch = <22>;
+				vsync-len = <22>;
+
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <1>;
+				pixelclk-active = <0>; 
+			};
+
+			timing_1024x600: timing-600 {
+				clock-frequency = <70000000>;
+				hactive = <1024>;
+				vactive = <600>;
+				hfront-porch = <160>;
+				hback-porch = <140>;
+				hsync-len = <20>;
+				vback-porch = <20>;
+				vfront-porch = <12>;
+				vsync-len = <3>;
+
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <1>;
+				pixelclk-active = <0>;
+			};
+
+			timing_1280x800: timing-800 {
+				clock-frequency = <71000000>;
+				hactive = <1280>;
+				vactive = <800>;
+				hfront-porch = <48>;
+				hback-porch = <80>;
+				hsync-len = <32>;
+				vfront-porch = <3>;
+				vback-porch = <14>;
+				vsync-len = <10>;
+				
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <1>;
+				pixelclk-active = <0>;
+			};
+
+			timing_1920x1080: timing-1080p {
+				clock-freq = <148500000>;
+				height = <1920>;
+				width = <1080>;
+				
+				h-back-porch = <148>;
+				h-sync-width = <44>;
+				h-front-porch = <88>;
+				v-back-porch = <36>;
+				v-sync-width = <5>;
+				v-front-porch = <4>;
+				
+				h-sync-active = <0>;
+				v-sync-active = <0>;
+				de-active = <1>;
+				pixelclk-active = <1>;
+			};
 		};
 	};
 };
@@ -466,7 +545,7 @@
 &pwm1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm1>;
-	status = "okay";
+	status = "disable";
 };
 
 &pxp {

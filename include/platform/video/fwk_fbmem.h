@@ -22,6 +22,7 @@
 #include <platform/fwk_platform.h>
 #include <platform/fwk_uaccess.h>
 #include <platform/fwk_fs.h>
+#include <platform/notifier/fwk_notifier.h>
 
 /*!< The defines */
 /*!< Maximum supported resolution */
@@ -136,6 +137,20 @@ struct fwk_fb_oprts
     kint32_t (*fb_ioctl) (struct fwk_fb_info *sprt_info, kuint32_t cmd, kuaddr_t arg);
     kint32_t (*fb_mmap) (struct fwk_fb_info *sprt_info, struct fwk_vm_area *vma);
 };
+
+/*!< Notifier */
+#define FB_NOTIFIER_HDMI_OPEN                           (0x00000001)
+#define FB_NOTIFIER_HDMI_CLOSE                          (0x00000002)
+
+struct fwk_fb_notifier_param
+{
+    struct fwk_fb_fix_screen_info *sprt_fix;			/*!< fix parameters */
+    struct fwk_fb_var_screen_info *sprt_var;			/*!< variadics */
+    kuint32_t bus_width;
+};
+
+/*!< The globals */
+BLOCKING_NOTIFIER_DECLARE(sgrt_fbmem_notifier_chain);
 
 /*!< The functions */
 /*!< -------------------------------------------------------------- */
