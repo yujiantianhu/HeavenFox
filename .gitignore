@@ -38,6 +38,7 @@ objects/
 !.gitignore
 !**/fsbl/*
 !**/*.img
+!**/image/*.bin
+!**/image/*.dtb
 
 # end of file
-
