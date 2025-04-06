@@ -1060,6 +1060,254 @@ typedef struct
 #define IMX6UL_QUARDSPI_ADDR_BASE                                   (0x21E0000u)
 #define IMX6UL_QSPI_PROPERTY_ENTRY(x)                               (srt_imx_qspi_t *)IMX6UL_QUARDSPI##x##_ADDR_BASE
 
+/*!< ------------------------------------------------------------------------- */
+/*! IMX6UL_SDMA - Register Layout Typedef */
+typedef struct 
+{
+    kuint32_t MC0PTR;                                               /*!< ARM platform Channel 0 Pointer, offset: 0x0 */
+    kuint32_t INTR;                                                 /*!< Channel Interrupts, offset: 0x4 */
+    kuint32_t STOP_STAT;                                            /*!< Channel Stop/Channel Status, offset: 0x8 */
+    kuint32_t HSTART;                                               /*!< Channel Start, offset: 0xC */
+    kuint32_t EVTOVR;                                               /*!< Channel Event Override, offset: 0x10 */
+    kuint32_t DSPOVR;                                               /*!< Channel BP Override, offset: 0x14 */
+    kuint32_t HOSTOVR;                                              /*!< Channel ARM platform Override, offset: 0x18 */
+    kuint32_t EVTPEND;                                              /*!< Channel Event Pending, offset: 0x1C */
+    kuint8_t  RESERVED_0[4];
+    kuint32_t RESET;                                                /*!< Reset Register, offset: 0x24 */
+    kuint32_t EVTERR;                                               /*!< DMA Request Error Register, offset: 0x28 */
+    kuint32_t INTRMASK;                                             /*!< Channel ARM platform Interrupt Mask, offset: 0x2C */
+    kuint32_t PSW;                                                  /*!< Schedule Status, offset: 0x30 */
+    kuint32_t EVTERRDBG;                                            /*!< DMA Request Error Register, offset: 0x34 */
+    kuint32_t CONFIG;                                               /*!< Configuration Register, offset: 0x38 */
+    kuint32_t SDMA_LOCK;                                            /*!< SDMA LOCK, offset: 0x3C */
+    kuint32_t ONCE_ENB;                                             /*!< OnCE Enable, offset: 0x40 */
+    kuint32_t ONCE_DATA;                                            /*!< OnCE Data Register, offset: 0x44 */
+    kuint32_t ONCE_INSTR;                                           /*!< OnCE Instruction Register, offset: 0x48 */
+    kuint32_t ONCE_STAT;                                            /*!< OnCE Status Register, offset: 0x4C */
+    kuint32_t ONCE_CMD;                                             /*!< OnCE Command Register, offset: 0x50 */
+    kuint8_t  RESERVED_1[4];
+    kuint32_t ILLINSTADDR;                                          /*!< Illegal Instruction Trap Address, offset: 0x58 */
+    kuint32_t CHN0ADDR;                                             /*!< Channel 0 Boot Address, offset: 0x5C */
+    kuint32_t EVT_MIRROR;                                           /*!< DMA Requests, offset: 0x60 */
+    kuint32_t EVT_MIRROR2;                                          /*!< DMA Requests 2, offset: 0x64 */
+    kuint8_t  RESERVED_2[8];
+    kuint32_t XTRIG_CONF1;                                          /*!< Cross-Trigger Events Configuration Register 1, offset: 0x70 */
+    kuint32_t XTRIG_CONF2;                                          /*!< Cross-Trigger Events Configuration Register 2, offset: 0x74 */
+    kuint8_t  RESERVED_3[136];
+    kuint32_t SDMA_CHNPRI[32];                                      /*!< Channel Priority Registers, array offset: 0x100, array step: 0x4 */
+    kuint8_t  RESERVED_4[128];
+    kuint32_t CHNENBL[48];                                          /*!< Channel Enable RAM, array offset: 0x200, array step: 0x4 */
+} srt_imx_sdma_t;
+
+/*!< Peripheral SDMA base address */
+#define IMX6UL_SDMA_ADDR_BASE                                       (0x20EC000u)
+#define IMX6UL_SDMA_PROPERTY_ENTRY()                                (srt_imx_qspi_t *)IMX6UL_QUARDSPI##x##_ADDR_BASE
+
+/*!< Peripheral SDMA Register */
+/*!< MC0PTR Register */
+#define IMX6UL_SDMA_MC0PTR_MC0PTR_U32(x)                            ((kuint32_t)(x))
+
+/*!< INTR Register */
+#define IMX6UL_SDMA_INTR_HI_U32(x)                                  ((kuint32_t)(x))
+
+/*!< STOP_STAT Register */
+#define IMX6UL_SDMA_STOP_STAT_HE_U32(x)                             ((kuint32_t)(x))
+
+/*!< HSTART Register */
+#define IMX6UL_SDMA_HSTART_HSTART_HE_U32(x)                         ((kuint32_t)(x))
+
+/*!< EVTOVR Register */
+#define IMX6UL_SDMA_EVTOVR_EO_U32(x)                                ((kuint32_t)(x))
+
+/*!< DSPOVR Register */
+#define IMX6UL_SDMA_DSPOVR_DO_U32(x)                                ((kuint32_t)(x))
+
+/*!< HOSTOVR Register */
+#define IMX6UL_SDMA_HOSTOVR_HO_U32(x)                               ((kuint32_t)(x))
+
+/*!< EVTPEND Register */
+#define IMX6UL_SDMA_EVTPEND_EP_U32(x)                               ((kuint32_t)(x))
+
+/*!< EVTERR Register */
+#define IMX6UL_SDMA_EVTERR_CHNERR_U32(x)                            ((kuint32_t)(x))
+
+/*!< INTRMASK Register */
+#define IMX6UL_SDMA_INTRMASK_HIMASK_U32(x)                          ((kuint32_t)(x))
+
+/*!< EVTERRDBG Register */
+#define IMX6UL_SDMA_EVTERRDBG_CHNERR_U32(x)                         ((kuint32_t)(x))
+
+/*!< RESET Register */
+#define IMX6UL_SDMA_RESET_RESET_MASK                                (0x1U)
+#define IMX6UL_SDMA_RESET_RESET_OFFSET                              (0U)
+#define IMX6UL_SDMA_RESET_RESET_BIT(x)                              mrt_bit_mask(x, IMX6UL_SDMA_RESET_RESET_MASK, IMX6UL_SDMA_RESET_RESET_OFFSET)
+
+#define IMX6UL_SDMA_RESET_RESCHED_MASK                              (0x1U)
+#define IMX6UL_SDMA_RESET_RESCHED_OFFSET                            (0U)
+#define IMX6UL_SDMA_RESET_RESCHED_BIT(x)                            mrt_bit_mask(x, IMX6UL_SDMA_RESET_RESCHED_MASK, IMX6UL_SDMA_RESET_RESCHED_OFFSET)
+
+/*!< PSW-Schedule Register */
+#define IMX6UL_SDMA_PSW_CCR_MASK                                    (0xFU)
+#define IMX6UL_SDMA_PSW_CCR_OFFSET                                  (0U)
+#define IMX6UL_SDMA_PSW_CCR(x)                                      mrt_bit_mask(x, IMX6UL_SDMA_PSW_CCR_MASK, IMX6UL_SDMA_PSW_CCR_OFFSET)
+#define IMX6UL_SDMA_PSW_CCP_MASK                                    (0xF0U)
+#define IMX6UL_SDMA_PSW_CCP_OFFSET                                  (4U)
+#define IMX6UL_SDMA_PSW_CCP(x)                                      mrt_bit_mask(x, IMX6UL_SDMA_PSW_CCP_MASK, IMX6UL_SDMA_PSW_CCP_OFFSET)
+#define IMX6UL_SDMA_PSW_NCR_MASK                                    (0x1F00U)
+#define IMX6UL_SDMA_PSW_NCR_OFFSET                                  (8U)
+#define IMX6UL_SDMA_PSW_NCR(x)                                      mrt_bit_mask(x, IMX6UL_SDMA_PSW_NCR_MASK, IMX6UL_SDMA_PSW_NCR_OFFSET)
+#define IMX6UL_SDMA_PSW_NCP_MASK                                    (0xE000U)
+#define IMX6UL_SDMA_PSW_NCP_OFFSET                                  (13U)
+#define IMX6UL_SDMA_PSW_NCP(x)                                      mrt_bit_mask(x, IMX6UL_SDMA_PSW_NCP_MASK, IMX6UL_SDMA_PSW_NCP_OFFSET)
+
+/*!< CONFIG Register */
+#define IMX6UL_SDMA_CONFIG_CSM_MASK                                 (0x3U)
+#define IMX6UL_SDMA_CONFIG_CSM_OFFSET                               (0U)
+#define IMX6UL_SDMA_CONFIG_CSM(x)                                   mrt_bit_mask(x, IMX6UL_SDMA_CONFIG_CSM_MASK, IMX6UL_SDMA_CONFIG_CSM_OFFSET)
+#define IMX6UL_SDMA_CONFIG_ACR_MASK                                 (0x10U)
+#define IMX6UL_SDMA_CONFIG_ACR_OFFSET                               (4U)
+#define IMX6UL_SDMA_CONFIG_ACR(x)                                   mrt_bit_mask(x, IMX6UL_SDMA_CONFIG_ACR_MASK, IMX6UL_SDMA_CONFIG_ACR_OFFSET)
+#define IMX6UL_SDMA_CONFIG_RTDOBS_MASK                              (0x800U)
+#define IMX6UL_SDMA_CONFIG_RTDOBS_OFFSET                            (11U)
+#define IMX6UL_SDMA_CONFIG_RTDOBS(x)                                mrt_bit_mask(x, IMX6UL_SDMA_CONFIG_RTDOBS_MASK, IMX6UL_SDMA_CONFIG_RTDOBS_OFFSET)
+#define IMX6UL_SDMA_CONFIG_DSPDMA_MASK                              (0x1000U)
+#define IMX6UL_SDMA_CONFIG_DSPDMA_OFFSET                            (12U)
+#define IMX6UL_SDMA_CONFIG_DSPDMA(x)                                mrt_bit_mask(x, IMX6UL_SDMA_CONFIG_DSPDMA_MASK, IMX6UL_SDMA_CONFIG_DSPDMA_OFFSET)
+
+/*!< SDMA_LOCK Register */
+#define IMX6UL_SDMA_LOCK_LOCK_MASK                                  (0x1U)
+#define IMX6UL_SDMA_LOCK_LOCK_OFFSET                                (0U)
+#define IMX6UL_SDMA_LOCK_LOCK(x)                                    mrt_bit_mask(x, IMX6UL_SDMA_SDMA_LOCK_LOCK_MASK, IMX6UL_SDMA_SDMA_LOCK_LOCK_OFFSET)
+#define IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_MASK                       (0x2U)
+#define IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_OFFSET                     (1U)
+#define IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR(x)                         mrt_bit_mask(x, IMX6UL_SDMA_SDMA_LOCK_SRESET_LOCK_CLR_MASK, IMX6UL_SDMA_SDMA_LOCK_SRESET_LOCK_CLR_OFFSET)
+
+/*!< ONCE_ENB Register */
+#define IMX6UL_SDMA_ONCE_ENB_ENB_MASK                               (0x1U)
+#define IMX6UL_SDMA_ONCE_ENB_ENB_OFFSET                             (0U)
+#define IMX6UL_SDMA_ONCE_ENB_ENB(x)                                 mrt_bit_mask(x, IMX6UL_SDMA_ONCE_ENB_ENB_MASK, IMX6UL_SDMA_ONCE_ENB_ENB_OFFSET)
+
+/*!< ONCE_DATA Register */
+#define IMX6UL_SDMA_ONCE_DATA_U32(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_DATA_DATA_MASK, IMX6UL_SDMA_ONCE_DATA_DATA_OFFSET)
+
+/*!< ONCE_INSTR Register */
+#define IMX6UL_SDMA_ONCE_INSTR_INSTR_MASK                           (0xFFFFU)
+#define IMX6UL_SDMA_ONCE_INSTR_INSTR_OFFSET                         (0U)
+#define IMX6UL_SDMA_ONCE_INSTR_INSTR(x)                             mrt_bit_mask(x, IMX6UL_SDMA_ONCE_INSTR_INSTR_MASK, IMX6UL_SDMA_ONCE_INSTR_INSTR_OFFSET)
+
+/*!< ONCE_STAT Register */
+#define IMX6UL_SDMA_ONCE_STAT_ECDR_MASK                             (0x7U)
+#define IMX6UL_SDMA_ONCE_STAT_ECDR_OFFSET                           (0U)
+#define IMX6UL_SDMA_ONCE_STAT_ECDR(x)                               mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_ECDR_MASK, IMX6UL_SDMA_ONCE_STAT_ECDR_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_MST_MASK                              (0x80U)
+#define IMX6UL_SDMA_ONCE_STAT_MST_OFFSET                            (7U)
+#define IMX6UL_SDMA_ONCE_STAT_MST(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_MST_MASK, IMX6UL_SDMA_ONCE_STAT_MST_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_SWB_MASK                              (0x100U)
+#define IMX6UL_SDMA_ONCE_STAT_SWB_OFFSET                            (8U)
+#define IMX6UL_SDMA_ONCE_STAT_SWB(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_SWB_MASK, IMX6UL_SDMA_ONCE_STAT_SWB_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_ODR_MASK                              (0x200U)
+#define IMX6UL_SDMA_ONCE_STAT_ODR_OFFSET                            (9U)
+#define IMX6UL_SDMA_ONCE_STAT_ODR(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_ODR_MASK, IMX6UL_SDMA_ONCE_STAT_ODR_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_EDR_MASK                              (0x400U)
+#define IMX6UL_SDMA_ONCE_STAT_EDR_OFFSET                            (10U)
+#define IMX6UL_SDMA_ONCE_STAT_EDR(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_EDR_MASK, IMX6UL_SDMA_ONCE_STAT_EDR_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_RCV_MASK                              (0x800U)
+#define IMX6UL_SDMA_ONCE_STAT_RCV_OFFSET                            (11U)
+#define IMX6UL_SDMA_ONCE_STAT_RCV(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_RCV_MASK, IMX6UL_SDMA_ONCE_STAT_RCV_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_PST_MASK                              (0xF000U)
+#define IMX6UL_SDMA_ONCE_STAT_PST_OFFSET                            (12U)
+#define IMX6UL_SDMA_ONCE_STAT_PST(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_PST_MASK, IMX6UL_SDMA_ONCE_STAT_PST_OFFSET)
+
+/*!< ONCE_CMD Register */
+#define IMX6UL_SDMA_ONCE_CMD_CMD_MASK                               (0xFU)
+#define IMX6UL_SDMA_ONCE_CMD_CMD_OFFSET                             (0U)
+#define IMX6UL_SDMA_ONCE_CMD_CMD(x)                                 mrt_bit_mask(x, IMX6UL_SDMA_ONCE_CMD_CMD_MASK, IMX6UL_SDMA_ONCE_CMD_CMD_OFFSET)
+
+/*!< ILLINSTADDR Register */
+#define IMX6UL_SDMA_ILLINSTADDR_MASK                                (0x3FFFU)
+#define IMX6UL_SDMA_ILLINSTADDR_OFFSET                              (0U)
+#define IMX6UL_SDMA_ILLINSTADDR(x)                                  mrt_bit_mask(x, IMX6UL_SDMA_ILLINSTADDR_ILLINSTADDR_MASK, IMX6UL_SDMA_ILLINSTADDR_ILLINSTADDR_OFFSET)
+
+/*!< CHN0ADDR Register */
+#define IMX6UL_SDMA_CHN0ADDR_CHN0ADDR_MASK                          (0x3FFFU)
+#define IMX6UL_SDMA_CHN0ADDR_CHN0ADDR_OFFSET                        (0U)
+#define IMX6UL_SDMA_CHN0ADDR_CHN0ADDR(x)                            mrt_bit_mask(x, IMX6UL_SDMA_CHN0ADDR_CHN0ADDR_MASK, IMX6UL_SDMA_CHN0ADDR_CHN0ADDR_OFFSET)
+#define IMX6UL_SDMA_CHN0ADDR_SMSZ_MASK                              (0x4000U)
+#define IMX6UL_SDMA_CHN0ADDR_SMSZ_OFFSET                            (14U)
+#define IMX6UL_SDMA_CHN0ADDR_SMSZ(x)                                mrt_bit_mask(x, IMX6UL_SDMA_CHN0ADDR_SMSZ_MASK, IMX6UL_SDMA_CHN0ADDR_SMSZ_OFFSET)
+
+/*!< EVT_MIRROR Register */
+#define IMX6UL_SDMA_EVT_MIRROR_EVENTS_U32(x)                        ((kuint32_t)(x))
+
+/*!< EVT_MIRROR2 Register */
+#define IMX6UL_SDMA_EVT_MIRROR2_EVENTS_MASK                         (0xFFFFU)
+#define IMX6UL_SDMA_EVT_MIRROR2_EVENTS_OFFSET                       (0U)
+#define IMX6UL_SDMA_EVT_MIRROR2_EVENTS(x)                           mrt_bit_mask(x, IMX6UL_SDMA_EVT_MIRROR2_EVENTS_MASK, IMX6UL_SDMA_EVT_MIRROR2_EVENTS_OFFSET)
+
+/*!< XTRIG_CONF1 Register */
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM0_MASK                           (0x3FU)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM0_OFFSET                         (0U)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM0(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM0_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM0_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF0_MASK                           (0x40U)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF0_OFFSET                         (6U)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF0(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF0_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF0_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM1_MASK                           (0x3F00U)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM1_OFFSET                         (8U)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM1(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM1_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM1_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF1_MASK                           (0x4000U)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF1_OFFSET                         (14U)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF1(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF1_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF1_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM2_MASK                           (0x3F0000U)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM2_OFFSET                         (16U)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM2(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM2_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM2_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF2_MASK                           (0x400000U)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF2_OFFSET                         (22U)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF2(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF2_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF2_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM3_MASK                           (0x3F000000U)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM3_OFFSET                         (24U)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM3(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM3_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM3_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF3_MASK                           (0x40000000U)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF3_OFFSET                         (30U)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF3(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF3_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF3_OFFSET)
+
+/*!< XTRIG_CONF2 Register */
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM4_MASK                           (0x3FU)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM4_OFFSET                         (0U)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM4(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM4_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM4_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF4_MASK                           (0x40U)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF4_OFFSET                         (6U)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF4(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF4_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF4_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM5_MASK                           (0x3F00U)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM5_OFFSET                         (8U)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM5(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM5_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM5_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF5_MASK                           (0x4000U)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF5_OFFSET                         (14U)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF5(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF5_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF5_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM6_MASK                           (0x3F0000U)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM6_OFFSET                         (16U)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM6(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM6_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM6_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF6_MASK                           (0x400000U)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF6_OFFSET                         (22U)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF6(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF6_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF6_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM7_MASK                           (0x3F000000U)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM7_OFFSET                         (24U)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM7(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM7_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM7_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF7_MASK                           (0x40000000U)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF7_OFFSET                         (30U)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF7(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF7_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF7_OFFSET)
+
+/*!< SDMA_CHNPRI Register */
+#define IMX6UL_SDMA_CHNPRI_CHNPRIn_MASK                             (0x7U)
+#define IMX6UL_SDMA_CHNPRI_CHNPRIn_OFFSET                           (0U)
+#define IMX6UL_SDMA_CHNPRI_CHNPRIn(x)                               mrt_bit_mask(x, IMX6UL_SDMA_SDMA_CHNPRI_CHNPRIn_MASK, IMX6UL_SDMA_SDMA_CHNPRI_CHNPRIn_OFFSET)
+/* The count of IMX6UL_SDMA_SDMA_CHNPRI */
+#define IMX6UL_SDMA_CHNPRI_COUNT                                    (32U)
+
+/*!< CHNENBL Register */
+#define IMX6UL_SDMA_CHNENBL_ENBLn(x)                                ((kuint32_t)(x))
+/*!< The count of IMX6UL_SDMA_CHNENBL */
+#define IMX6UL_SDMA_CHNENBL_COUNT                                   (48U)
+
 #ifdef __cplusplus
     }
 #endif

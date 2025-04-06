@@ -49,6 +49,7 @@ static void *button_task_entry(void *args)
     struct mailbox &sgrt_mb = cprt_this->get_mailbox();
     struct mail *sprt_mail = mrt_nullptr;
     struct mail_msg sgrt_msg[1] = {};
+    kchar_t msgs[8];
     kssize_t retval;
 
     do {
@@ -74,14 +75,26 @@ static void *button_task_entry(void *args)
             goto END;
         }
 
-        sgrt_msg[0].buffer = &status;
-        sgrt_msg[0].size = 1;
+        if (status)
+        {
+            strcpy(msgs, "on");
+            sgrt_msg[0].size = 2;
+            msgs[2] = '\0';
+        }
+        else
+        {
+            strcpy(msgs, "off");
+            sgrt_msg[0].size = 3;
+            msgs[3] = '\0';
+        }
+
+        sgrt_msg[0].buffer = (kuint8_t *)msgs;
         sgrt_msg[0].type = NR_MAIL_TYPE_KEY;
 
         sprt_mail->sprt_msg = &sgrt_msg[0];
         sprt_mail->num_msgs = 1;
 
-        mail_send("light-app-mailbox", sprt_mail);
+        mail_send("light-task-mailbox", sprt_mail);
         last_status = status;
 
 END:

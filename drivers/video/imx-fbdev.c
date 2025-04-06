@@ -640,6 +640,7 @@ static kint32_t imx_fbdev_driver_probe(struct fwk_platdev *sprt_pdev)
     sprt_drv->base = base;
     sprt_drv->sprt_fb = sprt_fb;
     sprt_drv->sprt_dev = &sprt_pdev->sgrt_dev;
+    sprt_drv->interface_type = NR_IMX_FBDEV_ELCDIF;
 
     sprt_drv->sprt_clk[0] = fwk_clk_get(&sprt_pdev->sgrt_dev, "pix");
     if (!isValid(sprt_drv->sprt_clk[0]))
@@ -698,7 +699,6 @@ static kint32_t imx_fbdev_driver_probe(struct fwk_platdev *sprt_pdev)
     if (retval < 0)
         goto fail7;
 
-    sprt_drv->interface_type = NR_IMX_FBDEV_ELCDIF;
     imx_fbdev_init(base, sprt_drv);
 
     return ER_NORMAL;

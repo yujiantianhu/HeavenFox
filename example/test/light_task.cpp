@@ -62,7 +62,8 @@ static void *light_task_entry(void *args)
         if (!isValid(sprt_mail))
             goto END2;
 
-        if (sprt_mail->sprt_msg->type == NR_MAIL_TYPE_SERIAL)
+        if ((sprt_mail->sprt_msg->type == NR_MAIL_TYPE_SERIAL) ||
+            (sprt_mail->sprt_msg->type == NR_MAIL_TYPE_KEY))
         {
             kchar_t *buffer = (kchar_t *)sprt_mail->sprt_msg[0].buffer;
 

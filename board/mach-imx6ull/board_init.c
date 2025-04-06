@@ -26,6 +26,7 @@ kint32_t board_init_console(void)
     imx6ull_console_init();
 
     /*!< Output Board Information */
+    print_info("\r\n");
     print_info("Console Initial Finished ...\r\n");
     print_info("Welcome to Use Real-Kernel!\r\n");
 

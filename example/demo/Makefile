@@ -9,7 +9,7 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-obj-y   +=  lvgl/
-obj-y   +=  network/
+obj-$(CONFIG_LVGL_TASK)   	+=  lvgl/
+obj-$(CONFIG_NETWORK_TASK)  +=  network/
 
 # end of file

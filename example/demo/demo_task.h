@@ -34,8 +34,17 @@
 /*!< The globals */
 
 /*!< The functions */
+#ifdef CONFIG_NETWORK_TASK
 extern kint32_t network_task_init(void);
+#else
+static inline kint32_t network_task_init(void) { return 0; }
+#endif
+
+#ifdef CONFIG_LVGL_TASK
 extern kint32_t lvgl_task_init(void);
+#else
+static inline kint32_t lvgl_task_init(void) { return 0; }
+#endif
 
 #endif
 

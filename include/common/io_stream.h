@@ -24,6 +24,7 @@
 #define __IO                                            volatile
 #define __IOW                                           volatile
 #define __IOR                                           volatile const
+#define __I                                             volatile const
 
 /*!< defines a general union format */
 #define UNION_SRT_FORMAT_DECLARE(urt_name, srt_name)  \

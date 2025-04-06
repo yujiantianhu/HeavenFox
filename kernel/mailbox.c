@@ -43,7 +43,7 @@ struct mailbox *mailbox_find(const kchar_t *name)
 
     foreach_list_next_entry(sprt_mb, &sgrt_kernel_mailboxs, sgrt_link)
     {
-        if (!strcmp(sprt_mb->name, name))
+        if (!kstrcmp(sprt_mb->name, name))
             return sprt_mb;
     }
 
