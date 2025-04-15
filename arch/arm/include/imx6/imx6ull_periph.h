@@ -1101,7 +1101,31 @@ typedef struct
 
 /*!< Peripheral SDMA base address */
 #define IMX6UL_SDMA_ADDR_BASE                                       (0x20EC000u)
-#define IMX6UL_SDMA_PROPERTY_ENTRY()                                (srt_imx_qspi_t *)IMX6UL_QUARDSPI##x##_ADDR_BASE
+#define IMX6UL_SDMA_PROPERTY_ENTRY()                                (srt_imx_sdma_t *)IMX6UL_SDMA_ADDR_BASE
+
+/*!< SDMA module channel number. */
+#define IMX6UL_SDMA_MODULE_CHANNEL                                  (32)
+/*!< SDMA module event number. */
+#define IMX6UL_SDMA_EVENT_NUM                                       (48)
+
+/*!< SDMA ROM memory to memory script start address. */
+#define IMX6UL_SDMA_M2M_ADDR                                        (642)
+/*!< SDMA ROM peripheral to memory script start address. */
+#define IMX6UL_SDMA_P2M_ADDR                                        (683)
+/*!< SDMA ROM memory to peripheral script start address. */
+#define IMX6UL_SDMA_M2P_ADDR                                        (747)
+/*!< SDMA ROM uart to memory script start address. */
+#define IMX6UL_SDMA_UART2M_ADDR                                     (817)
+/*!< SDMA ROM peripheral on SPBA to memory script start address. */
+#define IMX6UL_SDMA_SHP2M_ADDR                                      (891)
+/*!< SDMA ROM memory to peripheral on SPBA script start address. */
+#define IMX6UL_SDMA_M2SHP_ADDR                                      (960)
+/*!< SDMA ROM UART on SPBA to memory script start address. */
+#define IMX6UL_SDMA_UARTSH2M_ADDR                                   (1032)
+/*!< SDMA ROM SPDIF to memory script start address. */
+#define IMX6UL_SDMA_SPDIF2M_ADDR                                    (1100)
+/*!< SDMA ROM memory to SPDIF script start address. */
+#define IMX6UL_SDMA_M2SPDIF_ADDR                                    (1134)
 
 /*!< Peripheral SDMA Register */
 /*!< MC0PTR Register */
@@ -1177,10 +1201,10 @@ typedef struct
 /*!< SDMA_LOCK Register */
 #define IMX6UL_SDMA_LOCK_LOCK_MASK                                  (0x1U)
 #define IMX6UL_SDMA_LOCK_LOCK_OFFSET                                (0U)
-#define IMX6UL_SDMA_LOCK_LOCK(x)                                    mrt_bit_mask(x, IMX6UL_SDMA_SDMA_LOCK_LOCK_MASK, IMX6UL_SDMA_SDMA_LOCK_LOCK_OFFSET)
+#define IMX6UL_SDMA_LOCK_LOCK(x)                                    mrt_bit_mask(x, IMX6UL_SDMA_LOCK_LOCK_MASK, IMX6UL_SDMA_LOCK_LOCK_OFFSET)
 #define IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_MASK                       (0x2U)
 #define IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_OFFSET                     (1U)
-#define IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR(x)                         mrt_bit_mask(x, IMX6UL_SDMA_SDMA_LOCK_SRESET_LOCK_CLR_MASK, IMX6UL_SDMA_SDMA_LOCK_SRESET_LOCK_CLR_OFFSET)
+#define IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR(x)                         mrt_bit_mask(x, IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_MASK, IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_OFFSET)
 
 /*!< ONCE_ENB Register */
 #define IMX6UL_SDMA_ONCE_ENB_ENB_MASK                               (0x1U)
