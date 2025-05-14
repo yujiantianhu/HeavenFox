@@ -39,10 +39,10 @@
 typedef struct sil9022a_drv_info
 {
     kchar_t *name;
-    struct fwk_i2c_client *sprt_client;
+    struct fwk_i2c_client *sptr_client;
 
-    struct fwk_device sgrt_dev;
-    struct fwk_notifier_block sgrt_nb;
+    struct fwk_device sgtc_dev;
+    struct fwk_notifier_block sgtc_nb;
 
 } sil9022a_drv_info_t;
 
@@ -53,18 +53,18 @@ typedef struct sil9022a_drv_info
  * @retval none
  * @note   write data by i2c
  */
-static kuint16_t sil9022a_write_value(struct sil9022a_drv_info *sprt_drv, kuint8_t reg, kuint8_t value)
+static kuint16_t sil9022a_write_value(struct sil9022a_drv_info *sptr_drv, kuint8_t reg, kuint8_t value)
 {
-    struct fwk_i2c_msg sgrt_msgs;
+    struct fwk_i2c_msg sgtc_msgs = {};
     kuint8_t buf[2] = { reg, value };
     kint32_t retval;
 
-    sgrt_msgs.addr = sprt_drv->sprt_client->addr;
-    sgrt_msgs.flags = 0;
-    sgrt_msgs.ptr_buf = buf;
-    sgrt_msgs.len = sizeof(buf);
+    sgtc_msgs.addr = sptr_drv->sptr_client->addr;
+    sgtc_msgs.flags = 0;
+    sgtc_msgs.ptr_buf = buf;
+    sgtc_msgs.len = sizeof(buf);
 
-    retval = fwk_i2c_transfer(sprt_drv->sprt_client, &sgrt_msgs, 1);
+    retval = fwk_i2c_transfer(sptr_drv->sptr_client, &sgtc_msgs, 1);
     if (retval)
         return (0xff + 1);
 
@@ -77,23 +77,23 @@ static kuint16_t sil9022a_write_value(struct sil9022a_drv_info *sprt_drv, kuint8
  * @retval none
  * @note   read data by i2c
  */
-static kuint16_t sil9022a_read_value(struct sil9022a_drv_info *sprt_drv, kuint8_t reg)
+static kuint16_t sil9022a_read_value(struct sil9022a_drv_info *sptr_drv, kuint8_t reg)
 {
-    struct fwk_i2c_msg sgrt_msgs[2];
+    struct fwk_i2c_msg sgtc_msgs[2] = {};
     kuint8_t value = 0;
     kint32_t retval;
 
-    sgrt_msgs[0].addr = sprt_drv->sprt_client->addr;
-    sgrt_msgs[0].flags = 0;
-    sgrt_msgs[0].ptr_buf = &reg;
-    sgrt_msgs[0].len = 1;
+    sgtc_msgs[0].addr = sptr_drv->sptr_client->addr;
+    sgtc_msgs[0].flags = 0;
+    sgtc_msgs[0].ptr_buf = &reg;
+    sgtc_msgs[0].len = 1;
 
-    sgrt_msgs[1].addr = sprt_drv->sprt_client->addr;
-    sgrt_msgs[1].flags |= FWK_I2C_M_RD;
-    sgrt_msgs[1].ptr_buf = &value;
-    sgrt_msgs[1].len = sizeof(value);
+    sgtc_msgs[1].addr = sptr_drv->sptr_client->addr;
+    sgtc_msgs[1].flags |= FWK_I2C_M_RD;
+    sgtc_msgs[1].ptr_buf = &value;
+    sgtc_msgs[1].len = sizeof(value);
 
-    retval = fwk_i2c_transfer(sprt_drv->sprt_client, &sgrt_msgs[0], ARRAY_SIZE(sgrt_msgs));
+    retval = fwk_i2c_transfer(sptr_drv->sptr_client, &sgtc_msgs[0], ARRAY_SIZE(sgtc_msgs));
     if (retval)
         return (0xff + 1);
 
@@ -102,62 +102,62 @@ static kuint16_t sil9022a_read_value(struct sil9022a_drv_info *sprt_drv, kuint8_
 
 /*!
  * @brief  initialize sil9022a
- * @param  sprt_drv
+ * @param  sptr_drv
  * @retval errno
  * @note   none
  */
-static kint32_t sil9022a_init(struct sil9022a_drv_info *sprt_drv, struct fwk_fb_notifier_param *sprt_param)
+static kint32_t sil9022a_init(struct sil9022a_drv_info *sptr_drv, struct fwk_fb_notifier_param *sptr_param)
 {
-    struct fwk_fb_var_screen_info *sprt_var;
+    struct fwk_fb_var_screen_info *sptr_var;
 
     /*!< Read ID */
-    if (sil9022a_read_value(sprt_drv, SIL9022A_CHIPID) != 0x90)
+    if (sil9022a_read_value(sptr_drv, SIL9022A_CHIPID) != 0x90)
         return -ER_IOERR;
 
-    sprt_var = sprt_param->sprt_var;
+    sptr_var = sptr_param->sptr_var;
 
     /*!< Configuration */
     /*!< Enable all modules */
-    sil9022a_write_value(sprt_drv, SIL9022A_SYSTEM, 0x1f);
+    sil9022a_write_value(sptr_drv, SIL9022A_SYSTEM, 0x1f);
 
-    if ((sprt_var->xres == 1920) &&
-        (sprt_var->yres == 1080))
+    if ((sptr_var->xres == 1920) &&
+        (sptr_var->yres == 1080))
     {
         /*!< 1080@60Hz */
-        sil9022a_write_value(sprt_drv, SIL9022A_VIDFMT, 0x03);
+        sil9022a_write_value(sptr_drv, SIL9022A_VIDFMT, 0x03);
     }
 
-    if ((sprt_var->bits_per_pixel == 24) ||
-        (sprt_var->bits_per_pixel == 32))
+    if ((sptr_var->bits_per_pixel == 24) ||
+        (sptr_var->bits_per_pixel == 32))
     {
         /*!< RGB888 */
-        sil9022a_write_value(sprt_drv, SIL9022A_INPUT, 0x00);
+        sil9022a_write_value(sptr_drv, SIL9022A_INPUT, 0x00);
     }
 
     /*!< Enable all TMDS channels */
-    sil9022a_write_value(sprt_drv, SIL9022A_TMDS, 0x03);
+    sil9022a_write_value(sptr_drv, SIL9022A_TMDS, 0x03);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   notifier callback
- * @param   sprt_nb
+ * @param   sptr_nb
  * @retval  errno
  * @note    none
  */
-kint32_t sil9022a_hdmi_action(struct fwk_notifier_block *sprt_nb, kuint32_t event, void *args)
+kint32_t sil9022a_hdmi_action(struct fwk_notifier_block *sptr_nb, kuint32_t event, void *args)
 {
-    struct sil9022a_drv_info *sprt_drv;
-    struct fwk_fb_notifier_param *sprt_param;
+    struct sil9022a_drv_info *sptr_drv;
+    struct fwk_fb_notifier_param *sptr_param;
 
-    sprt_drv = (struct sil9022a_drv_info *)sprt_nb->data;
-    sprt_param = (struct fwk_fb_notifier_param *)args;
+    sptr_drv = (struct sil9022a_drv_info *)sptr_nb->data;
+    sptr_param = (struct fwk_fb_notifier_param *)args;
 
     switch (event)
     {
         case FB_NOTIFIER_HDMI_OPEN:
-            sil9022a_init(sprt_drv, sprt_param);
+            sil9022a_init(sptr_drv, sptr_param);
             break;
 
         case FB_NOTIFIER_HDMI_CLOSE:
@@ -172,83 +172,83 @@ kint32_t sil9022a_hdmi_action(struct fwk_notifier_block *sprt_nb, kuint32_t even
 /*!< --------------------------------------------------------------------- */
 /*!
  * @brief   sil9022a_driver_probe
- * @param   sprt_client
+ * @param   sptr_client
  * @retval  errno
  * @note    none
  */
-static kint32_t sil9022a_driver_probe(struct fwk_i2c_client *sprt_client, const struct fwk_i2c_device_id *sprt_id)
+static kint32_t sil9022a_driver_probe(struct fwk_i2c_client *sptr_client, const struct fwk_i2c_device_id *sptr_id)
 {
-    struct sil9022a_drv_info *sprt_drv;
+    struct sil9022a_drv_info *sptr_drv;
 
-    sprt_drv = kzalloc(sizeof(*sprt_drv), GFP_KERNEL);
-    if (!isValid(sprt_drv))
+    sptr_drv = kzalloc(sizeof(*sptr_drv), GFP_KERNEL);
+    if (!isValid(sptr_drv))
         return -ER_NOMEM;
 
-    sprt_drv->name = "sil9022a";
-    sprt_drv->sprt_client = sprt_client;
+    sptr_drv->name = "sil9022a";
+    sptr_drv->sptr_client = sptr_client;
 
-    fwk_device_initial(&sprt_drv->sgrt_dev);
-    sprt_drv->sgrt_dev.sprt_parent = &sprt_client->sgrt_dev;
-    mrt_dev_set_name(&sprt_drv->sgrt_dev, sprt_drv->name);
-    fwk_device_add(&sprt_drv->sgrt_dev);
+    fwk_device_initial(&sptr_drv->sgtc_dev);
+    sptr_drv->sgtc_dev.sptr_parent = &sptr_client->sgtc_dev;
+    mr_dev_set_name(&sptr_drv->sgtc_dev, sptr_drv->name);
+    fwk_device_add(&sptr_drv->sgtc_dev);
 
-    fwk_i2c_set_client_data(sprt_client, sprt_drv);
+    fwk_i2c_set_client_data(sptr_client, sptr_drv);
 
     /*!< Configure Notifier Chain */
-    sprt_drv->sgrt_nb.data = sprt_drv;
-    sprt_drv->sgrt_nb.notifier_call = sil9022a_hdmi_action;
-    sprt_drv->sgrt_nb.expect_event = FB_NOTIFIER_HDMI_OPEN | FB_NOTIFIER_HDMI_CLOSE;
-    init_list_head(&sprt_drv->sgrt_nb.sgrt_link);
-    fwk_blocking_notifier_chain_register(&sgrt_fbmem_notifier_chain, &sprt_drv->sgrt_nb);
+    sptr_drv->sgtc_nb.data = sptr_drv;
+    sptr_drv->sgtc_nb.notifier_call = sil9022a_hdmi_action;
+    sptr_drv->sgtc_nb.expect_event = FB_NOTIFIER_HDMI_OPEN | FB_NOTIFIER_HDMI_CLOSE;
+    init_list_head(&sptr_drv->sgtc_nb.sgtc_link);
+    fwk_blocking_notifier_chain_register(&sgtc_fbmem_notifier_chain, &sptr_drv->sgtc_nb);
 
 	return ER_NORMAL;
 }
 
 /*!
  * @brief   sil9022a_driver_remove
- * @param   sprt_client
+ * @param   sptr_client
  * @retval  errno
  * @note    none
  */
-static kint32_t sil9022a_driver_remove(struct fwk_i2c_client *sprt_client)
+static kint32_t sil9022a_driver_remove(struct fwk_i2c_client *sptr_client)
 {
-    struct sil9022a_drv_info *sprt_drv;
+    struct sil9022a_drv_info *sptr_drv;
 
-    sprt_drv = fwk_i2c_get_client_data(sprt_client);
+    sptr_drv = fwk_i2c_get_client_data(sptr_client);
 
-    fwk_blocking_notifier_chain_unregister(&sgrt_fbmem_notifier_chain, &sprt_drv->sgrt_nb);
-    kfree(sprt_drv);
-    fwk_i2c_set_client_data(sprt_client, mrt_nullptr);
+    fwk_blocking_notifier_chain_unregister(&sgtc_fbmem_notifier_chain, &sptr_drv->sgtc_nb);
+    kfree(sptr_drv);
+    fwk_i2c_set_client_data(sptr_client, mr_nullptr);
 
     return ER_NORMAL;
 }
 
-static const struct fwk_i2c_device_id sgrt_sil9022a_driver_ids[] =
+static const struct fwk_i2c_device_id sgtc_sil9022a_driver_ids[] =
 {
     { .name = "sil9022a", .driver_data = -1 },
     {},
 };
 
 /*!< device id for device-tree */
-static const struct fwk_of_device_id sgrt_sil9022a_driver_dts[] =
+static const struct fwk_of_device_id sgtc_sil9022a_driver_dts[] =
 {
 	{ .compatible = "silicon,sil9022a", },
 	{},
 };
 
 /*!< platform instance */
-static struct fwk_i2c_driver sgrt_sil9022a_driver =
+static struct fwk_i2c_driver sgtc_sil9022a_driver =
 {
 	.probe	= sil9022a_driver_probe,
 	.remove	= sil9022a_driver_remove,
 
-    .sprt_id_table = sgrt_sil9022a_driver_ids,
+    .sptr_id_table = sgtc_sil9022a_driver_ids,
 	
-	.sgrt_driver =
+	.sgtc_driver =
 	{
 		.name 	= "sil9022a,hdmi-phy",
 		.id 	= -1,
-		.sprt_of_match_table = sgrt_sil9022a_driver_dts,
+		.sptr_of_match_table = sgtc_sil9022a_driver_dts,
 	},
 };
 
@@ -261,7 +261,7 @@ static struct fwk_i2c_driver sgrt_sil9022a_driver =
  */
 kint32_t __fwk_init sil9022a_driver_init(void)
 {
-	return fwk_i2c_add_driver(&sgrt_sil9022a_driver);
+	return fwk_i2c_add_driver(&sgtc_sil9022a_driver);
 }
 
 /*!
@@ -272,7 +272,7 @@ kint32_t __fwk_init sil9022a_driver_init(void)
  */
 void __fwk_exit sil9022a_driver_exit(void)
 {
-	fwk_i2c_del_driver(&sgrt_sil9022a_driver);
+	fwk_i2c_del_driver(&sgtc_sil9022a_driver);
 }
 
 IMPORT_DRIVER_INIT(sil9022a_driver_init);

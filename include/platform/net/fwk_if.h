@@ -66,13 +66,13 @@ struct fwk_network_if
 {
 	kchar_t ifname[NET_IFNAME_SIZE];
 
-    struct fwk_sockaddr_in sgrt_ip;
-    struct fwk_sockaddr_in sgrt_gw;
-    struct fwk_sockaddr_in sgrt_netmask;
+    struct fwk_sockaddr_in sgtc_ip;
+    struct fwk_sockaddr_in sgtc_gw;
+    struct fwk_sockaddr_in sgtc_netmask;
 
-    struct fwk_network_if_ops *sprt_oprts;
+    struct fwk_network_if_ops *sptr_oprts;
 
-    struct list_head sgrt_link;
+    struct list_head sgtc_link;
     void *private_data;
 };
 
@@ -83,35 +83,35 @@ struct fwk_network_com
     kint32_t type;
     kint32_t protocol;
 
-    struct fwk_sockaddr_in sgrt_sin;
+    struct fwk_sockaddr_in sgtc_sin;
     void *private_data;
 };
 
 struct fwk_network_object
 {
-    struct fwk_network_com sgrt_socket;
-    struct fwk_network_if *sprt_if;
+    struct fwk_network_com sgtc_socket;
+    struct fwk_network_if *sptr_if;
 
-    struct radix_link sgrt_radix;
+    struct radix_link sgtc_radix;
 };
 
 /*!< network node: operations */
 struct fwk_network_if_ops
 {
-    kint32_t (*init)(struct fwk_network_com *sprt_socket);
-    void (*exit)(struct fwk_network_com *sprt_socket);
+    kint32_t (*init)(struct fwk_network_com *sptr_socket);
+    void (*exit)(struct fwk_network_com *sptr_socket);
 
-    void (*listen)(struct fwk_network_com *sprt_socket);
+    void (*listen)(struct fwk_network_com *sptr_socket);
 
-    kssize_t (*send)(struct fwk_network_com *sprt_socket, const void *buf, kssize_t size);
-    kssize_t (*recv)(struct fwk_network_com *sprt_socket, void *buf, kssize_t size);
-    kssize_t (*sendto)(struct fwk_network_com *sprt_socket, const void *buf, kssize_t len, 
-                        kint32_t flags, const struct fwk_sockaddr *sprt_dest, fwk_socklen_t addrlen);
-    kssize_t (*recvfrom)(struct fwk_network_com *sprt_socket, void *buf, size_t len, 
-                        kint32_t flags, struct fwk_sockaddr *sprt_src, fwk_socklen_t *addrlen);
+    kssize_t (*send)(struct fwk_network_com *sptr_socket, const void *buf, kssize_t size);
+    kssize_t (*recv)(struct fwk_network_com *sptr_socket, void *buf, kssize_t size);
+    kssize_t (*sendto)(struct fwk_network_com *sptr_socket, const void *buf, kssize_t len, 
+                        kint32_t flags, const struct fwk_sockaddr *sptr_dest, fwk_socklen_t addrlen);
+    kssize_t (*recvfrom)(struct fwk_network_com *sptr_socket, void *buf, size_t len, 
+                        kint32_t flags, struct fwk_sockaddr *sptr_src, fwk_socklen_t *addrlen);
 
-    kint32_t (*link_up)(struct fwk_network_if *sprt_if);
-    kint32_t (*link_down)(struct fwk_network_if *sprt_if);
+    kint32_t (*link_up)(struct fwk_network_if *sptr_if);
+    kint32_t (*link_down)(struct fwk_network_if *sptr_if);
 };
 
 struct fwk_ifmap
@@ -153,23 +153,23 @@ struct fwk_ifreq
     } urt_fwk_ifr_ifru;
 };
 
-#define mrt_ifr_name			urt_fwk_ifr_ifrn.ifrn_name					/*!< interface name */
-#define mrt_ifr_hwaddr			urt_fwk_ifr_ifru.ifru_hwaddr				/*!< MAC address */
-#define	mrt_ifr_addr			urt_fwk_ifr_ifru.ifru_addr					/*!< address */
-#define	mrt_ifr_dstaddr			urt_fwk_ifr_ifru.ifru_dstaddr				/*!< other end of p-p lnk	*/
-#define	mrt_ifr_broadaddr		urt_fwk_ifr_ifru.ifru_broadaddr				/*!< broadcast address */
-#define	mrt_ifr_netmask			urt_fwk_ifr_ifru.ifru_netmask				/*!< interface net mask */
-#define	mrt_ifr_flags			urt_fwk_ifr_ifru.ifru_flags					/*!< flags */
-#define	mrt_ifr_metric			urt_fwk_ifr_ifru.ifru_ivalue				/*!< metric */
-#define	mrt_ifr_mtu				urt_fwk_ifr_ifru.ifru_mtu					/*!< mtu */
-#define mrt_ifr_map				urt_fwk_ifr_ifru.ifru_map					/*!< device map */
-#define mrt_ifr_slave			urt_fwk_ifr_ifru.ifru_slave					/*!< slave device */
-#define	mrt_ifr_data			urt_fwk_ifr_ifru.ifru_data					/*!< for use by interface	*/
-#define mrt_ifr_ifindex			urt_fwk_ifr_ifru.ifru_ivalue				/*!< interface index */
-#define mrt_ifr_bandwidth		urt_fwk_ifr_ifru.ifru_ivalue    			/*!< link bandwidth */
-#define mrt_ifr_qlen			urt_fwk_ifr_ifru.ifru_ivalue				/*!< Queue length */
-#define mrt_ifr_newname			urt_fwk_ifr_ifru.ifru_newname				/*!< New name	*/
-// #define mrt_ifr_settings		urt_fwk_ifr_ifru.ifru_settings				/*!< Device/proto settings */
+#define mr_ifr_name			urt_fwk_ifr_ifrn.ifrn_name					/*!< interface name */
+#define mr_ifr_hwaddr			urt_fwk_ifr_ifru.ifru_hwaddr				/*!< MAC address */
+#define	mr_ifr_addr			urt_fwk_ifr_ifru.ifru_addr					/*!< address */
+#define	mr_ifr_dstaddr			urt_fwk_ifr_ifru.ifru_dstaddr				/*!< other end of p-p lnk	*/
+#define	mr_ifr_broadaddr		urt_fwk_ifr_ifru.ifru_broadaddr				/*!< broadcast address */
+#define	mr_ifr_netmask			urt_fwk_ifr_ifru.ifru_netmask				/*!< interface net mask */
+#define	mr_ifr_flags			urt_fwk_ifr_ifru.ifru_flags					/*!< flags */
+#define	mr_ifr_metric			urt_fwk_ifr_ifru.ifru_ivalue				/*!< metric */
+#define	mr_ifr_mtu				urt_fwk_ifr_ifru.ifru_mtu					/*!< mtu */
+#define mr_ifr_map				urt_fwk_ifr_ifru.ifru_map					/*!< device map */
+#define mr_ifr_slave			urt_fwk_ifr_ifru.ifru_slave					/*!< slave device */
+#define	mr_ifr_data			urt_fwk_ifr_ifru.ifru_data					/*!< for use by interface	*/
+#define mr_ifr_ifindex			urt_fwk_ifr_ifru.ifru_ivalue				/*!< interface index */
+#define mr_ifr_bandwidth		urt_fwk_ifr_ifru.ifru_ivalue    			/*!< link bandwidth */
+#define mr_ifr_qlen			urt_fwk_ifr_ifru.ifru_ivalue				/*!< Queue length */
+#define mr_ifr_newname			urt_fwk_ifr_ifru.ifru_newname				/*!< New name	*/
+// #define mr_ifr_settings		urt_fwk_ifr_ifru.ifru_settings				/*!< Device/proto settings */
 
 enum __ERT_NETWORK_IFR
 {
@@ -195,22 +195,22 @@ enum __ERT_NETWORK_IFR
 #define NETWORK_IFR_GET_MTU     FWK_IOR('n', NR_NETWORK_IFR_MTU, struct fwk_ifreq)
 
 /*!< The globals */
-extern struct fwk_network_if_ops *sprt_fwk_network_if_oprts;
+extern struct fwk_network_if_ops *sptr_fwk_network_if_oprts;
 
 /*!< The functions */
-extern struct fwk_network_if *network_find_node(const kchar_t *name, struct fwk_sockaddr_in *sprt_ip);
-extern struct fwk_network_if *network_next_node(struct fwk_network_if *sprt_if);
+extern struct fwk_network_if *network_find_node(const kchar_t *name, struct fwk_sockaddr_in *sptr_ip);
+extern struct fwk_network_if *network_next_node(struct fwk_network_if *sptr_if);
 
 /*!< API functions */
 /*!
  * @brief   configure default if operations
- * @param   sprt_oprts
+ * @param   sptr_oprts
  * @retval  none
  * @note    none
  */
-static inline void network_set_default_ops(const struct fwk_network_if_ops *sprt_oprts)
+static inline void network_set_default_ops(const struct fwk_network_if_ops *sptr_oprts)
 {
-    sprt_fwk_network_if_oprts = (struct fwk_network_if_ops *)sprt_oprts;
+    sptr_fwk_network_if_oprts = (struct fwk_network_if_ops *)sptr_oprts;
 }
 
 #ifdef __cplusplus

@@ -179,7 +179,7 @@ typedef struct
  */
 typedef struct 
 {
-    XGpioPs_Config sgrt_cfg;	                            /*!< Device configuration */
+    XGpioPs_Config sgtc_cfg;	                            /*!< Device configuration */
     kbool_t IsReady;			                            /*!< Device is initialized and ready */
 
     kuint32_t MaxPinNum;			                        /*!< Max pins in the GPIO device */
@@ -432,12 +432,12 @@ typedef struct
  */
 typedef struct 
 {
-    XUartPs_Config sgrt_cfg;	                            /*!< Configuration data structure */
+    XUartPs_Config sgtc_cfg;	                            /*!< Configuration data structure */
     kuint32_t InputClockHz;	                                /*!< Input clock frequency */
     kuint32_t BaudRate;		                                /*!< Current baud rate */
 
-    XUartPsBuffer sgrt_txbuf;
-    XUartPsBuffer sgrt_rxbuf;
+    XUartPsBuffer sgtc_txbuf;
+    XUartPsBuffer sgtc_rxbuf;
 
     kbool_t IsReady;		                                /*!< Device is initialized and ready */
     kbool_t is_rxbs_error;
@@ -448,13 +448,13 @@ typedef struct
                                 SdPs                                   
  ---------------------------------------------------------------------- */
 #define XSdPs_WriteReg8(addr, offset, data) \
-                                            mrt_writeb(data, (addr) + (offset))
+                                            mr_writeb(data, (addr) + (offset))
 #define XSdPs_WriteReg16(addr, offset, data)    \
-                                            mrt_writew(data, (addr) + (offset))
-#define XSdPs_WriteReg(addr, offset, data)  mrt_writel(data, (addr) + (offset))
-#define XSdPs_ReadReg8(addr, offset)        mrt_readb((addr) + (offset))
-#define XSdPs_ReadReg16(addr, offset)       mrt_readw((addr) + (offset))
-#define XSdPs_ReadReg(addr, offset)         mrt_readl((addr) + (offset))
+                                            mr_writew(data, (addr) + (offset))
+#define XSdPs_WriteReg(addr, offset, data)  mr_writel(data, (addr) + (offset))
+#define XSdPs_ReadReg8(addr, offset)        mr_readb((addr) + (offset))
+#define XSdPs_ReadReg16(addr, offset)       mr_readw((addr) + (offset))
+#define XSdPs_ReadReg(addr, offset)         mr_readl((addr) + (offset))
 
 /*!< @name Register Map
  *
@@ -922,7 +922,7 @@ typedef struct
  */
 typedef struct 
 {
-    XSdPs_Config sgrt_cfg;									/*!< Configuration structure */
+    XSdPs_Config sgtc_cfg;									/*!< Configuration structure */
     kuint32_t Host_Caps;									/*!< Capabilities of host controller */
     kuint32_t Host_CapsExt;									/*!< Extended Capabilities */
     kuint32_t HCS;											/*!< High capacity support in card */
@@ -1288,64 +1288,64 @@ extern void Xil_DCacheInvalidateRange(kuaddr_t adr, kuint32_t len);
 
 /*!< Gpio */
 extern XGpioPs_Config *XGpioPs_LookupConfig(kuint16_t DeviceId);
-extern kint32_t XGpioPs_CfgInitialize(XGpioPs *sprt_gpio, XGpioPs_Config *sprt_cfg, kuint32_t address);
+extern kint32_t XGpioPs_CfgInitialize(XGpioPs *sptr_gpio, XGpioPs_Config *sptr_cfg, kuint32_t address);
 extern void XGpioPs_GetBankPin(kuint32_t PinNumber, kuint8_t *BankNumber, kuint8_t *PinNumberInBank);
-extern kint32_t XGpioPs_GetDirectionPin(XGpioPs *sprt_gpio, kuint32_t Pin);
-extern kint32_t XGpioPs_SetDirectionPin(XGpioPs *sprt_gpio, kuint32_t Pin, kuint32_t Direction);
-extern kint32_t XGpioPs_GetOutputEnablePin(XGpioPs *sprt_gpio, kuint32_t Pin);
-extern kint32_t XGpioPs_SetOutputEnablePin(XGpioPs *sprt_gpio, kuint32_t Pin, kbool_t OpEnable);
-extern kint32_t XGpioPs_ReadPin(XGpioPs *sprt_gpio, kuint32_t Pin);
-extern kint32_t XGpioPs_WritePin(XGpioPs *sprt_gpio, kuint32_t Pin, kuint32_t Data);
+extern kint32_t XGpioPs_GetDirectionPin(XGpioPs *sptr_gpio, kuint32_t Pin);
+extern kint32_t XGpioPs_SetDirectionPin(XGpioPs *sptr_gpio, kuint32_t Pin, kuint32_t Direction);
+extern kint32_t XGpioPs_GetOutputEnablePin(XGpioPs *sptr_gpio, kuint32_t Pin);
+extern kint32_t XGpioPs_SetOutputEnablePin(XGpioPs *sptr_gpio, kuint32_t Pin, kbool_t OpEnable);
+extern kint32_t XGpioPs_ReadPin(XGpioPs *sptr_gpio, kuint32_t Pin);
+extern kint32_t XGpioPs_WritePin(XGpioPs *sptr_gpio, kuint32_t Pin, kuint32_t Data);
 
 /*!< Timer */
 extern XScuTimer_Config *XScuTimer_LookupConfig(kuint16_t DeviceId);
-extern kint32_t XScuTimer_CfgInitialize(XScuTimer *sprt_scutimer, XScuTimer_Config *sprt_config, kuint32_t BaseAddr);
-extern void XScuTimer_Start(XScuTimer *sprt_scutimer);
-extern void XScuTimer_Stop(XScuTimer *sprt_scutimer);
-extern void XScuTimer_LoadTimer(XScuTimer *sprt_scutimer, kuint32_t value);
-extern void XScuTimer_RestartTimer(XScuTimer *sprt_scutimer);
-extern void XScuTimer_EnableAutoReload(XScuTimer *sprt_scutimer);
-extern void XScuTimer_DisableAutoReload(XScuTimer *sprt_scutimer);
-extern void XScuTimer_EnableInterrupt(XScuTimer *sprt_scutimer);
-extern void XScuTimer_DisableInterrupt(XScuTimer *sprt_scutimer);
-extern kuint32_t XScuTimer_GetInterruptStatus(XScuTimer *sprt_scutimer);
-extern void XScuTimer_ClearInterruptStatus(XScuTimer *sprt_scutimer);
+extern kint32_t XScuTimer_CfgInitialize(XScuTimer *sptr_scutimer, XScuTimer_Config *sptr_config, kuint32_t BaseAddr);
+extern void XScuTimer_Start(XScuTimer *sptr_scutimer);
+extern void XScuTimer_Stop(XScuTimer *sptr_scutimer);
+extern void XScuTimer_LoadTimer(XScuTimer *sptr_scutimer, kuint32_t value);
+extern void XScuTimer_RestartTimer(XScuTimer *sptr_scutimer);
+extern void XScuTimer_EnableAutoReload(XScuTimer *sptr_scutimer);
+extern void XScuTimer_DisableAutoReload(XScuTimer *sptr_scutimer);
+extern void XScuTimer_EnableInterrupt(XScuTimer *sptr_scutimer);
+extern void XScuTimer_DisableInterrupt(XScuTimer *sptr_scutimer);
+extern kuint32_t XScuTimer_GetInterruptStatus(XScuTimer *sptr_scutimer);
+extern void XScuTimer_ClearInterruptStatus(XScuTimer *sptr_scutimer);
 
 /*!< Uart */
 extern XUartPs_Config *XUartPs_LookupConfig(kuint16_t DeviceId);
-extern void XUartPs_EnableUart(XUartPs *sprt_uart);
-extern void XUartPs_DisableUart(XUartPs *sprt_uart);
-extern kint32_t XUartPs_SetBaudRate(XUartPs *sprt_uart, kuint32_t BaudRate);
-extern kint32_t XUartPs_CfgInitialize(XUartPs *sprt_uart, XUartPs_Config *sprt_cfg, kuint32_t address);
+extern void XUartPs_EnableUart(XUartPs *sptr_uart);
+extern void XUartPs_DisableUart(XUartPs *sptr_uart);
+extern kint32_t XUartPs_SetBaudRate(XUartPs *sptr_uart, kuint32_t BaudRate);
+extern kint32_t XUartPs_CfgInitialize(XUartPs *sptr_uart, XUartPs_Config *sptr_cfg, kuint32_t address);
 extern kbool_t XUartPs_IsSendFull(kuint32_t address);
 extern kbool_t XUartPs_IsSendEmpty(kuint32_t BaseAddress);
 extern kbool_t XUartPs_IsRecvFull(kuint32_t BaseAddress);
 extern kbool_t XUartPs_IsRecvEmpty(kuint32_t address);
-extern kint32_t XUartPs_SendBuffer(XUartPs *sprt_uart);
-extern kint32_t XUartPs_ReceiveBuffer(XUartPs *sprt_uart);
-extern kint32_t XUartPs_Send(XUartPs *sprt_uart, kuint8_t *BufferPtr, kuint32_t NumBytes);
-extern kint32_t XUartPs_Recv(XUartPs *sprt_uart, kuint8_t *BufferPtr, kuint32_t NumBytes);
+extern kint32_t XUartPs_SendBuffer(XUartPs *sptr_uart);
+extern kint32_t XUartPs_ReceiveBuffer(XUartPs *sptr_uart);
+extern kint32_t XUartPs_Send(XUartPs *sptr_uart, kuint8_t *BufferPtr, kuint32_t NumBytes);
+extern kint32_t XUartPs_Recv(XUartPs *sptr_uart, kuint8_t *BufferPtr, kuint32_t NumBytes);
 
 /*!< Sd */
 extern XSdPs_Config *XSdPs_LookupConfig(kuint16_t DeviceId);
-extern kint32_t XSdPs_Change_ClkFreq(XSdPs *sprt_sd, kuint32_t SelFreq);
-extern kint32_t XSdPs_CfgInitialize(XSdPs *sprt_sd, XSdPs_Config *sprt_cfg, kuint32_t address);
-extern kbool_t XSdPs_IsCardDetected(XSdPs *sprt_sd);
-extern kint32_t XSdPs_Change_BusWidth(XSdPs *sprt_sd, kuint32_t width);
-extern kint32_t XSdPs_SetBlkSize(XSdPs *sprt_sd, kuint32_t BlkCnt, kuint32_t BlkSize);
-extern void XSdPs_SetupADMA2DescTbl(XSdPs *sprt_sd, kuint32_t BlkCnt, const kuint8_t *Buff);
+extern kint32_t XSdPs_Change_ClkFreq(XSdPs *sptr_sd, kuint32_t SelFreq);
+extern kint32_t XSdPs_CfgInitialize(XSdPs *sptr_sd, XSdPs_Config *sptr_cfg, kuint32_t address);
+extern kbool_t XSdPs_IsCardDetected(XSdPs *sptr_sd);
+extern kint32_t XSdPs_Change_BusWidth(XSdPs *sptr_sd, kuint32_t width);
+extern kint32_t XSdPs_SetBlkSize(XSdPs *sptr_sd, kuint32_t BlkCnt, kuint32_t BlkSize);
+extern void XSdPs_SetupADMA2DescTbl(XSdPs *sptr_sd, kuint32_t BlkCnt, const kuint8_t *Buff);
 
 /*!< AxiVdma & Vtc */
 extern XAxiVdma_Config *XAxiVdma_LookupConfig(kuint16_t DeviceId);
-extern kint32_t XAxiVdma_CfgInitialize(XAxiVdma *sprt_vdma, XAxiVdma_Config *sprt_cfg, kuint32_t EffectiveAddr);
+extern kint32_t XAxiVdma_CfgInitialize(XAxiVdma *sptr_vdma, XAxiVdma_Config *sptr_cfg, kuint32_t EffectiveAddr);
 extern XVtc_Config *XVtc_LookupConfig(kuint16_t DeviceId);
-extern kint32_t XVtc_CfgInitialize(XVtc *sprt_vtc, XVtc_Config *sprt_vcfg, kuint32_t EffectiveAddr);
-extern kint32_t DisplayInitialize(DisplayCtrl *sprt_disp, XAxiVdma *sprt_vdma, kuint16_t vtcId, 
+extern kint32_t XVtc_CfgInitialize(XVtc *sptr_vtc, XVtc_Config *sptr_vcfg, kuint32_t EffectiveAddr);
+extern kint32_t DisplayInitialize(DisplayCtrl *sptr_disp, XAxiVdma *sptr_vdma, kuint16_t vtcId, 
                                 kuint32_t dynClkAddr, kuint8_t *framePtr[DISPLAY_NUM_FRAMES], 
-                                kuint32_t stride, VideoMode *sprt_vmode);
-extern kint32_t DisplayChangeFrameBuffer(DisplayCtrl *sprt_disp, kuint32_t FrameAddr, kusize_t FrameSize);
-extern kint32_t DisplayStart(DisplayCtrl *sprt_disp);
-extern kint32_t DisplayStop(DisplayCtrl *sprt_dispctrl);
+                                kuint32_t stride, VideoMode *sptr_vmode);
+extern kint32_t DisplayChangeFrameBuffer(DisplayCtrl *sptr_disp, kuint32_t FrameAddr, kusize_t FrameSize);
+extern kint32_t DisplayStart(DisplayCtrl *sptr_disp);
+extern kint32_t DisplayStop(DisplayCtrl *sptr_dispctrl);
 
 /*!< EmacPs */
 

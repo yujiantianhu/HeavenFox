@@ -37,9 +37,9 @@ static const VideoMode VMODE_1920x1080 = {
 	.freq = 148.5
 };
 
-static DisplayCtrl sgrt_xil_display_ctrl;
-static XAxiVdma sgrt_xil_axivdma;
-static struct fwk_disp_info sgrt_xil_hdmi_disp[DISPLAY_NUM_FRAMES];
+static DisplayCtrl sgtc_xil_display_ctrl;
+static XAxiVdma sgtc_xil_axivdma;
+static struct fwk_disp_info sgtc_xil_hdmi_disp[DISPLAY_NUM_FRAMES];
 
 /*!< API function */
 /*!
@@ -50,44 +50,44 @@ static struct fwk_disp_info sgrt_xil_hdmi_disp[DISPLAY_NUM_FRAMES];
  */
 void zynq7_hdmi_init(void)
 {
-	XAxiVdma_Config *sprt_axicfg;
-    XVtc_Config *sprt_vcfg;
+	XAxiVdma_Config *sptr_axicfg;
+    XVtc_Config *sptr_vcfg;
     kuint8_t *pFrames[DISPLAY_NUM_FRAMES];
-    VideoMode *sprt_vmode;
+    VideoMode *sptr_vmode;
     kint32_t index, retval;
 
 	for (index = 0; index < DISPLAY_NUM_FRAMES; index++)
 		pFrames[index] = VMODE_BUFFER + index * (1920 * 1080 * 4);
 
-    sprt_axicfg = XAxiVdma_LookupConfig(XPAR_AXIVDMA_0_DEVICE_ID);
-    if (!sprt_axicfg)
+    sptr_axicfg = XAxiVdma_LookupConfig(XPAR_AXIVDMA_0_DEVICE_ID);
+    if (!sptr_axicfg)
         goto kill;
 
-    retval = XAxiVdma_CfgInitialize(&sgrt_xil_axivdma, sprt_axicfg, sprt_axicfg->BaseAddress);
+    retval = XAxiVdma_CfgInitialize(&sgtc_xil_axivdma, sptr_axicfg, sptr_axicfg->BaseAddress);
     if (retval)
         goto kill;
 
-    sprt_vmode = (VideoMode *)(&VMODE_1920x1080);
-    retval = DisplayInitialize(&sgrt_xil_display_ctrl, &sgrt_xil_axivdma, XPAR_VTC_0_DEVICE_ID, 
-                                    XPAR_AXI_DYNCLK_0_BASEADDR, pFrames, 1920 * 4, sprt_vmode);
+    sptr_vmode = (VideoMode *)(&VMODE_1920x1080);
+    retval = DisplayInitialize(&sgtc_xil_display_ctrl, &sgtc_xil_axivdma, XPAR_VTC_0_DEVICE_ID, 
+                                    XPAR_AXI_DYNCLK_0_BASEADDR, pFrames, 1920 * 4, sptr_vmode);
     if (retval)
         goto kill;
 
-    sprt_vcfg = XVtc_LookupConfig(XPAR_V_TC_0_DEVICE_ID);
-    if (!sprt_vcfg)
+    sptr_vcfg = XVtc_LookupConfig(XPAR_V_TC_0_DEVICE_ID);
+    if (!sptr_vcfg)
         goto kill;
 
-    retval = XVtc_CfgInitialize(&(sgrt_xil_display_ctrl.vtc), sprt_vcfg, sprt_vcfg->BaseAddress);
+    retval = XVtc_CfgInitialize(&(sgtc_xil_display_ctrl.vtc), sptr_vcfg, sptr_vcfg->BaseAddress);
     if (retval)
         goto kill;
 
-    retval = DisplayStart(&sgrt_xil_display_ctrl);
+    retval = DisplayStart(&sgtc_xil_display_ctrl);
     if (retval)
         goto kill;
 
-    fwk_display_ctrl_init(&sgrt_xil_hdmi_disp[0], &VMODE_BUFFER[0], &VMODE_BUFFER[0], 
+    fwk_display_ctrl_init(&sgtc_xil_hdmi_disp[0], &VMODE_BUFFER[0], &VMODE_BUFFER[0], 
                     1920 * 1080 * 4, 1920, 1080, FWK_RGB_PIXEL32);
-    fwk_display_clear(&sgrt_xil_hdmi_disp[0], RGB_WHITE);
+    fwk_display_clear(&sgtc_xil_hdmi_disp[0], RGB_WHITE);
 
 kill:
     return;

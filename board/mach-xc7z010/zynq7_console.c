@@ -14,7 +14,7 @@
 #include "zynq7_common.h"
 
 /*!< The globals */
-static XUartPs sgrt_ps7_xuart_ps_data;
+static XUartPs sgtc_ps7_xuart_ps_data;
 
 /*!< API function */
 /*!
@@ -25,17 +25,17 @@ static XUartPs sgrt_ps7_xuart_ps_data;
  */
 void zynq7_console_init(void)
 {
-    XUartPs *sprt_uart;
-    XUartPs_Config *sprt_cfg;
+    XUartPs *sptr_uart;
+    XUartPs_Config *sptr_cfg;
 
-    sprt_uart = &sgrt_ps7_xuart_ps_data;
+    sptr_uart = &sgtc_ps7_xuart_ps_data;
 
-    sprt_cfg = XUartPs_LookupConfig(XPAR_PS7_UART_0_DEVICE_ID);
-    if (!isValid(sprt_cfg))
+    sptr_cfg = XUartPs_LookupConfig(XPAR_PS7_UART_0_DEVICE_ID);
+    if (!isValid(sptr_cfg))
         return;
 
-    XUartPs_CfgInitialize(sprt_uart, sprt_cfg, sprt_cfg->BaseAddress);
-    XUartPs_SetBaudRate(sprt_uart, 115200);
+    XUartPs_CfgInitialize(sptr_uart, sptr_cfg, sptr_cfg->BaseAddress);
+    XUartPs_SetBaudRate(sptr_uart, 115200);
 }
 
 /*!
@@ -46,10 +46,10 @@ void zynq7_console_init(void)
  */
 void io_putc(const kubyte_t ch)
 {
-    XUartPs *sprt_uart;
+    XUartPs *sptr_uart;
 
-    sprt_uart = &sgrt_ps7_xuart_ps_data;
-    XUartPs_Send(sprt_uart, (kuint8_t *)&ch, 1);
+    sptr_uart = &sgtc_ps7_xuart_ps_data;
+    XUartPs_Send(sptr_uart, (kuint8_t *)&ch, 1);
 }
 
 /*!
@@ -60,16 +60,16 @@ void io_putc(const kubyte_t ch)
  */
 void io_putstr(const kubyte_t *msgs, kusize_t size)
 {
-    XUartPs *sprt_uart;
+    XUartPs *sptr_uart;
     kusize_t len, offset = 0;
 
-    sprt_uart = &sgrt_ps7_xuart_ps_data;
+    sptr_uart = &sgtc_ps7_xuart_ps_data;
 
     while (size)
     {
         len = CMP_MIN2(size, 64);
-        XUartPs_Send(sprt_uart, (kuint8_t *)msgs + offset, len);
-        mrt_delay_nop();
+        XUartPs_Send(sptr_uart, (kuint8_t *)msgs + offset, len);
+        mr_delay_nop();
 
         size -= len;
         offset += len;
@@ -84,11 +84,11 @@ void io_putstr(const kubyte_t *msgs, kusize_t size)
  */
 kubyte_t io_getc(kubyte_t *ch)
 {
-    XUartPs *sprt_uart;
+    XUartPs *sptr_uart;
     kubyte_t val;
 
-    sprt_uart = &sgrt_ps7_xuart_ps_data;
-    if (XUartPs_Recv(sprt_uart, &val, 1) < 0)
+    sptr_uart = &sgtc_ps7_xuart_ps_data;
+    if (XUartPs_Recv(sptr_uart, &val, 1) < 0)
         return 0;
 
     if (ch)
@@ -105,14 +105,14 @@ kubyte_t io_getc(kubyte_t *ch)
  */
 kssize_t io_getstr(kubyte_t *msgs, kusize_t size)
 {
-    XUartPs *sprt_uart;
+    XUartPs *sptr_uart;
     kssize_t retval;
     
     if (!msgs || !size)
         return 0;
 
-    sprt_uart = &sgrt_ps7_xuart_ps_data;
-    retval = XUartPs_Recv(sprt_uart, msgs, size - 1);
+    sptr_uart = &sgtc_ps7_xuart_ps_data;
+    retval = XUartPs_Recv(sptr_uart, msgs, size - 1);
     if (retval > 0)
         *(msgs + retval) = '\0';
 

@@ -23,9 +23,9 @@
 /*!< The defines */
 struct fwk_of_phandle_args;
 
-#define FDT_TO_ARCH_ENDIAN32(x)					mrt_be32_to_cpu(x)
-#define FDT_TO_ARCH_ENDIAN16(x)					mrt_be16_to_cpu(x)
-#define FDT_TO_ARCH_PTR32(x)					mrt_be32_to_cpup(x)
+#define FDT_TO_ARCH_ENDIAN32(x)					mr_be32_to_cpu(x)
+#define FDT_TO_ARCH_ENDIAN16(x)					mr_be16_to_cpu(x)
+#define FDT_TO_ARCH_PTR32(x)					mr_be32_to_cpup(x)
 
 typedef struct fwk_of_property
 {
@@ -36,7 +36,7 @@ typedef struct fwk_of_property
 	/*!< Property value, such as compatible = "myBoard", ===> value = "myBoard", lenth = strlen(value) */
 	void *value;
 	/*!< Next property */
-	struct fwk_of_property *sprt_next;
+	struct fwk_of_property *sptr_next;
 
 } srt_fwk_of_property_t;
 
@@ -54,7 +54,7 @@ typedef struct fwk_device_node
 	struct fwk_device_node *child;     	/*!< Child node */
 	struct fwk_device_node *sibling;   	/*!< Sibling (brother) node*/
 
-	struct fwk_device_node *sprt_next;	/*!< Used in the device_node build phase, after which it loses its meaning, the value is NULL  */
+	struct fwk_device_node *sptr_next;	/*!< Used in the device_node build phase, after which it loses its meaning, the value is NULL  */
 	struct fwk_device_node *allnext;	/*!< All nodes form a linked list */
 
 	kuint32_t flags;
@@ -63,35 +63,35 @@ typedef struct fwk_device_node
 } srt_fwk_device_node_t;
 
 /*!< The functions */
-extern struct fwk_of_property *fwk_of_find_property(struct fwk_device_node *sprt_node,
+extern struct fwk_of_property *fwk_of_find_property(struct fwk_device_node *sptr_node,
 													const kchar_t *ptr_name, kusize_t *ptr_lenth);
-extern void *fwk_of_get_property(struct fwk_device_node *sprt_node, const kchar_t *ptr_name, kusize_t *ptr_lenth);
-extern kint32_t fwk_of_property_read_u8_array_index(struct fwk_device_node *sprt_node, const kchar_t *ptr_name, 
+extern void *fwk_of_get_property(struct fwk_device_node *sptr_node, const kchar_t *ptr_name, kusize_t *ptr_lenth);
+extern kint32_t fwk_of_property_read_u8_array_index(struct fwk_device_node *sptr_node, const kchar_t *ptr_name, 
 													kuint8_t *ptr_value, kuint32_t index, kusize_t size);
-extern kint32_t fwk_of_property_read_u16_array_index(struct fwk_device_node *sprt_node, const kchar_t *ptr_name, 
+extern kint32_t fwk_of_property_read_u16_array_index(struct fwk_device_node *sptr_node, const kchar_t *ptr_name, 
 													kuint16_t *ptr_value, kuint32_t index, kusize_t size);
-extern kint32_t fwk_of_property_read_u32_array_index(struct fwk_device_node *sprt_node, const kchar_t *ptr_name, 
+extern kint32_t fwk_of_property_read_u32_array_index(struct fwk_device_node *sptr_node, const kchar_t *ptr_name, 
 													kuint32_t *ptr_value, kuint32_t index, kusize_t size);
-extern kint32_t fwk_of_property_read_u32_index(struct fwk_device_node *sprt_node,
+extern kint32_t fwk_of_property_read_u32_index(struct fwk_device_node *sptr_node,
 													const kchar_t *ptr_name, kuint32_t index, kuint32_t *ptr_value);
-extern kint32_t fwk_of_property_read_u8_array(struct fwk_device_node *sprt_node,
+extern kint32_t fwk_of_property_read_u8_array(struct fwk_device_node *sptr_node,
 													const kchar_t *ptr_name, kuint8_t *ptr_value, kusize_t size);
-extern kint32_t fwk_of_property_read_u16_array(struct fwk_device_node *sprt_node,
+extern kint32_t fwk_of_property_read_u16_array(struct fwk_device_node *sptr_node,
 													const kchar_t *ptr_name, kuint16_t *ptr_value, kusize_t size);
-extern kint32_t fwk_of_property_read_u32_array(struct fwk_device_node *sprt_node,
+extern kint32_t fwk_of_property_read_u32_array(struct fwk_device_node *sptr_node,
 													const kchar_t *ptr_name, kuint32_t *ptr_value, kusize_t size);
-extern kint32_t fwk_of_property_read_u8(struct fwk_device_node *sprt_node, const kchar_t *ptr_name, kuint8_t *ptr_value);
-extern kint32_t fwk_of_property_read_u16(struct fwk_device_node *sprt_node, const kchar_t *ptr_name, kuint16_t *ptr_value);
-extern kint32_t fwk_of_property_read_u32(struct fwk_device_node *sprt_node, const kchar_t *ptr_name, kuint32_t *ptr_value);
-extern kint32_t fwk_of_property_read_string(struct fwk_device_node *sprt_node, const kchar_t *ptr_name, kchar_t **ptr_string);
-extern kint32_t fwk_of_property_read_string_index(struct fwk_device_node *sprt_node,
+extern kint32_t fwk_of_property_read_u8(struct fwk_device_node *sptr_node, const kchar_t *ptr_name, kuint8_t *ptr_value);
+extern kint32_t fwk_of_property_read_u16(struct fwk_device_node *sptr_node, const kchar_t *ptr_name, kuint16_t *ptr_value);
+extern kint32_t fwk_of_property_read_u32(struct fwk_device_node *sptr_node, const kchar_t *ptr_name, kuint32_t *ptr_value);
+extern kint32_t fwk_of_property_read_string(struct fwk_device_node *sptr_node, const kchar_t *ptr_name, kchar_t **ptr_string);
+extern kint32_t fwk_of_property_read_string_index(struct fwk_device_node *sptr_node,
 													const kchar_t *ptr_name, kuint32_t index, kchar_t **ptr_string);
-extern kuint32_t fwk_of_n_size_cells(struct fwk_device_node *sprt_node);
-extern kuint32_t fwk_of_n_addr_cells(struct fwk_device_node *sprt_node);
-extern kbool_t   fwk_of_device_is_compatible(struct fwk_device_node *sprt_node, const kchar_t *ptr_compat);
-extern kint32_t fwk_of_parse_phandle_with_args(struct fwk_device_node *sprt_node, const kchar_t *list_name,
-										const kchar_t *cells_name, kuint32_t cell_count, kint32_t index, struct fwk_of_phandle_args *sprt_args);
-extern kint32_t fwk_of_property_match_string(struct fwk_device_node *sprt_node, const kchar_t *list_name, const kchar_t *match_name);
+extern kuint32_t fwk_of_n_size_cells(struct fwk_device_node *sptr_node);
+extern kuint32_t fwk_of_n_addr_cells(struct fwk_device_node *sptr_node);
+extern kbool_t   fwk_of_device_is_compatible(struct fwk_device_node *sptr_node, const kchar_t *ptr_compat);
+extern kint32_t fwk_of_parse_phandle_with_args(struct fwk_device_node *sptr_node, const kchar_t *list_name,
+										const kchar_t *cells_name, kuint32_t cell_count, kint32_t index, struct fwk_of_phandle_args *sptr_args);
+extern kint32_t fwk_of_property_match_string(struct fwk_device_node *sptr_node, const kchar_t *list_name, const kchar_t *match_name);
 
 #ifdef __cplusplus
     }

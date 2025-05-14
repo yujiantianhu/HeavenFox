@@ -24,29 +24,29 @@
 /*!< The defines */
 typedef struct mutex_lock
 {
-	struct atomic sgrt_atc;
+	struct atomic sgtc_atc;
 
 } srt_mutex_lock_t;
 
-#define MUTEX_LOCK_INIT()					{ .sgrt_atc = ATOMIC_INIT() }
+#define MUTEX_LOCK_INIT()					{ .sgtc_atc = ATOMIC_INIT() }
 
 /*!< The functions */
-extern void mutex_init(struct mutex_lock *sprt_lock);
-extern void mutex_lock(struct mutex_lock *sprt_lock);
-extern void mutex_wait(struct mutex_lock *sprt_lock);
-extern kint32_t mutex_try_lock(struct mutex_lock *sprt_lock);
-extern void mutex_unlock(struct mutex_lock *sprt_lock);
+extern void mutex_init(struct mutex_lock *sptr_lock);
+extern void mutex_lock(struct mutex_lock *sptr_lock);
+extern void mutex_wait(struct mutex_lock *sptr_lock);
+extern kint32_t mutex_try_lock(struct mutex_lock *sptr_lock);
+extern void mutex_unlock(struct mutex_lock *sptr_lock);
 
 /*!< API functions */
 /*!
  * @brief   check if mutex is locked
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  locked(true) / unlocked(false)
  * @note    none
  */
-static inline kbool_t mutex_is_locked(struct mutex_lock *sprt_lock)
+static inline kbool_t mutex_is_locked(struct mutex_lock *sptr_lock)
 {
-	return !!ATOMIC_READ(&sprt_lock->sgrt_atc);
+	return !!ATOMIC_READ(&sptr_lock->sgtc_atc);
 }
 
 #ifdef __cplusplus

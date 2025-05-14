@@ -24,170 +24,170 @@
 /*!< API functions */
 /*!
  * @brief   initial rw_lock lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    set count = 0
  */
-void rw_lock_init(struct rw_lock *sprt_lock)
+void rw_lock_init(struct rw_lock *sptr_lock)
 {
-    if (sprt_lock)
+    if (sptr_lock)
     {
-        ATOMIC_SET(&sprt_lock->sgrt_read, 0);
-        ATOMIC_SET(&sprt_lock->sgrt_write, 0);
+        ATOMIC_SET(&sptr_lock->sgtc_read, 0);
+        ATOMIC_SET(&sptr_lock->sgtc_write, 0);
     }
 }
 
 /*!
  * @brief   rw_lock lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    if it has been locked, schedule another thread; otherwise, lock it
  */
-void rw_lock(struct rw_lock *sprt_lock)
+void rw_lock(struct rw_lock *sptr_lock)
 {
-    if (!mrt_current)
+    if (!mr_current)
         return;
 
-    while (rw_is_locked(sprt_lock))
+    while (rw_is_locked(sptr_lock))
         schedule_thread();
     
-    atomic_inc(&sprt_lock->sgrt_read);
-    atomic_inc(&sprt_lock->sgrt_write);
+    atomic_inc(&sptr_lock->sgtc_read);
+    atomic_inc(&sptr_lock->sgtc_write);
 }
 
 /*!
  * @brief   rw_lock lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    if it has been locked, return directly
  */
-kint32_t rw_try_lock(struct rw_lock *sprt_lock)
+kint32_t rw_try_lock(struct rw_lock *sptr_lock)
 {
-    if (!mrt_current)
+    if (!mr_current)
         return -ER_FORBID;
 
-    if (rw_is_locked(sprt_lock))
+    if (rw_is_locked(sptr_lock))
         return -ER_BUSY;
     
-    atomic_inc(&sprt_lock->sgrt_read);
-    atomic_inc(&sprt_lock->sgrt_write);
+    atomic_inc(&sptr_lock->sgtc_read);
+    atomic_inc(&sptr_lock->sgtc_write);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   rw_lock unlock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    none
  */
-void rw_unlock(struct rw_lock *sprt_lock)
+void rw_unlock(struct rw_lock *sptr_lock)
 {
-    if (!mrt_current || !rw_is_locked(sprt_lock))
+    if (!mr_current || !rw_is_locked(sptr_lock))
         return;
     
-    atomic_dec(&sprt_lock->sgrt_read);
-    atomic_dec(&sprt_lock->sgrt_write);
+    atomic_dec(&sptr_lock->sgtc_read);
+    atomic_dec(&sptr_lock->sgtc_write);
 }
 
 /*!
  * @brief   read lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    if it has been locked, schedule another thread; otherwise, lock it
  */
-void rd_lock(struct rw_lock *sprt_lock)
+void rd_lock(struct rw_lock *sptr_lock)
 {
-    if (!mrt_current)
+    if (!mr_current)
         return;
 
-    while (wr_is_locked(sprt_lock))
+    while (wr_is_locked(sptr_lock))
         schedule_thread();
     
-    atomic_inc(&sprt_lock->sgrt_read);
+    atomic_inc(&sptr_lock->sgtc_read);
 }
 
 /*!
  * @brief   rw_lock lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    if it has been locked, return directly
  */
-kint32_t rd_try_lock(struct rw_lock *sprt_lock)
+kint32_t rd_try_lock(struct rw_lock *sptr_lock)
 {
-    if (!mrt_current)
+    if (!mr_current)
         return -ER_FORBID;
 
-    if (wr_is_locked(sprt_lock))
+    if (wr_is_locked(sptr_lock))
         return -ER_BUSY;
     
-    atomic_inc(&sprt_lock->sgrt_read);
+    atomic_inc(&sptr_lock->sgtc_read);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   rw_lock unlock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    none
  */
-void rd_unlock(struct rw_lock *sprt_lock)
+void rd_unlock(struct rw_lock *sptr_lock)
 {
-    if (!mrt_current || !rd_is_locked(sprt_lock))
+    if (!mr_current || !rd_is_locked(sptr_lock))
         return;
     
-    atomic_dec(&sprt_lock->sgrt_read);
+    atomic_dec(&sptr_lock->sgtc_read);
 }
 
 /*!
  * @brief   write lock lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    if it has been locked, schedule another thread; otherwise, lock it
  */
-void wr_lock(struct rw_lock *sprt_lock)
+void wr_lock(struct rw_lock *sptr_lock)
 {
-    if (!mrt_current)
+    if (!mr_current)
         return;
 
-    while (rw_is_locked(sprt_lock))
+    while (rw_is_locked(sptr_lock))
         schedule_thread();
     
-    atomic_inc(&sprt_lock->sgrt_write);
+    atomic_inc(&sptr_lock->sgtc_write);
 }
 
 /*!
  * @brief   write lock lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    if it has been locked, return directly
  */
-kint32_t wr_try_lock(struct rw_lock *sprt_lock)
+kint32_t wr_try_lock(struct rw_lock *sptr_lock)
 {
-    if (!mrt_current)
+    if (!mr_current)
         return -ER_FORBID;
 
-    if (rw_is_locked(sprt_lock))
+    if (rw_is_locked(sptr_lock))
         return -ER_BUSY;
     
-    atomic_inc(&sprt_lock->sgrt_write);
+    atomic_inc(&sptr_lock->sgtc_write);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   write lock unlock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    none
  */
-void wr_unlock(struct rw_lock *sprt_lock)
+void wr_unlock(struct rw_lock *sptr_lock)
 {
-    if (!mrt_current || !rw_is_locked(sprt_lock))
+    if (!mr_current || !rw_is_locked(sptr_lock))
         return;
     
-    atomic_dec(&sprt_lock->sgrt_write);
+    atomic_dec(&sptr_lock->sgtc_write);
 }
 
 /*!< end of file */

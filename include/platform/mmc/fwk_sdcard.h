@@ -55,21 +55,21 @@
 /*!< OCR Register */
 typedef enum nrt_fwk_sdcard_ocr
 {
-    NR_SdCard_OcrVddLowVol_Bit = mrt_bit(7U),               /*!< reserved for low power */
-    NR_SdCard_OcrVdd27_28_Bit = mrt_bit(15U),               /*!< VDD: 2.7V ~ 2.8V */
-    NR_SdCard_OcrVdd28_29_Bit = mrt_bit(16U),               /*!< VDD: 2.8V ~ 2.9V */
-    NR_SdCard_OcrVdd29_30_Bit = mrt_bit(17U),               /*!< VDD: 2.9V ~ 3.0V */
-    NR_SdCard_OcrVdd30_31_Bit = mrt_bit(18U),               /*!< VDD: 3.0V ~ 3.1V */
-    NR_SdCard_OcrVdd31_32_Bit = mrt_bit(19U),               /*!< VDD: 3.1V ~ 3.2V */
-    NR_SdCard_OcrVdd32_33_Bit = mrt_bit(20U),               /*!< VDD: 3.2V ~ 3.3V */
-    NR_SdCard_OcrVdd33_34_Bit = mrt_bit(21U),               /*!< VDD: 3.3V ~ 3.4V */
-    NR_SdCard_OcrVdd34_35_Bit = mrt_bit(22U),               /*!< VDD: 3.4V ~ 3.5V */
-    NR_SdCard_OcrVdd35_36_Bit = mrt_bit(23U),               /*!< VDD: 3.5V ~ 3.6V */
-    NR_SdCard_OcrToV18Request_Bit = mrt_bit(24U),           /*!< Switch to 1.8V request */
+    NR_SdCard_OcrVddLowVol_Bit = mr_bit(7U),               /*!< reserved for low power */
+    NR_SdCard_OcrVdd27_28_Bit = mr_bit(15U),               /*!< VDD: 2.7V ~ 2.8V */
+    NR_SdCard_OcrVdd28_29_Bit = mr_bit(16U),               /*!< VDD: 2.8V ~ 2.9V */
+    NR_SdCard_OcrVdd29_30_Bit = mr_bit(17U),               /*!< VDD: 2.9V ~ 3.0V */
+    NR_SdCard_OcrVdd30_31_Bit = mr_bit(18U),               /*!< VDD: 3.0V ~ 3.1V */
+    NR_SdCard_OcrVdd31_32_Bit = mr_bit(19U),               /*!< VDD: 3.1V ~ 3.2V */
+    NR_SdCard_OcrVdd32_33_Bit = mr_bit(20U),               /*!< VDD: 3.2V ~ 3.3V */
+    NR_SdCard_OcrVdd33_34_Bit = mr_bit(21U),               /*!< VDD: 3.3V ~ 3.4V */
+    NR_SdCard_OcrVdd34_35_Bit = mr_bit(22U),               /*!< VDD: 3.4V ~ 3.5V */
+    NR_SdCard_OcrVdd35_36_Bit = mr_bit(23U),               /*!< VDD: 3.5V ~ 3.6V */
+    NR_SdCard_OcrToV18Request_Bit = mr_bit(24U),           /*!< Switch to 1.8V request */
 
     /*!< bit30 should be read after Power-on finished and bit31 is true */
-    NR_SdCard_OcrCapacity_Bit = mrt_bit(30U),               /*!< Capacity of Card. 1: High-Capacity Card(HC or XC); 0: Standard Card(SC) */
-    NR_SdCard_OcrNotBusy_Bit = mrt_bit(31U),                /*!< Power-on State of Card. 1: Power on complete; 0: Power on not complete */
+    NR_SdCard_OcrCapacity_Bit = mr_bit(30U),               /*!< Capacity of Card. 1: High-Capacity Card(HC or XC); 0: Standard Card(SC) */
+    NR_SdCard_OcrNotBusy_Bit = mr_bit(31U),                /*!< Power-on State of Card. 1: Power on complete; 0: Power on not complete */
 
 } nrt_fwk_sdcard_ocr_t;
 
@@ -92,17 +92,17 @@ typedef struct fwk_sdcard_cid
  */
 enum __ERT_SDCARD_CSD_SLICE_BIT
 {
-    NR_SdCard_CsdTempWriteProtect_Bit = mrt_bit(0U),        /*!< Temporary write protection [12:12] */
-    NR_SdCard_CsdPermWriteProtect_Bit = mrt_bit(1U),        /*!< Permanent write protection [13:13] */
-    NR_SdCard_CsdCopyFlag_Bit = mrt_bit(2U),                /*!< Copy flag [14:14] */
-    NR_SdCard_CsdFileFormatGroup_Bit = mrt_bit(3U),         /*!< File format group [15:15] */
-    NR_SdCard_CsdPartialBlockWrite_Bit = mrt_bit(4U),       /*!< Partial blocks for write allowed [21:21] */
-    NR_SdCard_CsdWriteProtectEnable_Bit = mrt_bit(5U),      /*!< Write protect group enabled [31:31] */
-    NR_SdCard_CsdEraseBlockEnale_Bit = mrt_bit(6U),         /*!< Erase single block enabled [46:46] */
-    NR_SdCard_CsdDsrImplemented_Bit = mrt_bit(7U),          /*!< DSR implemented [76:76] */
-    NR_SdCard_CsdReadBlockMisalign_Bit = mrt_bit(8U),       /*!< Read block misalignment [77:77] */
-    NR_SdCard_CsdWriteBlockMisalign_Bit = mrt_bit(9U),      /*!< Write block misalignment [78:78] */
-    NR_SdCard_CsdPartialBlockRead_Bit = mrt_bit(10U),       /*!< Partial blocks for read allowed [79:79] */
+    NR_SdCard_CsdTempWriteProtect_Bit = mr_bit(0U),        /*!< Temporary write protection [12:12] */
+    NR_SdCard_CsdPermWriteProtect_Bit = mr_bit(1U),        /*!< Permanent write protection [13:13] */
+    NR_SdCard_CsdCopyFlag_Bit = mr_bit(2U),                /*!< Copy flag [14:14] */
+    NR_SdCard_CsdFileFormatGroup_Bit = mr_bit(3U),         /*!< File format group [15:15] */
+    NR_SdCard_CsdPartialBlockWrite_Bit = mr_bit(4U),       /*!< Partial blocks for write allowed [21:21] */
+    NR_SdCard_CsdWriteProtectEnable_Bit = mr_bit(5U),      /*!< Write protect group enabled [31:31] */
+    NR_SdCard_CsdEraseBlockEnale_Bit = mr_bit(6U),         /*!< Erase single block enabled [46:46] */
+    NR_SdCard_CsdDsrImplemented_Bit = mr_bit(7U),          /*!< DSR implemented [76:76] */
+    NR_SdCard_CsdReadBlockMisalign_Bit = mr_bit(8U),       /*!< Read block misalignment [77:77] */
+    NR_SdCard_CsdWriteBlockMisalign_Bit = mr_bit(9U),      /*!< Write block misalignment [78:78] */
+    NR_SdCard_CsdPartialBlockRead_Bit = mr_bit(10U),       /*!< Partial blocks for read allowed [79:79] */
 };
 
 /*!
@@ -163,22 +163,22 @@ typedef struct fwk_sdcard_csd
 /*!< cardCommandClass with CSD Register */
 enum __ERT_SDCARD_CSD_CMD_CLASS
 {
-    NR_SdCard_CmdClassBasic = mrt_bit(1U),                  /*!< Card command class 0 */
-    NR_SdCard_CmdClassBlockRead = mrt_bit(2U),              /*!< Card command class 2 */
-    NR_SdCard_CmdClassBlockWrite = mrt_bit(4U),             /*!< Card command class 4 */
-    NR_SdCard_CmdClassErase = mrt_bit(5U),                  /*!< Card command class 5 */
-    NR_SdCard_CmdClassWriteProtect = mrt_bit(6U),           /*!< Card command class 6 */
-    NR_SdCard_CmdClassLockCard = mrt_bit(7U),               /*!< Card command class 7 */
-    NR_SdCard_CmdClassAppSpecific = mrt_bit(8U),            /*!< Card command class 8 */
-    NR_SdCard_CmdClassInputOutputMode = mrt_bit(9U),        /*!< Card command class 9 */
-    NR_SdCard_CmdClassSwitch = mrt_bit(10U),                /*!< Card command class 10 */
+    NR_SdCard_CmdClassBasic = mr_bit(1U),                  /*!< Card command class 0 */
+    NR_SdCard_CmdClassBlockRead = mr_bit(2U),              /*!< Card command class 2 */
+    NR_SdCard_CmdClassBlockWrite = mr_bit(4U),             /*!< Card command class 4 */
+    NR_SdCard_CmdClassErase = mr_bit(5U),                  /*!< Card command class 5 */
+    NR_SdCard_CmdClassWriteProtect = mr_bit(6U),           /*!< Card command class 6 */
+    NR_SdCard_CmdClassLockCard = mr_bit(7U),               /*!< Card command class 7 */
+    NR_SdCard_CmdClassAppSpecific = mr_bit(8U),            /*!< Card command class 8 */
+    NR_SdCard_CmdClassInputOutputMode = mr_bit(9U),        /*!< Card command class 9 */
+    NR_SdCard_CmdClassSwitch = mr_bit(10U),                /*!< Card command class 10 */
 };
 
 /*!< SD card SCR register bit */
 enum __ERT_SDCARD_SCR_SLICE_BIT
 {
-    NR_SdCard_ScrSdSpecification3 = mrt_bit(0U),            /*!< Specification version 3.00 or higher [47:47]*/
-    NR_SdCard_ScrDataStatusAfterErase = mrt_bit(1U),        /*!< Data status after erases [55:55] */
+    NR_SdCard_ScrSdSpecification3 = mr_bit(0U),            /*!< Specification version 3.00 or higher [47:47]*/
+    NR_SdCard_ScrDataStatusAfterErase = mr_bit(1U),        /*!< Data status after erases [55:55] */
 };
 
 /*!< SD card SCR register */
@@ -367,9 +367,9 @@ typedef struct fwk_sdcard_cmd6_data
  *  bit[7:4]:   function group 2 for Power Command System
  *  bit[3:0]:   function group 1 for Power Access Mode
  */
-#define FWK_SDCARD_CMD6_SET_MODE(MODE)                      (mrt_bit_nr(MODE, 31U) | 0x00ffffffU)
-#define FWK_SDCARD_CMD6_GRP_MASK(group)                     (mrt_bit_nr(0xfU, (group) << 2U))
-#define FWK_SDCARD_CMD6_GRP_ARGS(group, data)               (mrt_bit_nr(data, (group) << 2U) | (~FWK_SDCARD_CMD6_GRP_MASK(group)))
+#define FWK_SDCARD_CMD6_SET_MODE(MODE)                      (mr_bit_nr(MODE, 31U) | 0x00ffffffU)
+#define FWK_SDCARD_CMD6_GRP_MASK(group)                     (mr_bit_nr(0xfU, (group) << 2U))
+#define FWK_SDCARD_CMD6_GRP_ARGS(group, data)               (mr_bit_nr(data, (group) << 2U) | (~FWK_SDCARD_CMD6_GRP_MASK(group)))
 #define FWK_SDCARD_CMD6_CHECK_MODE(group, data)             (FWK_SDCARD_CMD6_GRP_ARGS(group, data) & 0x00ffffffU)
 #define FWK_SDCARD_CMD6_SWITCH_MODE(group, data)            (FWK_SDCARD_CMD6_GRP_ARGS(group, data) & 0x80ffffffU)
 #define FWK_SDCARD_CMD6_ARGS(mode, group, data)             (FWK_SDCARD_CMD6_GRP_ARGS(group, data) & FWK_SDCARD_CMD6_SET_MODE(mode))
@@ -433,92 +433,92 @@ typedef enum nrt_fwk_sdcard_resp
 enum _ERT_FWK_SDCARD_R1_STATUS_BIT
 {
     /*!< error in the sequence of authentication process */
-    NR_SdCard_R1_AuthenticationSequenceErr_Bit = mrt_bit(3U),
+    NR_SdCard_R1_AuthenticationSequenceErr_Bit = mr_bit(3U),
 
     /*!< Application command enabled status bit */
-    NR_SdCard_R1_AppCmdEnabled_Bit = mrt_bit(5U),
+    NR_SdCard_R1_AppCmdEnabled_Bit = mr_bit(5U),
 
     /*!< Switch error status bit */
-    NR_SdCard_R1_SwitchErr_Bit = mrt_bit(7U),
+    NR_SdCard_R1_SwitchErr_Bit = mr_bit(7U),
 
     /*!< Ready for data status bit */
-    NR_SdCard_R1_ReadyForData_Bit = mrt_bit(8U),
+    NR_SdCard_R1_ReadyForData_Bit = mr_bit(8U),
 
     /*!< bit[12:9] is "__ERT_SDCARD_MODE_STATUS" */
 #define FWK_SDCARD_R1_STATUS_STATE_OFFSET                   (9U)
 #define FWK_SDCARD_R1_STATUS_STATE_MASK                     (0x1e00U)
-#define FWK_SDCARD_R1_STATUS_STATE_BIT(x)                   mrt_bit_mask((x), FWK_SDCARD_R1_STATUS_STATE_MASK, FWK_SDCARD_R1_STATUS_STATE_OFFSET)
+#define FWK_SDCARD_R1_STATUS_STATE_BIT(x)                   mr_bit_mask((x), FWK_SDCARD_R1_STATUS_STATE_MASK, FWK_SDCARD_R1_STATUS_STATE_OFFSET)
 #define FWK_SDCARD_R1_STATUS_STATE_U32(x)                   FWK_SDCARD_R1_STATUS_STATE_BIT(x)
 
     /*!< 0U */
     NR_SdCard_R1_StateIdle_Bit = FWK_SDCARD_R1_STATUS_STATE_BIT(NR_SdCard_Idle_State),
-    /*!< mrt_bit(9U) */
+    /*!< mr_bit(9U) */
     NR_SdCard_R1_StateReady_Bit = FWK_SDCARD_R1_STATUS_STATE_BIT(NR_SdCard_Ready_State),
-    /*!< mrt_bit(10U) */
+    /*!< mr_bit(10U) */
     NR_SdCard_R1_StateIdentify_Bit = FWK_SDCARD_R1_STATUS_STATE_BIT(NR_SdCard_Identify_State),
-    /*!< mrt_bit(9U) | mrt_bit(10U) */
+    /*!< mr_bit(9U) | mr_bit(10U) */
     NR_SdCard_R1_StateStandBy_Bit = FWK_SDCARD_R1_STATUS_STATE_BIT(NR_SdCard_StandBy_State),
-    /*!< mrt_bit(11U) */
+    /*!< mr_bit(11U) */
     NR_SdCard_R1_StateTransfer_Bit = FWK_SDCARD_R1_STATUS_STATE_BIT(NR_SdCard_Transfer_State),
-    /*!< mrt_bit(9U) | mrt_bit(11U) */
+    /*!< mr_bit(9U) | mr_bit(11U) */
     NR_SdCard_R1_StateDataTx_Bit = FWK_SDCARD_R1_STATUS_STATE_BIT(NR_SdCard_DataTx_State),
-    /*!< mrt_bit(10U) | mrt_bit(11U) */
+    /*!< mr_bit(10U) | mr_bit(11U) */
     NR_SdCard_R1_StateDataRx_Bit = FWK_SDCARD_R1_STATUS_STATE_BIT(NR_SdCard_DataRx_State),
-    /*!< mrt_bit(9U) | mrt_bit(10U) | mrt_bit(11U) */
+    /*!< mr_bit(9U) | mr_bit(10U) | mr_bit(11U) */
     NR_SdCard_R1_StateProgram_Bit = FWK_SDCARD_R1_STATUS_STATE_BIT(NR_SdCard_Program_State),
-    /*!< mrt_bit(12U) */
+    /*!< mr_bit(12U) */
     NR_SdCard_R1_StateDisconnect_Bit = FWK_SDCARD_R1_STATUS_STATE_BIT(NR_SdCard_Disconnect_State),
 
     /*!< Erase reset status bit */
-    NR_SdCard_R1_EraseReset_Bit = mrt_bit(13U),
+    NR_SdCard_R1_EraseReset_Bit = mr_bit(13U),
 
     /*!< Card ecc disabled status bit */
-    NR_SdCard_R1_CardEccDisabled_Bit = mrt_bit(14U),
+    NR_SdCard_R1_CardEccDisabled_Bit = mr_bit(14U),
 
     /*!< Write protection erase skip status bit */
-    NR_SdCard_R1_WriteProtEraseSkip_Bit = mrt_bit(15U),
+    NR_SdCard_R1_WriteProtEraseSkip_Bit = mr_bit(15U),
 
     /*!< Cid/csd overwrite status bit */
-    NR_SdCard_R1_CidCsdOverWrite_Bit = mrt_bit(16U),
+    NR_SdCard_R1_CidCsdOverWrite_Bit = mr_bit(16U),
 
     /*!< A general or an unknown error status bit */
-    NR_SdCard_R1_Error_Bit = mrt_bit(19U),
+    NR_SdCard_R1_Error_Bit = mr_bit(19U),
 
     /*!< Internal card controller error status bit */
-    NR_SdCard_R1_InternalCardCtrlErr_Bit = mrt_bit(20U),
+    NR_SdCard_R1_InternalCardCtrlErr_Bit = mr_bit(20U),
 
     /*!< Card ecc error status bit */
-    NR_SdCard_R1_CardEccErr_Bit = mrt_bit(21U),
+    NR_SdCard_R1_CardEccErr_Bit = mr_bit(21U),
 
     /*!< Illegal command status bit */
-    NR_SdCard_R1_IllegalCmd_Bit = mrt_bit(22U),
+    NR_SdCard_R1_IllegalCmd_Bit = mr_bit(22U),
 
     /*!< CRC error status bit */
-    NR_SdCard_R1_CrcErr_Bit = mrt_bit(23U),
+    NR_SdCard_R1_CrcErr_Bit = mr_bit(23U),
 
     /*!< lock/unlock error status bit */
-    NR_SdCard_R1_LockUnlockErr_Bit = mrt_bit(24U),
+    NR_SdCard_R1_LockUnlockErr_Bit = mr_bit(24U),
 
     /*!< Card locked status bit */
-    NR_SdCard_R1_CardLocked_Bit = mrt_bit(25U),
+    NR_SdCard_R1_CardLocked_Bit = mr_bit(25U),
 
     /*!< Write protection violation status bit */
-    NR_SdCard_R1_WriteProtViolate_Bit = mrt_bit(26U),
+    NR_SdCard_R1_WriteProtViolate_Bit = mr_bit(26U),
 
     /*!< Erase parameter error status bit */
-    NR_SdCard_R1_EraseParameterErr_Bit = mrt_bit(27U),
+    NR_SdCard_R1_EraseParameterErr_Bit = mr_bit(27U),
 
     /*!< Erase sequence error status bit */
-    NR_SdCard_R1_EraseSequenceErr_Bit = mrt_bit(28U),
+    NR_SdCard_R1_EraseSequenceErr_Bit = mr_bit(28U),
 
     /*!< Block length error status bit */
-    NR_SdCard_R1_BlockLenErr_Bit = mrt_bit(29U),
+    NR_SdCard_R1_BlockLenErr_Bit = mr_bit(29U),
 
     /*!< Address error status bit */
-    NR_SdCard_R1_AddressErr_Bit = mrt_bit(30U),
+    NR_SdCard_R1_AddressErr_Bit = mr_bit(30U),
     
     /*!< Out of range status bit */
-    NR_SdCard_R1_OutOfRange_Bit = mrt_bit(31U),
+    NR_SdCard_R1_OutOfRange_Bit = mr_bit(31U),
 
     /*!< Card error status */
     NR_SdCard_R1_AllErrBit = (NR_SdCard_R1_AuthenticationSequenceErr_Bit |
@@ -649,10 +649,10 @@ typedef struct fwk_sdcard_data
 /*!< command flags */
 enum __ERT_SDCARD_DATA_FLAGS
 {
-    NR_SdCard_CmdFlagsReadEnable = mrt_bit(1U),             /*!< data direction(1: read; 0: write) */
-    NR_SdCard_CmdFlagsAuto12Enable = mrt_bit(2U),           /*!< auto stop, Suitable for multi block operations */
-    NR_SdCard_CmdFlagsAuto23Enable = mrt_bit(3U),           /*!< auto write, Suitable for multi block operations */
-	NR_SdCard_CmdFlagsWithBlock = mrt_bit(4U),				/*!< r/w block ? if no, it maybe call by cmd6 or SCR */
+    NR_SdCard_CmdFlagsReadEnable = mr_bit(1U),             /*!< data direction(1: read; 0: write) */
+    NR_SdCard_CmdFlagsAuto12Enable = mr_bit(2U),           /*!< auto stop, Suitable for multi block operations */
+    NR_SdCard_CmdFlagsAuto23Enable = mr_bit(3U),           /*!< auto write, Suitable for multi block operations */
+	NR_SdCard_CmdFlagsWithBlock = mr_bit(4U),				/*!< r/w block ? if no, it maybe call by cmd6 or SCR */
 };
 
 /*!
@@ -691,13 +691,13 @@ enum __ERT_SDCARD_DATA_FLAGS
 /*!< SD Card Host */
 enum __ERT_SDCARD_HOST_SUPPORT_BIT
 {
-    NR_SdCard_SupportHighCapacity = mrt_bit(0U),
-    NR_SdCard_Support4BitWidth = mrt_bit(1U),
-    NR_SdCard_SupportCardSdhc = mrt_bit(2U),
-    NR_SdCard_SupportCardSdxc = mrt_bit(3U),
-    NR_SdCard_SupportVoltage1_8V = mrt_bit(4U),
-    NR_SdCard_SupportSetBlockCount = mrt_bit(5U),
-    NR_SdCard_SupportSpeedClassCtrl = mrt_bit(6U),
+    NR_SdCard_SupportHighCapacity = mr_bit(0U),
+    NR_SdCard_Support4BitWidth = mr_bit(1U),
+    NR_SdCard_SupportCardSdhc = mr_bit(2U),
+    NR_SdCard_SupportCardSdxc = mr_bit(3U),
+    NR_SdCard_SupportVoltage1_8V = mr_bit(4U),
+    NR_SdCard_SupportSetBlockCount = mr_bit(5U),
+    NR_SdCard_SupportSpeedClassCtrl = mr_bit(6U),
 };
 
 typedef struct fwk_sdcard_host
@@ -720,21 +720,21 @@ typedef struct fwk_sdcard_host
 /*!< SD Card Interface */
 typedef struct fwk_sdcard_if
 {
-    struct fwk_sdcard_host *sprt_host;
+    struct fwk_sdcard_host *sptr_host;
 
-    kint32_t (*sendCommand) (struct fwk_sdcard_cmd *sprt_cmds);
-    void (*recvResp) (struct fwk_sdcard_cmd *sprt_cmds);
-    kint32_t (*sendData) (struct fwk_sdcard_data *sprt_data);
-    kint32_t (*recvData) (struct fwk_sdcard_data *sprt_data);
-    kint32_t (*setup_dma)(struct fwk_sdcard_data *sprt_data);
+    kint32_t (*sendCommand) (struct fwk_sdcard_cmd *sptr_cmds);
+    void (*recvResp) (struct fwk_sdcard_cmd *sptr_cmds);
+    kint32_t (*sendData) (struct fwk_sdcard_data *sptr_data);
+    kint32_t (*recvData) (struct fwk_sdcard_data *sptr_data);
+    kint32_t (*setup_dma)(struct fwk_sdcard_data *sptr_data);
 
-    kbool_t (*is_insert) (struct fwk_sdcard_host *sprt_host);
-    void (*setBusWidth) (struct fwk_sdcard_host *sprt_host, kuint32_t option);
-    void (*setClkFreq) (struct fwk_sdcard_host *sprt_host, kuint32_t option);
-    kbool_t (*cardActive) (struct fwk_sdcard_host *sprt_host, kuint32_t timeout);
-    kint32_t (*switchVoltage) (struct fwk_sdcard_host *sprt_host, kuint32_t voltage);
+    kbool_t (*is_insert) (struct fwk_sdcard_host *sptr_host);
+    void (*setBusWidth) (struct fwk_sdcard_host *sptr_host, kuint32_t option);
+    void (*setClkFreq) (struct fwk_sdcard_host *sptr_host, kuint32_t option);
+    kbool_t (*cardActive) (struct fwk_sdcard_host *sptr_host, kuint32_t timeout);
+    kint32_t (*switchVoltage) (struct fwk_sdcard_host *sptr_host, kuint32_t voltage);
 
-    void (*addHeadTail) (struct fwk_sdcard_cmd *sprt_cmd);
+    void (*addHeadTail) (struct fwk_sdcard_cmd *sptr_cmd);
 
 } srt_fwk_sdcard_if_t;
 
@@ -752,12 +752,12 @@ typedef struct fwk_sdcard
 
     /*!< Registers */
     kuint32_t ocr;
-    struct fwk_sdcard_cid sgrt_cid;
-    struct fwk_sdcard_csd sgrt_csd;
-    struct fwk_sdcard_scr sgrt_scr;
+    struct fwk_sdcard_cid sgtc_cid;
+    struct fwk_sdcard_csd sgtc_csd;
+    struct fwk_sdcard_scr sgtc_scr;
 
     /*!< Interface */
-    struct fwk_sdcard_if sgrt_if;
+    struct fwk_sdcard_if sgtc_if;
 
     kbool_t isDynamic;
 
@@ -805,19 +805,19 @@ enum __ERT_SDCARD_SW_VOLTAGE
 };
 
 /*!< The functions */
-extern void *host_sdmmc_card_initial(struct fwk_sdcard *sprt_card);
+extern void *host_sdmmc_card_initial(struct fwk_sdcard *sptr_card);
 
-extern void *fwk_sdcard_allocate_device(void *sprt_sd);
-extern void fwk_sdcard_free_device(struct fwk_sdcard *sprt_card);
-extern kint32_t fwk_sdcard_initial_device(struct fwk_sdcard *sprt_card);
-extern void fwk_sdcard_inactive_device(struct fwk_sdcard *sprt_card);
+extern void *fwk_sdcard_allocate_device(void *sptr_sd);
+extern void fwk_sdcard_free_device(struct fwk_sdcard *sptr_card);
+extern kint32_t fwk_sdcard_initial_device(struct fwk_sdcard *sptr_card);
+extern void fwk_sdcard_inactive_device(struct fwk_sdcard *sptr_card);
 
-extern kbool_t fwk_sdcard_is_insert(struct fwk_sdcard *sprt_card);
-extern kbool_t fwk_sdcard_detect(struct fwk_sdcard *sprt_card);
-extern kbool_t fwk_sdcard_to_normal(struct fwk_sdcard *sprt_card);
-extern kbool_t fwk_sdcard_rw_blocks(struct fwk_sdcard *sprt_card, void *ptrBuffer, 
+extern kbool_t fwk_sdcard_is_insert(struct fwk_sdcard *sptr_card);
+extern kbool_t fwk_sdcard_detect(struct fwk_sdcard *sptr_card);
+extern kbool_t fwk_sdcard_to_normal(struct fwk_sdcard *sptr_card);
+extern kbool_t fwk_sdcard_rw_blocks(struct fwk_sdcard *sptr_card, void *ptrBuffer, 
                                 kuint32_t iBlockStart, kuint32_t iBlockCount, nrt_fwk_sdcard_rw_t egrt_rw);
-extern kbool_t fwk_sdcard_format_blocks(struct fwk_sdcard *sprt_card, kuint32_t iBlockStart, kuint32_t iBlockCount);
+extern kbool_t fwk_sdcard_format_blocks(struct fwk_sdcard *sptr_card, kuint32_t iBlockStart, kuint32_t iBlockCount);
 
 /*!< API function */
 /*!
@@ -826,14 +826,14 @@ extern kbool_t fwk_sdcard_format_blocks(struct fwk_sdcard *sprt_card, kuint32_t 
  * @retval  none
  * @note    Command Structure fill up
  */
-static inline kint32_t fwk_sdcard_initial_command(struct fwk_sdcard_cmd *sprt_cmd, kuint32_t index, kuint32_t args, kuint32_t response)
+static inline kint32_t fwk_sdcard_initial_command(struct fwk_sdcard_cmd *sptr_cmd, kuint32_t index, kuint32_t args, kuint32_t response)
 {
-    kmemzero(sprt_cmd, sizeof(struct fwk_sdcard_cmd));
+    kmemzero(sptr_cmd, sizeof(struct fwk_sdcard_cmd));
 
-    sprt_cmd->index = index & FWK_SDCARD_CMD_MASK;
-    sprt_cmd->args = mrt_be32_to_cpu(args);
-    sprt_cmd->respType = response;
-    sprt_cmd->cmdType = (index & FWK_SDCARD_CMD_APP) ? FWK_SDCARD_CMDTYPE_APPLICATION : FWK_SDCARD_CMDTYPE_GENERIC;
+    sptr_cmd->index = index & FWK_SDCARD_CMD_MASK;
+    sptr_cmd->args = mr_be32_to_cpu(args);
+    sptr_cmd->respType = response;
+    sptr_cmd->cmdType = (index & FWK_SDCARD_CMD_APP) ? FWK_SDCARD_CMDTYPE_APPLICATION : FWK_SDCARD_CMDTYPE_GENERIC;
 
     return ER_NORMAL;
 }

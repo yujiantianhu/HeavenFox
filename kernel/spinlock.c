@@ -24,58 +24,58 @@
 /*!< API functions */
 /*!
  * @brief   initial spin lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    set count = 0
  */
-void spin_lock_init(struct spin_lock *sprt_lock)
+void spin_lock_init(struct spin_lock *sptr_lock)
 {
-    if (isValid(sprt_lock))
-        ATOMIC_SET(&sprt_lock->sgrt_atc, 0);
+    if (isValid(sptr_lock))
+        ATOMIC_SET(&sptr_lock->sgtc_atc, 0);
 }
 
 /*!
  * @brief   spin lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    if it has been locked, schedule another thread
  */
-void spin_lock(struct spin_lock *sprt_lock)
+void spin_lock(struct spin_lock *sptr_lock)
 {
-    while (spin_is_locked(sprt_lock));
+    while (spin_is_locked(sptr_lock));
     
-    mrt_preempt_disable();
-    atomic_inc(&sprt_lock->sgrt_atc);
+    mr_preempt_disable();
+    atomic_inc(&sptr_lock->sgtc_atc);
 }
 
 /*!
  * @brief   spin unlock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    none
  */
-void spin_unlock(struct spin_lock *sprt_lock)
+void spin_unlock(struct spin_lock *sptr_lock)
 {
-    if (!spin_is_locked(sprt_lock))
+    if (!spin_is_locked(sptr_lock))
         return;
 
-    atomic_dec(&sprt_lock->sgrt_atc);
-    mrt_preempt_enable();
+    atomic_dec(&sptr_lock->sgtc_atc);
+    mr_preempt_enable();
 }
 
 /*!
  * @brief   try spin lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    if it has been locked, return right away
  */
-kint32_t spin_try_lock(struct spin_lock *sprt_lock)
+kint32_t spin_try_lock(struct spin_lock *sptr_lock)
 {
-    if (spin_is_locked(sprt_lock))
+    if (spin_is_locked(sptr_lock))
         return -ER_LOCKED;
 
-    mrt_preempt_disable();
-    atomic_inc(&sprt_lock->sgrt_atc);
+    mr_preempt_disable();
+    atomic_inc(&sptr_lock->sgtc_atc);
     
     return ER_NORMAL;
 }
@@ -83,115 +83,115 @@ kint32_t spin_try_lock(struct spin_lock *sprt_lock)
 /*!< for SMP (if is single core, do not need to use them) */
 /*!
  * @brief   spin lock and disable irq
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    none
  */
-void spin_lock_irq(struct spin_lock *sprt_lock)
+void spin_lock_irq(struct spin_lock *sptr_lock)
 {
-    while (spin_is_locked(sprt_lock));
+    while (spin_is_locked(sptr_lock));
     
-    mrt_disable_cpu_irq();
-    mrt_preempt_disable();
-    mrt_barrier();
+    mr_disable_cpu_irq();
+    mr_preempt_disable();
+    mr_barrier();
 
-    atomic_inc(&sprt_lock->sgrt_atc);
+    atomic_inc(&sptr_lock->sgtc_atc);
 }
 
 /*!
  * @brief   try spin lock and disable irq
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  1: lock success; 0: lock fail
  * @note    none
  */
-kint32_t spin_try_lock_irq(struct spin_lock *sprt_lock)
+kint32_t spin_try_lock_irq(struct spin_lock *sptr_lock)
 {
-    if (spin_is_locked(sprt_lock))
+    if (spin_is_locked(sptr_lock))
         return -ER_LOCKED;
 
-    mrt_disable_cpu_irq();
-    mrt_preempt_disable();
-    mrt_barrier();
+    mr_disable_cpu_irq();
+    mr_preempt_disable();
+    mr_barrier();
     
-    atomic_inc(&sprt_lock->sgrt_atc);
+    atomic_inc(&sptr_lock->sgtc_atc);
     
     return ER_NORMAL;
 }
 
 /*!
  * @brief   spin unlock and enable irq
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    none
  */
-void spin_unlock_irq(struct spin_lock *sprt_lock)
+void spin_unlock_irq(struct spin_lock *sptr_lock)
 {
-    if (!spin_is_locked(sprt_lock))
+    if (!spin_is_locked(sptr_lock))
         return;
     
-    spin_unlock(sprt_lock);
-    mrt_barrier();
-    mrt_enable_cpu_irq();
+    spin_unlock(sptr_lock);
+    mr_barrier();
+    mr_enable_cpu_irq();
 }
 
 /*!
  * @brief   spin lock and save current irq status
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    none
  */
-void spin_lock_irqsave(struct spin_lock *sprt_lock)
+void spin_lock_irqsave(struct spin_lock *sptr_lock)
 {
-    while (spin_is_locked(sprt_lock));
+    while (spin_is_locked(sptr_lock));
     
-    sprt_lock->flag = __get_cpsr();
-    mrt_disable_cpu_irq();
+    sptr_lock->flag = __get_cpsr();
+    mr_disable_cpu_irq();
 
-    mrt_barrier();
-    mrt_preempt_disable();
-    atomic_inc(&sprt_lock->sgrt_atc);
+    mr_barrier();
+    mr_preempt_disable();
+    atomic_inc(&sptr_lock->sgtc_atc);
 }
 
 /*!
  * @brief   try spin lock and save current irq status
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  1: lock success; 0: lock fail
  * @note    none
  */
-kint32_t spin_try_lock_irqsave(struct spin_lock *sprt_lock)
+kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock)
 {
-    if (spin_is_locked(sprt_lock))
+    if (spin_is_locked(sptr_lock))
         return -ER_LOCKED;
 
-    sprt_lock->flag = __get_cpsr();
-    mrt_disable_cpu_irq();
+    sptr_lock->flag = __get_cpsr();
+    mr_disable_cpu_irq();
 
-    mrt_barrier();
-    mrt_preempt_disable();
-    atomic_inc(&sprt_lock->sgrt_atc);
+    mr_barrier();
+    mr_preempt_disable();
+    atomic_inc(&sptr_lock->sgtc_atc);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   spin unlock and restore irq status
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    none
  */
-void spin_unlock_irqrestore(struct spin_lock *sprt_lock)
+void spin_unlock_irqrestore(struct spin_lock *sptr_lock)
 {
-    if (!spin_is_locked(sprt_lock))
+    if (!spin_is_locked(sptr_lock))
         return;
     
-    spin_unlock(sprt_lock);
-    mrt_barrier();
+    spin_unlock(sptr_lock);
+    mr_barrier();
 
     /*!< bit4 ~ bit0 is mode bit, which are not equaled to 0 */
-    if (!(sprt_lock->flag & CPSR_BIT_I))
-        mrt_enable_cpu_irq();
+    if (!(sptr_lock->flag & CPSR_BIT_I))
+        mr_enable_cpu_irq();
 
-    sprt_lock->flag = 0;
+    sptr_lock->flag = 0;
 }
 
 /*!< end of file */

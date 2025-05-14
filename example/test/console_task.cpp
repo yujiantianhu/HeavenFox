@@ -43,9 +43,9 @@ using namespace bsc;
  */
 static void command_mail_to_light(crt_task_t *cprt_this, kuint8_t *command_line)
 {
-    struct mailbox &sgrt_mb = cprt_this->get_mailbox();
-    struct mail sgrt_mail;
-    struct mail_msg sgrt_msg[1] = {};
+    struct mailbox &sgtc_mb = cprt_this->get_mailbox();
+    struct mail sgtc_mail;
+    struct mail_msg sgtc_msg[1] = {};
     kuint8_t status = 0;
 
     if (!kstrncmp((kchar_t *)command_line, "led1 on", 7))
@@ -55,16 +55,16 @@ static void command_mail_to_light(crt_task_t *cprt_this, kuint8_t *command_line)
     else
         return;
 
-    mail_init(&sgrt_mb, &sgrt_mail);
+    mail_init(&sgtc_mb, &sgtc_mail);
     
-    sgrt_msg[0].buffer = &status;
-    sgrt_msg[0].size = 1;
-    sgrt_msg[0].type = NR_MAIL_TYPE_SERIAL;
+    sgtc_msg[0].buffer = &status;
+    sgtc_msg[0].size = 1;
+    sgtc_msg[0].type = NR_MAIL_TYPE_SERIAL;
 
-    sgrt_mail.sprt_msg = &sgrt_msg[0];
-    sgrt_mail.num_msgs = 1;
+    sgtc_mail.sptr_msg = &sgtc_msg[0];
+    sgtc_mail.num_msgs = 1;
 
-    mail_send("light-app-mailbox", &sgrt_mail);
+    mail_send("light-app-mailbox", &sgtc_mail);
 }
 
 /*!
@@ -75,9 +75,9 @@ static void command_mail_to_light(crt_task_t *cprt_this, kuint8_t *command_line)
  */
 static void command_mail_to_display(crt_task_t *cprt_this, kuint8_t *command_line)
 {
-    struct mailbox &sgrt_mb = cprt_this->get_mailbox();
-    struct mail sgrt_mail;
-    struct mail_msg sgrt_msg[1] = {};
+    struct mailbox &sgtc_mb = cprt_this->get_mailbox();
+    struct mail sgtc_mail;
+    struct mail_msg sgtc_msg[1] = {};
     kuint8_t status = 0;
 
     if (!kstrncmp((kchar_t *)command_line, "page up", 9))
@@ -87,16 +87,16 @@ static void command_mail_to_display(crt_task_t *cprt_this, kuint8_t *command_lin
     else
         return;
 
-    mail_init(&sgrt_mb, &sgrt_mail);
+    mail_init(&sgtc_mb, &sgtc_mail);
     
-    sgrt_msg[0].buffer = &status;
-    sgrt_msg[0].size = 1;
-    sgrt_msg[0].type = NR_MAIL_TYPE_SERIAL;
+    sgtc_msg[0].buffer = &status;
+    sgtc_msg[0].size = 1;
+    sgtc_msg[0].type = NR_MAIL_TYPE_SERIAL;
 
-    sgrt_mail.sprt_msg = &sgrt_msg[0];
-    sgrt_mail.num_msgs = 1;
+    sgtc_mail.sptr_msg = &sgtc_msg[0];
+    sgtc_mail.num_msgs = 1;
 
-    mail_send("display-app-mailbox", &sgrt_mail);
+    mail_send("display-app-mailbox", &sgtc_mail);
 }
 
 /*!
@@ -146,8 +146,8 @@ kint32_t console_task_init(void)
     if (!cprt_task)
         return -ER_FAILD;
 
-    struct mailbox &sgrt_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgrt_mb, cprt_task->get_self(), "console-task-mailbox");
+    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cprt_task->get_self(), "console-task-mailbox");
 
     return ER_NORMAL;
 }

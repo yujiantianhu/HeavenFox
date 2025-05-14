@@ -42,21 +42,21 @@
 #define IMX_SDMMC_IF_PORT_ENTRY()                       IMX6UL_USDHC_PROPERTY_ENTRY(1)          /*!< register base address */
 
 /*!< The functions */
-static kbool_t imx6ull_sdmmc_is_card_insert(struct fwk_sdcard_host *sprt_host);
-static void imx6ull_sdmmc_set_bus_width(struct fwk_sdcard_host *sprt_host, kuint32_t option);
-static void imx6ull_sdmmc_set_clk_freq(struct fwk_sdcard_host *sprt_host, kuint32_t option);
-static kbool_t imx6ull_sdmmc_initial_active(struct fwk_sdcard_host *sprt_host, kuint32_t timeout);
-static kint32_t imx6ull_sdmmc_switch_voltage(struct fwk_sdcard_host *sprt_host, kuint32_t voltage);
-static kint32_t imx6ull_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds);
-static void imx6ull_sdmmc_recv_response(struct fwk_sdcard_cmd *sprt_cmds);
-static kint32_t imx6ull_sdmmc_transfer_data(struct fwk_sdcard_data *sprt_data);
-static void imx6ull_sdmmc_reset_transfer(struct fwk_sdcard_host *sprt_host);
+static kbool_t imx6ull_sdmmc_is_card_insert(struct fwk_sdcard_host *sptr_host);
+static void imx6ull_sdmmc_set_bus_width(struct fwk_sdcard_host *sptr_host, kuint32_t option);
+static void imx6ull_sdmmc_set_clk_freq(struct fwk_sdcard_host *sptr_host, kuint32_t option);
+static kbool_t imx6ull_sdmmc_initial_active(struct fwk_sdcard_host *sptr_host, kuint32_t timeout);
+static kint32_t imx6ull_sdmmc_switch_voltage(struct fwk_sdcard_host *sptr_host, kuint32_t voltage);
+static kint32_t imx6ull_sdmmc_send_command(struct fwk_sdcard_cmd *sptr_cmds);
+static void imx6ull_sdmmc_recv_response(struct fwk_sdcard_cmd *sptr_cmds);
+static kint32_t imx6ull_sdmmc_transfer_data(struct fwk_sdcard_data *sptr_data);
+static void imx6ull_sdmmc_reset_transfer(struct fwk_sdcard_host *sptr_host);
 
 /*!< private function */
-static void imx6ull_sdmmc_reset(srt_imx_usdhc_t *sprt_usdhc, kuint32_t optBit, kuint32_t timeout);
-static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data, void *ptrData);
-static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data);
-static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data);
+static void imx6ull_sdmmc_reset(srt_imx_usdhc_t *sptr_usdhc, kuint32_t optBit, kuint32_t timeout);
+static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sptr_usdhc, struct fwk_sdcard_data *sptr_data, void *ptrData);
+static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sptr_usdhc, struct fwk_sdcard_data *sptr_data);
+static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sptr_usdhc, struct fwk_sdcard_data *sptr_data);
 
 /*!< API function */
 /*!
@@ -67,9 +67,9 @@ static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_
  */
 static void imx6ull_sdmmc_clk_initial(void)
 {
-    srt_hal_imx_ccm_t *sprt_clk;
+    srt_hal_imx_ccm_t *sptr_clk;
 
-    sprt_clk = IMX_SDMMC_CLK_PORT_ENTRY();
+    sptr_clk = IMX_SDMMC_CLK_PORT_ENTRY();
 
     /*!<
      * The clock of USDHC is from two PFDs(Phase Fractional Dividers): PFD0(352MHz), PFD2(396MHz), which will output to USDHC after dividing 2.
@@ -78,15 +78,15 @@ static void imx6ull_sdmmc_clk_initial(void)
      * 
      * clock = PFD2 / 2 = 192MHz
      */
-    mrt_clrbitl(mrt_bit(16), &sprt_clk->CSCMR1);
-    mrt_clrbitl(mrt_bit(11) | mrt_bit(12) | mrt_bit(13), &sprt_clk->CSCDR1);
-    mrt_setbitl(mrt_bit(11), &sprt_clk->CSCDR1);
+    mr_clrbitl(mr_bit(16), &sptr_clk->CSCMR1);
+    mr_clrbitl(mr_bit(11) | mr_bit(12) | mr_bit(13), &sptr_clk->CSCDR1);
+    mr_setbitl(mr_bit(11), &sptr_clk->CSCDR1);
 
     /*!< enable clock */
-    mrt_imx_ccm_clk_enable(IMX_SDMMC_CLK_CG_REG, IMX_SDMMC_CLK_SELECT);
+    mr_imx_ccm_clk_enable(IMX_SDMMC_CLK_CG_REG, IMX_SDMMC_CLK_SELECT);
 
     /*!< enable cd pin clock */
-    mrt_imx_ccm_clk_enable(IMX_SDMMC_CD_CLK_CG_REG, IMX_SDMMC_CD_CLK_SELECT);
+    mr_imx_ccm_clk_enable(IMX_SDMMC_CD_CLK_CG_REG, IMX_SDMMC_CD_CLK_SELECT);
 }
 
 /*!
@@ -97,78 +97,78 @@ static void imx6ull_sdmmc_clk_initial(void)
  */
 static void imx6ull_sdmmc_pin_initial(void)
 {
-    srt_hal_imx_pin_t sgrt_uSDHC;
-    urt_imx_io_ctl_pad_t ugrt_ioPad;
+    srt_hal_imx_pin_t sgtc_uSDHC;
+    urt_imx_io_ctl_pad_t ugtr_ioPad;
 
     /*!< Card detect pin, input direction, 47k pull up, enable HYS */
-    mrt_reset_urt_data(&ugrt_ioPad);
-    mrt_write_urt_bits(&ugrt_ioPad, HYS, IMX6UL_IO_CTL_PAD_HYS_ENABLE);
-    mrt_write_urt_bits(&ugrt_ioPad, PUS, IMX6UL_IO_CTL_PAD_PUS_47K_UP);
-    mrt_write_urt_bits(&ugrt_ioPad, PUE, IMX6UL_IO_CTL_PAD_PUE_PULL);
-    mrt_write_urt_bits(&ugrt_ioPad, PKE, IMX6UL_IO_CTL_PAD_PKE_DISABLE);
-    mrt_write_urt_bits(&ugrt_ioPad, DSE, IMX6UL_IO_CTL_PAD_DSE_RDIV(4));
-    mrt_write_urt_bits(&ugrt_ioPad, SRE, IMX6UL_IO_CTL_PAD_FAST_RATE);
-    mrt_write_urt_bits(&ugrt_ioPad, SPEED, IMX6UL_IO_CTL_PAD_SPEED_200MHZ);
-    hal_imx_pin_attribute_init(&sgrt_uSDHC, IMX6UL_PIN_ADDR_BASE, 
-                        IMX_SDMMC_MUX_CD, mrt_trans_urt_data(&ugrt_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
-    hal_imx_pin_mux_configure(&sgrt_uSDHC);
-    hal_imx_pin_pad_configure(&sgrt_uSDHC);
+    mr_reset_urt_data(&ugtr_ioPad);
+    mr_write_urt_bits(&ugtr_ioPad, HYS, IMX6UL_IO_CTL_PAD_HYS_ENABLE);
+    mr_write_urt_bits(&ugtr_ioPad, PUS, IMX6UL_IO_CTL_PAD_PUS_47K_UP);
+    mr_write_urt_bits(&ugtr_ioPad, PUE, IMX6UL_IO_CTL_PAD_PUE_PULL);
+    mr_write_urt_bits(&ugtr_ioPad, PKE, IMX6UL_IO_CTL_PAD_PKE_DISABLE);
+    mr_write_urt_bits(&ugtr_ioPad, DSE, IMX6UL_IO_CTL_PAD_DSE_RDIV(4));
+    mr_write_urt_bits(&ugtr_ioPad, SRE, IMX6UL_IO_CTL_PAD_FAST_RATE);
+    mr_write_urt_bits(&ugtr_ioPad, SPEED, IMX6UL_IO_CTL_PAD_SPEED_200MHZ);
+    hal_imx_pin_attribute_init(&sgtc_uSDHC, IMX6UL_PIN_ADDR_BASE, 
+                        IMX_SDMMC_MUX_CD, mr_trans_urt_data(&ugtr_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
+    hal_imx_pin_mux_configure(&sgtc_uSDHC);
+    hal_imx_pin_pad_configure(&sgtc_uSDHC);
 
     /*!< Clock pin */
-    mrt_write_urt_bits(&ugrt_ioPad, HYS, IMX6UL_IO_CTL_PAD_HYS_DISABLE);
-    mrt_write_urt_bits(&ugrt_ioPad, PUS, IMX6UL_IO_CTL_PAD_PUS_22K_UP);
-    mrt_write_urt_bits(&ugrt_ioPad, PUE, IMX6UL_IO_CTL_PAD_PUE_PULL);
-    mrt_write_urt_bits(&ugrt_ioPad, PKE, IMX6UL_IO_CTL_PAD_PKE_DISABLE);
-    mrt_write_urt_bits(&ugrt_ioPad, DSE, IMX6UL_IO_CTL_PAD_DSE_RDIV(4));
-    mrt_write_urt_bits(&ugrt_ioPad, SRE, IMX6UL_IO_CTL_PAD_FAST_RATE);
-    mrt_write_urt_bits(&ugrt_ioPad, SPEED, IMX6UL_IO_CTL_PAD_SPEED_100MHZ);
-    hal_imx_pin_attribute_init(&sgrt_uSDHC, IMX6UL_PIN_ADDR_BASE, 
-                        IMX_SDMMC_MUX_CLK, mrt_trans_urt_data(&ugrt_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
-    hal_imx_pin_mux_configure(&sgrt_uSDHC);
-    hal_imx_pin_pad_configure(&sgrt_uSDHC);
+    mr_write_urt_bits(&ugtr_ioPad, HYS, IMX6UL_IO_CTL_PAD_HYS_DISABLE);
+    mr_write_urt_bits(&ugtr_ioPad, PUS, IMX6UL_IO_CTL_PAD_PUS_22K_UP);
+    mr_write_urt_bits(&ugtr_ioPad, PUE, IMX6UL_IO_CTL_PAD_PUE_PULL);
+    mr_write_urt_bits(&ugtr_ioPad, PKE, IMX6UL_IO_CTL_PAD_PKE_DISABLE);
+    mr_write_urt_bits(&ugtr_ioPad, DSE, IMX6UL_IO_CTL_PAD_DSE_RDIV(4));
+    mr_write_urt_bits(&ugtr_ioPad, SRE, IMX6UL_IO_CTL_PAD_FAST_RATE);
+    mr_write_urt_bits(&ugtr_ioPad, SPEED, IMX6UL_IO_CTL_PAD_SPEED_100MHZ);
+    hal_imx_pin_attribute_init(&sgtc_uSDHC, IMX6UL_PIN_ADDR_BASE, 
+                        IMX_SDMMC_MUX_CLK, mr_trans_urt_data(&ugtr_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
+    hal_imx_pin_mux_configure(&sgtc_uSDHC);
+    hal_imx_pin_pad_configure(&sgtc_uSDHC);
 
     /*!< Common Settings */
-    mrt_reset_urt_data(&ugrt_ioPad);
-    mrt_write_urt_bits(&ugrt_ioPad, HYS, IMX6UL_IO_CTL_PAD_HYS_DISABLE);
-    mrt_write_urt_bits(&ugrt_ioPad, PUS, IMX6UL_IO_CTL_PAD_PUS_22K_UP);
-    mrt_write_urt_bits(&ugrt_ioPad, PUE, IMX6UL_IO_CTL_PAD_PUE_PULL);
-    mrt_write_urt_bits(&ugrt_ioPad, PKE, IMX6UL_IO_CTL_PAD_PKE_DISABLE);
-    mrt_write_urt_bits(&ugrt_ioPad, DSE, IMX6UL_IO_CTL_PAD_DSE_RDIV(4));
-    mrt_write_urt_bits(&ugrt_ioPad, SRE, IMX6UL_IO_CTL_PAD_FAST_RATE);
+    mr_reset_urt_data(&ugtr_ioPad);
+    mr_write_urt_bits(&ugtr_ioPad, HYS, IMX6UL_IO_CTL_PAD_HYS_DISABLE);
+    mr_write_urt_bits(&ugtr_ioPad, PUS, IMX6UL_IO_CTL_PAD_PUS_22K_UP);
+    mr_write_urt_bits(&ugtr_ioPad, PUE, IMX6UL_IO_CTL_PAD_PUE_PULL);
+    mr_write_urt_bits(&ugtr_ioPad, PKE, IMX6UL_IO_CTL_PAD_PKE_DISABLE);
+    mr_write_urt_bits(&ugtr_ioPad, DSE, IMX6UL_IO_CTL_PAD_DSE_RDIV(4));
+    mr_write_urt_bits(&ugtr_ioPad, SRE, IMX6UL_IO_CTL_PAD_FAST_RATE);
 
     /*!< Command pin */
-    mrt_write_urt_bits(&ugrt_ioPad, SPEED, IMX6UL_IO_CTL_PAD_SPEED_100MHZ);
-    hal_imx_pin_attribute_init(&sgrt_uSDHC, IMX6UL_PIN_ADDR_BASE, 
-                        IMX_SDMMC_MUX_CMD, mrt_trans_urt_data(&ugrt_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
-    hal_imx_pin_mux_configure(&sgrt_uSDHC);
-    hal_imx_pin_pad_configure(&sgrt_uSDHC);
+    mr_write_urt_bits(&ugtr_ioPad, SPEED, IMX6UL_IO_CTL_PAD_SPEED_100MHZ);
+    hal_imx_pin_attribute_init(&sgtc_uSDHC, IMX6UL_PIN_ADDR_BASE, 
+                        IMX_SDMMC_MUX_CMD, mr_trans_urt_data(&ugtr_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
+    hal_imx_pin_mux_configure(&sgtc_uSDHC);
+    hal_imx_pin_pad_configure(&sgtc_uSDHC);
 
     /*!< Data pin 0 ~ 3 */
-    mrt_write_urt_bits(&ugrt_ioPad, SPEED, IMX6UL_IO_CTL_PAD_SPEED_100MHZ);
+    mr_write_urt_bits(&ugtr_ioPad, SPEED, IMX6UL_IO_CTL_PAD_SPEED_100MHZ);
 
     /*!< Data0 pin */
-    hal_imx_pin_attribute_init(&sgrt_uSDHC, IMX6UL_PIN_ADDR_BASE, 
-                        IMX_SDMMC_MUX_DATA0, mrt_trans_urt_data(&ugrt_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
-    hal_imx_pin_mux_configure(&sgrt_uSDHC);
-    hal_imx_pin_pad_configure(&sgrt_uSDHC);
+    hal_imx_pin_attribute_init(&sgtc_uSDHC, IMX6UL_PIN_ADDR_BASE, 
+                        IMX_SDMMC_MUX_DATA0, mr_trans_urt_data(&ugtr_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
+    hal_imx_pin_mux_configure(&sgtc_uSDHC);
+    hal_imx_pin_pad_configure(&sgtc_uSDHC);
 
     /*!< Data1 pin */
-    hal_imx_pin_attribute_init(&sgrt_uSDHC, IMX6UL_PIN_ADDR_BASE, 
-                        IMX_SDMMC_MUX_DATA1, mrt_trans_urt_data(&ugrt_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
-    hal_imx_pin_mux_configure(&sgrt_uSDHC);
-    hal_imx_pin_pad_configure(&sgrt_uSDHC);
+    hal_imx_pin_attribute_init(&sgtc_uSDHC, IMX6UL_PIN_ADDR_BASE, 
+                        IMX_SDMMC_MUX_DATA1, mr_trans_urt_data(&ugtr_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
+    hal_imx_pin_mux_configure(&sgtc_uSDHC);
+    hal_imx_pin_pad_configure(&sgtc_uSDHC);
 
     /*!< Data2 pin */
-    hal_imx_pin_attribute_init(&sgrt_uSDHC, IMX6UL_PIN_ADDR_BASE, 
-                        IMX_SDMMC_MUX_DATA2, mrt_trans_urt_data(&ugrt_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
-    hal_imx_pin_mux_configure(&sgrt_uSDHC);
-    hal_imx_pin_pad_configure(&sgrt_uSDHC);
+    hal_imx_pin_attribute_init(&sgtc_uSDHC, IMX6UL_PIN_ADDR_BASE, 
+                        IMX_SDMMC_MUX_DATA2, mr_trans_urt_data(&ugtr_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
+    hal_imx_pin_mux_configure(&sgtc_uSDHC);
+    hal_imx_pin_pad_configure(&sgtc_uSDHC);
 
     /*!< Data3 pin */
-    hal_imx_pin_attribute_init(&sgrt_uSDHC, IMX6UL_PIN_ADDR_BASE, 
-                        IMX_SDMMC_MUX_DATA3, mrt_trans_urt_data(&ugrt_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
-    hal_imx_pin_mux_configure(&sgrt_uSDHC);
-    hal_imx_pin_pad_configure(&sgrt_uSDHC);
+    hal_imx_pin_attribute_init(&sgtc_uSDHC, IMX6UL_PIN_ADDR_BASE, 
+                        IMX_SDMMC_MUX_DATA3, mr_trans_urt_data(&ugtr_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
+    hal_imx_pin_mux_configure(&sgtc_uSDHC);
+    hal_imx_pin_pad_configure(&sgtc_uSDHC);
 }
 
 /*!
@@ -179,38 +179,38 @@ static void imx6ull_sdmmc_pin_initial(void)
  */
 static void imx6ull_sdmmc_host_initial(void)
 {
-    srt_hal_imx_gpio_t  *sprt_cd;
-    srt_imx_usdhc_t *sprt_usdhc;
+    srt_hal_imx_gpio_t  *sptr_cd;
+    srt_imx_usdhc_t *sptr_usdhc;
     kuint32_t iSysCtrlReg, iWtmkLvlReg, iProtCtrlReg, iIntStatusReg;
 
-    sprt_cd    = IMX_SDMMC_CD_PORT_ENTRY();
-    sprt_usdhc = IMX_SDMMC_IF_PORT_ENTRY();
+    sptr_cd    = IMX_SDMMC_CD_PORT_ENTRY();
+    sptr_usdhc = IMX_SDMMC_IF_PORT_ENTRY();
 
     /*!< set to input direction */
-    mrt_clrbitl(IMX_SDMMC_CD_PIN_BIT, &sprt_cd->GDIR);
+    mr_clrbitl(IMX_SDMMC_CD_PIN_BIT, &sptr_cd->GDIR);
 
     /*!< ------------------------------------------------------------------------------- */
     /*!< Reset all */
-    mrt_setbitl(NR_ImxUsdhc_SysCtrl_SoftResetAll, &sprt_usdhc->SYS_CTRL);
-    while (mrt_isBitSetl(NR_ImxUsdhc_SysCtrl_SoftResetAll, &sprt_usdhc->SYS_CTRL));
+    mr_setbitl(NR_ImxUsdhc_SysCtrl_SoftResetAll, &sptr_usdhc->SYS_CTRL);
+    while (mr_isBitSetl(NR_ImxUsdhc_SysCtrl_SoftResetAll, &sptr_usdhc->SYS_CTRL));
 
     /*!< Reset Tuning */
-    mrt_setbitl(NR_ImxUsdhc_SysCtrl_ResetTuning, &sprt_usdhc->SYS_CTRL);
-    while (mrt_isBitSetl(NR_ImxUsdhc_SysCtrl_ResetTuning, &sprt_usdhc->SYS_CTRL));
+    mr_setbitl(NR_ImxUsdhc_SysCtrl_ResetTuning, &sptr_usdhc->SYS_CTRL);
+    while (mr_isBitSetl(NR_ImxUsdhc_SysCtrl_ResetTuning, &sptr_usdhc->SYS_CTRL));
 
     /*!< Read Registers */
-    iSysCtrlReg = mrt_readl(&sprt_usdhc->SYS_CTRL);
+    iSysCtrlReg = mr_readl(&sptr_usdhc->SYS_CTRL);
 
     /*!< Data Timeout Counter Value */
-    mrt_clrbitl(IMX_USDHC_SYS_CTRL_DTOCV_MASK, &iSysCtrlReg);
-    mrt_setbitl(IMX_USDHC_SYS_CTRL_DTOCV_U32(0xfU), &iSysCtrlReg);
+    mr_clrbitl(IMX_USDHC_SYS_CTRL_DTOCV_MASK, &iSysCtrlReg);
+    mr_setbitl(IMX_USDHC_SYS_CTRL_DTOCV_U32(0xfU), &iSysCtrlReg);
 
     /*!< Update Registers */
-    mrt_writel(iSysCtrlReg,  &sprt_usdhc->SYS_CTRL);
+    mr_writel(iSysCtrlReg,  &sptr_usdhc->SYS_CTRL);
 
     /*!< ------------------------------------------------------------------------------- */
     /*!< Read Registers */
-    iWtmkLvlReg = mrt_readl(&sprt_usdhc->WTMK_LVL);
+    iWtmkLvlReg = mr_readl(&sptr_usdhc->WTMK_LVL);
 
     /*!<
      * Read Watermark Level
@@ -218,8 +218,8 @@ static void imx6ull_sdmmc_host_initial(void)
      * number of words as a sequence of read bursts in back-to-back mode. The maximum legal value for the
      * read water mark level is 128
      */
-    mrt_clrbitl(IMX_USDHC_WTMK_LVL_RD_WML_MASK, &iWtmkLvlReg);
-    mrt_setbitl(IMX_USDHC_WTMK_LVL_RD_WML_U32(0x80U), &iWtmkLvlReg);
+    mr_clrbitl(IMX_USDHC_WTMK_LVL_RD_WML_MASK, &iWtmkLvlReg);
+    mr_setbitl(IMX_USDHC_WTMK_LVL_RD_WML_U32(0x80U), &iWtmkLvlReg);
 
     /*!<
      * Read Burst Length
@@ -227,8 +227,8 @@ static void imx6ull_sdmmc_host_initial(void)
      * to the read watermark level, and all bursts within a watermark level transfer will be in back-to-back mode.
      * On reset, this field will be 8. Writing 0 to this field will result in '01000' (i.e. it is not able to clear this field)
      */
-    mrt_clrbitl(IMX_USDHC_WTMK_LVL_RD_BRST_LEN_MASK, &iWtmkLvlReg);
-    mrt_setbitl(IMX_USDHC_WTMK_LVL_RD_BRST_LEN_U32(0x08U), &iWtmkLvlReg);
+    mr_clrbitl(IMX_USDHC_WTMK_LVL_RD_BRST_LEN_MASK, &iWtmkLvlReg);
+    mr_setbitl(IMX_USDHC_WTMK_LVL_RD_BRST_LEN_U32(0x08U), &iWtmkLvlReg);
 
     /*!<
      * Write Watermark Level
@@ -236,8 +236,8 @@ static void imx6ull_sdmmc_host_initial(void)
      * number of words as a sequence of write bursts in back-to-back mode. The maximum legal value for the
      * write watermark level is 128
      */
-    mrt_clrbitl(IMX_USDHC_WTMK_LVL_WR_WML_MASK, &iWtmkLvlReg);
-    mrt_setbitl(IMX_USDHC_WTMK_LVL_WR_WML_U32(0x80U), &iWtmkLvlReg);
+    mr_clrbitl(IMX_USDHC_WTMK_LVL_WR_WML_MASK, &iWtmkLvlReg);
+    mr_setbitl(IMX_USDHC_WTMK_LVL_WR_WML_U32(0x80U), &iWtmkLvlReg);
 
     /*!<
      * Write Burst Length
@@ -246,26 +246,26 @@ static void imx6ull_sdmmc_host_initial(void)
      * mode. On reset, this field will be 8. Writing 0 to this field will result in '01000' (i.e. it is not able to clear this
      * field).
      */
-    mrt_clrbitl(IMX_USDHC_WTMK_LVL_WR_BRST_LEN_MASK, &iWtmkLvlReg);
-    mrt_setbitl(IMX_USDHC_WTMK_LVL_WR_BRST_LEN_U32(0x08U), &iWtmkLvlReg);
+    mr_clrbitl(IMX_USDHC_WTMK_LVL_WR_BRST_LEN_MASK, &iWtmkLvlReg);
+    mr_setbitl(IMX_USDHC_WTMK_LVL_WR_BRST_LEN_U32(0x08U), &iWtmkLvlReg);
 
     /*!< Update Registers */
-    mrt_writel(iWtmkLvlReg,  &sprt_usdhc->WTMK_LVL);
+    mr_writel(iWtmkLvlReg,  &sptr_usdhc->WTMK_LVL);
     
     /*!< ------------------------------------------------------------------------------- */
     /*!< Read Registers */
-    iProtCtrlReg = mrt_readl(&sprt_usdhc->PROT_CTRL);
+    iProtCtrlReg = mr_readl(&sptr_usdhc->PROT_CTRL);
 
     /*!< Endian Mode */
-    mrt_clrbitl(IMX_USDHC_PROT_CTRL_EMODE_MASK, &iProtCtrlReg);
-    mrt_setbitl(NR_ImxUsdhc_ProtCtrl_LittleEndian, &iProtCtrlReg);
+    mr_clrbitl(IMX_USDHC_PROT_CTRL_EMODE_MASK, &iProtCtrlReg);
+    mr_setbitl(NR_ImxUsdhc_ProtCtrl_LittleEndian, &iProtCtrlReg);
 
     /*!< select which DMA (SDMA or ADMA) will be enabled */
-    mrt_clrbitl(IMX_USDHC_PROT_CTRL_DMASEL_MASK, &iProtCtrlReg);
-    mrt_setbitl(NR_ImxUsdhc_ProtCtrl_SDmaSelect, &iProtCtrlReg);
+    mr_clrbitl(IMX_USDHC_PROT_CTRL_DMASEL_MASK, &iProtCtrlReg);
+    mr_setbitl(NR_ImxUsdhc_ProtCtrl_SDmaSelect, &iProtCtrlReg);
 
     /*!< Update Registers */
-    mrt_writel(iProtCtrlReg, &sprt_usdhc->PROT_CTRL);
+    mr_writel(iProtCtrlReg, &sptr_usdhc->PROT_CTRL);
 
     /*!< ------------------------------------------------------------------------------- */
     /*!<
@@ -273,39 +273,39 @@ static void imx6ull_sdmmc_host_initial(void)
      *  0: In any scenario, uSDHC does not send out external DMA request.
      *  1: When internal DMA is not active, the external DMA request will be sent out.
      */
-    mrt_clrbitl(NR_ImxUsdhc_VendSpec_ExtDmaRequestEnable, &sprt_usdhc->VEND_SPEC);
+    mr_clrbitl(NR_ImxUsdhc_VendSpec_ExtDmaRequestEnable, &sptr_usdhc->VEND_SPEC);
 
     /*!< ------------------------------------------------------------------------------- */
     /*!< DMA Enable */
-    mrt_clrbitl(NR_ImxUsdhc_MixCtrl_DmaEnable, &sprt_usdhc->MIX_CTRL);
+    mr_clrbitl(NR_ImxUsdhc_MixCtrl_DmaEnable, &sptr_usdhc->MIX_CTRL);
 
     /*!< ------------------------------------------------------------------------------- */
     /*!< Read Registers */
-    iIntStatusReg = mrt_readl(&sprt_usdhc->INT_STATUS_EN);
+    iIntStatusReg = mr_readl(&sptr_usdhc->INT_STATUS_EN);
 
     /*!< Disable interrupt signal, but enable interrupt status  */
-    mrt_resetl(&iIntStatusReg);
+    mr_resetl(&iIntStatusReg);
 
     /*!< Select Interrupt Status Bit to Enable */
     /*!< Command Status Bit: Timeout Error, CRC Error, End Bit Error, Index Error */
-    mrt_setbitl(NR_ImxUsdhc_IntCmdTimeOutErr_Bit | NR_ImxUsdhc_IntCmdCrcErr_Bit | 
+    mr_setbitl(NR_ImxUsdhc_IntCmdTimeOutErr_Bit | NR_ImxUsdhc_IntCmdCrcErr_Bit | 
                NR_ImxUsdhc_IntCmdEndBitErr_Bit | NR_ImxUsdhc_IntCmdIndexErr_Bit, &iIntStatusReg);
     /*!< Card Insertion & Removal Status Bit */
-    mrt_setbitl(NR_ImxUsdhc_IntCardInsertion_Bit | NR_ImxUsdhc_IntCardRemoval_Bit, &iIntStatusReg);
+    mr_setbitl(NR_ImxUsdhc_IntCardInsertion_Bit | NR_ImxUsdhc_IntCardRemoval_Bit, &iIntStatusReg);
     /*!< Status Bit: Cmd Transfer Complete, Data Transfer Complete, DMA Interrupt, Buffer Write Ready, Buffer Read Ready */
-    mrt_setbitl(NR_ImxUsdhc_IntCmdComplete_Bit | NR_ImxUsdhc_IntDataComplete_Bit | 
+    mr_setbitl(NR_ImxUsdhc_IntCmdComplete_Bit | NR_ImxUsdhc_IntDataComplete_Bit | 
                NR_ImxUsdhc_IntDmaInterrupt_Bit | NR_ImxUsdhc_IntBufferWriteReady_Bit | 
                NR_ImxUsdhc_IntBufferReadReady_Bit, &iIntStatusReg);
     /*!< Data Status Bit: Data Timeout Error, Data CRC Error, Data End Bit Error, Auto CMD12 Error */
-    mrt_setbitl(NR_ImxUsdhc_IntDataTimeOutErr_Bit | NR_ImxUsdhc_IntDataCrcErr_Bit |
+    mr_setbitl(NR_ImxUsdhc_IntDataTimeOutErr_Bit | NR_ImxUsdhc_IntDataCrcErr_Bit |
                NR_ImxUsdhc_IntDataEndBitErr_Bit | NR_ImxUsdhc_IntACmd12Err_Bit, &iIntStatusReg);
     /*!< SDR104 Tuning Status Bit: Re-Tuning Event, Tuning Pass, Tuning Error */
-    mrt_setbitl(NR_ImxUsdhc_IntReTuningEvent_Bit | NR_ImxUsdhc_IntTuningPass_Bit |
+    mr_setbitl(NR_ImxUsdhc_IntReTuningEvent_Bit | NR_ImxUsdhc_IntTuningPass_Bit |
                NR_ImxUsdhc_IntTuningErr_Bit, &iIntStatusReg);
 
     /*!< Update Registers */
-    mrt_writel(iIntStatusReg, &sprt_usdhc->INT_STATUS_EN);
-    mrt_resetl(&sprt_usdhc->INT_SIGNAL_EN);
+    mr_writel(iIntStatusReg, &sptr_usdhc->INT_STATUS_EN);
+    mr_resetl(&sptr_usdhc->INT_SIGNAL_EN);
 }
 
 /*!
@@ -328,13 +328,13 @@ void imx6ull_sdmmc_init(void)
  * @retval  none
  * @note    reset command/data line
  */
-static void imx6ull_sdmmc_reset(srt_imx_usdhc_t *sprt_usdhc, kuint32_t optBit, kuint32_t timeout)
+static void imx6ull_sdmmc_reset(srt_imx_usdhc_t *sptr_usdhc, kuint32_t optBit, kuint32_t timeout)
 {
-    mrt_setbitl(optBit & NR_ImxUsdhc_SysCtrl_ResetMask, &sprt_usdhc->SYS_CTRL);
+    mr_setbitl(optBit & NR_ImxUsdhc_SysCtrl_ResetMask, &sptr_usdhc->SYS_CTRL);
 
-    mrt_run_code_retry(timeout,
+    mr_run_code_retry(timeout,
 
-        if (mrt_isBitResetl(optBit & NR_ImxUsdhc_SysCtrl_ResetMask, &sprt_usdhc->SYS_CTRL))
+        if (mr_isBitResetl(optBit & NR_ImxUsdhc_SysCtrl_ResetMask, &sptr_usdhc->SYS_CTRL))
             break;
     )
 
@@ -346,19 +346,19 @@ static void imx6ull_sdmmc_reset(srt_imx_usdhc_t *sprt_usdhc, kuint32_t optBit, k
  * @retval  none
  * @note    reset command/data line
  */
-static void imx6ull_sdmmc_reset_transfer(struct fwk_sdcard_host *sprt_host)
+static void imx6ull_sdmmc_reset_transfer(struct fwk_sdcard_host *sptr_host)
 {
-    srt_imx_usdhc_t *sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
+    srt_imx_usdhc_t *sptr_usdhc = (srt_imx_usdhc_t *)sptr_host->iHostIfBase;
 
     /*!<
      * CIHB: bit0, Command Inhibit (CMD). 0: idle; 1 : busy
      * CDIHB: bit1, Command Inhibit (DATA). 0: idle; 1 : busy
      */
-    if (mrt_isBitSetl(NR_ImxUsdhc_PresState_CmdInhibitCmdLine, &sprt_usdhc->PRES_STATE))
-        imx6ull_sdmmc_reset(sprt_usdhc, NR_ImxUsdhc_SysCtrl_SoftResetCmdLine, 100U);
+    if (mr_isBitSetl(NR_ImxUsdhc_PresState_CmdInhibitCmdLine, &sptr_usdhc->PRES_STATE))
+        imx6ull_sdmmc_reset(sptr_usdhc, NR_ImxUsdhc_SysCtrl_SoftResetCmdLine, 100U);
 
-    if (mrt_isBitSetl(NR_ImxUsdhc_PresState_CmdInhibitDataLine, &sprt_usdhc->PRES_STATE))
-        imx6ull_sdmmc_reset(sprt_usdhc, NR_ImxUsdhc_SysCtrl_SoftResetDataLine, 100U); 
+    if (mr_isBitSetl(NR_ImxUsdhc_PresState_CmdInhibitDataLine, &sptr_usdhc->PRES_STATE))
+        imx6ull_sdmmc_reset(sptr_usdhc, NR_ImxUsdhc_SysCtrl_SoftResetDataLine, 100U); 
 }
 
 /*!
@@ -367,12 +367,12 @@ static void imx6ull_sdmmc_reset_transfer(struct fwk_sdcard_host *sprt_host)
  * @retval  none
  * @note    detect if card insert
  */
-static kbool_t imx6ull_sdmmc_is_card_insert(struct fwk_sdcard_host *sprt_host)
+static kbool_t imx6ull_sdmmc_is_card_insert(struct fwk_sdcard_host *sptr_host)
 {
-    srt_hal_imx_gpio_t *sprt_cd = (srt_hal_imx_gpio_t *)sprt_host->iHostCDBase;
+    srt_hal_imx_gpio_t *sptr_cd = (srt_hal_imx_gpio_t *)sptr_host->iHostCDBase;
 
     /*!< Waitting for Card Inserting */
-    return mrt_isBitResetl(IMX_SDMMC_CD_PIN_BIT, &sprt_cd->DR);
+    return mr_isBitResetl(IMX_SDMMC_CD_PIN_BIT, &sptr_cd->DR);
 }
 
 /*!
@@ -381,23 +381,23 @@ static kbool_t imx6ull_sdmmc_is_card_insert(struct fwk_sdcard_host *sprt_host)
  * @retval  none
  * @note    configure card bus width
  */
-static void imx6ull_sdmmc_set_bus_width(struct fwk_sdcard_host *sprt_host, kuint32_t option)
+static void imx6ull_sdmmc_set_bus_width(struct fwk_sdcard_host *sptr_host, kuint32_t option)
 {
-    srt_imx_usdhc_t *sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
+    srt_imx_usdhc_t *sptr_usdhc = (srt_imx_usdhc_t *)sptr_host->iHostIfBase;
 
     if (option > NR_SdCard_BusWidth_8Bit)
         option = NR_SdCard_BusWidth_4Bit;
 
     /*!< reset command line and data line */
-    imx6ull_sdmmc_reset_transfer(sprt_host);
+    imx6ull_sdmmc_reset_transfer(sptr_host);
 
     /*!< clear all interrupt flags */
-    mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntAllInterrupt_Bit, &sprt_usdhc);
-    while (!mrt_isBitResetl(NR_ImxUsdhc_IntAllInterrupt_Bit, &sprt_usdhc->INT_STATUS));
+    mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntAllInterrupt_Bit, &sptr_usdhc);
+    while (!mr_isBitResetl(NR_ImxUsdhc_IntAllInterrupt_Bit, &sptr_usdhc->INT_STATUS));
 
     /*!< set DATA bus width */
-    mrt_clrbitl(IMX_USDHC_PROT_CTRL_DTW_MASK, &sprt_usdhc->PROT_CTRL);
-    mrt_setbitl(IMX_USDHC_PROT_CTRL_DTW_BIT(option), &sprt_usdhc->PROT_CTRL);
+    mr_clrbitl(IMX_USDHC_PROT_CTRL_DTW_MASK, &sptr_usdhc->PROT_CTRL);
+    mr_setbitl(IMX_USDHC_PROT_CTRL_DTW_BIT(option), &sptr_usdhc->PROT_CTRL);
 }
 
 /*!
@@ -406,9 +406,9 @@ static void imx6ull_sdmmc_set_bus_width(struct fwk_sdcard_host *sprt_host, kuint
  * @retval  none
  * @note    configure sdcard clock frequency
  */
-static void imx6ull_sdmmc_set_clk_freq(struct fwk_sdcard_host *sprt_host, kuint32_t option)
+static void imx6ull_sdmmc_set_clk_freq(struct fwk_sdcard_host *sptr_host, kuint32_t option)
 {
-    srt_imx_usdhc_t *sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
+    srt_imx_usdhc_t *sptr_usdhc = (srt_imx_usdhc_t *)sptr_host->iHostIfBase;
     kuint32_t bitFreq, preScaler = 256U, divisor = 16U;
     kuint32_t freqTimes2, sys_ctl;
 
@@ -421,7 +421,7 @@ static void imx6ull_sdmmc_set_clk_freq(struct fwk_sdcard_host *sprt_host, kuint3
      *  1: Dual Data Rate mode. Max dividers is 512
      *  0: Single Data Rate mode. Max dividers is 256
      */
-    freqTimes2 = mrt_isBitSetl(NR_ImxUsdhc_MixCtrl_DualDataRateMode, &sprt_usdhc->MIX_CTRL);
+    freqTimes2 = mr_isBitSetl(NR_ImxUsdhc_MixCtrl_DualDataRateMode, &sptr_usdhc->MIX_CTRL);
 
     /*!<
      * uSDHC Frequency is 192MHz
@@ -448,15 +448,15 @@ static void imx6ull_sdmmc_set_clk_freq(struct fwk_sdcard_host *sprt_host, kuint3
     }
 
     bitFreq = preScaler + divisor;
-    sys_ctl = mrt_readl(&sprt_usdhc->SYS_CTRL);
+    sys_ctl = mr_readl(&sptr_usdhc->SYS_CTRL);
 
     /*!< Update Divisor and SDCLK */
-    mrt_clrbitl(IMX_USDHC_SYS_CTRL_DVS_MASK | IMX_USDHC_SYS_CTRL_SDCLKFS_MASK, &sys_ctl);
-    mrt_setbitl(bitFreq, &sys_ctl);
-    mrt_writel(sys_ctl, &sprt_usdhc->SYS_CTRL);
+    mr_clrbitl(IMX_USDHC_SYS_CTRL_DVS_MASK | IMX_USDHC_SYS_CTRL_SDCLKFS_MASK, &sys_ctl);
+    mr_setbitl(bitFreq, &sys_ctl);
+    mr_writel(sys_ctl, &sptr_usdhc->SYS_CTRL);
 
     /*!< make sure that SDSTB is true: SD clock is stable */
-    while (!mrt_isBitSetl(NR_ImxUsdhc_PresState_SDClockStable, &sprt_usdhc->PRES_STATE));
+    while (!mr_isBitSetl(NR_ImxUsdhc_PresState_SDClockStable, &sptr_usdhc->PRES_STATE));
 }
 
 /*!
@@ -465,9 +465,9 @@ static void imx6ull_sdmmc_set_clk_freq(struct fwk_sdcard_host *sprt_host, kuint3
  * @retval  none
  * @note    initial active card; it will make card enter idle status
  */
-static kbool_t imx6ull_sdmmc_initial_active(struct fwk_sdcard_host *sprt_host, kuint32_t timeout)
+static kbool_t imx6ull_sdmmc_initial_active(struct fwk_sdcard_host *sptr_host, kuint32_t timeout)
 {
-    srt_imx_usdhc_t *sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
+    srt_imx_usdhc_t *sptr_usdhc = (srt_imx_usdhc_t *)sptr_host->iHostIfBase;
 
     /*!<
      * When this bit is set, 80 SD-Clocks are sent to the card. After the 80 clocks are sent, this bit is self cleared.
@@ -480,10 +480,10 @@ static kbool_t imx6ull_sdmmc_initial_active(struct fwk_sdcard_host *sprt_host, k
      * when this command ends, the driver can make sure the 80 clock cycles are sent out. This is very useful
      * when the driver needs send 80 cycles to the card and does not want to wait till this bit is self cleared.
      */
-    mrt_setbitl(NR_ImxUsdhc_SysCtrl_InitialActive, &sprt_usdhc->SYS_CTRL);
+    mr_setbitl(NR_ImxUsdhc_SysCtrl_InitialActive, &sptr_usdhc->SYS_CTRL);
 
     /*!< wait for 74 clk at less */
-    while (mrt_isBitSetl(NR_ImxUsdhc_SysCtrl_InitialActive, &sprt_usdhc->SYS_CTRL))
+    while (mr_isBitSetl(NR_ImxUsdhc_SysCtrl_InitialActive, &sptr_usdhc->SYS_CTRL))
     {
         if (!(timeout--))
         {
@@ -491,7 +491,7 @@ static kbool_t imx6ull_sdmmc_initial_active(struct fwk_sdcard_host *sprt_host, k
         }
     }
 
-    return mrt_to_kbool(timeout);
+    return mr_to_kbool(timeout);
 }
 
 /*!
@@ -500,40 +500,40 @@ static kbool_t imx6ull_sdmmc_initial_active(struct fwk_sdcard_host *sprt_host, k
  * @retval  none
  * @note    switch voltage by uSDHC
  */
-static kint32_t imx6ull_sdmmc_switch_voltage(struct fwk_sdcard_host *sprt_host, kuint32_t voltage)
+static kint32_t imx6ull_sdmmc_switch_voltage(struct fwk_sdcard_host *sptr_host, kuint32_t voltage)
 {
-    srt_imx_usdhc_t *sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
+    srt_imx_usdhc_t *sptr_usdhc = (srt_imx_usdhc_t *)sptr_host->iHostIfBase;
 
     kbool_t blRetval;
 
     /* check data line and cmd line status */
     /*!< all status should be "0" before switching */
-    blRetval = mrt_isBitResetl(NR_ImxUsdhc_PresState_Data0LineLevel | NR_ImxUsdhc_PresState_Data1LineLevel |
+    blRetval = mr_isBitResetl(NR_ImxUsdhc_PresState_Data0LineLevel | NR_ImxUsdhc_PresState_Data1LineLevel |
                              NR_ImxUsdhc_PresState_Data2LineLevel | NR_ImxUsdhc_PresState_Data3LineLevel, 
-                             &sprt_usdhc->PRES_STATE);
+                             &sptr_usdhc->PRES_STATE);
     if (!blRetval)
         return -ER_NREADY;
 
     /*!< switch to "voltage" */
     if (NR_SdCard_toVoltage1_8V == voltage)
-        mrt_setbitl(NR_ImxUsdhc_VendSpec_VoltageSelect, &sprt_usdhc->VEND_SPEC);
+        mr_setbitl(NR_ImxUsdhc_VendSpec_VoltageSelect, &sptr_usdhc->VEND_SPEC);
     else
-        mrt_clrbitl(NR_ImxUsdhc_VendSpec_VoltageSelect, &sprt_usdhc->VEND_SPEC);
+        mr_clrbitl(NR_ImxUsdhc_VendSpec_VoltageSelect, &sptr_usdhc->VEND_SPEC);
 
     delay_ms(100U);
 
     /*!< enable force clock on */
-    mrt_setbitl(NR_ImxUsdhc_VendSpec_ActiveClk, &sprt_usdhc->VEND_SPEC);
+    mr_setbitl(NR_ImxUsdhc_VendSpec_ActiveClk, &sptr_usdhc->VEND_SPEC);
     delay_ms(10U);
 
     /*!< disable force clock on */
-    mrt_clrbitl(NR_ImxUsdhc_VendSpec_ActiveClk, &sprt_usdhc->VEND_SPEC);
+    mr_clrbitl(NR_ImxUsdhc_VendSpec_ActiveClk, &sptr_usdhc->VEND_SPEC);
 
     /* check data line and cmd line status */
     /*!< at least one of the status should be "1" after switching */
-    blRetval = mrt_isBitResetl(NR_ImxUsdhc_PresState_Data0LineLevel | NR_ImxUsdhc_PresState_Data1LineLevel |
+    blRetval = mr_isBitResetl(NR_ImxUsdhc_PresState_Data0LineLevel | NR_ImxUsdhc_PresState_Data1LineLevel |
                              NR_ImxUsdhc_PresState_Data2LineLevel | NR_ImxUsdhc_PresState_Data3LineLevel, 
-                             &sprt_usdhc->PRES_STATE);
+                             &sptr_usdhc->PRES_STATE);
     if (blRetval)
         return -ER_FAILD;
 
@@ -546,55 +546,55 @@ static kint32_t imx6ull_sdmmc_switch_voltage(struct fwk_sdcard_host *sprt_host, 
  * @retval  none
  * @note    send command by uSDHC
  */
-static kint32_t imx6ull_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds)
+static kint32_t imx6ull_sdmmc_send_command(struct fwk_sdcard_cmd *sptr_cmds)
 {
-    srt_imx_usdhc_t *sprt_usdhc;
-    struct fwk_sdcard_host *sprt_host;
+    srt_imx_usdhc_t *sptr_usdhc;
+    struct fwk_sdcard_host *sptr_host;
     kuint32_t iCmdXfrTypReg;
     kuint8_t index;
     kuint32_t argument;
     kint32_t iRetval;
 
-    sprt_host = (struct fwk_sdcard_host *)sprt_cmds->ptrHost;
-    if (!isValid(sprt_host))
+    sptr_host = (struct fwk_sdcard_host *)sptr_cmds->ptrHost;
+    if (!isValid(sptr_host))
         return -ER_NULLPTR;
 
-    sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
+    sptr_usdhc = (srt_imx_usdhc_t *)sptr_host->iHostIfBase;
 
-    index = sprt_cmds->index & 0x3fU;
-    argument = mrt_be32_to_cpu(sprt_cmds->args);
+    index = sptr_cmds->index & 0x3fU;
+    argument = mr_be32_to_cpu(sptr_cmds->args);
 
     /*!< Wait until command/data bus out of busy status */
-    while (mrt_isBitSetl(NR_ImxUsdhc_PresState_CmdInhibitCmdLine, &sprt_usdhc->PRES_STATE))
+    while (mr_isBitSetl(NR_ImxUsdhc_PresState_CmdInhibitCmdLine, &sptr_usdhc->PRES_STATE))
     {
         /*!< do nothing */
     }
 
     /*!< check re-tuning request */
-    if (mrt_isBitSetl(NR_ImxUsdhc_IntReTuningEvent_Bit, &sprt_usdhc->INT_STATUS))
+    if (mr_isBitSetl(NR_ImxUsdhc_IntReTuningEvent_Bit, &sptr_usdhc->INT_STATUS))
     {
-        mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntReTuningEvent_Bit, &sprt_usdhc);
+        mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntReTuningEvent_Bit, &sptr_usdhc);
         return -ER_NREADY;
     }
 
     /*!< Read Registers */
-    iCmdXfrTypReg = mrt_readl(&sprt_usdhc->CMD_XFR_TYP);
+    iCmdXfrTypReg = mr_readl(&sptr_usdhc->CMD_XFR_TYP);
 
     /*!< configure data registers before command configure */
-    imx6ull_sdmmc_data_configure(sprt_usdhc, (struct fwk_sdcard_data *)sprt_cmds->ptrData, &iCmdXfrTypReg);
+    imx6ull_sdmmc_data_configure(sptr_usdhc, (struct fwk_sdcard_data *)sptr_cmds->ptrData, &iCmdXfrTypReg);
 
     /*!< set Command index */
-    mrt_clrbitl(IMX_USDHC_CMD_XFR_TYP_CMDINX_MASK, &iCmdXfrTypReg);
-    mrt_setbitl(IMX_USDHC_CMD_XFR_TYP_CMDINX_U32(index), &iCmdXfrTypReg);
+    mr_clrbitl(IMX_USDHC_CMD_XFR_TYP_CMDINX_MASK, &iCmdXfrTypReg);
+    mr_setbitl(IMX_USDHC_CMD_XFR_TYP_CMDINX_U32(index), &iCmdXfrTypReg);
 
     /*!< Normal Other commands */
-    mrt_clrbitl(IMX_USDHC_CMD_XFR_TYP_CMDTYP_MASK, &iCmdXfrTypReg);
+    mr_clrbitl(IMX_USDHC_CMD_XFR_TYP_CMDTYP_MASK, &iCmdXfrTypReg);
     /*!< Disable [Command Index Check] and [Command CRC Check] temporarily */
-    mrt_clrbitl(NR_ImxUsdhc_CmdXfrTyp_CmdIndexCheckEnable | NR_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable | 
+    mr_clrbitl(NR_ImxUsdhc_CmdXfrTyp_CmdIndexCheckEnable | NR_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable | 
                IMX_USDHC_CMD_XFR_TYP_RSPTYP_MASK, &iCmdXfrTypReg);
 
     /*!< set/reset bits according to response type */
-    switch (sprt_cmds->respType)
+    switch (sptr_cmds->respType)
     {
         case NR_SdCard_Response_0:
             break;
@@ -603,56 +603,56 @@ static kint32_t imx6ull_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds)
         case NR_SdCard_Response_5:
         case NR_SdCard_Response_6:
         case NR_SdCard_Response_7:
-            mrt_setbitl(NR_ImxUsdhc_CmdXfrTyp_CmdIndexCheckEnable | NR_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable, &iCmdXfrTypReg);
-            mrt_setbitl(NR_ImxUsdhc_CmdXfrTyp_Response48, &iCmdXfrTypReg);
+            mr_setbitl(NR_ImxUsdhc_CmdXfrTyp_CmdIndexCheckEnable | NR_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable, &iCmdXfrTypReg);
+            mr_setbitl(NR_ImxUsdhc_CmdXfrTyp_Response48, &iCmdXfrTypReg);
             break;
 
         case NR_SdCard_Response_2:
-            mrt_setbitl(NR_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable, &iCmdXfrTypReg);
-            mrt_setbitl(NR_ImxUsdhc_CmdXfrTyp_Response136, &iCmdXfrTypReg);
+            mr_setbitl(NR_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable, &iCmdXfrTypReg);
+            mr_setbitl(NR_ImxUsdhc_CmdXfrTyp_Response136, &iCmdXfrTypReg);
             break;
 
         case NR_SdCard_Response_3:
         case NR_SdCard_Response_4:
-            mrt_setbitl(NR_ImxUsdhc_CmdXfrTyp_Response48, &iCmdXfrTypReg);
+            mr_setbitl(NR_ImxUsdhc_CmdXfrTyp_Response48, &iCmdXfrTypReg);
             break;
 
         case NR_SdCard_Response_1b:
         case NR_SdCard_Response_5b:
-            mrt_setbitl(NR_ImxUsdhc_CmdXfrTyp_CmdIndexCheckEnable | NR_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable, &iCmdXfrTypReg);
-            mrt_setbitl(NR_ImxUsdhc_CmdXfrTyp_ResponseBusy48, &iCmdXfrTypReg);
+            mr_setbitl(NR_ImxUsdhc_CmdXfrTyp_CmdIndexCheckEnable | NR_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable, &iCmdXfrTypReg);
+            mr_setbitl(NR_ImxUsdhc_CmdXfrTyp_ResponseBusy48, &iCmdXfrTypReg);
             break;
 
         default:
-            mrt_assert(IT_FALSE);
+            mr_assert(IT_FALSE);
             break;
     }
 
     /*!< CMD_ARG::CMDARG: bit[31:0], Command Argument */
-    mrt_writel(argument, &sprt_usdhc->CMD_ARG);
-    mrt_writel(iCmdXfrTypReg, &sprt_usdhc->CMD_XFR_TYP);
+    mr_writel(argument, &sptr_usdhc->CMD_ARG);
+    mr_writel(iCmdXfrTypReg, &sptr_usdhc->CMD_XFR_TYP);
 
     /*!< ------------------------------------------------------------------------------- */
     /*!< Wait command done */
-    while (mrt_isBitResetl(NR_ImxUsdhc_IntCmdErr_Bit | NR_ImxUsdhc_IntCmdComplete_Bit, &sprt_usdhc->INT_STATUS))
+    while (mr_isBitResetl(NR_ImxUsdhc_IntCmdErr_Bit | NR_ImxUsdhc_IntCmdComplete_Bit, &sptr_usdhc->INT_STATUS))
     {
         /*!< do nothing */
     }
 
-    iRetval = (mrt_isBitResetl(NR_ImxUsdhc_IntCmdErr_Bit | NR_ImxUsdhc_IntTuningErr_Bit, &sprt_usdhc->INT_STATUS) ? 
+    iRetval = (mr_isBitResetl(NR_ImxUsdhc_IntCmdErr_Bit | NR_ImxUsdhc_IntTuningErr_Bit, &sptr_usdhc->INT_STATUS) ? 
                                                                 ER_NORMAL : (-ER_SCMD_FAILD));
 
     /*!< Clear Interrupt Status: write 1 to clear */
-    mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntCmdErr_Bit | NR_ImxUsdhc_IntTuningErr_Bit | 
-                                                    NR_ImxUsdhc_IntCmdComplete_Bit, &sprt_usdhc);
-    while (mrt_isBitSetl(NR_ImxUsdhc_IntCmdComplete_Bit, &sprt_usdhc->INT_STATUS))
+    mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntCmdErr_Bit | NR_ImxUsdhc_IntTuningErr_Bit | 
+                                                    NR_ImxUsdhc_IntCmdComplete_Bit, &sptr_usdhc);
+    while (mr_isBitSetl(NR_ImxUsdhc_IntCmdComplete_Bit, &sptr_usdhc->INT_STATUS))
     {
         /*!< do nothing */
     }                                                    
 
     /*!< reset */
     if ((-ER_SCMD_FAILD) == iRetval)
-        imx6ull_sdmmc_reset_transfer(sprt_host);
+        imx6ull_sdmmc_reset_transfer(sptr_host);
 
     return iRetval;
 }
@@ -663,45 +663,45 @@ static kint32_t imx6ull_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds)
  * @retval  none
  * @note    receive response by uSDHC
  */
-static void imx6ull_sdmmc_recv_response(struct fwk_sdcard_cmd *sprt_cmds)
+static void imx6ull_sdmmc_recv_response(struct fwk_sdcard_cmd *sptr_cmds)
 {
-    srt_imx_usdhc_t *sprt_usdhc;
-    struct fwk_sdcard_host *sprt_host;
+    srt_imx_usdhc_t *sptr_usdhc;
+    struct fwk_sdcard_host *sptr_host;
     kuint8_t rsp_cnt = 3U;
 
-    sprt_host = (struct fwk_sdcard_host *)sprt_cmds->ptrHost;
-    if (!isValid(sprt_host))
+    sptr_host = (struct fwk_sdcard_host *)sptr_cmds->ptrHost;
+    if (!isValid(sptr_host))
         return;
 
-    sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;  
+    sptr_usdhc = (srt_imx_usdhc_t *)sptr_host->iHostIfBase;  
 
-    if (NR_SdCard_Response_0 == sprt_cmds->respType)
+    if (NR_SdCard_Response_0 == sptr_cmds->respType)
         return;
 
     /*!< for CID/CSD: CMD_RSP0->bit[31:0] is CID/CSD bit[39:8] */
-    *(sprt_cmds->resp) = mrt_readl(&sprt_usdhc->CMD_RSP0);
+    *(sptr_cmds->resp) = mr_readl(&sptr_usdhc->CMD_RSP0);
 
     /*!< R2 args = CID/CSD (bit[127:8]) */
-    if (NR_SdCard_Response_2 == sprt_cmds->respType)
+    if (NR_SdCard_Response_2 == sptr_cmds->respType)
     {
         /*!< CMD_RSP3: bit[23:0] is CID/CSD bit[127:104]; CMD_RSP3 bit[31:24] is reserved */
-        *(sprt_cmds->resp + 3U) = mrt_readl(&sprt_usdhc->CMD_RSP3);
+        *(sptr_cmds->resp + 3U) = mr_readl(&sptr_usdhc->CMD_RSP3);
 
         /*!< CMD_RSP2: bit[31:0] is CID/CSD bit[103:72] */
-        *(sprt_cmds->resp + 2U) = mrt_readl(&sprt_usdhc->CMD_RSP2);
+        *(sptr_cmds->resp + 2U) = mr_readl(&sptr_usdhc->CMD_RSP2);
 
         /*!< CMD_RSP1: bit[31:0] is CID/CSD bit[71:40] */
-        *(sprt_cmds->resp + 1U) = mrt_readl(&sprt_usdhc->CMD_RSP1);
+        *(sptr_cmds->resp + 1U) = mr_readl(&sptr_usdhc->CMD_RSP1);
 
         /*!< make resp similar to CID/CSD(bit[127:8]) */
         do
         {
-            sprt_cmds->resp[rsp_cnt] = mrt_bit_mask(sprt_cmds->resp[rsp_cnt], 0xffffff00U, 8U);
-            mrt_setbitl(sprt_cmds->resp[rsp_cnt - 1] >> 24U, &sprt_cmds->resp[rsp_cnt]);
+            sptr_cmds->resp[rsp_cnt] = mr_bit_mask(sptr_cmds->resp[rsp_cnt], 0xffffff00U, 8U);
+            mr_setbitl(sptr_cmds->resp[rsp_cnt - 1] >> 24U, &sptr_cmds->resp[rsp_cnt]);
             
         } while (--rsp_cnt);
 
-        sprt_cmds->resp[0] = mrt_bit_mask(sprt_cmds->resp[0], 0xffffff00U, 8U);
+        sptr_cmds->resp[0] = mr_bit_mask(sptr_cmds->resp[0], 0xffffff00U, 8U);
     }
 
 }
@@ -712,41 +712,41 @@ static void imx6ull_sdmmc_recv_response(struct fwk_sdcard_cmd *sprt_cmds)
  * @retval  none
  * @note    send data by uSDHC
  */
-static kint32_t imx6ull_sdmmc_transfer_data(struct fwk_sdcard_data *sprt_data)
+static kint32_t imx6ull_sdmmc_transfer_data(struct fwk_sdcard_data *sptr_data)
 {
-    srt_imx_usdhc_t *sprt_usdhc;
-    struct fwk_sdcard_host *sprt_host;
+    srt_imx_usdhc_t *sptr_usdhc;
+    struct fwk_sdcard_host *sptr_host;
     kint32_t iRetval;
 
-    if (!sprt_data)
+    if (!sptr_data)
         return -ER_NULLPTR;
 
-    sprt_host = (struct fwk_sdcard_host *)sprt_data->ptrHost;
-    if (!isValid(sprt_host))
+    sptr_host = (struct fwk_sdcard_host *)sptr_data->ptrHost;
+    if (!isValid(sptr_host))
         return -ER_NULLPTR;
 
-    sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
+    sptr_usdhc = (srt_imx_usdhc_t *)sptr_host->iHostIfBase;
 
     /*!< ------------------------------------------------------------ */
     /*!< write or read */
-    iRetval = (sprt_data->txBuffer) ? imx6ull_sdmmc_write_data(sprt_usdhc, sprt_data) : imx6ull_sdmmc_read_data(sprt_usdhc, sprt_data);
+    iRetval = (sptr_data->txBuffer) ? imx6ull_sdmmc_write_data(sptr_usdhc, sptr_data) : imx6ull_sdmmc_read_data(sptr_usdhc, sptr_data);
     switch (iRetval)
     {
         case -ER_BUSY:
-            imx6ull_sdmmc_reset(sprt_usdhc, NR_ImxUsdhc_SysCtrl_ResetTuning, 100U);
+            imx6ull_sdmmc_reset(sptr_usdhc, NR_ImxUsdhc_SysCtrl_ResetTuning, 100U);
             break;
 
         case -ER_SDATA_FAILD:
         case -ER_RDATA_FAILD:
-            imx6ull_sdmmc_reset_transfer(sprt_host);
+            imx6ull_sdmmc_reset_transfer(sptr_host);
             break;
 
         default:
             break;
     }
 
-    mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntDataComplete_Bit | NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc);
-    while (!mrt_isBitResetl(NR_ImxUsdhc_IntDataComplete_Bit, &sprt_usdhc->INT_STATUS));
+    mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntDataComplete_Bit | NR_ImxUsdhc_IntDataErr_Bit, &sptr_usdhc);
+    while (!mr_isBitResetl(NR_ImxUsdhc_IntDataComplete_Bit, &sptr_usdhc->INT_STATUS));
 
     return iRetval;
 }
@@ -757,59 +757,59 @@ static kint32_t imx6ull_sdmmc_transfer_data(struct fwk_sdcard_data *sprt_data)
  * @retval  none
  * @note    write data to USDHC
  */
-static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data)
+static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sptr_usdhc, struct fwk_sdcard_data *sptr_data)
 {
-    struct fwk_sdcard_host *sprt_host;
+    struct fwk_sdcard_host *sptr_host;
     kuint32_t iWaterMarkLimit;
     kuint32_t *ptrTxBuffer;
     kuint32_t iDataWords, iTransWords, iTransCnt;
     kuint32_t iRetry = 4096U;
     kbool_t blRetval;
 
-    if ((!sprt_data) || (!sprt_usdhc))
+    if ((!sptr_data) || (!sptr_usdhc))
         return -ER_NULLPTR;
 
-    sprt_host = (struct fwk_sdcard_host *)sprt_data->ptrHost;
-    if (!isValid(sprt_host))
+    sptr_host = (struct fwk_sdcard_host *)sptr_data->ptrHost;
+    if (!isValid(sptr_host))
         return -ER_NULLPTR;
 
-    if (!mrt_isBitResetl(NR_ImxUsdhc_MixCtrl_DataTransferDirection, &sprt_usdhc->MIX_CTRL))
+    if (!mr_isBitResetl(NR_ImxUsdhc_MixCtrl_DataTransferDirection, &sptr_usdhc->MIX_CTRL))
         return -ER_NSUPPORT;
 
     /*!< 4 bytes align. blocksize is per block size (unit: byte) */
-    iDataWords = mrt_num_align4(sprt_data->blockSize) >> 2;
-    iDataWords *= sprt_data->blockCount;
-    ptrTxBuffer = (kuint32_t *)sprt_data->txBuffer;
+    iDataWords = mr_num_align4(sptr_data->blockSize) >> 2;
+    iDataWords *= sptr_data->blockCount;
+    ptrTxBuffer = (kuint32_t *)sptr_data->txBuffer;
 
     /*!< get watermark */
-    iWaterMarkLimit = mrt_getbitl(IMX_USDHC_WTMK_LVL_WR_WML_MASK, &sprt_usdhc->WTMK_LVL) >> IMX_USDHC_WTMK_LVL_WR_WML_OFFSET;
+    iWaterMarkLimit = mr_getbitl(IMX_USDHC_WTMK_LVL_WR_WML_MASK, &sptr_usdhc->WTMK_LVL) >> IMX_USDHC_WTMK_LVL_WR_WML_OFFSET;
 
     /*!< the maximum of data_size that transmited must less than iWaterMarkLimit */
     while (iDataWords)
     {
-        iTransWords = mrt_ret_min2(iDataWords, iWaterMarkLimit);
+        iTransWords = mr_ret_min2(iDataWords, iWaterMarkLimit);
 
         /*!< wait for buffer ready */
         do
         {
-            blRetval = mrt_isBitResetl(NR_ImxUsdhc_IntBufferWriteReady_Bit | NR_ImxUsdhc_IntDataErr_Bit | 
-                                     NR_ImxUsdhc_IntTuningErr_Bit, &sprt_usdhc->INT_STATUS);
+            blRetval = mr_isBitResetl(NR_ImxUsdhc_IntBufferWriteReady_Bit | NR_ImxUsdhc_IntDataErr_Bit | 
+                                     NR_ImxUsdhc_IntTuningErr_Bit, &sptr_usdhc->INT_STATUS);
 
         } while (blRetval); // && (--iRetry));
 
         if (blRetval || (!iRetry))
             return -ER_TIMEOUT;
 
-        if (mrt_isBitSetl(NR_ImxUsdhc_IntTuningErr_Bit, &sprt_usdhc->INT_STATUS))
+        if (mr_isBitSetl(NR_ImxUsdhc_IntTuningErr_Bit, &sptr_usdhc->INT_STATUS))
         {
             /*!< write 1 to clear */
-            mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntTuningErr_Bit, &sprt_usdhc);
+            mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntTuningErr_Bit, &sptr_usdhc);
             return -ER_BUSY;
         }
 
         /*!< blRetval = (no error) ? true : false */
-        blRetval = mrt_isBitResetl(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS);
-        mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc);
+        blRetval = mr_isBitResetl(NR_ImxUsdhc_IntDataErr_Bit, &sptr_usdhc->INT_STATUS);
+        mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntDataErr_Bit, &sptr_usdhc);
 
         if (blRetval)
         {
@@ -818,22 +818,22 @@ static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk
             for (iTransCnt = 0; iTransCnt < iTransWords; iTransCnt++)
             {
                 /*!< 32 bits (4 bytes) will be written to Register */
-                mrt_writel(*(ptrTxBuffer++), &sprt_usdhc->DATA_BUFF_ACC_PORT);
+                mr_writel(*(ptrTxBuffer++), &sptr_usdhc->DATA_BUFF_ACC_PORT);
             }
 
             /*!< watermark is full, clear write-ready bit, waiting for the next transmission */
-            mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntBufferWriteReady_Bit, &sprt_usdhc);
+            mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntBufferWriteReady_Bit, &sptr_usdhc);
         }
     }
 
     /*!< ------------------------------------------------------------------- */
     /*!< waitting for writting data complete, or error occur */
-    while (mrt_isBitResetl(NR_ImxUsdhc_IntDataComplete_Bit | NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS))
+    while (mr_isBitResetl(NR_ImxUsdhc_IntDataComplete_Bit | NR_ImxUsdhc_IntDataErr_Bit, &sptr_usdhc->INT_STATUS))
     {
         /*!< do nothing */
     }
 
-    if (mrt_isBitSetl(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS))
+    if (mr_isBitSetl(NR_ImxUsdhc_IntDataErr_Bit, &sptr_usdhc->INT_STATUS))
         return -ER_SDATA_FAILD;
 
     return ER_NORMAL;
@@ -845,9 +845,9 @@ static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk
  * @retval  none
  * @note    read data from USDHC
  */
-static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data)
+static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sptr_usdhc, struct fwk_sdcard_data *sptr_data)
 {
-    struct fwk_sdcard_host *sprt_host;
+    struct fwk_sdcard_host *sptr_host;
     kuint32_t iWaterMarkLimit;
     kuint32_t *ptrRxBuffer;
     kuint32_t iDataWords, iTransWords, iTransCnt;
@@ -855,49 +855,49 @@ static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_
     kint32_t iRetval = ER_NORMAL;
     kbool_t blRetval;
 
-    if ((!sprt_data) || (!sprt_usdhc))
+    if ((!sptr_data) || (!sptr_usdhc))
         return -ER_NULLPTR;
 
-    sprt_host = (struct fwk_sdcard_host *)sprt_data->ptrHost;
-    if (!isValid(sprt_host))
+    sptr_host = (struct fwk_sdcard_host *)sptr_data->ptrHost;
+    if (!isValid(sptr_host))
         return -ER_NULLPTR;
 
-    if (!mrt_isBitSetl(NR_ImxUsdhc_MixCtrl_DataTransferDirection, &sprt_usdhc->MIX_CTRL))
+    if (!mr_isBitSetl(NR_ImxUsdhc_MixCtrl_DataTransferDirection, &sptr_usdhc->MIX_CTRL))
         return -ER_NSUPPORT;
 
     /*!< 4 bytes align. blocksize is per block size (unit: byte) */
-    iDataWords = mrt_num_align4(sprt_data->blockSize) >> 2;
-    iDataWords *= sprt_data->blockCount;
-    ptrRxBuffer = (kuint32_t *)sprt_data->rxBuffer;
+    iDataWords = mr_num_align4(sptr_data->blockSize) >> 2;
+    iDataWords *= sptr_data->blockCount;
+    ptrRxBuffer = (kuint32_t *)sptr_data->rxBuffer;
 
     /*!< get watermark */
-    iWaterMarkLimit = mrt_getbitl(IMX_USDHC_WTMK_LVL_RD_WML_MASK, &sprt_usdhc->WTMK_LVL) >> IMX_USDHC_WTMK_LVL_RD_WML_OFFSET;
+    iWaterMarkLimit = mr_getbitl(IMX_USDHC_WTMK_LVL_RD_WML_MASK, &sptr_usdhc->WTMK_LVL) >> IMX_USDHC_WTMK_LVL_RD_WML_OFFSET;
 
     /*!< the maximum of data_size that transmited must less than iWaterMarkLimit */
     while (iDataWords)
     {
-        iTransWords = mrt_ret_min2(iDataWords, iWaterMarkLimit);
+        iTransWords = mr_ret_min2(iDataWords, iWaterMarkLimit);
 
         /*!< wait for buffer ready */
         do
         {
-            blRetval = mrt_isBitResetl(NR_ImxUsdhc_IntBufferReadReady_Bit | NR_ImxUsdhc_IntDataErr_Bit | 
-                                     NR_ImxUsdhc_IntTuningErr_Bit, &sprt_usdhc->INT_STATUS);
+            blRetval = mr_isBitResetl(NR_ImxUsdhc_IntBufferReadReady_Bit | NR_ImxUsdhc_IntDataErr_Bit | 
+                                     NR_ImxUsdhc_IntTuningErr_Bit, &sptr_usdhc->INT_STATUS);
 
         } while (blRetval); // && (--iRetry));
 
         if (blRetval || (!iRetry))
             return -ER_TIMEOUT;
 
-        if (mrt_isBitSetl(NR_ImxUsdhc_IntTuningErr_Bit, &sprt_usdhc->INT_STATUS))
+        if (mr_isBitSetl(NR_ImxUsdhc_IntTuningErr_Bit, &sptr_usdhc->INT_STATUS))
         {
-            mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntTuningErr_Bit, &sprt_usdhc);
+            mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntTuningErr_Bit, &sptr_usdhc);
             return -ER_BUSY;
         }
 
         /*!< blRetval = (no error) ? true : false */
-        blRetval = mrt_isBitResetl(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc->INT_STATUS);
-        mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntDataErr_Bit, &sprt_usdhc);
+        blRetval = mr_isBitResetl(NR_ImxUsdhc_IntDataErr_Bit, &sptr_usdhc->INT_STATUS);
+        mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntDataErr_Bit, &sptr_usdhc);
 
         if (blRetval)
         {
@@ -906,11 +906,11 @@ static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_
             for (iTransCnt = 0; iTransCnt < iTransWords; iTransCnt++)
             {
                 /*!< 32 bits (4 bytes) will be read from Register */
-                *(ptrRxBuffer++) = mrt_readl(&sprt_usdhc->DATA_BUFF_ACC_PORT);
+                *(ptrRxBuffer++) = mr_readl(&sptr_usdhc->DATA_BUFF_ACC_PORT);
             }
 
             /*!< watermark is full, clear read-ready bit, waiting for the next transmission */
-            mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntBufferReadReady_Bit, &sprt_usdhc);
+            mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntBufferReadReady_Bit, &sptr_usdhc);
             iRetval = ER_NORMAL;
         }
         else
@@ -926,7 +926,7 @@ static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sprt_usdhc, struct fwk_
  * @retval  none
  * @note    configure registers about data transfer
  */
-static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, struct fwk_sdcard_data *sprt_data, void *ptrData)
+static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sptr_usdhc, struct fwk_sdcard_data *sptr_data, void *ptrData)
 {
     kuint32_t iCmdXfrTyp;
     kuint32_t iMixCtrlReg;
@@ -940,24 +940,24 @@ static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, struct fwk
      * 
      * default 1
      */
-    mrt_clrbitl(mrt_bit(23U), &sprt_usdhc->VEND_SPEC2);
+    mr_clrbitl(mr_bit(23U), &sptr_usdhc->VEND_SPEC2);
 
     iCmdXfrTyp = *(kuint32_t *)ptrData;
 
     /*!< Commands only using CMD line */
-    mrt_clrbitl(NR_ImxUsdhc_CmdXfrTyp_DataPresentSelect, &iCmdXfrTyp);
+    mr_clrbitl(NR_ImxUsdhc_CmdXfrTyp_DataPresentSelect, &iCmdXfrTyp);
 
     /*!< read register */
-    iMixCtrlReg = mrt_readl(&sprt_usdhc->MIX_CTRL);
+    iMixCtrlReg = mr_readl(&sptr_usdhc->MIX_CTRL);
 
     /*!< Disable DMA */
-    mrt_clrbitl(NR_ImxUsdhc_MixCtrl_DmaEnable, &iMixCtrlReg);
+    mr_clrbitl(NR_ImxUsdhc_MixCtrl_DmaEnable, &iMixCtrlReg);
     /*!< Block Count Disable, Select Single Block, Auto CMD12 Disable, Data Transfer Direction is Write */
-    mrt_clrbitl(NR_ImxUsdhc_MixCtrl_BlockCountEnable | NR_ImxUsdhc_MixCtrl_AutoCmd12Enable | NR_ImxUsdhc_MixCtrl_AutoCmd23Enable |
+    mr_clrbitl(NR_ImxUsdhc_MixCtrl_BlockCountEnable | NR_ImxUsdhc_MixCtrl_AutoCmd12Enable | NR_ImxUsdhc_MixCtrl_AutoCmd23Enable |
                NR_ImxUsdhc_MixCtrl_DataTransferDirection | NR_ImxUsdhc_MixCtrl_MultiSingleBlockSelect, &iMixCtrlReg);
 
     /*!< check if data request command */
-    if (!sprt_data)
+    if (!sptr_data)
     {
         /*!< Update Register */
         *(kuint32_t *)ptrData = iMixCtrlReg;
@@ -966,19 +966,19 @@ static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, struct fwk
     }
 
     /*!< Wait until command/data bus out of busy status */
-    while (mrt_isBitSetl(NR_ImxUsdhc_PresState_CmdInhibitDataLine, &sprt_usdhc->PRES_STATE))
+    while (mr_isBitSetl(NR_ImxUsdhc_PresState_CmdInhibitDataLine, &sptr_usdhc->PRES_STATE))
     {
         /*!< do nothing */
     }
 
-    if (sprt_data->blockCount > 1U)
+    if (sptr_data->blockCount > 1U)
     {
-        mrt_setbitl(NR_ImxUsdhc_MixCtrl_BlockCountEnable | NR_ImxUsdhc_MixCtrl_MultiSingleBlockSelect, &iMixCtrlReg);
+        mr_setbitl(NR_ImxUsdhc_MixCtrl_BlockCountEnable | NR_ImxUsdhc_MixCtrl_MultiSingleBlockSelect, &iMixCtrlReg);
 
-        if (mrt_isBitSetw(NR_SdCard_CmdFlagsAuto23Enable, &sprt_data->flags))
+        if (mr_isBitSetw(NR_SdCard_CmdFlagsAuto23Enable, &sptr_data->flags))
         {
-            mrt_setbitl(NR_ImxUsdhc_MixCtrl_AutoCmd23Enable, &iMixCtrlReg);
-            mrt_setbitl(mrt_bit(23U), &sprt_usdhc->VEND_SPEC2);
+            mr_setbitl(NR_ImxUsdhc_MixCtrl_AutoCmd23Enable, &iMixCtrlReg);
+            mr_setbitl(mr_bit(23U), &sptr_usdhc->VEND_SPEC2);
 
             /*!<
             * DMA System Address
@@ -987,31 +987,31 @@ static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, struct fwk
             * 1, SDMA uses ADMA System Address register (05Fh – 058h) instead of this register to support both 32-bit
             * and 64-bit addressing. This register is used only for Argument2 and SDMA may use Auto CMD23
             */
-            mrt_writel(sprt_data->blockCount, &sprt_usdhc->DS_ADDR);
+            mr_writel(sptr_data->blockCount, &sptr_usdhc->DS_ADDR);
         }
 
-        if (mrt_isBitSetw(NR_SdCard_CmdFlagsAuto12Enable, &sprt_data->flags))
-            mrt_setbitl(NR_ImxUsdhc_MixCtrl_AutoCmd12Enable, &iMixCtrlReg);
+        if (mr_isBitSetw(NR_SdCard_CmdFlagsAuto12Enable, &sptr_data->flags))
+            mr_setbitl(NR_ImxUsdhc_MixCtrl_AutoCmd12Enable, &iMixCtrlReg);
     }
 
-    if (mrt_isBitSetw(NR_SdCard_CmdFlagsReadEnable, &sprt_data->flags))
-        mrt_setbitl(NR_ImxUsdhc_MixCtrl_DataTransferDirection, &iMixCtrlReg);
+    if (mr_isBitSetw(NR_SdCard_CmdFlagsReadEnable, &sptr_data->flags))
+        mr_setbitl(NR_ImxUsdhc_MixCtrl_DataTransferDirection, &iMixCtrlReg);
 
     /*!< BLK_ATT (Block Attribute) */
-    iBlockAttr = mrt_readl(&sprt_usdhc->BLK_ATT);
-    mrt_clrbitl(IMX_USDHC_BLK_ATT_BLKCNT_MASK | IMX_USDHC_BLK_ATT_BLKSIZE_MASK, &iBlockAttr);
+    iBlockAttr = mr_readl(&sptr_usdhc->BLK_ATT);
+    mr_clrbitl(IMX_USDHC_BLK_ATT_BLKCNT_MASK | IMX_USDHC_BLK_ATT_BLKSIZE_MASK, &iBlockAttr);
 
     /*!< block count */
-    mrt_setbitl(IMX_USDHC_BLK_ATT_BLKCNT_U32(sprt_data->blockCount), &iBlockAttr);
+    mr_setbitl(IMX_USDHC_BLK_ATT_BLKCNT_U32(sptr_data->blockCount), &iBlockAttr);
     /*!< block size */
-    mrt_setbitl(IMX_USDHC_BLK_ATT_BLKSIZE_U32(sprt_data->blockSize), &iBlockAttr);
+    mr_setbitl(IMX_USDHC_BLK_ATT_BLKSIZE_U32(sptr_data->blockSize), &iBlockAttr);
 
     /*!< Commands using CMD line and DATA line */
-    mrt_setbitl(NR_ImxUsdhc_CmdXfrTyp_DataPresentSelect, &iCmdXfrTyp);
+    mr_setbitl(NR_ImxUsdhc_CmdXfrTyp_DataPresentSelect, &iCmdXfrTyp);
 
     /*!< Update Register */
-    mrt_writel(iBlockAttr, &sprt_usdhc->BLK_ATT);
-    mrt_writel(iMixCtrlReg, &sprt_usdhc->MIX_CTRL);
+    mr_writel(iBlockAttr, &sptr_usdhc->BLK_ATT);
+    mr_writel(iMixCtrlReg, &sptr_usdhc->MIX_CTRL);
 
     *(kuint32_t *)ptrData = iCmdXfrTyp;
 }
@@ -1022,58 +1022,58 @@ static void imx6ull_sdmmc_data_configure(srt_imx_usdhc_t *sprt_usdhc, struct fwk
  * @retval  none
  * @note    initial host of SD Card
  */
-void *host_sdmmc_card_initial(struct fwk_sdcard *sprt_card)
+void *host_sdmmc_card_initial(struct fwk_sdcard *sptr_card)
 {
-    srt_imx_usdhc_t *sprt_usdhc;
-    struct fwk_sdcard_if *sprt_if;
-    struct fwk_sdcard_host *sprt_host;
+    srt_imx_usdhc_t *sptr_usdhc;
+    struct fwk_sdcard_if *sptr_if;
+    struct fwk_sdcard_host *sptr_host;
     kuint32_t iDoEmpty;
 
-    if (!isValid(sprt_card))
-        return mrt_nullptr;
+    if (!isValid(sptr_card))
+        return mr_nullptr;
 
-    sprt_if = &sprt_card->sgrt_if;
+    sptr_if = &sptr_card->sgtc_if;
 
-    sprt_host = (struct fwk_sdcard_host *)kzalloc(sizeof(struct fwk_sdcard_host), GFP_KERNEL);
-    if (!isValid(sprt_host))
-        return mrt_nullptr;
+    sptr_host = (struct fwk_sdcard_host *)kzalloc(sizeof(struct fwk_sdcard_host), GFP_KERNEL);
+    if (!isValid(sptr_host))
+        return mr_nullptr;
 
-    sprt_host->iHostIfBase = (kuaddr_t)IMX_SDMMC_IF_PORT_ENTRY();
-    sprt_host->iHostCDBase = (kuaddr_t)IMX_SDMMC_CD_PORT_ENTRY();
-    sprt_host->isSelfDync = true;
+    sptr_host->iHostIfBase = (kuaddr_t)IMX_SDMMC_IF_PORT_ENTRY();
+    sptr_host->iHostCDBase = (kuaddr_t)IMX_SDMMC_CD_PORT_ENTRY();
+    sptr_host->isSelfDync = true;
 
-    sprt_usdhc = (srt_imx_usdhc_t *)sprt_host->iHostIfBase;
+    sptr_usdhc = (srt_imx_usdhc_t *)sptr_host->iHostIfBase;
 
     /*!< get support */
-    sprt_host->maxBlockLength = mrt_getbit_u32(IMX_USDHC_HOST_CTRL_CAP_MBL_MASK, IMX_USDHC_HOST_CTRL_CAP_MBL_OFFSET, &sprt_usdhc->HOST_CTRL_CAP);
-    sprt_host->maxBlockCount  = 0xffffU;
+    sptr_host->maxBlockLength = mr_getbit_u32(IMX_USDHC_HOST_CTRL_CAP_MBL_MASK, IMX_USDHC_HOST_CTRL_CAP_MBL_OFFSET, &sptr_usdhc->HOST_CTRL_CAP);
+    sptr_host->maxBlockCount  = 0xffffU;
 
-    mrt_resetl(&sprt_host->flagBit);
-    if (mrt_isBitSetl(NR_ImxUsdhc_HostCtrlCap_Voltage18VSupport, &sprt_usdhc->HOST_CTRL_CAP))
-        mrt_setbitl(NR_SdCard_SupportVoltage1_8V, &sprt_host->flagBit);
+    mr_resetl(&sptr_host->flagBit);
+    if (mr_isBitSetl(NR_ImxUsdhc_HostCtrlCap_Voltage18VSupport, &sptr_usdhc->HOST_CTRL_CAP))
+        mr_setbitl(NR_SdCard_SupportVoltage1_8V, &sptr_host->flagBit);
 
-    mrt_setbitl(NR_SdCard_Support4BitWidth, &sprt_host->flagBit);
+    mr_setbitl(NR_SdCard_Support4BitWidth, &sptr_host->flagBit);
 
     /*!< interface initial */
-    sprt_if->is_insert      = imx6ull_sdmmc_is_card_insert;
-    sprt_if->setBusWidth    = imx6ull_sdmmc_set_bus_width;
-    sprt_if->setClkFreq     = imx6ull_sdmmc_set_clk_freq;
-    sprt_if->cardActive     = imx6ull_sdmmc_initial_active;
-    sprt_if->sendCommand    = imx6ull_sdmmc_send_command;
-    sprt_if->recvResp       = imx6ull_sdmmc_recv_response;
-    sprt_if->sendData       = imx6ull_sdmmc_transfer_data;
-    sprt_if->recvData       = imx6ull_sdmmc_transfer_data;
-    sprt_if->switchVoltage  = imx6ull_sdmmc_switch_voltage;
-    sprt_if->addHeadTail    = mrt_nullptr;
+    sptr_if->is_insert      = imx6ull_sdmmc_is_card_insert;
+    sptr_if->setBusWidth    = imx6ull_sdmmc_set_bus_width;
+    sptr_if->setClkFreq     = imx6ull_sdmmc_set_clk_freq;
+    sptr_if->cardActive     = imx6ull_sdmmc_initial_active;
+    sptr_if->sendCommand    = imx6ull_sdmmc_send_command;
+    sptr_if->recvResp       = imx6ull_sdmmc_recv_response;
+    sptr_if->sendData       = imx6ull_sdmmc_transfer_data;
+    sptr_if->recvData       = imx6ull_sdmmc_transfer_data;
+    sptr_if->switchVoltage  = imx6ull_sdmmc_switch_voltage;
+    sptr_if->addHeadTail    = mr_nullptr;
 
     /*!< read but not use */
-    iDoEmpty = mrt_readl(&sprt_usdhc->DATA_BUFF_ACC_PORT);
+    iDoEmpty = mr_readl(&sptr_usdhc->DATA_BUFF_ACC_PORT);
     iDoEmpty++;
 
-    mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntBufferWriteReady_Bit, &sprt_usdhc);
-    mrt_imx_clear_interrupt_flags(NR_ImxUsdhc_IntBufferReadReady_Bit, &sprt_usdhc);
+    mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntBufferWriteReady_Bit, &sptr_usdhc);
+    mr_imx_clear_interrupt_flags(NR_ImxUsdhc_IntBufferReadReady_Bit, &sptr_usdhc);
 
-    return sprt_host;
+    return sptr_host;
 }
 
 

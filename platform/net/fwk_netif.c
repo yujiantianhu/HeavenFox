@@ -27,7 +27,7 @@
 /*!< The defines */
 
 /*!< The globals */
-static struct fwk_sk_buff_head sgrt_fwk_skb_rx_lists;
+static struct fwk_sk_buff_head sgtc_fwk_skb_rx_lists;
 
 /*!< API functions */
 /*!
@@ -89,7 +89,7 @@ kuint32_t fwk_inet_addr(const kchar_t *addr)
             goto fail;
     }
 
-    return mrt_htonl(val);
+    return mr_htonl(val);
 
 fail:
     print_err("%s: input argument error!\r\n", __FUNCTION__);
@@ -115,12 +115,12 @@ kchar_t *fwk_inet_ntoa(kchar_t *inet_str, kuint32_t addr)
 
 #define INET_IP_BYTES                   4
 
-    inet_addr = mrt_ntohl(addr);
+    inet_addr = mr_ntohl(addr);
 
     for (idx = 0; idx < INET_IP_BYTES; idx++)
     {
         val = (inet_addr >> (((INET_IP_BYTES - 1) - idx) << 3)) & 0xff;
-        len = convert_number_to_string(&inet_str[offset], val);
+        len = uint_to_str(&inet_str[offset], val);
 
         offset += len;
         if (idx != (INET_IP_BYTES - 1))
@@ -154,53 +154,53 @@ void fwk_inet_random_addr(kuint8_t *buf, kusize_t lenth)
  */
 static kuint32_t __fwk_icmp_csum_before(kuint8_t *msg)
 {
-    struct fwk_icmp_hdr *sprt_icmphdr;
+    struct fwk_icmp_hdr *sptr_icmphdr;
 
-    sprt_icmphdr = (struct fwk_icmp_hdr *)msg;
-    sprt_icmphdr->check_sum = 0;
+    sptr_icmphdr = (struct fwk_icmp_hdr *)msg;
+    sptr_icmphdr->check_sum = 0;
 
     return 0;
 }
 
 /*!
  * @brief   prepare to calculate the checksum (TCP/UDP)
- * @param   sprt_iphdr, msg (tcp/udp message)
+ * @param   sptr_iphdr, msg (tcp/udp message)
  * @retval  check sum
  * @note    none
  */
-static kuint32_t __fwk_tcp_udp_csum_before(struct fwk_ip_hdr *sprt_iphdr, kuint8_t *msg)
+static kuint32_t __fwk_tcp_udp_csum_before(struct fwk_ip_hdr *sptr_iphdr, kuint8_t *msg)
 {
     kuint16_t data, idx;
     kuint16_t data_len;
     kuint32_t chksum = 0;
-    struct fwk_ip_fakehdr sgrt_fhdr;
+    struct fwk_ip_fakehdr sgtc_fhdr;
     kuint8_t *fake_msg;
 
-    data_len = mrt_htons(sprt_iphdr->tot_len) - sprt_iphdr->ihl * 4;
+    data_len = mr_htons(sptr_iphdr->tot_len) - sptr_iphdr->ihl * 4;
 
-    sgrt_fhdr.saddr = sprt_iphdr->saddr;
-    sgrt_fhdr.daddr = sprt_iphdr->daddr;
-    sgrt_fhdr.proto = sprt_iphdr->protocol;
-    sgrt_fhdr.zero = 0;
+    sgtc_fhdr.saddr = sptr_iphdr->saddr;
+    sgtc_fhdr.daddr = sptr_iphdr->daddr;
+    sgtc_fhdr.proto = sptr_iphdr->protocol;
+    sgtc_fhdr.zero = 0;
 
-    sgrt_fhdr.len = mrt_htons(data_len);
-    fake_msg = (kuint8_t *)&sgrt_fhdr;
+    sgtc_fhdr.len = mr_htons(data_len);
+    fake_msg = (kuint8_t *)&sgtc_fhdr;
 
-    for (idx = 0; idx < sizeof(sgrt_fhdr); idx += 2) 
+    for (idx = 0; idx < sizeof(sgtc_fhdr); idx += 2) 
     {
         data = (fake_msg[idx] << 8) | fake_msg[idx + 1];
         chksum += data;
     }
 
-    if (sprt_iphdr->protocol == NET_IP_PROTO_TCP)
+    if (sptr_iphdr->protocol == NET_IP_PROTO_TCP)
     {
-        struct fwk_tcp_hdr *sprt_tcphdr = (struct fwk_tcp_hdr *)msg;
-        sprt_tcphdr->check_sum = 0;
+        struct fwk_tcp_hdr *sptr_tcphdr = (struct fwk_tcp_hdr *)msg;
+        sptr_tcphdr->check_sum = 0;
     }
     else
     {
-        struct fwk_udp_hdr *sprt_udphdr = (struct fwk_udp_hdr *)msg;
-        sprt_udphdr->check_sum = 0;
+        struct fwk_udp_hdr *sptr_udphdr = (struct fwk_udp_hdr *)msg;
+        sptr_udphdr->check_sum = 0;
     }
 
     return chksum;
@@ -208,45 +208,45 @@ static kuint32_t __fwk_tcp_udp_csum_before(struct fwk_ip_hdr *sprt_iphdr, kuint8
 
 /*!
  * @brief   prepare to calculate the checksum (IP)
- * @param   sprt_iphdr
+ * @param   sptr_iphdr
  * @retval  check sum
  * @note    none
  */
-kuint16_t fwk_ip_network_csum(struct fwk_ip_hdr *sprt_iphdr)
+kuint16_t fwk_ip_network_csum(struct fwk_ip_hdr *sptr_iphdr)
 {
     kuint16_t data, idx;
     kuint32_t chksum = 0;
-    kuint8_t *msg = (kuint8_t *)sprt_iphdr;
+    kuint8_t *msg = (kuint8_t *)sptr_iphdr;
 
-    sprt_iphdr->check = 0;
-    for (idx = 0; idx < (sprt_iphdr->ihl * 4); idx += 2) 
+    sptr_iphdr->check = 0;
+    for (idx = 0; idx < (sptr_iphdr->ihl * 4); idx += 2) 
     {
         data = (msg[idx] << 8) | msg[idx + 1];
         chksum += data;
     }
 
     chksum = ((chksum & 0xffff0000) >> 16) + (chksum & 0x0000ffff);
-    return mrt_htons((kuint16_t)(~chksum));
+    return mr_htons((kuint16_t)(~chksum));
 }
 
 /*!
  * @brief   prepare to calculate the checksum (ICMP/UDP/TCP)
- * @param   sprt_iphdr, msg (tcp/udp message)
+ * @param   sptr_iphdr, msg (tcp/udp message)
  * @retval  check sum
  * @note    none
  */
-kuint16_t fwk_ip_transport_csum(struct fwk_ip_hdr *sprt_iphdr, kuint8_t *msg)
+kuint16_t fwk_ip_transport_csum(struct fwk_ip_hdr *sptr_iphdr, kuint8_t *msg)
 {
     kuint16_t data, idx;
     kuint16_t data_len;
     kuint32_t chksum = 0;
     kbool_t is_odd;
 
-    switch (sprt_iphdr->protocol)
+    switch (sptr_iphdr->protocol)
     {
         case NET_IP_PROTO_UDP:
         case NET_IP_PROTO_TCP:
-            chksum = __fwk_tcp_udp_csum_before(sprt_iphdr, msg);
+            chksum = __fwk_tcp_udp_csum_before(sptr_iphdr, msg);
             break;
 
         case NET_IP_PROTO_ICMP:
@@ -256,7 +256,7 @@ kuint16_t fwk_ip_transport_csum(struct fwk_ip_hdr *sprt_iphdr, kuint8_t *msg)
         default: break;
     }
 
-    data_len = mrt_htons(sprt_iphdr->tot_len) - sprt_iphdr->ihl * 4;
+    data_len = mr_htons(sptr_iphdr->tot_len) - sptr_iphdr->ihl * 4;
     is_odd = !!(data_len & 0x01);
 
     data_len &= ~(kuint16_t)0x01;
@@ -270,21 +270,21 @@ kuint16_t fwk_ip_transport_csum(struct fwk_ip_hdr *sprt_iphdr, kuint8_t *msg)
         chksum += msg[data_len];
 
     chksum = ((chksum & 0xffff0000) >> 16) + (chksum & 0x0000ffff);
-    return mrt_htons((kuint16_t)(~chksum));
+    return mr_htons((kuint16_t)(~chksum));
 }
 
 /*!
  * @brief   prepare to calculate the checksum
- * @param   sprt_iphdr, offset (0 or sprt_iphdr->ihl)
+ * @param   sptr_iphdr, offset (0 or sptr_iphdr->ihl)
  * @retval  check sum
  * @note    none
  */
-kuint16_t fwk_ip_slow_csum(struct fwk_ip_hdr *sprt_iphdr, kuint16_t offset)
+kuint16_t fwk_ip_slow_csum(struct fwk_ip_hdr *sptr_iphdr, kuint16_t offset)
 {
-    if (offset < sprt_iphdr->ihl)
-        return fwk_ip_network_csum(sprt_iphdr);
+    if (offset < sptr_iphdr->ihl)
+        return fwk_ip_network_csum(sptr_iphdr);
 
-    return fwk_ip_transport_csum(sprt_iphdr, ((kuint8_t *)sprt_iphdr) + (sprt_iphdr->ihl * 4));
+    return fwk_ip_transport_csum(sptr_iphdr, ((kuint8_t *)sptr_iphdr) + (sptr_iphdr->ihl * 4));
 }
 
 /*!
@@ -295,7 +295,7 @@ kuint16_t fwk_ip_slow_csum(struct fwk_ip_hdr *sprt_iphdr, kuint16_t offset)
  */
 struct fwk_sk_buff_head *fwk_netif_rxq_get(void)
 {
-    return &sgrt_fwk_skb_rx_lists;
+    return &sgtc_fwk_skb_rx_lists;
 }
 
 /*!< -------------------------------------------------------------------- */
@@ -303,21 +303,21 @@ struct fwk_sk_buff_head *fwk_netif_rxq_get(void)
  * @brief   network open (called by net_link_up())
  * @param   name
  * @retval  errno
- * @note    name ---> sprt_ndev ---> driver_open
+ * @note    name ---> sptr_ndev ---> driver_open
  */
 kint32_t fwk_netif_open(const kchar_t *name)
 {
-    struct fwk_net_device *sprt_ndev;
-    const struct fwk_netdev_ops *sprt_ops;
+    struct fwk_net_device *sptr_ndev;
+    const struct fwk_netdev_ops *sptr_ops;
 
-    sprt_ndev = fwk_ifname_to_ndev(name);
-    if (!isValid(sprt_ndev))
-        return PTR_ERR(sprt_ndev);
+    sptr_ndev = fwk_ifname_to_ndev(name);
+    if (!isValid(sptr_ndev))
+        return PTR_ERR(sptr_ndev);
 
-    sprt_ops = sprt_ndev->sprt_netdev_oprts;
-    if (sprt_ops->ndo_open)
+    sptr_ops = sptr_ndev->sptr_netdev_oprts;
+    if (sptr_ops->ndo_open)
     {
-        if (sprt_ops->ndo_open(sprt_ndev))
+        if (sptr_ops->ndo_open(sptr_ndev))
             return -ER_FAILD;
     }
 
@@ -328,21 +328,21 @@ kint32_t fwk_netif_open(const kchar_t *name)
  * @brief   network close (called by net_link_down())
  * @param   name
  * @retval  errno
- * @note    name ---> sprt_ndev ---> driver_stop
+ * @note    name ---> sptr_ndev ---> driver_stop
  */
 kint32_t fwk_netif_close(const kchar_t *name)
 {
-    struct fwk_net_device *sprt_ndev;
-    const struct fwk_netdev_ops *sprt_ops;
+    struct fwk_net_device *sptr_ndev;
+    const struct fwk_netdev_ops *sptr_ops;
 
-    sprt_ndev = fwk_ifname_to_ndev(name);
-    if (!isValid(sprt_ndev))
-        return PTR_ERR(sprt_ndev);
+    sptr_ndev = fwk_ifname_to_ndev(name);
+    if (!isValid(sptr_ndev))
+        return PTR_ERR(sptr_ndev);
 
-    sprt_ops = sprt_ndev->sprt_netdev_oprts;
-    if (sprt_ops->ndo_stop)
+    sptr_ops = sptr_ndev->sptr_netdev_oprts;
+    if (sptr_ops->ndo_stop)
     {
-        if (sprt_ops->ndo_stop(sprt_ndev))
+        if (sptr_ops->ndo_stop(sptr_ndev))
             return -ER_FAILD;
     }
 
@@ -357,20 +357,20 @@ kint32_t fwk_netif_close(const kchar_t *name)
  */
 kint32_t fwk_netif_ioctl(kuint32_t request, kuaddr_t args)
 {
-    struct fwk_ifreq *sprt_ifr;
-    struct fwk_net_device *sprt_ndev;
-    const struct fwk_netdev_ops *sprt_ops;
+    struct fwk_ifreq *sptr_ifr;
+    struct fwk_net_device *sptr_ndev;
+    const struct fwk_netdev_ops *sptr_ops;
 
-    sprt_ifr = (struct fwk_ifreq *)args;
-    sprt_ndev = fwk_ifname_to_ndev(sprt_ifr->mrt_ifr_name);
-    if (!isValid(sprt_ndev))
-        return PTR_ERR(sprt_ndev);
+    sptr_ifr = (struct fwk_ifreq *)args;
+    sptr_ndev = fwk_ifname_to_ndev(sptr_ifr->mr_ifr_name);
+    if (!isValid(sptr_ndev))
+        return PTR_ERR(sptr_ndev);
 
-    /*!< if sprt_ops->ndo_do_ioctl defined, use sprt_ops->ndo_do_ioctl */
-    sprt_ops = sprt_ndev->sprt_netdev_oprts;
-    if (sprt_ops->ndo_do_ioctl)
+    /*!< if sptr_ops->ndo_do_ioctl defined, use sptr_ops->ndo_do_ioctl */
+    sptr_ops = sptr_ndev->sptr_netdev_oprts;
+    if (sptr_ops->ndo_do_ioctl)
     {
-        if (!sprt_ops->ndo_do_ioctl(sprt_ndev, sprt_ifr, (kint32_t)request))
+        if (!sptr_ops->ndo_do_ioctl(sptr_ndev, sptr_ifr, (kint32_t)request))
             goto out;
     }
 
@@ -378,15 +378,15 @@ kint32_t fwk_netif_ioctl(kuint32_t request, kuaddr_t args)
     switch (request)
     {
         case NETWORK_IFR_GET_HWADDR:
-            kmemcpy(sprt_ifr->mrt_ifr_hwaddr.sa_data, sprt_ndev->dev_addr, NET_MAC_ETH_ALEN);
+            kmemcpy(sptr_ifr->mr_ifr_hwaddr.sa_data, sptr_ndev->dev_addr, NET_MAC_ETH_ALEN);
             break;
 
         case NETWORK_IFR_GET_MTU:
-            sprt_ifr->mrt_ifr_mtu = sprt_ndev->mtu;
+            sptr_ifr->mr_ifr_mtu = sptr_ndev->mtu;
             break;
 
         default:
-            return -ER_UNVALID;
+            return -ER_INVALID;
     }
 
 out:
@@ -395,46 +395,46 @@ out:
 
 /*!
  * @brief   send skb
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  size sent
  * @note    none
  */
-static netdev_tx_t __fwk_dev_queue_xmit(struct fwk_sk_buff *sprt_skb)
+static netdev_tx_t __fwk_dev_queue_xmit(struct fwk_sk_buff *sptr_skb)
 {
-    struct fwk_net_device *sprt_ndev;
-    const struct fwk_netdev_ops *sprt_ops;
+    struct fwk_net_device *sptr_ndev;
+    const struct fwk_netdev_ops *sptr_ops;
     netdev_tx_t retval;
     
-    sprt_ndev = sprt_skb->sprt_ndev;
-    sprt_ops = sprt_ndev->sprt_netdev_oprts;
+    sptr_ndev = sptr_skb->sptr_ndev;
+    sptr_ops = sptr_ndev->sptr_netdev_oprts;
 
-    if (!sprt_ops->ndo_start_xmit)
+    if (!sptr_ops->ndo_start_xmit)
         return -ER_TRXERR;
 
-    retval = sprt_ops->ndo_start_xmit(sprt_skb, sprt_ndev);
+    retval = sptr_ops->ndo_start_xmit(sptr_skb, sptr_ndev);
     return retval;
 }
 
 /*!
  * @brief   send skb
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  size sent
  * @note    none
  */
-kint32_t fwk_dev_queue_xmit(struct fwk_sk_buff *sprt_skb)
+kint32_t fwk_dev_queue_xmit(struct fwk_sk_buff *sptr_skb)
 {
-    return __fwk_dev_queue_xmit(sprt_skb);
+    return __fwk_dev_queue_xmit(sptr_skb);
 }
 
 /*!
  * @brief   add skb received to global rx list
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  errno
  * @note    the function will wake up rx_thread
  */
-kint32_t fwk_netif_rx(struct fwk_sk_buff *sprt_skb)
+kint32_t fwk_netif_rx(struct fwk_sk_buff *sptr_skb)
 {
-    if (!fwk_skb_enqueue(fwk_netif_rxq_get(), sprt_skb))
+    if (!fwk_skb_enqueue(fwk_netif_rxq_get(), sptr_skb))
         schedule_thread_wakeup(THREAD_TID_SOCKRX);
 
     return ER_NORMAL;
@@ -443,7 +443,7 @@ kint32_t fwk_netif_rx(struct fwk_sk_buff *sprt_skb)
 /*!< ----------------------------------------------------------------------- */
 struct fwk_netif_tcb
 {
-    struct fwk_sk_buff_head sgrt_head;
+    struct fwk_sk_buff_head sgtc_head;
     
     void *args;
     void (*pfunc_rx)(void *rxq, void *args);
@@ -457,27 +457,27 @@ struct fwk_netif_tcb
  */
 static void *fwk_netif_rx_entry(void *args)
 {
-    struct fwk_netif_tcb *sprt_tcb;
-    struct fwk_sk_buff_head *sprt_head;
+    struct fwk_netif_tcb *sptr_tcb;
+    struct fwk_sk_buff_head *sptr_head;
     kuint32_t flags;
 
-    sprt_head = fwk_netif_rxq_get();
-    sprt_tcb = (struct fwk_netif_tcb *)args;
+    sptr_head = fwk_netif_rxq_get();
+    sptr_tcb = (struct fwk_netif_tcb *)args;
 
     for (;;)
     {
-        if (mrt_skbuff_list_empty(sprt_head))
+        if (mr_skbuff_list_empty(sptr_head))
             schedule_self_suspend();
 
         local_irq_save(&flags);
 
-        fwk_skb_split(&sprt_tcb->sgrt_head, sprt_head);
-        fwk_skb_list_init(sprt_head);
+        fwk_skb_split(&sptr_tcb->sgtc_head, sptr_head);
+        fwk_skb_list_init(sptr_head);
 
         local_irq_restore(&flags);
 
-        if (sprt_tcb->pfunc_rx)
-            sprt_tcb->pfunc_rx(&sprt_tcb->sgrt_head, sprt_tcb->args);       
+        if (sptr_tcb->pfunc_rx)
+            sptr_tcb->pfunc_rx(&sptr_tcb->sgtc_head, sptr_tcb->args);       
     }
 
     return args;
@@ -492,22 +492,22 @@ static void *fwk_netif_rx_entry(void *args)
  */
 void fwk_netif_init(void (*pfunc_rx)(void *rxq, void *args), void *args)
 {
-    struct fwk_netif_tcb *sprt_tcb;
-    struct fwk_sk_buff_head *sprt_head;
+    struct fwk_netif_tcb *sptr_tcb;
+    struct fwk_sk_buff_head *sptr_head;
 
-    sprt_tcb = kmalloc(sizeof(*sprt_tcb), GFP_KERNEL);
-    if (!isValid(sprt_tcb))
+    sptr_tcb = kmalloc(sizeof(*sptr_tcb), GFP_KERNEL);
+    if (!isValid(sptr_tcb))
         return;
 
-    sprt_tcb->args = args;
-    sprt_tcb->pfunc_rx = pfunc_rx;
-    fwk_skb_list_init(&sprt_tcb->sgrt_head);
+    sptr_tcb->args = args;
+    sptr_tcb->pfunc_rx = pfunc_rx;
+    fwk_skb_list_init(&sptr_tcb->sgtc_head);
 
-    sprt_head = fwk_netif_rxq_get();
-    fwk_skb_list_init(sprt_head);
+    sptr_head = fwk_netif_rxq_get();
+    fwk_skb_list_init(sptr_head);
 
-    kernel_thread_create(THREAD_TID_SOCKRX, mrt_nullptr, fwk_netif_rx_entry, sprt_tcb);
-    thread_set_priority(mrt_tid_attr(THREAD_TID_SOCKRX), THREAD_PROTY_SOCKRX);
+    kernel_thread_create(THREAD_TID_SOCKRX, mr_nullptr, fwk_netif_rx_entry, sptr_tcb);
+    thread_set_priority(mr_tid_attr(THREAD_TID_SOCKRX), THREAD_PROTY_SOCKRX);
 
     /*!< register command */
     term_cmd_add_ifconfig();

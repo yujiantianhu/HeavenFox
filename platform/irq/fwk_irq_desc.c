@@ -23,9 +23,9 @@
 #define FWK_IRQ_DESC_MAX					(1024)
 
 /*!< The globals */
-static DECLARE_RADIX_TREE(sgrt_fwk_irq_radix_tree, default_malloc, kfree);
-static kuint32_t g_fwk_allocated_irqs[mrt_num_align(FWK_IRQ_DESC_MAX, RET_BITS_PER_INT) / RET_BITS_PER_INT] = { 0 };
-static struct spin_lock sgrt_fwk_irqs_lock = SPIN_LOCK_INIT();
+static DECLARE_RADIX_TREE(sgtc_fwk_irq_radix_tree, default_malloc, kfree);
+static kuint32_t g_fwk_allocated_irqs[mr_num_align(FWK_IRQ_DESC_MAX, RET_BITS_PER_INT) / RET_BITS_PER_INT] = { 0 };
+static struct spin_lock sgtc_fwk_irqs_lock = SPIN_LOCK_INIT();
 
 /*!< API functions */
 /*!
@@ -36,16 +36,16 @@ static struct spin_lock sgrt_fwk_irqs_lock = SPIN_LOCK_INIT();
  */
 static struct fwk_irq_desc *fwk_allocate_irq_desc(nrt_gfp_t gfp)
 {
-	struct fwk_irq_desc *sprt_desc;
+	struct fwk_irq_desc *sptr_desc;
 
-	sprt_desc = (struct fwk_irq_desc *)kzalloc(sizeof(*sprt_desc), gfp);
-	if (!isValid(sprt_desc))
-		return mrt_nullptr;
+	sptr_desc = (struct fwk_irq_desc *)kzalloc(sizeof(*sptr_desc), gfp);
+	if (!isValid(sptr_desc))
+		return mr_nullptr;
 
-	init_list_head(&sprt_desc->sgrt_action);
-	spin_lock_init(&sprt_desc->sgrt_lock);
+	init_list_head(&sptr_desc->sgtc_action);
+	spin_lock_init(&sptr_desc->sgtc_lock);
 		
-	return sprt_desc;
+	return sptr_desc;
 }
 
 /*!
@@ -85,27 +85,27 @@ static kint32_t fwk_irq_bitmap_find_areas(kuint32_t *bitmap, kint32_t irq_base, 
 
 /*!
  * @brief   allocate and initialize irq_data
- * @param   sprt_domain, virq, hwirq, nr_irqs
+ * @param   sptr_domain, virq, hwirq, nr_irqs
  * @retval  virtual irq number or errno
  * @note    none
  */
-static kint32_t irq_domain_alloc_irq_data(struct fwk_irq_domain *sprt_domain, kuint32_t virq, kuint32_t hwirq, kuint32_t nr_irqs)
+static kint32_t irq_domain_alloc_irq_data(struct fwk_irq_domain *sptr_domain, kuint32_t virq, kuint32_t hwirq, kuint32_t nr_irqs)
 {
-	struct fwk_irq_data *sprt_data;
+	struct fwk_irq_data *sptr_data;
 
 	for (kuint32_t i = 0; i < nr_irqs; i++)
 	{
-		sprt_data = fwk_irq_get_data(virq + i);
+		sptr_data = fwk_irq_get_data(virq + i);
 
-		if (!isValid(sprt_data))
+		if (!isValid(sptr_data))
 			return -ER_NOTFOUND;
 
-		sprt_data->sprt_domain = sprt_domain;
-		sprt_data->irq = virq + i;
-		sprt_data->hwirq = hwirq + i;
-		sprt_data->sprt_chip = &sgrt_fwk_irq_dummy_chip;
-		sprt_data->mask = 0;
-		sprt_domain->revmap[hwirq + i] = virq + i;
+		sptr_data->sptr_domain = sptr_domain;
+		sptr_data->irq = virq + i;
+		sptr_data->hwirq = hwirq + i;
+		sptr_data->sptr_chip = &sgtc_fwk_irq_dummy_chip;
+		sptr_data->mask = 0;
+		sptr_domain->revmap[hwirq + i] = virq + i;
 	}
 
 	return virq;
@@ -119,34 +119,34 @@ static kint32_t irq_domain_alloc_irq_data(struct fwk_irq_domain *sprt_domain, ku
  */
 static kint32_t fwk_irq_domain_alloc_descs(kint32_t irq_base, kuint32_t nr_irqs)
 {
-	struct fwk_irq_desc *sprt_desc;
+	struct fwk_irq_desc *sptr_desc;
 	kuint32_t virq;
 
-	spin_lock_irqsave(&sgrt_fwk_irqs_lock);
+	spin_lock_irqsave(&sgtc_fwk_irqs_lock);
 
 	virq = fwk_irq_bitmap_find_areas(g_fwk_allocated_irqs, irq_base, FWK_IRQ_DESC_MAX, nr_irqs);
 	if (virq < 0)
 	{
-		spin_unlock_irqrestore(&sgrt_fwk_irqs_lock);
+		spin_unlock_irqrestore(&sgtc_fwk_irqs_lock);
 		return virq;
 	}
 
 	/*!< create desc for every irq */
 	for (kuint32_t i = 0; i < nr_irqs; i++)
 	{
-		sprt_desc = fwk_allocate_irq_desc(GFP_KERNEL);
-		if (!isValid(sprt_desc))
+		sptr_desc = fwk_allocate_irq_desc(GFP_KERNEL);
+		if (!isValid(sptr_desc))
 		{
-			spin_unlock_irqrestore(&sgrt_fwk_irqs_lock);
+			spin_unlock_irqrestore(&sgtc_fwk_irqs_lock);
 			return -ER_NOMEM;
 		}
 
-		sprt_desc->irq = virq + i;
-		radix_tree_add(&sgrt_fwk_irq_radix_tree, virq + i, &sprt_desc->sgrt_radix);
+		sptr_desc->irq = virq + i;
+		radix_tree_add(&sgtc_fwk_irq_radix_tree, virq + i, &sptr_desc->sgtc_radix);
 	}
 
 	bitmap_set_nr_bit_valid(g_fwk_allocated_irqs, virq, FWK_IRQ_DESC_MAX, nr_irqs);
-	spin_unlock_irqrestore(&sgrt_fwk_irqs_lock);
+	spin_unlock_irqrestore(&sgtc_fwk_irqs_lock);
 
 	return virq;
 }
@@ -160,16 +160,16 @@ static kint32_t fwk_irq_domain_alloc_descs(kint32_t irq_base, kuint32_t nr_irqs)
  */
 struct fwk_irq_desc *fwk_irq_to_desc(kuint32_t virq)
 {
-	struct fwk_irq_desc *sprt_desc;
+	struct fwk_irq_desc *sptr_desc;
 
 	if (virq < 0)
-		return mrt_nullptr;
+		return mr_nullptr;
 	
-	spin_lock_irqsave(&sgrt_fwk_irqs_lock);
-	sprt_desc = radix_tree_next_entry(&sgrt_fwk_irq_radix_tree, struct fwk_irq_desc, sgrt_radix, virq);
-	spin_unlock_irqrestore(&sgrt_fwk_irqs_lock);
+	spin_lock_irqsave(&sgtc_fwk_irqs_lock);
+	sptr_desc = radix_tree_next_entry(&sgtc_fwk_irq_radix_tree, struct fwk_irq_desc, sgtc_radix, virq);
+	spin_unlock_irqrestore(&sgtc_fwk_irqs_lock);
 
-	return sprt_desc;
+	return sptr_desc;
 }
 
 /*!
@@ -178,9 +178,9 @@ struct fwk_irq_desc *fwk_irq_to_desc(kuint32_t virq)
  * @retval  irq_desc
  * @note    none
  */
-struct fwk_irq_desc *fwk_irq_data_to_desc(struct fwk_irq_data *sprt_data)
+struct fwk_irq_desc *fwk_irq_data_to_desc(struct fwk_irq_data *sptr_data)
 {
-	return sprt_data ? mrt_container_of(sprt_data, struct fwk_irq_desc, sgrt_data) : mrt_nullptr;
+	return sptr_data ? mr_container_of(sptr_data, struct fwk_irq_desc, sgtc_data) : mr_nullptr;
 }
 
 /*!
@@ -191,62 +191,62 @@ struct fwk_irq_desc *fwk_irq_data_to_desc(struct fwk_irq_data *sprt_data)
  */
 struct fwk_irq_data *fwk_irq_get_data(kuint32_t virq)
 {
-	struct fwk_irq_desc *sprt_desc = fwk_irq_to_desc(virq);
-	return (sprt_desc) ? &sprt_desc->sgrt_data : mrt_nullptr;
+	struct fwk_irq_desc *sptr_desc = fwk_irq_to_desc(virq);
+	return (sptr_desc) ? &sptr_desc->sgtc_data : mr_nullptr;
 }
 
 /*!
  * @brief   get irq_data by hard irq
- * @param   sprt_domain, hwirq
+ * @param   sptr_domain, hwirq
  * @retval  irq_data
  * @note    none
  */
-struct fwk_irq_data *fwk_irq_domain_get_data(struct fwk_irq_domain *sprt_domain, kuint32_t hwirq)
+struct fwk_irq_data *fwk_irq_domain_get_data(struct fwk_irq_domain *sptr_domain, kuint32_t hwirq)
 {
 	kint32_t virq;
-	struct fwk_irq_data *sprt_data;
+	struct fwk_irq_data *sptr_data;
 
-	if (!isValid(sprt_domain))
+	if (!isValid(sptr_domain))
 		goto fail;
 
-	virq = sprt_domain->revmap[hwirq];
+	virq = sptr_domain->revmap[hwirq];
 	if (virq < 0)
 		goto fail;
 
-	sprt_data = fwk_irq_get_data(virq);
-	if (isValid(sprt_data))
-		return ((sprt_data->hwirq == hwirq) && (sprt_data->sprt_domain == sprt_domain)) ? sprt_data : mrt_nullptr;
+	sptr_data = fwk_irq_get_data(virq);
+	if (isValid(sptr_data))
+		return ((sptr_data->hwirq == hwirq) && (sptr_data->sptr_domain == sptr_domain)) ? sptr_data : mr_nullptr;
 
 fail:
-	return mrt_nullptr;
+	return mr_nullptr;
 }
 
 /*!
  * @brief   get irq_data by hard irq
- * @param   sprt_domain, hwirq
+ * @param   sptr_domain, hwirq
  * @retval  irq_data
  * @note    none
  */
-kint32_t fwk_irq_domain_find_map(struct fwk_irq_domain *sprt_domain, kuint32_t hwirq, kuint32_t type)
+kint32_t fwk_irq_domain_find_map(struct fwk_irq_domain *sptr_domain, kuint32_t hwirq, kuint32_t type)
 {
-	struct fwk_irq_desc *sprt_desc;
-	struct fwk_irq_data *sprt_data;
+	struct fwk_irq_desc *sptr_desc;
+	struct fwk_irq_data *sptr_data;
 
-	sprt_data = fwk_irq_domain_get_data(sprt_domain, hwirq);
-	if (!isValid(sprt_data))
-		return -ER_UNVALID;
+	sptr_data = fwk_irq_domain_get_data(sptr_domain, hwirq);
+	if (!isValid(sptr_data))
+		return -ER_INVALID;
 
 	if (!type)
 		goto END;
 
-	sprt_desc = fwk_irq_data_to_desc(sprt_data);
+	sptr_desc = fwk_irq_data_to_desc(sptr_data);
 	type &= IRQ_TYPE_SENSE_MASK;
 	
-	if (!(sprt_desc->flags & type))
-		sprt_desc->flags |= type;
+	if (!(sptr_desc->flags & type))
+		sptr_desc->flags |= type;
 
 END:
-	return sprt_data->irq;
+	return sptr_data->irq;
 }
 
 /*!
@@ -257,21 +257,21 @@ END:
  */
 void fwk_irq_desc_set_type(kuint32_t virq, kuint32_t type)
 {
-	struct fwk_irq_desc *sprt_desc = fwk_irq_to_desc(virq);
+	struct fwk_irq_desc *sptr_desc = fwk_irq_to_desc(virq);
 
-	if (!isValid(sprt_desc))
+	if (!isValid(sptr_desc))
 		return;
 
-	sprt_desc->flags |= type;
+	sptr_desc->flags |= type;
 }
 
 /*!
  * @brief   allocate multiple irq numbers
- * @param   sprt_domain, irq_base, hwirq, nr_irqs
+ * @param   sptr_domain, irq_base, hwirq, nr_irqs
  * @retval  irq base allocated
  * @note    none
  */
-kint32_t fwk_irq_domain_alloc_irqs(struct fwk_irq_domain *sprt_domain, kint32_t irq_base, kuint32_t hwirq, kuint32_t nr_irqs)
+kint32_t fwk_irq_domain_alloc_irqs(struct fwk_irq_domain *sptr_domain, kint32_t irq_base, kuint32_t hwirq, kuint32_t nr_irqs)
 {
 	kint32_t virq;
 
@@ -279,7 +279,7 @@ kint32_t fwk_irq_domain_alloc_irqs(struct fwk_irq_domain *sprt_domain, kint32_t 
 	if (virq < 0)
 		return virq;
 	
-	return irq_domain_alloc_irq_data(sprt_domain, virq, hwirq, nr_irqs);
+	return irq_domain_alloc_irq_data(sptr_domain, virq, hwirq, nr_irqs);
 }
 
 /*!
@@ -290,51 +290,51 @@ kint32_t fwk_irq_domain_alloc_irqs(struct fwk_irq_domain *sprt_domain, kint32_t 
  */
 void fwk_irq_desc_free(kint32_t irq)
 {
-	struct fwk_irq_desc *sprt_desc;
-	struct fwk_irq_data *sprt_data;
+	struct fwk_irq_desc *sptr_desc;
+	struct fwk_irq_data *sptr_data;
 
-	sprt_desc = fwk_irq_to_desc(irq);
-	sprt_data = &sprt_desc->sgrt_data;
+	sptr_desc = fwk_irq_to_desc(irq);
+	sptr_data = &sptr_desc->sgtc_data;
 
-	spin_lock_irqsave(&sgrt_fwk_irqs_lock);
+	spin_lock_irqsave(&sgtc_fwk_irqs_lock);
 
-	bitmap_set_nr_bit_zero(g_fwk_allocated_irqs, sprt_data->irq, FWK_IRQ_DESC_MAX, 1);
-	fwk_destroy_irq_action(sprt_data->irq);
-	radix_tree_del(&sgrt_fwk_irq_radix_tree, sprt_data->irq);
+	bitmap_set_nr_bit_zero(g_fwk_allocated_irqs, sptr_data->irq, FWK_IRQ_DESC_MAX, 1);
+	fwk_destroy_irq_action(sptr_data->irq);
+	radix_tree_del(&sgtc_fwk_irq_radix_tree, sptr_data->irq);
 
-	spin_unlock_irqrestore(&sgrt_fwk_irqs_lock);
-	kfree(sprt_desc);
+	spin_unlock_irqrestore(&sgtc_fwk_irqs_lock);
+	kfree(sptr_desc);
 }
 
 /*!
  * @brief   release multiple irq numbers
- * @param   sprt_domain
+ * @param   sptr_domain
  * @retval  none
  * @note    none
  */
-void fwk_irq_domain_free_irqs(struct fwk_irq_domain *sprt_domain)
+void fwk_irq_domain_free_irqs(struct fwk_irq_domain *sptr_domain)
 {
 	kuint32_t idx;
 
-	for (idx = 0; idx < sprt_domain->hwirq_max; idx++)
+	for (idx = 0; idx < sptr_domain->hwirq_max; idx++)
 	{
-		if (sprt_domain->revmap[idx] < 0)
+		if (sptr_domain->revmap[idx] < 0)
 			continue;
 
-		fwk_irq_desc_free(sprt_domain->revmap[idx]);
-		sprt_domain->revmap[idx] = -1;
+		fwk_irq_desc_free(sptr_domain->revmap[idx]);
+		sptr_domain->revmap[idx] = -1;
 	}
 }
 
 /*!
  * @brief   parse and map irq
- * @param   sprt_node, index
+ * @param   sptr_node, index
  * @retval  irq number (hwirq ---> virtual irq)
  * @note    none
  */
-kint32_t fwk_of_irq_get(struct fwk_device_node *sprt_node, kuint32_t index)
+kint32_t fwk_of_irq_get(struct fwk_device_node *sptr_node, kuint32_t index)
 {
-	return fwk_irq_of_parse_and_map(sprt_node, index);
+	return fwk_irq_of_parse_and_map(sptr_node, index);
 }
 
 

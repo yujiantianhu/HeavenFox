@@ -15,12 +15,12 @@
 #include <common/mem_manage.h>
 
 /*!< The globals */
-static struct mem_info sgrt_infoMalloc =
+static struct mem_info sgtc_infoMalloc =
 {
     .base	= 0,
     .lenth	= 0,
 
-    .sprt_mem = mrt_nullptr,
+    .sptr_mem = mr_nullptr,
 };
 
 /*!< API function */
@@ -32,7 +32,7 @@ static struct mem_info sgrt_infoMalloc =
  */
 __weak kuaddr_t _sbrk(kuint32_t incr)
 {
-    static kuint8_t *ptr_heapHead = mrt_nullptr;
+    static kuint8_t *ptr_heapHead = mr_nullptr;
     kuint8_t *ptr_heapEnd;
     kuint8_t *prev_heap;
     kuaddr_t status;
@@ -41,13 +41,13 @@ __weak kuaddr_t _sbrk(kuint32_t incr)
     ptr_heapEnd = (kuint8_t *)MEMORY_HEAP_END;
 
     /*!< heap start */
-    if (ptr_heapHead == mrt_nullptr) 
+    if (ptr_heapHead == mr_nullptr) 
         ptr_heapHead = (kuint8_t *)MEMORY_HEAP_START;
     
     /*!< save memory base address */
     prev_heap = ptr_heapHead;
 
-    if (((ptr_heapHead + incr) <= ptr_heapEnd) && (prev_heap != mrt_nullptr)) 
+    if (((ptr_heapHead + incr) <= ptr_heapEnd) && (prev_heap != mr_nullptr)) 
     {
         ptr_heapHead += incr;
         status = (kuaddr_t)((void *)prev_heap);
@@ -66,14 +66,14 @@ __weak kuaddr_t _sbrk(kuint32_t incr)
  */
 kbool_t malloc_block_initial(void)
 {
-    struct mem_info *sprt_info;
+    struct mem_info *sptr_info;
 
-    sprt_info = &sgrt_infoMalloc;
+    sptr_info = &sgtc_infoMalloc;
 
-    if (isValid(sprt_info->sprt_mem))
+    if (isValid(sptr_info->sptr_mem))
         return false;
 
-    memory_block_create(sprt_info, 
+    memory_block_create(sptr_info, 
                         MEMORY_HEAP_START, 
                         MEMORY_HEAP_END - MEMORY_HEAP_START);
 
@@ -88,14 +88,14 @@ kbool_t malloc_block_initial(void)
  */
 kbool_t malloc_block_self_defines(kuaddr_t base, kusize_t size)
 {
-    struct mem_info *sprt_info;
+    struct mem_info *sptr_info;
 
-    sprt_info = &sgrt_infoMalloc;
+    sptr_info = &sgtc_infoMalloc;
 
-    if (isValid(sprt_info->sprt_mem))
+    if (isValid(sptr_info->sptr_mem))
         return false;
 
-    memory_block_create(sprt_info, base, size);
+    memory_block_create(sptr_info, base, size);
 
     return true;
 }
@@ -108,7 +108,7 @@ kbool_t malloc_block_self_defines(kuaddr_t base, kusize_t size)
  */
 void malloc_block_destroy(void)
 {
-    memory_block_destroy(&sgrt_infoMalloc);
+    memory_block_destroy(&sgtc_infoMalloc);
 }
 
 /*!
@@ -119,10 +119,10 @@ void malloc_block_destroy(void)
  */
 __weak void *malloc(size_t __size)
 {
-    if (sgrt_infoMalloc.alloc)
-        return sgrt_infoMalloc.alloc(&sgrt_infoMalloc, __size);
+    if (sgtc_infoMalloc.alloc)
+        return sgtc_infoMalloc.alloc(&sgtc_infoMalloc, __size);
 
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
@@ -133,8 +133,8 @@ __weak void *malloc(size_t __size)
  */
 __weak void free(void *__ptr)
 {
-    if (sgrt_infoMalloc.free)
-        sgrt_infoMalloc.free(&sgrt_infoMalloc, __ptr);
+    if (sgtc_infoMalloc.free)
+        sgtc_infoMalloc.free(&sgtc_infoMalloc, __ptr);
 }
 
 /*!

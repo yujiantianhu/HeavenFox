@@ -35,21 +35,21 @@ void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
     print_err("---> line     : %d\r\n", __line);
     print_err("---> function : %s\r\n", __function);
 
-    if (mrt_current)
+    if (mr_current)
     {
-        struct thread *sprt_thread = mrt_current;
-        struct scheduler_context_regs *sprt_regs = thread_get_context(sprt_thread->sprt_attr);
+        struct thread *sptr_thread = mr_current;
+        struct scheduler_context_regs *sptr_regs = thread_get_context(sptr_thread->sptr_attr);
 
-        if (*sprt_thread->name)
-            print_err("current thread name: %s\r\n", sprt_thread->name);
-        print_err("current thread id: %d ==== < === > \r\n\t", sprt_thread->tid);
+        if (*sptr_thread->name)
+            print_err("current thread name: %s\r\n", sptr_thread->name);
+        print_err("current thread id: %d ==== < === > \r\n\t", sptr_thread->tid);
 
         for (kint32_t idx = 0; idx < 9; idx++)
         {
             if (idx < 10)
-                print_err("r%d:    0x%x\r\n\t", idx, *((kuaddr_t *)(&sprt_regs->r0) + idx));
+                print_err("r%d:    0x%x\r\n\t", idx, *((kuaddr_t *)(&sptr_regs->r0) + idx));
             else
-                print_err("r%d:   0x%x\r\n\t",  idx, *((kuaddr_t *)(&sprt_regs->r0) + idx));
+                print_err("r%d:   0x%x\r\n\t",  idx, *((kuaddr_t *)(&sptr_regs->r0) + idx));
         }
 
         print_err(	"lr:    0x%x\r\n\t"
@@ -57,7 +57,7 @@ void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
                     "pc:    0x%x\r\n\t"
                     "spsr:  0x%x\r\n\t"
                     "flag:  0x%x\r\n\t",
-                    sprt_regs->lr, sprt_regs->sp, sprt_regs->pc, sprt_regs->psr, sprt_regs->flags);
+                    sptr_regs->lr, sptr_regs->sp, sptr_regs->pc, sptr_regs->psr, sptr_regs->flags);
     }
 
     print_err("\r\n");

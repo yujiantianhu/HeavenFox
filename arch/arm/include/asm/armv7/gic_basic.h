@@ -34,7 +34,7 @@ typedef struct gic_common
     void *cpu_base;
 
     kuint32_t gic_irqs;
-    void *sprt_domain;
+    void *sptr_domain;
 
 } srt_gic_t;
 
@@ -125,15 +125,15 @@ typedef struct gic_cpu
 
 } srt_gic_cpu_t;
 
-#define __mrt_get_gic_distributor() \
-    (srt_gic_dist_t *)(mrt_mask(__get_cp15_cbar(), 0xffff0000U) + GIC_DIST_HEAD_OFFSET)
-#define __mrt_get_gic_interface()   \
-    (srt_gic_cpu_t *)(mrt_mask(__get_cp15_cbar(), 0xffff0000U) + GIC_DIST_HEAD_OFFSET + sizeof(srt_gic_dist_t))
+#define __mr_get_gic_distributor() \
+    (srt_gic_dist_t *)(mr_mask(__get_cp15_cbar(), 0xffff0000U) + GIC_DIST_HEAD_OFFSET)
+#define __mr_get_gic_interface()   \
+    (srt_gic_cpu_t *)(mr_mask(__get_cp15_cbar(), 0xffff0000U) + GIC_DIST_HEAD_OFFSET + sizeof(srt_gic_dist_t))
 
-#define mrt_get_gic_distributor(gic)  \
-    (((gic) && ((gic)->dest_base)) ? (srt_gic_dist_t *)((gic)->dest_base) : __mrt_get_gic_distributor())
-#define mrt_get_gic_interface(gic)    \
-    (((gic) && ((gic)->cpu_base))  ? (srt_gic_cpu_t *)((gic)->cpu_base)  : __mrt_get_gic_interface())
+#define mr_get_gic_distributor(gic)  \
+    (((gic) && ((gic)->dest_base)) ? (srt_gic_dist_t *)((gic)->dest_base) : __mr_get_gic_distributor())
+#define mr_get_gic_interface(gic)    \
+    (((gic) && ((gic)->cpu_base))  ? (srt_gic_cpu_t *)((gic)->cpu_base)  : __mr_get_gic_interface())
 
 /* The functions */
 extern srt_gic_t *fwk_get_gic_data(kuint32_t gic_nr);
@@ -149,11 +149,11 @@ extern kint32_t fwk_gpc_to_gic_irq(kint32_t virq);
  */
 static inline void hw_enable_irq(kint32_t hwirq)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_dist_t *sprt_dist;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_dist_t *sptr_dist;
 
-    sprt_dist = mrt_get_gic_distributor(sprt_gic);
-    mrt_setbit_towords(hwirq, &sprt_dist->D_ISENABLER);
+    sptr_dist = mr_get_gic_distributor(sptr_gic);
+    mr_setbit_towords(hwirq, &sptr_dist->D_ISENABLER);
 }
 
 /*!
@@ -164,11 +164,11 @@ static inline void hw_enable_irq(kint32_t hwirq)
  */
 static inline void hw_disable_irq(kint32_t hwirq)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_dist_t *sprt_dist;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_dist_t *sptr_dist;
 
-    sprt_dist = mrt_get_gic_distributor(sprt_gic);
-    mrt_setbit_towords(hwirq, &sprt_dist->D_ICENABLER);
+    sptr_dist = mr_get_gic_distributor(sptr_gic);
+    mr_setbit_towords(hwirq, &sptr_dist->D_ICENABLER);
 }
 
 /*!
@@ -213,11 +213,11 @@ static inline void local_irq_disable(kint32_t irq_number)
  */
 static inline kint32_t hw_irq_acknowledge(void)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_cpu_t *sprt_cpu;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_cpu_t *sptr_cpu;
 
-    sprt_cpu = mrt_get_gic_interface(sprt_gic);
-    return mrt_mask(sprt_cpu->C_IAR, 0x1fffU);
+    sptr_cpu = mr_get_gic_interface(sptr_gic);
+    return mr_mask(sptr_cpu->C_IAR, 0x1fffU);
 }
 
 /*!
@@ -228,11 +228,11 @@ static inline kint32_t hw_irq_acknowledge(void)
  */
 static inline void hw_irq_deactivate(kuint32_t value)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_cpu_t *sprt_cpu;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_cpu_t *sptr_cpu;
 
-    sprt_cpu = mrt_get_gic_interface(sprt_gic);
-    mrt_writel(value, &sprt_cpu->C_EOIR);
+    sptr_cpu = mr_get_gic_interface(sptr_gic);
+    mr_writel(value, &sptr_cpu->C_EOIR);
 }
 
 /*!
@@ -243,11 +243,11 @@ static inline void hw_irq_deactivate(kuint32_t value)
  */
 static inline kuint32_t hw_irq_get_running_priority(void)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_cpu_t *sprt_cpu;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_cpu_t *sptr_cpu;
 
-    sprt_cpu = mrt_get_gic_interface(sprt_gic);
-    return mrt_mask(sprt_cpu->C_RPR, 0xffU);
+    sptr_cpu = mr_get_gic_interface(sptr_gic);
+    return mr_mask(sptr_cpu->C_RPR, 0xffU);
 }
 
 /*!
@@ -258,11 +258,11 @@ static inline kuint32_t hw_irq_get_running_priority(void)
  */
 static inline void hw_irq_set_priority_grouping(kuint32_t priorityGroup)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_cpu_t *sprt_cpu;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_cpu_t *sptr_cpu;
 
-    sprt_cpu = mrt_get_gic_interface(sprt_gic);
-    mrt_writel(mrt_mask(priorityGroup, 0x7U), &sprt_cpu->C_BPR);
+    sptr_cpu = mr_get_gic_interface(sptr_gic);
+    mr_writel(mr_mask(priorityGroup, 0x7U), &sptr_cpu->C_BPR);
 }
 
 /*!
@@ -273,11 +273,11 @@ static inline void hw_irq_set_priority_grouping(kuint32_t priorityGroup)
  */
 static inline kuint32_t hw_irq_get_priority_grouping(void)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_cpu_t *sprt_cpu;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_cpu_t *sptr_cpu;
 
-    sprt_cpu = mrt_get_gic_interface(sprt_gic);
-    return mrt_mask(sprt_cpu->C_BPR, 0x7U);
+    sptr_cpu = mr_get_gic_interface(sptr_gic);
+    return mr_mask(sptr_cpu->C_BPR, 0x7U);
 }
 
 /*!
@@ -288,16 +288,16 @@ static inline kuint32_t hw_irq_get_priority_grouping(void)
  */
 static inline void hw_irq_set_priority(kuint32_t irq_number, kuint32_t priority)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_dist_t *sprt_dist;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_dist_t *sptr_dist;
     kint32_t hwirq;
 
     hwirq = fwk_gpc_to_gic_irq(irq_number);
     if (hwirq < 0)
         return;
 
-    sprt_dist = mrt_get_gic_distributor(sprt_gic);
-    mrt_writeb(mrt_bit_mask(priority, 0xffU, 8U - __GIC_PRIO_BITS), &sprt_dist->D_IPRIORITYR[hwirq]);
+    sptr_dist = mr_get_gic_distributor(sptr_gic);
+    mr_writeb(mr_bit_mask(priority, 0xffU, 8U - __GIC_PRIO_BITS), &sptr_dist->D_IPRIORITYR[hwirq]);
 }
 
 /*!
@@ -308,16 +308,16 @@ static inline void hw_irq_set_priority(kuint32_t irq_number, kuint32_t priority)
  */
 static inline kuint32_t hw_irq_get_priority(kuint32_t irq_number)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_dist_t *sprt_dist;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_dist_t *sptr_dist;
     kint32_t hwirq;
 
     hwirq = fwk_gpc_to_gic_irq(irq_number);
     if (hwirq < 0)
         return 0;
 
-    sprt_dist = mrt_get_gic_distributor(sprt_gic);
-    return (kuint32_t)mrt_getbit_u8(0xffU, 8U - __GIC_PRIO_BITS, &sprt_dist->D_IPRIORITYR[hwirq]);
+    sptr_dist = mr_get_gic_distributor(sptr_gic);
+    return (kuint32_t)mr_getbit_u8(0xffU, 8U - __GIC_PRIO_BITS, &sptr_dist->D_IPRIORITYR[hwirq]);
 }
 
 #ifdef __cplusplus

@@ -29,20 +29,20 @@ struct fs_stream
 {
     kchar_t *full_name;
     kuint32_t mode;
-    struct fwk_inode *sprt_dnode;
-    struct fwk_block_device_oprts *sprt_bops;
+    struct fwk_inode *sptr_dnode;
+    struct fwk_block_device_oprts *sptr_bops;
 
     void *private_data;
 };
 
 /*!< The functions */
 extern struct fs_stream *file_open(const kchar_t *name, kuint32_t mode);
-extern void file_close(struct fs_stream *sprt_fs);
-extern kssize_t file_write(struct fs_stream *sprt_fs, const void *buf, kusize_t size);
-extern kssize_t file_read(struct fs_stream *sprt_fs, void *buf, kusize_t size);
-extern kssize_t file_size(struct fs_stream *sprt_fs);
-extern kint32_t file_lseek(struct fs_stream *sprt_fs, kuint32_t offset);
-extern kssize_t file_tell(struct fs_stream *sprt_fs);
+extern void file_close(struct fs_stream *sptr_fs);
+extern kssize_t file_write(struct fs_stream *sptr_fs, const void *buf, kusize_t size);
+extern kssize_t file_read(struct fs_stream *sptr_fs, void *buf, kusize_t size);
+extern kssize_t file_size(struct fs_stream *sptr_fs);
+extern kint32_t file_lseek(struct fs_stream *sptr_fs, kuint32_t offset);
+extern kssize_t file_tell(struct fs_stream *sptr_fs);
 
 #ifdef __cplusplus
     }

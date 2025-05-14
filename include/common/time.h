@@ -36,7 +36,7 @@ extern kutime_t g_delay_timer_counter;
 
 /*!< The defines */
 #define TICK_HZ                                             CONFIG_HZ
-#define mrt_jiffies                                         (*ptr_systick_counter)
+#define mr_jiffies                                         (*ptr_systick_counter)
 
 #define JIFFIES_INITVAL                                     (86400000 - 1)
 #define JIFFIES_MAX                                         ((kutime_t)(~0))
@@ -56,11 +56,11 @@ struct time_spec
 	kutime_t tv_nsec;		                                /*!< nanoseconds */
 };
 
-#define mrt_is_timespec_empty(t)                            (((t)->tv_sec == 0) && ((t)->tv_nsec == 0))
+#define mr_is_timespec_empty(t)                            (((t)->tv_sec == 0) && ((t)->tv_nsec == 0))
 
 struct timer_list 
 {
-	struct list_head sgrt_link;
+	struct list_head sgtc_link;
 	kutime_t expires;
 
 	void (*entry)(kuint32_t args);
@@ -77,35 +77,35 @@ struct timer_list
 #define DEFINE_TIMER(_name, _entry, _expires, _data)		\
 	struct timer_list _name = TIMER_INITIALIZER(_entry, _expires, _data)
 
-#define mrt_setup_timer(timer, fn, data)    \
+#define mr_setup_timer(timer, fn, data)    \
 	do {    \
-		init_list_head(&(timer)->sgrt_link);  \
+		init_list_head(&(timer)->sgtc_link);  \
 		(timer)->entry = (fn); \
 		(timer)->data = (data);   \
 	} while (0)
 
-#define mrt_time_check_type(a, b)   \
+#define mr_time_check_type(a, b)   \
 	const kutime_t _a = 0;	\
 	const kutime_t _b = 0;	\
 	(void)(&_a == &(a));	\
     (void)(&_b == &(b));
 
 /*!< a > b ? true : false */
-#define mrt_time_after(a, b)    \
+#define mr_time_after(a, b)    \
 ({  \
-    mrt_time_check_type(a, b)   \
+    mr_time_check_type(a, b)   \
 	((a) > (b));   \
 })
 
 /*!< a >= b ? true : false */
-#define mrt_time_after_eq(a, b)	\
+#define mr_time_after_eq(a, b)	\
 ({  \
-    mrt_time_check_type(a, b)   \
+    mr_time_check_type(a, b)   \
 	((a) >= (b));   \
 })
 
-#define mrt_time_before(a, b)                               mrt_time_after(b, a)            /*!< a < b ? true : false */
-#define mrt_time_before_eq(a, b)                            mrt_time_after_eq(b, a)         /*!< a <= b ? true : false */
+#define mr_time_before(a, b)                               mr_time_after(b, a)            /*!< a < b ? true : false */
+#define mr_time_before_eq(a, b)                            mr_time_after_eq(b, a)         /*!< a <= b ? true : false */
 
 struct time_clock 
 {
@@ -118,7 +118,7 @@ struct time_clock
     kuint8_t second;
     kuint16_t milsecond;
 };
-extern struct time_clock sgrt_systime_clock;
+extern struct time_clock sgtc_systime_clock;
 
 /*!< The functions */
 extern void simple_delay_timer_initial(void);
@@ -131,13 +131,13 @@ extern void delay_us(kuint32_t n_us);
 extern void wait_secs(kuint32_t seconds);
 extern void wait_msecs(kuint32_t milseconds);
 extern void wait_usecs(kuint32_t useconds);
-extern void msecs_to_timeclock(struct time_clock *sprt_tclk, kutype_t milseconds);
+extern void msecs_to_timeclock(struct time_clock *sptr_tclk, kutype_t milseconds);
 
-extern void setup_timer(struct timer_list *sprt_timer, void (*entry)(kuint32_t), kuint32_t data);
-extern void add_timer(struct timer_list *sprt_timer);
-extern void del_timer(struct timer_list *sprt_timer);
-extern kbool_t find_timer(struct timer_list *sprt_timer);
-extern void mod_timer(struct timer_list *sprt_timer, kutime_t expires);
+extern void setup_timer(struct timer_list *sptr_timer, void (*entry)(kuint32_t), kuint32_t data);
+extern void add_timer(struct timer_list *sptr_timer);
+extern void del_timer(struct timer_list *sptr_timer);
+extern kbool_t find_timer(struct timer_list *sptr_timer);
+extern void mod_timer(struct timer_list *sptr_timer, kutime_t expires);
 extern void do_timer_event(void);
 
 /*!< API functions */
@@ -243,27 +243,27 @@ static inline kutime_t nsecs_to_jiffies(const kuint64_t n)
 
 /*!
  * @brief   time_spec ---> ms
- * @param   sprt_tm
+ * @param   sptr_tm
  * @retval  ms
  * @note    none
  */
-static inline kutime_t time_spec_to_msecs(struct time_spec *sprt_tm)
+static inline kutime_t time_spec_to_msecs(struct time_spec *sptr_tm)
 {
-    return ((sprt_tm->tv_sec * 1000) + (sprt_tm->tv_nsec / 1000 / 1000));
+    return ((sptr_tm->tv_sec * 1000) + (sptr_tm->tv_nsec / 1000 / 1000));
 }
 
 /*!
  * @brief   ms ---> time_spec
- * @param   sprt_tm, m
- * @retval  sprt_tm
+ * @param   sptr_tm, m
+ * @retval  sptr_tm
  * @note    none
  */
-static inline struct time_spec *msecs_to_time_spec(struct time_spec *sprt_tm, const kuint32_t m)
+static inline struct time_spec *msecs_to_time_spec(struct time_spec *sptr_tm, const kuint32_t m)
 {
-    sprt_tm->tv_sec  = m / 1000;
-    sprt_tm->tv_nsec = (m - (sprt_tm->tv_sec * 1000)) * 1000 * 1000;
+    sptr_tm->tv_sec  = m / 1000;
+    sptr_tm->tv_nsec = (m - (sptr_tm->tv_sec * 1000)) * 1000 * 1000;
     
-    return sprt_tm;
+    return sptr_tm;
 }
 
 #ifdef __cplusplus

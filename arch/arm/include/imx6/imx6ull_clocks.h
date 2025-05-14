@@ -35,7 +35,7 @@
 #define IMX6UL_CCGR_ENABLE_ALL                      (0xffffffff)
 
 #define IMX6UL_CCM_CCGR_MASK                        (0x3U)
-#define IMX6UL_CCM_CCGR_BIT(offset)                 mrt_bit_nr(IMX6UL_CCM_CCGR_MASK, (offset) << 1)
+#define IMX6UL_CCM_CCGR_BIT(offset)                 mr_bit_nr(IMX6UL_CCM_CCGR_MASK, (offset) << 1)
 
 enum __ERT_IMX6UL_CCM_CCGRx
 {
@@ -492,16 +492,16 @@ typedef struct
 /*!< Register Property Base Address */
 /*!< Peripheral CCM base address */
 #define IMX6UL_CCM_ADDR_BASE                        (0x20C4000u)
-#define IMX6UL_CCM_CCGR0_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR0)
-#define IMX6UL_CCM_CCGR1_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR1)
-#define IMX6UL_CCM_CCGR2_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR2)
-#define IMX6UL_CCM_CCGR3_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR3)
-#define IMX6UL_CCM_CCGR4_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR4)
-#define IMX6UL_CCM_CCGR5_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR5)
-#define IMX6UL_CCM_CCGR6_ADDR_OFFSET 			    mrt_member_offset(srt_hal_imx_ccm_t, CCGR6)
+#define IMX6UL_CCM_CCGR0_ADDR_OFFSET 			    mr_member_offset(srt_hal_imx_ccm_t, CCGR0)
+#define IMX6UL_CCM_CCGR1_ADDR_OFFSET 			    mr_member_offset(srt_hal_imx_ccm_t, CCGR1)
+#define IMX6UL_CCM_CCGR2_ADDR_OFFSET 			    mr_member_offset(srt_hal_imx_ccm_t, CCGR2)
+#define IMX6UL_CCM_CCGR3_ADDR_OFFSET 			    mr_member_offset(srt_hal_imx_ccm_t, CCGR3)
+#define IMX6UL_CCM_CCGR4_ADDR_OFFSET 			    mr_member_offset(srt_hal_imx_ccm_t, CCGR4)
+#define IMX6UL_CCM_CCGR5_ADDR_OFFSET 			    mr_member_offset(srt_hal_imx_ccm_t, CCGR5)
+#define IMX6UL_CCM_CCGR6_ADDR_OFFSET 			    mr_member_offset(srt_hal_imx_ccm_t, CCGR6)
 #define IMX6UL_CCM_CCGR_CLOCK_ENTRY(x)              (IMX6UL_CCM_ADDR_BASE + IMX6UL_CCM_CCGR##x##_ADDR_OFFSET)
 
-#define mrt_imx_ccm_configure(port, data)   \
+#define mr_imx_ccm_configure(port, data)   \
 do {   \
     *((volatile kuaddr_t *)(IMX6UL_CCM_ADDR_BASE + IMX6UL_CCM_CCGR##port##_ADDR_OFFSET)) = (data);  \
 } while(0)
@@ -513,21 +513,21 @@ do {   \
 #define IMX6UL_CCM_PLL_PROPERTY_ENTRY()             (srt_hal_imx_ccm_pll_t  *)IMX6UL_CCM_ANALOG_BASE
 
 /*!< enable clk */
-#define mrt_imx_ccm_clk_enable(reg, ccgr)    \
+#define mr_imx_ccm_clk_enable(reg, ccgr)    \
 do {   \
-    urt_imx_ccgr_t ugrt_ccgr;   \
-	mrt_write_urt_data(&ugrt_ccgr, mrt_readl(ccgr));   \
-	mrt_write_urt_bits(&ugrt_ccgr, reg, IMX6UL_CCM_CCGR_ENABLE);  \
-	mrt_writel(mrt_trans_urt_data(&ugrt_ccgr), ccgr);  \
+    urt_imx_ccgr_t ugtr_ccgr;   \
+	mr_write_urt_data(&ugtr_ccgr, mr_readl(ccgr));   \
+	mr_write_urt_bits(&ugtr_ccgr, reg, IMX6UL_CCM_CCGR_ENABLE);  \
+	mr_writel(mr_trans_urt_data(&ugtr_ccgr), ccgr);  \
 } while(0)
 
 /*!< disable clk */
-#define mrt_imx_ccm_clk_disable(uprt_ccgr, reg, ccgr)    \
+#define mr_imx_ccm_clk_disable(reg, ccgr)    \
 do {   \
-    urt_imx_ccgr_t ugrt_ccgr;   \
-	mrt_write_urt_data(&ugrt_ccgr, mrt_readl(ccgr));   \
-	mrt_write_urt_bits(&ugrt_ccgr, reg, IMX6UL_CCM_CCGR_DISABLE);  \
-	mrt_writel(mrt_trans_urt_data(&ugrt_ccgr), ccgr);  \
+    urt_imx_ccgr_t ugtr_ccgr;   \
+	mr_write_urt_data(&ugtr_ccgr, mr_readl(ccgr));   \
+	mr_write_urt_bits(&ugtr_ccgr, reg, IMX6UL_CCM_CCGR_DISABLE);  \
+	mr_writel(mr_trans_urt_data(&ugtr_ccgr), ccgr);  \
 } while (0)
 
 /*!< ------------------------------------------------------------------------- */
@@ -542,10 +542,10 @@ static inline kuint64_t hal_imx_sysclk_freq_counter(void)
 }
 
 /*!< Define Sys_Clk by Macro Definition */
-#define mrt_imx_sysclk_freq_counter \
+#define mr_imx_sysclk_freq_counter \
     ((kuint64_t)(((CONFIG_XTAL_FREQ_CLK * IMX6UL_SYSCLK_DIVID_FAC2) / IMX6UL_SYSCLK_DIVID_FAC1) >> 1))
 
-#define IMX_SYSCLK_FREQ_COUNTER                     mrt_imx_sysclk_freq_counter
+#define IMX_SYSCLK_FREQ_COUNTER                     mr_imx_sysclk_freq_counter
 
 /* clks for device-tree */
 #define IMX6UL_CLK_DUMMY		                    0

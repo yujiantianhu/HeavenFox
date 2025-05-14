@@ -35,8 +35,8 @@
 #define AREA_FIRST_CODE				        0xA1
 #define BITS_FIRST_CODE				        0xA1
 
-#define FWK_FONT_SONG16_ADDR                (sprt_fwk_video_params->sgrt_hz16x16.base)
-#define FWK_FONT_SONG16_SIZE                (sprt_fwk_video_params->sgrt_hz16x16.size)
+#define FWK_FONT_SONG16_ADDR                (sptr_fwk_video_params->sgtc_hz16x16.base)
+#define FWK_FONT_SONG16_SIZE                (sptr_fwk_video_params->sgtc_hz16x16.size)
 
 enum __ERT_FWK_FONT_TYPE
 {
@@ -77,12 +77,12 @@ extern const kuint8_t g_font_ascii_song24[];
 /*!
  * @brief   get song16 memory
  * @param   none
- * @retval  &sgrt_hz16x16
+ * @retval  &sgtc_hz16x16
  * @note    none
  */
 static inline struct m_area *fwk_font_hz_song16_get(void)
 {
-    return sprt_fwk_video_params ? &sprt_fwk_video_params->sgrt_hz16x16 : mrt_nullptr;
+    return sptr_fwk_video_params ? &sptr_fwk_video_params->sgtc_hz16x16 : mr_nullptr;
 }
 
 #ifdef __cplusplus

@@ -25,17 +25,17 @@
  */
 void zynq7_led_init(void)
 {
-    XGpioPs sgrt_gpio;
-    XGpioPs_Config *sprt_cfg;
+    XGpioPs sgtc_gpio;
+    XGpioPs_Config *sptr_cfg;
 
-    sprt_cfg = XGpioPs_LookupConfig(XPAR_PS7_GPIO_0_DEVICE_ID);
-    if (!isValid(sprt_cfg))
+    sptr_cfg = XGpioPs_LookupConfig(XPAR_PS7_GPIO_0_DEVICE_ID);
+    if (!isValid(sptr_cfg))
         return;
 
-    XGpioPs_CfgInitialize(&sgrt_gpio, sprt_cfg, sprt_cfg->BaseAddr);
-    XGpioPs_SetDirectionPin(&sgrt_gpio, XGPIOPS_BANK_PIN(0, 0), XGPIOPS_PIN_DIR_OUTPUT);
-    XGpioPs_SetOutputEnablePin(&sgrt_gpio, XGPIOPS_BANK_PIN(0, 0), true);
-    XGpioPs_WritePin(&sgrt_gpio, XGPIOPS_BANK_PIN(0, 0), XGPIOPS_PIN_LEVEL_LOW);
+    XGpioPs_CfgInitialize(&sgtc_gpio, sptr_cfg, sptr_cfg->BaseAddr);
+    XGpioPs_SetDirectionPin(&sgtc_gpio, XGPIOPS_BANK_PIN(0, 0), XGPIOPS_PIN_DIR_OUTPUT);
+    XGpioPs_SetOutputEnablePin(&sgtc_gpio, XGPIOPS_BANK_PIN(0, 0), true);
+    XGpioPs_WritePin(&sgtc_gpio, XGPIOPS_BANK_PIN(0, 0), XGPIOPS_PIN_LEVEL_LOW);
 }
 
 /* end of file*/

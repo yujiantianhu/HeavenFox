@@ -35,7 +35,7 @@ enum __ERT_ERROR_CODE
 	ER_RETRY,
 	ER_PERMIT,
 	ER_NOMEM,
-	ER_UNVALID,
+	ER_INVALID,
 	ER_EMPTY,
 	ER_FULL,
 	ER_NULLPTR,
@@ -76,10 +76,10 @@ extern void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
 			   					kuint32_t __line, const kchar_t *__function)
 								__THROW __attribute__ ((__noreturn__));
 /*!< The defines */
-#define mrt_void()									((void)(0))
-#define mrt_assert(x)								((x) ? mrt_void() : deal_assert_fail(#x, __FILE__, __LINE__, __ASSERT_FUNCTION))
+#define mr_void()									((void)(0))
+#define mr_assert(x)								((x) ? mr_void() : deal_assert_fail(#x, __FILE__, __LINE__, __ASSERT_FUNCTION))
 
-#define mrt_jump_to(label, run_codes)	\
+#define mr_jump_to(label, run_codes)	\
 	do {	\
 		run_codes;	\
 		goto label;	\

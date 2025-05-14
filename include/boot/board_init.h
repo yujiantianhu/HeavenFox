@@ -80,14 +80,14 @@ extern kint32_t board_init_systick(void);
  */
 static inline srt_gd_t *board_get_gd(void)
 {
-    srt_gd_t *sprt_gd;
+    srt_gd_t *sptr_gd;
 
     __asm__ __volatile__ (
         " mov %0, r9    "
-        : "=&r"(sprt_gd)
+        : "=&r"(sptr_gd)
     );
 
-    return sprt_gd;
+    return sptr_gd;
 }
 
 /*!

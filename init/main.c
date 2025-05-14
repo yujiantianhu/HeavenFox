@@ -33,45 +33,45 @@
 #include <platform/net/fwk_netif.h>
 
 /*!< The globals */
-static struct tag_params *sprt_tag_params;
+static struct tag_params *sptr_tag_params;
 
 /*!< The defines */
-#define mrt_tag_params_get()    \
+#define mr_tag_params_get()    \
 ({    \
-    struct tag_params *sprt_param;  \
+    struct tag_params *sptr_param;  \
     __asm__ __volatile__ (  \
         " str r2, [%0]  \n\t"   \
         : \
-        : "r"(&sprt_param)   \
+        : "r"(&sptr_param)   \
         : "cc","memory" \
     );  \
-    sprt_param; \
+    sptr_param; \
 })
 
 /*!< API functions */
 /*!
  * @brief  populate params
- * @param  sprt_params
+ * @param  sptr_params
  * @retval none
  * @note   none
  */
-void setup_tag_params(struct tag_params *sprt_params)
+void setup_tag_params(struct tag_params *sptr_params)
 {
-    while (sprt_params->sgrt_hdr.type != (-1))
+    while (sptr_params->sgtc_hdr.type != (-1))
     {
-        switch (sprt_params->sgrt_hdr.type)
+        switch (sptr_params->sgtc_hdr.type)
         {
             case TAG_PARAM_VIDEO:
-                sprt_fwk_video_params = &sprt_params->u.sgrt_vdp;
+                sptr_fwk_video_params = &sptr_params->u.sgtc_vdp;
                 break;
             case TAG_PARAM_FDT:
-                sprt_fwk_fdt_params = &sprt_params->u.sgrt_fdt;
+                sptr_fwk_fdt_params = &sptr_params->u.sgtc_fdt;
                 break;
 
             default: break;
         }
 
-        sprt_params = TAG_PARAM_NEXT(sprt_params);
+        sptr_params = TAG_PARAM_NEXT(sptr_params);
     }
 }
 
@@ -81,12 +81,12 @@ void setup_tag_params(struct tag_params *sprt_params)
  * @retval none
  * @note   cpu param populate
  */
-void setup_machine(struct tag_params *sprt_params)
+void setup_machine(struct tag_params *sptr_params)
 {
-    setup_tag_params(sprt_params);
+    setup_tag_params(sptr_params);
 
     /*!< build device-tree */
-    setup_machine_fdt(sprt_fwk_fdt_params);
+    setup_machine_fdt(sptr_fwk_fdt_params);
 }
 
 /*!
@@ -97,7 +97,7 @@ void setup_machine(struct tag_params *sprt_params)
  */
 void start_kernel(void)
 {
-    sprt_tag_params = mrt_tag_params_get();
+    sptr_tag_params = mr_tag_params_get();
 
     /*!< initial memory pool */
     fwk_mempool_initial();
@@ -105,7 +105,7 @@ void start_kernel(void)
     print_info("\r\nStart kernel ...... \r\n");
 
     /*!< populate params from bootloader */
-    setup_machine(sprt_tag_params);
+    setup_machine(sptr_tag_params);
 
     /*!< board initcall */
     if (run_machine_initcall())
@@ -126,7 +126,7 @@ void start_kernel(void)
         goto fail;
 
     /*!< enable interrupt */
-    mrt_enable_cpu_irq();
+    mr_enable_cpu_irq();
 
 #if CONFIG_SCHDULE
     /*!< create thread */
@@ -143,7 +143,7 @@ void start_kernel(void)
 
 fail:
     print_info("start kernel failed!\r\n");
-    mrt_assert(false);
+    mr_assert(false);
 }
 
 /* end of file */

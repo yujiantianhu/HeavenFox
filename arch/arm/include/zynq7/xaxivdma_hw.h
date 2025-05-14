@@ -340,7 +340,7 @@ extern "C" {
 *
 ******************************************************************************/
 #define XAxiVdma_ReadReg(BaseAddress, RegOffset)             \
-    			mrt_readl((BaseAddress) + (RegOffset))
+    			mr_readl((BaseAddress) + (RegOffset))
 
 /*****************************************************************************/
 /**
@@ -359,7 +359,7 @@ extern "C" {
 *
 ******************************************************************************/
 #define XAxiVdma_WriteReg(BaseAddress, RegOffset, Data)          \
-    			mrt_writel((Data), (BaseAddress) + (RegOffset))
+    			mr_writel((Data), (BaseAddress) + (RegOffset))
 
 #ifdef __cplusplus
 }

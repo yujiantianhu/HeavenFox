@@ -54,13 +54,13 @@ struct mail
 {
     const kchar_t *src_name;
 
-    struct mail_msg *sprt_msg;
+    struct mail_msg *sptr_msg;
     kuint32_t num_msgs;
 
     kuint32_t status;
-    struct list_head sgrt_link;
+    struct list_head sgtc_link;
 
-    struct mutex_lock sgrt_lock;
+    struct mutex_lock sgtc_lock;
 };
 
 #define MAILBOX_NAME_LEN                        (32)
@@ -71,27 +71,27 @@ struct mailbox
     tid_t tid;
 
     kuint32_t num_mails;
-    struct list_head sgrt_mail;
+    struct list_head sgtc_mail;
 
-    struct list_head sgrt_link;
-    struct mutex_lock sgrt_lock;
+    struct list_head sgtc_link;
+    struct mutex_lock sgtc_lock;
 };
 
 /*!< The functions */
 extern struct mailbox *mailbox_find(const kchar_t *name);
-extern void mailbox_insert(struct mailbox *sprt_mb);
+extern void mailbox_insert(struct mailbox *sptr_mb);
 
-extern kint32_t mailbox_init(struct mailbox *sprt_mb, tid_t tid, const kchar_t *name);
-extern void mailbox_deinit(struct mailbox *sprt_mb);
+extern kint32_t mailbox_init(struct mailbox *sptr_mb, tid_t tid, const kchar_t *name);
+extern void mailbox_deinit(struct mailbox *sptr_mb);
 extern struct mailbox *mailbox_create(tid_t tid, const kchar_t *name);
-extern void mailbox_destroy(struct mailbox *sprt_mb);
+extern void mailbox_destroy(struct mailbox *sptr_mb);
 
-extern void mail_init(struct mailbox *sprt_mb, struct mail *sprt_mail);
-extern struct mail *mail_create(struct mailbox *sprt_mb);
-extern void mail_destroy(struct mailbox *sprt_mb, struct mail *sprt_mail);
-extern kint32_t mail_send(const kchar_t *mb_name, struct mail *sprt_mail);
-extern struct mail *mail_recv(struct mailbox *sprt_mb, kutime_t timeout);
-extern void mail_recv_finish(struct mail *sprt_mail);
+extern void mail_init(struct mailbox *sptr_mb, struct mail *sptr_mail);
+extern struct mail *mail_create(struct mailbox *sptr_mb);
+extern void mail_destroy(struct mailbox *sptr_mb, struct mail *sptr_mail);
+extern kint32_t mail_send(const kchar_t *mb_name, struct mail *sptr_mail);
+extern struct mail *mail_recv(struct mailbox *sptr_mb, kutime_t timeout);
+extern void mail_recv_finish(struct mail *sptr_mail);
 
 #ifdef __cplusplus
     }

@@ -43,108 +43,108 @@ void __weak initIRQ(void)
  * @retval  none
  * @note    none
  */
-void fwk_of_irq_init(const struct fwk_of_device_id *sprt_matches)
+void fwk_of_irq_init(const struct fwk_of_device_id *sptr_matches)
 {
     struct fwk_irq_intcs_desc
     {
-        struct list_head sgrt_link;
-        struct fwk_device_node *sprt_np;
-        struct fwk_device_node *sprt_parent;    
+        struct list_head sgtc_link;
+        struct fwk_device_node *sptr_np;
+        struct fwk_device_node *sptr_parent;    
     };
 
-    struct fwk_device_node *sprt_np;
-    struct fwk_of_property *sprt_prop;
-    struct fwk_irq_intcs_desc *sprt_desc, *sprt_desc_temp;
-    struct fwk_of_device_id *sprt_match;
-    struct fwk_device_node *parent = mrt_nullptr;
+    struct fwk_device_node *sptr_np;
+    struct fwk_of_property *sptr_prop;
+    struct fwk_irq_intcs_desc *sptr_desc, *sptr_desc_temp;
+    struct fwk_of_device_id *sptr_match;
+    struct fwk_device_node *parent = mr_nullptr;
     kbool_t of_status;
     kint32_t retval;
 
-    DECLARE_LIST_HEAD(sgrt_intc_desc_list);
-    DECLARE_LIST_HEAD(sgrt_intc_parent_list);
+    DECLARE_LIST_HEAD(sgtc_intc_desc_list);
+    DECLARE_LIST_HEAD(sgtc_intc_parent_list);
 
     /*!< for each node */
-    foreach_fwk_of_dt_node(sprt_np, mrt_nullptr)
+    foreach_fwk_of_dt_node(sptr_np, mr_nullptr)
     {
-        sprt_prop = fwk_of_find_property(sprt_np, "interrupt-controller", mrt_nullptr);
-        of_status = fwk_of_device_is_avaliable(sprt_np);
+        sptr_prop = fwk_of_find_property(sptr_np, "interrupt-controller", mr_nullptr);
+        of_status = fwk_of_device_is_avaliable(sptr_np);
 
-        if ((!isValid(sprt_prop)) || (!of_status))
+        if ((!isValid(sptr_prop)) || (!of_status))
             continue;
 
-        /*!< if is not matched with "sprt_matches" */
-        if (!fwk_of_node_try_matches(sprt_np, sprt_matches, mrt_nullptr))
+        /*!< if is not matched with "sptr_matches" */
+        if (!fwk_of_node_try_matches(sptr_np, sptr_matches, mr_nullptr))
             continue;
 
         /*!< matched sucessfully */
-        sprt_desc = (struct fwk_irq_intcs_desc *)kzalloc(sizeof(struct fwk_irq_intcs_desc), GFP_KERNEL);
-        if (!isValid(sprt_desc))
+        sptr_desc = (struct fwk_irq_intcs_desc *)kzalloc(sizeof(struct fwk_irq_intcs_desc), GFP_KERNEL);
+        if (!isValid(sptr_desc))
             goto fail;
 
-        sprt_desc->sprt_np = sprt_np;
+        sptr_desc->sptr_np = sptr_np;
 
         /*!< for intc, it's irq parent is null; for gpc, it's parent is intc */
-        sprt_desc->sprt_parent = fwk_of_irq_parent(sprt_np);
-        if (sprt_np == sprt_desc->sprt_parent)
-            sprt_desc->sprt_parent = mrt_nullptr;
+        sptr_desc->sptr_parent = fwk_of_irq_parent(sptr_np);
+        if (sptr_np == sptr_desc->sptr_parent)
+            sptr_desc->sptr_parent = mr_nullptr;
 
-        list_head_add_tail(&sgrt_intc_desc_list, &sprt_desc->sgrt_link);
+        list_head_add_tail(&sgtc_intc_desc_list, &sptr_desc->sgtc_link);
     }
 
-    while (!mrt_list_head_empty(&sgrt_intc_desc_list))
+    while (!mr_list_head_empty(&sgtc_intc_desc_list))
     {
-        foreach_list_next_entry_safe(sprt_desc, sprt_desc_temp, &sgrt_intc_desc_list, sgrt_link)
+        foreach_list_next_entry_safe(sptr_desc, sptr_desc_temp, &sgtc_intc_desc_list, sgtc_link)
         {
-            sprt_match = fwk_of_match_node(sprt_matches, sprt_desc->sprt_np);
+            sptr_match = fwk_of_match_node(sptr_matches, sptr_desc->sptr_np);
 
             /* if equal, skip it; this way, the list will not be empty for the time being */
-            if (parent != sprt_desc->sprt_parent)
+            if (parent != sptr_desc->sptr_parent)
                 continue;
 
-            list_head_del(&sprt_desc->sgrt_link);
+            list_head_del(&sptr_desc->sgtc_link);
 
-            if ((!sprt_match) || (!sprt_match->data))
+            if ((!sptr_match) || (!sptr_match->data))
             {
-                kfree(sprt_desc);
+                kfree(sptr_desc);
                 continue;
             }
 
             /*!< do intc initial */
-            retval = ((func_fwk_irq_init_cb_t)sprt_match->data)(sprt_desc->sprt_np, sprt_desc->sprt_parent);
+            retval = ((func_fwk_irq_init_cb_t)sptr_match->data)(sptr_desc->sptr_np, sptr_desc->sptr_parent);
             if (retval < 0)
             {
-                print_err("Initial IRQ Controller: %s failed!\r\n", sprt_match->compatible);
-                kfree(sprt_desc);
+                print_err("Initial IRQ Controller: %s failed!\r\n", sptr_match->compatible);
+                kfree(sptr_desc);
                 continue;
             }
 
-            list_head_add_tail(&sgrt_intc_parent_list, &sprt_desc->sgrt_link);
+            list_head_add_tail(&sgtc_intc_parent_list, &sptr_desc->sgtc_link);
         }
 
-        sprt_desc = mrt_list_first_valid_entry(&sgrt_intc_parent_list, typeof(*sprt_desc), sgrt_link);
-        if (!isValid(sprt_desc))
+        sptr_desc = mr_list_first_valid_entry(&sgtc_intc_parent_list, typeof(*sptr_desc), sgtc_link);
+        if (!isValid(sptr_desc))
         {
             print_err("List is already empty, can not get any desc\r\n");
             break;
         }
 
-        parent = sprt_desc->sprt_np;
+        parent = sptr_desc->sptr_np;
 
-        list_head_del(&sprt_desc->sgrt_link);
-        kfree(sprt_desc);
+        list_head_del(&sptr_desc->sgtc_link);
+        kfree(sptr_desc);
     }
 
-    foreach_list_next_entry_safe(sprt_desc, sprt_desc_temp, &sgrt_intc_parent_list, sgrt_link)
+    foreach_list_next_entry_safe(sptr_desc, sptr_desc_temp, &sgtc_intc_parent_list, sgtc_link)
     {
-        list_head_del(&sprt_desc->sgrt_link);
-        kfree(sprt_desc);
+        list_head_del(&sptr_desc->sgtc_link);
+        kfree(sptr_desc);
     }
 
 fail:
-    foreach_list_next_entry_safe(sprt_desc, sprt_desc_temp, &sgrt_intc_desc_list, sgrt_link)
+    foreach_list_next_entry_safe(sptr_desc, sptr_desc_temp, &sgtc_intc_desc_list, sgtc_link)
     {
-        list_head_del(&sprt_desc->sgrt_link);
-        kfree(sprt_desc);
+        list_head_del(&sptr_desc->sgtc_link);
+        kfree(sptr_desc);
     }
 }
 

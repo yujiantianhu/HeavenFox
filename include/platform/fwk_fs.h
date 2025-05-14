@@ -23,18 +23,18 @@
 #include <platform/fwk_uaccess.h>
 
 /*!< The defines */
-#define RET_INODE_FROM_FILE(file)								((file)->sprt_inode)
+#define RET_INODE_FROM_FILE(file)								((file)->sptr_inode)
 #define RET_PRIVATE_DRV_DATA(file)								((file)->private_data)
 
 struct fwk_file
 {
 	kuint32_t mode;
 
-	struct fwk_inode *sprt_inode;
-	struct fwk_file_oprts *sprt_foprts;
+	struct fwk_inode *sptr_inode;
+	struct fwk_file_oprts *sptr_foprts;
 
 	/*!< All open files form a list */
-	struct list_head sgrt_list;
+	struct list_head sgtc_list;
 
 	void *private_data;
 };
@@ -53,7 +53,7 @@ struct fwk_file_oprts
 
 /*!< The functions */
 extern struct fwk_file *fwk_do_filp_open(kchar_t *name, kuint32_t mode);
-extern void fwk_do_filp_close(struct fwk_file *sprt_file);
+extern void fwk_do_filp_close(struct fwk_file *sptr_file);
 
 #ifdef __cplusplus
     }

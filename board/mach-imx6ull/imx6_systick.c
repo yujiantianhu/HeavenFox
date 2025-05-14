@@ -26,7 +26,7 @@
 #define IMX_SYSTICK_PORT_ENTRY()                        	IMX6UL_GPT_PROPERTY_ENTRY(1)
 
 /* The globals */
-static const struct fwk_of_device_id sgrt_imx_systick_ids[] =
+static const struct fwk_of_device_id sgtc_imx_systick_ids[] =
 {
 	{ .compatible = "fsl,imx6ul-gpt" },
 	{},
@@ -44,36 +44,36 @@ irq_return_t imx6_systick_isr(void *ptrDev);
  */
 void imx6ull_systick_init(void)
 {
-	struct fwk_device_node *sprt_node;
-	srt_hal_imx_gptimer_t *sprt_tick;
+	struct fwk_device_node *sptr_node;
+	srt_hal_imx_gptimer_t *sptr_tick;
 	kint32_t irq;
 	kint32_t retval;
 
-	sprt_node = fwk_of_find_matching_node_and_match(mrt_nullptr, sgrt_imx_systick_ids, mrt_nullptr);
-	if (!isValid(sprt_node))
+	sptr_node = fwk_of_find_matching_node_and_match(mr_nullptr, sgtc_imx_systick_ids, mr_nullptr);
+	if (!isValid(sptr_node))
 		return;
 
-	irq = fwk_of_irq_get(sprt_node, 0);
+	irq = fwk_of_irq_get(sptr_node, 0);
 	if (irq < 0)
 		return;
 
-	sprt_tick = IMX_SYSTICK_PORT_ENTRY();
+	sptr_tick = IMX_SYSTICK_PORT_ENTRY();
 
 	/*!< enable gpt1 clock */
-  	mrt_imx_ccm_clk_enable(IMX_SYSTICK_CLK_CG_REG, IMX_SYSTICK_CLK_SELECT);
+  	mr_imx_ccm_clk_enable(IMX_SYSTICK_CLK_CG_REG, IMX_SYSTICK_CLK_SELECT);
 
 	/*!< 
 	 * EN: bit0, GPT Enable
 	 * Disable GPT by setting EN=0 in GPT_CR register
 	 */
-	mrt_clrbitl(mrt_bit(0U), &sprt_tick->CR);
+	mr_clrbitl(mr_bit(0U), &sptr_tick->CR);
 
 	/*!< 
 	 * SWR: bit15, Software reset of the GPT module. It is a self-clearing bit
 	 * Assert the SWR bit in GPT_CR register 
 	 */
-	mrt_setbitl(mrt_bit(15U), &sprt_tick->CR);
-	while (mrt_isBitSetl(mrt_bit(15U), &sprt_tick->CR));
+	mr_setbitl(mr_bit(15U), &sptr_tick->CR);
+	while (mr_isBitSetl(mr_bit(15U), &sptr_tick->CR));
 
 	/*!< 
 	 * FRR: bit9, Free-Run or Restart mode
@@ -83,7 +83,7 @@ void imx6ull_systick_init(void)
 	 *	• In Free-Run mode (bit9 is 1), after a compare event, the counter continues counting until 0xFFFFFFFF and
 	 *	  then rolls over to 0
 	 */
-	mrt_clrbitl(mrt_bit(9U), &sprt_tick->CR);
+	mr_clrbitl(mr_bit(9U), &sptr_tick->CR);
 
 	/*!< 
 	 * ROVIE: bit5, Rollover Interrupt Enable
@@ -92,11 +92,11 @@ void imx6ull_systick_init(void)
 	 * 
 	 * OF1IE ~ OF3IE: bit0 ~ bit3
 	 */
-	mrt_resetl(&sprt_tick->IR);
+	mr_resetl(&sptr_tick->IR);
 
-	retval = fwk_request_irq(irq, imx6_systick_isr, 0, "imx6-systick", sprt_tick);
+	retval = fwk_request_irq(irq, imx6_systick_isr, 0, "imx6-systick", sptr_tick);
 	if (!retval)
-		mrt_setbitl(mrt_bit(0U), &sprt_tick->IR);
+		mr_setbitl(mr_bit(0U), &sptr_tick->IR);
 
 	/*!<
 	 * CLKSRC: bit[8:6], Clock Source select.
@@ -115,8 +115,8 @@ void imx6ull_systick_init(void)
 	 * 
 	 * ipg_clk = 66MHz
 	 */
-	mrt_clrbitl(mrt_bit(6U) | mrt_bit(7U) | mrt_bit(8U), &sprt_tick->CR);
-	mrt_setbitl(mrt_bit(6U), &sprt_tick->CR);
+	mr_clrbitl(mr_bit(6U) | mr_bit(7U) | mr_bit(8U), &sptr_tick->CR);
+	mr_setbitl(mr_bit(6U), &sptr_tick->CR);
 
 	/*!<
 	 * PRESCALER: bit[11:0], Prescaler bits
@@ -126,11 +126,11 @@ void imx6ull_systick_init(void)
 	 * Peripheral clock(ipg_clk) = 66MHz, if divider = 66, GPT1 Frequency = 1MHz;
 	 * So Timer Period = 1us
 	 */
-	mrt_clrbitl(0xfffU, &sprt_tick->PR);
-	mrt_setbitl(66 - 1, &sprt_tick->PR);
+	mr_clrbitl(0xfffU, &sptr_tick->PR);
+	mr_setbitl(66 - 1, &sptr_tick->PR);
 
 	/*!< compare value: 1000us = 1ms; 1000000us = 1000ms = 1s */
-	mrt_writel(1000000 / TICK_HZ, &sprt_tick->OCR[0]);
+	mr_writel(1000000 / TICK_HZ, &sptr_tick->OCR[0]);
 
 	/*!< 
 	 * ROV: bit5, Rollover Flag
@@ -140,7 +140,7 @@ void imx6ull_systick_init(void)
 	 * 
 	 * Clear GPT status register (GPT_SR) (i.e., w1c) 
 	 */
-	mrt_resetl(&sprt_tick->SR);
+	mr_resetl(&sptr_tick->SR);
 
 	/*!<
 	 * ENMOD: bit1, GPT Enable mode
@@ -155,12 +155,12 @@ void imx6ull_systick_init(void)
 	 *
 	 * Set ENMOD=1 in GPT_CR register, to bring GPT counter to 0x00000000
 	 */
-	mrt_setbitl(mrt_bit(1U), &sprt_tick->CR);
+	mr_setbitl(mr_bit(1U), &sptr_tick->CR);
 
 	/*!< EN: bit0, GPT Enable */
-	mrt_setbitl(mrt_bit(0U), &sprt_tick->CR);
+	mr_setbitl(mr_bit(0U), &sptr_tick->CR);
 
-	ptr_systick_counter = (kutime_t *)&sprt_tick->CNT;
+	ptr_systick_counter = (kutime_t *)&sptr_tick->CNT;
 }
 
 /*!
@@ -171,16 +171,16 @@ void imx6ull_systick_init(void)
  */
 irq_return_t imx6_systick_isr(void *ptrDev)
 {
-	srt_hal_imx_gptimer_t *sprt_tick = (srt_hal_imx_gptimer_t *)ptrDev;
+	srt_hal_imx_gptimer_t *sptr_tick = (srt_hal_imx_gptimer_t *)ptrDev;
 
-	if (mrt_isBitSetl(mrt_bit(0), &sprt_tick->SR))
+	if (mr_isBitSetl(mr_bit(0), &sptr_tick->SR))
 	{
 		/*!< reset jiffies when counter over */
 		get_time_counter();
 		do_timer_event();
 
 		/*!< set 1 to clear compare status */
-		mrt_setbitl(mrt_bit(0), &sprt_tick->SR);
+		mr_setbitl(mr_bit(0), &sptr_tick->SR);
 	}
 
 	return ER_NORMAL;

@@ -34,32 +34,32 @@
  */
 void imx6ull_led_init(void)
 {
-	srt_hal_imx_pin_t  sgrt_Port;
-	urt_imx_io_ctl_pad_t ugrt_ioPad;
-	srt_hal_imx_gpio_t *sprt_Light;
+	srt_hal_imx_pin_t  sgtc_Port;
+	urt_imx_io_ctl_pad_t ugtr_ioPad;
+	srt_hal_imx_gpio_t *sptr_Light;
 
-	sprt_Light = IMX_LIGHT_PORT_ENTRY();
+	sptr_Light = IMX_LIGHT_PORT_ENTRY();
 
 	/*!< enable gpio1 clock */
-    mrt_imx_ccm_clk_enable(IMX_LIGHT_CLK_CG_REG, IMX_LIGHT_CLK_SELECT);
+    mr_imx_ccm_clk_enable(IMX_LIGHT_CLK_CG_REG, IMX_LIGHT_CLK_SELECT);
 
 	/*!< set Gpio Peripheral */
-	mrt_write_urt_data(&ugrt_ioPad, 
+	mr_write_urt_data(&ugtr_ioPad, 
 						IMX6UL_IO_CTL_PAD_PKE_BIT(IMX6UL_IO_CTL_PAD_PKE_ENABLE)  |
 						IMX6UL_IO_CTL_PAD_PUS_BIT(IMX6UL_IO_CTL_PAD_PUS_100K_UP) |
 						IMX6UL_IO_CTL_PAD_SPEED_BIT(IMX6UL_IO_CTL_PAD_SPEED_100MHZ) |
 						IMX6UL_IO_CTL_PAD_DSE_BIT(IMX6UL_IO_CTL_PAD_DSE_RDIV(6)));
-	hal_imx_pin_attribute_init(&sgrt_Port, IMX6UL_PIN_ADDR_BASE, 
-						IMX_LIGHT_MUX_SELECT, mrt_trans_urt_data(&ugrt_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
+	hal_imx_pin_attribute_init(&sgtc_Port, IMX6UL_PIN_ADDR_BASE, 
+						IMX_LIGHT_MUX_SELECT, mr_trans_urt_data(&ugtr_ioPad), IMX6UL_PIN_MUX_FUNC_DISABLE);
 
-	hal_imx_pin_mux_configure(&sgrt_Port);
-	hal_imx_pin_pad_configure(&sgrt_Port);
+	hal_imx_pin_mux_configure(&sgtc_Port);
+	hal_imx_pin_pad_configure(&sgtc_Port);
 
 	/*!< set Gpio Pin Direction Output */
-	mrt_setbitl(IMX_LIGHT_PIN_BIT, &sprt_Light->GDIR);
+	mr_setbitl(IMX_LIGHT_PIN_BIT, &sptr_Light->GDIR);
 
 	/*!< set Gpio Default Level */
-	mrt_clrbitl(IMX_LIGHT_PIN_BIT, &sprt_Light->DR);
+	mr_clrbitl(IMX_LIGHT_PIN_BIT, &sptr_Light->DR);
 }
 
 /* end of file*/

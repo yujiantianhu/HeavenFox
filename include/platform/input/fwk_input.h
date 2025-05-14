@@ -190,16 +190,16 @@ enum __ERT_FWK_INPUT_ABS_CODE
 
 /*!< API functions */
 /*!
- * @brief   fill sprt_event
- * @param   sprt_event, type, code, and value
+ * @brief   fill sptr_event
+ * @param   sptr_event, type, code, and value
  * @retval  none
  * @note    none
  */
-static inline void fwk_input_set_event(struct fwk_input_event *sprt_event, kuint32_t type, kuint32_t code, kint32_t value)
+static inline void fwk_input_set_event(struct fwk_input_event *sptr_event, kuint32_t type, kuint32_t code, kint32_t value)
 {
-	sprt_event->type = type;
-	sprt_event->code = code;
-	sprt_event->value = value;
+	sptr_event->type = type;
+	sptr_event->code = code;
+	sptr_event->value = value;
 }
 
 #ifdef __cplusplus

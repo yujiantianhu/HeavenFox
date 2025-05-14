@@ -27,7 +27,7 @@ struct mutex_lock;
 
 enum __ERT_FWK_CLK_FLAG
 {
-	NR_FWK_CLK_IS_DYNAMIC = mrt_bit(0),
+	NR_FWK_CLK_IS_DYNAMIC = mr_bit(0),
 };
 
 typedef struct fwk_clk
@@ -37,8 +37,8 @@ typedef struct fwk_clk
 	kuint32_t max_rate;
 	kuint32_t min_rate;
 
-	struct fwk_clk_core *sprt_core;
-	struct list_head sgrt_link;
+	struct fwk_clk_core *sptr_core;
+	struct list_head sgtc_link;
 
 	kuint8_t flags;
 
@@ -47,13 +47,13 @@ typedef struct fwk_clk
 typedef struct fwk_clk_core
 {
 	const kchar_t	*name;
-	const struct fwk_clk_ops *sprt_ops;
-	struct fwk_clk_hw *sprt_hw;
+	const struct fwk_clk_ops *sptr_ops;
+	struct fwk_clk_hw *sptr_hw;
 
-	struct fwk_clk_core	*sprt_parent;
+	struct fwk_clk_core	*sptr_parent;
 
 	const kchar_t	**parent_names;
-	struct fwk_clk_core	**sprt_parents;
+	struct fwk_clk_core	**sptr_parents;
 
 	kuint32_t rate;
 
@@ -61,15 +61,15 @@ typedef struct fwk_clk_core
 	kuint32_t enable_count;
 	kuint32_t prepare_count;
 
-	struct list_head sgrt_clks;
-	struct mutex_lock sgrt_mutex;
+	struct list_head sgtc_clks;
+	struct mutex_lock sgtc_mutex;
 
 } srt_fwk_clk_core_t;
 
 typedef struct fwk_clk_init_data 
 {
 	const kchar_t *name;
-	const struct fwk_clk_ops *sprt_ops;
+	const struct fwk_clk_ops *sptr_ops;
 
 	const kchar_t **parent_names;
 	kuint8_t num_parents;
@@ -80,64 +80,64 @@ typedef struct fwk_clk_init_data
 
 typedef struct fwk_clk_hw
 {
-	struct fwk_clk_core *sprt_core;
-	struct fwk_clk *sprt_clk;
-	const struct fwk_clk_init_data *sprt_init;
+	struct fwk_clk_core *sptr_core;
+	struct fwk_clk *sptr_clk;
+	const struct fwk_clk_init_data *sptr_init;
 
 } srt_fwk_clk_hw_t;
 
 typedef struct fwk_clk_ops
 {
-	kint32_t	(*prepare) (struct fwk_clk_hw *sprt_hw);
-	void		(*unprepare) (struct fwk_clk_hw *sprt_hw);
-	kint32_t	(*is_prepared) (struct fwk_clk_hw *sprt_hw);
-	void		(*unprepare_unused) (struct fwk_clk_hw *sprt_hw);
-	kint32_t	(*enable) (struct fwk_clk_hw *sprt_hw);
-	void		(*disable) (struct fwk_clk_hw *sprt_hw);
-	kint32_t	(*is_enabled) (struct fwk_clk_hw *sprt_hw);
-	void		(*disable_unused) (struct fwk_clk_hw *sprt_hw);
+	kint32_t	(*prepare) (struct fwk_clk_hw *sptr_hw);
+	void		(*unprepare) (struct fwk_clk_hw *sptr_hw);
+	kint32_t	(*is_prepared) (struct fwk_clk_hw *sptr_hw);
+	void		(*unprepare_unused) (struct fwk_clk_hw *sptr_hw);
+	kint32_t	(*enable) (struct fwk_clk_hw *sptr_hw);
+	void		(*disable) (struct fwk_clk_hw *sptr_hw);
+	kint32_t	(*is_enabled) (struct fwk_clk_hw *sptr_hw);
+	void		(*disable_unused) (struct fwk_clk_hw *sptr_hw);
 
-	kint32_t	(*round_rate) (struct fwk_clk_hw *sprt_hw, kuint32_t rate, kuint32_t *parent_rate);
+	kint32_t	(*round_rate) (struct fwk_clk_hw *sptr_hw, kuint32_t rate, kuint32_t *parent_rate);
 
-	kint32_t	(*set_parent) (struct fwk_clk_hw *sprt_hw, kuint8_t index);
-	kuint8_t	(*get_parent) (struct fwk_clk_hw *sprt_hw);
-	kint32_t	(*set_rate) (struct fwk_clk_hw *sprt_hw, kuint32_t rate, kuint32_t parent_rate);
+	kint32_t	(*set_parent) (struct fwk_clk_hw *sptr_hw, kuint8_t index);
+	kuint8_t	(*get_parent) (struct fwk_clk_hw *sptr_hw);
+	kint32_t	(*set_rate) (struct fwk_clk_hw *sptr_hw, kuint32_t rate, kuint32_t parent_rate);
 
-	kint32_t	(*get_phase) (struct fwk_clk_hw *sprt_hw);
-	kint32_t	(*set_phase) (struct fwk_clk_hw *sprt_hw, kint32_t degrees);
-	void		(*init) (struct fwk_clk_hw *sprt_hw);
+	kint32_t	(*get_phase) (struct fwk_clk_hw *sptr_hw);
+	kint32_t	(*set_phase) (struct fwk_clk_hw *sptr_hw, kint32_t degrees);
+	void		(*init) (struct fwk_clk_hw *sptr_hw);
 
 } srt_fwk_clk_ops_t;
 
 /*!< The functions */
-extern struct fwk_clk *fwk_clk_register(struct fwk_device *sprt_dev, struct fwk_clk_hw *sprt_hw);
-extern void fwk_clk_unregister(struct fwk_clk *sprt_clk);
+extern struct fwk_clk *fwk_clk_register(struct fwk_device *sptr_dev, struct fwk_clk_hw *sptr_hw);
+extern void fwk_clk_unregister(struct fwk_clk *sptr_clk);
 
-extern struct fwk_clk *fwk_clk_config(struct fwk_clk *sprt_clk, 
-									struct fwk_clk_hw *sprt_hw, const kchar_t *dev_id, const kchar_t *con_id);
-extern struct fwk_clk *fwk_create_clk(struct fwk_clk_hw *sprt_hw, const kchar_t *dev_id, const kchar_t *con_id);
-extern kint32_t fwk_init_clk(struct fwk_device *sprt_dev, struct fwk_clk *sprt_clk);
+extern struct fwk_clk *fwk_clk_config(struct fwk_clk *sptr_clk, 
+									struct fwk_clk_hw *sptr_hw, const kchar_t *dev_id, const kchar_t *con_id);
+extern struct fwk_clk *fwk_create_clk(struct fwk_clk_hw *sptr_hw, const kchar_t *dev_id, const kchar_t *con_id);
+extern kint32_t fwk_init_clk(struct fwk_device *sptr_dev, struct fwk_clk *sptr_clk);
 
-extern struct fwk_clk *fwk_clk_get(struct fwk_device *sprt_dev, const kchar_t *name);
-extern void fwk_clk_put(struct fwk_clk *sprt_clk);
-extern void fwk_clk_enable(struct fwk_clk *sprt_clk);
-extern void fwk_clk_disable(struct fwk_clk *sprt_clk);
-extern void fwk_clk_prepare(struct fwk_clk *sprt_clk);
-extern void fwk_clk_unprepare(struct fwk_clk *sprt_clk);
-extern kbool_t fwk_clk_is_enabled(struct fwk_clk *sprt_clk);
-extern void fwk_clk_prepare_enable(struct fwk_clk *sprt_clk);
-extern void fwk_clk_disable_unprepare(struct fwk_clk *sprt_clk);
+extern struct fwk_clk *fwk_clk_get(struct fwk_device *sptr_dev, const kchar_t *name);
+extern void fwk_clk_put(struct fwk_clk *sptr_clk);
+extern void fwk_clk_enable(struct fwk_clk *sptr_clk);
+extern void fwk_clk_disable(struct fwk_clk *sptr_clk);
+extern void fwk_clk_prepare(struct fwk_clk *sptr_clk);
+extern void fwk_clk_unprepare(struct fwk_clk *sptr_clk);
+extern kbool_t fwk_clk_is_enabled(struct fwk_clk *sptr_clk);
+extern void fwk_clk_prepare_enable(struct fwk_clk *sptr_clk);
+extern void fwk_clk_disable_unprepare(struct fwk_clk *sptr_clk);
 
 /*!< API functions */
 /*!
- * @brief   sprt_clk ---> fwk_clk_hw
- * @param   sprt_clk
- * @retval  sprt_hw
+ * @brief   sptr_clk ---> fwk_clk_hw
+ * @param   sptr_clk
+ * @retval  sptr_hw
  * @note    none
  */
-static inline struct fwk_clk_hw *fwk_clk_to_hw(struct fwk_clk *sprt_clk)
+static inline struct fwk_clk_hw *fwk_clk_to_hw(struct fwk_clk *sptr_clk)
 {
-    return sprt_clk ? sprt_clk->sprt_core->sprt_hw : mrt_nullptr;
+    return sptr_clk ? sptr_clk->sptr_core->sptr_hw : mr_nullptr;
 }
 
 #ifdef __cplusplus

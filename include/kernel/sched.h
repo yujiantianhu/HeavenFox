@@ -43,64 +43,64 @@ struct thread
 
     /*!< thread entry */
     void *(*start_routine) (void *);
-    struct thread_attr *sprt_attr;
+    struct thread_attr *sptr_attr;
     void *ptr_args;
 
     /*!< thread list (to ready/suspend/sleep list) */
-    struct list_head sgrt_link;
+    struct list_head sgtc_link;
 
-    /*!< thread time slice (period = sprt_attr->sgrt_param.mrt_sched_init_budget) */
+    /*!< thread time slice (period = sptr_attr->sgtc_param.mr_sched_init_budget) */
     kutime_t expires;
 
     /*!< refer to "__ERT_THREAD_SIGNALS" */
     kuint32_t flags;
 
-    struct spin_lock sgrt_lock;
-    struct mailbox *sprt_mb;
+    struct spin_lock sgtc_lock;
+    struct mailbox *sptr_mb;
 };
 
-#define mrt_thread_set_flags(signal, sprt_tsk)	\
+#define mr_thread_set_flags(signal, sptr_tsk)	\
     do {	\
-        sprt_tsk->flags |= mrt_bit(signal);	\
+        sptr_tsk->flags |= mr_bit(signal);	\
     } while (0)
 
-#define mrt_thread_clr_flags(signal, sprt_tsk)	\
+#define mr_thread_clr_flags(signal, sptr_tsk)	\
     do {	\
-        sprt_tsk->flags &= ~mrt_bit(signal);	\
+        sptr_tsk->flags &= ~mr_bit(signal);	\
     } while (0)
 
-#define mrt_thread_is_flags(signal, sprt_tsk)						(!!((sprt_tsk)->flags & mrt_bit(signal)))
+#define mr_thread_is_flags(signal, sptr_tsk)						(!!((sptr_tsk)->flags & mr_bit(signal)))
 
 /*!< thread manage table */
 struct scheduler_table
 {
     kint32_t max_tidarr;											/*!< = THREAD_MAX_NUM */
-    kint32_t max_tids; 												/*!< = THREAD_MAX_NUM + count of sprt_tids */
+    kint32_t max_tids; 												/*!< = THREAD_MAX_NUM + count of sptr_tids */
     kint32_t max_tidset;											/*!< the max tid */
-    kint32_t ref_tidarr; 											/*!< number of allocated descriptors in sprt_tid_array */
+    kint32_t ref_tidarr; 											/*!< number of allocated descriptors in sptr_tid_array */
 
     struct {
         kutype_t cnt_out;											/*!< when sched_cnt is over (~0), cnt_out++ */
         kutype_t sched_cnt;											/*!< schedule counter, max is ~0 */
-    } sgrt_cnt;
+    } sgtc_cnt;
 
-    struct list_head sgrt_ready;									/*!< ready list head (manage all ready thread) */
-    struct list_head sgrt_suspend;									/*!< suspend list head (manage all suspend thread) */
-    struct list_head sgrt_sleep;									/*!< sleep list head (manage all sleepy thread) */
+    struct list_head sgtc_ready;									/*!< ready list head (manage all ready thread) */
+    struct list_head sgtc_suspend;									/*!< suspend list head (manage all suspend thread) */
+    struct list_head sgtc_sleep;									/*!< sleep list head (manage all sleepy thread) */
 
-    struct thread *sprt_work;									    /*!< current thread (status is running) */
+    struct thread *sptr_work;									    /*!< current thread (status is running) */
 
-    struct thread **sprt_tids;									    /*!< if sprt_tid_array is up to max, new thread form mempool */
-    struct thread *sprt_tid_array[THREAD_MAX_NUM];		            /*!< thread maximum, tid = 0 ~ THREAD_MAX_NUM */
+    struct thread **sptr_tids;									    /*!< if sptr_tid_array is up to max, new thread form mempool */
+    struct thread *sptr_tid_array[THREAD_MAX_NUM];		            /*!< thread maximum, tid = 0 ~ THREAD_MAX_NUM */
 
-    struct spin_lock sgrt_lock;
+    struct spin_lock sgtc_lock;
 
 #define __THREAD_MAX_STATS					((kutype_t)(~0))
-#define __THREAD_HANDLER(ptr, tid)			((ptr)->sprt_tid_array[(tid)])
-#define __THREAD_RUNNING_LIST(ptr)			((ptr)->sprt_work)
-#define __THREAD_READY_LIST(ptr)			(&((ptr)->sgrt_ready))
-#define __THREAD_SUSPEND_LIST(ptr)			(&((ptr)->sgrt_suspend))
-#define __THREAD_SLEEP_LIST(ptr)			(&((ptr)->sgrt_sleep))
+#define __THREAD_HANDLER(ptr, tid)			((ptr)->sptr_tid_array[(tid)])
+#define __THREAD_RUNNING_LIST(ptr)			((ptr)->sptr_work)
+#define __THREAD_READY_LIST(ptr)			(&((ptr)->sgtc_ready))
+#define __THREAD_SUSPEND_LIST(ptr)			(&((ptr)->sgtc_suspend))
+#define __THREAD_SLEEP_LIST(ptr)			(&((ptr)->sgtc_sleep))
 };
 
 /*!< The globals */
@@ -111,7 +111,7 @@ extern struct list_head *get_ready_thread_table(void);
 extern struct thread *get_thread_handle(tid_t tid);
 extern void thread_set_name(tid_t tid, const kchar_t *name);
 extern void thread_set_self_name(const kchar_t *name);
-extern void thread_set_state(struct thread *sprt_thread, kuint32_t state);
+extern void thread_set_state(struct thread *sptr_thread, kuint32_t state);
 extern struct spin_lock *scheduler_lock(void);
 extern tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count);
 extern kuint64_t scheduler_stats_get(void);
@@ -128,62 +128,62 @@ extern struct thread *get_first_ready_thread(void);
 extern struct thread *get_first_suspend_thread(void);
 extern struct thread *get_first_sleep_thread(void);
 extern kbool_t is_thread_valid(tid_t tid);
-extern struct thread *next_ready_thread(struct thread *sprt_prev);
-extern struct thread *next_suspend_thread(struct thread *sprt_prev);
-extern struct thread *next_sleep_thread(struct thread *sprt_prev);
+extern struct thread *next_ready_thread(struct thread *sptr_prev);
+extern struct thread *next_suspend_thread(struct thread *sptr_prev);
+extern struct thread *next_sleep_thread(struct thread *sptr_prev);
 
 extern kint32_t schedule_thread_switch(tid_t tid);
-extern kint32_t register_new_thread(struct thread *sprt_thread, tid_t tid);
+extern kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid);
 extern struct thread *unregister_thread(tid_t tid);
 extern void __thread_init_before(void);
 extern struct scheduler_context *__schedule_thread(void);
 extern void schedule_thread(void);
 
 /*!< The defines */
-#define mrt_current                             get_current_thread()
-#define mrt_tid_handle(tid)                     get_thread_handle(tid)
-#define mrt_tid_attr(tid)                       thread_attr_get(tid)
+#define mr_current                             get_current_thread()
+#define mr_tid_handle(tid)                     get_thread_handle(tid)
+#define mr_tid_attr(tid)                       thread_attr_get(tid)
 
 /*!< API functions */
 /*!
  * @brief   get thread state
- * @param   sprt_thread
+ * @param   sptr_thread
  * @retval  status
  * @note    none
  */
-static inline kbool_t thread_state_pending(struct thread *sprt_thread)
+static inline kbool_t thread_state_pending(struct thread *sptr_thread)
 {
     kbool_t is_wakeup, is_killed;
 
-    spin_lock_irqsave(&sprt_thread->sgrt_lock);
-    is_wakeup = mrt_thread_is_flags(NR_THREAD_SIG_WAKEUP, sprt_thread);
-    is_killed = mrt_thread_is_flags(NR_THREAD_SIG_KILL, sprt_thread);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    is_wakeup = mr_thread_is_flags(NR_THREAD_SIG_WAKEUP, sptr_thread);
+    is_killed = mr_thread_is_flags(NR_THREAD_SIG_KILL, sptr_thread);
 
-    mrt_barrier();
+    mr_barrier();
 
-    mrt_thread_clr_flags(NR_THREAD_SIG_WAKEUP, sprt_thread);
-    mrt_thread_clr_flags(NR_THREAD_SIG_KILL, sprt_thread);
-    spin_unlock_irqrestore(&sprt_thread->sgrt_lock);
+    mr_thread_clr_flags(NR_THREAD_SIG_WAKEUP, sptr_thread);
+    mr_thread_clr_flags(NR_THREAD_SIG_KILL, sptr_thread);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
 
     return (is_wakeup || is_killed);
 }
 
 /*!
  * @brief   set thread state
- * @param   sprt_thread, state, mode
+ * @param   sptr_thread, state, mode
  * @retval  none
  * @note    none
  */
-static inline void thread_state_signal(struct thread *sprt_thread, kuint32_t state, kbool_t mode)
+static inline void thread_state_signal(struct thread *sptr_thread, kuint32_t state, kbool_t mode)
 {
-    spin_lock_irqsave(&sprt_thread->sgrt_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock);
 
     if (mode)
-        mrt_thread_set_flags(state, sprt_thread);
+        mr_thread_set_flags(state, sptr_thread);
     else
-        mrt_thread_clr_flags(state, sprt_thread);
+        mr_thread_clr_flags(state, sptr_thread);
     
-    spin_unlock_irqrestore(&sprt_thread->sgrt_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
 }
 
 #ifdef __cplusplus

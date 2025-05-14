@@ -46,15 +46,15 @@ static void *button_task_entry(void *args)
     crt_task_t *cprt_this = (crt_task_t *)args;
     kuint8_t status = 0, last_status = 0;
     kint32_t fd;
-    struct mailbox &sgrt_mb = cprt_this->get_mailbox();
-    struct mail *sprt_mail = mrt_nullptr;
-    struct mail_msg sgrt_msg[1] = {};
+    struct mailbox &sgtc_mb = cprt_this->get_mailbox();
+    struct mail *sptr_mail = mr_nullptr;
+    struct mail_msg sgtc_msg[1] = {};
     kchar_t msgs[8];
     kssize_t retval;
 
     do {
         fd = virt_open("/dev/input/event0", O_RDONLY);
-        if (mrt_unlikely(fd < 0))
+        if (mr_unlikely(fd < 0))
             msleep(200);
 
     } while (fd < 0);
@@ -65,36 +65,36 @@ static void *button_task_entry(void *args)
         if ((retval < 0) || (status == last_status))
             goto END;
         
-        if (sprt_mail)
-            mail_destroy(&sgrt_mb, sprt_mail);
+        if (sptr_mail)
+            mail_destroy(&sgtc_mb, sptr_mail);
 
-        sprt_mail = mail_create(&sgrt_mb);
-        if (!isValid(sprt_mail))
+        sptr_mail = mail_create(&sgtc_mb);
+        if (!isValid(sptr_mail))
         {
-            sprt_mail = mrt_nullptr;
+            sptr_mail = mr_nullptr;
             goto END;
         }
 
         if (status)
         {
             strcpy(msgs, "on");
-            sgrt_msg[0].size = 2;
+            sgtc_msg[0].size = 2;
             msgs[2] = '\0';
         }
         else
         {
             strcpy(msgs, "off");
-            sgrt_msg[0].size = 3;
+            sgtc_msg[0].size = 3;
             msgs[3] = '\0';
         }
 
-        sgrt_msg[0].buffer = (kuint8_t *)msgs;
-        sgrt_msg[0].type = NR_MAIL_TYPE_KEY;
+        sgtc_msg[0].buffer = (kuint8_t *)msgs;
+        sgtc_msg[0].type = NR_MAIL_TYPE_KEY;
 
-        sprt_mail->sprt_msg = &sgrt_msg[0];
-        sprt_mail->num_msgs = 1;
+        sptr_mail->sptr_msg = &sgtc_msg[0];
+        sptr_mail->num_msgs = 1;
 
-        mail_send("light-task-mailbox", sprt_mail);
+        mail_send("light-task-mailbox", sptr_mail);
         last_status = status;
 
 END:
@@ -123,8 +123,8 @@ kint32_t button_task_init(void)
     if (!cprt_task)
         return -ER_FAILD;
 
-    struct mailbox &sgrt_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgrt_mb, cprt_task->get_self(), "button-task-mailbox");
+    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cprt_task->get_self(), "button-task-mailbox");
 
     return ER_NORMAL;
 }

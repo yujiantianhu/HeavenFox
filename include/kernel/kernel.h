@@ -70,28 +70,28 @@ enum __ERT_THREAD_SIGNALS
 /*!< The globals */
 extern kuint32_t g_sched_preempt_cnt;
 
-#define mrt_preempt_cnt_dec()						COUNT_DEC(g_sched_preempt_cnt)
-#define mrt_preempt_cnt_inc()						COUNT_INC(g_sched_preempt_cnt)
+#define mr_preempt_cnt_dec()						COUNT_DEC(g_sched_preempt_cnt)
+#define mr_preempt_cnt_inc()						COUNT_INC(g_sched_preempt_cnt)
 
 #ifdef CONFIG_PREEMPT_NESTING
-#define mrt_preempt_enable()						mrt_barrier()
-#define mrt_preempt_disable()						mrt_barrier()
-#define mrt_preempt_is_locked()						(!!g_sched_preempt_cnt)
+#define mr_preempt_enable()						mr_barrier()
+#define mr_preempt_disable()						mr_barrier()
+#define mr_preempt_is_locked()						(!!g_sched_preempt_cnt)
 
 #else
-#define mrt_preempt_enable()	\
+#define mr_preempt_enable()	\
 	do {	\
-		mrt_barrier();	\
-		mrt_preempt_cnt_dec();	\
+		mr_barrier();	\
+		mr_preempt_cnt_dec();	\
 	} while (0)
 
-#define mrt_preempt_disable()	\
+#define mr_preempt_disable()	\
 	do {	\
-		mrt_preempt_cnt_inc();	\
-		mrt_barrier();	\
+		mr_preempt_cnt_inc();	\
+		mr_barrier();	\
 	} while (0)
 
-#define mrt_preempt_is_locked()						(!!g_sched_preempt_cnt)
+#define mr_preempt_is_locked()						(!!g_sched_preempt_cnt)
 #endif
 
 #ifdef __cplusplus

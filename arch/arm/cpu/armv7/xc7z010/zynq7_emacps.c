@@ -50,35 +50,35 @@ struct xtopology
 #define EMACPS_SLCR_DIV_MASK                    0xFC0FC0FF
 
 /*!< BdRing */
-#define XEMACPS_RING_SEEKAHEAD(sprt_bdring, BdPtr, NumBd)   \
+#define XEMACPS_RING_SEEKAHEAD(sptr_bdring, BdPtr, NumBd)   \
     do {    \
         kuint32_t Addr = (kuint32_t)(void *)(BdPtr);    \
         \
-        Addr += ((sprt_bdring)->Separation * (NumBd));  \
-        if ((Addr > (sprt_bdring)->HighBdAddr) ||   \
+        Addr += ((sptr_bdring)->Separation * (NumBd));  \
+        if ((Addr > (sptr_bdring)->HighBdAddr) ||   \
             ((kuint32_t)(void *)(BdPtr) > Addr))  \
-            Addr -= (sprt_bdring)->Length;  \
+            Addr -= (sptr_bdring)->Length;  \
         \
         (BdPtr) = (XEmacPs_Bd *)(void *)Addr;    \
     } while (0)
 
-#define XEMACPS_RING_SEEKBACK(sprt_bdring, BdPtr, NumBd)     \
+#define XEMACPS_RING_SEEKBACK(sptr_bdring, BdPtr, NumBd)     \
     do {    \
         kuint32_t Addr = (kuint32_t)(void *)(BdPtr);    \
         \
-        Addr -= ((sprt_bdring)->Separation * (NumBd));  \
-        if ((Addr < (sprt_bdring)->BaseBdAddr) ||   \
+        Addr -= ((sptr_bdring)->Separation * (NumBd));  \
+        if ((Addr < (sptr_bdring)->BaseBdAddr) ||   \
             ((kuint32_t)(void *)(BdPtr) < Addr))   \
-            Addr += (sprt_bdring)->Length;  \
+            Addr += (sptr_bdring)->Length;  \
         \
         (BdPtr) = (XEmacPs_Bd *)(void*)Addr; \
     } while (0)
 
-#define XEMACPS_BD_TO_INDEX(sprt_bdring, bdptr) \
-    (((kuint32_t)bdptr - (kuint32_t)(sprt_bdring)->BaseBdAddr) / (sprt_bdring)->Separation)
+#define XEMACPS_BD_TO_INDEX(sptr_bdring, bdptr) \
+    (((kuint32_t)bdptr - (kuint32_t)(sptr_bdring)->BaseBdAddr) / (sptr_bdring)->Separation)
 
 /*!< The globals */
-static struct xtopology sgrt_xsdk_topology[] = 
+static struct xtopology sgtc_xsdk_topology[] = 
 {
     {
         .emac_baseaddr = 0xE000B000,
@@ -88,9 +88,9 @@ static struct xtopology sgrt_xsdk_topology[] =
         .scugic_emac_intr = 0x36,
     },
 };
-const kint32_t g_xsdk_topology_num = ARRAY_SIZE(sgrt_xsdk_topology);
+const kint32_t g_xsdk_topology_num = ARRAY_SIZE(sgtc_xsdk_topology);
 
-static XEmacPs_Config sgrt_xmacps_configTable[XPAR_XEMACPS_NUM_INSTANCES] =
+static XEmacPs_Config sgtc_xmacps_configTable[XPAR_XEMACPS_NUM_INSTANCES] =
 {
     {
         XPAR_PS7_ETHERNET_0_DEVICE_ID,
@@ -146,11 +146,11 @@ static void XEmacPs_BdSetTxWrap(kuint32_t BdPtr)
 
 /*!
  * @brief   create Bd Ring
- * @param   sprt_bdring: BdRing structure pointer
+ * @param   sptr_bdring: BdRing structure pointer
  * @param   PhysAddr: phy address
  * @retval  errno
  */
-kint32_t XEmacPs_BdRingCreate(XEmacPs_BdRing *sprt_bdring, kuint32_t PhysAddr,
+kint32_t XEmacPs_BdRingCreate(XEmacPs_BdRing *sptr_bdring, kuint32_t PhysAddr,
                             kuint32_t VirtAddr, kuint32_t Alignment, kuint32_t BdCount)
 {
     kuint32_t i;
@@ -163,15 +163,15 @@ kint32_t XEmacPs_BdRingCreate(XEmacPs_BdRing *sprt_bdring, kuint32_t PhysAddr,
      * following attributes are 0 to prevent calls to other functions
      * from doing anything.
      */
-    sprt_bdring->AllCnt = 0U;
-    sprt_bdring->FreeCnt = 0U;
-    sprt_bdring->HwCnt = 0U;
-    sprt_bdring->PreCnt = 0U;
-    sprt_bdring->PostCnt = 0U;
+    sptr_bdring->AllCnt = 0U;
+    sptr_bdring->FreeCnt = 0U;
+    sptr_bdring->HwCnt = 0U;
+    sptr_bdring->PreCnt = 0U;
+    sptr_bdring->PostCnt = 0U;
 
     /*!< Make sure Alignment parameter meets minimum requirements */
     if (Alignment < (kuint32_t)XEMACPS_DMABD_MINIMUM_ALIGNMENT)
-        return -ER_UNVALID;
+        return -ER_INVALID;
 
     /*!< Make sure Alignment is a power of 2 */
     if (((Alignment - 0x00000001U) & Alignment) != 0x00000000U)
@@ -183,16 +183,16 @@ kint32_t XEmacPs_BdRingCreate(XEmacPs_BdRing *sprt_bdring, kuint32_t PhysAddr,
 
     /*!< Is BdCount reasonable? */
     if (BdCount == 0x00000000U)
-        return -ER_UNVALID;
+        return -ER_INVALID;
 
     /*!< Figure out how many bytes will be between the start of adjacent BDs */
-    sprt_bdring->Separation = ((kuint32_t)sizeof(XEmacPs_Bd));
+    sptr_bdring->Separation = ((kuint32_t)sizeof(XEmacPs_Bd));
 
     /*!< 
      * Must make sure the ring doesn't span address 0x00000000. If it does,
      * then the next/prev BD traversal macros will fail.
      */
-    if (VirtAddrLoc > ((VirtAddrLoc + (sprt_bdring->Separation * BdCount)) - (kuint32_t)1))
+    if (VirtAddrLoc > ((VirtAddrLoc + (sptr_bdring->Separation * BdCount)) - (kuint32_t)1))
         return -ER_FAULT;
 
     /*!< 
@@ -200,84 +200,84 @@ kint32_t XEmacPs_BdRingCreate(XEmacPs_BdRing *sprt_bdring, kuint32_t PhysAddr,
      *  - Clear the entire space
      *  - Setup each BD's BDA field with the physical address of the next BD
      */
-    memset((void *)VirtAddrLoc, 0, (sprt_bdring->Separation * BdCount));
+    memset((void *)VirtAddrLoc, 0, (sptr_bdring->Separation * BdCount));
 
     BdVirtAddr = VirtAddrLoc;
-    BdPhyAddr = PhysAddr + sprt_bdring->Separation;
+    BdPhyAddr = PhysAddr + sptr_bdring->Separation;
     for (i = 1U; i < BdCount; i++) 
     {
-        BdVirtAddr += sprt_bdring->Separation;
-        BdPhyAddr += sprt_bdring->Separation;
+        BdVirtAddr += sptr_bdring->Separation;
+        BdPhyAddr += sptr_bdring->Separation;
     }
 
     /*!< Setup and initialize pointers and counters */
-    sprt_bdring->IsRunning = false;
-    sprt_bdring->BaseBdAddr = VirtAddrLoc;
-    sprt_bdring->PhysBaseAddr = PhysAddr;
-    sprt_bdring->HighBdAddr = BdVirtAddr;
-    sprt_bdring->Length = ((sprt_bdring->HighBdAddr - sprt_bdring->BaseBdAddr) + sprt_bdring->Separation);
-    sprt_bdring->AllCnt = (kuint32_t)BdCount;
-    sprt_bdring->FreeCnt = (kuint32_t)BdCount;
-    sprt_bdring->FreeHead = (XEmacPs_Bd *)(void *)VirtAddrLoc;
-    sprt_bdring->PreHead = (XEmacPs_Bd *)VirtAddrLoc;
-    sprt_bdring->HwHead = (XEmacPs_Bd *)VirtAddrLoc;
-    sprt_bdring->HwTail = (XEmacPs_Bd *)VirtAddrLoc;
-    sprt_bdring->PostHead = (XEmacPs_Bd *)VirtAddrLoc;
-    sprt_bdring->BdaRestart = (XEmacPs_Bd *)(void *)PhysAddr;
+    sptr_bdring->IsRunning = false;
+    sptr_bdring->BaseBdAddr = VirtAddrLoc;
+    sptr_bdring->PhysBaseAddr = PhysAddr;
+    sptr_bdring->HighBdAddr = BdVirtAddr;
+    sptr_bdring->Length = ((sptr_bdring->HighBdAddr - sptr_bdring->BaseBdAddr) + sptr_bdring->Separation);
+    sptr_bdring->AllCnt = (kuint32_t)BdCount;
+    sptr_bdring->FreeCnt = (kuint32_t)BdCount;
+    sptr_bdring->FreeHead = (XEmacPs_Bd *)(void *)VirtAddrLoc;
+    sptr_bdring->PreHead = (XEmacPs_Bd *)VirtAddrLoc;
+    sptr_bdring->HwHead = (XEmacPs_Bd *)VirtAddrLoc;
+    sptr_bdring->HwTail = (XEmacPs_Bd *)VirtAddrLoc;
+    sptr_bdring->PostHead = (XEmacPs_Bd *)VirtAddrLoc;
+    sptr_bdring->BdaRestart = (XEmacPs_Bd *)(void *)PhysAddr;
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   Initial Bd Ring
- * @param   sprt_bdring: BdRing structure pointer
+ * @param   sptr_bdring: BdRing structure pointer
  * @param   PhysAddr: phy address
  * @retval  none
  */
-void XEmacPs_BdRingInitial(XEmacPs_BdRing *sprt_bdring, kuint32_t PhysAddr,
+void XEmacPs_BdRingInitial(XEmacPs_BdRing *sptr_bdring, kuint32_t PhysAddr,
                             kuint32_t VirtAddr, kuint32_t Alignment, kuint32_t BdCount)
 {
-    (void)XEmacPs_BdRingCreate(sprt_bdring, PhysAddr, VirtAddr, Alignment, BdCount);
+    (void)XEmacPs_BdRingCreate(sptr_bdring, PhysAddr, VirtAddr, Alignment, BdCount);
 }
 
 /*!
  * @brief   copy Bd Ring
- * @param   sprt_bdring: BdRing structure pointer
- * @param   sprt_bd: Bd base address
+ * @param   sptr_bdring: BdRing structure pointer
+ * @param   sptr_bd: Bd base address
  * @retval  errno
  */
-kint32_t XEmacPs_BdRingClone(XEmacPs_BdRing *sprt_bdring, XEmacPs_Bd *sprt_bd, kuint8_t Direction)
+kint32_t XEmacPs_BdRingClone(XEmacPs_BdRing *sptr_bdring, XEmacPs_Bd *sptr_bd, kuint8_t Direction)
 {
     kuint32_t i;
     kuint32_t CurBd;
 
     /*!< Can't do this function if there isn't a ring */
-    if (sprt_bdring->AllCnt == 0x00000000U)
+    if (sptr_bdring->AllCnt == 0x00000000U)
         return -ER_EMPTY;
 
     /*!< Can't do this function with the channel running */
-    if (sprt_bdring->IsRunning)
+    if (sptr_bdring->IsRunning)
         return -ER_LOCKED;
 
     /*!< Can't do this function with some of the BDs in use */
-    if (sprt_bdring->FreeCnt != sprt_bdring->AllCnt)
+    if (sptr_bdring->FreeCnt != sptr_bdring->AllCnt)
         return -ER_ERROR;
 
     if ((Direction != (kuint8_t)XEMACPS_SEND) && (Direction != (kuint8_t)XEMACPS_RECV))
-        return -ER_UNVALID;
+        return -ER_INVALID;
 
     /*!< 
      * Starting from the top of the ring, save BD.Next, overwrite the entire
      * BD with the template, then restore BD.Next
      */
-    CurBd = sprt_bdring->BaseBdAddr;
-    for (i = 0U; i < sprt_bdring->AllCnt; i++) 
+    CurBd = sptr_bdring->BaseBdAddr;
+    for (i = 0U; i < sptr_bdring->AllCnt; i++) 
     {
-        memcpy((void *)CurBd, sprt_bd, sizeof(XEmacPs_Bd));
-        CurBd += sprt_bdring->Separation;
+        memcpy((void *)CurBd, sptr_bd, sizeof(XEmacPs_Bd));
+        CurBd += sptr_bdring->Separation;
     }
 
-    CurBd -= sprt_bdring->Separation;
+    CurBd -= sptr_bdring->Separation;
 
     if (Direction == XEMACPS_RECV)
         XEmacPs_BdSetRxWrap(CurBd);
@@ -289,81 +289,81 @@ kint32_t XEmacPs_BdRingClone(XEmacPs_BdRing *sprt_bdring, XEmacPs_Bd *sprt_bd, k
 
 /*!
  * @brief   allocate Bd Ring
- * @param   sprt_bdring: BdRing structure pointer
+ * @param   sptr_bdring: BdRing structure pointer
  * @param   NumBd: the length of bd
  * @retval  errno
  */
-kint32_t XEmacPs_BdRingAlloc(XEmacPs_BdRing *sprt_bdring, kuint32_t NumBd, XEmacPs_Bd **sprt_bd)
+kint32_t XEmacPs_BdRingAlloc(XEmacPs_BdRing *sptr_bdring, kuint32_t NumBd, XEmacPs_Bd **sptr_bd)
 {
     /*!< Enough free BDs available for the request? */
-    if (sprt_bdring->FreeCnt < NumBd)
+    if (sptr_bdring->FreeCnt < NumBd)
         return -ER_FAULT;
 
     /*!< Set the return argument and move FreeHead forward */
-    *sprt_bd = sprt_bdring->FreeHead;
-    XEMACPS_RING_SEEKAHEAD(sprt_bdring, sprt_bdring->FreeHead, NumBd);
+    *sptr_bd = sptr_bdring->FreeHead;
+    XEMACPS_RING_SEEKAHEAD(sptr_bdring, sptr_bdring->FreeHead, NumBd);
 
-    sprt_bdring->FreeCnt -= NumBd;
-    sprt_bdring->PreCnt += NumBd;
+    sptr_bdring->FreeCnt -= NumBd;
+    sptr_bdring->PreCnt += NumBd;
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   unallocate Bd Ring
- * @param   sprt_bdring: BdRing structure pointer
+ * @param   sptr_bdring: BdRing structure pointer
  * @param   NumBd: the length of bd
  * @retval  errno
  */
-kint32_t XEmacPs_BdRingUnAlloc(XEmacPs_BdRing *sprt_bdring, kuint32_t NumBd, XEmacPs_Bd *sprt_bd)
+kint32_t XEmacPs_BdRingUnAlloc(XEmacPs_BdRing *sptr_bdring, kuint32_t NumBd, XEmacPs_Bd *sptr_bd)
 {
-    if ((!sprt_bdring) ||
-        (!sprt_bd))
-        return -ER_UNVALID;
+    if ((!sptr_bdring) ||
+        (!sptr_bd))
+        return -ER_INVALID;
 
     /*!< Enough BDs in the free state for the request? */
-    if (sprt_bdring->PreCnt < NumBd)
+    if (sptr_bdring->PreCnt < NumBd)
         return -ER_FAULT;
 
     /*!< Set the return argument and move FreeHead backward */
-    XEMACPS_RING_SEEKBACK(sprt_bdring, sprt_bdring->FreeHead, NumBd);
-    sprt_bdring->FreeCnt += NumBd;
-    sprt_bdring->PreCnt -= NumBd;
+    XEMACPS_RING_SEEKBACK(sptr_bdring, sptr_bdring->FreeHead, NumBd);
+    sptr_bdring->FreeCnt += NumBd;
+    sptr_bdring->PreCnt -= NumBd;
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   release Bd Ring
- * @param   sprt_bdring: BdRing structure pointer
+ * @param   sptr_bdring: BdRing structure pointer
  * @param   NumBd: the length of bd
  * @retval  errno
  */
-kint32_t XEmacPs_BdRingFree(XEmacPs_BdRing *sprt_bdring, kuint32_t NumBd, XEmacPs_Bd *sprt_bd)
+kint32_t XEmacPs_BdRingFree(XEmacPs_BdRing *sptr_bdring, kuint32_t NumBd, XEmacPs_Bd *sptr_bd)
 {
     /*!< if no bds to process, simply return. */
     if (0U == NumBd)
-        return -ER_UNVALID;
+        return -ER_INVALID;
 
     /*!< Make sure we are in sync with XEmacPs_BdRingFromHw() */
-    if ((sprt_bdring->PostCnt < NumBd) || (sprt_bdring->PostHead != sprt_bd))
+    if ((sptr_bdring->PostCnt < NumBd) || (sptr_bdring->PostHead != sptr_bd))
         return -ER_ERROR;
     
     /*!< Update pointers and counters */
-    sprt_bdring->FreeCnt += NumBd;
-    sprt_bdring->PostCnt -= NumBd;
-    XEMACPS_RING_SEEKAHEAD(sprt_bdring, sprt_bdring->PostHead, NumBd);
+    sptr_bdring->FreeCnt += NumBd;
+    sptr_bdring->PostCnt -= NumBd;
+    XEMACPS_RING_SEEKAHEAD(sptr_bdring, sptr_bdring->PostHead, NumBd);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   allocate Bd Ring
- * @param   sprt_bdring: BdRing structure pointer
+ * @param   sptr_bdring: BdRing structure pointer
  * @param   NumBd: the length of bd
  * @retval  errno
  */
-kuint32_t XEmacPs_BdRingFromHwTx(XEmacPs_BdRing *sprt_bdring, kuint32_t BdLimit, XEmacPs_Bd **sprt_bd)
+kuint32_t XEmacPs_BdRingFromHwTx(XEmacPs_BdRing *sptr_bdring, kuint32_t BdLimit, XEmacPs_Bd **sptr_bd)
 {
     XEmacPs_Bd *CurBdPtr;
     kuint32_t BdStr = 0U;
@@ -372,28 +372,28 @@ kuint32_t XEmacPs_BdRingFromHwTx(XEmacPs_BdRing *sprt_bdring, kuint32_t BdLimit,
     kuint32_t Sop = 0U;
     kuint32_t BdLimitLoc = BdLimit;
 
-    CurBdPtr = sprt_bdring->HwHead;
+    CurBdPtr = sptr_bdring->HwHead;
     BdCount = 0U;
     BdPartialCount = 0U;
 
     /*!< If no BDs in work group, then there's nothing to search */
-    if (sprt_bdring->HwCnt == 0x00000000U) 
+    if (sptr_bdring->HwCnt == 0x00000000U) 
         goto fail;
 
-    if (BdLimitLoc > sprt_bdring->HwCnt)
-        BdLimitLoc = sprt_bdring->HwCnt;
+    if (BdLimitLoc > sptr_bdring->HwCnt)
+        BdLimitLoc = sptr_bdring->HwCnt;
 
     /*!< 
      * Starting at HwHead, keep moving forward in the list until:
      *  - A BD is encountered with its new/used bit set which means
      *    hardware has not completed processing of that BD.
-     *  - sprt_bdring->HwTail is reached and sprt_bdring->HwCnt is reached.
+     *  - sptr_bdring->HwTail is reached and sptr_bdring->HwCnt is reached.
      *  - The number of requested BDs has been processed
      */
     while (BdCount < BdLimitLoc) 
     {
         /*!< Read the status */
-        if (CurBdPtr != mrt_nullptr)
+        if (CurBdPtr != mr_nullptr)
             BdStr = XEmacPs_BdRead(CurBdPtr, XEMACPS_BD_STAT_OFFSET);
 
         if ((Sop == 0x00000000U) && ((BdStr & XEMACPS_TXBUF_USED_MASK) != 0x00000000U))
@@ -417,7 +417,7 @@ kuint32_t XEmacPs_BdRingFromHwTx(XEmacPs_BdRing *sprt_bdring, kuint32_t BdLimit,
         }
 
         /*!< Move on to next BD in work group */
-        CurBdPtr = XEmacPs_BdRingNext(sprt_bdring, CurBdPtr);
+        CurBdPtr = XEmacPs_BdRingNext(sptr_bdring, CurBdPtr);
     }
 
     /*!< Subtract off any partial packet BDs found */
@@ -429,51 +429,51 @@ kuint32_t XEmacPs_BdRingFromHwTx(XEmacPs_BdRing *sprt_bdring, kuint32_t BdLimit,
      */
     if (BdCount > 0x00000000U) 
     {
-        *sprt_bd = sprt_bdring->HwHead;
-        sprt_bdring->HwCnt -= BdCount;
-        sprt_bdring->PostCnt += BdCount;
-        XEMACPS_RING_SEEKAHEAD(sprt_bdring, sprt_bdring->HwHead, BdCount);
+        *sptr_bd = sptr_bdring->HwHead;
+        sptr_bdring->HwCnt -= BdCount;
+        sptr_bdring->PostCnt += BdCount;
+        XEMACPS_RING_SEEKAHEAD(sptr_bdring, sptr_bdring->HwHead, BdCount);
 
         return BdCount;
     }
 
 fail:
-    *sprt_bd = mrt_nullptr;
+    *sptr_bd = mr_nullptr;
     return 0;
 }
 
 /*!
  * @brief   allocate Bd Ring
- * @param   sprt_bdring: BdRing structure pointer
+ * @param   sptr_bdring: BdRing structure pointer
  * @param   NumBd: the length of bd
  * @retval  errno
  */
-kuint32_t XEmacPs_BdRingFromHwRx(XEmacPs_BdRing *sprt_bdring, kuint32_t BdLimit, XEmacPs_Bd **sprt_bd)
+kuint32_t XEmacPs_BdRingFromHwRx(XEmacPs_BdRing *sptr_bdring, kuint32_t BdLimit, XEmacPs_Bd **sptr_bd)
 {
     XEmacPs_Bd *CurBdPtr;
     kuint32_t BdStr = 0U;
     kuint32_t BdCount;
     kuint32_t BdPartialCount;
 
-    CurBdPtr = sprt_bdring->HwHead;
+    CurBdPtr = sptr_bdring->HwHead;
     BdCount = 0U;
     BdPartialCount = 0U;
 
     /*!< If no BDs in work group, then there's nothing to search */
-    if (sprt_bdring->HwCnt == 0x00000000U)
+    if (sptr_bdring->HwCnt == 0x00000000U)
         goto fail;
 
     /*!< 
      * Starting at HwHead, keep moving forward in the list until:
      *  - A BD is encountered with its new/used bit set which means
      *    hardware has completed processing of that BD.
-     *  - sprt_bdring->HwTail is reached and sprt_bdring->HwCnt is reached.
+     *  - sptr_bdring->HwTail is reached and sptr_bdring->HwCnt is reached.
      *  - The number of requested BDs has been processed
      */
     while (BdCount < BdLimit)
     {
         /*!< Read the status */
-        if (CurBdPtr != mrt_nullptr)
+        if (CurBdPtr != mr_nullptr)
             BdStr = XEmacPs_BdRead(CurBdPtr, XEMACPS_BD_STAT_OFFSET);
 
         if (!XEmacPs_BdIsRxNew(CurBdPtr))
@@ -491,7 +491,7 @@ kuint32_t XEmacPs_BdRingFromHwRx(XEmacPs_BdRing *sprt_bdring, kuint32_t BdLimit,
             BdPartialCount++;
 
         /*!< Move on to next BD in work group */
-        CurBdPtr = XEmacPs_BdRingNext(sprt_bdring, CurBdPtr);
+        CurBdPtr = XEmacPs_BdRingNext(sptr_bdring, CurBdPtr);
     }
 
     /*!< Subtract off any partial packet BDs found */
@@ -503,47 +503,47 @@ kuint32_t XEmacPs_BdRingFromHwRx(XEmacPs_BdRing *sprt_bdring, kuint32_t BdLimit,
      */
     if (BdCount > 0x00000000U) 
     {
-        *sprt_bd = sprt_bdring->HwHead;
-        sprt_bdring->HwCnt -= BdCount;
-        sprt_bdring->PostCnt += BdCount;
-        XEMACPS_RING_SEEKAHEAD(sprt_bdring, sprt_bdring->HwHead, BdCount);
+        *sptr_bd = sptr_bdring->HwHead;
+        sptr_bdring->HwCnt -= BdCount;
+        sptr_bdring->PostCnt += BdCount;
+        XEMACPS_RING_SEEKAHEAD(sptr_bdring, sptr_bdring->HwHead, BdCount);
 
         return BdCount;
     }
 
 fail:
-    *sprt_bd = mrt_nullptr;
+    *sptr_bd = mr_nullptr;
     return 0;
 }
 
 /*!
  * @brief   allocate Bd Ring
- * @param   sprt_bdring: BdRing structure pointer
+ * @param   sptr_bdring: BdRing structure pointer
  * @param   NumBd: the length of bd
  * @retval  errno
  */
-kint32_t XEmacPs_BdRingToHw(XEmacPs_BdRing *sprt_bdring, kuint32_t NumBd, XEmacPs_Bd *sprt_bd)
+kint32_t XEmacPs_BdRingToHw(XEmacPs_BdRing *sptr_bdring, kuint32_t NumBd, XEmacPs_Bd *sptr_bd)
 {
     XEmacPs_Bd *CurBdPtr;
     kuint32_t i;
 
     /*!< if no bds to process, simply return. */
     if (0U == NumBd)
-        return -ER_UNVALID;
+        return -ER_INVALID;
  
     /*!< Make sure we are in sync with XEmacPs_BdRingAlloc() */
-    if ((sprt_bdring->PreCnt < NumBd) || (sprt_bdring->PreHead != sprt_bd))
+    if ((sptr_bdring->PreCnt < NumBd) || (sptr_bdring->PreHead != sptr_bd))
         return -ER_ERROR;
 
-    CurBdPtr = sprt_bd;
+    CurBdPtr = sptr_bd;
     for (i = 0U; i < NumBd; i++)
-        CurBdPtr = (XEmacPs_Bd *)((void *)XEmacPs_BdRingNext(sprt_bdring, CurBdPtr));
+        CurBdPtr = (XEmacPs_Bd *)((void *)XEmacPs_BdRingNext(sptr_bdring, CurBdPtr));
 
     /*!< Adjust ring pointers & counters */
-    XEMACPS_RING_SEEKAHEAD(sprt_bdring, sprt_bdring->PreHead, NumBd);
-    sprt_bdring->PreCnt -= NumBd;
-    sprt_bdring->HwTail = CurBdPtr;
-    sprt_bdring->HwCnt += NumBd;
+    XEMACPS_RING_SEEKAHEAD(sptr_bdring, sptr_bdring->PreHead, NumBd);
+    sptr_bdring->PreCnt -= NumBd;
+    sptr_bdring->HwTail = CurBdPtr;
+    sptr_bdring->HwCnt += NumBd;
 
     return ER_NORMAL;
 }
@@ -551,20 +551,20 @@ kint32_t XEmacPs_BdRingToHw(XEmacPs_BdRing *sprt_bdring, kuint32_t NumBd, XEmacP
 /*!< -------------------------------------------------------------------------- */
 /*!
  * @brief   read emac phy maintaince reg
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @retval  errno
  */
-kint32_t XEmacPs_PhyRead(XEmacPs *sprt_emacps, kuint32_t PhyAddress, kuint32_t RegisterNum, kuint16_t *PhyDataPtr)
+kint32_t XEmacPs_PhyRead(XEmacPs *sptr_emacps, kuint32_t PhyAddress, kuint32_t RegisterNum, kuint16_t *PhyDataPtr)
 {
     kuint32_t Mgtcr;
     volatile kuint32_t Ipisr;
     kuint32_t Status;
 
-    if (!sprt_emacps)
+    if (!sptr_emacps)
         return -ER_NREADY;
 
     /*!< Make sure no other PHY operation is currently in progress */
-    Status = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWSR_OFFSET);
+    Status = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWSR_OFFSET);
     if (!(Status & XEMACPS_NWSR_MDIOIDLE_MASK))
         return -ER_BUSY;
 
@@ -574,35 +574,35 @@ kint32_t XEmacPs_PhyRead(XEmacPs *sprt_emacps, kuint32_t PhyAddress, kuint32_t R
             (RegisterNum << XEMACPS_PHYMNTNC_PREG_SHFT_MSK);
 
     /*!< Write Mgtcr and wait for completion */
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_PHYMNTNC_OFFSET, Mgtcr);
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_PHYMNTNC_OFFSET, Mgtcr);
 
     do {
-        Ipisr = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWSR_OFFSET);
+        Ipisr = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWSR_OFFSET);
 
     } while ((Ipisr & XEMACPS_NWSR_MDIOIDLE_MASK) == 0U);
 
     /*!< Read data */
-    *PhyDataPtr = (kuint16_t)XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_PHYMNTNC_OFFSET);
+    *PhyDataPtr = (kuint16_t)XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_PHYMNTNC_OFFSET);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   write emac phy maintaince reg
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @retval  errno
  */
-kint32_t XEmacPs_PhyWrite(XEmacPs *sprt_emacps, kuint32_t PhyAddress, kuint32_t RegisterNum, kuint16_t PhyData)
+kint32_t XEmacPs_PhyWrite(XEmacPs *sptr_emacps, kuint32_t PhyAddress, kuint32_t RegisterNum, kuint16_t PhyData)
 {
     kuint32_t Mgtcr;
     volatile kuint32_t Ipisr;
     kuint32_t Status;
 
-    if (!sprt_emacps)
+    if (!sptr_emacps)
         return -ER_NREADY;
 
     /*!< Make sure no other PHY operation is currently in progress */
-    Status = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWSR_OFFSET);
+    Status = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWSR_OFFSET);
     if (!(Status & XEMACPS_NWSR_MDIOIDLE_MASK))
         return -ER_BUSY;
 
@@ -612,10 +612,10 @@ kint32_t XEmacPs_PhyWrite(XEmacPs *sprt_emacps, kuint32_t PhyAddress, kuint32_t 
             (RegisterNum << XEMACPS_PHYMNTNC_PREG_SHFT_MSK) | (kuint32_t)PhyData;
 
     /*!< Write Mgtcr and wait for completion */
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_PHYMNTNC_OFFSET, Mgtcr);
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_PHYMNTNC_OFFSET, Mgtcr);
 
     do {
-        Ipisr = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWSR_OFFSET);
+        Ipisr = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWSR_OFFSET);
 
     } while ((Ipisr & XEMACPS_NWSR_MDIOIDLE_MASK) == 0U);
 
@@ -624,45 +624,45 @@ kint32_t XEmacPs_PhyWrite(XEmacPs *sprt_emacps, kuint32_t PhyAddress, kuint32_t 
 
 /*!
  * @brief   check if phy is detected
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @param   phy_addr: phy address
  * @retval  1: yes; 0: no
  */
-kbool_t XEmacPs_PhyLinkDetect(XEmacPs *sprt_emacps, kuint32_t phy_addr)
+kbool_t XEmacPs_PhyLinkDetect(XEmacPs *sptr_emacps, kuint32_t phy_addr)
 {
     kuint16_t status;
 
     /*!< Read Phy Status register twice to get the confirmation of the current link status. */
-    XEmacPs_PhyRead(sprt_emacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
-    XEmacPs_PhyRead(sprt_emacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
+    XEmacPs_PhyRead(sptr_emacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
+    XEmacPs_PhyRead(sptr_emacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
     
     return !!(status & IEEE_STAT_LINK_STATUS);
 }
 
 /*!
  * @brief   check if phy is configured with auto...
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @param   phy_addr: phy address
  * @retval  1: yes; 0: no
  */
-kbool_t XEmacPs_PhyAutoNegStatus(XEmacPs *sprt_emacps, kuint32_t phy_addr)
+kbool_t XEmacPs_PhyAutoNegStatus(XEmacPs *sptr_emacps, kuint32_t phy_addr)
 {
     kuint16_t status;
 
     /*!< Read Phy Status register twice to get the confirmation of the current link status. */
-    XEmacPs_PhyRead(sprt_emacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
-    XEmacPs_PhyRead(sprt_emacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
+    XEmacPs_PhyRead(sptr_emacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
+    XEmacPs_PhyRead(sptr_emacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
    
     return !!(status & IEEE_STAT_AUTONEGOTIATE_COMPLETE);
 }
 
 /*!
  * @brief   check if phy is configured with auto...
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @param   phy_addr: phy address
  * @retval  1: yes; 0: no
  */
-kint32_t XEmacPs_PhySetup(XEmacPs *sprt_emacps, kuint32_t phy_addr, kint32_t link_speed)
+kint32_t XEmacPs_PhySetup(XEmacPs *sptr_emacps, kuint32_t phy_addr, kint32_t link_speed)
 {
     kuint32_t conv_present = 0;
     kuint32_t convspeeddupsetting = 0;
@@ -680,50 +680,50 @@ kint32_t XEmacPs_PhySetup(XEmacPs *sprt_emacps, kuint32_t phy_addr, kint32_t lin
 #ifdef CONFIG_LINKSPEED_AUTODETECT
     if (link_speed == 1000) 
     {
-        XEmacPs_SetUpSLCRDivisors(sprt_emacps->Config.BaseAddress, 1000);
+        XEmacPs_SetUpSLCRDivisors(sptr_emacps->Config.BaseAddress, 1000);
         convspeeddupsetting = XEMACPS_GMII2RGMII_SPEED1000_FD;
     } 
     else if (link_speed == 100) 
     {
-        XEmacPs_SetUpSLCRDivisors(sprt_emacps->Config.BaseAddress, 100);
+        XEmacPs_SetUpSLCRDivisors(sptr_emacps->Config.BaseAddress, 100);
         convspeeddupsetting = XEMACPS_GMII2RGMII_SPEED100_FD;
     }
     else if (link_speed == 10)
     {
-        XEmacPs_SetUpSLCRDivisors(sprt_emacps->Config.BaseAddress, 10);
+        XEmacPs_SetUpSLCRDivisors(sptr_emacps->Config.BaseAddress, 10);
         convspeeddupsetting = XEMACPS_GMII2RGMII_SPEED10_FD;
     } 
     else 
     {
         print_debug("Phy setup error \r\n");
-        return -ER_UNVALID;
+        return -ER_INVALID;
     }
 
 #elif defined(CONFIG_LINKSPEED1000)
-    XEmacPs_SetUpSLCRDivisors(sprt_emacps->Config.BaseAddress,1000);
+    XEmacPs_SetUpSLCRDivisors(sptr_emacps->Config.BaseAddress,1000);
     link_speed = 1000;
-    configure_IEEE_phy_speed(sprt_emacps, phy_addr, link_speed);
+    configure_IEEE_phy_speed(sptr_emacps, phy_addr, link_speed);
     convspeeddupsetting = XEMACPS_GMII2RGMII_SPEED1000_FD;
     delay_s(1);
 
 #elif defined(CONFIG_LINKSPEED100)
-    XEmacPs_SetUpSLCRDivisors(sprt_emacps->Config.BaseAddress,100);
+    XEmacPs_SetUpSLCRDivisors(sptr_emacps->Config.BaseAddress,100);
     link_speed = 100;
-    configure_IEEE_phy_speed(sprt_emacps, phy_addr, link_speed);
+    configure_IEEE_phy_speed(sptr_emacps, phy_addr, link_speed);
     convspeeddupsetting = XEMACPS_GMII2RGMII_SPEED100_FD;
     delay_s(1);
 
 #elif defined(CONFIG_LINKSPEED10)
-    XEmacPs_SetUpSLCRDivisors(sprt_emacps->Config.BaseAddress,10);
+    XEmacPs_SetUpSLCRDivisors(sptr_emacps->Config.BaseAddress,10);
     link_speed = 10;
-    configure_IEEE_phy_speed(sprt_emacps, phy_addr, link_speed);
+    configure_IEEE_phy_speed(sptr_emacps, phy_addr, link_speed);
     convspeeddupsetting = XEMACPS_GMII2RGMII_SPEED10_FD;
     delay_s(1);
 #endif
 
     if (conv_present) 
     {
-        XEmacPs_PhyWrite(sprt_emacps, convphyaddr,
+        XEmacPs_PhyWrite(sptr_emacps, convphyaddr,
                 XEMACPS_GMII2RGMII_REG_NUM, convspeeddupsetting);
     }
 
@@ -734,62 +734,62 @@ kint32_t XEmacPs_PhySetup(XEmacPs *sprt_emacps, kuint32_t phy_addr, kint32_t lin
 /*!< ------------------------------------------------------------------------- */
 /*!
  * @brief   stop emac
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @retval  errno
  */
-kint32_t XEmacPs_Stop(XEmacPs *sprt_emacps)
+kint32_t XEmacPs_Stop(XEmacPs *sptr_emacps)
 {
     kuint32_t Reg;
 
-    if ((!sprt_emacps) ||
-        (!sprt_emacps->IsReady))
+    if ((!sptr_emacps) ||
+        (!sptr_emacps->IsReady))
         return -ER_NREADY;
 
     /*!< Disable all interrupts */
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, 
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, 
                         XEMACPS_IDR_OFFSET, XEMACPS_IXR_ALL_MASK);
 
     /*!< Disable the receiver & transmitter */
-    Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
+    Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
     Reg &= (kuint32_t)(~XEMACPS_NWCTRL_RXEN_MASK);
     Reg &= (kuint32_t)(~XEMACPS_NWCTRL_TXEN_MASK);
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
 
     /*!< Mark as stopped */
-    sprt_emacps->IsStarted = false;
+    sptr_emacps->IsStarted = false;
     return ER_NORMAL;
 }
 
 /*!
  * @brief   set queue address to register
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @param   QPtr: queue base address
  * @param   QueueNum: queue length
  * @param   Direction: mark whether it is sending queue or recving queue
  * @retval  errno
  */
-kint32_t XEmacPs_SetQueuePtr(XEmacPs *sprt_emacps, kuint32_t QPtr, kuint8_t QueueNum, kuint16_t Direction)
+kint32_t XEmacPs_SetQueuePtr(XEmacPs *sptr_emacps, kuint32_t QPtr, kuint8_t QueueNum, kuint16_t Direction)
 {
     /*!< Assert bad arguments and conditions */
-    if ((!sprt_emacps) ||
-        (!sprt_emacps->IsReady))
+    if ((!sptr_emacps) ||
+        (!sptr_emacps->IsReady))
         return -ER_NREADY;
 
     /*!< If already started, then there is nothing to do */
-    if (sprt_emacps->IsStarted)
+    if (sptr_emacps->IsStarted)
          return ER_NORMAL;
 
     if (QueueNum == 0x00U) 
     {
         if (Direction == XEMACPS_SEND)
-            XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, 
+            XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, 
                             XEMACPS_TXQBASE_OFFSET, (QPtr & ULONG64_LO_MASK));
         else
-            XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, 
+            XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, 
                             XEMACPS_RXQBASE_OFFSET, (QPtr & ULONG64_LO_MASK));
     }
     else
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, 
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, 
                             XEMACPS_TXQ1BASE_OFFSET, (QPtr & ULONG64_LO_MASK));
 
     return ER_NORMAL;
@@ -797,26 +797,26 @@ kint32_t XEmacPs_SetQueuePtr(XEmacPs *sprt_emacps, kuint32_t QPtr, kuint8_t Queu
 
 /*!
  * @brief   set mac address to register
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @param   AddressPtr: mac address
  * @param   Index: mac index (0 ~ 5)
  * @retval  errno
  */
-kint32_t XEmacPs_SetMacAddress(XEmacPs *sprt_emacps, void *AddressPtr, kuint8_t Index)
+kint32_t XEmacPs_SetMacAddress(XEmacPs *sptr_emacps, void *AddressPtr, kuint8_t Index)
 {
     kuint32_t MacAddr;
     kuint8_t *Aptr = (kuint8_t *)AddressPtr;
     kuint8_t IndexLoc = Index;
 
-    if ((!sprt_emacps) ||
+    if ((!sptr_emacps) ||
         (!Aptr) ||
-        (!sprt_emacps->IsReady) ||
+        (!sptr_emacps->IsReady) ||
         (!Index) ||
         (IndexLoc > (kuint8_t)XEMACPS_MAX_TYPE_ID))
         return -ER_NREADY;
 
     /*!< Be sure device has been stopped */
-    if (sprt_emacps->IsStarted)
+    if (sptr_emacps->IsStarted)
         return -ER_LOCKED;
 
     /*!< Index ranges 1 to 4, for offset calculation is 0 to 3. */
@@ -827,11 +827,11 @@ kint32_t XEmacPs_SetMacAddress(XEmacPs *sprt_emacps, void *AddressPtr, kuint8_t 
     MacAddr |= ((kuint32_t)(*(Aptr + 1)) << 8U);
     MacAddr |= ((kuint32_t)(*(Aptr + 2)) << 16U);
     MacAddr |= ((kuint32_t)(*(Aptr + 3)) << 24U);
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
                 ((kuint32_t)XEMACPS_LADDR1L_OFFSET + ((kuint32_t)IndexLoc * (kuint32_t)8)), MacAddr);
 
     /*!< There are reserved bits in TOP so don't affect them */
-    MacAddr = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress,
+    MacAddr = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress,
                     ((kuint32_t)XEMACPS_LADDR1H_OFFSET + ((kuint32_t)IndexLoc * (kuint32_t)8)));
 
     MacAddr &= (kuint32_t)(~XEMACPS_LADDR_MACH_MASK);
@@ -840,7 +840,7 @@ kint32_t XEmacPs_SetMacAddress(XEmacPs *sprt_emacps, void *AddressPtr, kuint8_t 
     MacAddr |= (kuint32_t)(*(Aptr + 4));
     MacAddr |= (kuint32_t)(*(Aptr + 5)) << 8U;
 
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
                 ((kuint32_t)XEMACPS_LADDR1H_OFFSET + ((kuint32_t)IndexLoc * (kuint32_t)8)), MacAddr);
 
     return ER_NORMAL;
@@ -848,30 +848,30 @@ kint32_t XEmacPs_SetMacAddress(XEmacPs *sprt_emacps, void *AddressPtr, kuint8_t 
 
 /*!
  * @brief   set ID MATCH register
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @param   Id_Check: ID number
  * @param   Index: ID MATCH reg's number
  * @retval  errno
  */
-kint32_t XEmacPs_SetTypeIdCheck(XEmacPs *sprt_emacps, kuint32_t Id_Check, kuint8_t Index)
+kint32_t XEmacPs_SetTypeIdCheck(XEmacPs *sptr_emacps, kuint32_t Id_Check, kuint8_t Index)
 {
     kuint8_t IndexLoc = Index;
 
-    if ((!sprt_emacps) ||
-        (!sprt_emacps->IsReady) ||
+    if ((!sptr_emacps) ||
+        (!sptr_emacps->IsReady) ||
         (!Index) ||
         (IndexLoc > (kuint8_t)XEMACPS_MAX_TYPE_ID))
         return -ER_NREADY;
 
     /*!< Be sure device has been stopped */
-    if (sprt_emacps->IsStarted)
+    if (sptr_emacps->IsStarted)
         return -ER_LOCKED;
 
     /*!< Index ranges 1 to 4, for offset calculation is 0 to 3. */
     IndexLoc--;
 
     /*!< Set the ID bits in MATCHx register */
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
                 ((kuint32_t)XEMACPS_MATCH1_OFFSET + ((kuint32_t)IndexLoc * (kuint32_t)4)), Id_Check);
 
     return ER_NORMAL;
@@ -879,41 +879,41 @@ kint32_t XEmacPs_SetTypeIdCheck(XEmacPs *sprt_emacps, kuint32_t Id_Check, kuint8
 
 /*!
  * @brief   set network cfg register
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @param   Divisor: freq divisor
  * @retval  errno
  */
-kint32_t XEmacPs_SetMdioDivisor(XEmacPs *sprt_emacps, XEmacPs_MdcDiv Divisor)
+kint32_t XEmacPs_SetMdioDivisor(XEmacPs *sptr_emacps, XEmacPs_MdcDiv Divisor)
 {
     kuint32_t Reg;
 
-    if ((!sprt_emacps) ||
-        (!sprt_emacps->IsReady) ||
+    if ((!sptr_emacps) ||
+        (!sptr_emacps->IsReady) ||
         (Divisor > (XEmacPs_MdcDiv)0x7))	            /*!< only last three bits are valid */
         return -ER_NREADY;
 
-    Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET);
+    Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET);
 
     /*!< clear these three bits, could be done with mask */
     Reg &= (kuint32_t)(~XEMACPS_NWCFG_MDCCLKDIV_MASK);
     Reg |= ((kuint32_t)Divisor << XEMACPS_NWCFG_MDC_SHIFT_MASK);
 
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET, Reg);
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET, Reg);
     return ER_NORMAL;
 }
 
 /*!
  * @brief   set emac operating speed
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @param   Speed: phy speed
  * @retval  errno
  */
-kint32_t XEmacPs_SetOperatingSpeed(XEmacPs *sprt_emacps, kuint16_t Speed)
+kint32_t XEmacPs_SetOperatingSpeed(XEmacPs *sptr_emacps, kuint16_t Speed)
 {
     kuint32_t Reg, bps_mask = 0;
 
-    if ((!sprt_emacps) ||
-        (!sprt_emacps->IsReady))
+    if ((!sptr_emacps) ||
+        (!sptr_emacps->IsReady))
         return -ER_NREADY;
 
     switch (Speed) 
@@ -933,11 +933,11 @@ kint32_t XEmacPs_SetOperatingSpeed(XEmacPs *sprt_emacps, kuint16_t Speed)
             return -ER_NSUPPORT;
     }
 
-    Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET);
+    Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET);
     Reg &= (kuint32_t)(~(XEMACPS_NWCFG_1000_MASK | XEMACPS_NWCFG_100_MASK));
 
     /*!< Set register and return */
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET, Reg | bps_mask);
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET, Reg | bps_mask);
     
     return ER_NORMAL;
 }
@@ -960,7 +960,7 @@ void XEmacPs_SetUpSLCRDivisors(kuint32_t mac_baseaddr, kint32_t speed)
     kuint32_t CrlApbDiv1 = 0;
     kuint32_t CrlApbGemCtrl;
 
-    gigeversion = ((mrt_readl(mac_baseaddr + 0xFC)) >> 16) & 0xFFF;
+    gigeversion = ((mr_readl(mac_baseaddr + 0xFC)) >> 16) & 0xFFF;
     if (gigeversion == 2) 
     {
         *(volatile kuint32_t *)(SLCR_UNLOCK_ADDR) = SLCR_UNLOCK_KEY_VALUE;
@@ -1176,22 +1176,22 @@ void XEmacPs_SetUpSLCRDivisors(kuint32_t mac_baseaddr, kint32_t speed)
 
 /*!
  * @brief   set network cfg register
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @param   Options: value
  * @retval  errno
  */
-kint32_t XEmacPs_SetOptions(XEmacPs *sprt_emacps, kuint32_t Options)
+kint32_t XEmacPs_SetOptions(XEmacPs *sptr_emacps, kuint32_t Options)
 {
     kuint32_t Reg;		                                /*!< Generic register contents */
     kuint32_t RegNetCfg;		                        /*!< Reflects original contents of NET_CONFIG */
     kuint32_t RegNewNetCfg;	                            /*!< Reflects new contents of NET_CONFIG */
 
-    if ((!sprt_emacps) ||
-        (!sprt_emacps->IsReady))
+    if ((!sptr_emacps) ||
+        (!sptr_emacps->IsReady))
         return -ER_NREADY;
 
     /*!< Be sure device has been stopped */
-    if (sprt_emacps->IsStarted)
+    if (sptr_emacps->IsStarted)
         return -ER_LOCKED;
 
     /*!< 
@@ -1201,7 +1201,7 @@ kint32_t XEmacPs_SetOptions(XEmacPs *sprt_emacps, kuint32_t Options)
      */
 
     /*!< Grab current register contents */
-    RegNetCfg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET);
+    RegNetCfg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET);
     RegNewNetCfg = RegNetCfg;
 
     /*!< It is configured to max 1536. */
@@ -1242,13 +1242,13 @@ kint32_t XEmacPs_SetOptions(XEmacPs *sprt_emacps, kuint32_t Options)
 
     /*!< Enable jumbo frames */
     if (((Options & XEMACPS_JUMBO_ENABLE_OPTION) != 0x00000000U) &&
-        (sprt_emacps->Version > 2)) 
+        (sptr_emacps->Version > 2)) 
     {
         RegNewNetCfg |= XEMACPS_NWCFG_JUMBO_MASK;
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
                 XEMACPS_JUMBOMAXLEN_OFFSET, XEMACPS_RX_BUF_SIZE_JUMBO);
         
-        Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET);
+        Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET);
         Reg &= ~XEMACPS_DMACR_RXBUF_MASK;
         Reg |= (((((kuint32_t)XEMACPS_RX_BUF_SIZE_JUMBO / (kuint32_t)XEMACPS_RX_BUF_UNIT) +
                 (((((kuint32_t)XEMACPS_RX_BUF_SIZE_JUMBO %
@@ -1256,76 +1256,76 @@ kint32_t XEmacPs_SetOptions(XEmacPs *sprt_emacps, kuint32_t Options)
                 (kuint32_t)(XEMACPS_DMACR_RXBUF_SHIFT)) &
                 (kuint32_t)(XEMACPS_DMACR_RXBUF_MASK));
 
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET, Reg);
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET, Reg);
 
-        sprt_emacps->MaxMtuSize = XEMACPS_MTU_JUMBO;
-        sprt_emacps->MaxFrameSize = XEMACPS_MTU_JUMBO + XEMACPS_HDR_SIZE + XEMACPS_TRL_SIZE;
-        sprt_emacps->MaxVlanFrameSize = sprt_emacps->MaxFrameSize + XEMACPS_HDR_VLAN_SIZE;
-        sprt_emacps->RxBufMask = XEMACPS_RXBUF_LEN_JUMBO_MASK;
+        sptr_emacps->MaxMtuSize = XEMACPS_MTU_JUMBO;
+        sptr_emacps->MaxFrameSize = XEMACPS_MTU_JUMBO + XEMACPS_HDR_SIZE + XEMACPS_TRL_SIZE;
+        sptr_emacps->MaxVlanFrameSize = sptr_emacps->MaxFrameSize + XEMACPS_HDR_VLAN_SIZE;
+        sptr_emacps->RxBufMask = XEMACPS_RXBUF_LEN_JUMBO_MASK;
     }
 
     if (((Options & XEMACPS_SGMII_ENABLE_OPTION) != 0x00000000U) &&
-        (sprt_emacps->Version > 2)) 
+        (sptr_emacps->Version > 2)) 
         RegNewNetCfg |= (XEMACPS_NWCFG_SGMIIEN_MASK | XEMACPS_NWCFG_PCSSEL_MASK);
 
     /*!< Officially change the NET_CONFIG registers if it needs to be modified. */
     if (RegNetCfg != RegNewNetCfg)
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET, RegNewNetCfg);
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET, RegNewNetCfg);
 
     /*!< Enable TX checksum offload */
     if ((Options & XEMACPS_TX_CHKSUM_ENABLE_OPTION) != 0x00000000U) 
     {
-        Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET);
+        Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET);
         Reg |= XEMACPS_DMACR_TCPCKSUM_MASK;
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET, Reg);
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET, Reg);
     }
 
     /*!< Enable transmitter */
     if ((Options & XEMACPS_TRANSMITTER_ENABLE_OPTION) != 0x00000000U) 
     {
-        Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
+        Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
         Reg |= XEMACPS_NWCTRL_TXEN_MASK;
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
     }
 
     /*!< Enable receiver */
     if ((Options & XEMACPS_RECEIVER_ENABLE_OPTION) != 0x00000000U) 
     {
-        Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
+        Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
         Reg |= XEMACPS_NWCTRL_RXEN_MASK;
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
     }
 
     /*!< 
      * The remaining options not handled here are managed elsewhere in the
      * driver. No register modifications are needed at this time. Reflecting
-     * the option in sprt_emacps->Options is good enough for now.
+     * the option in sptr_emacps->Options is good enough for now.
      */
 
     /*!< Set options word to its new value */
-    sprt_emacps->Options |= Options;
+    sptr_emacps->Options |= Options;
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   reset network cfg register
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @param   Options: value
  * @retval  errno
  */
-kint32_t XEmacPs_ClearOptions(XEmacPs *sprt_emacps, kuint32_t Options)
+kint32_t XEmacPs_ClearOptions(XEmacPs *sptr_emacps, kuint32_t Options)
 {
     kuint32_t Reg;		                                /*!< Generic */
     kuint32_t RegNetCfg;		                        /*!< Reflects original contents of NET_CONFIG */
     kuint32_t RegNewNetCfg;	                            /*!< Reflects new contents of NET_CONFIG */
 
-    if ((!sprt_emacps) ||
-        (!sprt_emacps->IsReady))
+    if ((!sptr_emacps) ||
+        (!sptr_emacps->IsReady))
         return -ER_NREADY;
 
     /*!< Be sure device has been stopped */
-    if (sprt_emacps->IsStarted)
+    if (sptr_emacps->IsStarted)
         return -ER_LOCKED;
 
     /*!< 
@@ -1335,7 +1335,7 @@ kint32_t XEmacPs_ClearOptions(XEmacPs *sprt_emacps, kuint32_t Options)
      */
 
     /*!< Grab current register contents */
-    RegNetCfg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress,
+    RegNetCfg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress,
                       XEMACPS_NWCFG_OFFSET);
     RegNewNetCfg = RegNetCfg;
 
@@ -1380,10 +1380,10 @@ kint32_t XEmacPs_ClearOptions(XEmacPs *sprt_emacps, kuint32_t Options)
 
     /*!< Disable jumbo frames */
     if (((Options & XEMACPS_JUMBO_ENABLE_OPTION) != 0x00000000U) &&
-        (sprt_emacps->Version > 2))
+        (sptr_emacps->Version > 2))
     {
         RegNewNetCfg &= (kuint32_t)(~XEMACPS_NWCFG_JUMBO_MASK);
-        Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET);
+        Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET);
 
         Reg &= ~XEMACPS_DMACR_RXBUF_MASK;
         Reg |= (((((kuint32_t)XEMACPS_RX_BUF_SIZE / (kuint32_t)XEMACPS_RX_BUF_UNIT) +
@@ -1392,75 +1392,75 @@ kint32_t XEmacPs_ClearOptions(XEmacPs *sprt_emacps, kuint32_t Options)
             (kuint32_t)(XEMACPS_DMACR_RXBUF_SHIFT)) &
             (kuint32_t)(XEMACPS_DMACR_RXBUF_MASK));
 
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET, Reg);
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET, Reg);
 
-        sprt_emacps->MaxMtuSize = XEMACPS_MTU;
-        sprt_emacps->MaxFrameSize = XEMACPS_MTU + XEMACPS_HDR_SIZE + XEMACPS_TRL_SIZE;
-        sprt_emacps->MaxVlanFrameSize = sprt_emacps->MaxFrameSize + XEMACPS_HDR_VLAN_SIZE;
-        sprt_emacps->RxBufMask = XEMACPS_RXBUF_LEN_MASK;
+        sptr_emacps->MaxMtuSize = XEMACPS_MTU;
+        sptr_emacps->MaxFrameSize = XEMACPS_MTU + XEMACPS_HDR_SIZE + XEMACPS_TRL_SIZE;
+        sptr_emacps->MaxVlanFrameSize = sptr_emacps->MaxFrameSize + XEMACPS_HDR_VLAN_SIZE;
+        sptr_emacps->RxBufMask = XEMACPS_RXBUF_LEN_MASK;
     }
 
     if (((Options & XEMACPS_SGMII_ENABLE_OPTION) != 0x00000000U) &&
-        (sprt_emacps->Version > 2))
+        (sptr_emacps->Version > 2))
         RegNewNetCfg &= (kuint32_t)(~(XEMACPS_NWCFG_SGMIIEN_MASK | XEMACPS_NWCFG_PCSSEL_MASK));
 
     /*!< Officially change the NET_CONFIG registers if it needs to be modified. */
     if (RegNetCfg != RegNewNetCfg)
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
                    XEMACPS_NWCFG_OFFSET, RegNewNetCfg);
 
     /*!< Disable TX checksum offload */
     if ((Options & XEMACPS_TX_CHKSUM_ENABLE_OPTION) != 0x00000000U) 
     {
-        Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET);
+        Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET);
         Reg &= (kuint32_t)(~XEMACPS_DMACR_TCPCKSUM_MASK);
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET, Reg);
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET, Reg);
     }
 
     /*!< Disable transmitter */
     if ((Options & XEMACPS_TRANSMITTER_ENABLE_OPTION) != 0x00000000U) 
     {
-        Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
+        Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
         Reg &= (kuint32_t)(~XEMACPS_NWCTRL_TXEN_MASK);
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
     }
 
     /*!< Disable receiver */
     if ((Options & XEMACPS_RECEIVER_ENABLE_OPTION) != 0x00000000U) 
     {
-        Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
+        Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
         Reg &= (kuint32_t)(~XEMACPS_NWCTRL_RXEN_MASK);
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
     }
 
     /*!< 
      * The remaining options not handled here are managed elsewhere in the
      * driver. No register modifications are needed at this time. Reflecting
-     * option in sprt_emacps->Options is good enough for now.
+     * option in sptr_emacps->Options is good enough for now.
      */
 
     /*!< Set options word to its new value */
-    sprt_emacps->Options &= ~Options;
+    sptr_emacps->Options &= ~Options;
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   clear emac hash
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @retval  errno
  */
-kint32_t XEmacPs_ClearHash(XEmacPs *sprt_emacps)
+kint32_t XEmacPs_ClearHash(XEmacPs *sptr_emacps)
 {
-    if ((!sprt_emacps) ||
-        (!sprt_emacps->IsReady))
+    if ((!sptr_emacps) ||
+        (!sptr_emacps->IsReady))
         return -ER_NREADY;
 
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
                     XEMACPS_HASHL_OFFSET, 0x0U);
 
     /*!< write bits [63:32] in TOP */
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
                     XEMACPS_HASHH_OFFSET, 0x0U);
 
     return ER_NORMAL;
@@ -1468,51 +1468,51 @@ kint32_t XEmacPs_ClearHash(XEmacPs *sprt_emacps)
 
 /*!
  * @brief   reset emac
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @retval  errno
  */
-kint32_t XEmacPs_Reset(XEmacPs *sprt_emacps)
+kint32_t XEmacPs_Reset(XEmacPs *sptr_emacps)
 {
     kuint32_t Reg;
     kuint8_t i;
     kint8_t EmacPs_zero_MAC[6] = { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 };
 
-    if ((!sprt_emacps) ||
-        (!sprt_emacps->IsReady))
+    if ((!sptr_emacps) ||
+        (!sptr_emacps->IsReady))
         return -ER_NREADY;
 
     /*!< Stop the device and reset hardware */
-    XEmacPs_Stop(sprt_emacps);
+    XEmacPs_Stop(sptr_emacps);
 
-    sprt_emacps->Options = XEMACPS_DEFAULT_OPTIONS;
-    sprt_emacps->Version = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, 0xFC);
-    sprt_emacps->Version = (sprt_emacps->Version >> 16) & 0xFFF;
-    sprt_emacps->MaxMtuSize = XEMACPS_MTU;
-    sprt_emacps->MaxFrameSize = XEMACPS_MTU + XEMACPS_HDR_SIZE + XEMACPS_TRL_SIZE;
-    sprt_emacps->MaxVlanFrameSize = sprt_emacps->MaxFrameSize + XEMACPS_HDR_VLAN_SIZE;
-    sprt_emacps->RxBufMask = XEMACPS_RXBUF_LEN_MASK;
+    sptr_emacps->Options = XEMACPS_DEFAULT_OPTIONS;
+    sptr_emacps->Version = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, 0xFC);
+    sptr_emacps->Version = (sptr_emacps->Version >> 16) & 0xFFF;
+    sptr_emacps->MaxMtuSize = XEMACPS_MTU;
+    sptr_emacps->MaxFrameSize = XEMACPS_MTU + XEMACPS_HDR_SIZE + XEMACPS_TRL_SIZE;
+    sptr_emacps->MaxVlanFrameSize = sptr_emacps->MaxFrameSize + XEMACPS_HDR_VLAN_SIZE;
+    sptr_emacps->RxBufMask = XEMACPS_RXBUF_LEN_MASK;
 
     /*!< Setup hardware with default values */
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
             XEMACPS_NWCTRL_OFFSET,
             (XEMACPS_NWCTRL_STATCLR_MASK |
             XEMACPS_NWCTRL_MDEN_MASK) &
             (kuint32_t)(~XEMACPS_NWCTRL_LOOPEN_MASK));
 
-    Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET);
+    Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET);
     Reg &= XEMACPS_NWCFG_MDCCLKDIV_MASK;
     Reg |= ((kuint32_t)XEMACPS_NWCFG_100_MASK | (kuint32_t)XEMACPS_NWCFG_FDEN_MASK | (kuint32_t)XEMACPS_NWCFG_UCASTHASHEN_MASK);
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET, Reg);
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET, Reg);
 
-    if (sprt_emacps->Version > 2) 
+    if (sptr_emacps->Version > 2) 
     {
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET,
-            (XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET) |
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET,
+            (XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCFG_OFFSET) |
                 XEMACPS_NWCFG_DWIDTH_64_MASK));
     }
 
     /*!< dma control reg */
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET,
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET,
             (((((kuint32_t)XEMACPS_RX_BUF_SIZE / (kuint32_t)XEMACPS_RX_BUF_UNIT) +
             (((((kuint32_t)XEMACPS_RX_BUF_SIZE % (kuint32_t)XEMACPS_RX_BUF_UNIT)) != (kuint32_t)0) ? 1U : 0U)) <<
             (kuint32_t)(XEMACPS_DMACR_RXBUF_SHIFT)) &
@@ -1520,53 +1520,53 @@ kint32_t XEmacPs_Reset(XEmacPs *sprt_emacps)
             (kuint32_t)XEMACPS_DMACR_RXSIZE_MASK |
             (kuint32_t)XEMACPS_DMACR_TXSIZE_MASK);
     
-    if (sprt_emacps->Version > 2) 
+    if (sptr_emacps->Version > 2) 
     {
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET,
-            (XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET) |
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET,
+            (XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_DMACR_OFFSET) |
             (kuint32_t)XEMACPS_DMACR_INCR16_AHB_BURST));
     }
 
     /*!< clear send status reg */
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
                XEMACPS_TXSR_OFFSET, 0x0U);
 
     /*!< set queue ptr (tx and rx) */
-    XEmacPs_SetQueuePtr(sprt_emacps, 0, 0x00U, (kuint16_t)XEMACPS_SEND);
-    if (sprt_emacps->Version > 2)
-        XEmacPs_SetQueuePtr(sprt_emacps, 0, 0x01U, (kuint16_t)XEMACPS_SEND);
-    XEmacPs_SetQueuePtr(sprt_emacps, 0, 0x00U, (kuint16_t)XEMACPS_RECV);
+    XEmacPs_SetQueuePtr(sptr_emacps, 0, 0x00U, (kuint16_t)XEMACPS_SEND);
+    if (sptr_emacps->Version > 2)
+        XEmacPs_SetQueuePtr(sptr_emacps, 0, 0x01U, (kuint16_t)XEMACPS_SEND);
+    XEmacPs_SetQueuePtr(sptr_emacps, 0, 0x00U, (kuint16_t)XEMACPS_RECV);
 
     /*!< clear recv status reg */
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
                XEMACPS_RXSR_OFFSET, 0x0U);
 
     /*!< disable interrupt reg*/
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_IDR_OFFSET,
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_IDR_OFFSET,
                XEMACPS_IXR_ALL_MASK);
 
     /*!< clear interrupt status reg (write 1 to clear)*/
-    Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_ISR_OFFSET);
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_ISR_OFFSET, Reg);
+    Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_ISR_OFFSET);
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_ISR_OFFSET, Reg);
 
-    XEmacPs_ClearHash(sprt_emacps);
+    XEmacPs_ClearHash(sptr_emacps);
 
     /*!< clear mac and id register*/
     for (i = 1U; i < 5U; i++) 
     {
-        XEmacPs_SetMacAddress(sprt_emacps, EmacPs_zero_MAC, i);
-        XEmacPs_SetTypeIdCheck(sprt_emacps, 0x00000000U, i);
+        XEmacPs_SetMacAddress(sptr_emacps, EmacPs_zero_MAC, i);
+        XEmacPs_SetTypeIdCheck(sptr_emacps, 0x00000000U, i);
     }
 
     /*!< clear all counters */
     for (i = 0U; i < (kuint8_t)((XEMACPS_LAST_OFFSET - XEMACPS_OCTTXL_OFFSET) / 4U); i++)
-        XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress,
+        XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress,
                             XEMACPS_OCTTXL_OFFSET + (kuint32_t)(((kuint32_t)i) * ((kuint32_t)4)));
 
     /*!< Disable the receiver */
-    Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
+    Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
     Reg &= (kuint32_t)(~XEMACPS_NWCTRL_RXEN_MASK);
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET, Reg);
 
     /*!< 
      * Sync default options with hardware but leave receiver and
@@ -1574,27 +1574,27 @@ kint32_t XEmacPs_Reset(XEmacPs *sprt_emacps)
      * XEMACPS_TRANSMITTER_ENABLE_OPTION and
      * XEMACPS_RECEIVER_ENABLE_OPTION are set.
      */
-    XEmacPs_SetOptions(sprt_emacps, sprt_emacps->Options &
+    XEmacPs_SetOptions(sptr_emacps, sptr_emacps->Options &
                 ~((kuint32_t)XEMACPS_TRANSMITTER_ENABLE_OPTION |
                   (kuint32_t)XEMACPS_RECEIVER_ENABLE_OPTION));
 
-    XEmacPs_ClearOptions(sprt_emacps, ~sprt_emacps->Options);
+    XEmacPs_ClearOptions(sptr_emacps, ~sptr_emacps->Options);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   start emac
- * @param   sprt_emacps: emac structure pointer
+ * @param   sptr_emacps: emac structure pointer
  * @retval  errno
  */
-kint32_t XEmacPs_Start(XEmacPs *sprt_emacps)
+kint32_t XEmacPs_Start(XEmacPs *sptr_emacps)
 {
     kuint32_t Reg;
 
     /*!< Assert bad arguments and conditions */
-    if ((!sprt_emacps) ||
-        (!sprt_emacps->IsReady))
+    if ((!sptr_emacps) ||
+        (!sptr_emacps->IsReady))
         return -ER_NREADY;
 
     /*!< Start DMA */
@@ -1602,58 +1602,58 @@ kint32_t XEmacPs_Start(XEmacPs *sprt_emacps)
      * When starting the DMA channels, both transmit and receive sides
      * need an initialized BD list.
      */
-    if (sprt_emacps->Version == 2) 
+    if (sptr_emacps->Version == 2) 
     {
-        if ((!sprt_emacps->RxBdRing.BaseBdAddr) ||
-            (!sprt_emacps->TxBdRing.BaseBdAddr))
-            return -ER_UNVALID;
+        if ((!sptr_emacps->RxBdRing.BaseBdAddr) ||
+            (!sptr_emacps->TxBdRing.BaseBdAddr))
+            return -ER_INVALID;
 
         /*!< dma transmit channels (tx/rx buffer) */
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_RXQBASE_OFFSET,
-                        sprt_emacps->RxBdRing.BaseBdAddr);
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_RXQBASE_OFFSET,
+                        sptr_emacps->RxBdRing.BaseBdAddr);
 
-        XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_TXQBASE_OFFSET,
-                        sprt_emacps->TxBdRing.BaseBdAddr);
+        XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_TXQBASE_OFFSET,
+                        sptr_emacps->TxBdRing.BaseBdAddr);
     }
 
     /*!< clear any existed int status */
-    XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress, XEMACPS_ISR_OFFSET, XEMACPS_IXR_ALL_MASK);
+    XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress, XEMACPS_ISR_OFFSET, XEMACPS_IXR_ALL_MASK);
 
     /*!< Enable transmitter if not already enabled */
-    if ((sprt_emacps->Options & (kuint32_t)XEMACPS_TRANSMITTER_ENABLE_OPTION) != 0x00000000U) 
+    if ((sptr_emacps->Options & (kuint32_t)XEMACPS_TRANSMITTER_ENABLE_OPTION) != 0x00000000U) 
     {
-        Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
+        Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
         if (!(Reg & XEMACPS_NWCTRL_TXEN_MASK))
         {
-            XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+            XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
                         XEMACPS_NWCTRL_OFFSET,
                         Reg | (kuint32_t)XEMACPS_NWCTRL_TXEN_MASK);
         }
     }
 
     /*!< Enable receiver if not already enabled */
-    if ((sprt_emacps->Options & XEMACPS_RECEIVER_ENABLE_OPTION) != 0x00000000U) 
+    if ((sptr_emacps->Options & XEMACPS_RECEIVER_ENABLE_OPTION) != 0x00000000U) 
     {
-        Reg = XEmacPs_ReadReg(sprt_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
+        Reg = XEmacPs_ReadReg(sptr_emacps->Config.BaseAddress, XEMACPS_NWCTRL_OFFSET);
         if (!(Reg & XEMACPS_NWCTRL_RXEN_MASK)) 
         {
-            XEmacPs_WriteReg(sprt_emacps->Config.BaseAddress,
+            XEmacPs_WriteReg(sptr_emacps->Config.BaseAddress,
                         XEMACPS_NWCTRL_OFFSET,
                         Reg | (kuint32_t)XEMACPS_NWCTRL_RXEN_MASK);
         }
     }
 
     /*!< Enable TX and RX interrupts */
-    XEmacPs_IntEnable(sprt_emacps, 
+    XEmacPs_IntEnable(sptr_emacps, 
             (XEMACPS_IXR_TX_ERR_MASK | XEMACPS_IXR_RX_ERR_MASK | 
             (kuint32_t)XEMACPS_IXR_FRAMERX_MASK | (kuint32_t)XEMACPS_IXR_TXCOMPL_MASK));
 
     /*!< Enable TX Q1 Interrupts */
-    if (sprt_emacps->Version > 2)
-        XEmacPs_IntQ1Enable(sprt_emacps, XEMACPS_INTQ1_IXR_ALL_MASK);
+    if (sptr_emacps->Version > 2)
+        XEmacPs_IntQ1Enable(sptr_emacps, XEMACPS_INTQ1_IXR_ALL_MASK);
 
     /*!< Mark as started */
-    sprt_emacps->IsStarted = true;
+    sptr_emacps->IsStarted = true;
     return ER_NORMAL;
 }
 
@@ -1665,46 +1665,46 @@ kint32_t XEmacPs_Start(XEmacPs *sprt_emacps)
  */
 XEmacPs_Config *XEmacPs_LookupConfig(kuint16_t DeviceId)
 {
-    XEmacPs_Config *sprt_config = mrt_nullptr;
+    XEmacPs_Config *sptr_config = mr_nullptr;
     kuint32_t i;
 
     for (i = 0U; i < (kuint32_t)XPAR_XEMACPS_NUM_INSTANCES; i++) 
     {
-        if (sgrt_xmacps_configTable[i].DeviceId == DeviceId) 
+        if (sgtc_xmacps_configTable[i].DeviceId == DeviceId) 
         {
-            sprt_config = &sgrt_xmacps_configTable[i];
+            sptr_config = &sgtc_xmacps_configTable[i];
             break;
         }
     }
 
-    return sprt_config;
+    return sptr_config;
 }
 
 /*!
  * @brief   initialize emac configuation
- * @param   sprt_emacps: emac structure pointer
- * @param   sprt_config: emac configuration structure
+ * @param   sptr_emacps: emac structure pointer
+ * @param   sptr_config: emac configuration structure
  * @param   EffectiveAddress: emac physical address
  * @retval  errno
  */
-kint32_t XEmacPs_CfgInitialize(XEmacPs *sprt_emacps, XEmacPs_Config *sprt_config, kuint32_t EffectiveAddress)
+kint32_t XEmacPs_CfgInitialize(XEmacPs *sptr_emacps, XEmacPs_Config *sptr_config, kuint32_t EffectiveAddress)
 {
     /*!< Verify arguments */
-    if ((!sprt_emacps) ||
-        (!sprt_config))
+    if ((!sptr_emacps) ||
+        (!sptr_config))
         return -ER_NULLPTR;
 
     /*!< Set device base address and ID */
-    sprt_emacps->Config.DeviceId = sprt_config->DeviceId;
-    sprt_emacps->Config.BaseAddress = EffectiveAddress;
-    sprt_emacps->Config.IsCacheCoherent = sprt_config->IsCacheCoherent;
+    sptr_emacps->Config.DeviceId = sptr_config->DeviceId;
+    sptr_emacps->Config.BaseAddress = EffectiveAddress;
+    sptr_emacps->Config.IsCacheCoherent = sptr_config->IsCacheCoherent;
 
     /*!< Set callbacks to an initial stub routine */
-    sprt_emacps->SendHandler = (XEmacPs_Handler)mrt_nullptr;
-    sprt_emacps->RecvHandler = (XEmacPs_Handler)mrt_nullptr;
-    sprt_emacps->ErrorHandler = (XEmacPs_ErrHandler)mrt_nullptr;
+    sptr_emacps->SendHandler = (XEmacPs_Handler)mr_nullptr;
+    sptr_emacps->RecvHandler = (XEmacPs_Handler)mr_nullptr;
+    sptr_emacps->ErrorHandler = (XEmacPs_ErrHandler)mr_nullptr;
 
     /*!< Reset the hardware and set default options */
-    sprt_emacps->IsReady = true;
-    return XEmacPs_Reset(sprt_emacps);
+    sptr_emacps->IsReady = true;
+    return XEmacPs_Reset(sptr_emacps);
 }

@@ -25,13 +25,13 @@ typedef struct fwk_irq_data srt_fwk_irq_data_t;
 
 typedef struct fwk_irq_chip 
 {
-	void (*irq_enable) (struct fwk_irq_data *sprt_data);
-	void (*irq_disable) (struct fwk_irq_data *sprt_data);
-	void (*irq_mask) (struct fwk_irq_data *sprt_data);
-	void (*irq_unmask) (struct fwk_irq_data *sprt_data);
-	kbool_t (*irq_ack) (struct fwk_irq_data *sprt_data);
-	kbool_t (*irq_is_enabled) (struct fwk_irq_data *sprt_data);
-	kint32_t (*irq_set_type) (struct fwk_irq_data *sprt_data, kuint32_t type);
+	void (*irq_enable) (struct fwk_irq_data *sptr_data);
+	void (*irq_disable) (struct fwk_irq_data *sptr_data);
+	void (*irq_mask) (struct fwk_irq_data *sptr_data);
+	void (*irq_unmask) (struct fwk_irq_data *sptr_data);
+	kbool_t (*irq_ack) (struct fwk_irq_data *sptr_data);
+	kbool_t (*irq_is_enabled) (struct fwk_irq_data *sptr_data);
+	kint32_t (*irq_set_type) (struct fwk_irq_data *sptr_data, kuint32_t type);
 
 } srt_fwk_irq_chip_t;
 
@@ -40,14 +40,14 @@ typedef struct fwk_irq_generic
 	kuaddr_t manage_reg;
 	kuaddr_t status_reg;
 
-	struct fwk_irq_chip sgrt_chip;
+	struct fwk_irq_chip sgtc_chip;
 	void *private_data;
 
 } srt_fwk_irq_generic_t;
 
 /*!< The globals */
-extern struct fwk_irq_chip sgrt_fwk_irq_dummy_chip;
-extern struct fwk_irq_chip sgrt_fwk_irq_generic_chip;
+extern struct fwk_irq_chip sgtc_fwk_irq_dummy_chip;
+extern struct fwk_irq_chip sgtc_fwk_irq_generic_chip;
 
 /*!< The functions */
 extern void fwk_enable_irq(kint32_t irq);
@@ -56,9 +56,9 @@ extern void fwk_irq_set_type(kint32_t irq, kuint32_t flags);
 extern kbool_t fwk_irq_is_acked(kint32_t irq);
 extern kbool_t fwk_irq_is_enabled(kint32_t irq);
 
-extern void fwk_irq_setup_generic_chip(kint32_t irq_base, kuint32_t irq_max, struct fwk_irq_generic *sprt_gc, void *chip_data);
+extern void fwk_irq_setup_generic_chip(kint32_t irq_base, kuint32_t irq_max, struct fwk_irq_generic *sptr_gc, void *chip_data);
 extern void fwk_irq_shutdown_generic_chip(kint32_t irq_base, kuint32_t irq_max);
-extern struct fwk_irq_generic *fwk_irq_get_generic_data(struct fwk_irq_data *sprt_data);
+extern struct fwk_irq_generic *fwk_irq_get_generic_data(struct fwk_irq_data *sptr_data);
 
 #ifdef __cplusplus
 	}

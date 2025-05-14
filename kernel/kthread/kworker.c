@@ -23,21 +23,21 @@
 
 /*!< The globals */
 static tid_t g_kworker_tid;
-static struct thread_attr sgrt_kworker_attr;
+static struct thread_attr sgtc_kworker_attr;
 static kuint32_t g_kworker_stack[KWORKER_THREAD_STACK_SIZE];
 
-static DECLARE_WORKQUEUE(sgrt_kworker_wqh);
+static DECLARE_WORKQUEUE(sgtc_kworker_wqh);
 
 /*!< API functions */
 /*!
- * @brief	add sprt_wq to sgrt_kworker_wqh
- * @param  	sprt_wq: new work
+ * @brief	add sptr_wq to sgtc_kworker_wqh
+ * @param  	sptr_wq: new work
  * @retval 	none
  * @note   	none
  */
-void schedule_work(struct workqueue *sprt_wq)
+void schedule_work(struct workqueue *sptr_wq)
 {
-    queue_work(&sgrt_kworker_wqh, sprt_wq);
+    queue_work(&sgtc_kworker_wqh, sptr_wq);
 }
 
 /*!
@@ -48,22 +48,22 @@ void schedule_work(struct workqueue *sprt_wq)
  */
 static void *kworker_entry(void *args)
 {
-    struct workqueue *sprt_wq;
-    struct workqueue *sprt_temp;
+    struct workqueue *sptr_wq;
+    struct workqueue *sptr_temp;
 
-    print_info("%s is enter, which tid is: %d\r\n", __FUNCTION__, mrt_current->tid);
+    print_info("%s is enter, which tid is: %d\r\n", __FUNCTION__, mr_current->tid);
 
     for (;;)
     {
-        if (is_workqueue_empty(&sgrt_kworker_wqh))
+        if (is_workqueue_empty(&sgtc_kworker_wqh))
             goto END;
 
-        foreach_workqueue_safe(sprt_wq, sprt_temp, &sgrt_kworker_wqh)
+        foreach_workqueue_safe(sptr_wq, sptr_temp, &sgtc_kworker_wqh)
         {
-            if (sprt_wq->func)
-                sprt_wq->func(sprt_wq);
+            if (sptr_wq->func)
+                sptr_wq->func(sptr_wq);
 
-            detach_work(sprt_wq);
+            detach_work(sptr_wq);
         }
 
         continue;
@@ -83,21 +83,21 @@ END:
  */
 kint32_t kworker_init(void)
 {
-    struct thread_attr *sprt_attr = &sgrt_kworker_attr;
+    struct thread_attr *sptr_attr = &sgtc_kworker_attr;
 
-	sprt_attr->detachstate = THREAD_CREATE_JOINABLE;
-	sprt_attr->inheritsched	= THREAD_INHERIT_SCHED;
-	sprt_attr->schedpolicy = THREAD_SCHED_FIFO;
+	sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
+	sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;
+	sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-	thread_set_stack(sprt_attr, mrt_nullptr, g_kworker_stack, sizeof(g_kworker_stack));
+	thread_set_stack(sptr_attr, mr_nullptr, g_kworker_stack, sizeof(g_kworker_stack));
     /*!< lowest priority */
-	thread_set_priority(sprt_attr, THREAD_PROTY_KWORKER);
+	thread_set_priority(sptr_attr, THREAD_PROTY_KWORKER);
     /*!< default time slice */
-    thread_set_time_slice(sprt_attr, THREAD_TIME_DEFUALT);
+    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
 
     /*!< register thread */
-    g_kworker_tid = kernel_thread_create(-1, sprt_attr, kworker_entry, mrt_nullptr);
+    g_kworker_tid = kernel_thread_create(-1, sptr_attr, kworker_entry, mr_nullptr);
     if (g_kworker_tid >= 0)
     {
         thread_set_name(g_kworker_tid, "kworker_entry");

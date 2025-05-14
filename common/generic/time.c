@@ -24,15 +24,15 @@
 volatile kutime_t jiffies = JIFFIES_INITVAL;
 volatile kutime_t jiffies_out = 0;
 
-kutime_t *ptr_systick_counter = mrt_nullptr;
+kutime_t *ptr_systick_counter = mr_nullptr;
 kutime_t g_delay_timer_counter = 0;
-struct time_clock sgrt_systime_clock;
+struct time_clock sgtc_systime_clock;
 
 static kuint32_t g_simple_delay_timer = 0;
 static kuint32_t g_simple_timeout_cnt = 0;
 
-static DECLARE_LIST_HEAD(sgrt_global_timer_list);
-static DECLARE_SPIN_LOCK(sgrt_global_timer_lock);
+static DECLARE_LIST_HEAD(sgtc_global_timer_list);
+static DECLARE_SPIN_LOCK(sgtc_global_timer_lock);
 
 /*!< API function */
 /*!
@@ -63,7 +63,7 @@ void simple_delay_timer_runs(void)
         g_simple_timeout_cnt = (g_simple_timeout_cnt >= 255) ? TIMER_DELAY_COUNTER_INIT : (g_simple_timeout_cnt + 1);
     }
 
-    g_delay_timer_counter = mrt_bit_mask(g_simple_timeout_cnt, ~TIMER_DELAY_COUNTER_MAX, 24U) + g_simple_delay_timer;
+    g_delay_timer_counter = mr_bit_mask(g_simple_timeout_cnt, ~TIMER_DELAY_COUNTER_MAX, 24U) + g_simple_delay_timer;
 }
 
 /*!
@@ -75,7 +75,7 @@ void simple_delay_timer_runs(void)
 void delay_cnt(kuint32_t n)
 {
     while (n--)
-        mrt_delay_nop();
+        mr_delay_nop();
 }
 
 /*!
@@ -124,7 +124,7 @@ void wait_secs(kuint32_t seconds)
 {
     kutime_t count = jiffies + secs_to_jiffies(seconds);
     
-    while (mrt_time_before(jiffies, count));
+    while (mr_time_before(jiffies, count));
 }
 
 /*!
@@ -137,7 +137,7 @@ void wait_msecs(kuint32_t milseconds)
 {
     kutime_t count = jiffies + msecs_to_jiffies(milseconds);
     
-    while (mrt_time_before(jiffies, count));
+    while (mr_time_before(jiffies, count));
 }
 
 /*!
@@ -150,7 +150,7 @@ void wait_usecs(kuint32_t useconds)
 {
     kutime_t count = jiffies + usecs_to_jiffies(useconds);
     
-    while (mrt_time_before(jiffies, count));
+    while (mr_time_before(jiffies, count));
 }
 
 /*!
@@ -159,93 +159,93 @@ void wait_usecs(kuint32_t useconds)
  * @retval  none
  * @note    none
  */
-void msecs_to_timeclock(struct time_clock *sprt_tclk, kutype_t milseconds)
+void msecs_to_timeclock(struct time_clock *sptr_tclk, kutype_t milseconds)
 {
     kuint32_t temp;
 
-    sprt_tclk->milsecond = udiv_remainder(milseconds, 1000);
+    sptr_tclk->milsecond = udiv_remainder(milseconds, 1000);
     temp = udiv_integer(milseconds, 1000);
  
-    sprt_tclk->second = udiv_remainder(temp, 60);
+    sptr_tclk->second = udiv_remainder(temp, 60);
     temp = udiv_integer(temp, 60);
 
-    sprt_tclk->minute = udiv_remainder(temp, 60);
+    sptr_tclk->minute = udiv_remainder(temp, 60);
     temp = udiv_integer(temp, 60);
 
-    sprt_tclk->hour = udiv_remainder(temp, 60);
+    sptr_tclk->hour = udiv_remainder(temp, 60);
     temp = udiv_integer(temp, 60);
 
-    sprt_tclk->day = udiv_remainder(temp, 24);
+    sptr_tclk->day = udiv_remainder(temp, 24);
     temp = udiv_integer(temp, 24);
 
-    sprt_tclk->month = udiv_remainder(temp, 30);
+    sptr_tclk->month = udiv_remainder(temp, 30);
     temp = udiv_integer(temp, 30);
 
-    sprt_tclk->year = udiv_remainder(temp, 12);
+    sptr_tclk->year = udiv_remainder(temp, 12);
 }
 
 /*!
  * @brief   initial timer
- * @param   sprt_timer: timer
+ * @param   sptr_timer: timer
  * @param	entry: timeout function
  * @param	data: argument for timeout function
  * @retval  none
  * @note    none
  */
-void setup_timer(struct timer_list *sprt_timer, void (*entry)(kuint32_t), kuint32_t data)
+void setup_timer(struct timer_list *sptr_timer, void (*entry)(kuint32_t), kuint32_t data)
 {
-    if (!isValid(sprt_timer))
+    if (!isValid(sptr_timer))
         return;
 
-    mrt_setup_timer(sprt_timer, entry, data);
+    mr_setup_timer(sptr_timer, entry, data);
 }
 
 /*!
  * @brief   add timer to global list
- * @param   sprt_timer
+ * @param   sptr_timer
  * @retval  none
  * @note    systick interrupt will traverses the global list
  */
-void add_timer(struct timer_list *sprt_timer)
+void add_timer(struct timer_list *sptr_timer)
 {
-    if ((!isValid(sprt_timer)) || 
-        (!sprt_timer->expires))
+    if ((!isValid(sptr_timer)) || 
+        (!sptr_timer->expires))
         return;
 
-    spin_lock_irqsave(&sgrt_global_timer_lock);
-    list_head_add_tail(&sgrt_global_timer_list, &sprt_timer->sgrt_link);
-    spin_unlock_irqrestore(&sgrt_global_timer_lock);
+    spin_lock_irqsave(&sgtc_global_timer_lock);
+    list_head_add_tail(&sgtc_global_timer_list, &sptr_timer->sgtc_link);
+    spin_unlock_irqrestore(&sgtc_global_timer_lock);
 }
 
 /*!
  * @brief   delete timer from global list
- * @param   sprt_timer
+ * @param   sptr_timer
  * @retval  none
  * @note    none
  */
-void del_timer(struct timer_list *sprt_timer)
+void del_timer(struct timer_list *sptr_timer)
 {
-    if (!isValid(sprt_timer))
+    if (!isValid(sptr_timer))
         return;
 
-    spin_lock_irqsave(&sgrt_global_timer_lock);
-    list_head_del_safe(&sgrt_global_timer_list, &sprt_timer->sgrt_link);
-    spin_unlock_irqrestore(&sgrt_global_timer_lock);
+    spin_lock_irqsave(&sgtc_global_timer_lock);
+    list_head_del_safe(&sgtc_global_timer_list, &sptr_timer->sgtc_link);
+    spin_unlock_irqrestore(&sgtc_global_timer_lock);
 }
 
 /*!
  * @brief   find timer from global list
- * @param   sprt_timer
+ * @param   sptr_timer
  * @retval  none
  * @note    1: found; 0: not found
  */
-kbool_t find_timer(struct timer_list *sprt_timer)
+kbool_t find_timer(struct timer_list *sptr_timer)
 {
-    struct timer_list *sprt_any;
+    struct timer_list *sptr_any;
 
-    foreach_list_next_entry(sprt_any, &sgrt_global_timer_list, sgrt_link)
+    foreach_list_next_entry(sptr_any, &sgtc_global_timer_list, sgtc_link)
     {
-        if (sprt_timer == sprt_any)
+        if (sptr_timer == sptr_any)
             return true;
     }
 
@@ -254,24 +254,24 @@ kbool_t find_timer(struct timer_list *sprt_timer)
 
 /*!
  * @brief   modilfy timer period
- * @param   sprt_timer
+ * @param   sptr_timer
  * @param	expires: period
  * @retval  none
  * @note    if timer has not been added to list, add it right away
  */
-void mod_timer(struct timer_list *sprt_timer, kutime_t expires)
+void mod_timer(struct timer_list *sptr_timer, kutime_t expires)
 {
-    if (!isValid(sprt_timer))
+    if (!isValid(sptr_timer))
         return;
 
-    sprt_timer->expires = expires;
+    sptr_timer->expires = expires;
     
 #if 0
-    if (!find_timer(sprt_timer)) {
+    if (!find_timer(sptr_timer)) {
 #else
-    if (mrt_list_head_empty(&sprt_timer->sgrt_link)) {
+    if (mr_list_head_empty(&sptr_timer->sgtc_link)) {
 #endif
-        add_timer(sprt_timer);
+        add_timer(sptr_timer);
     }
 }
 
@@ -284,17 +284,17 @@ void mod_timer(struct timer_list *sprt_timer, kutime_t expires)
  */
 void do_timer_event(void)
 {
-    struct timer_list *sprt_timer;
+    struct timer_list *sptr_timer;
 
-    foreach_list_next_entry(sprt_timer, &sgrt_global_timer_list, sgrt_link)
+    foreach_list_next_entry(sptr_timer, &sgtc_global_timer_list, sgtc_link)
     {
-        if (!sprt_timer->expires)
+        if (!sptr_timer->expires)
             continue;
 
-        if (mrt_time_after(jiffies, sprt_timer->expires))
+        if (mr_time_after(jiffies, sptr_timer->expires))
         {
-            if (sprt_timer->entry)
-                sprt_timer->entry(sprt_timer->data);
+            if (sptr_timer->entry)
+                sptr_timer->entry(sptr_timer->data);
         }
     }
 }

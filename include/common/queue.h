@@ -31,8 +31,8 @@ enum __ERT_PQ_TYPE
 
 struct pq_data
 {
-    void (*release)(struct pq_data *sprt_pqd);
-    kbool_t (*dequeue_chk)(struct pq_data *sprt_pqd, kusize_t limit);
+    void (*release)(struct pq_data *sptr_pqd);
+    kbool_t (*dequeue_chk)(struct pq_data *sptr_pqd, kusize_t limit);
 };
 
 typedef struct pq_queue
@@ -44,19 +44,19 @@ typedef struct pq_queue
     kint32_t len;
 
     kusize_t tot_len;
-    struct pq_data *sprt_data[];
+    struct pq_data *sptr_data[];
 
 } srt_pq_t;
 
 /*!< The functions */
 extern struct pq_queue *pq_queue_create(kint32_t type, kusize_t data_len);
-extern void pq_queue_destroy(struct pq_queue *sprt_pq);
-extern kint32_t pq_enqueue(struct pq_queue *sprt_pq, struct pq_data *sprt_data);
-extern void *pq_dequeue(struct pq_queue *sprt_pq);
-extern void *pq_dequeue_with_chk(struct pq_queue *sprt_pq, kusize_t limit);
-extern void *pq_lookback(struct pq_queue *sprt_pq, kint32_t *base);
-extern void *pq_lookfront(struct pq_queue *sprt_pq, kint32_t *base);
-extern kint32_t pq_queue_get_size(struct pq_queue *sprt_pq);
+extern void pq_queue_destroy(struct pq_queue *sptr_pq);
+extern kint32_t pq_enqueue(struct pq_queue *sptr_pq, struct pq_data *sptr_data);
+extern void *pq_dequeue(struct pq_queue *sptr_pq);
+extern void *pq_dequeue_with_chk(struct pq_queue *sptr_pq, kusize_t limit);
+extern void *pq_lookback(struct pq_queue *sptr_pq, kint32_t *base);
+extern void *pq_lookfront(struct pq_queue *sptr_pq, kint32_t *base);
+extern kint32_t pq_queue_get_size(struct pq_queue *sptr_pq);
 
 #ifdef __cplusplus
     }

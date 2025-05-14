@@ -21,7 +21,7 @@
 #define IDLE_THREAD_STACK_SIZE                      THREAD_STACK_QUAR(1)    /*!< 1/4 page (1kbytes) */
 
 /*!< The globals */
-static struct thread_attr sgrt_idle_attr;
+static struct thread_attr sgtc_idle_attr;
 static kuint32_t g_idle_stack[IDLE_THREAD_STACK_SIZE];
 
 /*!< API functions */
@@ -39,8 +39,8 @@ static void *rest_entry(void *args)
     {   
 #if (!CONFIG_PREEMPT)
         /*!< check priority */
-        struct thread *sprt_ready = get_first_ready_thread();
-        if (!sprt_ready || (sprt_ready == mrt_current))
+        struct thread *sptr_ready = get_first_ready_thread();
+        if (!sptr_ready || (sptr_ready == mr_current))
             continue;
 #endif
 
@@ -58,21 +58,21 @@ static void *rest_entry(void *args)
  */
 kint32_t rest_init(void)
 {
-    struct thread_attr *sprt_attr = &sgrt_idle_attr;
+    struct thread_attr *sptr_attr = &sgtc_idle_attr;
 
-	sprt_attr->detachstate = THREAD_CREATE_JOINABLE;
-	sprt_attr->inheritsched	= THREAD_INHERIT_SCHED;
-	sprt_attr->schedpolicy = THREAD_SCHED_FIFO;
+	sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
+	sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;
+	sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-	thread_set_stack(sprt_attr, mrt_nullptr, g_idle_stack, sizeof(g_idle_stack));
+	thread_set_stack(sptr_attr, mr_nullptr, g_idle_stack, sizeof(g_idle_stack));
     /*!< lowest priority */
-	thread_set_priority(sprt_attr, THREAD_PROTY_IDLE);
+	thread_set_priority(sptr_attr, THREAD_PROTY_IDLE);
     /*!< default time slice */
-    thread_set_time_slice(sprt_attr, THREAD_TIME_DEFUALT);
+    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
 
     /*!< register idle thread */
-    return kernel_thread_idle_create(sprt_attr, rest_entry, mrt_nullptr);
+    return kernel_thread_idle_create(sptr_attr, rest_entry, mr_nullptr);
 }
 
 /*!< end of file */

@@ -36,20 +36,20 @@ typedef struct fatfs_disk
     kchar_t diskPath[FATFS_DISK_PATH_LEN];
     kuint8_t path_lenth;
 
-    FATFS sgrt_fatfs;
-    struct fwk_kobject *sprt_kobj;
+    FATFS sgtc_fatfs;
+    struct fwk_kobject *sptr_kobj;
 
-    struct fwk_gendisk sgrt_gdisk;
+    struct fwk_gendisk sgtc_gdisk;
 
     kuint16_t disk_number;
     kbool_t is_mounted;
 
-    struct list_head sgrt_link;
+    struct list_head sgtc_link;
 
 } srt_fatfs_disk_t;
 
-#define mrt_fatfs_disk_get(gdisk)   \
-            mrt_container_of(gdisk, struct fatfs_disk, sgrt_gdisk)
+#define mr_fatfs_disk_get(gdisk)   \
+            mr_container_of(gdisk, struct fatfs_disk, sgtc_gdisk)
 
 /*!< The functions */
 /*!< sd card */
@@ -63,8 +63,8 @@ extern DSTATUS fs_sdfatfs_initial(kuint8_t physicalDrive);
 extern DSTATUS fs_sdfatfs_release(kuint8_t physicalDrive);
 
 extern struct fatfs_disk *fs_alloc_fatfs(kuint16_t number);
-extern kint32_t fs_register_fatfs(struct fatfs_disk *sprt_fdisk);
-extern void fs_unregister_fatfs(struct fatfs_disk *sprt_fdisk);
+extern kint32_t fs_register_fatfs(struct fatfs_disk *sptr_fdisk);
+extern void fs_unregister_fatfs(struct fatfs_disk *sptr_fdisk);
 
 #ifdef __cplusplus
     }

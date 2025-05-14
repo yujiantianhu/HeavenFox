@@ -25,6 +25,7 @@ obj-y	+=	clk/
 obj-y	+=	irq/
 obj-y	+=	pinctrl/
 obj-y	+=	gpio/
+obj-y	+=	dma/
 obj-y	+=	i2c/
 
 obj-y	+=	chardev/

@@ -30,8 +30,8 @@ struct fwk_block_device
     kchar_t name[DEVICE_NAME_LEN];
     kuint32_t major;
 
-    struct fwk_inode *sprt_inode;
-    struct fwk_gendisk *sprt_gdisk;
+    struct fwk_inode *sptr_inode;
+    struct fwk_gendisk *sptr_gdisk;
 };
 
 /*!< The globals */

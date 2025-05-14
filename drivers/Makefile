@@ -15,6 +15,9 @@ obj-y	+=	clk/
 obj-$(CONFIG_PINCTRL)	+=	pinctrl/
 obj-y	+=	gpio/
 
+obj-$(CONFIG_DMA)	+=	dma/
+obj-$(CONFIG_UART)	+=	uart/
+
 obj-$(CONFIG_INPUTDEV)	+=	input/
 obj-$(CONFIG_I2C)	+=	i2c/
 obj-$(CONFIG_USB)	+=	usb/

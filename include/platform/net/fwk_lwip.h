@@ -35,17 +35,17 @@
 #include <lwip/contrib/apps/udpecho_raw/udpecho_raw.h>
 
 /*!< The functions */
-extern kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sprt_upcb, void *buf, 
-                                        kusize_t size, ip_addr_t *sprt_src, u16_t *port);
-extern kssize_t lwip_udp_raw_sendto(struct udp_pcb *sprt_upcb, const ip_addr_t *sprt_dest, 
+extern kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sptr_upcb, void *buf, 
+                                        kusize_t size, ip_addr_t *sptr_src, u16_t *port);
+extern kssize_t lwip_udp_raw_sendto(struct udp_pcb *sptr_upcb, const ip_addr_t *sptr_dest, 
                                         u16_t dest_port, const void *buf, kusize_t size);
-extern struct udp_pcb *lwip_udp_raw_bind(const ip_addr_t *sprt_ip, u16_t port);
+extern struct udp_pcb *lwip_udp_raw_bind(const ip_addr_t *sptr_ip, u16_t port);
 
-extern kssize_t lwip_tcp_raw_recv(struct tcp_pcb *sprt_tpcb, void *buf, kusize_t size);
-extern kssize_t lwip_tcp_raw_send(struct tcp_pcb *sprt_tpcb, const void *buf, kusize_t size);
-extern struct tcp_pcb *lwip_tcp_raw_bind(const ip_addr_t *sprt_ip, u16_t port);
-extern struct tcp_pcb *lwip_tcp_raw_listen(struct tcp_pcb *sprt_tpcb);
-extern kint32_t lwip_tcp_raw_accept(struct tcp_pcb *sprt_tpcb);
+extern kssize_t lwip_tcp_raw_recv(struct tcp_pcb *sptr_tpcb, void *buf, kusize_t size);
+extern kssize_t lwip_tcp_raw_send(struct tcp_pcb *sptr_tpcb, const void *buf, kusize_t size);
+extern struct tcp_pcb *lwip_tcp_raw_bind(const ip_addr_t *sptr_ip, u16_t port);
+extern struct tcp_pcb *lwip_tcp_raw_listen(struct tcp_pcb *sptr_tpcb);
+extern kint32_t lwip_tcp_raw_accept(struct tcp_pcb *sptr_tpcb);
 
 #ifdef __cplusplus
     }

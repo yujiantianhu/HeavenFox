@@ -34,7 +34,7 @@ using namespace tsk;
 #define NETWORK_TASK_STACK_SIZE                        THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
 
 /*!< The globals */
-static crt_lwip_data_t sgrt_network_task_data;
+static crt_lwip_data_t sgtc_network_task_data;
 
 /*!< API functions */
 /*!
@@ -45,7 +45,7 @@ static crt_lwip_data_t sgrt_network_task_data;
  */
 static void *network_task_entry(void *args)
 {
-    crt_lwip_data_t &cgrt_data = sgrt_network_task_data;
+    crt_lwip_data_t &cgrt_data = sgtc_network_task_data;
 
     cgrt_data.args = args;
     cgrt_data.echo_cnt = 0;
@@ -80,8 +80,8 @@ kint32_t network_task_init(void)
     if (!cprt_task)
         return -ER_FAILD;
 
-    struct mailbox &sgrt_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgrt_mb, cprt_task->get_self(), "network-task-mailbox");
+    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cprt_task->get_self(), "network-task-mailbox");
 
     return ER_NORMAL;
 }

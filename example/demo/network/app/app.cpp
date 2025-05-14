@@ -45,22 +45,22 @@ using namespace tsk;
 /*!< API functions */
 /*!
  * @brief  start up
- * @param  sprt_dctrl
+ * @param  sptr_dctrl
  * @retval none
  * @note   none
  */
 void crt_lwip_data_t::startup(void)
 {
-    struct fwk_sockaddr_in sgrt_local;
-    struct fwk_sockaddr_in sgrt_ip, sgrt_gw, sgrt_netmask;
+    struct fwk_sockaddr_in sgtc_local;
+    struct fwk_sockaddr_in sgtc_ip, sgtc_gw, sgtc_netmask;
     kint32_t sockfd;
     kint32_t retval;
 
-    sgrt_ip.sin_addr.s_addr = fwk_inet_addr(LOCAL_IP_ADDRESS);
-    sgrt_gw.sin_addr.s_addr = fwk_inet_addr(LCOAL_GW_ADDRESS);
-    sgrt_netmask.sin_addr.s_addr = fwk_inet_addr(LOCAL_IP_MASK);
+    sgtc_ip.sin_addr.s_addr = fwk_inet_addr(LOCAL_IP_ADDRESS);
+    sgtc_gw.sin_addr.s_addr = fwk_inet_addr(LCOAL_GW_ADDRESS);
+    sgtc_netmask.sin_addr.s_addr = fwk_inet_addr(LOCAL_IP_MASK);
 
-    retval = net_link_up(NETIF_NAME, &sgrt_ip, &sgrt_gw, &sgrt_netmask);
+    retval = net_link_up(NETIF_NAME, &sgtc_ip, &sgtc_gw, &sgtc_netmask);
     if (retval)
         return;
 
@@ -68,12 +68,12 @@ void crt_lwip_data_t::startup(void)
     if (sockfd < 0)
         goto fail1;
 
-    sgrt_local.sin_port = mrt_htons(LOCAL_IP_PORT);
-    sgrt_local.sin_family = NET_AF_INET;
-    sgrt_local.sin_addr.s_addr = fwk_inet_addr(LOCAL_IP_ADDRESS);
-    memset(sgrt_local.zero, 0, sizeof(sgrt_local.zero));
+    sgtc_local.sin_port = mr_htons(LOCAL_IP_PORT);
+    sgtc_local.sin_family = NET_AF_INET;
+    sgtc_local.sin_addr.s_addr = fwk_inet_addr(LOCAL_IP_ADDRESS);
+    memset(sgtc_local.zero, 0, sizeof(sgtc_local.zero));
 
-    retval = socket_bind(sockfd, (struct fwk_sockaddr *)&sgrt_local, sizeof(struct fwk_sockaddr));
+    retval = socket_bind(sockfd, (struct fwk_sockaddr *)&sgtc_local, sizeof(struct fwk_sockaddr));
     if (retval)
         goto fail2;
 
@@ -94,24 +94,24 @@ fail1:
  */
 void crt_lwip_data_t::excute(void)
 {
-    struct fwk_sockaddr_in sgrt_remote;
+    struct fwk_sockaddr_in sgtc_remote;
     const kchar_t *msg = "HeavenFox OS will be all the best!";
     fwk_socklen_t addrlen;
     kssize_t len;
     crt_task_t *cprt_this = (crt_task_t *)this->args;
-    struct mailbox &sgrt_mb = cprt_this->get_mailbox();
-    struct mail *sprt_mail;
+    struct mailbox &sgtc_mb = cprt_this->get_mailbox();
+    struct mail *sptr_mail;
 
     if (this->fd < 0)
         return;
 
-    sgrt_remote.sin_port = mrt_htons(REMOTE_IP_PORT);
-    sgrt_remote.sin_family = NET_AF_INET;
-    sgrt_remote.sin_addr.s_addr = fwk_inet_addr(REMOTE_IP_ADDRESS);
-    memset(sgrt_remote.zero, 0, sizeof(sgrt_remote.zero));
+    sgtc_remote.sin_port = mr_htons(REMOTE_IP_PORT);
+    sgtc_remote.sin_family = NET_AF_INET;
+    sgtc_remote.sin_addr.s_addr = fwk_inet_addr(REMOTE_IP_ADDRESS);
+    memset(sgtc_remote.zero, 0, sizeof(sgtc_remote.zero));
 
     len = socket_sendto(this->fd, msg, strlen(msg) + 1, 0, 
-                    (struct fwk_sockaddr *)&sgrt_remote, sizeof(struct fwk_sockaddr));
+                    (struct fwk_sockaddr *)&sgtc_remote, sizeof(struct fwk_sockaddr));
     if (len <= 0)
     {
         cout << __func__ << ": send msg failed!" << endl;
@@ -121,7 +121,7 @@ void crt_lwip_data_t::excute(void)
 #if 1
     /*!< blocking */
     len = socket_recvfrom(this->fd, this->rx_buffer, 128, 0, 
-                    (struct fwk_sockaddr *)&sgrt_remote, &addrlen);
+                    (struct fwk_sockaddr *)&sgtc_remote, &addrlen);
     if (len <= 0)
     {
         cout << "recv msg failed!" << endl;
@@ -130,19 +130,19 @@ void crt_lwip_data_t::excute(void)
 
     this->rx_buffer[len] = '\0';
 
-    sprt_mail = mail_recv(&sgrt_mb, 0);
-    if (!isValid(sprt_mail))
+    sptr_mail = mail_recv(&sgtc_mb, 0);
+    if (!isValid(sptr_mail))
         goto END;
 
-    if (sprt_mail->sprt_msg->type == NR_MAIL_TYPE_SERIAL)
+    if (sptr_mail->sptr_msg->type == NR_MAIL_TYPE_SERIAL)
     {
-        kchar_t *buffer = (kchar_t *)sprt_mail->sprt_msg[0].buffer;
+        kchar_t *buffer = (kchar_t *)sptr_mail->sptr_msg[0].buffer;
 
         if (!kstrncmp(buffer, "echo", 4))
             this->echo_cnt++;
     }
 
-    mail_recv_finish(sprt_mail);
+    mail_recv_finish(sptr_mail);
 
 END:
     if (this->echo_cnt)

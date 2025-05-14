@@ -22,32 +22,32 @@
 #include <kernel/spinlock.h>
 
 /*!< The globals */
-static struct fwk_file_table sgrt_fwk_file_table =
+static struct fwk_file_table sgtc_fwk_file_table =
 {
     .max_fdarr	= 0,
     .max_fds	= FILE_DESC_NUM_MAX,
     .max_fdset	= -1,
     .ref_fdarr	= 0,
 
-    .fds		= mrt_nullptr,
-    .fd_array	= { mrt_nullptr },
+    .fds		= mr_nullptr,
+    .fd_array	= { mr_nullptr },
 
-    .sgrt_mutex	= MUTEX_LOCK_INIT(),
+    .sgtc_mutex	= MUTEX_LOCK_INIT(),
 };
 
-static struct fwk_file sgrt_fwk_file_stdio[DEVICE_MAJOR_BASE] =
+static struct fwk_file sgtc_fwk_file_stdio[DEVICE_MAJOR_BASE] =
 {
     {
-        .sprt_inode		= mrt_nullptr,
-        .sprt_foprts	= mrt_nullptr,
+        .sptr_inode		= mr_nullptr,
+        .sptr_foprts	= mr_nullptr,
     },
     {
-        .sprt_inode		= mrt_nullptr,
-        .sprt_foprts	= mrt_nullptr,
+        .sptr_inode		= mr_nullptr,
+        .sptr_foprts	= mr_nullptr,
     },
     {
-        .sprt_inode		= mrt_nullptr,
-        .sprt_foprts	= mrt_nullptr,
+        .sptr_inode		= mr_nullptr,
+        .sptr_foprts	= mr_nullptr,
     },
 };
 
@@ -60,31 +60,31 @@ static struct fwk_file sgrt_fwk_file_stdio[DEVICE_MAJOR_BASE] =
  */
 kint32_t __plat_init fwk_file_system_init(void)
 {
-    struct fwk_file_table *sprt_table;
+    struct fwk_file_table *sptr_table;
     kusize_t  num_farray;
     kuint32_t fileCnt;
 
-    sprt_table = &sgrt_fwk_file_table;
-    num_farray = ARRAY_SIZE(sprt_table->fd_array);
+    sptr_table = &sgtc_fwk_file_table;
+    num_farray = ARRAY_SIZE(sptr_table->fd_array);
 
-    if (!sprt_table->max_fds)
-        sprt_table->max_fds	= num_farray;
+    if (!sptr_table->max_fds)
+        sptr_table->max_fds	= num_farray;
 
-    sprt_table->max_fdarr = CMP_MIN2(sprt_table->max_fds, num_farray);
-    num_farray = ARRAY_SIZE(sgrt_fwk_file_stdio);
+    sptr_table->max_fdarr = CMP_MIN2(sptr_table->max_fds, num_farray);
+    num_farray = ARRAY_SIZE(sgtc_fwk_file_stdio);
 
-    if (sprt_table->max_fdarr < num_farray)
+    if (sptr_table->max_fdarr < num_farray)
         return -ER_MORE;
 
     /*!< Occupy the top three */
     for (fileCnt = 0; fileCnt < num_farray; fileCnt++)
-        sprt_table->fd_array[fileCnt] = &sgrt_fwk_file_stdio[fileCnt];
+        sptr_table->fd_array[fileCnt] = &sgtc_fwk_file_stdio[fileCnt];
 
-    sprt_table->max_fds		= sprt_table->max_fdarr;
-    sprt_table->ref_fdarr	= fileCnt;
-    sprt_table->max_fdset 	= CMP_GT2(num_farray, 0, num_farray - 1, sprt_table->max_fdset);
+    sptr_table->max_fds		= sptr_table->max_fdarr;
+    sptr_table->ref_fdarr	= fileCnt;
+    sptr_table->max_fdset 	= CMP_GT2(num_farray, 0, num_farray - 1, sptr_table->max_fdset);
 
-    mutex_init(&sprt_table->sgrt_mutex);
+    mutex_init(&sptr_table->sgtc_mutex);
 
     return ER_NORMAL;
 }
@@ -95,22 +95,22 @@ kint32_t __plat_init fwk_file_system_init(void)
  * @retval  none
  * @note    none
  */
-static kint32_t fwk_get_expand_fdtable(struct fwk_file_table *sprt_table, kuint32_t flags)
+static kint32_t fwk_get_expand_fdtable(struct fwk_file_table *sptr_table, kuint32_t flags)
 {
     kint32_t index;
 
     /*!< Created for the first time */
-    if (!isValid(sprt_table->fds))
-        sprt_table->fds	= (struct fwk_file **)kcalloc(sizeof(struct fwk_file), FILE_DESC_EXP_NUM, GFP_KERNEL);
+    if (!isValid(sptr_table->fds))
+        sptr_table->fds	= (struct fwk_file **)kcalloc(sizeof(struct fwk_file), FILE_DESC_EXP_NUM, GFP_KERNEL);
 
     /*!< It still doesn't exist after it was created */
-    if (!isValid(sprt_table->fds))
+    if (!isValid(sptr_table->fds))
         goto fail;
 
     /*!< Fetch an unused index from fds */
     for (index = 0; index < FILE_DESC_EXP_NUM; index++)
     {
-        if (!sprt_table->fds[index])
+        if (!sptr_table->fds[index])
             goto fdget;
     }
 
@@ -118,9 +118,9 @@ static kint32_t fwk_get_expand_fdtable(struct fwk_file_table *sprt_table, kuint3
     goto fail;
 
 fdget:
-    index += sprt_table->max_fdarr;
-    sprt_table->max_fdset = mrt_ret_max2(sprt_table->max_fdset, index);
-    sprt_table->max_fds	= sprt_table->max_fdarr	+ FILE_DESC_EXP_NUM;
+    index += sptr_table->max_fdarr;
+    sptr_table->max_fdset = mr_ret_max2(sptr_table->max_fdset, index);
+    sptr_table->max_fds	= sptr_table->max_fdarr	+ FILE_DESC_EXP_NUM;
 
     return index;
 
@@ -134,26 +134,26 @@ fail:
  * @retval  none
  * @note    none
  */
-static void fwk_put_expand_fdtable(struct fwk_file_table *sprt_table, kint32_t fd)
+static void fwk_put_expand_fdtable(struct fwk_file_table *sptr_table, kint32_t fd)
 {
     kint32_t index;
 
     /*!< The array does not exist */
-    if (!isValid(sprt_table->fds) || (fd < sprt_table->max_fdarr))
+    if (!isValid(sptr_table->fds) || (fd < sptr_table->max_fdarr))
         return;
 
-    index = fd - sprt_table->max_fdarr;
-    sprt_table->fds[index] = mrt_nullptr;
+    index = fd - sptr_table->max_fdarr;
+    sptr_table->fds[index] = mr_nullptr;
 
-    sprt_table->max_fdset = CMP_GTS(sprt_table->max_fdset, fd, fd - 1);
+    sptr_table->max_fdset = CMP_GTS(sptr_table->max_fdset, fd, fd - 1);
 
     /*!< The extended array has all been emptied. Free up space and save memory */
     if (!index)
     {
-        kfree(sprt_table->fds);
+        kfree(sptr_table->fds);
 
-        sprt_table->fds 	= mrt_nullptr;
-        sprt_table->max_fds = sprt_table->max_fdarr;
+        sptr_table->fds 	= mr_nullptr;
+        sptr_table->max_fds = sptr_table->max_fdarr;
     }
 }
 
@@ -165,48 +165,48 @@ static void fwk_put_expand_fdtable(struct fwk_file_table *sprt_table, kint32_t f
  */
 static kint32_t fwk_get_unused_fd_flags(kuint32_t flags)
 {
-    struct fwk_file_table *sprt_table;
+    struct fwk_file_table *sptr_table;
     kint32_t index;
 
-    sprt_table = &sgrt_fwk_file_table;
+    sptr_table = &sgtc_fwk_file_table;
 
     /*!< Check if fd_array are fully assigned */
-    index = fwk_get_fd_available(sprt_table);
+    index = fwk_get_fd_available(sptr_table);
     if (index < 0)
         goto expand;
 
-    mutex_lock(&sprt_table->sgrt_mutex);
+    mutex_lock(&sptr_table->sgtc_mutex);
 
     /*!< Priority is given to backward allocation */
-    index = CMP_LTS(sprt_table->max_fdset + 1, sprt_table->max_fdarr, -1);
+    index = CMP_LTS(sptr_table->max_fdset + 1, sptr_table->max_fdarr, -1);
     if (index >= 0)
     {
-        sprt_table->max_fdset++;
+        sptr_table->max_fdset++;
         goto fdget;
     }
 
     /*!< Fetch an unused index from the file_array */
-    for (index = 0; index < sprt_table->max_fdset; index++)
+    for (index = 0; index < sptr_table->max_fdset; index++)
     {
-        if (!sprt_table->fd_array[index])
+        if (!sptr_table->fd_array[index])
             goto fdget;
     }
 
-    mutex_unlock(&sprt_table->sgrt_mutex);
+    mutex_unlock(&sptr_table->sgtc_mutex);
 
     /*!< Fail: fwk_get_fd_available check failed || RET_MIN_SUPER fail to get || for loop calls the overrun */
     return -ER_MORE;
 
 fdget:
-    fwk_fdtable_get(sprt_table);
-    mutex_unlock(&sprt_table->sgrt_mutex);
+    fwk_fdtable_get(sptr_table);
+    mutex_unlock(&sptr_table->sgtc_mutex);
 
     return index;
 
 expand:
     /*!< fd has run out */
-    index = fwk_get_expand_fdtable(sprt_table, flags);
-    mutex_unlock(&sprt_table->sgrt_mutex);
+    index = fwk_get_expand_fdtable(sptr_table, flags);
+    mutex_unlock(&sptr_table->sgtc_mutex);
 
     return index;
 }
@@ -219,33 +219,33 @@ expand:
  */
 static void fwk_put_used_fd_flags(kint32_t fd)
 {
-    struct fwk_file_table *sprt_table;
+    struct fwk_file_table *sptr_table;
     kint32_t index;
 
     if (FILE_DESC_OVER_BASE(fd))
         return;
 
-    sprt_table = &sgrt_fwk_file_table;
+    sptr_table = &sgtc_fwk_file_table;
     index = fd;
 
-    if (index >= sprt_table->max_fdarr)
+    if (index >= sptr_table->max_fdarr)
         goto expand;
 
-    mutex_lock(&sprt_table->sgrt_mutex);
+    mutex_lock(&sptr_table->sgtc_mutex);
 
-    sprt_table->fd_array[index]	= mrt_nullptr;
-    sprt_table->max_fdset = CMP_GTS(sprt_table->max_fdset, fd, fd - 1);
-    fwk_fdtable_put(sprt_table);
+    sptr_table->fd_array[index]	= mr_nullptr;
+    sptr_table->max_fdset = CMP_GTS(sptr_table->max_fdset, fd, fd - 1);
+    fwk_fdtable_put(sptr_table);
 
-    mutex_unlock(&sprt_table->sgrt_mutex);
+    mutex_unlock(&sptr_table->sgtc_mutex);
 
     return;
 
 expand:
-    mutex_lock(&sprt_table->sgrt_mutex);
+    mutex_lock(&sptr_table->sgtc_mutex);
     /*!< fd has run out */
-    fwk_put_expand_fdtable(sprt_table, fd);
-    mutex_unlock(&sprt_table->sgrt_mutex);
+    fwk_put_expand_fdtable(sptr_table, fd);
+    mutex_unlock(&sptr_table->sgtc_mutex);
 }
 
 /*!
@@ -254,31 +254,31 @@ expand:
  * @retval  none
  * @note    none
  */
-static kint32_t fwk_fd_install(kint32_t fd, struct fwk_file *sprt_file)
+static kint32_t fwk_fd_install(kint32_t fd, struct fwk_file *sptr_file)
 {
-    struct fwk_file_table *sprt_table;
-    struct fwk_file **sprt_fdt;
+    struct fwk_file_table *sptr_table;
+    struct fwk_file **sptr_fdt;
     kint32_t index;
 
-    if (FILE_DESC_OVER_BASE(fd) || !isValid(sprt_file))
-        return -ER_UNVALID;
+    if (FILE_DESC_OVER_BASE(fd) || !isValid(sptr_file))
+        return -ER_INVALID;
 
-    sprt_table	= &sgrt_fwk_file_table;
-    sprt_fdt	= sprt_table->fd_array;
+    sptr_table	= &sgtc_fwk_file_table;
+    sptr_fdt	= sptr_table->fd_array;
     index		= fd;
 
-    if (fd >= sprt_table->max_fdarr)
+    if (fd >= sptr_table->max_fdarr)
     {
-        sprt_fdt = sprt_table->fds;
-        index = fd - sprt_table->max_fdarr;
+        sptr_fdt = sptr_table->fds;
+        index = fd - sptr_table->max_fdarr;
     }
 
-    if (sprt_fdt[index])
-        return -ER_UNVALID;
+    if (sptr_fdt[index])
+        return -ER_INVALID;
 
-    mutex_lock(&sprt_table->sgrt_mutex);
-    sprt_fdt[index] = sprt_file;
-    mutex_unlock(&sprt_table->sgrt_mutex);
+    mutex_lock(&sptr_table->sgtc_mutex);
+    sptr_fdt[index] = sptr_file;
+    mutex_unlock(&sptr_table->sgtc_mutex);
 
     return ER_NORMAL;
 }
@@ -291,24 +291,24 @@ static kint32_t fwk_fd_install(kint32_t fd, struct fwk_file *sprt_file)
  */
 static struct fwk_file *fwk_fd_to_file(kint32_t fd)
 {
-    struct fwk_file_table *sprt_table;
-    struct fwk_file  **sprt_fdt;
+    struct fwk_file_table *sptr_table;
+    struct fwk_file  **sptr_fdt;
     kint32_t index;
 
     if (FILE_DESC_OVER_BASE(fd))
-        return mrt_nullptr;
+        return mr_nullptr;
 
-    sprt_table	= &sgrt_fwk_file_table;
-    sprt_fdt	= sprt_table->fd_array;
+    sptr_table	= &sgtc_fwk_file_table;
+    sptr_fdt	= sptr_table->fd_array;
     index		= fd;
 
-    if (fd >= sprt_table->max_fdarr)
+    if (fd >= sptr_table->max_fdarr)
     {
-        sprt_fdt = sprt_table->fds;
-        index = fd - sprt_table->max_fdarr;
+        sptr_fdt = sptr_table->fds;
+        index = fd - sptr_table->max_fdarr;
     }
 
-    return sprt_fdt[index];
+    return sptr_fdt[index];
 }
 
 /*!
@@ -319,7 +319,7 @@ static struct fwk_file *fwk_fd_to_file(kint32_t fd)
  */
 static kint32_t fwk_do_open(const kchar_t *dev, kuint32_t mode)
 {
-    struct fwk_file  *sprt_file;
+    struct fwk_file  *sptr_file;
     kint32_t fd;
     kint32_t retval;
 
@@ -327,18 +327,18 @@ static kint32_t fwk_do_open(const kchar_t *dev, kuint32_t mode)
     if (fd < 0)
         goto fail1;
 
-    sprt_file = fwk_do_filp_open((kchar_t *)dev, mode);
-    if (!isValid(sprt_file))
+    sptr_file = fwk_do_filp_open((kchar_t *)dev, mode);
+    if (!isValid(sptr_file))
         goto fail2;
 
-    retval = fwk_fd_install(fd, sprt_file);
+    retval = fwk_fd_install(fd, sptr_file);
     if (retval)
         goto fail3;
 
     return fd;
 
 fail3:
-    fwk_do_filp_close(sprt_file);
+    fwk_do_filp_close(sptr_file);
 fail2:
     fwk_put_used_fd_flags(fd);
 fail1:
@@ -353,13 +353,13 @@ fail1:
  */
 static void fwk_do_close(kint32_t fd)
 {
-    struct fwk_file *sprt_file;
+    struct fwk_file *sptr_file;
 
-    sprt_file = fwk_fd_to_file(fd);
-    if (!isValid(sprt_file))
+    sptr_file = fwk_fd_to_file(fd);
+    if (!isValid(sptr_file))
         return;
 
-    fwk_do_filp_close(sprt_file);
+    fwk_do_filp_close(sptr_file);
     fwk_put_used_fd_flags(fd);
 }
 
@@ -371,22 +371,22 @@ static void fwk_do_close(kint32_t fd)
  */
 static kssize_t fwk_do_write(kint32_t fd, const void *buf, kusize_t size)
 {
-    struct fwk_file *sprt_file;
+    struct fwk_file *sptr_file;
     kint32_t retval;
 
     if (fd < 0)
         return -ER_ERROR;
 
-    sprt_file = fwk_fd_to_file(fd);
-    if (!isValid(sprt_file))
+    sptr_file = fwk_fd_to_file(fd);
+    if (!isValid(sptr_file))
         return -ER_ERROR;
 
-    if ((sprt_file->mode & O_WRONLY) != O_WRONLY)
+    if ((sptr_file->mode & O_WRONLY) != O_WRONLY)
         return -ER_FORBID;
 
-    if (sprt_file->sprt_foprts->write)
+    if (sptr_file->sptr_foprts->write)
     {
-        retval = sprt_file->sprt_foprts->write(sprt_file, (const kbuffer_t *)buf, size);
+        retval = sptr_file->sptr_foprts->write(sptr_file, (const kbuffer_t *)buf, size);
         if (!retval)
             return size;
     }
@@ -402,22 +402,22 @@ static kssize_t fwk_do_write(kint32_t fd, const void *buf, kusize_t size)
  */
 static kssize_t fwk_do_read(kint32_t fd, void *buf, kusize_t size)
 {
-    struct fwk_file *sprt_file;
+    struct fwk_file *sptr_file;
     kint32_t retval;
 
     if (fd < 0)
         return -ER_ERROR;
 
-    sprt_file = fwk_fd_to_file(fd);
-    if (!isValid(sprt_file))
+    sptr_file = fwk_fd_to_file(fd);
+    if (!isValid(sptr_file))
         return -ER_ERROR;
 
-    if ((sprt_file->mode & O_RDONLY) != O_RDONLY)
+    if ((sptr_file->mode & O_RDONLY) != O_RDONLY)
         return -ER_FORBID;
 
-    if (sprt_file->sprt_foprts->read)
+    if (sptr_file->sptr_foprts->read)
     {
-        retval = sprt_file->sprt_foprts->read(sprt_file, (kbuffer_t *)buf, size);
+        retval = sptr_file->sptr_foprts->read(sptr_file, (kbuffer_t *)buf, size);
         if (!retval)
             return size;
         else if (retval > 0)
@@ -435,19 +435,19 @@ static kssize_t fwk_do_read(kint32_t fd, void *buf, kusize_t size)
  */
 static kint32_t fwk_do_ioctl(kint32_t fd, kuint32_t request, kuaddr_t args)
 {
-    struct fwk_file *sprt_file;
+    struct fwk_file *sptr_file;
     kint32_t retval;
 
     if (fd < 0)
         return -ER_ERROR;
 
-    sprt_file = fwk_fd_to_file(fd);
-    if (!isValid(sprt_file))
+    sptr_file = fwk_fd_to_file(fd);
+    if (!isValid(sptr_file))
         return -ER_ERROR;
 
-    if (sprt_file->sprt_foprts->unlocked_ioctl)
+    if (sptr_file->sptr_foprts->unlocked_ioctl)
     {
-        retval = sprt_file->sprt_foprts->unlocked_ioctl(sprt_file, request, args);
+        retval = sptr_file->sptr_foprts->unlocked_ioctl(sptr_file, request, args);
         if (!retval)
             return ER_NORMAL;
     }
@@ -463,32 +463,32 @@ static kint32_t fwk_do_ioctl(kint32_t fd, kuint32_t request, kuaddr_t args)
  */
 static void *fwk_do_mmap(void *addr, kusize_t length, kint32_t prot, kint32_t flags, kint32_t fd, kuint32_t offset)
 {
-    struct fwk_vm_area sgrt_vm;
-    struct fwk_file *sprt_file;
+    struct fwk_vm_area sgtc_vm;
+    struct fwk_file *sptr_file;
     kint32_t retval;
 
     if (fd < 0)
-        return mrt_nullptr;
+        return mr_nullptr;
 
-    sprt_file = fwk_fd_to_file(fd);
-    if (!isValid(sprt_file))
-        return mrt_nullptr;
+    sptr_file = fwk_fd_to_file(fd);
+    if (!isValid(sptr_file))
+        return mr_nullptr;
 
-    sgrt_vm.offset = offset;
-    if (sprt_file->sprt_foprts->mmap)
+    sgtc_vm.offset = offset;
+    if (sptr_file->sptr_foprts->mmap)
     {
-        retval = sprt_file->sprt_foprts->mmap(sprt_file, &sgrt_vm);
+        retval = sptr_file->sptr_foprts->mmap(sptr_file, &sgtc_vm);
         if (retval)
-            return mrt_nullptr;
+            return mr_nullptr;
     }
 
-    if (length > sgrt_vm.size)
-        return mrt_nullptr;
+    if (length > sgtc_vm.size)
+        return mr_nullptr;
     
     if (!isValid(addr))
-        return (void *)sgrt_vm.virt_addr;
+        return (void *)sgtc_vm.virt_addr;
 
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!< ------------------------------------------------------------ */

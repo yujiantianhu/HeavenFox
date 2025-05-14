@@ -12,6 +12,8 @@
 
 /*!< The includes */
 #include <platform/fwk_basic.h>
+#include <platform/fwk_fcntl.h>
+#include <platform/fwk_fs.h>
 #include <kernel/kernel.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>
@@ -27,7 +29,7 @@ struct term_kbd_priv;
 struct term_kbd_handle
 {
     kint32_t key;
-    void (*do_cmd) (struct term_kbd_priv *sprt_priv, kuint32_t *inc);
+    void (*do_cmd) (struct term_kbd_priv *sptr_priv, kuint32_t *inc);
 };
 
 struct term_kbd_priv
@@ -40,15 +42,17 @@ struct term_kbd_priv
 
 /*!< The globals */
 static tid_t g_term_task_tid;
-static struct thread_attr sgrt_term_task_attr;
+static struct thread_attr sgtc_term_task_attr;
 static kuint8_t g_term_task_stack[TERM_TASK_THREAD_STACK_SIZE];
-static struct mailbox sgrt_term_task_mailbox;
+static struct mailbox sgtc_term_task_mailbox;
 
 static kubyte_t g_term_cmdline[TERM_MSG_RECV_LEN];
 static kuint32_t g_term_inc;
 
-static struct pq_queue *sprt_term_cmd_queue;
+static struct pq_queue *sptr_term_cmd_queue;
 static kint32_t g_term_cmd_queue_cur = -1;
+
+static kint32_t g_term_fd = -1;
 
 /*!< API functions */
 /*!
@@ -65,12 +69,12 @@ kchar_t *term_cmdline_get(void)
 /*!
  * @brief   get cmdline queue
  * @param   none
- * @retval  sprt_term_cmd_queue
+ * @retval  sptr_term_cmd_queue
  * @note    none
  */
 struct pq_queue *term_cmd_queue_get(void)
 {
-    return sprt_term_cmd_queue;
+    return sptr_term_cmd_queue;
 }
 
 /*!
@@ -86,16 +90,16 @@ void term_cmd_wrap_line(void)
 
 /*!
  * @brief   queue release API
- * @param   sprt_pqd
+ * @param   sptr_pqd
  * @retval  none
  * @note    none
  */
-static void term_cmd_queue_free(struct pq_data *sprt_pqd)
+static void term_cmd_queue_free(struct pq_data *sptr_pqd)
 {
-    struct term_cmd_his *sprt_his;
+    struct term_cmd_his *sptr_his;
 
-    sprt_his = mrt_container_of(sprt_pqd, struct term_cmd_his, sgrt_pqd);
-    kfree(sprt_his);
+    sptr_his = mr_container_of(sptr_pqd, struct term_cmd_his, sgtc_pqd);
+    kfree(sptr_his);
 }
 
 /*!
@@ -147,21 +151,21 @@ void term_clear_screen(void)
 
 /*!
  * @brief   delete repeat char
- * @param   sprt_priv, *offset (size of cmdline)
+ * @param   sptr_priv, *offset (size of cmdline)
  * @retval  none
  * @note    none
  */
-static void term_kbd_repeat(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
+static void term_kbd_repeat(struct term_kbd_priv *sptr_priv, kuint32_t *offset)
 {   
-    if ((sprt_priv->key >= CHAR_ASC_SPACE) || 
-        (sprt_priv->key < CHAR_ASC_DEL))
+    if ((sptr_priv->key >= CHAR_ASC_SPACE) || 
+        (sptr_priv->key < CHAR_ASC_DEL))
     {
-        kbyte_t key = (kbyte_t)sprt_priv->key;
+        kbyte_t key = (kbyte_t)sptr_priv->key;
         kuint32_t cur_idx;
         kubyte_t *msg;
 
         cur_idx = *offset;
-        msg = sprt_priv->msg;
+        msg = sptr_priv->msg;
         if ((*offset) && (msg[cur_idx - 1] == key))
             return;
 
@@ -172,13 +176,13 @@ static void term_kbd_repeat(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
 
 /*!
  * @brief   Ctrl + C
- * @param   sprt_priv, *offset (size of cmdline)
+ * @param   sptr_priv, *offset (size of cmdline)
  * @retval  none
  * @note    none
  */
-static void term_kbd_pause(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
+static void term_kbd_pause(struct term_kbd_priv *sptr_priv, kuint32_t *offset)
 {
-    kubyte_t *msg = sprt_priv->msg;
+    kubyte_t *msg = sptr_priv->msg;
 
     /*!< echo is the first task */
     term_cmd_print_login();
@@ -189,15 +193,15 @@ static void term_kbd_pause(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
 
 /*!
  * @brief   \n
- * @param   sprt_priv, *offset (size of cmdline)
+ * @param   sptr_priv, *offset (size of cmdline)
  * @retval  none
  * @note    none
  */
-static void term_kbd_enter(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
+static void term_kbd_enter(struct term_kbd_priv *sptr_priv, kuint32_t *offset)
 {
     kuint32_t cur_idx = *offset;
-    kubyte_t *msg = sprt_priv->msg;
-    struct term_cmd_his *sprt_his;
+    kubyte_t *msg = sptr_priv->msg;
+    struct term_cmd_his *sptr_his;
     kuint32_t align_size;
 
     *(msg + cur_idx) = '\0';
@@ -210,20 +214,20 @@ static void term_kbd_enter(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
         term_cmdline_distribute((const kchar_t *)msg);
 
         /*!< save current command to history queue */
-        if (sprt_term_cmd_queue)
+        if (sptr_term_cmd_queue)
         {
-            align_size = mrt_align(sizeof(*sprt_his), ARCH_PER_SIZE);
+            align_size = mr_align(sizeof(*sptr_his), ARCH_PER_SIZE);
 
-            sprt_his = (struct term_cmd_his *)kmalloc(align_size + (*offset), GFP_KERNEL);
-            if (isValid(sprt_his))
+            sptr_his = (struct term_cmd_his *)kmalloc(align_size + (*offset), GFP_KERNEL);
+            if (isValid(sptr_his))
             {
-                sprt_his->length = *offset;
-                sprt_his->cmd = ((void *)sprt_his) + align_size;
-                sprt_his->sgrt_pqd.release = term_cmd_queue_free;
-                sprt_his->sgrt_pqd.dequeue_chk = mrt_nullptr;
+                sptr_his->length = *offset;
+                sptr_his->cmd = ((void *)sptr_his) + align_size;
+                sptr_his->sgtc_pqd.release = term_cmd_queue_free;
+                sptr_his->sgtc_pqd.dequeue_chk = mr_nullptr;
 
-                memcpy(sprt_his->cmd, msg, sprt_his->length);
-                pq_enqueue(sprt_term_cmd_queue, &sprt_his->sgrt_pqd);
+                memcpy(sptr_his->cmd, msg, sptr_his->length);
+                pq_enqueue(sptr_term_cmd_queue, &sptr_his->sgtc_pqd);
             }
         }
     }
@@ -234,24 +238,24 @@ static void term_kbd_enter(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
 
 /*!
  * @brief   Tab
- * @param   sprt_priv, *offset (size of cmdline)
+ * @param   sptr_priv, *offset (size of cmdline)
  * @retval  none
  * @note    none
  */
-static void term_kbd_tab(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
+static void term_kbd_tab(struct term_kbd_priv *sptr_priv, kuint32_t *offset)
 {
 
 }
 
 /*!
  * @brief   Backspace
- * @param   sprt_priv, *offset (size of cmdline)
+ * @param   sptr_priv, *offset (size of cmdline)
  * @retval  none
  * @note    none
  */
-static void term_kbd_bs(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
+static void term_kbd_bs(struct term_kbd_priv *sptr_priv, kuint32_t *offset)
 {
-    kubyte_t *msg = sprt_priv->msg;
+    kubyte_t *msg = sptr_priv->msg;
 
     if (*offset)
     {
@@ -269,26 +273,26 @@ static void term_kbd_bs(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
 
 /*!
  * @brief   direction-up key
- * @param   sprt_priv, *offset (size of cmdline)
+ * @param   sptr_priv, *offset (size of cmdline)
  * @retval  none
  * @note    none
  */
-static void term_kbd_dir_up(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
+static void term_kbd_dir_up(struct term_kbd_priv *sptr_priv, kuint32_t *offset)
 {
-    kubyte_t *msg = sprt_priv->msg;
-    struct term_cmd_his *sprt_his;
-    struct pq_data *sprt_pqd;
+    kubyte_t *msg = sptr_priv->msg;
+    struct term_cmd_his *sptr_his;
+    struct pq_data *sptr_pqd;
 
-    if (!sprt_term_cmd_queue)
+    if (!sptr_term_cmd_queue)
         return;
 
-    sprt_pqd = pq_lookback(sprt_term_cmd_queue, &g_term_cmd_queue_cur);
-    if (!sprt_pqd)
+    sptr_pqd = pq_lookback(sptr_term_cmd_queue, &g_term_cmd_queue_cur);
+    if (!sptr_pqd)
         return;
 
-    sprt_his = mrt_container_of(sprt_pqd, struct term_cmd_his, sgrt_pqd);
-    memcpy(msg, sprt_his->cmd, sprt_his->length);
-    *offset = sprt_his->length;
+    sptr_his = mr_container_of(sptr_pqd, struct term_cmd_his, sgtc_pqd);
+    memcpy(msg, sptr_his->cmd, sptr_his->length);
+    *offset = sptr_his->length;
     *(msg + *offset) = '\0';
 
     term_clear_line();
@@ -297,31 +301,31 @@ static void term_kbd_dir_up(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
     /*!< echo is the first task */
     term_cmd_print_login();
 
-    io_putstr(msg, sprt_his->length);
+    io_putstr(msg, sptr_his->length);
 }
 
 /*!
  * @brief   direction-down key
- * @param   sprt_priv, *offset (size of cmdline)
+ * @param   sptr_priv, *offset (size of cmdline)
  * @retval  none
  * @note    none
  */
-static void term_kbd_dir_down(struct term_kbd_priv *sprt_priv, kuint32_t *offset)
+static void term_kbd_dir_down(struct term_kbd_priv *sptr_priv, kuint32_t *offset)
 {
-    kubyte_t *msg = sprt_priv->msg;
-    struct term_cmd_his *sprt_his;
-    struct pq_data *sprt_pqd;
+    kubyte_t *msg = sptr_priv->msg;
+    struct term_cmd_his *sptr_his;
+    struct pq_data *sptr_pqd;
 
-    if (!sprt_term_cmd_queue)
+    if (!sptr_term_cmd_queue)
         return;
 
-    sprt_pqd = pq_lookfront(sprt_term_cmd_queue, &g_term_cmd_queue_cur);
-    if (!sprt_pqd)
+    sptr_pqd = pq_lookfront(sptr_term_cmd_queue, &g_term_cmd_queue_cur);
+    if (!sptr_pqd)
         return;
 
-    sprt_his = mrt_container_of(sprt_pqd, struct term_cmd_his, sgrt_pqd);
-    memcpy(msg, sprt_his->cmd, sprt_his->length);
-    *offset = sprt_his->length;
+    sptr_his = mr_container_of(sptr_pqd, struct term_cmd_his, sgtc_pqd);
+    memcpy(msg, sptr_his->cmd, sptr_his->length);
+    *offset = sptr_his->length;
     *(msg + *offset) = '\0';
 
     term_clear_line();
@@ -330,11 +334,11 @@ static void term_kbd_dir_down(struct term_kbd_priv *sprt_priv, kuint32_t *offset
     /*!< echo is the first task */
     term_cmd_print_login();
 
-    io_putstr(msg, sprt_his->length);
+    io_putstr(msg, sptr_his->length);
 }
 
 /*!< super key */
-static struct term_kbd_handle sgrt_term_kbd_handles[] =
+static struct term_kbd_handle sgtc_term_kbd_handles[] =
 {
     { CHAR_ASC_SPACE, term_kbd_repeat },                /*!< space */
 
@@ -383,7 +387,7 @@ static void term_echo(kint32_t msg)
  */
 static void term_cmdline(kint32_t msg, kuint8_t len)
 {
-    struct term_kbd_handle *sprt_kbdh;
+    struct term_kbd_handle *sptr_kbdh;
     kuint32_t num, idx;
 
     /*!< exclude ' ' */
@@ -396,21 +400,21 @@ static void term_cmdline(kint32_t msg, kuint8_t len)
         return;
     }
 
-    sprt_kbdh = &sgrt_term_kbd_handles[0];
-    num = ARRAY_SIZE(sgrt_term_kbd_handles);
+    sptr_kbdh = &sgtc_term_kbd_handles[0];
+    num = ARRAY_SIZE(sgtc_term_kbd_handles);
 
     for (idx = 0; idx < num; idx++)
     {
-        if ((msg == sprt_kbdh[idx].key) &&
-            (sprt_kbdh[idx].do_cmd))
+        if ((msg == sptr_kbdh[idx].key) &&
+            (sptr_kbdh[idx].do_cmd))
         {
-            struct term_kbd_priv sgrt_priv;
+            struct term_kbd_priv sgtc_priv;
 
-            sgrt_priv.msg = &g_term_cmdline[0];
-            sgrt_priv.key = msg;
-            sgrt_priv.len = len;
+            sgtc_priv.msg = &g_term_cmdline[0];
+            sgtc_priv.key = msg;
+            sgtc_priv.len = len;
 
-            sprt_kbdh[idx].do_cmd(&sgrt_priv, &g_term_inc);
+            sptr_kbdh[idx].do_cmd(&sgtc_priv, &g_term_inc);
             return;
         }
     }
@@ -428,7 +432,7 @@ static const term_cmd_fn_t g_term_cmd_fn[] =
     term_cmd_add_kill,
     term_cmd_add_history,
 
-    mrt_nullptr,
+    mr_nullptr,
 };
 
 /*!
@@ -447,6 +451,64 @@ static void term_new_command(const term_cmd_fn_t term_cmd_fn[])
 
 /*!< --------------------------------------------------------------------- */
 /*!
+ * @brief   putc
+ * @param   none
+ * @retval  none
+ * @note    send character
+ */
+static void term_putc(const kubyte_t ch)
+{
+    virt_write(g_term_fd, &ch, 1);
+}
+
+/*!
+ * @brief   putstr
+ * @param   none
+ * @retval  none
+ * @note    printk typedef
+ */
+static void term_putstr(const kubyte_t *msgs, kusize_t size)
+{
+    virt_write(g_term_fd, msgs, size);
+}
+
+/*!
+ * @brief   getc
+ * @param   none
+ * @retval  none
+ * @note    get character
+ */
+static kubyte_t term_getc(kubyte_t *ch)
+{
+    kssize_t size;
+
+    size = virt_read(g_term_fd, &ch, 1);
+    return (size > 0) ? (kubyte_t)size : 0;
+}
+
+/*!
+ * @brief   getstr
+ * @param   string
+ * @retval  none
+ * @note    string read
+ */
+static kssize_t term_getstr(kubyte_t *msgs, kusize_t size)
+{
+    return virt_read(g_term_fd, msgs, size);;
+}
+
+/*!< io stream reality */
+static struct io_stream_dev sgtc_term_io_stream =
+{
+    .name = CONFIG_CONSOLE_DEVICE,
+
+    ._putc = term_putc,
+    ._putstr = term_putstr,
+    ._getc = term_getc,
+    ._getstr = term_getstr,
+};
+
+/*!
  * @brief   term task main
  * @param   args
  * @retval  args
@@ -454,7 +516,7 @@ static void term_new_command(const term_cmd_fn_t term_cmd_fn[])
  */
 static void *term_entry(void *args)
 {
-    struct mailbox *sprt_mb = &sgrt_term_task_mailbox;
+    struct mailbox *sptr_mb = &sgtc_term_task_mailbox;
     kint32_t msg;
     kssize_t length;
 
@@ -465,13 +527,13 @@ static void *term_entry(void *args)
     printk("\r\n");
     printk("%s", g_term_cmdline);
 
-    mailbox_init(sprt_mb, mrt_current->tid, "term-task-mailbox");
+    mailbox_init(sptr_mb, mr_current->tid, "term-task-mailbox");
 
     /*!< system command */
     term_new_command(g_term_cmd_fn);
 
     /*!< create ring buffer to save history commands */
-    sprt_term_cmd_queue = pq_queue_create(NR_PQ_RING, TERM_MSG_RECV_LEN);
+    sptr_term_cmd_queue = pq_queue_create(NR_PQ_RING, TERM_MSG_RECV_LEN);
 
     for (;;)
     {
@@ -504,21 +566,46 @@ static void *term_entry(void *args)
  */
 kint32_t term_init(void)
 {
-    struct thread_attr *sprt_attr = &sgrt_term_task_attr;
+    struct thread_attr *sptr_attr = &sgtc_term_task_attr;
 
-    sprt_attr->detachstate = THREAD_CREATE_JOINABLE;
-    sprt_attr->inheritsched	= THREAD_INHERIT_SCHED;
-    sprt_attr->schedpolicy = THREAD_SCHED_FIFO;
+    /*!< Open console device */
+    g_term_fd = virt_open(CONFIG_CONSOLE_DEVICE, O_RDWR);
+    if (g_term_fd < 0)
+    {
+        g_term_fd = -1;
+        printk("Open console device \"%s\" failed!\n");
+    }
+    else
+    {
+        struct io_stream_dev *sprt_dev;
+        struct io_stream_dev *sptr_stream = &sgtc_term_io_stream;
+
+        /*!< Register IO Stream */
+        init_list_head(&sptr_stream->sgtc_link);
+        sptr_stream->is_opened = true;
+
+        /*!< Existed? Unregister first */
+        sprt_dev = find_io_stream_dev((const kchar_t *)sptr_stream->name);
+        if (sprt_dev)
+            unregister_io_stream(sprt_dev);
+
+        if (register_io_stream(sptr_stream))
+            return -ER_ERROR;
+    }
+
+    sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
+    sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;
+    sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-    thread_set_stack(sprt_attr, mrt_nullptr, g_term_task_stack, sizeof(g_term_task_stack));
+    thread_set_stack(sptr_attr, mr_nullptr, g_term_task_stack, sizeof(g_term_task_stack));
     /*!< lowest priority */
-    thread_set_priority(sprt_attr, THREAD_PROTY_TERM);
+    thread_set_priority(sptr_attr, THREAD_PROTY_TERM);
     /*!< default time slice */
-    thread_set_time_slice(sprt_attr, THREAD_TIME_DEFUALT);
+    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
 
     /*!< register thread */
-    g_term_task_tid = kernel_thread_create(-1, sprt_attr, term_entry, mrt_nullptr);
+    g_term_task_tid = kernel_thread_create(-1, sptr_attr, term_entry, mr_nullptr);
     if (g_term_task_tid >= 0)
     {
         thread_set_name(g_term_task_tid, "term_entry");

@@ -72,8 +72,8 @@ struct fwk_bmp_info_header
 
 typedef struct fwk_bmp_ctrl
 {
-    struct fwk_disp_info *sprt_disp;
-    struct fwk_bmp_info_header sgrt_bi;
+    struct fwk_disp_info *sptr_disp;
+    struct fwk_bmp_info_header sgtc_bi;
 
     kuint32_t x_start;
     kuint32_t y_start;
@@ -83,26 +83,26 @@ typedef struct fwk_bmp_ctrl
 } srt_fwk_bmp_ctrl_t;
 
 /*!< The functions */
-extern kint32_t fwk_bitmap_get_and_check(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t *image);
-extern kint32_t fwk_display_bitmap(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t *image, kusize_t size);
-extern kssize_t fwk_display_whole_bitmap(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t *image);
+extern kint32_t fwk_bitmap_get_and_check(struct fwk_bmp_ctrl *sptr_bctl, const kuint8_t *image);
+extern kint32_t fwk_display_bitmap(struct fwk_bmp_ctrl *sptr_bctl, const kuint8_t *image, kusize_t size);
+extern kssize_t fwk_display_whole_bitmap(struct fwk_bmp_ctrl *sptr_bctl, const kuint8_t *image);
 
 /*!< API functions */
 /*!
  * @brief   initialize fwk_bmp_ctrl
- * @param   sprt_bctl, ...
+ * @param   sptr_bctl, ...
  * @retval  none
  * @note    none
  */
-static inline void fwk_bitmap_ctrl_init(struct fwk_bmp_ctrl *sprt_bctl, 
-                            struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start)
+static inline void fwk_bitmap_ctrl_init(struct fwk_bmp_ctrl *sptr_bctl, 
+                            struct fwk_disp_info *sptr_disp, kuint32_t x_start, kuint32_t y_start)
 {
-    sprt_bctl->x_start = x_start;
-    sprt_bctl->y_start = y_start;
-    sprt_bctl->x_next = sprt_bctl->y_next = 0;
-    sprt_bctl->sprt_disp = sprt_disp;
+    sptr_bctl->x_start = x_start;
+    sptr_bctl->y_start = y_start;
+    sptr_bctl->x_next = sptr_bctl->y_next = 0;
+    sptr_bctl->sptr_disp = sptr_disp;
     
-    memset(&sprt_bctl->sgrt_bi, 0, sizeof(sprt_bctl->sgrt_bi));
+    memset(&sptr_bctl->sgtc_bi, 0, sizeof(sptr_bctl->sgtc_bi));
 }
 
 #ifdef __cplusplus

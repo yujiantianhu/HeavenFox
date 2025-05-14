@@ -21,32 +21,32 @@
  * @retval  none
  * @note    none
  */
-static kint32_t fwk_chrdev_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_chrdev_open(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
 {
-    struct fwk_cdev *sprt_cdev;
+    struct fwk_cdev *sptr_cdev;
     kuint32_t devNum;
 
-    devNum = sprt_inode->r_dev;
+    devNum = sptr_inode->r_dev;
 /*
     if (devNum < DEVICE_MAJOR_BASE)
         goto fail;
 */
 
-    sprt_cdev = (struct fwk_cdev *)fwk_kobjmap_lookup(sprt_fwk_chrdev_map, devNum);
-    if (!isValid(sprt_cdev))
+    sptr_cdev = (struct fwk_cdev *)fwk_kobjmap_lookup(sptr_fwk_chrdev_map, devNum);
+    if (!isValid(sptr_cdev))
         goto fail;
 
-    sprt_inode->sprt_cdev = sprt_cdev;
+    sptr_inode->sptr_cdev = sptr_cdev;
 
     /*!< Replace the device operate function */
-    sprt_file->sprt_foprts = sprt_cdev->sprt_oprts;
-    if (sprt_file->sprt_foprts->open)
-        return sprt_file->sprt_foprts->open(sprt_inode, sprt_file);
+    sptr_file->sptr_foprts = sptr_cdev->sptr_oprts;
+    if (sptr_file->sptr_foprts->open)
+        return sptr_file->sptr_foprts->open(sptr_inode, sptr_file);
 
     return ER_NORMAL;
 
 fail:
-    return -ER_UNVALID;
+    return -ER_INVALID;
 }
 
 /*!
@@ -55,14 +55,14 @@ fail:
  * @retval  none
  * @note    none
  */
-static kint32_t fwk_chrdev_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_chrdev_close(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
 {
-    sprt_inode->sprt_cdev = mrt_nullptr;
+    sptr_inode->sptr_cdev = mr_nullptr;
 
     return ER_NORMAL;
 }
 
-static struct fwk_file_oprts sgrt_fwk_inode_def_chrfoprts =
+static struct fwk_file_oprts sgtc_fwk_inode_def_chrfoprts =
 {
     .open	= fwk_chrdev_open,
     .close	= fwk_chrdev_close,
@@ -74,24 +74,24 @@ static struct fwk_file_oprts sgrt_fwk_inode_def_chrfoprts =
  * @retval  none
  * @note    none
  */
-static kint32_t fwk_blkdev_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_blkdev_open(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
 {
-    struct fwk_block_device *sprt_blkdev;
+    struct fwk_block_device *sptr_blkdev;
     kuint32_t devNum;
 
-    devNum = sprt_inode->r_dev;
+    devNum = sptr_inode->r_dev;
 
-    sprt_blkdev = (struct fwk_block_device *)fwk_kobjmap_lookup(sprt_fwk_blkdev_map, devNum);
-    if (!isValid(sprt_blkdev))
+    sptr_blkdev = (struct fwk_block_device *)fwk_kobjmap_lookup(sptr_fwk_blkdev_map, devNum);
+    if (!isValid(sptr_blkdev))
         goto fail;
 
-    sprt_inode->sprt_blkdev = sprt_blkdev;
-    sprt_blkdev->sprt_inode = sprt_inode;
+    sptr_inode->sptr_blkdev = sptr_blkdev;
+    sptr_blkdev->sptr_inode = sptr_inode;
 
     return ER_NORMAL;
 
 fail:
-    return -ER_UNVALID;
+    return -ER_INVALID;
 }
 
 /*!
@@ -100,18 +100,18 @@ fail:
  * @retval  none
  * @note    none
  */
-static kint32_t fwk_blkdev_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_blkdev_close(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
 {
-    struct fwk_block_device *sprt_blkdev;
+    struct fwk_block_device *sptr_blkdev;
 
-    sprt_blkdev = sprt_inode->sprt_blkdev;
-    sprt_blkdev->sprt_inode = mrt_nullptr;
-    sprt_inode->sprt_blkdev = mrt_nullptr;
+    sptr_blkdev = sptr_inode->sptr_blkdev;
+    sptr_blkdev->sptr_inode = mr_nullptr;
+    sptr_inode->sptr_blkdev = mr_nullptr;
 
     return ER_NORMAL;
 }
 
-static struct fwk_file_oprts sgrt_fwk_inode_def_blkfoprts =
+static struct fwk_file_oprts sgtc_fwk_inode_def_blkfoprts =
 {
     .open	= fwk_blkdev_open,
     .close	= fwk_blkdev_close,
@@ -123,7 +123,7 @@ static struct fwk_file_oprts sgrt_fwk_inode_def_blkfoprts =
  * @retval  none
  * @note    none
  */
-static kint32_t fwk_netdev_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_netdev_open(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
 {
     return ER_NORMAL;
 }
@@ -134,12 +134,12 @@ static kint32_t fwk_netdev_open(struct fwk_inode *sprt_inode, struct fwk_file *s
  * @retval  none
  * @note    none
  */
-static kint32_t fwk_netdev_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fwk_netdev_close(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
 {
     return ER_NORMAL;
 }
 
-static struct fwk_file_oprts sgrt_fwk_inode_def_netfoprts =
+static struct fwk_file_oprts sgtc_fwk_inode_def_netfoprts =
 {
     .open	= fwk_netdev_open,
     .close	= fwk_netdev_close,
@@ -147,29 +147,29 @@ static struct fwk_file_oprts sgrt_fwk_inode_def_netfoprts =
 
 /*!
  * @brief   set the operation functions to inode
- * @param   sprt_node, type, devNum
+ * @param   sptr_node, type, devNum
  * @retval  errno
  * @note    none
  */
-kint32_t fwk_inode_set_ops(struct fwk_inode *sprt_inode, kuint32_t type, kint32_t devNum)
+kint32_t fwk_inode_set_ops(struct fwk_inode *sptr_inode, kuint32_t type, kint32_t devNum)
 {
-    if (!sprt_inode)
+    if (!sptr_inode)
         return -ER_NOMEM;
 
-    sprt_inode->r_dev = devNum;
+    sptr_inode->r_dev = devNum;
 
     switch(type)
     {
         case NR_TYPE_CHRDEV:
-            sprt_inode->sprt_foprts	= &sgrt_fwk_inode_def_chrfoprts;
+            sptr_inode->sptr_foprts	= &sgtc_fwk_inode_def_chrfoprts;
             break;
 
         case NR_TYPE_BLKDEV:
-            sprt_inode->sprt_foprts	= &sgrt_fwk_inode_def_blkfoprts;
+            sptr_inode->sptr_foprts	= &sgtc_fwk_inode_def_blkfoprts;
             break;
 
         case NR_TYPE_NETDEV:
-            sprt_inode->sprt_foprts	= &sgrt_fwk_inode_def_netfoprts;
+            sptr_inode->sptr_foprts	= &sgtc_fwk_inode_def_netfoprts;
             break;
 
         default:
@@ -185,24 +185,24 @@ kint32_t fwk_inode_set_ops(struct fwk_inode *sprt_inode, kuint32_t type, kint32_
  * @retval  none
  * @note    none
  */
-struct fwk_inode *fwk_mk_inode(struct fwk_kobject *sprt_kobj, kuint32_t type, kint32_t devNum)
+struct fwk_inode *fwk_mk_inode(struct fwk_kobject *sptr_kobj, kuint32_t type, kint32_t devNum)
 {
-    struct fwk_inode *sprt_inode;
+    struct fwk_inode *sptr_inode;
 
-    if (!sprt_kobj)
+    if (!sptr_kobj)
         return ERR_PTR(-ER_ERROR);
 
-    sprt_inode = (struct fwk_inode *)kzalloc(sizeof(struct fwk_inode), GFP_KERNEL);
-    if (!isValid(sprt_inode))
+    sptr_inode = (struct fwk_inode *)kzalloc(sizeof(struct fwk_inode), GFP_KERNEL);
+    if (!isValid(sptr_inode))
         return ERR_PTR(-ER_NOMEM);
 
-    sprt_inode->name = sprt_kobj->name;
-    sprt_inode->type = sprt_kobj->is_dir ? INODE_TYPE_DIR : INODE_TYPE_FILE;
-    sprt_inode->sprt_kobj = sprt_kobj;
+    sptr_inode->name = sptr_kobj->name;
+    sptr_inode->type = sptr_kobj->is_dir ? INODE_TYPE_DIR : INODE_TYPE_FILE;
+    sptr_inode->sptr_kobj = sptr_kobj;
 
-    fwk_inode_set_ops(sprt_inode, type, devNum);
+    fwk_inode_set_ops(sptr_inode, type, devNum);
 
-    return sprt_inode;
+    return sptr_inode;
 }
 
 /*!
@@ -211,13 +211,13 @@ struct fwk_inode *fwk_mk_inode(struct fwk_kobject *sprt_kobj, kuint32_t type, ki
  * @retval  none
  * @note    none
  */
-void fwk_rm_inode(struct fwk_inode *sprt_inode)
+void fwk_rm_inode(struct fwk_inode *sptr_inode)
 {
-    if (!sprt_inode)
+    if (!sptr_inode)
         return;
 
     /*!< Free up resources */
-    kfree(sprt_inode);
+    kfree(sptr_inode);
 }
 
 /*!
@@ -228,16 +228,16 @@ void fwk_rm_inode(struct fwk_inode *sprt_inode)
  */
 struct fwk_inode *fwk_inode_find(kchar_t *name)
 {
-    struct fwk_kobject *sprt_kobj;
+    struct fwk_kobject *sptr_kobj;
 
     if (!name || !(*name))
-        return mrt_nullptr;
+        return mr_nullptr;
 
-    sprt_kobj = fwk_find_kobject_by_path(mrt_nullptr, name);
-    if (!isValid(sprt_kobj))
+    sptr_kobj = fwk_find_kobject_by_path(mr_nullptr, name);
+    if (!isValid(sptr_kobj))
         return ERR_PTR(-ER_NOTFOUND);
 
-    return sprt_kobj->sprt_inode;
+    return sptr_kobj->sptr_inode;
 }
 
 /*!
@@ -248,20 +248,20 @@ struct fwk_inode *fwk_inode_find(kchar_t *name)
  */
 struct fwk_inode *fwk_inode_find_disk(const kchar_t *name)
 {
-    struct fwk_kobject *sprt_kobj = mrt_nullptr;
+    struct fwk_kobject *sptr_kobj = mr_nullptr;
     kchar_t *disk_name;
     kuint32_t lenth, mark = 0;
 
     if (!name || (*name != '/'))
-        return mrt_nullptr;
+        return mr_nullptr;
 
     lenth = strlen(name);
     if (*(name + lenth - 1) == '/')
-        return mrt_nullptr;
+        return mr_nullptr;
 
     disk_name = (kchar_t *)kmalloc(lenth + 1, GFP_KERNEL);
     if (!isValid(disk_name))
-        return mrt_nullptr;
+        return mr_nullptr;
 
     strcpy(disk_name, name);
 
@@ -281,19 +281,19 @@ struct fwk_inode *fwk_inode_find_disk(const kchar_t *name)
         mark = 1;
         *(disk_name + lenth) = '\0';
 
-        sprt_kobj = fwk_find_kobject_by_path(sprt_kobj, disk_name);
-        if (!isValid(sprt_kobj))
+        sptr_kobj = fwk_find_kobject_by_path(sptr_kobj, disk_name);
+        if (!isValid(sptr_kobj))
             continue;
 
-        if (sprt_kobj->is_disk)
+        if (sptr_kobj->is_disk)
             goto succ;
     }
 
-    sprt_kobj = mrt_nullptr;
+    sptr_kobj = mr_nullptr;
 
 succ:
     kfree(disk_name);
-    return (isValid(sprt_kobj) ? sprt_kobj->sprt_inode : mrt_nullptr);
+    return (isValid(sptr_kobj) ? sptr_kobj->sptr_inode : mr_nullptr);
 }
 
 /*!< end of file */

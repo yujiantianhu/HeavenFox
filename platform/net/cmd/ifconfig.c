@@ -28,46 +28,46 @@
 /*!< API functions */
 /*!
  * @brief   cmd 'ifconfig': excute function
- * @param   sprt_cmd, argc, argv
+ * @param   sptr_cmd, argc, argv
  * @retval  errno
  * @note    none
  */
-static kint32_t term_cmd_ifconfig(struct term_cmd *sprt_cmd, kint32_t argc, kchar_t **argv)
+static kint32_t term_cmd_ifconfig(struct term_cmd *sptr_cmd, kint32_t argc, kchar_t **argv)
 {
-    struct fwk_network_if *sprt_if;
-    struct fwk_net_device *sprt_ndev = mrt_nullptr;
+    struct fwk_network_if *sptr_if;
+    struct fwk_net_device *sptr_ndev = mr_nullptr;
     kchar_t ip_addr[16], netmask[16];
 
     switch (argc)
     {
         case 1:
-            while ((sprt_ndev = next_netdevice(sprt_ndev)))
+            while ((sptr_ndev = next_netdevice(sptr_ndev)))
             {
-                sprt_if = network_find_node(sprt_ndev->name, mrt_nullptr);
+                sptr_if = network_find_node(sptr_ndev->name, mr_nullptr);
 
                 /*!< Link Up */
-                if (sprt_if)
+                if (sptr_if)
                 {
-                    fwk_inet_ntoa(ip_addr, sprt_if->sgrt_ip.sin_addr.s_addr);
-                    fwk_inet_ntoa(netmask, sprt_if->sgrt_netmask.sin_addr.s_addr);
+                    fwk_inet_ntoa(ip_addr, sptr_if->sgtc_ip.sin_addr.s_addr);
+                    fwk_inet_ntoa(netmask, sptr_if->sgtc_netmask.sin_addr.s_addr);
 
-                    printk("%s: <UP RUNNING> mtu %d\r\n", sprt_if->ifname, sprt_ndev->mtu);
+                    printk("%s: <UP RUNNING> mtu %d\r\n", sptr_if->ifname, sptr_ndev->mtu);
                 }
                 else
                 {
                     fwk_inet_ntoa(ip_addr, 0);
                     fwk_inet_ntoa(netmask, 0);
 
-                    printk("%s: <DOWN SLEEPING> mtu %d\r\n", sprt_ndev->name, sprt_ndev->mtu);
+                    printk("%s: <DOWN SLEEPING> mtu %d\r\n", sptr_ndev->name, sptr_ndev->mtu);
                 }
 
                 printk("        inet: %s netmask: %s\r\n", ip_addr, netmask);
                 printk("        ether: %x:%x:%x:%x:%x:%x\r\n",
-                                sprt_ndev->dev_addr[0], sprt_ndev->dev_addr[1], sprt_ndev->dev_addr[2],
-                                sprt_ndev->dev_addr[3], sprt_ndev->dev_addr[4], sprt_ndev->dev_addr[5]);
+                                sptr_ndev->dev_addr[0], sptr_ndev->dev_addr[1], sptr_ndev->dev_addr[2],
+                                sptr_ndev->dev_addr[3], sptr_ndev->dev_addr[4], sptr_ndev->dev_addr[5]);
 
-                printk("        Rx Packet %ld bytes %ld\r\n", sprt_ndev->sgrt_stats.rx_packets, sprt_ndev->sgrt_stats.rx_bytes);
-                printk("        Tx Packet %ld bytes %ld\r\n", sprt_ndev->sgrt_stats.tx_packets, sprt_ndev->sgrt_stats.tx_bytes);
+                printk("        Rx Packet %ld bytes %ld\r\n", sptr_ndev->sgtc_stats.rx_packets, sptr_ndev->sgtc_stats.rx_bytes);
+                printk("        Tx Packet %ld bytes %ld\r\n", sptr_ndev->sgtc_stats.tx_packets, sptr_ndev->sgtc_stats.tx_bytes);
                 printk("\r\n");
             }
 
@@ -75,7 +75,7 @@ static kint32_t term_cmd_ifconfig(struct term_cmd *sprt_cmd, kint32_t argc, kcha
 
         case 2:
             if (!strcmp(argv[1], "--help"))
-                sprt_cmd->help();
+                sptr_cmd->help();
             else
                 goto fail;
 
@@ -111,14 +111,14 @@ static void term_cmd_ifconfig_help(void)
  */
 void term_cmd_add_ifconfig(void)
 {
-    struct term_cmd *sprt_cmd;
+    struct term_cmd *sptr_cmd;
 
-    sprt_cmd = term_cmd_allocate("ifconfig", GFP_KERNEL);
-    if (!isValid(sprt_cmd))
+    sptr_cmd = term_cmd_allocate("ifconfig", GFP_KERNEL);
+    if (!isValid(sptr_cmd))
         return;
 
-    sprt_cmd->do_excute = term_cmd_ifconfig;
-    sprt_cmd->help = term_cmd_ifconfig_help;
+    sptr_cmd->do_excute = term_cmd_ifconfig;
+    sptr_cmd->help = term_cmd_ifconfig_help;
 
-    term_cmd_add(sprt_cmd);
+    term_cmd_add(sptr_cmd);
 }

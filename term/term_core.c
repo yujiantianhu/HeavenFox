@@ -21,7 +21,7 @@
 static kchar_t g_term_cmdline_argv[TERM_MSG_RECV_LEN];
 
 /*!< top command: help */
-static DECLARE_LIST_HEAD(sgrt_term_cmd_lists);
+static DECLARE_LIST_HEAD(sgtc_term_cmd_lists);
  
 /*!< The functions */
 /*!
@@ -32,19 +32,19 @@ static DECLARE_LIST_HEAD(sgrt_term_cmd_lists);
  */
 struct term_cmd *term_cmd_find_by_name(kchar_t *name)
 {
-    struct term_cmd *sprt_cmd;
+    struct term_cmd *sptr_cmd;
 
     if (!name || !(*name))
         goto fail;
 
-    foreach_list_next_entry(sprt_cmd, &sgrt_term_cmd_lists, sgrt_link)
+    foreach_list_next_entry(sptr_cmd, &sgtc_term_cmd_lists, sgtc_link)
     {
-        if (!strcmp(sprt_cmd->name, name))
-            return sprt_cmd;
+        if (!strcmp(sptr_cmd->name, name))
+            return sptr_cmd;
     }
 
 fail:
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
@@ -55,67 +55,67 @@ fail:
  */
 struct term_cmd *term_cmd_allocate(const kchar_t *name, nrt_gfp_t gfp_mask)
 {
-    struct term_cmd *sprt_cmd;
+    struct term_cmd *sptr_cmd;
     kssize_t size;
 
-    sprt_cmd = kmalloc(sizeof(*sprt_cmd), gfp_mask);
-    if (!isValid(sprt_cmd))
-        return sprt_cmd;
+    sptr_cmd = kmalloc(sizeof(*sptr_cmd), gfp_mask);
+    if (!isValid(sptr_cmd))
+        return sptr_cmd;
 
     size = strlen(name);
-    memcpy(sprt_cmd->name, name, size);
-    sprt_cmd->name[size] = '\0';
+    memcpy(sptr_cmd->name, name, size);
+    sptr_cmd->name[size] = '\0';
 
-    sprt_cmd->do_excute = mrt_nullptr;
-    sprt_cmd->help = mrt_nullptr;
-    init_list_head(&sprt_cmd->sgrt_link);
+    sptr_cmd->do_excute = mr_nullptr;
+    sptr_cmd->help = mr_nullptr;
+    init_list_head(&sptr_cmd->sgtc_link);
 
-    return sprt_cmd;
+    return sptr_cmd;
 }
 
 /*!
  * @brief   release command
- * @param   sprt_cmd
+ * @param   sptr_cmd
  * @retval  none
  * @note    none
  */
-void term_cmd_free(struct term_cmd *sprt_cmd)
+void term_cmd_free(struct term_cmd *sptr_cmd)
 {
-    if (!mrt_list_head_empty(&sprt_cmd->sgrt_link))
-        term_cmd_del(sprt_cmd);
+    if (!mr_list_head_empty(&sptr_cmd->sgtc_link))
+        term_cmd_del(sptr_cmd);
 
-    kfree(sprt_cmd);
+    kfree(sptr_cmd);
 }
 
 /*!
  * @brief   add command
- * @param   sprt_cmd
+ * @param   sptr_cmd
  * @retval  errno
  * @note    none
  */
-kint32_t term_cmd_add(struct term_cmd *sprt_cmd)
+kint32_t term_cmd_add(struct term_cmd *sptr_cmd)
 {
-    if ((!sprt_cmd->name) ||
-        (*sprt_cmd->name == '\0') ||
-        (kstrchr(sprt_cmd->name, ' ')))
-        return -ER_UNVALID;
+    if ((!sptr_cmd->name) ||
+        (*sptr_cmd->name == '\0') ||
+        (kstrchr(sptr_cmd->name, ' ')))
+        return -ER_INVALID;
 
-    if (term_cmd_find_by_name(sprt_cmd->name))
+    if (term_cmd_find_by_name(sptr_cmd->name))
         return -ER_EXISTED;
 
-    list_head_add_tail(&sgrt_term_cmd_lists, &sprt_cmd->sgrt_link);
+    list_head_add_tail(&sgtc_term_cmd_lists, &sptr_cmd->sgtc_link);
     return ER_NORMAL;
 }
 
 /*!
  * @brief   detach command
- * @param   sprt_cmd
+ * @param   sptr_cmd
  * @retval  none
  * @note    none
  */
-void term_cmd_del(struct term_cmd *sprt_cmd)
+void term_cmd_del(struct term_cmd *sptr_cmd)
 {
-    list_head_del(&sprt_cmd->sgrt_link);    
+    list_head_del(&sptr_cmd->sgtc_link);    
 }
 
 /*!
@@ -127,14 +127,14 @@ void term_cmd_del(struct term_cmd *sprt_cmd)
  */
 void term_cmdline_excute(kint32_t argc, kchar_t **argv)
 {
-    struct term_cmd *sprt_cmd;
+    struct term_cmd *sptr_cmd;
 
     if (argc < 1)
         return;
 
-    foreach_list_next_entry(sprt_cmd, &sgrt_term_cmd_lists, sgrt_link)
+    foreach_list_next_entry(sptr_cmd, &sgtc_term_cmd_lists, sgtc_link)
     {
-        if (!strcmp(sprt_cmd->name, argv[0]))
+        if (!strcmp(sptr_cmd->name, argv[0]))
             goto succ;
     }
 
@@ -142,8 +142,8 @@ void term_cmdline_excute(kint32_t argc, kchar_t **argv)
     return;
 
 succ:
-    if (sprt_cmd->do_excute)
-        sprt_cmd->do_excute(sprt_cmd, argc, argv);
+    if (sptr_cmd->do_excute)
+        sptr_cmd->do_excute(sptr_cmd, argc, argv);
 }
 
 /*!
@@ -181,24 +181,24 @@ void term_cmdline_distribute(const kchar_t *cmdline)
 /*!< ----------------------------------------------------------- */
 /*!
  * @brief   cmd 'help': excute function
- * @param   sprt_cmd, argc, argv
+ * @param   sptr_cmd, argc, argv
  * @retval  errno
  * @note    none
  */
-static kint32_t term_cmd_show_help(struct term_cmd *sprt_cmd, kint32_t argc, kchar_t **argv)
+static kint32_t term_cmd_show_help(struct term_cmd *sptr_cmd, kint32_t argc, kchar_t **argv)
 {
-    struct term_cmd *sprt_per;
+    struct term_cmd *sptr_per;
 
     if (argc != 1)
         goto fail;
 
     printk("command list: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n");
-    foreach_list_next_entry(sprt_per, &sgrt_term_cmd_lists, sgrt_link)
+    foreach_list_next_entry(sptr_per, &sgtc_term_cmd_lists, sgtc_link)
     {
-        if (sprt_per->help)
+        if (sptr_per->help)
         {
-            printk("\'%s\'> ", sprt_per->name);
-            sprt_per->help();
+            printk("\'%s\'> ", sptr_per->name);
+            sptr_per->help();
         }
     }
 
@@ -217,14 +217,14 @@ fail:
  */
 void term_cmd_add_help(void)
 {
-    struct term_cmd *sprt_cmd;
+    struct term_cmd *sptr_cmd;
 
-    sprt_cmd = term_cmd_allocate("help", GFP_KERNEL);
-    if (!isValid(sprt_cmd))
+    sptr_cmd = term_cmd_allocate("help", GFP_KERNEL);
+    if (!isValid(sptr_cmd))
         return;
 
-    sprt_cmd->do_excute = term_cmd_show_help;
-    sprt_cmd->help = mrt_nullptr;
+    sptr_cmd->do_excute = term_cmd_show_help;
+    sptr_cmd->help = mr_nullptr;
 
-    term_cmd_add(sprt_cmd);
+    term_cmd_add(sptr_cmd);
 }

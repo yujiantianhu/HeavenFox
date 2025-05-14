@@ -45,7 +45,7 @@ const thread_init_t proc_table::g_test_tables[] =
     test_task_init,
     
     /*!< end */
-    mrt_nullptr,
+    mr_nullptr,
 };
 
 const thread_init_t proc_table::g_demo_tables[] =
@@ -55,7 +55,7 @@ const thread_init_t proc_table::g_demo_tables[] =
     network_task_init,
     
     /*!< end */
-    mrt_nullptr,
+    mr_nullptr,
 };
 
 /*!< API functions */
@@ -77,11 +77,11 @@ crt_task_t::crt_task_t(const kchar_t *name, void *(*task_entry)(void *),
     if (!name || !(*name) || !task_entry)
         return;
 
-    memset(&this->sgrt_attr, 0, sizeof(this->sgrt_attr));
+    memset(&this->sgtc_attr, 0, sizeof(this->sgtc_attr));
 
-    this->sgrt_attr.detachstate = THREAD_CREATE_JOINABLE;
-    this->sgrt_attr.inheritsched = THREAD_INHERIT_SCHED;
-    this->sgrt_attr.schedpolicy = THREAD_SCHED_FIFO;
+    this->sgtc_attr.detachstate = THREAD_CREATE_JOINABLE;
+    this->sgtc_attr.inheritsched = THREAD_INHERIT_SCHED;
+    this->sgtc_attr.schedpolicy = THREAD_SCHED_FIFO;
 
     if (!stack) {
         kuint8_t *ptr = new kuint8_t[stack_size];
@@ -93,15 +93,15 @@ crt_task_t::crt_task_t(const kchar_t *name, void *(*task_entry)(void *),
     }
 
     /*!< thread stack */
-    thread_set_stack(&this->sgrt_attr, mrt_nullptr, this->stack_base, this->stack_size);
+    thread_set_stack(&this->sgtc_attr, mr_nullptr, this->stack_base, this->stack_size);
 
     /*!< lowest priority */
-    thread_set_priority(&this->sgrt_attr, prio);
+    thread_set_priority(&this->sgtc_attr, prio);
     /*!< default time slice */
-    thread_set_time_slice(&this->sgrt_attr, tslice);
+    thread_set_time_slice(&this->sgtc_attr, tslice);
 
     /*!< register thread */
-    retval = thread_create(&this->tid, &sgrt_attr, task_entry, (void *)this);
+    retval = thread_create(&this->tid, &sgtc_attr, task_entry, (void *)this);
     if (retval) {
         if (this->isdync)
             delete[] this->stack_base;
@@ -124,13 +124,13 @@ crt_task_t::~crt_task_t()
     /*!< unregister thread */
 
     /*!< clean attr */
-    thread_attr_destroy(&this->sgrt_attr);
+    thread_attr_destroy(&this->sgtc_attr);
 
     if (this->isdync)
         delete[] this->stack_base;
 
     this->tid = -1;
-    this->stack_base = mrt_nullptr;
+    this->stack_base = mr_nullptr;
     this->stack_size = 0;
     this->isdync = false;
 }

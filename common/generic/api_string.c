@@ -250,12 +250,12 @@ void do_string_reverse(void *ptr_src, kuint32_t size)
 }
 
 /*!
- * @brief   convert_number_to_string
+ * @brief   uint_to_str
  * @param   ptr_dst, value
  * @retval  none
  * @note    integrater convert to string
  */
-kusize_t convert_number_to_string(void *ptr_dst, kuint64_t value)
+kusize_t uint_to_str(void *ptr_dst, kuint64_t value)
 {
     kuint8_t *ptr_buf;
     kuint64_t num;
@@ -287,6 +287,31 @@ kusize_t convert_number_to_string(void *ptr_dst, kuint64_t value)
 }
 
 /*!
+ * @brief   uint_to_str
+ * @param   ptr_dst, value
+ * @retval  none
+ * @note    integrater convert to string
+ */
+kusize_t int_to_str(void *ptr_dst, kint64_t value)
+{
+    kusize_t lenth = 0;
+
+    if (value < 0) {
+        kchar_t *ptr_buf = (kchar_t *)ptr_dst;
+
+        if (ptr_buf)
+            *(ptr_buf++) = '-';
+
+        lenth = uint_to_str(ptr_buf, (kuint64_t)(-value));
+        lenth++;
+    } else {
+        lenth = uint_to_str(ptr_dst, (kuint64_t)(value));
+    }
+
+    return lenth;
+}
+
+/*!
  * @brief   seek_char_in_string
  * @param   ptr_src, ch
  * @retval  the character position in string
@@ -306,21 +331,21 @@ kchar_t *seek_char_in_string(const void *ptr_src, kchar_t ch)
         ptr_ch++;
     }
 
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
  * @brief   seek_char_by_pos
- * @param   ptr_src, index
+ * @param   ptr_src, offset
  * @retval  the character position in string
  * @note    find a character position
  */
-kchar_t *seek_char_by_pos(const void *ptr_src, kuint32_t index)
+kchar_t *seek_char_by_pos(const void *ptr_src, kuint32_t offset)
 {
     kchar_t *ptr_ch, *ptr_end;
 
     ptr_ch  = (kchar_t *)ptr_src;
-    ptr_end = ptr_ch + index;
+    ptr_end = ptr_ch + offset;
 
     while (*ptr_ch != '\0')
     {
@@ -330,8 +355,41 @@ kchar_t *seek_char_by_pos(const void *ptr_src, kuint32_t index)
         ptr_ch++;
     }
 
-    return mrt_nullptr;
+    return mr_nullptr;
 }
+
+/*!
+ * @brief   seek_n_char_in_string
+ * @param   ptr_src, ch, n
+ * @retval  the character position in string
+ * @note    find the index character position; if n < 0, it is no limit
+ */
+kchar_t *seek_n_char_in_string(const void *ptr_src, kchar_t ch, kint32_t n)
+{
+    kchar_t *str, *str_found = mr_nullptr;
+    kuint32_t count = (n < 0) ? (kuint32_t)(~0) : n;
+
+    str = (kchar_t *)ptr_src;
+    if (!str)
+        return mr_nullptr;
+
+    while (*str != '\0') {
+        str = seek_char_in_string(str, ch);
+        if (!str || !(count--))
+            return str_found;
+
+        str_found = str++;
+    }
+
+    /*!< for example, ch = 'a', and string is "a\0" */
+    return (n < 0) ? str_found : mr_nullptr;
+}
+
+static const kchar_t g_fmt_repeat_chars[] = {
+    'l', 'c', 'd', 'u', 's', 'B', 'P', 'X', 
+    'b', 'p', 'x', '0', '+', '-', '#'
+};
+static const kusize_t g_fmt_repeat_chars_num = ARRAY_SIZE(g_fmt_repeat_chars);
 
 /*!
  * @brief   do_fmt_convert
@@ -341,30 +399,35 @@ kchar_t *seek_char_by_pos(const void *ptr_src, kuint32_t index)
  */
 kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_fmt, va_list ptr_list, kusize_t size)
 {
-    kchar_t *ptr_data, *ptr_args;
-    kubyte_t ch;
-    kusize_t lenth, count;
-    kuint64_t i, num;
+    kchar_t *ptr_data = (kchar_t *)ptr_buf;
+    kubyte_t ch, pad_ch = ' ';
+    kusize_t lenth = 0, count;
+    kuint32_t super_cnt = 0;
+	kbool_t is_super = false;
+    kbool_t is_longint = false;
+    kbool_t is_hexprex = false;
 
-    ptr_data = (kchar_t *)ptr_buf;
-    lenth = 0;
+    /*!< false: right align; true: left align */
+    kbool_t left_align = false;
+    kusize_t width = 0, align_pad = 0;
     
     if (size < 1)
         return 0;
 
+    /*!< Ignore '\0' */
     size -= 1;
 
     /*!< calculate numbers first */
-    for (i = 0; *(ptr_fmt + i) != '\0'; i++)
-    {
+    for (kuint64_t i = 0; *(ptr_fmt + i) != '\0'; i++) {
+
+        /*!< read current character */
         ch = *(ptr_fmt + i);
 
-        if (!i && (ch == *(PRINT_LEVEL_SOH)))
+        /*!< jump over PRINT_LEVEL_SOH */
+        if ((0 == i) && (ch == *(PRINT_LEVEL_SOH)))
         {
             i++;
-
-            if (ptr_level)
-            {
+            if (ptr_level) {
                 *ptr_level = *(PRINT_LEVEL_SOH);
                 *(ptr_level + 1) = *(ptr_fmt + i);
             }
@@ -372,152 +435,320 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_f
             continue;
         }
 
-        if (ch == '\n')
-        {
-            /*!< jump over */
+        if (ch == '%') {
+            if (!is_super) {
+                super_cnt = 0;
+
+                /*!< next character */
+                i++;
+                ch = *(ptr_fmt + i);
+            }
+
+            /*!< mark to start format */
+            is_super = true;
+
+            /*!< initial all flags */
+            pad_ch = ' ';
+            width = 0;
+            left_align = false;
+            is_longint = false;
+            is_hexprex = false;
         }
 
-        /*!< ------------------------------------------------------------------ */
-        /*!< Aim to '%' */
-        if (ch != '%')
-        {
-            if ((lenth + 1) > size)
-                break;
+        if (is_super) {
+            super_cnt++;
 
-            if (isValid(ptr_buf))
-                *(ptr_data++) = ch;
+            switch (ch) {
+                case 'c': {
+                    kchar_t chr = (kchar_t)va_arg(ptr_list, kuint32_t);
 
-            lenth++;
+                    align_pad = (width > 1) ? (width - 1) : 0;
+                    if ((lenth + 1 + align_pad) > size)
+                        goto out;
 
-            continue;
-        }
+                    if (ptr_buf) {
+                        if (left_align) {
+                            /*!< save character */
+                            *ptr_data = chr;
+                            /*!< character's length is 1, fill pad_ch to align */
+                            memset(ptr_data + 1, pad_ch, align_pad);
+                        } else {
+                            /*!< character's length is 1, fill pad_ch to align */
+                            memset(ptr_data, pad_ch, align_pad);
+                            /*!< save character */
+                            *(ptr_data + align_pad) = chr;
+                        }
 
-        /*!< if (ch == '%') */
-        i++;
-        ch = *(ptr_fmt + i);
-
-        switch (ch)
-        {
-            case 'c':
-                num = (kchar_t)va_arg(ptr_list, kuint32_t);
-
-                if ((lenth + 1) > size)
-                    break;
-
-                if (isValid(ptr_buf))
-                    *(ptr_data++) = num;
-
-                lenth += 1;
-                break;
-
-            case 'd':
-                num = (kuint32_t)va_arg(ptr_list, kuint32_t);
-                count = convert_number_to_string(mrt_nullptr, num);
-
-                if ((lenth + count) > size)
-                    break;
-
-                convert_number_to_string(ptr_data, num);
-
-                if (isValid(ptr_buf))
-                    ptr_data += count;
-
-                lenth += count;
-                break;
-
-            case 'l':
-                if (*(ptr_fmt + i + 1) == 'd')
-                {
-                    num = (kuint64_t)va_arg(ptr_list, kuint64_t);
-                    count = convert_number_to_string(mrt_nullptr, num);
-
-                    if ((lenth + count) > size)
-                        break;
-
-                    if (isValid(ptr_buf))
-                    {
-                        convert_number_to_string(ptr_data, num);
-                        ptr_data += count;
+                        ptr_data += (1 + align_pad);
                     }
 
-                    i++;
-                    lenth += count;
+                    is_super = false;
+                    lenth += (1 + align_pad);
+                    break;
                 }
-                else
-                {
-                    if ((lenth + 1) > size)
-                        break;
+                case 'd': {
+                    kint64_t i_num = 0;
 
-                    if (isValid(ptr_buf))
-                        *(ptr_data++) = '%';
+                    if (is_longint)
+                        i_num = (kint64_t)va_arg(ptr_list, kint64_t);
+                    else
+                        i_num = (kint64_t)va_arg(ptr_list, kint32_t);
 
-                    i--;
-                    lenth++;
+                    /*!< calculate length */
+                    count = int_to_str(mr_nullptr, i_num);
+                    align_pad = (width > count) ? (width - count) : 0;
+                    if ((lenth + count + align_pad) > size)
+                        goto out;
+
+                    if (ptr_buf) {
+                        if (left_align) {
+                            /*!< convert digit number to string */
+                            int_to_str(ptr_data, i_num);
+                            /*!< if string is too short (less than width), fill pad_ch to align */
+                            memset(ptr_data + count, pad_ch, align_pad);
+                        } else {
+                            /*!< if string is too short (less than width), fill pad_ch to align */
+                            memset(ptr_data, pad_ch, align_pad);
+                            /*!< convert digit number to string */
+                            int_to_str(ptr_data + align_pad, i_num);
+                        }
+                    
+                        ptr_data += (count + align_pad);
+                    }
+
+                    is_super = false;
+                    lenth += (count + align_pad);
+                    break;
                 }
-                break;
+                case 'u': {
+                    kuint64_t u_num = 0;
 
-            case 's':
-                ptr_args = (kchar_t *)va_arg(ptr_list, kchar_t *);
-                count	 = get_string_lenth(ptr_args);
+                    if (is_longint)
+                        u_num = (kuint64_t)va_arg(ptr_list, kuint64_t);
+                    else
+                        u_num = (kuint64_t)va_arg(ptr_list, kuint32_t);
 
-                if ((lenth + count) > size)
+                    /*!< calculate length */
+                    count = uint_to_str(mr_nullptr, u_num);
+                    align_pad = (width > count) ? (width - count) : 0;
+                    if ((lenth + count + align_pad) > size)
+                        goto out;
+
+                    if (ptr_buf) {
+                        if (left_align) {
+                            /*!< convert digit number to string */
+                            uint_to_str(ptr_data, u_num);
+                            /*!< if string is too short (less than width), fill pad_ch to align */
+                            memset(ptr_data + count, pad_ch, align_pad);
+                        } else {
+                            /*!< if string is too short (less than width), fill pad_ch to align */
+                            memset(ptr_data, pad_ch, align_pad);
+                            /*!< convert digit number to string */
+                            uint_to_str(ptr_data + align_pad, u_num);
+                        }
+                    
+                        ptr_data += (count + align_pad);
+                    }
+
+                    is_super = false;
+                    lenth += (count + align_pad);
                     break;
-
-                if (isValid(ptr_buf))
-                {
-                    do_string_split(ptr_data, 0, ptr_args);
-                    ptr_data += count;
                 }
+                case 's': {
+                    kchar_t *ptr_str = (kchar_t *)va_arg(ptr_list, kchar_t *);
 
-                lenth += count;
+                    /*!< calculate length */
+                    count = get_string_lenth(ptr_str);
 
-                break;
+                    align_pad = (width > count) ? (width - count) : 0;
+                    if ((lenth + count + align_pad) > size)
+                        goto out;
+    
+                    if (ptr_buf)
+                    {
+                        if (left_align) {
+                            /*!< split new string to ptr_data */
+                            do_string_split(ptr_data, 0, ptr_str);
+                            /*!< if string is too short (less than width), fill pad_ch to align */
+                            memset(ptr_data + count, pad_ch, align_pad);
+                        } else {
+                            /*!< if string is too short (less than width), fill pad_ch to align */
+                            memset(ptr_data, pad_ch, align_pad);
+                            /*!< split new string to ptr_data + align_pad */
+                            do_string_split(ptr_data, align_pad, ptr_str);
+                        }
 
-            case 'x':
-            case 'p':
-                num = (kutype_t)va_arg(ptr_list, kutype_t);
-                count = dec_to_hex(mrt_nullptr, num, -1);
+                        ptr_data += (count + align_pad);
+                    }
 
-                if ((lenth + count) > size)
+                    is_super = false;
+                    lenth += (count + align_pad);
                     break;
+                }
+                case 'x':
+                case 'X':
+                case 'p': 
+                case 'P': {
+                    kutype_t hex_num = 0;
+                    kuint32_t mode = -1;
 
-                dec_to_hex(ptr_data, num, -1);
+                    if (is_hexprex)
+                        mode = (ch > 'a') ? 0 : 1;
 
-                if (isValid(ptr_buf))
-                    ptr_data += count;
+                    if (ch == 'p')
+                        hex_num = (kutype_t)va_arg(ptr_list, void *);
+                    else
+                        hex_num = (kutype_t)va_arg(ptr_list, kutype_t);
 
-                lenth += count;
-                break;
-
-            case 'b':
-                num = (kutype_t)va_arg(ptr_list, kutype_t);
-                count = dec_to_binary(mrt_nullptr, num, -1);
-
-                if ((lenth + count) > size)
+                    /*!< calculate length */
+                    count = dec_to_hex(mr_nullptr, hex_num, mode);
+    
+                    align_pad = (width > count) ? (width - count) : 0;
+                    if ((lenth + count + align_pad) > size)
+                        goto out;
+    
+                    if (ptr_buf) {
+                        if (left_align) {
+                            /*!< convert hex to string */
+                            dec_to_hex(ptr_data, hex_num, mode);
+                            /*!< if string is too short (less than width), fill pad_ch to align */
+                            memset(ptr_data + count, pad_ch, align_pad);
+                        } else {
+                            /*!< if string is too short (less than width), fill pad_ch to align */
+                            memset(ptr_data, pad_ch, align_pad);
+                            /*!< convert hex to string */
+                            dec_to_hex(ptr_data + align_pad, hex_num, mode);
+                        }
+                    
+                        ptr_data += (count + align_pad);
+                    }
+    
+                    is_super = false;
+                    lenth += (count + align_pad);
                     break;
+                }
+                case 'b':
+                case 'B': {
+                    kutype_t bin_num = (kutype_t)va_arg(ptr_list, kutype_t);
+                    kuint32_t mode = -1;
 
-                dec_to_binary(ptr_data, num, -1);
+                    if (is_hexprex)
+                        mode = (ch > 'a') ? 0 : 1;
 
-                if (isValid(ptr_buf))
-                    ptr_data += count;
+                    /*!< calculate length */
+                    count = dec_to_binary(mr_nullptr, bin_num, mode);
 
-                lenth += count;
-                break;
-
-            default:
-                if ((lenth + 1) > size)
+                    align_pad = (width > count) ? (width - count) : 0;
+                    if ((lenth + count + align_pad) > size)
+                        goto out;
+    
+                    if (ptr_buf) {
+                        if (left_align) {
+                            /*!< convert binary to string */
+                            dec_to_binary(ptr_data, bin_num, mode);
+                            /*!< if string is too short (less than width), fill pad_ch to align */
+                            memset(ptr_data + count, pad_ch, align_pad);
+                        } else {
+                            /*!< if string is too short (less than width), fill pad_ch to align */
+                            memset(ptr_data, pad_ch, align_pad);
+                            /*!< convert binary to string */
+                            dec_to_binary(ptr_data + align_pad, bin_num, mode);
+                        }
+                    
+                        ptr_data += (count + align_pad);
+                    }
+    
+                    is_super = false;
+                    lenth += (count + align_pad);
                     break;
+                }
+                case 'l': {
+                    /*!< only permit "%ld", "%lu", "%lld", "%llu" */
+                    kchar_t next_ch = *(ptr_fmt + i + 1);
 
-                if (isValid(ptr_buf))
-                    *(ptr_data++) = '%';
+                    if (((next_ch == 'd') || (next_ch == 'u')) ||
+                        ((next_ch == 'l') && (!is_longint)))
+                        is_longint = true;
+                    else {
+                        is_longint = false;
+                        goto esac;
+                    }
+                    break;
+                }
+                case '0' ... '9': {
+                    /*!< do not set is_super to false */
+                    /*!< width = width * 10 + ch - '0' */
+                    width = (width << 1) + (width << 3) + ch - '0';
 
-                i--;
-                lenth++;
-                break;
+                    /*!< first enter */
+                    if (!width)
+                        pad_ch = (ch == '0') ? '0' : ' ';
+                    break;
+                }
+                case '#':
+                case '+':
+                case '-': {
+                    /*!< left margin align? */
+                    const kchar_t *ptr_rpt = g_fmt_repeat_chars;
+                    kusize_t rpt_num = g_fmt_repeat_chars_num;
+
+                    kchar_t next_ch = *(ptr_fmt + i + 1);
+                    kchar_t last_ch = *(ptr_fmt + i - 1);
+                    kbool_t last_matched = false;
+                    kbool_t next_matched = false;
+
+                    /*!< if string is "%#3d"/"%#345d", it's correct; but "%3#d"/"%#3#d" is not allowed */
+                    width = 0;
+
+                    /*!
+                     * @note '#', '+', '-' can be repeated, and no order requirement; 
+                     *      but next character must be valid (such as 'x'/'X', '0' ~ '9', ...);
+                     *      if next character is 'd'/'c'/'s'/'l', ignore '#'/'+'/'-', does not ouput
+                     */
+                    while (rpt_num--) {
+                        if (next_ch == ptr_rpt[rpt_num])
+                            next_matched = true;
+                        if ((super_cnt == 1) || (last_ch == ptr_rpt[rpt_num]))
+                            last_matched = true;
+                    }
+
+                    /*!< ptr_rpt not include '0' ~ '9' */
+                    if (!last_matched || (!next_matched && ((next_ch < '0') || (next_ch > '9'))))
+                        goto esac;
+
+                    if (ch == '#')
+                        is_hexprex = true;
+                    else if (ch == '-')
+                        left_align = true;
+                    break;
+                }
+                default:
+                    goto esac;
+            }
+
+            continue;
+
+        esac:
+            /*!< if string is invalid (such as "%3h"), clear width for next formating */
+            width = 0;
+            is_super = false;
+
+            /*!< back to last character */
+            i -= super_cnt;
+            ch = '%';
         }
+        
+        if ((lenth + 1) > size)
+            break;
+
+        if (ptr_buf)
+            *(ptr_data++) = ch;
+
+        lenth++;
     }
 
-    if (isValid(ptr_buf))
+out:
+    if (ptr_buf)
         *ptr_data = '\0';
 
     return lenth;
@@ -529,24 +760,24 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_f
  * @retval  none
  * @note    String format conversion
  */
-kchar_t *vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, va_list sprt_list)
+kchar_t *vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, va_list sptr_list)
 {
-    va_list sprt_copy;
+    va_list sptr_copy;
     kchar_t *ptr;
     kusize_t lenth;
 
     if (!ptr_fmt)
-        return mrt_nullptr;
+        return mr_nullptr;
 
-    va_copy(sprt_copy, sprt_list);
-    lenth = do_fmt_convert(mrt_nullptr, mrt_nullptr, ptr_fmt, sprt_copy, (kusize_t)(~0));
-    va_end(sprt_copy);
+    va_copy(sptr_copy, sptr_list);
+    lenth = do_fmt_convert(mr_nullptr, mr_nullptr, ptr_fmt, sptr_copy, (kusize_t)(~0));
+    va_end(sptr_copy);
 
     ptr = kmalloc(lenth + 1, GFP_KERNEL);
     if (!isValid(ptr))
-        return mrt_nullptr;
+        return mr_nullptr;
 
-    do_fmt_convert(ptr, mrt_nullptr, ptr_fmt, sprt_list, lenth + 1);
+    do_fmt_convert(ptr, mr_nullptr, ptr_fmt, sptr_list, lenth + 1);
     if (size)
         *size = lenth;
 
@@ -559,24 +790,24 @@ kchar_t *vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, va_list sprt_lis
  * @retval  none
  * @note    String format conversion
  */
-kchar_t *lv_vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, kubyte_t *ptr_lv, va_list sprt_list)
+kchar_t *lv_vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, kubyte_t *ptr_lv, va_list sptr_list)
 {
-    va_list sprt_copy;
+    va_list sptr_copy;
     kchar_t *ptr;
     kusize_t lenth;
 
     if (!ptr_fmt)
-        return mrt_nullptr;
+        return mr_nullptr;
 
-    va_copy(sprt_copy, sprt_list);
-    lenth = do_fmt_convert(mrt_nullptr, mrt_nullptr, ptr_fmt, sprt_copy, (kusize_t)(~0));
-    va_end(sprt_copy);
+    va_copy(sptr_copy, sptr_list);
+    lenth = do_fmt_convert(mr_nullptr, mr_nullptr, ptr_fmt, sptr_copy, (kusize_t)(~0));
+    va_end(sptr_copy);
 
     ptr = kmalloc(lenth + 1, GFP_KERNEL);
     if (!isValid(ptr))
-        return mrt_nullptr;
+        return mr_nullptr;
 
-    do_fmt_convert(ptr, ptr_lv, ptr_fmt, sprt_list, lenth + 1);
+    do_fmt_convert(ptr, ptr_lv, ptr_fmt, sptr_list, lenth + 1);
     if (size)
         *size = lenth;
 
@@ -589,14 +820,14 @@ kchar_t *lv_vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, kubyte_t *ptr
  * @retval  none
  * @note    String format conversion
  */
-kint32_t vasprintk(void *ptr_buf, const kchar_t *ptr_fmt, va_list sprt_list)
+kint32_t vasprintk(void *ptr_buf, const kchar_t *ptr_fmt, va_list sptr_list)
 {
-    va_list sprt_copy;
+    va_list sptr_copy;
     kusize_t size;
 
-    va_copy(sprt_copy, sprt_list);
-    size = do_fmt_convert(ptr_buf, mrt_nullptr, ptr_fmt, sprt_copy, (kusize_t)(~0));
-    va_end(sprt_copy);
+    va_copy(sptr_copy, sptr_list);
+    size = do_fmt_convert(ptr_buf, mr_nullptr, ptr_fmt, sptr_copy, (kusize_t)(~0));
+    va_end(sptr_copy);
 
     return size;
 }
@@ -613,7 +844,7 @@ kint32_t sprintk(void *ptr_buf, const kchar_t *ptr_fmt, ...)
     kusize_t size;
 
     va_start(ptr_list, ptr_fmt);
-    size = do_fmt_convert(ptr_buf, mrt_nullptr, ptr_fmt, ptr_list, (kusize_t)(~0));
+    size = do_fmt_convert(ptr_buf, mr_nullptr, ptr_fmt, ptr_list, (kusize_t)(~0));
     va_end(ptr_list);
 
     return size;
@@ -627,27 +858,27 @@ kint32_t sprintk(void *ptr_buf, const kchar_t *ptr_fmt, ...)
  */
 kchar_t *sprintk_safe(const kchar_t *ptr_fmt, ...)
 {
-    va_list sprt_list, sprt_copy;
+    va_list sptr_list, sptr_copy;
     kchar_t *ptr;
     kusize_t lenth;
 
     if (!ptr_fmt)
-        return mrt_nullptr;
+        return mr_nullptr;
 
-    va_start(sprt_list, ptr_fmt);
+    va_start(sptr_list, ptr_fmt);
 
-    va_copy(sprt_copy, sprt_list);
-    lenth = do_fmt_convert(mrt_nullptr, mrt_nullptr, ptr_fmt, sprt_copy, (kusize_t)(~0));
-    va_end(sprt_copy);
+    va_copy(sptr_copy, sptr_list);
+    lenth = do_fmt_convert(mr_nullptr, mr_nullptr, ptr_fmt, sptr_copy, (kusize_t)(~0));
+    va_end(sptr_copy);
 
     ptr = kmalloc(lenth + 1, GFP_KERNEL);
     if (!isValid(ptr)) {
-        va_end(sprt_list);
-        return mrt_nullptr;
+        va_end(sptr_list);
+        return mr_nullptr;
     }
 
-    do_fmt_convert(ptr, mrt_nullptr, ptr_fmt, sprt_list, lenth + 1);
-    va_end(sprt_list);
+    do_fmt_convert(ptr, mr_nullptr, ptr_fmt, sptr_list, lenth + 1);
+    va_end(sptr_list);
 
     return ptr;
 }
@@ -819,6 +1050,17 @@ __weak kint32_t kstrncmp(kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
 __weak kchar_t *kstrchr(const kchar_t *__s1, kchar_t ch)
 {
     return seek_char_in_string(__s1, ch);
+}
+
+/*!
+ * @brief   kstrnchr
+ * @param   none
+ * @retval  none
+ * @note    locate where the n "ch" appears
+ */
+__weak kchar_t *kstrnchr(const kchar_t *__s1, kchar_t ch, kint32_t n)
+{
+    return seek_n_char_in_string(__s1, ch, n);
 }
 
 /*!

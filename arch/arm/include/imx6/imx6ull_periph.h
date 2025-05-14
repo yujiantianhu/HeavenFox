@@ -46,7 +46,7 @@ typedef struct hal_imx_gpio
 #define IMX6UL_GPIO4_ADDR_BASE                                      (0x20A8000u)
 #define IMX6UL_GPIO5_ADDR_BASE                                      (0x20AC000u)
 #define IMX6UL_GPIO_PROPERTY_ENTRY(x)                               (srt_hal_imx_gpio_t *)IMX6UL_GPIO##x##_ADDR_BASE
-#define IMX6UL_GPIO_PIN_OFFSET_BIT(x)                               mrt_bit(x)
+#define IMX6UL_GPIO_PIN_OFFSET_BIT(x)                               mr_bit(x)
 
 /*!< ICR1/ICR2 Register */
 #define HAL_IMX_ICR_LOW_LEVEL						                (0x00)
@@ -377,21 +377,21 @@ typedef struct
 
 typedef enum __ERT_IMX_USBOTG_INTR_BIT
 {
-    NR_ImxUsbOtgIntr_UsbIntBit = mrt_bit(0U),
-    NR_ImxUsbOtgIntr_UsbErrIntBit = mrt_bit(1U),
-    NR_ImxUsbOtgIntr_PortChangeDetectIntBit = mrt_bit(2U),
-    NR_ImxUsbOtgIntr_FrameRolloverIntBit = mrt_bit(3U),
-    NR_ImxUsbOtgIntr_SystemErrIntBit = mrt_bit(4U),
-    NR_ImxUsbOtgIntr_AsyncAdvanceIntBit = mrt_bit(5U),
-    NR_ImxUsbOtgIntr_UsbResetIntBit = mrt_bit(6U),
-    NR_ImxUsbOtgIntr_SofRecvIntBit = mrt_bit(7U),
-    NR_ImxUsbOtgIntr_SleepIntBit = mrt_bit(8U),
-    NR_ImxUsbOtgIntr_UlpiIntBit = mrt_bit(10U),
-    NR_ImxUsbOtgIntr_NakIntBit = mrt_bit(16U),
-    NR_ImxUsbOtgIntr_UsbHostAsyncIntBit = mrt_bit(18U),
-    NR_ImxUsbOtgIntr_UsbHostPeriodicIntBit = mrt_bit(19U),
-    NR_ImxUsbOtgIntr_GpTimer0IntBit = mrt_bit(24U),
-    NR_ImxUsbOtgIntr_GpTimer1IntBit = mrt_bit(25U),
+    NR_ImxUsbOtgIntr_UsbIntBit = mr_bit(0U),
+    NR_ImxUsbOtgIntr_UsbErrIntBit = mr_bit(1U),
+    NR_ImxUsbOtgIntr_PortChangeDetectIntBit = mr_bit(2U),
+    NR_ImxUsbOtgIntr_FrameRolloverIntBit = mr_bit(3U),
+    NR_ImxUsbOtgIntr_SystemErrIntBit = mr_bit(4U),
+    NR_ImxUsbOtgIntr_AsyncAdvanceIntBit = mr_bit(5U),
+    NR_ImxUsbOtgIntr_UsbResetIntBit = mr_bit(6U),
+    NR_ImxUsbOtgIntr_SofRecvIntBit = mr_bit(7U),
+    NR_ImxUsbOtgIntr_SleepIntBit = mr_bit(8U),
+    NR_ImxUsbOtgIntr_UlpiIntBit = mr_bit(10U),
+    NR_ImxUsbOtgIntr_NakIntBit = mr_bit(16U),
+    NR_ImxUsbOtgIntr_UsbHostAsyncIntBit = mr_bit(18U),
+    NR_ImxUsbOtgIntr_UsbHostPeriodicIntBit = mr_bit(19U),
+    NR_ImxUsbOtgIntr_GpTimer0IntBit = mr_bit(24U),
+    NR_ImxUsbOtgIntr_GpTimer1IntBit = mr_bit(25U),
 
 } nrt_imx_usb_intr_t;
 
@@ -583,27 +583,27 @@ typedef struct
 /*!< for Registers: INT_SIGNAL_EN, INT_STATUS_EN, INT_STATUS */
 enum __ERT_IMX_USDHC_INTERRUPT_BIT
 {
-    NR_ImxUsdhc_IntCmdComplete_Bit = mrt_bit(0U),                   /*!< Command Complete Status Enable */
-    NR_ImxUsdhc_IntDataComplete_Bit = mrt_bit(1U),                  /*!< Transfer Complete Status Enable */
-    NR_ImxUsdhc_IntBlockGapEvent_Bit = mrt_bit(2U),                 /*!< Block Gap Event Status Enable */
-    NR_ImxUsdhc_IntDmaInterrupt_Bit = mrt_bit(3U),                  /*!< DMA Interrupt Status Enable */
-    NR_ImxUsdhc_IntBufferWriteReady_Bit = mrt_bit(4U),              /*!< Buffer Write Ready Status Enable */
-    NR_ImxUsdhc_IntBufferReadReady_Bit = mrt_bit(5U),               /*!< Buffer Read Ready Status Enable */
-    NR_ImxUsdhc_IntCardInsertion_Bit = mrt_bit(6U),                 /*!< Card Insertion Status Enable */
-    NR_ImxUsdhc_IntCardRemoval_Bit = mrt_bit(7U),                   /*!< Card Removal Status Enable */
-    NR_ImxUsdhc_IntCardInterrupt_Bit = mrt_bit(8U),                 /*!< Card Interrupt Status Enable */
-    NR_ImxUsdhc_IntReTuningEvent_Bit = mrt_bit(12U),                /*!< Re-Tuning Event Status Enable */
-    NR_ImxUsdhc_IntTuningPass_Bit = mrt_bit(14U),                   /*!< Tuning Pass Status Enable */
-    NR_ImxUsdhc_IntCmdTimeOutErr_Bit = mrt_bit(16U),                /*!< Command Timeout Error Status Enable */
-    NR_ImxUsdhc_IntCmdCrcErr_Bit = mrt_bit(17U),                    /*!< Command CRC Error Status Enable */
-    NR_ImxUsdhc_IntCmdEndBitErr_Bit = mrt_bit(18U),                 /*!< Command End Bit Error Status Enable */
-    NR_ImxUsdhc_IntCmdIndexErr_Bit = mrt_bit(19U),                  /*!< Command Index Error Status Enable */
-    NR_ImxUsdhc_IntDataTimeOutErr_Bit = mrt_bit(20U),               /*!< Data Timeout Error Status Enable */
-    NR_ImxUsdhc_IntDataCrcErr_Bit = mrt_bit(21U),                   /*!< Data CRC Error Status Enable */
-    NR_ImxUsdhc_IntDataEndBitErr_Bit = mrt_bit(22U),                /*!< Data End Bit Error Status Enable */
-    NR_ImxUsdhc_IntACmd12Err_Bit = mrt_bit(24U),                    /*!< Auto CMD12 Error Status Enable */
-    NR_ImxUsdhc_IntTuningErr_Bit = mrt_bit(26U),                    /*!< Tuning Error Status Enable */
-    NR_ImxUsdhc_IntDmaErr_Bit = mrt_bit(28U),                       /*!< DMA Error Status Enable */
+    NR_ImxUsdhc_IntCmdComplete_Bit = mr_bit(0U),                   /*!< Command Complete Status Enable */
+    NR_ImxUsdhc_IntDataComplete_Bit = mr_bit(1U),                  /*!< Transfer Complete Status Enable */
+    NR_ImxUsdhc_IntBlockGapEvent_Bit = mr_bit(2U),                 /*!< Block Gap Event Status Enable */
+    NR_ImxUsdhc_IntDmaInterrupt_Bit = mr_bit(3U),                  /*!< DMA Interrupt Status Enable */
+    NR_ImxUsdhc_IntBufferWriteReady_Bit = mr_bit(4U),              /*!< Buffer Write Ready Status Enable */
+    NR_ImxUsdhc_IntBufferReadReady_Bit = mr_bit(5U),               /*!< Buffer Read Ready Status Enable */
+    NR_ImxUsdhc_IntCardInsertion_Bit = mr_bit(6U),                 /*!< Card Insertion Status Enable */
+    NR_ImxUsdhc_IntCardRemoval_Bit = mr_bit(7U),                   /*!< Card Removal Status Enable */
+    NR_ImxUsdhc_IntCardInterrupt_Bit = mr_bit(8U),                 /*!< Card Interrupt Status Enable */
+    NR_ImxUsdhc_IntReTuningEvent_Bit = mr_bit(12U),                /*!< Re-Tuning Event Status Enable */
+    NR_ImxUsdhc_IntTuningPass_Bit = mr_bit(14U),                   /*!< Tuning Pass Status Enable */
+    NR_ImxUsdhc_IntCmdTimeOutErr_Bit = mr_bit(16U),                /*!< Command Timeout Error Status Enable */
+    NR_ImxUsdhc_IntCmdCrcErr_Bit = mr_bit(17U),                    /*!< Command CRC Error Status Enable */
+    NR_ImxUsdhc_IntCmdEndBitErr_Bit = mr_bit(18U),                 /*!< Command End Bit Error Status Enable */
+    NR_ImxUsdhc_IntCmdIndexErr_Bit = mr_bit(19U),                  /*!< Command Index Error Status Enable */
+    NR_ImxUsdhc_IntDataTimeOutErr_Bit = mr_bit(20U),               /*!< Data Timeout Error Status Enable */
+    NR_ImxUsdhc_IntDataCrcErr_Bit = mr_bit(21U),                   /*!< Data CRC Error Status Enable */
+    NR_ImxUsdhc_IntDataEndBitErr_Bit = mr_bit(22U),                /*!< Data End Bit Error Status Enable */
+    NR_ImxUsdhc_IntACmd12Err_Bit = mr_bit(24U),                    /*!< Auto CMD12 Error Status Enable */
+    NR_ImxUsdhc_IntTuningErr_Bit = mr_bit(26U),                    /*!< Tuning Error Status Enable */
+    NR_ImxUsdhc_IntDmaErr_Bit = mr_bit(28U),                       /*!< DMA Error Status Enable */
 
     NR_ImxUsdhc_IntCmdErr_Bit = (NR_ImxUsdhc_IntCmdIndexErr_Bit | NR_ImxUsdhc_IntCmdEndBitErr_Bit |
                                 NR_ImxUsdhc_IntCmdCrcErr_Bit | NR_ImxUsdhc_IntCmdTimeOutErr_Bit),
@@ -621,7 +621,7 @@ enum __ERT_IMX_USDHC_INTERRUPT_BIT
                                 NR_ImxUsdhc_IntAllTuning_Bit),
 
 /*!< write 1 to clear */
-#define mrt_imx_clear_interrupt_flags(flagBit, usdhc)                mrt_writel(flagBit, usdhc->INT_STATUS)
+#define mr_imx_clear_interrupt_flags(flagBit, usdhc)                mr_writel(flagBit, usdhc->INT_STATUS)
 };
 
 /*!< for Register: SYS_CTRL */
@@ -637,7 +637,7 @@ enum __ERT_IMX_USDHC_SYS_CTRL_BIT
  */
 #define IMX_USDHC_SYS_CTRL_DVS_OFFSET                               (4U)
 #define IMX_USDHC_SYS_CTRL_DVS_MASK                                 (0xf0U) 
-#define IMX_USDHC_SYS_CTRL_DVS_BIT(x)                               mrt_bit_mask((x), IMX_USDHC_SYS_CTRL_DVS_MASK, IMX_USDHC_SYS_CTRL_DVS_OFFSET)
+#define IMX_USDHC_SYS_CTRL_DVS_BIT(x)                               mr_bit_mask((x), IMX_USDHC_SYS_CTRL_DVS_MASK, IMX_USDHC_SYS_CTRL_DVS_OFFSET)
 #define IMX_USDHC_SYS_CTRL_DVS_U32(x)                               (((x) >= 1) ? IMX_USDHC_SYS_CTRL_DVS_BIT((x) - 1) : IMX_USDHC_SYS_CTRL_DVS_BIT(1U))
 
 /*!< 
@@ -649,18 +649,18 @@ enum __ERT_IMX_USDHC_SYS_CTRL_BIT
  */
 #define IMX_USDHC_SYS_CTRL_SDCLKFS_OFFSET                           (8U)
 #define IMX_USDHC_SYS_CTRL_SDCLKFS_MASK                             (0xff00U) 
-#define IMX_USDHC_SYS_CTRL_SDCLKFS_BIT(x)                           mrt_bit_mask((x), IMX_USDHC_SYS_CTRL_SDCLKFS_MASK, IMX_USDHC_SYS_CTRL_SDCLKFS_OFFSET)
+#define IMX_USDHC_SYS_CTRL_SDCLKFS_BIT(x)                           mr_bit_mask((x), IMX_USDHC_SYS_CTRL_SDCLKFS_MASK, IMX_USDHC_SYS_CTRL_SDCLKFS_OFFSET)
 #define IMX_USDHC_SYS_CTRL_SDCLKFS_U32(ddr_en, x)                   ((ddr_en) ? IMX_USDHC_SYS_CTRL_SDCLKFS_BIT((x) >> 2U) : IMX_USDHC_SYS_CTRL_SDCLKFS_BIT((x) >> 1U))
 
 /*!< DTOCV: bit[19:16]. Data Timeout Counter Value */
 #define IMX_USDHC_SYS_CTRL_DTOCV_OFFSET                             (16U)
 #define IMX_USDHC_SYS_CTRL_DTOCV_MASK                               (0xf0000U) 
-#define IMX_USDHC_SYS_CTRL_DTOCV_BIT(x)                             mrt_bit_mask((x), IMX_USDHC_SYS_CTRL_DTOCV_MASK, IMX_USDHC_SYS_CTRL_DTOCV_OFFSET)
+#define IMX_USDHC_SYS_CTRL_DTOCV_BIT(x)                             mr_bit_mask((x), IMX_USDHC_SYS_CTRL_DTOCV_MASK, IMX_USDHC_SYS_CTRL_DTOCV_OFFSET)
 #define IMX_USDHC_SYS_CTRL_DTOCV_U32(x)                             IMX_USDHC_SYS_CTRL_DTOCV_BIT(x)
 
-    NR_ImxUsdhc_SysCtrl_SoftResetAll = mrt_bit(24U),                /*!< RSTA: Software Reset For ALL. 1: Reset; 0: No Reset */   
-    NR_ImxUsdhc_SysCtrl_SoftResetCmdLine = mrt_bit(25U),            /*!< RSTC: Software Reset For CMD Line. 1: Reset; 0: No Reset */
-    NR_ImxUsdhc_SysCtrl_SoftResetDataLine = mrt_bit(26U),           /*!< RSTD: Software Reset For DATA Line. 1: Reset; 0: No Reset */
+    NR_ImxUsdhc_SysCtrl_SoftResetAll = mr_bit(24U),                /*!< RSTA: Software Reset For ALL. 1: Reset; 0: No Reset */   
+    NR_ImxUsdhc_SysCtrl_SoftResetCmdLine = mr_bit(25U),            /*!< RSTC: Software Reset For CMD Line. 1: Reset; 0: No Reset */
+    NR_ImxUsdhc_SysCtrl_SoftResetDataLine = mr_bit(26U),           /*!< RSTD: Software Reset For DATA Line. 1: Reset; 0: No Reset */
 
     /*!< 
      * INITA: Initialization Active.
@@ -674,13 +674,13 @@ enum __ERT_IMX_USDHC_SYS_CTRL_BIT
      * when this command ends, the driver can make sure the 80 clock cycles are sent out. This is very useful
      * when the driver needs send 80 cycles to the card and does not want to wait till this bit is self cleared
      */
-    NR_ImxUsdhc_SysCtrl_InitialActive = mrt_bit(27U),
+    NR_ImxUsdhc_SysCtrl_InitialActive = mr_bit(27U),
 
     /*!< 
      * RSTT: Reset Tuning. 
      * When set this bit to 1, it will reset tuning circuit. After tuning circuits are reset, bit value is 0 
      */
-    NR_ImxUsdhc_SysCtrl_ResetTuning = mrt_bit(28U),
+    NR_ImxUsdhc_SysCtrl_ResetTuning = mr_bit(28U),
 
     NR_ImxUsdhc_SysCtrl_ResetMask = ((NR_ImxUsdhc_SysCtrl_SoftResetAll | NR_ImxUsdhc_SysCtrl_SoftResetCmdLine |
                                       NR_ImxUsdhc_SysCtrl_SoftResetDataLine | NR_ImxUsdhc_SysCtrl_ResetTuning) & 0x17000000U),
@@ -698,24 +698,24 @@ enum __ERT_IMX_USDHC_MIX_CTRL_BIT
      * sets the DPSEL bit of this register. Whether the Simple DMA or the Advanced DMA is active depends on
      * the DMA Select field of the Protocol Control register
      */
-    NR_ImxUsdhc_MixCtrl_DmaEnable = mrt_bit(0U),
+    NR_ImxUsdhc_MixCtrl_DmaEnable = mr_bit(0U),
 
     /*!< 
      * BCEN: Block Count Enable
      * This bit is used to enable the Block Count register, which is only relevant for multiple block transfers.
      * When this bit is 0, the internal counter for block is disabled, which is useful in executing an infinite transfer
      */
-    NR_ImxUsdhc_MixCtrl_BlockCountEnable = mrt_bit(1U),
+    NR_ImxUsdhc_MixCtrl_BlockCountEnable = mr_bit(1U),
 
-    NR_ImxUsdhc_MixCtrl_AutoCmd12Enable = mrt_bit(2U),              /*!< Auto CMD12 Enable */
-    NR_ImxUsdhc_MixCtrl_DualDataRateMode = mrt_bit(3U),             /*!< DDR_EN: Dual Data Rate mode selection */
+    NR_ImxUsdhc_MixCtrl_AutoCmd12Enable = mr_bit(2U),              /*!< Auto CMD12 Enable */
+    NR_ImxUsdhc_MixCtrl_DualDataRateMode = mr_bit(3U),             /*!< DDR_EN: Dual Data Rate mode selection */
 
     /*!< 
      * DTDSEL: Data Transfer Direction Select
      *  1, Read (Card to Host)
      *  0, Write (Host to Card)
      */
-    NR_ImxUsdhc_MixCtrl_DataTransferDirection = mrt_bit(4U),
+    NR_ImxUsdhc_MixCtrl_DataTransferDirection = mr_bit(4U),
 
     /*!<
      * MSBSEL: Multi/Single Block Select
@@ -724,14 +724,14 @@ enum __ERT_IMX_USDHC_MIX_CTRL_BIT
      *  1, Multiple Blocks
      *  0, Single Block
      */
-    NR_ImxUsdhc_MixCtrl_MultiSingleBlockSelect = mrt_bit(5U),
+    NR_ImxUsdhc_MixCtrl_MultiSingleBlockSelect = mr_bit(5U),
 
     /*!<
      * AC23EN
      * When this bit is set to 1, the Host Controller issues a CMD23 automatically before issuing a command
      * specified in the Command Register
      */
-    NR_ImxUsdhc_MixCtrl_AutoCmd23Enable = mrt_bit(7U),
+    NR_ImxUsdhc_MixCtrl_AutoCmd23Enable = mr_bit(7U),
 
     /*!<
      * EXE_TUNE: Execute Tuning: (Only used for SD3.0, SDR104 mode)
@@ -740,7 +740,7 @@ enum __ERT_IMX_USDHC_MIX_CTRL_BIT
      *  1, Execute Tuning
      *  0, Not Tuned or Tuning Completed
      */
-    NR_ImxUsdhc_MixCtrl_ExecuteTuning = mrt_bit(22U),
+    NR_ImxUsdhc_MixCtrl_ExecuteTuning = mr_bit(22U),
 
     /*!<
      * SMP_CLK_SEL: When STD_TUNING_EN is 0, this bit is used to select Tuned clock or Fixed clock to sample data / cmd
@@ -748,27 +748,27 @@ enum __ERT_IMX_USDHC_MIX_CTRL_BIT
      *  1, Tuned clock is used to sample data/cmd
      *  0, Fixed clock is used to sample data/cmd
      */
-    NR_ImxUsdhc_MixCtrl_SampleClkSelect = mrt_bit(23U),
+    NR_ImxUsdhc_MixCtrl_SampleClkSelect = mr_bit(23U),
 
     /*!<
      * AUTO_TUNE_EN: Auto Tuning Enable (Only used for SD3.0, SDR104 mode)
      *  1, Enable auto tuning
      *  0, Disable auto tuning
      */
-    NR_ImxUsdhc_MixCtrl_AutoTuning = mrt_bit(24U),
+    NR_ImxUsdhc_MixCtrl_AutoTuning = mr_bit(24U),
 
     /*!<
      * FBCLK_SEL: Feedback Clock Source Selection (Only used for SD3.0, SDR104 mode)
      *  1, Feedback clock comes from the ipp_card_clk_out
      *  0, Feedback clock comes from the loopback CLK
      */
-    NR_ImxUsdhc_MixCtrl_FeedbackClkSelect = mrt_bit(25U),
+    NR_ImxUsdhc_MixCtrl_FeedbackClkSelect = mr_bit(25U),
 };
 
 /*!< for Register: PROT_CTRL */
 enum __ERT_IMX_USDHC_PROT_CTRL_BIT
 {
-    NR_ImxUsdhc_ProtCtrl_LedControl = mrt_bit(0U),                  /*!< LCTL. 1: LED on; 0: LED off */
+    NR_ImxUsdhc_ProtCtrl_LedControl = mr_bit(0U),                  /*!< LCTL. 1: LED on; 0: LED off */
 
 /*!<
  * DTW: Data Transfer Width
@@ -777,18 +777,18 @@ enum __ERT_IMX_USDHC_PROT_CTRL_BIT
  */
 #define IMX_USDHC_PROT_CTRL_DTW_OFFSET                              (1U)
 #define IMX_USDHC_PROT_CTRL_DTW_MASK                                (0x6U)
-#define IMX_USDHC_PROT_CTRL_DTW_BIT(x)                              mrt_bit_mask((x), IMX_USDHC_PROT_CTRL_DTW_MASK, IMX_USDHC_PROT_CTRL_DTW_OFFSET)
+#define IMX_USDHC_PROT_CTRL_DTW_BIT(x)                              mr_bit_mask((x), IMX_USDHC_PROT_CTRL_DTW_MASK, IMX_USDHC_PROT_CTRL_DTW_OFFSET)
 
     NR_ImxUsdhc_ProtCtrl_DataWidth1Bits = IMX_USDHC_PROT_CTRL_DTW_BIT(0U),
     NR_ImxUsdhc_ProtCtrl_DataWidth4Bits = IMX_USDHC_PROT_CTRL_DTW_BIT(1U),
     NR_ImxUsdhc_ProtCtrl_DataWidth8Bits = IMX_USDHC_PROT_CTRL_DTW_BIT(2U),
 
-    NR_ImxUsdhc_ProtCtrl_Data3AsCardDetect = mrt_bit(3U),           /*!< D3CD. 1: DATA3 as Card Detection Pin; 0 DATA3 does not monitor Card Insertion */
+    NR_ImxUsdhc_ProtCtrl_Data3AsCardDetect = mr_bit(3U),           /*!< D3CD. 1: DATA3 as Card Detection Pin; 0 DATA3 does not monitor Card Insertion */
 
 /*!< EMODE: Endian Mode */
 #define IMX_USDHC_PROT_CTRL_EMODE_OFFSET                            (4U)
 #define IMX_USDHC_PROT_CTRL_EMODE_MASK                              (0x30U)
-#define IMX_USDHC_PROT_CTRL_EMODE_BIT(x)                            mrt_bit_mask((x), IMX_USDHC_PROT_CTRL_EMODE_MASK, IMX_USDHC_PROT_CTRL_EMODE_OFFSET)
+#define IMX_USDHC_PROT_CTRL_EMODE_BIT(x)                            mr_bit_mask((x), IMX_USDHC_PROT_CTRL_EMODE_MASK, IMX_USDHC_PROT_CTRL_EMODE_OFFSET)
 
     NR_ImxUsdhc_ProtCtrl_BigEndian = IMX_USDHC_PROT_CTRL_EMODE_BIT(0U),
     NR_ImxUsdhc_ProtCtrl_HalfWordEndian = IMX_USDHC_PROT_CTRL_EMODE_BIT(1U),
@@ -800,7 +800,7 @@ enum __ERT_IMX_USDHC_PROT_CTRL_BIT
      *  1, Card Detect Test Level is 1, card inserted
      *  0, Card Detect Test Level is 0, no card inserted
      */
-    NR_ImxUsdhc_ProtCtrl_CardDetectTestLevel = mrt_bit(6U),
+    NR_ImxUsdhc_ProtCtrl_CardDetectTestLevel = mr_bit(6U),
 
     /*!<
      * CDSS: Card Detect Signal Selection
@@ -808,21 +808,21 @@ enum __ERT_IMX_USDHC_PROT_CTRL_BIT
      *  1, Card Detection Test Level is selected (for test purpose).
      *  0, Card Detection Level is selected (for normal purpose).
      */
-    NR_ImxUsdhc_ProtCtrl_CardDetectLevelSelect = mrt_bit(7U),
+    NR_ImxUsdhc_ProtCtrl_CardDetectLevelSelect = mr_bit(7U),
 
 /*!< DMA Select */
 #define IMX_USDHC_PROT_CTRL_DMASEL_OFFSET                           (8U)
 #define IMX_USDHC_PROT_CTRL_DMASEL_MASK                             (0x300U)
-#define IMX_USDHC_PROT_CTRL_DMASEL_BIT(x)                           mrt_bit_mask((x), IMX_USDHC_PROT_CTRL_DMASEL_MASK, IMX_USDHC_PROT_CTRL_DMASEL_OFFSET)
+#define IMX_USDHC_PROT_CTRL_DMASEL_BIT(x)                           mr_bit_mask((x), IMX_USDHC_PROT_CTRL_DMASEL_MASK, IMX_USDHC_PROT_CTRL_DMASEL_OFFSET)
 
     NR_ImxUsdhc_ProtCtrl_SDmaSelect = IMX_USDHC_PROT_CTRL_DMASEL_BIT(0U),
     NR_ImxUsdhc_ProtCtrl_ADma1Select = IMX_USDHC_PROT_CTRL_DMASEL_BIT(1U),
     NR_ImxUsdhc_ProtCtrl_ADma2Select = IMX_USDHC_PROT_CTRL_DMASEL_BIT(2U),
 
-    NR_ImxUsdhc_ProtCtrl_StopBlockkGapRequest = mrt_bit(16U),       /*!< SABGREQ. Stop At Block Gap Request. */
-    NR_ImxUsdhc_ProtCtrl_ContinueRequest = mrt_bit(17U),            /*!< CREQ. Continue Request */
-    NR_ImxUsdhc_ProtCtrl_ReadWaitControl = mrt_bit(18U),            /*!< RWCTL. Read Wait Control */
-    NR_ImxUsdhc_ProtCtrl_InterruptBlockGap = mrt_bit(19U),          /*!< IABG. Interrupt At Block Gap */
+    NR_ImxUsdhc_ProtCtrl_StopBlockkGapRequest = mr_bit(16U),       /*!< SABGREQ. Stop At Block Gap Request. */
+    NR_ImxUsdhc_ProtCtrl_ContinueRequest = mr_bit(17U),            /*!< CREQ. Continue Request */
+    NR_ImxUsdhc_ProtCtrl_ReadWaitControl = mr_bit(18U),            /*!< RWCTL. Read Wait Control */
+    NR_ImxUsdhc_ProtCtrl_InterruptBlockGap = mr_bit(19U),          /*!< IABG. Interrupt At Block Gap */
 
     /*!<
      * RD_DONE_NO_8CLK: Read done no 8 clock
@@ -836,36 +836,36 @@ enum __ERT_IMX_USDHC_PROT_CTRL_BIT
      * In a summary, this bit should be set only if the use case needs to use stop at block gap feature while the
      * device can't support the read wait feature
      */
-    NR_ImxUsdhc_ProtCtrl_ReadDoneNo8Clock = mrt_bit(20U),
+    NR_ImxUsdhc_ProtCtrl_ReadDoneNo8Clock = mr_bit(20U),
 
-    NR_ImxUsdhc_ProtCtrl_WakeEventOnCardInt = mrt_bit(24U),         /*!< WECINT. Wakeup Event Enable On Card Interrupt */
-    NR_ImxUsdhc_ProtCtrl_WakeEventOnCardInsert = mrt_bit(25U),      /*!< WECINS. Wakeup Event Enable On SD Card Insertion */
-    NR_ImxUsdhc_ProtCtrl_WakeEventOnCardRemoval = mrt_bit(26U),     /*!< WECRM. Wakeup Event Enable On SD Card Removal */
+    NR_ImxUsdhc_ProtCtrl_WakeEventOnCardInt = mr_bit(24U),         /*!< WECINT. Wakeup Event Enable On Card Interrupt */
+    NR_ImxUsdhc_ProtCtrl_WakeEventOnCardInsert = mr_bit(25U),      /*!< WECINS. Wakeup Event Enable On SD Card Insertion */
+    NR_ImxUsdhc_ProtCtrl_WakeEventOnCardRemoval = mr_bit(26U),     /*!< WECRM. Wakeup Event Enable On SD Card Removal */
 };
 
 /*!< for Register: PRES_STATE */
 enum __ERT_IMX_USDHC_PRES_STATE_BIT
 {
-    NR_ImxUsdhc_PresState_CmdInhibitCmdLine = mrt_bit(0U),          /*!< CIHB. 1: Cannot issue command; 0: Can issue command using only CMD line */
-    NR_ImxUsdhc_PresState_CmdInhibitDataLine = mrt_bit(1U),         /*!< CDIHB. 1: Cannot issue command which uses the DATA line; 0: Can issue command which uses the DATA line */
-    NR_ImxUsdhc_PresState_DataLineActive = mrt_bit(2U),             /*!< DLA. Data Line Active */
-    NR_ImxUsdhc_PresState_SDClockStable = mrt_bit(3U),              /*!< SDSTB. SD Clock Stable. */
-    NR_ImxUsdhc_PresState_WriteTransferActive = mrt_bit(8U),        /*!< WTA. Write Transfer Active */
+    NR_ImxUsdhc_PresState_CmdInhibitCmdLine = mr_bit(0U),          /*!< CIHB. 1: Cannot issue command; 0: Can issue command using only CMD line */
+    NR_ImxUsdhc_PresState_CmdInhibitDataLine = mr_bit(1U),         /*!< CDIHB. 1: Cannot issue command which uses the DATA line; 0: Can issue command which uses the DATA line */
+    NR_ImxUsdhc_PresState_DataLineActive = mr_bit(2U),             /*!< DLA. Data Line Active */
+    NR_ImxUsdhc_PresState_SDClockStable = mr_bit(3U),              /*!< SDSTB. SD Clock Stable. */
+    NR_ImxUsdhc_PresState_WriteTransferActive = mr_bit(8U),        /*!< WTA. Write Transfer Active */
 
-    NR_ImxUsdhc_PresState_ReadTransferActive = mrt_bit(9U),         /*!< RTA. Read Transfer Active */
-    NR_ImxUsdhc_PresState_BufferWriteEnable = mrt_bit(10U),         /*!< BWEN. Buffer Write Enable */
-    NR_ImxUsdhc_PresState_BufferReadEnable = mrt_bit(11U),          /*!< BREN. Buffer Read Enable */
-    NR_ImxUsdhc_PresState_CardInserted = mrt_bit(16U),              /*!< CINST. Card Inserted */
-    NR_ImxUsdhc_PresState_CommandLineLevel = mrt_bit(23U),          /*!< CLSL. CMD Line Signal Level */
+    NR_ImxUsdhc_PresState_ReadTransferActive = mr_bit(9U),         /*!< RTA. Read Transfer Active */
+    NR_ImxUsdhc_PresState_BufferWriteEnable = mr_bit(10U),         /*!< BWEN. Buffer Write Enable */
+    NR_ImxUsdhc_PresState_BufferReadEnable = mr_bit(11U),          /*!< BREN. Buffer Read Enable */
+    NR_ImxUsdhc_PresState_CardInserted = mr_bit(16U),              /*!< CINST. Card Inserted */
+    NR_ImxUsdhc_PresState_CommandLineLevel = mr_bit(23U),          /*!< CLSL. CMD Line Signal Level */
 
-    NR_ImxUsdhc_PresState_Data0LineLevel = mrt_bit(24U),            /*!< DLSL. Data 0 line signal level */
-    NR_ImxUsdhc_PresState_Data1LineLevel = mrt_bit(25U),            /*!< DLSL. Data 1 line signal level */
-    NR_ImxUsdhc_PresState_Data2LineLevel = mrt_bit(26U),            /*!< DLSL. Data 2 line signal level */
-    NR_ImxUsdhc_PresState_Data3LineLevel = mrt_bit(27U),            /*!< DLSL. Data 3 line signal level */
-    NR_ImxUsdhc_PresState_Data4LineLevel = mrt_bit(28U),            /*!< DLSL. Data 4 line signal level */
-    NR_ImxUsdhc_PresState_Data5LineLevel = mrt_bit(29U),            /*!< DLSL. Data 5 line signal level */
-    NR_ImxUsdhc_PresState_Data6LineLevel = mrt_bit(30U),            /*!< DLSL. Data 6 line signal level */
-    NR_ImxUsdhc_PresState_Data7LineLevel = mrt_bit(31U),            /*!< DLSL. Data 7 line signal level */
+    NR_ImxUsdhc_PresState_Data0LineLevel = mr_bit(24U),            /*!< DLSL. Data 0 line signal level */
+    NR_ImxUsdhc_PresState_Data1LineLevel = mr_bit(25U),            /*!< DLSL. Data 1 line signal level */
+    NR_ImxUsdhc_PresState_Data2LineLevel = mr_bit(26U),            /*!< DLSL. Data 2 line signal level */
+    NR_ImxUsdhc_PresState_Data3LineLevel = mr_bit(27U),            /*!< DLSL. Data 3 line signal level */
+    NR_ImxUsdhc_PresState_Data4LineLevel = mr_bit(28U),            /*!< DLSL. Data 4 line signal level */
+    NR_ImxUsdhc_PresState_Data5LineLevel = mr_bit(29U),            /*!< DLSL. Data 5 line signal level */
+    NR_ImxUsdhc_PresState_Data6LineLevel = mr_bit(30U),            /*!< DLSL. Data 6 line signal level */
+    NR_ImxUsdhc_PresState_Data7LineLevel = mr_bit(31U),            /*!< DLSL. Data 7 line signal level */
 };
 
 /*!< for Register: CMD_XFR_TYP */
@@ -874,20 +874,20 @@ enum __ERT_IMX_USDHC_CMD_XFR_TYP_BIT
 /*!< RSPTYP: Response Type Select */
 #define IMX_USDHC_CMD_XFR_TYP_RSPTYP_OFFSET                         (16U)
 #define IMX_USDHC_CMD_XFR_TYP_RSPTYP_MASK                           (0x30000U)
-#define IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(x)                         mrt_bit_mask((x), IMX_USDHC_CMD_XFR_TYP_RSPTYP_MASK, IMX_USDHC_CMD_XFR_TYP_RSPTYP_OFFSET)
+#define IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(x)                         mr_bit_mask((x), IMX_USDHC_CMD_XFR_TYP_RSPTYP_MASK, IMX_USDHC_CMD_XFR_TYP_RSPTYP_OFFSET)
 
     NR_ImxUsdhc_CmdXfrTyp_NoResponse = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(0U),
     NR_ImxUsdhc_CmdXfrTyp_Response136 = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(1U),
     NR_ImxUsdhc_CmdXfrTyp_Response48 = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(2U),
     NR_ImxUsdhc_CmdXfrTyp_ResponseBusy48 = IMX_USDHC_CMD_XFR_TYP_RSPTYP_BIT(3U),
 
-    NR_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable = mrt_bit(19U),
-    NR_ImxUsdhc_CmdXfrTyp_CmdIndexCheckEnable = mrt_bit(20U),
-    NR_ImxUsdhc_CmdXfrTyp_DataPresentSelect = mrt_bit(21U),
+    NR_ImxUsdhc_CmdXfrTyp_CmdCrcCheckEnable = mr_bit(19U),
+    NR_ImxUsdhc_CmdXfrTyp_CmdIndexCheckEnable = mr_bit(20U),
+    NR_ImxUsdhc_CmdXfrTyp_DataPresentSelect = mr_bit(21U),
 
 #define IMX_USDHC_CMD_XFR_TYP_CMDTYP_OFFSET                         (22U)
 #define IMX_USDHC_CMD_XFR_TYP_CMDTYP_MASK                           (0xc00000U)
-#define IMX_USDHC_CMD_XFR_TYP_CMDTYP_BIT(x)                         mrt_bit_mask((x), IMX_USDHC_CMD_XFR_TYP_CMDTYP_MASK, IMX_USDHC_CMD_XFR_TYP_CMDTYP_OFFSET)
+#define IMX_USDHC_CMD_XFR_TYP_CMDTYP_BIT(x)                         mr_bit_mask((x), IMX_USDHC_CMD_XFR_TYP_CMDTYP_MASK, IMX_USDHC_CMD_XFR_TYP_CMDTYP_OFFSET)
 
     /*!<
      * CMDTYP: bit[23:22], Command Type
@@ -902,26 +902,26 @@ enum __ERT_IMX_USDHC_CMD_XFR_TYP_BIT
 
 #define IMX_USDHC_CMD_XFR_TYP_CMDINX_OFFSET                         (24U)
 #define IMX_USDHC_CMD_XFR_TYP_CMDINX_MASK                           (0x3f000000U)
-#define IMX_USDHC_CMD_XFR_TYP_CMDINX_BIT(x)                         mrt_bit_mask((x), IMX_USDHC_CMD_XFR_TYP_CMDINX_MASK, IMX_USDHC_CMD_XFR_TYP_CMDINX_OFFSET)
+#define IMX_USDHC_CMD_XFR_TYP_CMDINX_BIT(x)                         mr_bit_mask((x), IMX_USDHC_CMD_XFR_TYP_CMDINX_MASK, IMX_USDHC_CMD_XFR_TYP_CMDINX_OFFSET)
 #define IMX_USDHC_CMD_XFR_TYP_CMDINX_U32(x)                         IMX_USDHC_CMD_XFR_TYP_CMDINX_BIT(x)
 };
 
 /*!< for Register: HOST_CTRL_CAP */
 enum __ERT_IMX_USDHC_HOST_CTRL_CAP_BIT
 {
-    NR_ImxUsdhc_HostCtrlCap_Sdr50Support = mrt_bit(0U),             /*!< This bit indicates support of SDR50 mode */
-    NR_ImxUsdhc_HostCtrlCap_Sdr104Support = mrt_bit(1U),            /*!< This bit indicates support of SDR104 mode */
-    NR_ImxUsdhc_HostCtrlCap_Ddr50Support = mrt_bit(2U),             /*!< This bit indicates support of DDR50 mode */
+    NR_ImxUsdhc_HostCtrlCap_Sdr50Support = mr_bit(0U),             /*!< This bit indicates support of SDR50 mode */
+    NR_ImxUsdhc_HostCtrlCap_Sdr104Support = mr_bit(1U),            /*!< This bit indicates support of SDR104 mode */
+    NR_ImxUsdhc_HostCtrlCap_Ddr50Support = mr_bit(2U),             /*!< This bit indicates support of DDR50 mode */
 
 #define IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_OFFSET              (8U)
 #define IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_MASK                (0xf00U)
-#define IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_BIT(x)              mrt_bit_mask((x), IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_MASK, IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_OFFSET)
+#define IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_BIT(x)              mr_bit_mask((x), IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_MASK, IMX_USDHC_HOST_CTRL_CAP_TIMCNT_RETUNING_OFFSET)
 
-    NR_ImxUsdhc_HostCtrlCap_UseTuningSdr50 = mrt_bit(13U),          /*!< This bit is set to 1. Host controller requires tuning to operate SDR50 */
+    NR_ImxUsdhc_HostCtrlCap_UseTuningSdr50 = mr_bit(13U),          /*!< This bit is set to 1. Host controller requires tuning to operate SDR50 */
 
 #define IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_OFFSET                (14U)
 #define IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_MASK                  (0xc000U)
-#define IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_BIT(x)                mrt_bit_mask((x), IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_MASK, IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_OFFSET)
+#define IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_BIT(x)                mr_bit_mask((x), IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_MASK, IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_OFFSET)
 
     NR_ImxUsdhc_HostCtrlCap_RetuningMode1 = IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_BIT(0U),
     NR_ImxUsdhc_HostCtrlCap_RetuningMode2 = IMX_USDHC_HOST_CTRL_CAP_RETUNING_MODE_BIT(1U),
@@ -929,41 +929,41 @@ enum __ERT_IMX_USDHC_HOST_CTRL_CAP_BIT
 
 #define IMX_USDHC_HOST_CTRL_CAP_MBL_OFFSET                          (16U)
 #define IMX_USDHC_HOST_CTRL_CAP_MBL_MASK                            (0x70000U)
-#define IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(x)                          mrt_bit_mask((x), IMX_USDHC_HOST_CTRL_CAP_MBL_MASK, IMX_USDHC_HOST_CTRL_CAP_MBL_OFFSET)
+#define IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(x)                          mr_bit_mask((x), IMX_USDHC_HOST_CTRL_CAP_MBL_MASK, IMX_USDHC_HOST_CTRL_CAP_MBL_OFFSET)
 
     NR_ImxUsdhc_HostCtrlCap_MaxBlockLenth512Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(0U),
     NR_ImxUsdhc_HostCtrlCap_MaxBlockLenth1024Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(1U),
     NR_ImxUsdhc_HostCtrlCap_MaxBlockLenth2048Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(2U),
     NR_ImxUsdhc_HostCtrlCap_MaxBlockLenth4096Byte = IMX_USDHC_HOST_CTRL_CAP_MBL_BIT(3U),
 
-    NR_ImxUsdhc_HostCtrlCap_AdmaSupport = mrt_bit(20U),             /*!< This bit indicates whether the uSDHC supports the ADMA feature */
-    NR_ImxUsdhc_HostCtrlCap_HighSpeedSupport = mrt_bit(21U),        /*!< High Speed Supported (Host System maybe supply a SD Clock frequency from 25 MHz to 50 MHz) */
-    NR_ImxUsdhc_HostCtrlCap_DmaSupport = mrt_bit(22U),              /*!< DMA Support */
-    NR_ImxUsdhc_HostCtrlCap_SuspendResumeSupport = mrt_bit(23U),    /*!< Suspend / Resume Support */
-    NR_ImxUsdhc_HostCtrlCap_Voltage33VSupport = mrt_bit(24U),       /*!< Voltage Support 3.3V */
-    NR_ImxUsdhc_HostCtrlCap_Voltage30VSupport = mrt_bit(25U),       /*!< Voltage Support 3.0V */
-    NR_ImxUsdhc_HostCtrlCap_Voltage18VSupport = mrt_bit(26U),       /*!< Voltage Support 1.8V */
+    NR_ImxUsdhc_HostCtrlCap_AdmaSupport = mr_bit(20U),             /*!< This bit indicates whether the uSDHC supports the ADMA feature */
+    NR_ImxUsdhc_HostCtrlCap_HighSpeedSupport = mr_bit(21U),        /*!< High Speed Supported (Host System maybe supply a SD Clock frequency from 25 MHz to 50 MHz) */
+    NR_ImxUsdhc_HostCtrlCap_DmaSupport = mr_bit(22U),              /*!< DMA Support */
+    NR_ImxUsdhc_HostCtrlCap_SuspendResumeSupport = mr_bit(23U),    /*!< Suspend / Resume Support */
+    NR_ImxUsdhc_HostCtrlCap_Voltage33VSupport = mr_bit(24U),       /*!< Voltage Support 3.3V */
+    NR_ImxUsdhc_HostCtrlCap_Voltage30VSupport = mr_bit(25U),       /*!< Voltage Support 3.0V */
+    NR_ImxUsdhc_HostCtrlCap_Voltage18VSupport = mr_bit(26U),       /*!< Voltage Support 1.8V */
 };
 
 /*!< for Register: WTMK_LVL */
 #define IMX_USDHC_WTMK_LVL_RD_WML_OFFSET                            (0U)
 #define IMX_USDHC_WTMK_LVL_RD_WML_MASK                              (0xffU)
-#define IMX_USDHC_WTMK_LVL_RD_WML_BIT(x)                            mrt_bit_mask((x), IMX_USDHC_WTMK_LVL_RD_WML_MASK, IMX_USDHC_WTMK_LVL_RD_WML_OFFSET)
+#define IMX_USDHC_WTMK_LVL_RD_WML_BIT(x)                            mr_bit_mask((x), IMX_USDHC_WTMK_LVL_RD_WML_MASK, IMX_USDHC_WTMK_LVL_RD_WML_OFFSET)
 #define IMX_USDHC_WTMK_LVL_RD_WML_U32(x)                            IMX_USDHC_WTMK_LVL_RD_WML_BIT(x)
 
 #define IMX_USDHC_WTMK_LVL_RD_BRST_LEN_OFFSET                       (8U)
 #define IMX_USDHC_WTMK_LVL_RD_BRST_LEN_MASK                         (0x1f00U)
-#define IMX_USDHC_WTMK_LVL_RD_BRST_LEN_BIT(x)                       mrt_bit_mask((x), IMX_USDHC_WTMK_LVL_RD_BRST_LEN_MASK, IMX_USDHC_WTMK_LVL_RD_BRST_LEN_OFFSET)
+#define IMX_USDHC_WTMK_LVL_RD_BRST_LEN_BIT(x)                       mr_bit_mask((x), IMX_USDHC_WTMK_LVL_RD_BRST_LEN_MASK, IMX_USDHC_WTMK_LVL_RD_BRST_LEN_OFFSET)
 #define IMX_USDHC_WTMK_LVL_RD_BRST_LEN_U32(x)                       IMX_USDHC_WTMK_LVL_RD_BRST_LEN_BIT(x)
 
 #define IMX_USDHC_WTMK_LVL_WR_WML_OFFSET                            (16U)
 #define IMX_USDHC_WTMK_LVL_WR_WML_MASK                              (0xff0000U)
-#define IMX_USDHC_WTMK_LVL_WR_WML_BIT(x)                            mrt_bit_mask((x), IMX_USDHC_WTMK_LVL_WR_WML_MASK, IMX_USDHC_WTMK_LVL_WR_WML_OFFSET)
+#define IMX_USDHC_WTMK_LVL_WR_WML_BIT(x)                            mr_bit_mask((x), IMX_USDHC_WTMK_LVL_WR_WML_MASK, IMX_USDHC_WTMK_LVL_WR_WML_OFFSET)
 #define IMX_USDHC_WTMK_LVL_WR_WML_U32(x)                            IMX_USDHC_WTMK_LVL_WR_WML_BIT(x)
 
 #define IMX_USDHC_WTMK_LVL_WR_BRST_LEN_OFFSET                       (24U)
 #define IMX_USDHC_WTMK_LVL_WR_BRST_LEN_MASK                         (0x1f000000U)
-#define IMX_USDHC_WTMK_LVL_WR_BRST_LEN_BIT(x)                       mrt_bit_mask((x), IMX_USDHC_WTMK_LVL_WR_BRST_LEN_MASK, IMX_USDHC_WTMK_LVL_WR_BRST_LEN_OFFSET)
+#define IMX_USDHC_WTMK_LVL_WR_BRST_LEN_BIT(x)                       mr_bit_mask((x), IMX_USDHC_WTMK_LVL_WR_BRST_LEN_MASK, IMX_USDHC_WTMK_LVL_WR_BRST_LEN_OFFSET)
 #define IMX_USDHC_WTMK_LVL_WR_BRST_LEN_U32(x)                       IMX_USDHC_WTMK_LVL_WR_BRST_LEN_BIT(x)
 
 /*!< for Register: BLK_ATT */
@@ -976,7 +976,7 @@ enum __ERT_IMX_USDHC_HOST_CTRL_CAP_BIT
  */
 #define IMX_USDHC_BLK_ATT_BLKCNT_OFFSET                             (16U)
 #define IMX_USDHC_BLK_ATT_BLKCNT_MASK                               (0xffff0000U)
-#define IMX_USDHC_BLK_ATT_BLKCNT_BIT(x)                             mrt_bit_mask((x), IMX_USDHC_BLK_ATT_BLKCNT_MASK, IMX_USDHC_BLK_ATT_BLKCNT_OFFSET)
+#define IMX_USDHC_BLK_ATT_BLKCNT_BIT(x)                             mr_bit_mask((x), IMX_USDHC_BLK_ATT_BLKCNT_MASK, IMX_USDHC_BLK_ATT_BLKCNT_OFFSET)
 #define IMX_USDHC_BLK_ATT_BLKCNT_U32(x)                             IMX_USDHC_BLK_ATT_BLKCNT_BIT(x)
 
 /*!<
@@ -986,28 +986,28 @@ enum __ERT_IMX_USDHC_HOST_CTRL_CAP_BIT
  */
 #define IMX_USDHC_BLK_ATT_BLKSIZE_OFFSET                            (0U)
 #define IMX_USDHC_BLK_ATT_BLKSIZE_MASK                              (0x00000fffU)
-#define IMX_USDHC_BLK_ATT_BLKSIZE_BIT(x)                            mrt_bit_mask((x), IMX_USDHC_BLK_ATT_BLKSIZE_MASK, IMX_USDHC_BLK_ATT_BLKSIZE_OFFSET)
+#define IMX_USDHC_BLK_ATT_BLKSIZE_BIT(x)                            mr_bit_mask((x), IMX_USDHC_BLK_ATT_BLKSIZE_MASK, IMX_USDHC_BLK_ATT_BLKSIZE_OFFSET)
 #define IMX_USDHC_BLK_ATT_BLKSIZE_U32(x)                            IMX_USDHC_BLK_ATT_BLKSIZE_BIT(x)
 
 /*!< for Register: VEND_SPEC */
 enum  __ERT_IMX_USDHC_VEND_SPEC_BIT
 {
-    NR_ImxUsdhc_VendSpec_ExtDmaRequestEnable = mrt_bit(0U),         /*!< External DMA Request Enable */
-    NR_ImxUsdhc_VendSpec_VoltageSelect = mrt_bit(1U),               /*!< Voltage Selection */
-    NR_ImxUsdhc_VendSpec_ConflictCheckEnable = mrt_bit(2U),         /*!< Conflict check enable. */
-    NR_ImxUsdhc_VendSpec_CheckBusyAfterAC12WR = mrt_bit(3U),        /*!< Check busy enable after auto CMD12 for write data packet */
-    NR_ImxUsdhc_VendSpec_Data3DetectPolarity = mrt_bit(4U),         /*!< Polarity of DATA3 pin when it is used as card detection. Only for debug */
-    NR_ImxUsdhc_VendSpec_CD_B_Polarity = mrt_bit(5U),               /*!< Polarity of the CD_B pin. Only for debug */
-    NR_ImxUsdhc_VendSpec_WriteProtectPolarity = mrt_bit(6U),        /*!< Polarity of the WP pin. Only for debug */
-    NR_ImxUsdhc_VendSpec_ActiveClkInAbortSend = mrt_bit(7U),        /*!< Force CLK output active when sending Abort command. Only for debug */
-    NR_ImxUsdhc_VendSpec_ActiveClk = mrt_bit(8U),                   /*!< Force CLK output active */
-    NR_ImxUsdhc_VendSpec_IpgClkSoftEnable = mrt_bit(11U),           /*!< IPG_CLK Software Enable */
-    NR_ImxUsdhc_VendSpec_AhbClkSoftEnable = mrt_bit(12U),           /*!< AHB Clock Software Enable */
-    NR_ImxUsdhc_VendSpec_IpgPerClkSoftEnable = mrt_bit(13U),        /*!< IPG_PERCLK Software Enable */
-    NR_ImxUsdhc_VendSpec_CardClkSoftEnable = mrt_bit(14U),          /*!< Card Clock Software Enable */
-    NR_ImxUsdhc_VendSpec_CrcCheckDisable = mrt_bit(15U),            /*!< CRC Check Disable */
+    NR_ImxUsdhc_VendSpec_ExtDmaRequestEnable = mr_bit(0U),         /*!< External DMA Request Enable */
+    NR_ImxUsdhc_VendSpec_VoltageSelect = mr_bit(1U),               /*!< Voltage Selection */
+    NR_ImxUsdhc_VendSpec_ConflictCheckEnable = mr_bit(2U),         /*!< Conflict check enable. */
+    NR_ImxUsdhc_VendSpec_CheckBusyAfterAC12WR = mr_bit(3U),        /*!< Check busy enable after auto CMD12 for write data packet */
+    NR_ImxUsdhc_VendSpec_Data3DetectPolarity = mr_bit(4U),         /*!< Polarity of DATA3 pin when it is used as card detection. Only for debug */
+    NR_ImxUsdhc_VendSpec_CD_B_Polarity = mr_bit(5U),               /*!< Polarity of the CD_B pin. Only for debug */
+    NR_ImxUsdhc_VendSpec_WriteProtectPolarity = mr_bit(6U),        /*!< Polarity of the WP pin. Only for debug */
+    NR_ImxUsdhc_VendSpec_ActiveClkInAbortSend = mr_bit(7U),        /*!< Force CLK output active when sending Abort command. Only for debug */
+    NR_ImxUsdhc_VendSpec_ActiveClk = mr_bit(8U),                   /*!< Force CLK output active */
+    NR_ImxUsdhc_VendSpec_IpgClkSoftEnable = mr_bit(11U),           /*!< IPG_CLK Software Enable */
+    NR_ImxUsdhc_VendSpec_AhbClkSoftEnable = mr_bit(12U),           /*!< AHB Clock Software Enable */
+    NR_ImxUsdhc_VendSpec_IpgPerClkSoftEnable = mr_bit(13U),        /*!< IPG_PERCLK Software Enable */
+    NR_ImxUsdhc_VendSpec_CardClkSoftEnable = mr_bit(14U),          /*!< Card Clock Software Enable */
+    NR_ImxUsdhc_VendSpec_CrcCheckDisable = mr_bit(15U),            /*!< CRC Check Disable */
 
-    NR_ImxUsdhc_VendSpec_CmdByteAccess = mrt_bit(31U),              /*!< Byte access */
+    NR_ImxUsdhc_VendSpec_CmdByteAccess = mr_bit(31U),              /*!< Byte access */
 };
 
 /*!< ------------------------------------------------------------------------- */
@@ -1103,30 +1103,6 @@ typedef struct
 #define IMX6UL_SDMA_ADDR_BASE                                       (0x20EC000u)
 #define IMX6UL_SDMA_PROPERTY_ENTRY()                                (srt_imx_sdma_t *)IMX6UL_SDMA_ADDR_BASE
 
-/*!< SDMA module channel number. */
-#define IMX6UL_SDMA_MODULE_CHANNEL                                  (32)
-/*!< SDMA module event number. */
-#define IMX6UL_SDMA_EVENT_NUM                                       (48)
-
-/*!< SDMA ROM memory to memory script start address. */
-#define IMX6UL_SDMA_M2M_ADDR                                        (642)
-/*!< SDMA ROM peripheral to memory script start address. */
-#define IMX6UL_SDMA_P2M_ADDR                                        (683)
-/*!< SDMA ROM memory to peripheral script start address. */
-#define IMX6UL_SDMA_M2P_ADDR                                        (747)
-/*!< SDMA ROM uart to memory script start address. */
-#define IMX6UL_SDMA_UART2M_ADDR                                     (817)
-/*!< SDMA ROM peripheral on SPBA to memory script start address. */
-#define IMX6UL_SDMA_SHP2M_ADDR                                      (891)
-/*!< SDMA ROM memory to peripheral on SPBA script start address. */
-#define IMX6UL_SDMA_M2SHP_ADDR                                      (960)
-/*!< SDMA ROM UART on SPBA to memory script start address. */
-#define IMX6UL_SDMA_UARTSH2M_ADDR                                   (1032)
-/*!< SDMA ROM SPDIF to memory script start address. */
-#define IMX6UL_SDMA_SPDIF2M_ADDR                                    (1100)
-/*!< SDMA ROM memory to SPDIF script start address. */
-#define IMX6UL_SDMA_M2SPDIF_ADDR                                    (1134)
-
 /*!< Peripheral SDMA Register */
 /*!< MC0PTR Register */
 #define IMX6UL_SDMA_MC0PTR_MC0PTR_U32(x)                            ((kuint32_t)(x))
@@ -1164,101 +1140,101 @@ typedef struct
 /*!< RESET Register */
 #define IMX6UL_SDMA_RESET_RESET_MASK                                (0x1U)
 #define IMX6UL_SDMA_RESET_RESET_OFFSET                              (0U)
-#define IMX6UL_SDMA_RESET_RESET_BIT(x)                              mrt_bit_mask(x, IMX6UL_SDMA_RESET_RESET_MASK, IMX6UL_SDMA_RESET_RESET_OFFSET)
+#define IMX6UL_SDMA_RESET_RESET_BIT(x)                              mr_bit_mask(x, IMX6UL_SDMA_RESET_RESET_MASK, IMX6UL_SDMA_RESET_RESET_OFFSET)
 
 #define IMX6UL_SDMA_RESET_RESCHED_MASK                              (0x1U)
 #define IMX6UL_SDMA_RESET_RESCHED_OFFSET                            (0U)
-#define IMX6UL_SDMA_RESET_RESCHED_BIT(x)                            mrt_bit_mask(x, IMX6UL_SDMA_RESET_RESCHED_MASK, IMX6UL_SDMA_RESET_RESCHED_OFFSET)
+#define IMX6UL_SDMA_RESET_RESCHED_BIT(x)                            mr_bit_mask(x, IMX6UL_SDMA_RESET_RESCHED_MASK, IMX6UL_SDMA_RESET_RESCHED_OFFSET)
 
 /*!< PSW-Schedule Register */
 #define IMX6UL_SDMA_PSW_CCR_MASK                                    (0xFU)
 #define IMX6UL_SDMA_PSW_CCR_OFFSET                                  (0U)
-#define IMX6UL_SDMA_PSW_CCR(x)                                      mrt_bit_mask(x, IMX6UL_SDMA_PSW_CCR_MASK, IMX6UL_SDMA_PSW_CCR_OFFSET)
+#define IMX6UL_SDMA_PSW_CCR(x)                                      mr_bit_mask(x, IMX6UL_SDMA_PSW_CCR_MASK, IMX6UL_SDMA_PSW_CCR_OFFSET)
 #define IMX6UL_SDMA_PSW_CCP_MASK                                    (0xF0U)
 #define IMX6UL_SDMA_PSW_CCP_OFFSET                                  (4U)
-#define IMX6UL_SDMA_PSW_CCP(x)                                      mrt_bit_mask(x, IMX6UL_SDMA_PSW_CCP_MASK, IMX6UL_SDMA_PSW_CCP_OFFSET)
+#define IMX6UL_SDMA_PSW_CCP(x)                                      mr_bit_mask(x, IMX6UL_SDMA_PSW_CCP_MASK, IMX6UL_SDMA_PSW_CCP_OFFSET)
 #define IMX6UL_SDMA_PSW_NCR_MASK                                    (0x1F00U)
 #define IMX6UL_SDMA_PSW_NCR_OFFSET                                  (8U)
-#define IMX6UL_SDMA_PSW_NCR(x)                                      mrt_bit_mask(x, IMX6UL_SDMA_PSW_NCR_MASK, IMX6UL_SDMA_PSW_NCR_OFFSET)
+#define IMX6UL_SDMA_PSW_NCR(x)                                      mr_bit_mask(x, IMX6UL_SDMA_PSW_NCR_MASK, IMX6UL_SDMA_PSW_NCR_OFFSET)
 #define IMX6UL_SDMA_PSW_NCP_MASK                                    (0xE000U)
 #define IMX6UL_SDMA_PSW_NCP_OFFSET                                  (13U)
-#define IMX6UL_SDMA_PSW_NCP(x)                                      mrt_bit_mask(x, IMX6UL_SDMA_PSW_NCP_MASK, IMX6UL_SDMA_PSW_NCP_OFFSET)
+#define IMX6UL_SDMA_PSW_NCP(x)                                      mr_bit_mask(x, IMX6UL_SDMA_PSW_NCP_MASK, IMX6UL_SDMA_PSW_NCP_OFFSET)
 
 /*!< CONFIG Register */
 #define IMX6UL_SDMA_CONFIG_CSM_MASK                                 (0x3U)
 #define IMX6UL_SDMA_CONFIG_CSM_OFFSET                               (0U)
-#define IMX6UL_SDMA_CONFIG_CSM(x)                                   mrt_bit_mask(x, IMX6UL_SDMA_CONFIG_CSM_MASK, IMX6UL_SDMA_CONFIG_CSM_OFFSET)
+#define IMX6UL_SDMA_CONFIG_CSM(x)                                   mr_bit_mask(x, IMX6UL_SDMA_CONFIG_CSM_MASK, IMX6UL_SDMA_CONFIG_CSM_OFFSET)
 #define IMX6UL_SDMA_CONFIG_ACR_MASK                                 (0x10U)
 #define IMX6UL_SDMA_CONFIG_ACR_OFFSET                               (4U)
-#define IMX6UL_SDMA_CONFIG_ACR(x)                                   mrt_bit_mask(x, IMX6UL_SDMA_CONFIG_ACR_MASK, IMX6UL_SDMA_CONFIG_ACR_OFFSET)
+#define IMX6UL_SDMA_CONFIG_ACR(x)                                   mr_bit_mask(x, IMX6UL_SDMA_CONFIG_ACR_MASK, IMX6UL_SDMA_CONFIG_ACR_OFFSET)
 #define IMX6UL_SDMA_CONFIG_RTDOBS_MASK                              (0x800U)
 #define IMX6UL_SDMA_CONFIG_RTDOBS_OFFSET                            (11U)
-#define IMX6UL_SDMA_CONFIG_RTDOBS(x)                                mrt_bit_mask(x, IMX6UL_SDMA_CONFIG_RTDOBS_MASK, IMX6UL_SDMA_CONFIG_RTDOBS_OFFSET)
+#define IMX6UL_SDMA_CONFIG_RTDOBS(x)                                mr_bit_mask(x, IMX6UL_SDMA_CONFIG_RTDOBS_MASK, IMX6UL_SDMA_CONFIG_RTDOBS_OFFSET)
 #define IMX6UL_SDMA_CONFIG_DSPDMA_MASK                              (0x1000U)
 #define IMX6UL_SDMA_CONFIG_DSPDMA_OFFSET                            (12U)
-#define IMX6UL_SDMA_CONFIG_DSPDMA(x)                                mrt_bit_mask(x, IMX6UL_SDMA_CONFIG_DSPDMA_MASK, IMX6UL_SDMA_CONFIG_DSPDMA_OFFSET)
+#define IMX6UL_SDMA_CONFIG_DSPDMA(x)                                mr_bit_mask(x, IMX6UL_SDMA_CONFIG_DSPDMA_MASK, IMX6UL_SDMA_CONFIG_DSPDMA_OFFSET)
 
 /*!< SDMA_LOCK Register */
 #define IMX6UL_SDMA_LOCK_LOCK_MASK                                  (0x1U)
 #define IMX6UL_SDMA_LOCK_LOCK_OFFSET                                (0U)
-#define IMX6UL_SDMA_LOCK_LOCK(x)                                    mrt_bit_mask(x, IMX6UL_SDMA_LOCK_LOCK_MASK, IMX6UL_SDMA_LOCK_LOCK_OFFSET)
+#define IMX6UL_SDMA_LOCK_LOCK(x)                                    mr_bit_mask(x, IMX6UL_SDMA_LOCK_LOCK_MASK, IMX6UL_SDMA_LOCK_LOCK_OFFSET)
 #define IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_MASK                       (0x2U)
 #define IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_OFFSET                     (1U)
-#define IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR(x)                         mrt_bit_mask(x, IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_MASK, IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_OFFSET)
+#define IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR(x)                         mr_bit_mask(x, IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_MASK, IMX6UL_SDMA_LOCK_SRESET_LOCK_CLR_OFFSET)
 
 /*!< ONCE_ENB Register */
 #define IMX6UL_SDMA_ONCE_ENB_ENB_MASK                               (0x1U)
 #define IMX6UL_SDMA_ONCE_ENB_ENB_OFFSET                             (0U)
-#define IMX6UL_SDMA_ONCE_ENB_ENB(x)                                 mrt_bit_mask(x, IMX6UL_SDMA_ONCE_ENB_ENB_MASK, IMX6UL_SDMA_ONCE_ENB_ENB_OFFSET)
+#define IMX6UL_SDMA_ONCE_ENB_ENB(x)                                 mr_bit_mask(x, IMX6UL_SDMA_ONCE_ENB_ENB_MASK, IMX6UL_SDMA_ONCE_ENB_ENB_OFFSET)
 
 /*!< ONCE_DATA Register */
-#define IMX6UL_SDMA_ONCE_DATA_U32(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_DATA_DATA_MASK, IMX6UL_SDMA_ONCE_DATA_DATA_OFFSET)
+#define IMX6UL_SDMA_ONCE_DATA_U32(x)                                mr_bit_mask(x, IMX6UL_SDMA_ONCE_DATA_DATA_MASK, IMX6UL_SDMA_ONCE_DATA_DATA_OFFSET)
 
 /*!< ONCE_INSTR Register */
 #define IMX6UL_SDMA_ONCE_INSTR_INSTR_MASK                           (0xFFFFU)
 #define IMX6UL_SDMA_ONCE_INSTR_INSTR_OFFSET                         (0U)
-#define IMX6UL_SDMA_ONCE_INSTR_INSTR(x)                             mrt_bit_mask(x, IMX6UL_SDMA_ONCE_INSTR_INSTR_MASK, IMX6UL_SDMA_ONCE_INSTR_INSTR_OFFSET)
+#define IMX6UL_SDMA_ONCE_INSTR_INSTR(x)                             mr_bit_mask(x, IMX6UL_SDMA_ONCE_INSTR_INSTR_MASK, IMX6UL_SDMA_ONCE_INSTR_INSTR_OFFSET)
 
 /*!< ONCE_STAT Register */
 #define IMX6UL_SDMA_ONCE_STAT_ECDR_MASK                             (0x7U)
 #define IMX6UL_SDMA_ONCE_STAT_ECDR_OFFSET                           (0U)
-#define IMX6UL_SDMA_ONCE_STAT_ECDR(x)                               mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_ECDR_MASK, IMX6UL_SDMA_ONCE_STAT_ECDR_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_ECDR(x)                               mr_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_ECDR_MASK, IMX6UL_SDMA_ONCE_STAT_ECDR_OFFSET)
 #define IMX6UL_SDMA_ONCE_STAT_MST_MASK                              (0x80U)
 #define IMX6UL_SDMA_ONCE_STAT_MST_OFFSET                            (7U)
-#define IMX6UL_SDMA_ONCE_STAT_MST(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_MST_MASK, IMX6UL_SDMA_ONCE_STAT_MST_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_MST(x)                                mr_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_MST_MASK, IMX6UL_SDMA_ONCE_STAT_MST_OFFSET)
 #define IMX6UL_SDMA_ONCE_STAT_SWB_MASK                              (0x100U)
 #define IMX6UL_SDMA_ONCE_STAT_SWB_OFFSET                            (8U)
-#define IMX6UL_SDMA_ONCE_STAT_SWB(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_SWB_MASK, IMX6UL_SDMA_ONCE_STAT_SWB_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_SWB(x)                                mr_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_SWB_MASK, IMX6UL_SDMA_ONCE_STAT_SWB_OFFSET)
 #define IMX6UL_SDMA_ONCE_STAT_ODR_MASK                              (0x200U)
 #define IMX6UL_SDMA_ONCE_STAT_ODR_OFFSET                            (9U)
-#define IMX6UL_SDMA_ONCE_STAT_ODR(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_ODR_MASK, IMX6UL_SDMA_ONCE_STAT_ODR_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_ODR(x)                                mr_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_ODR_MASK, IMX6UL_SDMA_ONCE_STAT_ODR_OFFSET)
 #define IMX6UL_SDMA_ONCE_STAT_EDR_MASK                              (0x400U)
 #define IMX6UL_SDMA_ONCE_STAT_EDR_OFFSET                            (10U)
-#define IMX6UL_SDMA_ONCE_STAT_EDR(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_EDR_MASK, IMX6UL_SDMA_ONCE_STAT_EDR_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_EDR(x)                                mr_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_EDR_MASK, IMX6UL_SDMA_ONCE_STAT_EDR_OFFSET)
 #define IMX6UL_SDMA_ONCE_STAT_RCV_MASK                              (0x800U)
 #define IMX6UL_SDMA_ONCE_STAT_RCV_OFFSET                            (11U)
-#define IMX6UL_SDMA_ONCE_STAT_RCV(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_RCV_MASK, IMX6UL_SDMA_ONCE_STAT_RCV_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_RCV(x)                                mr_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_RCV_MASK, IMX6UL_SDMA_ONCE_STAT_RCV_OFFSET)
 #define IMX6UL_SDMA_ONCE_STAT_PST_MASK                              (0xF000U)
 #define IMX6UL_SDMA_ONCE_STAT_PST_OFFSET                            (12U)
-#define IMX6UL_SDMA_ONCE_STAT_PST(x)                                mrt_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_PST_MASK, IMX6UL_SDMA_ONCE_STAT_PST_OFFSET)
+#define IMX6UL_SDMA_ONCE_STAT_PST(x)                                mr_bit_mask(x, IMX6UL_SDMA_ONCE_STAT_PST_MASK, IMX6UL_SDMA_ONCE_STAT_PST_OFFSET)
 
 /*!< ONCE_CMD Register */
 #define IMX6UL_SDMA_ONCE_CMD_CMD_MASK                               (0xFU)
 #define IMX6UL_SDMA_ONCE_CMD_CMD_OFFSET                             (0U)
-#define IMX6UL_SDMA_ONCE_CMD_CMD(x)                                 mrt_bit_mask(x, IMX6UL_SDMA_ONCE_CMD_CMD_MASK, IMX6UL_SDMA_ONCE_CMD_CMD_OFFSET)
+#define IMX6UL_SDMA_ONCE_CMD_CMD(x)                                 mr_bit_mask(x, IMX6UL_SDMA_ONCE_CMD_CMD_MASK, IMX6UL_SDMA_ONCE_CMD_CMD_OFFSET)
 
 /*!< ILLINSTADDR Register */
 #define IMX6UL_SDMA_ILLINSTADDR_MASK                                (0x3FFFU)
 #define IMX6UL_SDMA_ILLINSTADDR_OFFSET                              (0U)
-#define IMX6UL_SDMA_ILLINSTADDR(x)                                  mrt_bit_mask(x, IMX6UL_SDMA_ILLINSTADDR_ILLINSTADDR_MASK, IMX6UL_SDMA_ILLINSTADDR_ILLINSTADDR_OFFSET)
+#define IMX6UL_SDMA_ILLINSTADDR(x)                                  mr_bit_mask(x, IMX6UL_SDMA_ILLINSTADDR_ILLINSTADDR_MASK, IMX6UL_SDMA_ILLINSTADDR_ILLINSTADDR_OFFSET)
 
 /*!< CHN0ADDR Register */
 #define IMX6UL_SDMA_CHN0ADDR_CHN0ADDR_MASK                          (0x3FFFU)
 #define IMX6UL_SDMA_CHN0ADDR_CHN0ADDR_OFFSET                        (0U)
-#define IMX6UL_SDMA_CHN0ADDR_CHN0ADDR(x)                            mrt_bit_mask(x, IMX6UL_SDMA_CHN0ADDR_CHN0ADDR_MASK, IMX6UL_SDMA_CHN0ADDR_CHN0ADDR_OFFSET)
+#define IMX6UL_SDMA_CHN0ADDR_CHN0ADDR(x)                            mr_bit_mask(x, IMX6UL_SDMA_CHN0ADDR_CHN0ADDR_MASK, IMX6UL_SDMA_CHN0ADDR_CHN0ADDR_OFFSET)
 #define IMX6UL_SDMA_CHN0ADDR_SMSZ_MASK                              (0x4000U)
 #define IMX6UL_SDMA_CHN0ADDR_SMSZ_OFFSET                            (14U)
-#define IMX6UL_SDMA_CHN0ADDR_SMSZ(x)                                mrt_bit_mask(x, IMX6UL_SDMA_CHN0ADDR_SMSZ_MASK, IMX6UL_SDMA_CHN0ADDR_SMSZ_OFFSET)
+#define IMX6UL_SDMA_CHN0ADDR_SMSZ(x)                                mr_bit_mask(x, IMX6UL_SDMA_CHN0ADDR_SMSZ_MASK, IMX6UL_SDMA_CHN0ADDR_SMSZ_OFFSET)
 
 /*!< EVT_MIRROR Register */
 #define IMX6UL_SDMA_EVT_MIRROR_EVENTS_U32(x)                        ((kuint32_t)(x))
@@ -1266,64 +1242,64 @@ typedef struct
 /*!< EVT_MIRROR2 Register */
 #define IMX6UL_SDMA_EVT_MIRROR2_EVENTS_MASK                         (0xFFFFU)
 #define IMX6UL_SDMA_EVT_MIRROR2_EVENTS_OFFSET                       (0U)
-#define IMX6UL_SDMA_EVT_MIRROR2_EVENTS(x)                           mrt_bit_mask(x, IMX6UL_SDMA_EVT_MIRROR2_EVENTS_MASK, IMX6UL_SDMA_EVT_MIRROR2_EVENTS_OFFSET)
+#define IMX6UL_SDMA_EVT_MIRROR2_EVENTS(x)                           mr_bit_mask(x, IMX6UL_SDMA_EVT_MIRROR2_EVENTS_MASK, IMX6UL_SDMA_EVT_MIRROR2_EVENTS_OFFSET)
 
 /*!< XTRIG_CONF1 Register */
 #define IMX6UL_SDMA_XTRIG_CONF1_NUM0_MASK                           (0x3FU)
 #define IMX6UL_SDMA_XTRIG_CONF1_NUM0_OFFSET                         (0U)
-#define IMX6UL_SDMA_XTRIG_CONF1_NUM0(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM0_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM0_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM0(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM0_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM0_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF1_CNF0_MASK                           (0x40U)
 #define IMX6UL_SDMA_XTRIG_CONF1_CNF0_OFFSET                         (6U)
-#define IMX6UL_SDMA_XTRIG_CONF1_CNF0(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF0_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF0_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF0(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF0_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF0_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF1_NUM1_MASK                           (0x3F00U)
 #define IMX6UL_SDMA_XTRIG_CONF1_NUM1_OFFSET                         (8U)
-#define IMX6UL_SDMA_XTRIG_CONF1_NUM1(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM1_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM1_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM1(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM1_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM1_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF1_CNF1_MASK                           (0x4000U)
 #define IMX6UL_SDMA_XTRIG_CONF1_CNF1_OFFSET                         (14U)
-#define IMX6UL_SDMA_XTRIG_CONF1_CNF1(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF1_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF1_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF1(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF1_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF1_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF1_NUM2_MASK                           (0x3F0000U)
 #define IMX6UL_SDMA_XTRIG_CONF1_NUM2_OFFSET                         (16U)
-#define IMX6UL_SDMA_XTRIG_CONF1_NUM2(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM2_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM2_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM2(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM2_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM2_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF1_CNF2_MASK                           (0x400000U)
 #define IMX6UL_SDMA_XTRIG_CONF1_CNF2_OFFSET                         (22U)
-#define IMX6UL_SDMA_XTRIG_CONF1_CNF2(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF2_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF2_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF2(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF2_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF2_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF1_NUM3_MASK                           (0x3F000000U)
 #define IMX6UL_SDMA_XTRIG_CONF1_NUM3_OFFSET                         (24U)
-#define IMX6UL_SDMA_XTRIG_CONF1_NUM3(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM3_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM3_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_NUM3(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_NUM3_MASK, IMX6UL_SDMA_XTRIG_CONF1_NUM3_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF1_CNF3_MASK                           (0x40000000U)
 #define IMX6UL_SDMA_XTRIG_CONF1_CNF3_OFFSET                         (30U)
-#define IMX6UL_SDMA_XTRIG_CONF1_CNF3(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF3_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF3_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF1_CNF3(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF1_CNF3_MASK, IMX6UL_SDMA_XTRIG_CONF1_CNF3_OFFSET)
 
 /*!< XTRIG_CONF2 Register */
 #define IMX6UL_SDMA_XTRIG_CONF2_NUM4_MASK                           (0x3FU)
 #define IMX6UL_SDMA_XTRIG_CONF2_NUM4_OFFSET                         (0U)
-#define IMX6UL_SDMA_XTRIG_CONF2_NUM4(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM4_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM4_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM4(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM4_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM4_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF2_CNF4_MASK                           (0x40U)
 #define IMX6UL_SDMA_XTRIG_CONF2_CNF4_OFFSET                         (6U)
-#define IMX6UL_SDMA_XTRIG_CONF2_CNF4(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF4_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF4_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF4(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF4_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF4_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF2_NUM5_MASK                           (0x3F00U)
 #define IMX6UL_SDMA_XTRIG_CONF2_NUM5_OFFSET                         (8U)
-#define IMX6UL_SDMA_XTRIG_CONF2_NUM5(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM5_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM5_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM5(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM5_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM5_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF2_CNF5_MASK                           (0x4000U)
 #define IMX6UL_SDMA_XTRIG_CONF2_CNF5_OFFSET                         (14U)
-#define IMX6UL_SDMA_XTRIG_CONF2_CNF5(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF5_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF5_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF5(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF5_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF5_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF2_NUM6_MASK                           (0x3F0000U)
 #define IMX6UL_SDMA_XTRIG_CONF2_NUM6_OFFSET                         (16U)
-#define IMX6UL_SDMA_XTRIG_CONF2_NUM6(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM6_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM6_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM6(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM6_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM6_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF2_CNF6_MASK                           (0x400000U)
 #define IMX6UL_SDMA_XTRIG_CONF2_CNF6_OFFSET                         (22U)
-#define IMX6UL_SDMA_XTRIG_CONF2_CNF6(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF6_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF6_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF6(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF6_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF6_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF2_NUM7_MASK                           (0x3F000000U)
 #define IMX6UL_SDMA_XTRIG_CONF2_NUM7_OFFSET                         (24U)
-#define IMX6UL_SDMA_XTRIG_CONF2_NUM7(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM7_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM7_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_NUM7(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_NUM7_MASK, IMX6UL_SDMA_XTRIG_CONF2_NUM7_OFFSET)
 #define IMX6UL_SDMA_XTRIG_CONF2_CNF7_MASK                           (0x40000000U)
 #define IMX6UL_SDMA_XTRIG_CONF2_CNF7_OFFSET                         (30U)
-#define IMX6UL_SDMA_XTRIG_CONF2_CNF7(x)                             mrt_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF7_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF7_OFFSET)
+#define IMX6UL_SDMA_XTRIG_CONF2_CNF7(x)                             mr_bit_mask(x, IMX6UL_SDMA_XTRIG_CONF2_CNF7_MASK, IMX6UL_SDMA_XTRIG_CONF2_CNF7_OFFSET)
 
 /*!< SDMA_CHNPRI Register */
 #define IMX6UL_SDMA_CHNPRI_CHNPRIn_MASK                             (0x7U)
 #define IMX6UL_SDMA_CHNPRI_CHNPRIn_OFFSET                           (0U)
-#define IMX6UL_SDMA_CHNPRI_CHNPRIn(x)                               mrt_bit_mask(x, IMX6UL_SDMA_SDMA_CHNPRI_CHNPRIn_MASK, IMX6UL_SDMA_SDMA_CHNPRI_CHNPRIn_OFFSET)
+#define IMX6UL_SDMA_CHNPRI_CHNPRIn(x)                               mr_bit_mask(x, IMX6UL_SDMA_SDMA_CHNPRI_CHNPRIn_MASK, IMX6UL_SDMA_SDMA_CHNPRI_CHNPRIn_OFFSET)
 /* The count of IMX6UL_SDMA_SDMA_CHNPRI */
 #define IMX6UL_SDMA_CHNPRI_COUNT                                    (32U)
 

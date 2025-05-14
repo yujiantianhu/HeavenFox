@@ -16,111 +16,111 @@
 #include <platform/irq/fwk_irq_chip.h>
 
 /*!< API function */
-static void fwk_irq_chip_dummy(struct fwk_irq_data *sprt_data) {}
+static void fwk_irq_chip_dummy(struct fwk_irq_data *sptr_data) {}
 
-struct fwk_irq_chip sgrt_fwk_irq_dummy_chip =
+struct fwk_irq_chip sgtc_fwk_irq_dummy_chip =
 {
 	.irq_enable = fwk_irq_chip_dummy,
 	.irq_disable = fwk_irq_chip_dummy,
 	.irq_mask = fwk_irq_chip_dummy,
 	.irq_unmask = fwk_irq_chip_dummy,
-	.irq_ack = mrt_nullptr,
-	.irq_set_type = mrt_nullptr,
+	.irq_ack = mr_nullptr,
+	.irq_set_type = mr_nullptr,
 };
 
 /*!
  * @brief   default enable API
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  none
  * @note    none
  */
-static void fwk_irq_chip_gc_enable(struct fwk_irq_data *sprt_data)
+static void fwk_irq_chip_gc_enable(struct fwk_irq_data *sptr_data)
 {
 
 }
 
 /*!
  * @brief   default disable API
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  none
  * @note    none
  */
-static void fwk_irq_chip_gc_disable(struct fwk_irq_data *sprt_data)
+static void fwk_irq_chip_gc_disable(struct fwk_irq_data *sptr_data)
 {
 
 }
 
 /*!
  * @brief   irq register enable
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  none
  * @note    none
  */
-static void fwk_irq_chip_gc_mask(struct fwk_irq_data *sprt_data)
+static void fwk_irq_chip_gc_mask(struct fwk_irq_data *sptr_data)
 {
-	struct fwk_irq_generic *sprt_gc;
+	struct fwk_irq_generic *sptr_gc;
 
-	sprt_gc = (struct fwk_irq_generic *)sprt_data->handler_data;
-	if (!sprt_gc)
+	sptr_gc = (struct fwk_irq_generic *)sptr_data->handler_data;
+	if (!sptr_gc)
 		return;
 
 	/*!< manage_reg: write 1 to enable; status_reg: write 1 to reset */
-	mrt_setbitl(sprt_data->mask, sprt_gc->manage_reg);
-	mrt_setbitl(sprt_data->mask, sprt_gc->status_reg);
+	mr_setbitl(sptr_data->mask, sptr_gc->manage_reg);
+	mr_setbitl(sptr_data->mask, sptr_gc->status_reg);
 }
 
 /*!
  * @brief   irq register disable
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  none
  * @note    none
  */
-static void fwk_irq_chip_gc_unmask(struct fwk_irq_data *sprt_data)
+static void fwk_irq_chip_gc_unmask(struct fwk_irq_data *sptr_data)
 {
-	struct fwk_irq_generic *sprt_gc;
+	struct fwk_irq_generic *sptr_gc;
 
-	sprt_gc = (struct fwk_irq_generic *)sprt_data->handler_data;
-	if (!sprt_gc)
+	sptr_gc = (struct fwk_irq_generic *)sptr_data->handler_data;
+	if (!sptr_gc)
 		return;
 
-	mrt_clrbitl(sprt_data->mask, sprt_gc->manage_reg);
+	mr_clrbitl(sptr_data->mask, sptr_gc->manage_reg);
 }
 
 /*!
  * @brief   get irq status register
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  1: irq occur; 0: no irq
  * @note    none
  */
-static kbool_t fwk_irq_chip_gc_ack(struct fwk_irq_data *sprt_data)
+static kbool_t fwk_irq_chip_gc_ack(struct fwk_irq_data *sptr_data)
 {
-	struct fwk_irq_generic *sprt_gc;
+	struct fwk_irq_generic *sptr_gc;
 
-	sprt_gc = (struct fwk_irq_generic *)sprt_data->handler_data;
-	if (!sprt_gc)
+	sptr_gc = (struct fwk_irq_generic *)sptr_data->handler_data;
+	if (!sptr_gc)
 		return false;
 
-	return !!mrt_getbitl(sprt_data->mask, sprt_gc->status_reg);
+	return !!mr_getbitl(sptr_data->mask, sptr_gc->status_reg);
 }
 
 /*!
  * @brief   check if irq register is enabled
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  1: enabled; 0: close
  * @note    none
  */
-static kbool_t fwk_irq_chip_gc_is_enabled(struct fwk_irq_data *sprt_data)
+static kbool_t fwk_irq_chip_gc_is_enabled(struct fwk_irq_data *sptr_data)
 {
-	struct fwk_irq_generic *sprt_gc;
+	struct fwk_irq_generic *sptr_gc;
 
-	sprt_gc = (struct fwk_irq_generic *)sprt_data->handler_data;
-	if (!sprt_gc)
+	sptr_gc = (struct fwk_irq_generic *)sptr_data->handler_data;
+	if (!sptr_gc)
 		return false;
 
-	return !!mrt_getbitl(sprt_data->mask, sprt_gc->manage_reg);
+	return !!mr_getbitl(sptr_data->mask, sptr_gc->manage_reg);
 }
 
-struct fwk_irq_chip sgrt_fwk_irq_generic_chip =
+struct fwk_irq_chip sgtc_fwk_irq_generic_chip =
 {
 	.irq_enable = fwk_irq_chip_gc_enable,
 	.irq_disable = fwk_irq_chip_gc_disable,
@@ -132,48 +132,48 @@ struct fwk_irq_chip sgrt_fwk_irq_generic_chip =
 
 /*!
  * @brief   save privdata to irq_chip
- * @param   sprt_data, data
+ * @param   sptr_data, data
  * @retval  none
  * @note    none
  */
-void fwk_irq_set_chip_data(struct fwk_irq_data *sprt_data, void *data)
+void fwk_irq_set_chip_data(struct fwk_irq_data *sptr_data, void *data)
 {
-	sprt_data->chip_data = data;
+	sptr_data->chip_data = data;
 }
 
 /*!
  * @brief   save privdata to irq_chip
- * @param   sprt_data, sprt_chip, data
+ * @param   sptr_data, sptr_chip, data
  * @retval  none
  * @note    none
  */
-void fwk_irq_set_chip_handler(struct fwk_irq_data *sprt_data, struct fwk_irq_chip *sprt_chip, void *data)
+void fwk_irq_set_chip_handler(struct fwk_irq_data *sptr_data, struct fwk_irq_chip *sptr_chip, void *data)
 {
-	sprt_data->sprt_chip = sprt_chip;
-	sprt_data->handler_data = data;
+	sptr_data->sptr_chip = sptr_chip;
+	sptr_data->handler_data = data;
 }
 
 /*!
  * @brief   save data to irq_chip
- * @param   irq_base, sprt_gc, chip_data
+ * @param   irq_base, sptr_gc, chip_data
  * @retval  none
  * @note    none
  */
-void fwk_irq_setup_generic_chip(kint32_t irq_base, kuint32_t irq_max, struct fwk_irq_generic *sprt_gc, void *chip_data)
+void fwk_irq_setup_generic_chip(kint32_t irq_base, kuint32_t irq_max, struct fwk_irq_generic *sptr_gc, void *chip_data)
 {
-	struct fwk_irq_data *sprt_data;
+	struct fwk_irq_data *sptr_data;
 	kuint32_t irq;
 
 	for (irq = irq_base; irq < (irq_base + irq_max); irq++)
 	{
-		sprt_data = fwk_irq_get_data(irq);
-		if (!sprt_data)
+		sptr_data = fwk_irq_get_data(irq);
+		if (!sptr_data)
 			continue;
 
-		sprt_data->mask = mrt_bit(irq - irq_base);
+		sptr_data->mask = mr_bit(irq - irq_base);
 
-		fwk_irq_set_chip_data(sprt_data, chip_data);
-		fwk_irq_set_chip_handler(sprt_data, &sprt_gc->sgrt_chip, sprt_gc);
+		fwk_irq_set_chip_data(sptr_data, chip_data);
+		fwk_irq_set_chip_handler(sptr_data, &sptr_gc->sgtc_chip, sptr_gc);
 	}
 }
 
@@ -185,33 +185,33 @@ void fwk_irq_setup_generic_chip(kint32_t irq_base, kuint32_t irq_max, struct fwk
  */
 void fwk_irq_shutdown_generic_chip(kint32_t irq_base, kuint32_t irq_max)
 {
-	struct fwk_irq_data *sprt_data;
+	struct fwk_irq_data *sptr_data;
 	kuint32_t irq;
 
 	for (irq = irq_base; irq < (irq_base + irq_max); irq++)
 	{
-		sprt_data = fwk_irq_get_data(irq);
-		if (!sprt_data)
+		sptr_data = fwk_irq_get_data(irq);
+		if (!sptr_data)
 			continue;
 
-		sprt_data->mask = 0;
-		fwk_irq_set_chip_data(sprt_data, mrt_nullptr);
-		fwk_irq_set_chip_handler(sprt_data, &sgrt_fwk_irq_dummy_chip, mrt_nullptr);
+		sptr_data->mask = 0;
+		fwk_irq_set_chip_data(sptr_data, mr_nullptr);
+		fwk_irq_set_chip_handler(sptr_data, &sgtc_fwk_irq_dummy_chip, mr_nullptr);
 	}
 }
 
 /*!
  * @brief   get data
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  generic data
  * @note    none
  */
-struct fwk_irq_generic *fwk_irq_get_generic_data(struct fwk_irq_data *sprt_data)
+struct fwk_irq_generic *fwk_irq_get_generic_data(struct fwk_irq_data *sptr_data)
 {
-	struct fwk_irq_generic *sprt_gc;
+	struct fwk_irq_generic *sptr_gc;
 
-	sprt_gc = mrt_container_of(sprt_data->sprt_chip, typeof(*sprt_gc), sgrt_chip);
-	return sprt_gc;
+	sptr_gc = mr_container_of(sptr_data->sptr_chip, typeof(*sptr_gc), sgtc_chip);
+	return sptr_gc;
 }
 
 /*!
@@ -222,16 +222,16 @@ struct fwk_irq_generic *fwk_irq_get_generic_data(struct fwk_irq_data *sprt_data)
  */
 void fwk_enable_irq(kint32_t irq)
 {
-	struct fwk_irq_data *sprt_data;
+	struct fwk_irq_data *sptr_data;
 
-	sprt_data = fwk_irq_get_data(irq);
-	if (!sprt_data)
+	sptr_data = fwk_irq_get_data(irq);
+	if (!sptr_data)
 		return;
 
-	if (sprt_data->sprt_chip->irq_enable)
-		sprt_data->sprt_chip->irq_enable(sprt_data);
-	else if (sprt_data->sprt_chip->irq_mask)
-		sprt_data->sprt_chip->irq_mask(sprt_data);
+	if (sptr_data->sptr_chip->irq_enable)
+		sptr_data->sptr_chip->irq_enable(sptr_data);
+	else if (sptr_data->sptr_chip->irq_mask)
+		sptr_data->sptr_chip->irq_mask(sptr_data);
 }
 
 /*!
@@ -242,16 +242,16 @@ void fwk_enable_irq(kint32_t irq)
  */
 void fwk_disable_irq(kint32_t irq)
 {
-	struct fwk_irq_data *sprt_data;
+	struct fwk_irq_data *sptr_data;
 
-	sprt_data = fwk_irq_get_data(irq);
-	if (!sprt_data)
+	sptr_data = fwk_irq_get_data(irq);
+	if (!sptr_data)
 		return;
 
-	if (sprt_data->sprt_chip->irq_disable)
-		sprt_data->sprt_chip->irq_disable(sprt_data);
-	else if (sprt_data->sprt_chip->irq_mask)
-		sprt_data->sprt_chip->irq_unmask(sprt_data);
+	if (sptr_data->sptr_chip->irq_disable)
+		sptr_data->sptr_chip->irq_disable(sptr_data);
+	else if (sptr_data->sptr_chip->irq_mask)
+		sptr_data->sptr_chip->irq_unmask(sptr_data);
 }
 
 /*!
@@ -262,22 +262,22 @@ void fwk_disable_irq(kint32_t irq)
  */
 void fwk_irq_set_type(kint32_t irq, kuint32_t flags)
 {
-	struct fwk_irq_data *sprt_data;
-	struct fwk_irq_desc *sprt_desc;
+	struct fwk_irq_data *sptr_data;
+	struct fwk_irq_desc *sptr_desc;
 	kuint32_t type;
 
-	sprt_data = fwk_irq_get_data(irq);
-	if (!sprt_data)
+	sptr_data = fwk_irq_get_data(irq);
+	if (!sptr_data)
 		return;
 
-	sprt_desc = fwk_irq_data_to_desc(sprt_data);
+	sptr_desc = fwk_irq_data_to_desc(sptr_data);
 
 	type = flags & IRQ_TYPE_SENSE_MASK;
 	if (!type)
-		type = sprt_desc->flags & IRQ_TYPE_SENSE_MASK;
+		type = sptr_desc->flags & IRQ_TYPE_SENSE_MASK;
 
-	if (sprt_data->sprt_chip->irq_set_type)
-		sprt_data->sprt_chip->irq_set_type(sprt_data, type);
+	if (sptr_data->sptr_chip->irq_set_type)
+		sptr_data->sptr_chip->irq_set_type(sptr_data, type);
 }
 
 /*!
@@ -288,14 +288,14 @@ void fwk_irq_set_type(kint32_t irq, kuint32_t flags)
  */
 kbool_t fwk_irq_is_acked(kint32_t irq)
 {
-	struct fwk_irq_data *sprt_data;
+	struct fwk_irq_data *sptr_data;
 
-	sprt_data = fwk_irq_get_data(irq);
-	if (!sprt_data)
+	sptr_data = fwk_irq_get_data(irq);
+	if (!sptr_data)
 		return false;
 
-	if (sprt_data->sprt_chip->irq_ack)
-		return sprt_data->sprt_chip->irq_ack(sprt_data);
+	if (sptr_data->sptr_chip->irq_ack)
+		return sptr_data->sptr_chip->irq_ack(sptr_data);
 
 	return false;
 }
@@ -308,14 +308,14 @@ kbool_t fwk_irq_is_acked(kint32_t irq)
  */
 kbool_t fwk_irq_is_enabled(kint32_t irq)
 {
-	struct fwk_irq_data *sprt_data;
+	struct fwk_irq_data *sptr_data;
 
-	sprt_data = fwk_irq_get_data(irq);
-	if (!sprt_data)
+	sptr_data = fwk_irq_get_data(irq);
+	if (!sptr_data)
 		return false;
 
-	if (sprt_data->sprt_chip->irq_is_enabled)
-		return sprt_data->sprt_chip->irq_is_enabled(sprt_data);
+	if (sptr_data->sptr_chip->irq_is_enabled)
+		return sptr_data->sptr_chip->irq_is_enabled(sptr_data);
 
 	return false;
 }

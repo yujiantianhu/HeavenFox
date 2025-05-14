@@ -40,63 +40,63 @@ __weak kint32_t get_trie_node_branch(kchar_t ch)
 
 /*!
  * @brief   create a group of branches of trie_node
- * @param   sprt_tree, sprt_node
+ * @param   sptr_tree, sptr_node
  * @retval  none
  * @note    none
  */
-struct trie_node **create_trie_branch(struct trie_tree *sprt_tree, struct trie_node *sprt_node, kuint32_t size)
+struct trie_node **create_trie_branch(struct trie_tree *sptr_tree, struct trie_node *sptr_node, kuint32_t size)
 {
-    struct trie_node **sprt_branches;
+    struct trie_node **sptr_branches;
 
-    sprt_branches = (struct trie_node **)sprt_tree->alloc(size * sizeof(*sprt_branches));
-    if (!isValid(sprt_branches))
-        return mrt_nullptr;
+    sptr_branches = (struct trie_node **)sptr_tree->alloc(size * sizeof(*sptr_branches));
+    if (!isValid(sptr_branches))
+        return mr_nullptr;
 
     for (kuint32_t i = 0; i < size; i++)
-        sprt_branches[i] = mrt_nullptr;
+        sptr_branches[i] = mr_nullptr;
 
-    if (sprt_node)
-        sprt_node->sprt_branches = sprt_branches;
+    if (sptr_node)
+        sptr_node->sptr_branches = sptr_branches;
 
-    return sprt_branches;
+    return sptr_branches;
 }
 
 /*!
  * @brief   allocate a new trie_node
- * @param   sprt_tree, sprt_par, sprt_branches
+ * @param   sptr_tree, sptr_par, sptr_branches
  * @retval  none
  * @note    none
  */
-struct trie_node *allocate_trie_node(struct trie_tree *sprt_tree, struct trie_node *sprt_par, struct trie_node **sprt_branches)
+struct trie_node *allocate_trie_node(struct trie_tree *sptr_tree, struct trie_node *sptr_par, struct trie_node **sptr_branches)
 {
-    struct trie_node *sprt_node;
+    struct trie_node *sptr_node;
 
-    sprt_node = (struct trie_node *)sprt_tree->alloc(sizeof(*sprt_node));
-    if (!isValid(sprt_node))
-        return mrt_nullptr;
+    sptr_node = (struct trie_node *)sptr_tree->alloc(sizeof(*sptr_node));
+    if (!isValid(sptr_node))
+        return mr_nullptr;
     
-    sprt_node->sprt_parent = sprt_par;
-    sprt_node->sprt_branches = sprt_branches;
-    sprt_node->sprt_link = mrt_nullptr;
+    sptr_node->sptr_parent = sptr_par;
+    sptr_node->sptr_branches = sptr_branches;
+    sptr_node->sptr_link = mr_nullptr;
 
-    return sprt_node;
+    return sptr_node;
 }
 
 /*!
- * @brief   find a trie_node in sprt_tree
- * @param   sprt_tree, name
+ * @brief   find a trie_node in sptr_tree
+ * @param   sptr_tree, name
  * @retval  none
  * @note    none
  */
-struct trie_node *find_trie_node(struct trie_tree *sprt_tree, const char *name)
+struct trie_node *find_trie_node(struct trie_tree *sptr_tree, const char *name)
 {
-    struct trie_node *sprt_node;
+    struct trie_node *sptr_node;
     const kchar_t *str = name;
     kint32_t offset = 0;
 
-    foreach_trie_tree(sprt_node, sprt_tree, offset) 
+    foreach_trie_tree(sptr_node, sptr_tree, offset) 
     {
-        offset = sprt_tree->get(*(str++));
+        offset = sptr_tree->get(*(str++));
 
         if (IS_STRING_END(offset))
             break;
@@ -104,130 +104,130 @@ struct trie_node *find_trie_node(struct trie_tree *sprt_tree, const char *name)
             return ERR_PTR(-ER_FAULT);
     }
 
-    if (sprt_node)
-        return sprt_node->sprt_link ? sprt_node : mrt_nullptr;
+    if (sptr_node)
+        return sptr_node->sptr_link ? sptr_node : mr_nullptr;
 
     print_debug("find node failed, name is: %s\r\n", name);
 
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
- * @brief   find a trie_node in sprt_tree
- * @param   sprt_tree, name
+ * @brief   find a trie_node in sptr_tree
+ * @param   sptr_tree, name
  * @retval  none
  * @note    none
  */
-struct trie_link *trie_tree_look_up(struct trie_tree *sprt_tree, const kchar_t *name)
+struct trie_link *trie_tree_look_up(struct trie_tree *sptr_tree, const kchar_t *name)
 {
-    struct trie_node *sprt_node;
+    struct trie_node *sptr_node;
 
-    sprt_node = find_trie_node(sprt_tree, name);
-    if (IS_ERR(sprt_node) || !sprt_node)
-        return mrt_nullptr;
+    sptr_node = find_trie_node(sptr_tree, name);
+    if (IS_ERR(sptr_node) || !sptr_node)
+        return mr_nullptr;
 
-    return sprt_node->sprt_link;
+    return sptr_node->sptr_link;
 }
 
 /*!
- * @brief   add a new trie_node to sprt_tree
- * @param   sprt_tree, name
+ * @brief   add a new trie_node to sptr_tree
+ * @param   sptr_tree, name
  * @retval  none
  * @note    none
  */
-void trie_node_add(struct trie_tree *sprt_tree, const kchar_t *name, struct trie_link *sprt_link)
+void trie_node_add(struct trie_tree *sptr_tree, const kchar_t *name, struct trie_link *sptr_link)
 {
-    struct trie_node *sprt_node, *sprt_temp;
+    struct trie_node *sptr_node, *sptr_temp;
     const kchar_t *str = name;
     kuint32_t lenth = strlen(name);
     kuint32_t i;
     kint32_t offset;
 
-    if (!sprt_link)
+    if (!sptr_link)
         return;
 
-    sprt_node = find_trie_node(sprt_tree, name);
+    sptr_node = find_trie_node(sptr_tree, name);
 
     /*!< found or error */
-    if (sprt_node)
+    if (sptr_node)
         return;
 
-    for (i = 0, sprt_node = &sprt_tree->sgrt_node; i < lenth; i++) 
+    for (i = 0, sptr_node = &sptr_tree->sgtc_node; i < lenth; i++) 
     {
-        offset = sprt_tree->get(*(str + i));
+        offset = sptr_tree->get(*(str + i));
 
-        if (!sprt_node->sprt_branches) 
+        if (!sptr_node->sptr_branches) 
         {
-            if (!create_trie_branch(sprt_tree, sprt_node, sprt_tree->size))
+            if (!create_trie_branch(sptr_tree, sptr_node, sptr_tree->size))
                 return;
         }
 
-        if (!sprt_node->sprt_branches[offset]) 
+        if (!sptr_node->sptr_branches[offset]) 
         {
-            sprt_temp = allocate_trie_node(sprt_tree, sprt_node, mrt_nullptr);
-            if (!isValid(sprt_temp))
+            sptr_temp = allocate_trie_node(sptr_tree, sptr_node, mr_nullptr);
+            if (!isValid(sptr_temp))
                 return;
 
-            sprt_node->sprt_branches[offset] = sprt_temp;
+            sptr_node->sptr_branches[offset] = sptr_temp;
         }
 
-        print_debug("%s: i = %d, sprt_node: %p, offset: %c\r\n", __FUNCTION__, i, sprt_node->sprt_branches[offset], offset + 'a');
+        print_debug("%s: i = %d, sptr_node: %p, offset: %c\r\n", __FUNCTION__, i, sptr_node->sptr_branches[offset], offset + 'a');
 
-        sprt_link->depth = i;
-        sprt_node = sprt_node->sprt_branches[offset];
+        sptr_link->depth = i;
+        sptr_node = sptr_node->sptr_branches[offset];
     }
 
-    sprt_node->sprt_link = sprt_link;
+    sptr_node->sptr_link = sptr_link;
 
     print_debug("add new node succeuss, name is: %s\r\n", name);
 }
 
 /*!
- * @brief   delete sprt_node from sprt_tree with recursion
- * @param   sprt_tree, sprt_node
+ * @brief   delete sptr_node from sptr_tree with recursion
+ * @param   sptr_tree, sptr_node
  * @retval  none
  * @note    none
  */
-static void __del_trie_node(struct trie_tree *sprt_tree, struct trie_node *sprt_node, struct trie_node *sprt_child)
+static void __del_trie_node(struct trie_tree *sptr_tree, struct trie_node *sptr_node, struct trie_node *sptr_child)
 {
     kuint32_t i, count = 0;
     
-    if (!sprt_node)
+    if (!sptr_node)
         return;
 
 	/*!< just for leaf node */
-    if (!sprt_child && sprt_node->sprt_branches)
+    if (!sptr_child && sptr_node->sptr_branches)
         return;
 
-    if (sprt_node->sprt_branches) 
+    if (sptr_node->sptr_branches) 
     {
-        for (i = 0; i < sprt_tree->size; i++) 
+        for (i = 0; i < sptr_tree->size; i++) 
         {
-            if (sprt_node->sprt_branches[i] == sprt_child) 
+            if (sptr_node->sptr_branches[i] == sptr_child) 
             {
-                sprt_node->sprt_branches[i] = mrt_nullptr;
+                sptr_node->sptr_branches[i] = mr_nullptr;
 
                 if (count)
                     goto out;
             }
 
-            if (sprt_node->sprt_branches[i])
+            if (sptr_node->sptr_branches[i])
                 count++;
         }
 
         if (count)
             goto out;
 
-        sprt_tree->free(sprt_node->sprt_branches);
-        sprt_node->sprt_branches = mrt_nullptr;
+        sptr_tree->free(sptr_node->sptr_branches);
+        sptr_node->sptr_branches = mr_nullptr;
     }
 
-    if (!sprt_node->sprt_link) 
+    if (!sptr_node->sptr_link) 
     {
-        __del_trie_node(sprt_tree, sprt_node->sprt_parent, sprt_node);
+        __del_trie_node(sptr_tree, sptr_node->sptr_parent, sptr_node);
 
-        if (sprt_node != &sprt_tree->sgrt_node)
-            sprt_tree->free(sprt_node);
+        if (sptr_node != &sptr_tree->sgtc_node)
+            sptr_tree->free(sptr_node);
     }
 
 out:
@@ -235,38 +235,38 @@ out:
 }
 
 /*!
- * @brief   delete sprt_node from sprt_tree
- * @param   sprt_tree, name
+ * @brief   delete sptr_node from sptr_tree
+ * @param   sptr_tree, name
  * @retval  none
  * @note    none
  */
-void trie_node_del(struct trie_tree *sprt_tree, const kchar_t *name)
+void trie_node_del(struct trie_tree *sptr_tree, const kchar_t *name)
 {
-    struct trie_node *sprt_node;
+    struct trie_node *sptr_node;
     const kchar_t *str = name;
     kuint32_t lenth = strlen(name);
     kuint32_t i;
     kint32_t offset = 0;
 
-    for (i = 0, sprt_node = &sprt_tree->sgrt_node; i < lenth; i++) 
+    for (i = 0, sptr_node = &sptr_tree->sgtc_node; i < lenth; i++) 
     {
-        if (!sprt_node || !sprt_node->sprt_branches)
+        if (!sptr_node || !sptr_node->sptr_branches)
             return;
         
-        offset = sprt_tree->get(*(str + i));
+        offset = sptr_tree->get(*(str + i));
         if (IS_STRING_ERR(offset))
             return;
 
-        sprt_node = sprt_node->sprt_branches[offset];
+        sptr_node = sptr_node->sptr_branches[offset];
     }
 
-    if (!sprt_node ||
-        !sprt_node->sprt_link ||
-        (sprt_node == &sprt_tree->sgrt_node))
+    if (!sptr_node ||
+        !sptr_node->sptr_link ||
+        (sptr_node == &sptr_tree->sgtc_node))
         return;
 
-    sprt_node->sprt_link = mrt_nullptr;
-    __del_trie_node(sprt_tree, sprt_node, mrt_nullptr);
+    sptr_node->sptr_link = mr_nullptr;
+    __del_trie_node(sptr_tree, sptr_node, mr_nullptr);
 }
 
 /*!< end of file */

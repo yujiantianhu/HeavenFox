@@ -41,15 +41,15 @@ typedef struct mem_block
     kusize_t lenth;								/*!< current block total lenth(unit: byte), including header of memory info */
     kusize_t remain;							/*!< the lenth of remaining usable memoty(unit: byte) */
 
-    struct mem_block *sprt_prev;				/*!< the first address of last memory block */
-    struct mem_block *sprt_next;				/*!< the first address of next memory block */
+    struct mem_block *sptr_prev;				/*!< the first address of last memory block */
+    struct mem_block *sptr_next;				/*!< the first address of next memory block */
 
-    struct list_head sgrt_link;
+    struct list_head sgtc_link;
 
 } srt_mem_block_t;
 
 #define IS_MEMORYPOOL_VALID(this)               ((this)->magic == MEMORY_POOL_MAGIC)
-#define MEM_BLOCK_HEADER_SIZE                   (mrt_num_align4(sizeof(struct mem_block)))  /*!< 32bytes */
+#define MEM_BLOCK_HEADER_SIZE                   (mr_num_align4(sizeof(struct mem_block)))  /*!< 32bytes */
 
 enum __ERT_MEM_TYPE
 {
@@ -79,7 +79,7 @@ enum __ERT_MEM_TYPE
 
 typedef struct mem_hash
 {
-    struct list_head sgrt_list;
+    struct list_head sgtc_list;
 
 } srt_mem_hash_t;
 
@@ -89,20 +89,20 @@ typedef struct mem_info
     kuaddr_t base;                                          
     kusize_t lenth;
     
-    struct mem_block *sprt_mem;
-    struct mem_hash sgrt_hash[NR_MEM_NUM];
+    struct mem_block *sptr_mem;
+    struct mem_hash sgtc_hash[NR_MEM_NUM];
 
-    void *(*alloc)(struct mem_info *sprt_info, kusize_t size);
-    void (*free)(struct mem_info *sprt_info, void *ptr_mem);
+    void *(*alloc)(struct mem_info *sptr_info, kusize_t size);
+    void (*free)(struct mem_info *sptr_info, void *ptr_mem);
 
 } srt_mem_info_t;
 
 /*!< The functions */
-extern kint32_t memory_simple_block_create(struct mem_info *sprt_info, kuaddr_t mem_addr, kusize_t size);
-extern void memory_simple_block_destroy(struct mem_info *sprt_info);
+extern kint32_t memory_simple_block_create(struct mem_info *sptr_info, kuaddr_t mem_addr, kusize_t size);
+extern void memory_simple_block_destroy(struct mem_info *sptr_info);
 
-extern kint32_t memory_block_create(struct mem_info *sprt_info, kuaddr_t mem_addr, kusize_t size);
-extern void memory_block_destroy(struct mem_info *sprt_info);
+extern kint32_t memory_block_create(struct mem_info *sptr_info, kuaddr_t mem_addr, kusize_t size);
+extern void memory_block_destroy(struct mem_info *sptr_info);
 
 /*!< malloc */
 extern kbool_t malloc_block_initial(void);
@@ -203,7 +203,7 @@ static inline void kmemzero(void *dest, kusize_t size)
 {
     kmemset(dest, 0, size);
 }
-#define mrt_bzero(addr, size)       kmemzero(addr, size)
+#define mr_bzero(addr, size)       kmemzero(addr, size)
 
 /*!
  * @brief   kmemcmp
@@ -261,7 +261,7 @@ static inline void *kmemcpy(void *dest, const void *src, kusize_t size)
     kuint8_t data;
 
     if (!dest || !src)
-        return mrt_nullptr;
+        return mr_nullptr;
 
     s1_addr = (kuaddr_t)dest;
     s2_addr = (kuaddr_t)src;
@@ -331,7 +331,7 @@ static inline void u16_set2u8(void *addr, void *val)
  * @retval  none
  * @note    none
  */
-#define mrt_u32_set(addr, val)   \
+#define mr_u32_set(addr, val)   \
     do {    \
         __asm__ __volatile__ (  \
             " mov %0, %1  "   \
@@ -344,7 +344,7 @@ static inline void u16_set2u8(void *addr, void *val)
 static inline __force_inline 
 void u32_set(kuint32_t *addr, kuint32_t offset, kuint32_t val)
 {
-    mrt_u32_set(addr + offset, val);
+    mr_u32_set(addr + offset, val);
 }
 
 /*!
@@ -353,7 +353,7 @@ void u32_set(kuint32_t *addr, kuint32_t offset, kuint32_t val)
  * @retval  none
  * @note    none
  */
-#define mrt_u16_set(addr, val)   \
+#define mr_u16_set(addr, val)   \
     do {    \
         __asm__ __volatile__ (  \
             " mov.w %0, %1  "   \
@@ -366,7 +366,7 @@ void u32_set(kuint32_t *addr, kuint32_t offset, kuint32_t val)
 static inline __force_inline 
 void u16_set(kuint16_t *addr, kuint32_t offset, kuint16_t val)
 {
-    mrt_u16_set(addr + offset, val);
+    mr_u16_set(addr + offset, val);
 }
 
 /*!
@@ -375,7 +375,7 @@ void u16_set(kuint16_t *addr, kuint32_t offset, kuint16_t val)
  * @retval  none
  * @note    none
  */
-#define mrt_u8_set(addr, val)   \
+#define mr_u8_set(addr, val)   \
     do {    \
         __asm__ __volatile__ (  \
             " mov.b %0, %1  "   \
@@ -388,7 +388,7 @@ void u16_set(kuint16_t *addr, kuint32_t offset, kuint16_t val)
 static inline __force_inline 
 void u8_set(kuint8_t *addr, kuint32_t offset, kuint8_t val)
 {
-    mrt_u8_set(addr + offset, val);
+    mr_u8_set(addr + offset, val);
 }
 
 #ifdef __cplusplus

@@ -24,9 +24,9 @@
 struct fwk_irq_group
 {
     tid_t tid;
-    srt_atomic_t sgrt_rec;
+    srt_atomic_t sgtc_rec;
 
-    struct fwk_irq_action sgrt_action;
+    struct fwk_irq_action sgtc_action;
     irq_handler_t thread_fn;
 };
 
@@ -52,30 +52,30 @@ static irq_return_t fwk_default_irq_isr(void *ptrDev)
  */
 void *fwk_find_irq_action(kint32_t irq, const kchar_t *name, void *ptrDev)
 {
-    struct fwk_irq_desc *sprt_desc;
-    struct fwk_irq_action *sprt_action;
+    struct fwk_irq_desc *sptr_desc;
+    struct fwk_irq_action *sptr_action;
     kint32_t retval = 0;
 
-    sprt_desc = fwk_irq_to_desc(irq);
-    if (!isValid(sprt_desc))
-        return mrt_nullptr;
+    sptr_desc = fwk_irq_to_desc(irq);
+    if (!isValid(sptr_desc))
+        return mr_nullptr;
 
-    spin_lock_irqsave(&sprt_desc->sgrt_lock);
+    spin_lock_irqsave(&sptr_desc->sgtc_lock);
 
-    foreach_list_next_entry(sprt_action, &sprt_desc->sgrt_action, sgrt_link)
+    foreach_list_next_entry(sptr_action, &sptr_desc->sgtc_action, sgtc_link)
     {
         if (name)
-            retval = strncmp(sprt_action->name, name, FWK_IRQ_DESC_NAME_LENTH);
+            retval = strncmp(sptr_action->name, name, FWK_IRQ_DESC_NAME_LENTH);
 
-        if (!retval && (sprt_action->ptrArgs == ptrDev))
+        if (!retval && (sptr_action->ptrArgs == ptrDev))
         {
-            spin_unlock_irqrestore(&sprt_desc->sgrt_lock);
-            return sprt_action;
+            spin_unlock_irqrestore(&sptr_desc->sgtc_lock);
+            return sptr_action;
         }
     }
 
-    spin_unlock_irqrestore(&sprt_desc->sgrt_lock);
-    return mrt_nullptr;
+    spin_unlock_irqrestore(&sptr_desc->sgtc_lock);
+    return mr_nullptr;
 }
 
 /*!
@@ -86,21 +86,21 @@ void *fwk_find_irq_action(kint32_t irq, const kchar_t *name, void *ptrDev)
  */
 static void *irq_thread(void *args)
 {
-    struct fwk_irq_group *sprt_grp;
+    struct fwk_irq_group *sptr_grp;
 
-    sprt_grp = (struct fwk_irq_group *)args;
+    sptr_grp = (struct fwk_irq_group *)args;
 
     for (;;)
     {
         /*!< no additional judgement on whether thread_fn exsits */
-        sprt_grp->thread_fn(sprt_grp->sgrt_action.ptrArgs);
-        atomic_dec(&sprt_grp->sgrt_rec);
+        sptr_grp->thread_fn(sptr_grp->sgtc_action.ptrArgs);
+        atomic_dec(&sptr_grp->sgtc_rec);
 
-        if (!ATOMIC_READ(&sprt_grp->sgrt_rec))
+        if (!ATOMIC_READ(&sptr_grp->sgtc_rec))
             schedule_self_suspend();
     }
 
-    return sprt_grp->sgrt_action.ptrArgs;
+    return sptr_grp->sgtc_action.ptrArgs;
 }
 
 /*!
@@ -112,9 +112,9 @@ static void *irq_thread(void *args)
 kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
                                 kuint32_t flags, const kchar_t *name, void *ptrDev)
 {
-    struct fwk_irq_group *sprt_grp;
-    struct fwk_irq_desc *sprt_desc;
-    struct fwk_irq_action *sprt_action;
+    struct fwk_irq_group *sptr_grp;
+    struct fwk_irq_desc *sptr_desc;
+    struct fwk_irq_action *sptr_action;
     kuint32_t len = kstrlen(name);
 
     if ((!name) || (!ptrDev))
@@ -123,56 +123,56 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
     if (fwk_find_irq_action(irq, name, ptrDev))
         return -ER_EXISTED;
 
-    sprt_desc = fwk_irq_to_desc(irq);
-    if (!isValid(sprt_desc))
+    sptr_desc = fwk_irq_to_desc(irq);
+    if (!isValid(sptr_desc))
         return -ER_NOMEM;
 
-    sprt_grp = (struct fwk_irq_group *)kzalloc(sizeof(*sprt_grp), GFP_KERNEL);
-    if (!isValid(sprt_grp))
+    sptr_grp = (struct fwk_irq_group *)kzalloc(sizeof(*sptr_grp), GFP_KERNEL);
+    if (!isValid(sptr_grp))
         return -ER_NOMEM;
 
-    sprt_action = &sprt_grp->sgrt_action;
-    sprt_action->handler = handler ? handler : fwk_default_irq_isr;
-    sprt_action->flags = flags;
-    sprt_action->ptrArgs = ptrDev;
+    sptr_action = &sptr_grp->sgtc_action;
+    sptr_action->handler = handler ? handler : fwk_default_irq_isr;
+    sptr_action->flags = flags;
+    sptr_action->ptrArgs = ptrDev;
 
-    if (len >= sizeof(sprt_action->name))
+    if (len >= sizeof(sptr_action->name))
         goto fail;
 
-    sprt_grp->tid = -1;
-    ATOMIC_SET(&sprt_grp->sgrt_rec, 0);
-    sprt_grp->thread_fn = thread_fn;
+    sptr_grp->tid = -1;
+    ATOMIC_SET(&sptr_grp->sgtc_rec, 0);
+    sptr_grp->thread_fn = thread_fn;
 
     if (thread_fn)
     {
-        mrt_preempt_disable();
+        mr_preempt_disable();
 
-        sprt_grp->tid = kernel_thread_create(-1, mrt_nullptr, irq_thread, sprt_grp);
-        if (sprt_grp->tid < 0)
+        sptr_grp->tid = kernel_thread_create(-1, mr_nullptr, irq_thread, sptr_grp);
+        if (sptr_grp->tid < 0)
         {
-            mrt_preempt_enable();
+            mr_preempt_enable();
             goto fail;
         }
 
-        schedule_thread_suspend(sprt_grp->tid);
-        thread_set_priority(thread_attr_get(sprt_grp->tid), THREAD_PROTY_IRQ);
-        mrt_preempt_enable();
+        schedule_thread_suspend(sptr_grp->tid);
+        thread_set_priority(thread_attr_get(sptr_grp->tid), THREAD_PROTY_IRQ);
+        mr_preempt_enable();
     }
     
-    kstrcpy(sprt_action->name, name);
+    kstrcpy(sptr_action->name, name);
     
     fwk_irq_set_type(irq, flags);
 
-    spin_lock_irqsave(&sprt_desc->sgrt_lock);
-    list_head_add_tail(&sprt_desc->sgrt_action, &sprt_action->sgrt_link);
-    spin_unlock_irqrestore(&sprt_desc->sgrt_lock);
+    spin_lock_irqsave(&sptr_desc->sgtc_lock);
+    list_head_add_tail(&sptr_desc->sgtc_action, &sptr_action->sgtc_link);
+    spin_unlock_irqrestore(&sptr_desc->sgtc_lock);
 
     fwk_enable_irq(irq);
 
     return ER_NORMAL;
 
 fail:
-    kfree(sprt_grp);
+    kfree(sptr_grp);
     return -ER_CHECKERR;
 }
 
@@ -184,7 +184,7 @@ fail:
  */
 kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, const kchar_t *name, void *ptrDev)
 {
-    return fwk_request_threaded_irq(irq, handler, mrt_nullptr, flags, name, ptrDev);
+    return fwk_request_threaded_irq(irq, handler, mr_nullptr, flags, name, ptrDev);
 }
 
 /*!
@@ -195,33 +195,33 @@ kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, c
  */
 void fwk_free_irq(kint32_t irq, void *ptrDev)
 {
-    struct fwk_irq_group *sprt_grp;
-    struct fwk_irq_desc *sprt_desc;
-    struct fwk_irq_action *sprt_action;
+    struct fwk_irq_group *sptr_grp;
+    struct fwk_irq_desc *sptr_desc;
+    struct fwk_irq_action *sptr_action;
 
     if ((irq < 0) || (!ptrDev))
         return;
 
-    sprt_desc = fwk_irq_to_desc(irq);
-    if (!isValid(sprt_desc))
+    sptr_desc = fwk_irq_to_desc(irq);
+    if (!isValid(sptr_desc))
         return;
 
     fwk_disable_irq(irq);
 
-    sprt_action = fwk_find_irq_action(irq, mrt_nullptr, ptrDev);
-    if (isValid(sprt_action))
+    sptr_action = fwk_find_irq_action(irq, mr_nullptr, ptrDev);
+    if (isValid(sptr_action))
     {
-        sprt_grp = mrt_container_of(sprt_action, struct fwk_irq_group, sgrt_action);
+        sptr_grp = mr_container_of(sptr_action, struct fwk_irq_group, sgtc_action);
 
-        spin_lock_irqsave(&sprt_desc->sgrt_lock);
-        list_head_del(&sprt_action->sgrt_link);
-        spin_unlock_irqrestore(&sprt_desc->sgrt_lock);
+        spin_lock_irqsave(&sptr_desc->sgtc_lock);
+        list_head_del(&sptr_action->sgtc_link);
+        spin_unlock_irqrestore(&sptr_desc->sgtc_lock);
 
         /*!< let irq_thread to sleep, and destroy it later (by "kernel_thread") */
-        if (sprt_grp->tid >= 0)
-            schedule_thread_sleep(sprt_grp->tid);
+        if (sptr_grp->tid >= 0)
+            schedule_thread_sleep(sptr_grp->tid);
 
-        kfree(sprt_grp);
+        kfree(sptr_grp);
     }
 }
 
@@ -233,29 +233,29 @@ void fwk_free_irq(kint32_t irq, void *ptrDev)
  */
 void fwk_destroy_irq_action(kint32_t irq)
 {
-    struct fwk_irq_group *sprt_grp;
-    struct fwk_irq_desc *sprt_desc;
-    struct fwk_irq_action *sprt_action, *sprt_temp;
+    struct fwk_irq_group *sptr_grp;
+    struct fwk_irq_desc *sptr_desc;
+    struct fwk_irq_action *sptr_action, *sptr_temp;
 
-    sprt_desc = fwk_irq_to_desc(irq);
-    if (!isValid(sprt_desc))
+    sptr_desc = fwk_irq_to_desc(irq);
+    if (!isValid(sptr_desc))
         return;
 
-    spin_lock_irqsave(&sprt_desc->sgrt_lock);
+    spin_lock_irqsave(&sptr_desc->sgtc_lock);
 
-    foreach_list_next_entry_safe(sprt_action, sprt_temp, &sprt_desc->sgrt_action, sgrt_link)
+    foreach_list_next_entry_safe(sptr_action, sptr_temp, &sptr_desc->sgtc_action, sgtc_link)
     {
-        sprt_grp = mrt_container_of(sprt_action, struct fwk_irq_group, sgrt_action);
+        sptr_grp = mr_container_of(sptr_action, struct fwk_irq_group, sgtc_action);
 
-        list_head_del(&sprt_action->sgrt_link);
+        list_head_del(&sptr_action->sgtc_link);
 
         /*!< let irq_thread to sleep, and destroy it later (by "kernel_thread") */
-        if (sprt_grp->tid >= 0)
-            schedule_thread_sleep(sprt_grp->tid);
-        kfree(sprt_grp);
+        if (sptr_grp->tid >= 0)
+            schedule_thread_sleep(sptr_grp->tid);
+        kfree(sptr_grp);
     }
 
-    spin_unlock_irqrestore(&sprt_desc->sgrt_lock);
+    spin_unlock_irqrestore(&sptr_desc->sgtc_lock);
 }
 
 /*!
@@ -266,32 +266,32 @@ void fwk_destroy_irq_action(kint32_t irq)
  */
 void fwk_do_irq_handler(kint32_t softIrq)
 {
-    struct fwk_irq_group *sprt_grp;
-    struct fwk_irq_desc *sprt_desc;
-    struct fwk_irq_action *sprt_action;
+    struct fwk_irq_group *sptr_grp;
+    struct fwk_irq_desc *sptr_desc;
+    struct fwk_irq_action *sptr_action;
     kint32_t retval;
 
     if (softIrq < 0)
         return;
 
-    sprt_desc = fwk_irq_to_desc(softIrq);
-    if (!isValid(sprt_desc))
+    sptr_desc = fwk_irq_to_desc(softIrq);
+    if (!isValid(sptr_desc))
         return;
         
-    foreach_list_next_entry(sprt_action, &sprt_desc->sgrt_action, sgrt_link)
+    foreach_list_next_entry(sptr_action, &sptr_desc->sgtc_action, sgtc_link)
     {
-        retval = sprt_action->handler ? sprt_action->handler(sprt_action->ptrArgs) : NR_IRQ_WAKE_THREAD;
+        retval = sptr_action->handler ? sptr_action->handler(sptr_action->ptrArgs) : NR_IRQ_WAKE_THREAD;
         switch (retval)
         {
             case NR_IRQ_HANDLED:
                 break;
 
             case NR_IRQ_WAKE_THREAD:
-                sprt_grp = mrt_container_of(sprt_action, struct fwk_irq_group, sgrt_action);
-                if (sprt_grp->tid >= 0)
+                sptr_grp = mr_container_of(sptr_action, struct fwk_irq_group, sgtc_action);
+                if (sptr_grp->tid >= 0)
                 {
-                    atomic_inc(&sprt_grp->sgrt_rec);
-                    schedule_thread_wakeup(sprt_grp->tid);
+                    atomic_inc(&sptr_grp->sgtc_rec);
+                    schedule_thread_wakeup(sptr_grp->tid);
                 }
 
                 break;

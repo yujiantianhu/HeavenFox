@@ -29,22 +29,22 @@
 
 /*!< The defines */
 /*!< general */
-#define mrt_isNull(x)									(mrt_nullptr == (x))
-#define mrt_notNull(x)									(mrt_nullptr != (x))
-#define mrt_isValid(x)									(x)
+#define mr_isNull(x)									(mr_nullptr == (x))
+#define mr_notNull(x)									(mr_nullptr != (x))
+#define mr_isValid(x)									(x)
 
 /*!< bit calc */
-#define mrt_bit_nr(val, nr)								((kuint32_t)(((kuint32_t)(val)) << (nr)))
-#define mrt_bit(nr)							        	mrt_bit_nr(1, (nr))
-#define mrt_mask(val, mask)								((kuint32_t)(val) & (mask))
-#define mrt_bit_mask(val, mask, nr)						(mrt_bit_nr(val, nr) & (mask))
-#define mrt_bit_mask_nr(val, mask, nr)					mrt_bit_mask(val, mrt_bit_nr(mask, nr), nr)
+#define mr_bit_nr(val, nr)								((kuint32_t)(((kuint32_t)(val)) << (nr)))
+#define mr_bit(nr)							        	mr_bit_nr(1, (nr))
+#define mr_mask(val, mask)								((kuint32_t)(val) & (mask))
+#define mr_bit_mask(val, mask, nr)						(mr_bit_nr(val, nr) & (mask))
+#define mr_bit_mask_nr(val, mask, nr)					mr_bit_mask(val, mr_bit_nr(mask, nr), nr)
 
-#define mrt_setbit(val, nr)								((val) |=  mrt_bit(nr))
-#define mrt_clrbit(val, nr)								((val) &= ~mrt_bit(nr))
-#define mrt_is_bitequal(val, mask)						((mask) == ((val) & (mask)))
-#define mrt_is_bitset(val, mask)						((val) & (mask))
-#define mrt_is_bitreset(val, mask)						(0 == ((val) & (mask)))
+#define mr_setbit(val, nr)								((val) |=  mr_bit(nr))
+#define mr_clrbit(val, nr)								((val) &= ~mr_bit(nr))
+#define mr_is_bitequal(val, mask)						((mask) == ((val) & (mask)))
+#define mr_is_bitset(val, mask)						    ((val) & (mask))
+#define mr_is_bitreset(val, mask)						(0 == ((val) & (mask)))
 
 /*!< compare at least two number */
 #define CMP_GT2(a, b, c, d)								(((a) > (b)) ? (c) : (d))
@@ -55,7 +55,7 @@
 #define CMP_MIN2(a, b)									CMP_LT2(a, b, a, b)
 
 /*!< correct usage for comparing both variable */
-#define mrt_cmp_gt(a, b, c, d)	\
+#define mr_cmp_gt(a, b, c, d)	\
 ({	\
     const typeof(a) _a = (a);	\
     const typeof(b) _b = (b);	\
@@ -65,7 +65,7 @@
     CMP_GT2(_a, _b, _c, _d);	\
 })
 
-#define mrt_cmp_lt(a, b, c, d)	\
+#define mr_cmp_lt(a, b, c, d)	\
 ({	\
     const typeof(a) _a = (a);	\
     const typeof(b) _b = (b);	\
@@ -75,13 +75,13 @@
     CMP_LT2(_a, _b, _c, _d);	\
 })
 
-#define mrt_ret_max_super(a, b, d)						mrt_cmp_gt(a, b, a, d)
-#define mrt_ret_min_super(a, b, d)						mrt_cmp_lt(a, b, a, d)
-#define mrt_ret_max2(a, b)								mrt_cmp_gt(a, b, a, b)
-#define mrt_ret_min2(a, b)								mrt_cmp_lt(a, b, a, b)
+#define mr_ret_max_super(a, b, d)					    mr_cmp_gt(a, b, a, d)
+#define mr_ret_min_super(a, b, d)						mr_cmp_lt(a, b, a, d)
+#define mr_ret_max2(a, b)								mr_cmp_gt(a, b, a, b)
+#define mr_ret_min2(a, b)								mr_cmp_lt(a, b, a, b)
 
-#define mrt_abs(a)										((typeof(a))(((a) < 0) ? -(a) : (a)))
-#define mrt_usub(a, b)	\
+#define mr_abs(a)										((typeof(a))(((a) < 0) ? -(a) : (a)))
+#define mr_usub(a, b)	\
 ({	\
     const typeof(a) _a = (a);	\
     const typeof(b) _b = (b);	\
@@ -97,43 +97,43 @@
  * Take 4 bytes as an example: 00, 04, 08, what they have in common is that the lower 2 bits must be zero. (0b11 = 0x03 = (4 - 1));
  * So the principle of alignment is to make the corresponding bit 0.
  */
-#define mrt_align(x, mask)								(((x) + ((mask) - 1)) & (~((mask) - 1)))
-#define mrt_is_aligned(x, mask)							((x) & ((typeof(x))(mask) - 1) == 0)
-#define mrt_align4(x)									mrt_align(x, 4)
+#define mr_align(x, mask)								(((x) + ((mask) - 1)) & (~((mask) - 1)))
+#define mr_is_aligned(x, mask)							((x) & ((typeof(x))(mask) - 1) == 0)
+#define mr_align4(x)									mr_align(x, 4)
 
-#define mrt_num_align(x, mask)							((typeof(x))mrt_align((x), (typeof(x))(mask)))
-#define mrt_ptr_align(p, mask)							((typeof(p))mrt_align((kuaddr_t)(p), (kuaddr_t)(mask)))
-#define mrt_num_align4(x)								mrt_num_align((x), 4)
-#define mrt_ptr_align4(p)								mrt_ptr_align((p), 4)
-#define mrt_num_align8(x)								mrt_num_align((x), 8)
-#define mrt_ptr_align8(p)								mrt_ptr_align((p), 8)
+#define mr_num_align(x, mask)							((typeof(x))mr_align((x), (typeof(x))(mask)))
+#define mr_ptr_align(p, mask)							((typeof(p))mr_align((kuaddr_t)(p), (kuaddr_t)(mask)))
+#define mr_num_align4(x)								mr_num_align((x), 4)
+#define mr_ptr_align4(p)								mr_ptr_align((p), 4)
+#define mr_num_align8(x)								mr_num_align((x), 8)
+#define mr_ptr_align8(p)								mr_ptr_align((p), 8)
 
-#define mrt_ralign(x, mask)								((x) & (~((mask) - 1)))
+#define mr_ralign(x, mask)								((x) & (~((mask) - 1)))
 
 /*!< Position bit offset on 32-bit array */
-#define mrt_word_offset(integer)						((kuint32_t)((integer) >> 5U))
-#define mrt_bit_offset(integer)							((kuint32_t)(integer) & 0x1fU)
+#define mr_word_offset(integer)						    ((kuint32_t)((integer) >> 5U))
+#define mr_bit_offset(integer)							((kuint32_t)(integer) & 0x1fU)
 
 /*!< Get the number of arrays */						
 #define ARRAY_SIZE(arr)									(sizeof(arr) / sizeof((arr)[0]))
-#define mrt_array_size(arr)								ARRAY_SIZE(arr)
+#define mr_array_size(arr)								ARRAY_SIZE(arr)
 
 /*!< Calculate the offset of the member in the struct */
-#define mrt_member_offset(type, member)					((kusize_t)(&((type *)0)->member))
+#define mr_member_offset(type, member)					((kusize_t)(&((type *)0)->member))
 
 #ifdef __compiler_offsetof
-    #define mrt_offsetof(type, member)					__compiler_offsetof(type, member)
+    #define mr_offsetof(type, member)					__compiler_offsetof(type, member)
 #else
-    #define mrt_offsetof(type, member)					mrt_member_offset(type, member)
+    #define mr_offsetof(type, member)					mr_member_offset(type, member)
 #endif
 
 /*!< Return the handler of parent struct */
-#define mrt_to_parent_handler(ptr, type, member)	\
+#define mr_to_parent_handler(ptr, type, member)	\
 ({	\
     const typeof(((type *)0)->member) *ptr_member = (ptr);	\
-    (type *)((char *)ptr_member - mrt_offsetof(type, member));	\
+    (type *)((char *)ptr_member - mr_offsetof(type, member));	\
 })
-#define mrt_container_of(ptr, type, member)				mrt_to_parent_handler(ptr, type, member)
+#define mr_container_of(ptr, type, member)				mr_to_parent_handler(ptr, type, member)
 
 /*!< swap high byte and low byte for 2 bytes val */
 #define TO_CONVERT_BYTE16(x)	\
@@ -182,13 +182,13 @@
 
 /*!< get inverse */
 #define TO_REVERSE(x)									(~(x))
-#define mrt_reverse(x)									TO_REVERSE(x)
+#define mr_reverse(x)									TO_REVERSE(x)
 /*!< get complement */
 #define TO_COMPLEMENT(x)								(TO_REVERSE(x) + 1)
-#define mrt_complement(x)								TO_COMPLEMENT(x)
+#define mr_complement(x)								TO_COMPLEMENT(x)
 
 /*!< run code retry */
-#define mrt_run_code_retry(timeout, run_code) \
+#define mr_run_code_retry(timeout, run_code) \
 {   \
     kuint32_t time_cnt = (timeout);   \
     do  \
@@ -205,8 +205,9 @@ extern kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kint32_t mode);
 extern kutype_t dec_to_binary(kchar_t *buf, kutype_t number, kint32_t mode);
 extern kint32_t ascii_to_dec(const kchar_t *str);
 extern kutype_t random_val(void);
+extern kuint16_t parse_valid_u32_bits(kuint32_t number);
 
-#define mrt_udiv(divied, div)	\
+#define mr_udiv(divied, div)	\
 ({	\
     typeof(divied) _divied = (divied);	\
     typeof(div) _div = (div);	\
@@ -214,7 +215,7 @@ extern kutype_t random_val(void);
     (typeof(divied))udiv_integer(_divied, _div);	\
 })
 
-#define mrt_sdiv(divied, div)	\
+#define mr_sdiv(divied, div)	\
 ({	\
     typeof(divied) _divied = (divied);	\
     typeof(div) _div = (div);	\
@@ -222,7 +223,7 @@ extern kutype_t random_val(void);
     (typeof(divied))sdiv_integer(_divied, _div);	\
 })
 
-#define mrt_urem(divied, div)	\
+#define mr_urem(divied, div)	\
 ({	\
     typeof(divied) _divied = (divied);	\
     typeof(div) _div = (div);	\
@@ -259,7 +260,7 @@ __force_inline static inline kbool_t isPower2(kutype_t number)
      *	4:	= pow(2, 2), 0b100 & 0b011 = 0 == 0, return true
      *	...
      *
-     * all in all, it is equivalent to mrt_is_aligned(number, number)
+     * all in all, it is equivalent to mr_is_aligned(number, number)
      * (when only one bit is 1, it is an n-pwoer of 2; that is, it is aligned with itself)
      */
     return (number && (0 == (number & (number - 1))));
@@ -271,7 +272,7 @@ __force_inline static inline kbool_t isPower2(kutype_t number)
  * @retval  result
  * @note    swap high byte and low byte for 4 bytes val
  */
-#define mrt_reverse_byte32(ptr, val)	\
+#define mr_reverse_byte32(ptr, val)	\
     do {    \
         __asm__ __volatile__ (  \
             " rev %0, %1	"   \
@@ -285,7 +286,7 @@ static inline kuint32_t reverse_byte32(kuint32_t val)
 {
     kuint32_t result;
 
-    mrt_reverse_byte32(&result, val);
+    mr_reverse_byte32(&result, val);
     return result;
 }
 
@@ -295,7 +296,7 @@ static inline kuint32_t reverse_byte32(kuint32_t val)
  * @retval  result
  * @note    swap high byte and low byte for 2 bytes val
  */
-#define mrt_reverse_byte16(ptr, val)	\
+#define mr_reverse_byte16(ptr, val)	\
     do {    \
         __asm__ __volatile__ (  \
             " rev16 %0, %1	"   \
@@ -309,7 +310,7 @@ static inline kuint16_t reverse_byte16(kuint16_t val)
 {
     kuint16_t result;
 
-    mrt_reverse_byte16(&result, val);
+    mr_reverse_byte16(&result, val);
     return result;
 }
 

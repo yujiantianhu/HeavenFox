@@ -26,8 +26,8 @@ struct fwk_block_major_name
 };
 
 /*!< The globals */
-struct fwk_block_major_name *sgrt_block_major_name[DEVICE_MAX_NUM];
-static struct mutex_lock sgrt_blkdev_mutex = MUTEX_LOCK_INIT();
+struct fwk_block_major_name *sgtc_block_major_name[DEVICE_MAX_NUM];
+static struct mutex_lock sgtc_blkdev_mutex = MUTEX_LOCK_INIT();
 
 /*!< API function */
 /*!
@@ -38,17 +38,17 @@ static struct mutex_lock sgrt_blkdev_mutex = MUTEX_LOCK_INIT();
  */
 static struct fwk_block_major_name *__fwk_register_blkdev(kuint32_t major, const kchar_t *name)
 {
-    struct fwk_block_major_name *sprt_blkdev;
-    struct fwk_block_major_name **sprt_Dst;
+    struct fwk_block_major_name *sptr_blkdev;
+    struct fwk_block_major_name **sptr_Dst;
     kuint32_t index;
     kusize_t blkdevMax;
     kint32_t i;
 
-    blkdevMax = ARRAY_SIZE(sgrt_block_major_name);
+    blkdevMax = ARRAY_SIZE(sgtc_block_major_name);
 
     if (!major)
     {
-        sprt_Dst = &sgrt_block_major_name[blkdevMax - 1];
+        sptr_Dst = &sgtc_block_major_name[blkdevMax - 1];
 
         /*!< 
          * The composite value of the Major + Minor must be less than 2^32, 
@@ -56,7 +56,7 @@ static struct fwk_block_major_name *__fwk_register_blkdev(kuint32_t major, const
          */
         for (i = (blkdevMax - 1); i >= 0; i--)
         {
-            if (!(*(sprt_Dst--)))
+            if (!(*(sptr_Dst--)))
                 break;
         }
 
@@ -67,24 +67,24 @@ static struct fwk_block_major_name *__fwk_register_blkdev(kuint32_t major, const
     }
 
     if (major >= blkdevMax)
-        return ERR_PTR(-ER_UNVALID);
+        return ERR_PTR(-ER_INVALID);
 
     index = major % blkdevMax;
-    sprt_Dst = &sgrt_block_major_name[index];
+    sptr_Dst = &sgtc_block_major_name[index];
 
-    /*!< If sprt_Temp[index] is empty, sprt_blkdev can be deposited directly */
-    if (*sprt_Dst)
+    /*!< If sptr_Temp[index] is empty, sptr_blkdev can be deposited directly */
+    if (*sptr_Dst)
         return ERR_PTR(-ER_EXISTED);
 
-    sprt_blkdev = (struct fwk_block_major_name *)kmalloc(sizeof(*sprt_blkdev), GFP_KERNEL);
-    if (!isValid(sprt_blkdev))
+    sptr_blkdev = (struct fwk_block_major_name *)kmalloc(sizeof(*sptr_blkdev), GFP_KERNEL);
+    if (!isValid(sptr_blkdev))
         return ERR_PTR(-ER_FAILD);
 
-    sprt_blkdev->major = major;
-    strncpy(sprt_blkdev->name, (const char *)name, sizeof(sprt_blkdev->name));
-    *sprt_Dst = sprt_blkdev;
+    sptr_blkdev->major = major;
+    strncpy(sptr_blkdev->name, (const char *)name, sizeof(sptr_blkdev->name));
+    *sptr_Dst = sptr_blkdev;
 
-    return sprt_blkdev;
+    return sptr_blkdev;
 }
 
 /*!
@@ -95,27 +95,27 @@ static struct fwk_block_major_name *__fwk_register_blkdev(kuint32_t major, const
  */
 static struct fwk_block_major_name *__fwk_unregister_blkdev(kuint32_t major, const kchar_t *name)
 {
-    struct fwk_block_major_name *sprt_Rlt;
-    struct fwk_block_major_name **sprt_Dst;
+    struct fwk_block_major_name *sptr_Rlt;
+    struct fwk_block_major_name **sptr_Dst;
     kuint32_t index;
     kusize_t  blkdevMax;
 
-    blkdevMax = ARRAY_SIZE(sgrt_block_major_name);
+    blkdevMax = ARRAY_SIZE(sgtc_block_major_name);
     if (major >= blkdevMax)
-        return ERR_PTR(-ER_UNVALID);
+        return ERR_PTR(-ER_INVALID);
 
     index = major % blkdevMax;
-    sprt_Dst = &sgrt_block_major_name[index];
-    if (!(*sprt_Dst))
+    sptr_Dst = &sgtc_block_major_name[index];
+    if (!(*sptr_Dst))
         return ERR_PTR(-ER_EMPTY);
 
-    sprt_Rlt = *sprt_Dst;
-    if (strcmp(sprt_Rlt->name, name))
+    sptr_Rlt = *sptr_Dst;
+    if (strcmp(sptr_Rlt->name, name))
         return ERR_PTR(-ER_CHECKERR);
 
-    *sprt_Dst = mrt_nullptr;
+    *sptr_Dst = mr_nullptr;
 
-    return sprt_Rlt;
+    return sptr_Rlt;
 }
 
 /*!
@@ -126,20 +126,20 @@ static struct fwk_block_major_name *__fwk_unregister_blkdev(kuint32_t major, con
  */
 kint32_t fwk_register_blkdev(kuint32_t major, const kchar_t *name)
 {
-    struct fwk_block_major_name *sprt_blkdev;
+    struct fwk_block_major_name *sptr_blkdev;
 
-    mutex_lock(&sgrt_blkdev_mutex);
+    mutex_lock(&sgtc_blkdev_mutex);
 
-    sprt_blkdev = __fwk_register_blkdev(major, name);
-    if (!isValid(sprt_blkdev))
+    sptr_blkdev = __fwk_register_blkdev(major, name);
+    if (!isValid(sptr_blkdev))
     {
-        mutex_unlock(&sgrt_blkdev_mutex);
+        mutex_unlock(&sgtc_blkdev_mutex);
         print_err("register block device \"%s\" failed!\r\n", name);
 
         return -ER_FAILD;
     }
 
-    mutex_unlock(&sgrt_blkdev_mutex);
+    mutex_unlock(&sgtc_blkdev_mutex);
     return ER_NORMAL;
 }
 
@@ -151,9 +151,9 @@ kint32_t fwk_register_blkdev(kuint32_t major, const kchar_t *name)
  */
 void fwk_unregister_blkdev(kuint32_t major, const kchar_t *name)
 {
-    mutex_lock(&sgrt_blkdev_mutex);
+    mutex_lock(&sgtc_blkdev_mutex);
     __fwk_unregister_blkdev(major, name);
-    mutex_unlock(&sgrt_blkdev_mutex);
+    mutex_unlock(&sgtc_blkdev_mutex);
 }
 
 /* end of file */

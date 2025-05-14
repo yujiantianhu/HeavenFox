@@ -37,13 +37,13 @@ struct fwk_inode
 	kuint8_t type;
 	kuint32_t r_dev;
 
-	struct fwk_file_oprts *sprt_foprts;
-	struct fwk_kobject *sprt_kobj;
+	struct fwk_file_oprts *sptr_foprts;
+	struct fwk_kobject *sptr_kobj;
 
 	union
 	{
-		struct fwk_cdev *sprt_cdev;
-		struct fwk_block_device *sprt_blkdev;
+		struct fwk_cdev *sptr_cdev;
+		struct fwk_block_device *sptr_blkdev;
 	};
 };
 
@@ -59,9 +59,9 @@ struct fwk_inode
 #define FWK_PATH_SYS_DRIVER								FWK_PATH_SYSTEM"drivers/"
 
 /*!< The functions */
-extern kint32_t fwk_inode_set_ops(struct fwk_inode *sprt_inode, kuint32_t type, kint32_t devNum);
-extern struct fwk_inode *fwk_mk_inode(struct fwk_kobject *sprt_kobj, kuint32_t type, kint32_t devNum);
-extern void fwk_rm_inode(struct fwk_inode *sprt_inode);
+extern kint32_t fwk_inode_set_ops(struct fwk_inode *sptr_inode, kuint32_t type, kint32_t devNum);
+extern struct fwk_inode *fwk_mk_inode(struct fwk_kobject *sptr_kobj, kuint32_t type, kint32_t devNum);
+extern void fwk_rm_inode(struct fwk_inode *sptr_inode);
 extern struct fwk_inode *fwk_inode_find(kchar_t *name);
 extern struct fwk_inode *fwk_inode_find_disk(const kchar_t *name);
 

@@ -36,24 +36,24 @@ struct term_cmd
     kint32_t (*do_excute)(struct term_cmd *, kint32_t argc, kchar_t **argv);
     void (*help)(void);
 
-    struct list_head sgrt_link;
+    struct list_head sgtc_link;
 };
 
 struct term_cmd_his
 {
     kuint32_t length;
-    struct pq_data sgrt_pqd;
+    struct pq_data sgtc_pqd;
 
     void *cmd;
 };
 
 /*!< The functions */
 extern struct term_cmd *term_cmd_allocate(const kchar_t *name, nrt_gfp_t gfp_mask);
-extern void term_cmd_free(struct term_cmd *sprt_cmd);
+extern void term_cmd_free(struct term_cmd *sptr_cmd);
 
 extern struct term_cmd *term_cmd_find_by_name(kchar_t *name);
-extern kint32_t term_cmd_add(struct term_cmd *sprt_cmd);
-extern void term_cmd_del(struct term_cmd *sprt_cmd);
+extern kint32_t term_cmd_add(struct term_cmd *sptr_cmd);
+extern void term_cmd_del(struct term_cmd *sptr_cmd);
 
 extern kchar_t *term_cmdline_get(void);
 extern struct pq_queue *term_cmd_queue_get(void);

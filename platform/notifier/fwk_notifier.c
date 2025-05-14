@@ -16,71 +16,71 @@
 /*!< API functions */
 /*!
  * @brief   register notifier
- * @param   sprt_chain
- * @param   sprt_nb
+ * @param   sptr_chain
+ * @param   sptr_nb
  * @retval  errno
  * @note    none
  */
-kint32_t fwk_blocking_notifier_chain_register(struct fwk_notifier_chain *sprt_chain, struct fwk_notifier_block *sprt_nb)
+kint32_t fwk_blocking_notifier_chain_register(struct fwk_notifier_chain *sptr_chain, struct fwk_notifier_block *sptr_nb)
 {
-    if (!sprt_chain || !sprt_nb)
+    if (!sptr_chain || !sptr_nb)
         return -ER_NULLPTR;
 
-    if (!mrt_list_head_empty(&sprt_nb->sgrt_link))
+    if (!mr_list_head_empty(&sptr_nb->sgtc_link))
         return -ER_EXISTED;
 
-    if (!sprt_nb->notifier_call)
-        return -ER_UNVALID;
+    if (!sptr_nb->notifier_call)
+        return -ER_INVALID;
 
-    mutex_lock(&sprt_chain->sgrt_lock);
-    list_head_add_tail(&sprt_chain->sgrt_nbs, &sprt_nb->sgrt_link);
-    mutex_unlock(&sprt_chain->sgrt_lock);
+    mutex_lock(&sptr_chain->sgtc_lock);
+    list_head_add_tail(&sptr_chain->sgtc_nbs, &sptr_nb->sgtc_link);
+    mutex_unlock(&sptr_chain->sgtc_lock);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   unregister notifier
- * @param   sprt_chain
- * @param   sprt_nb
+ * @param   sptr_chain
+ * @param   sptr_nb
  * @retval  errno
  * @note    none
  */
-void fwk_blocking_notifier_chain_unregister(struct fwk_notifier_chain *sprt_chain, struct fwk_notifier_block *sprt_nb)
+void fwk_blocking_notifier_chain_unregister(struct fwk_notifier_chain *sptr_chain, struct fwk_notifier_block *sptr_nb)
 {
-    if (!sprt_nb ||
-        mrt_list_head_empty(&sprt_nb->sgrt_link))
+    if (!sptr_nb ||
+        mr_list_head_empty(&sptr_nb->sgtc_link))
         return;
 
-    mutex_lock(&sprt_chain->sgrt_lock);
-    list_head_del(&sprt_nb->sgrt_link);
-    mutex_unlock(&sprt_chain->sgrt_lock);
+    mutex_lock(&sptr_chain->sgtc_lock);
+    list_head_del(&sptr_nb->sgtc_link);
+    mutex_unlock(&sptr_chain->sgtc_lock);
 }
 
 /*!
  * @brief   call notifier
- * @param   sprt_chain
+ * @param   sptr_chain
  * @param   event, args
  * @retval  errno
  * @note    none
  */
-kint32_t fwk_blocking_notifier_call_chain(struct fwk_notifier_chain *sprt_chain, kuint32_t event, void *args)
+kint32_t fwk_blocking_notifier_call_chain(struct fwk_notifier_chain *sptr_chain, kuint32_t event, void *args)
 {
-    struct fwk_notifier_block *sprt_nb;
+    struct fwk_notifier_block *sptr_nb;
 
-    if (!sprt_chain ||
-        mrt_list_head_empty(&sprt_chain->sgrt_nbs))
+    if (!sptr_chain ||
+        mr_list_head_empty(&sptr_chain->sgtc_nbs))
         return -ER_PERMIT;
 
-    mutex_lock(&sprt_chain->sgrt_lock);
+    mutex_lock(&sptr_chain->sgtc_lock);
 
-    foreach_list_next_entry(sprt_nb, &sprt_chain->sgrt_nbs, sgrt_link)
+    foreach_list_next_entry(sptr_nb, &sptr_chain->sgtc_nbs, sgtc_link)
     {
-        if (sprt_nb->expect_event & event)
-            sprt_nb->notifier_call(sprt_nb, event, args);
+        if (sptr_nb->expect_event & event)
+            sptr_nb->notifier_call(sptr_nb, event, args);
     }
 
-    mutex_unlock(&sprt_chain->sgrt_lock);
+    mutex_unlock(&sptr_chain->sgtc_lock);
 
     return ER_NORMAL;
 }

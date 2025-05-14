@@ -4,13 +4,13 @@
 #define CONFIG_VERDOR "nxp"
 #define CONFIG_CPU "imx6ull"
 #define CONFIG_COMPILER "arm-linux-gnueabihf-"
-#define CONFIG_COMPILER_PATH "/usr/local/arm/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf"
 #define CONFIG_ARCH_ARMV7 1
 #define CONFIG_LITTILE_ENDIAN 1
 #define CONFIG_VFP 1
 #define CONFIG_INSTRUCTION arm
 #define CONFIG_BUILD_TYPE debug
 #define CONFIG_OPTIMIZE_CLASS 0
+#define CONFIG_CONSOLE_DEVICE "/dev/uart0"
 #define CONFIG_XTAL_FREQ_CLK (24000000)
 #define CONFIG_RTC_FREQ_CLK (32768)
 #define CONFIG_RAM_DDR_ORIGIN (0x80000000)
@@ -43,7 +43,9 @@
 #define CONFIG_OF 1
 #define CONFIG_PINCTRL 1
 #define CONFIG_MMC 1
+#define CONFIG_UART 1
 #define CONFIG_I2C 1
+#define CONFIG_DMA 1
 #define CONFIG_INPUTDEV 1
 #define CONFIG_VIDEO 1
 #define CONFIG_USB 1
@@ -54,10 +56,12 @@
 #define CONFIG_GPIO_IMX_LED 1
 #define CONFIG_PINCTRL_IMX6 1
 #define CONFIG_INPUT_IMX_KEY 1
+#define CONFIG_UART_IMX6 1
 #define CONFIG_I2C_IMX6 1
 #define CONFIG_I2C_AP3216C 1
 #define CONFIG_I2C_AT24CXX 1
 #define CONFIG_I2C_TSC2007 1
+#define CONFIG_SDMA_IMX6 1
 #define CONFIG_HDMI_SIL9022A 1
 #define CONFIG_SDMMC_BUS_WIDTH 1
 #define CONFIG_VIDEO_FB_IMX6 1

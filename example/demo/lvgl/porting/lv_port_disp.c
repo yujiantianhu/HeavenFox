@@ -35,7 +35,7 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-static kint32_t disp_init(struct fwk_disp_ctrl *sprt_dctrl);
+static kint32_t disp_init(struct fwk_disp_ctrl *sptr_dctrl);
 
 static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p);
 //static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width,
@@ -44,7 +44,7 @@ static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_colo
 /**********************
  *  STATIC VARIABLES
  **********************/
-static struct timer_list sgrt_lvgl_tick_timer;
+static struct timer_list sgtc_lvgl_tick_timer;
 static kint32_t g_lvgl_fbdev_fd = -1;
 
 /**********************
@@ -57,18 +57,18 @@ static kint32_t g_lvgl_fbdev_fd = -1;
 
 void lv_port_disp_init(void *args)
 {
-    struct fwk_disp_ctrl *sprt_dctrl;
-    struct fwk_disp_info *sprt_disp;
+    struct fwk_disp_ctrl *sptr_dctrl;
+    struct fwk_disp_info *sptr_disp;
 
-    sprt_dctrl = (struct fwk_disp_ctrl *)args;
-    sprt_disp  = sprt_dctrl->sprt_di;
-    if (!isValid(sprt_disp))
+    sptr_dctrl = (struct fwk_disp_ctrl *)args;
+    sptr_disp  = sptr_dctrl->sptr_di;
+    if (!isValid(sptr_disp))
         return;
 
     /*-------------------------
      * Initialize your display
      * -----------------------*/
-    if (disp_init(sprt_dctrl))
+    if (disp_init(sptr_dctrl))
         return;
 
     /*-----------------------------
@@ -118,8 +118,8 @@ void lv_port_disp_init(void *args)
 #else
 
     static lv_disp_draw_buf_t draw_buf_dsc_4;
-    lv_disp_draw_buf_init(&draw_buf_dsc_4, sprt_disp->buffer_bak, sprt_disp->buffer,
-                          sprt_disp->height * sprt_disp->width);   /*Initialize the display buffer*/
+    lv_disp_draw_buf_init(&draw_buf_dsc_4, sptr_disp->buffer_bak, sptr_disp->buffer,
+                          sptr_disp->height * sptr_disp->width);   /*Initialize the display buffer*/
 
 #endif
 
@@ -133,8 +133,8 @@ void lv_port_disp_init(void *args)
     /*Set up the functions to access to your display*/
 
     /*Set the resolution of the display*/
-    disp_drv.hor_res = sprt_disp->width;
-    disp_drv.ver_res = sprt_disp->height;
+    disp_drv.hor_res = sptr_disp->width;
+    disp_drv.ver_res = sptr_disp->height;
 
     /*Used to copy the buffer's content to the display*/
     disp_drv.flush_cb = disp_flush;
@@ -142,7 +142,7 @@ void lv_port_disp_init(void *args)
     /*Set a display buffer*/
     disp_drv.draw_buf = &draw_buf_dsc_4;
 
-    disp_drv.user_data = (void *)sprt_dctrl;
+    disp_drv.user_data = (void *)sptr_dctrl;
 
     /*Required for Example 3)*/
     //disp_drv.full_refresh = 1;
@@ -156,37 +156,37 @@ void lv_port_disp_init(void *args)
     lv_disp_drv_register(&disp_drv);
 }
 
-void lv_port_disp_logo(struct fwk_disp_ctrl *sprt_dctrl)
+void lv_port_disp_logo(struct fwk_disp_ctrl *sptr_dctrl)
 {
-    struct fwk_disp_info *sprt_disp = sprt_dctrl->sprt_di;
-    struct fs_stream *sprt_file;
-    struct fwk_bmp_ctrl sgrt_bctl;
+    struct fwk_disp_info *sptr_disp = sptr_dctrl->sptr_di;
+    struct fs_stream *sptr_file;
+    struct fwk_bmp_ctrl sgtc_bctl;
     void *buffer;
     kuint8_t bytes_per_pixel;
     kssize_t size;
     kuint32_t flags;
 
-    bytes_per_pixel = sprt_disp->bpp >> 3;
-    size = sprt_disp->width * sprt_disp->height * bytes_per_pixel;
+    bytes_per_pixel = sptr_disp->bpp >> 3;
+    size = sptr_disp->width * sptr_disp->height * bytes_per_pixel;
     buffer = kmalloc(size, GFP_KERNEL);
     if (!isValid(buffer))
         return;
 
     local_irq_save(&flags);
-    sprt_file = file_open(CONFIG_POWER_LOGO, O_RDONLY);
-    if (!isValid(sprt_file))
+    sptr_file = file_open(CONFIG_POWER_LOGO, O_RDONLY);
+    if (!isValid(sptr_file))
         goto END1;
 
-    if (file_read(sprt_file, buffer, size) <= 0)
+    if (file_read(sptr_file, buffer, size) <= 0)
         goto END2;
 
     print_info("Waitting...\r\n");
 
-    fwk_bitmap_ctrl_init(&sgrt_bctl, sprt_disp, 0, 0);
-    fwk_display_whole_bitmap(&sgrt_bctl, buffer);
+    fwk_bitmap_ctrl_init(&sgtc_bctl, sptr_disp, 0, 0);
+    fwk_display_whole_bitmap(&sgtc_bctl, buffer);
 
 END2:
-    file_close(sprt_file);
+    file_close(sptr_file);
 END1:
     local_irq_restore(&flags);
     kfree(buffer);
@@ -197,63 +197,63 @@ END1:
  **********************/
 static void lvgl_disp_tick_inc(kuint32_t args)
 {
-    struct timer_list *sprt_tim = (struct timer_list *)args;
+    struct timer_list *sptr_tim = (struct timer_list *)args;
 
     lv_tick_inc(10);
-    mod_timer(sprt_tim, jiffies + msecs_to_jiffies(10));
+    mod_timer(sptr_tim, jiffies + msecs_to_jiffies(10));
 }
 
 /*Initialize your display and the required peripherals.*/
-static kint32_t disp_init(struct fwk_disp_ctrl *sprt_dctrl)
+static kint32_t disp_init(struct fwk_disp_ctrl *sptr_dctrl)
 {
     /*You code here*/
-    struct timer_list *sprt_tim = &sgrt_lvgl_tick_timer;
+    struct timer_list *sptr_tim = &sgtc_lvgl_tick_timer;
     kint32_t fd;
-    struct fwk_fb_fix_screen_info sgrt_fix;
-	struct fwk_fb_var_screen_info sgrt_var;
+    struct fwk_fb_fix_screen_info sgtc_fix;
+	struct fwk_fb_var_screen_info sgtc_var;
     kuint32_t *fb_buffer1, *fb_buffer2;
-    struct fwk_disp_info *sprt_disp;
+    struct fwk_disp_info *sptr_disp;
 
-    sprt_disp = sprt_dctrl->sprt_di;
-    kmemzero(&sprt_dctrl->sgrt_set, sizeof(struct fwk_font_setting));
+    sptr_disp = sptr_dctrl->sptr_di;
+    kmemzero(&sptr_dctrl->sgtc_set, sizeof(struct fwk_font_setting));
 
     fd = virt_open("/dev/fb0", O_RDWR);
     if (fd < 0)
         goto fail1;
 
-    virt_ioctl(fd, NR_FB_IOGET_VARINFO, &sgrt_var);
-    virt_ioctl(fd, NR_FB_IOGET_FIXINFO, &sgrt_fix);
+    virt_ioctl(fd, NR_FB_IOGET_VARINFO, &sgtc_var);
+    virt_ioctl(fd, NR_FB_IOGET_FIXINFO, &sgtc_fix);
 
-    fb_buffer1 = (kuint32_t *)virt_mmap(mrt_nullptr, sgrt_fix.smem_len, 0, 0, fd, 0);
+    fb_buffer1 = (kuint32_t *)virt_mmap(mr_nullptr, sgtc_fix.smem_len, 0, 0, fd, 0);
     if (!isValid(fb_buffer1))
         goto fail2;
 
-    fb_buffer2 = (kuint32_t *)virt_mmap(mrt_nullptr, sgrt_fix.smem_len, 0, 0, fd, sgrt_fix.smem_len);
+    fb_buffer2 = (kuint32_t *)virt_mmap(mr_nullptr, sgtc_fix.smem_len, 0, 0, fd, sgtc_fix.smem_len);
     if (!isValid(fb_buffer2))
         goto fail3;
 
     g_lvgl_fbdev_fd = fd;
-    fwk_display_ctrl_init(sprt_disp, fb_buffer1, fb_buffer2, sgrt_fix.smem_len, 
-                        sgrt_var.xres, sgrt_var.yres, sgrt_var.bits_per_pixel);
+    fwk_display_ctrl_init(sptr_disp, fb_buffer1, fb_buffer2, sgtc_fix.smem_len, 
+                        sgtc_var.xres, sgtc_var.yres, sgtc_var.bits_per_pixel);
 
     /*!< add timer tick */
-    setup_timer(sprt_tim, lvgl_disp_tick_inc, (kuint32_t)sprt_tim);
-    sprt_tim->expires = jiffies + msecs_to_jiffies(10);
-    add_timer(sprt_tim);
+    setup_timer(sptr_tim, lvgl_disp_tick_inc, (kuint32_t)sptr_tim);
+    sptr_tim->expires = jiffies + msecs_to_jiffies(10);
+    add_timer(sptr_tim);
 
-    fwk_display_frame_exchange(sprt_disp);
-    lv_port_disp_logo(sprt_dctrl);
+    fwk_display_frame_exchange(sptr_disp);
+    lv_port_disp_logo(sptr_dctrl);
 
-    sgrt_var.yoffset += sgrt_var.yres;
-    mrt_dsb();
-    mrt_barrier();
+    sgtc_var.yoffset += sgtc_var.yres;
+    mr_dsb();
+    mr_barrier();
 
-    virt_ioctl(fd, NR_FB_IOSET_VARINFO, &sgrt_var);
+    virt_ioctl(fd, NR_FB_IOSET_VARINFO, &sgtc_var);
     return ER_NORMAL;
 
-    virt_munmap(fb_buffer2, sgrt_fix.smem_len);
+    virt_munmap(fb_buffer2, sgtc_fix.smem_len);
 fail3:
-    virt_munmap(fb_buffer1, sgrt_fix.smem_len);
+    virt_munmap(fb_buffer1, sgtc_fix.smem_len);
 fail2:
     virt_close(fd);
 fail1:
@@ -284,47 +284,47 @@ static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_colo
     if (disp_flush_enabled) {
         /*The most simple case (but also the slowest) to put all pixels to the screen one-by-one*/
 
-        struct fwk_disp_ctrl *sprt_dctrl;
-        struct fwk_disp_info *sprt_disp;
+        struct fwk_disp_ctrl *sptr_dctrl;
+        struct fwk_disp_info *sptr_disp;
         kuint8_t  pixelbits;
-        lv_disp_t *sprt_refr;
-        lv_disp_draw_buf_t *sprt_draw;
+        lv_disp_t *sptr_refr;
+        lv_disp_draw_buf_t *sptr_draw;
         
-        sprt_dctrl = (struct fwk_disp_ctrl *)disp_drv->user_data;
-        sprt_disp  = sprt_dctrl->sprt_di;
-        pixelbits  = mrt_fwk_disp_bpp_get(sprt_disp->bpp);
+        sptr_dctrl = (struct fwk_disp_ctrl *)disp_drv->user_data;
+        sptr_disp  = sptr_dctrl->sptr_di;
+        pixelbits  = mr_fwk_disp_bpp_get(sptr_disp->bpp);
 
-        sprt_refr = _lv_refr_get_disp_refreshing();
-        sprt_draw = lv_disp_get_draw_buf(sprt_refr);
+        sptr_refr = _lv_refr_get_disp_refreshing();
+        sptr_draw = lv_disp_get_draw_buf(sptr_refr);
 
         if ((pixelbits == 32) &&
             (!disp_drv->direct_mode) &&
-            (sprt_draw->flushing_last)) {
+            (sptr_draw->flushing_last)) {
             kint32_t fd = g_lvgl_fbdev_fd;
-            struct fwk_fb_var_screen_info sgrt_var;
+            struct fwk_fb_var_screen_info sgtc_var;
 
             if (fd < 0)
                 goto END;
 
-            fwk_display_frame_exchange(sprt_disp);
-            virt_ioctl(fd, NR_FB_IOGET_VARINFO, &sgrt_var);
-            if (!sgrt_var.yoffset)
-                sgrt_var.yoffset += sgrt_var.yres;
+            fwk_display_frame_exchange(sptr_disp);
+            virt_ioctl(fd, NR_FB_IOGET_VARINFO, &sgtc_var);
+            if (!sgtc_var.yoffset)
+                sgtc_var.yoffset += sgtc_var.yres;
             else
-                sgrt_var.yoffset = 0;
+                sgtc_var.yoffset = 0;
             
-            virt_ioctl(fd, NR_FB_IOSET_VARINFO, &sgrt_var);
-            fwk_display_frame_sync(sprt_disp, sprt_disp->buf_size);
+            virt_ioctl(fd, NR_FB_IOSET_VARINFO, &sgtc_var);
+            fwk_display_frame_sync(sptr_disp, sptr_disp->buf_size);
         }
         else {
             kuint32_t offset, length;
 
             pixelbits >>= 3;
             for (int32_t y = area->y1; y <= area->y2; y++) {
-                offset = mrt_fwk_disp_advance_pos(area->x1, y, sprt_disp->width);
+                offset = mr_fwk_disp_advance_pos(area->x1, y, sptr_disp->width);
                 length = area->x2 - area->x1 + 1;
 
-                memcpy(sprt_disp->buffer + offset * pixelbits, color_p, length * pixelbits);
+                memcpy(sptr_disp->buffer + offset * pixelbits, color_p, length * pixelbits);
                 color_p += length;
             }
         }

@@ -29,11 +29,11 @@ struct fwk_char_device
 	kchar_t name[DEVICE_NAME_LEN];
 
 	/*!< All devices with the same primary device number form a list */
-	struct fwk_char_device *sprt_next;
+	struct fwk_char_device *sptr_next;
 };
 
 /*!< The globals */
-extern struct fwk_char_device *sgrt_fwk_chrdevs[];
+extern struct fwk_char_device *sgtc_fwk_chrdevs[];
 
 /*!< The functions */
 /*!< -------------------------------------------------------------- */

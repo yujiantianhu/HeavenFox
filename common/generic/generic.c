@@ -21,7 +21,7 @@
 
 struct common_random_state
 {
-    struct spin_lock sgrt_lock;
+    struct spin_lock sgtc_lock;
 
     union {
         kutype_t value;
@@ -30,9 +30,9 @@ struct common_random_state
 };
 
 /*!< The globals */
-static struct common_random_state sgrt_com_random_state = 
+static struct common_random_state sgtc_com_random_state = 
 {
-    .sgrt_lock = SPIN_LOCK_INIT(),
+    .sgtc_lock = SPIN_LOCK_INIT(),
 };
 
 /*!< API function */
@@ -64,8 +64,8 @@ kutype_t udiv_integer(kutype_t divied, kutype_t div)
 kstype_t sdiv_integer(kstype_t divied, kstype_t div)
 {
     kstype_t count = 0;
-    kstype_t number1 = mrt_abs(divied);
-    kstype_t number2 = mrt_abs(div);
+    kstype_t number1 = mr_abs(divied);
+    kstype_t number2 = mr_abs(div);
 
     while (number1 >= number2)
     {
@@ -102,10 +102,9 @@ kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kint32_t mode)
     kchar_t temp[(sizeof(kutype_t) << 1) + 4];
     kchar_t result = 0;
     kint16_t count = 0, idx;
-    kuint32_t offset = 0;
+    kuint32_t offset = (mode != (-1)) ? 2 : 0;
 
-    do
-    {
+    do {
         result = number - ((number >> 4) << 4);
         number = number >> 4;
 
@@ -118,21 +117,16 @@ kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kint32_t mode)
         
     } while (number);
 
-    if (!buf)
-        goto END;
-    
-    if (mode != (-1))
-    {
-        *buf = '0';
-        *(buf + 1) = (mode == 1) ? 'X' : 'x';
+    if (buf) {
+        if (offset == 2) {
+            *buf = '0';
+            *(buf + 1) = (mode == 1) ? 'X' : 'x';
+        }
 
-        offset = 2;
+        for (idx = 0; idx < count; idx++)
+            *(buf + idx + offset) = temp[count - idx - 1];
     }
 
-    for (idx = 0; idx < count; idx++)
-        *(buf + idx + offset) = temp[count - idx - 1];
-    
-END:
     return (count + offset);
 }
 
@@ -148,10 +142,9 @@ kutype_t dec_to_binary(kchar_t *buf, kutype_t number, kint32_t mode)
     kchar_t temp[(sizeof(kutype_t) << 3) + 4];
     kchar_t result = 0;
     kint16_t count = 0, idx;
-    kuint32_t offset = 0;
+    kuint32_t offset = (mode != (-1)) ? 2 : 0;
 
-    do
-    {
+    do {
         result = number - ((number >> 1) << 1);
         number = number >> 1;
 
@@ -159,21 +152,16 @@ kutype_t dec_to_binary(kchar_t *buf, kutype_t number, kint32_t mode)
         
     } while (number);
 
-    if (!buf)
-        goto END;
-    
-    if (mode != (-1))
-    {
-        *buf = '0';
-        *(buf + 1) = 'b';
+    if (buf) {
+        if (offset == 2) {
+            *buf = '0';
+            *(buf + 1) = 'b';
+        }
 
-        offset = 2;
+        for (idx = 0; idx < count; idx++)
+            *(buf + idx + offset) = temp[count - idx - 1];
     }
 
-    for (idx = 0; idx < count; idx++)
-        *(buf + idx + offset) = temp[count - idx - 1];
-    
-END:
     return (count + offset);
 }
 
@@ -257,17 +245,42 @@ fail:
  */
 kutype_t random_val(void)
 {
-    struct common_random_state *sprt_rand;
+    struct common_random_state *sptr_rand;
     kutype_t value;
 
-    sprt_rand = &sgrt_com_random_state;
+    sptr_rand = &sgtc_com_random_state;
 
-    spin_lock_irqsave(&sprt_rand->sgrt_lock);
-    value = (kutype_t)(((jiffies % 32767) * (sprt_rand->u.value + 345977126UL)) ^ 4298547119UL);
-    sprt_rand->u.value = value;
-    spin_unlock_irqrestore(&sprt_rand->sgrt_lock);
+    spin_lock_irqsave(&sptr_rand->sgtc_lock);
+    value = (kutype_t)(((jiffies % 32767) * (sptr_rand->u.value + 345977126UL)) ^ 4298547119UL);
+    sptr_rand->u.value = value;
+    spin_unlock_irqrestore(&sptr_rand->sgtc_lock);
 
     return value;
+}
+
+/*!
+ * @brief   get the number of valid bits (bit = 1)
+ * @param   number
+ * @param   prompt_valids
+ * @retval  none
+ * @note    for example: number = 0x1010 (16bits), valid bits = 2; zero bits = 30
+ */
+kuint16_t parse_valid_u32_bits(kuint32_t number)
+{
+    kint16_t i;
+    kuint16_t count = 0;
+
+    /*!< get the numer of zero-bit from high to low */
+    for (i = 31; i >= 0; i--) 
+    {
+        /*!< The first bit that is '1' */
+        if (number & (1UL << i))
+            break;
+
+        count++;
+    }
+
+    return (32 - count);
 }
 
 /* end of file */

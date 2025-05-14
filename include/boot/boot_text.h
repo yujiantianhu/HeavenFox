@@ -145,7 +145,7 @@ static inline void boot_text_print(void)
     {
         /*!< memory pool is only used after kernel starting; bootloader uses another areas */
         print_err("error: there is not enough memory avaliable for memory pool!\r\n");
-        mrt_assert(false);
+        mr_assert(false);
     }
     
     print_info("framebuffer base address: 0x%x, size = %d KB\r\n", FBUFFER_DRAM_BASE, __BYTES_TO_KB(FBUFFER_DRAM_SIZE));

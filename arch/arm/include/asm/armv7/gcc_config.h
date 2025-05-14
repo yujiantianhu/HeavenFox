@@ -23,12 +23,12 @@
 
 /*!< The defines */
 /*!
- * @brief  	mrt_enable_cpu_irq
+ * @brief  	mr_enable_cpu_irq
  * @param  	none
  * @retval 	none
  * @note   	enable irq
  */
-#define mrt_enable_cpu_irq()    \
+#define mr_enable_cpu_irq()    \
 {   \
     __asm__ __volatile__ (  \
         " cpsie i   "   \
@@ -39,12 +39,12 @@
 }
 
 /*!
- * @brief  	mrt_disable_cpu_irq
+ * @brief  	mr_disable_cpu_irq
  * @param  	none
  * @retval 	none
  * @note   	disable irq
  */
-#define mrt_disable_cpu_irq()    \
+#define mr_disable_cpu_irq()    \
     do {   \
         __asm__ __volatile__ (  \
             " cpsid i   "   \
@@ -55,12 +55,12 @@
     } while (0)
 
 /*!
- * @brief  	mrt_enable_cpu_fiq
+ * @brief  	mr_enable_cpu_fiq
  * @param  	none
  * @retval 	none
  * @note   	enable fiq
  */
-#define mrt_enable_cpu_fiq()    \
+#define mr_enable_cpu_fiq()    \
     do {   \
         __asm__ __volatile__ (  \
             " cpsie f   "   \
@@ -71,12 +71,12 @@
     } while (0)
 
 /*!
- * @brief  	mrt_disable_cpu_fiq
+ * @brief  	mr_disable_cpu_fiq
  * @param  	none
  * @retval 	none
  * @note   	disable fiq
  */
-#define mrt_disable_cpu_fiq()    \
+#define mr_disable_cpu_fiq()    \
     do {   \
         __asm__ __volatile__ (  \
             " cpsid f   "   \
@@ -87,53 +87,53 @@
     } while (0)
 
 /*!
- * @brief  	mrt_nop
+ * @brief  	mr_nop
  * @param  	none
  * @retval 	none
  * @note   	do nothing
  */
-#define mrt_nop()                                   do { __asm__ __volatile__ ("nop"); } while (0)
-#define mrt_delay_nop()                             mrt_nop()
+#define mr_nop()                                   do { __asm__ __volatile__ ("nop"); } while (0)
+#define mr_delay_nop()                             mr_nop()
 
 /*!
- * @brief  	mrt_wfi
+ * @brief  	mr_wfi
  * @param  	none
  * @retval 	none
  * @note   	wait for Interrupt
  */
-#define mrt_wfi()                                   do { __asm__ __volatile__ ("wfi"); } while (0)
+#define mr_wfi()                                   do { __asm__ __volatile__ ("wfi"); } while (0)
 
 /*!
- * @brief  	mrt_wfe
+ * @brief  	mr_wfe
  * @param  	none
  * @retval 	none
  * @note   	wait for Event
  */
-#define mrt_wfe()                                   do { __asm__ __volatile__ ("wfe"); } while (0)
+#define mr_wfe()                                   do { __asm__ __volatile__ ("wfe"); } while (0)
 
 /*!
- * @brief  	mrt_sev
+ * @brief  	mr_sev
  * @param  	none
  * @retval 	none
  * @note   	send Event
  */
-#define mrt_sev()                                   do { __asm__ __volatile__ ("sev"); } while (0)
+#define mr_sev()                                   do { __asm__ __volatile__ ("sev"); } while (0)
 
 /*!
- * @brief  	mrt_barrier
+ * @brief  	mr_barrier
  * @param  	none
  * @retval 	none
  * @note   	barrier
  */
-#define mrt_barrier()                               do { __asm__ __volatile__ ("": : : "memory"); } while (0)
+#define mr_barrier()                               do { __asm__ __volatile__ ("": : : "memory"); } while (0)
 
 /*!
- * @brief  	mrt_isb
+ * @brief  	mr_isb
  * @param  	none
  * @retval 	none
  * @note   	Instruction Synchronization Barrier
  */
-#define mrt_isb()    \
+#define mr_isb()    \
     do {   \
         __asm__ __volatile__ (  \
             " isb 0xf   "   \
@@ -144,12 +144,12 @@
     } while (0)
 
 /*!
- * @brief  	mrt_dsb
+ * @brief  	mr_dsb
  * @param  	none
  * @retval 	none
  * @note   	Data Synchronization Barrier
  */
-#define mrt_dsb()    \
+#define mr_dsb()    \
     do {   \
         __asm__ __volatile__ (  \
             " dsb 0xf   "   \
@@ -160,12 +160,12 @@
     } while (0)
 
 /*!
- * @brief  	mrt_dmb
+ * @brief  	mr_dmb
  * @param  	none
  * @retval 	none
  * @note   	Data Memory Synchronization Barrier
  */
-#define mrt_dmb()    \
+#define mr_dmb()    \
     do {   \
         __asm__ __volatile__ (  \
             " dmb 0xf   "   \
@@ -176,12 +176,12 @@
     } while (0)
 
 /*!
- * @brief  	mrt_set_cp15
+ * @brief  	mr_set_cp15
  * @param  	op: such as "0, %0, c0, c0, 0"
  * @retval 	none
  * @note   	write rn to cp15
  */
-#define mrt_set_cp15(op, rn)    \
+#define mr_set_cp15(op, rn)    \
     do {    \
         __asm__ __volatile__ (  \
             " mcr p15, "op   \
@@ -192,12 +192,12 @@
     } while (0)
 
 /*!
- * @brief  	mrt_get_cp15
+ * @brief  	mr_get_cp15
  * @param  	op: such as "0, %0, c0, c0, 0"
  * @retval 	none
  * @note   	read cp15 to rn
  */
-#define mrt_get_cp15(op, rn)    \
+#define mr_get_cp15(op, rn)    \
     do {    \
         __asm__ __volatile__ (  \
             " mrc p15, "op   \

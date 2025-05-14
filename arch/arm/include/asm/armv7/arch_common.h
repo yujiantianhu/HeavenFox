@@ -27,10 +27,10 @@
     #define CPU_INTC_COMPATIBLE                             "arm,cortex-a7-gic"
 #endif
 
-#define mrt_enable_irq(irqNumber)                           local_irq_enable(irqNumber)
-#define mrt_disable_irq(irqNumber)                          local_irq_disable(irqNumber)
-#define mrt_get_irq_pri(irqNumber)                          hw_irq_get_priority(irqNumber)
-#define mrt_set_irq_pri(irqNumber, pri)                     hw_irq_set_priority(irqNumber, pri)
+#define mr_enable_irq(irqNumber)                           local_irq_enable(irqNumber)
+#define mr_disable_irq(irqNumber)                          local_irq_disable(irqNumber)
+#define mr_get_irq_pri(irqNumber)                          hw_irq_get_priority(irqNumber)
+#define mr_set_irq_pri(irqNumber, pri)                     hw_irq_set_priority(irqNumber, pri)
 
 /*!< API function */
 /*!
@@ -42,7 +42,7 @@
 static inline void local_irq_save(kuint32_t *flags)
 {
     *flags = __get_cpsr();
-    mrt_disable_cpu_irq();
+    mr_disable_cpu_irq();
 }
 
 /*!
@@ -54,7 +54,7 @@ static inline void local_irq_save(kuint32_t *flags)
 static inline void local_irq_restore(kuint32_t *flags)
 {
     if (!(*flags & CPSR_BIT_I))
-        mrt_enable_cpu_irq();
+        mr_enable_cpu_irq();
 }
 
 /*!
@@ -65,7 +65,7 @@ static inline void local_irq_restore(kuint32_t *flags)
  */
 static inline kuint32_t get_irq_priority(kint32_t irqNumber)
 {
-    return mrt_get_irq_pri(irqNumber);
+    return mr_get_irq_pri(irqNumber);
 }
 
 /*!
@@ -76,7 +76,7 @@ static inline kuint32_t get_irq_priority(kint32_t irqNumber)
  */
 static inline void set_irq_priority(kint32_t irqNumber, kuint32_t priority)
 {
-    mrt_set_irq_pri(irqNumber, priority);
+    mr_set_irq_pri(irqNumber, priority);
 }
 
 #ifdef __cplusplus

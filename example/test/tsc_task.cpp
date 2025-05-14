@@ -45,7 +45,7 @@ using namespace bsc;
 static void *tsc_task_entry(void *args)
 {
     kint32_t fd;
-    struct fwk_input_event sgrt_event[4] = {};
+    struct fwk_input_event sgtc_event[4] = {};
     kssize_t retval;
     
     do 
@@ -58,16 +58,16 @@ static void *tsc_task_entry(void *args)
 
     for (;;)
     {
-        memset(&sgrt_event[0], 0, sizeof(sgrt_event));
+        memset(&sgtc_event[0], 0, sizeof(sgtc_event));
 
-        retval = virt_read(fd, &sgrt_event[0], sizeof(sgrt_event));
+        retval = virt_read(fd, &sgtc_event[0], sizeof(sgtc_event));
         if ((retval < 0))
             goto END;
 
         cout << __FUNCTION__ 
-             << ": key: "   << sgrt_event[0].value 
-             << ", abs_x: " << sgrt_event[1].value 
-             << ", abs_y: " << sgrt_event[2].value 
+             << ": key: "   << sgtc_event[0].value 
+             << ", abs_x: " << sgtc_event[1].value 
+             << ", abs_y: " << sgtc_event[2].value 
              << endl;
         
 END:
@@ -95,8 +95,8 @@ kint32_t tsc_task_init(void)
     if (!cprt_task)
         return -ER_FAILD;
 
-    struct mailbox &sgrt_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgrt_mb, cprt_task->get_self(), "tsc-task-mailbox");
+    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cprt_task->get_self(), "tsc-task-mailbox");
 
     return ER_NORMAL;
 }

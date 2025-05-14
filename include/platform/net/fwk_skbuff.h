@@ -24,15 +24,15 @@
 /*!< The defines */
 typedef kuint8_t*			sk_buff_data_t;
 
-#define SKB_DATA_HEAD_LEN(mac_len)                          (mrt_align(mac_len, ARCH_PER_SIZE) - mac_len)
+#define SKB_DATA_HEAD_LEN(mac_len)                          (mr_align(mac_len, ARCH_PER_SIZE) - mac_len)
 
 struct fwk_sk_buff
 {
     /*!< These two members must be first. */
-    struct fwk_sk_buff *sprt_next;                                      /*!< doubly list, pointing to the latter sk_buff */
-    struct fwk_sk_buff *sprt_prev;                                      /*!< doubly list, pointing to the previous sk_buff */
+    struct fwk_sk_buff *sptr_next;                                      /*!< doubly list, pointing to the latter sk_buff */
+    struct fwk_sk_buff *sptr_prev;                                      /*!< doubly list, pointing to the previous sk_buff */
 
-    struct fwk_net_device *sprt_ndev;                                   /*!< net_device */
+    struct fwk_net_device *sptr_ndev;                                   /*!< net_device */
 
     kuint16_t queue_mapping;
 
@@ -70,316 +70,316 @@ struct fwk_sk_buff
 struct fwk_sk_buff_head
 {
     /*!< These two members must be first. */
-    struct fwk_sk_buff *sprt_next;                                      /*!< doubly list, pointing to the latter sk_buff */
-    struct fwk_sk_buff *sprt_prev;                                      /*!< doubly list, pointing to the previous sk_buff */
+    struct fwk_sk_buff *sptr_next;                                      /*!< doubly list, pointing to the latter sk_buff */
+    struct fwk_sk_buff *sptr_prev;                                      /*!< doubly list, pointing to the previous sk_buff */
 
     kint32_t qlen;
 };
 
-#define mrt_skbuff_list_empty(head) \
-            (((head)->sprt_next == (struct fwk_sk_buff *)(head)) && \
-             ((head)->sprt_prev == (struct fwk_sk_buff *)(head)))
+#define mr_skbuff_list_empty(head) \
+            (((head)->sptr_next == (struct fwk_sk_buff *)(head)) && \
+             ((head)->sptr_prev == (struct fwk_sk_buff *)(head)))
 
-#define mrt_skuff_next_entry(head)                  ((!(head) || mrt_skbuff_list_empty(head)) ? mrt_nullptr : (head)->sprt_next)
+#define mr_skuff_next_entry(head)                  ((!(head) || mr_skbuff_list_empty(head)) ? mr_nullptr : (head)->sptr_next)
 
 /*!< The functions */
 extern struct fwk_sk_buff *fwk_alloc_skb(kuint32_t data_size, nrt_gfp_t flags);
-extern void fwk_free_skb(struct fwk_sk_buff *sprt_skb);
-extern kint32_t fwk_skb_enqueue(struct fwk_sk_buff_head *sprt_head, struct fwk_sk_buff *sprt_skb);
-extern struct fwk_sk_buff *fwk_skb_dequeue(struct fwk_sk_buff_head *sprt_head);
+extern void fwk_free_skb(struct fwk_sk_buff *sptr_skb);
+extern kint32_t fwk_skb_enqueue(struct fwk_sk_buff_head *sptr_head, struct fwk_sk_buff *sptr_skb);
+extern struct fwk_sk_buff *fwk_skb_dequeue(struct fwk_sk_buff_head *sptr_head);
 
 /*!< API functions */
 /*!
  * @brief   reserve head (len = data - head)
- * @param   sprt_skb
+ * @param   sptr_skb
  * @param   len: ip_hdr must be 4-bytes align, therefore, len can be ALIGN4(sizeof(ether_hdr)) - sizeof(ether_hdr)
  * @retval  none
  * @note    len can be 2 usually, and sizeof(ether_hdr) is 14 ===> ip_hdr = 14 + 2 = 16, it's 4-bytes align
  */
-static inline void fwk_skb_reserve(struct fwk_sk_buff *sprt_skb, kuint32_t len)
+static inline void fwk_skb_reserve(struct fwk_sk_buff *sptr_skb, kuint32_t len)
 {
-    sprt_skb->data += len;
-    sprt_skb->tail += len;
+    sptr_skb->data += len;
+    sptr_skb->tail += len;
 }
 
 /*!
  * @brief   increase data length for buffer (keep data, and change tail)
- * @param   sprt_skb
+ * @param   sptr_skb
  * @param   len: sizeof(eth_hdr) + sizeof(network_hdr) + sizeof(transport_hdr) + data_len
  * @retval  none
  * @note    none
  */
-static inline void *fwk_skb_put(struct fwk_sk_buff *sprt_skb, kuint32_t len)
+static inline void *fwk_skb_put(struct fwk_sk_buff *sptr_skb, kuint32_t len)
 {
-    kuint8_t *tail = sprt_skb->tail + len;
-    if (tail > sprt_skb->end)
+    kuint8_t *tail = sptr_skb->tail + len;
+    if (tail > sptr_skb->end)
         return ERR_PTR(-ER_MORE);
     
-    sprt_skb->tail = tail;
-    sprt_skb->len += len;
+    sptr_skb->tail = tail;
+    sptr_skb->len += len;
 
-    return (void *)sprt_skb->data;
+    return (void *)sptr_skb->data;
 }
 
 /*!
  * @brief   increase data length for buffer (keep tail, and change data)
- * @param   sprt_skb
+ * @param   sptr_skb
  * @param   len
  * @retval  none
  * @note    none
  */
-static inline void *fwk_skb_push(struct fwk_sk_buff *sprt_skb, kuint32_t len)
+static inline void *fwk_skb_push(struct fwk_sk_buff *sptr_skb, kuint32_t len)
 {
-    kuint8_t *data = sprt_skb->data - len;
-    if (data < sprt_skb->head)
+    kuint8_t *data = sptr_skb->data - len;
+    if (data < sptr_skb->head)
         return ERR_PTR(-ER_LACK);
     
-    sprt_skb->data = data;
-    sprt_skb->len += len;
+    sptr_skb->data = data;
+    sptr_skb->len += len;
 
-    return (void *)sprt_skb->data;
+    return (void *)sptr_skb->data;
 }
 
 /*!
  * @brief   decrease data length for buffer (keep tail, and change data)
- * @param   sprt_skb
+ * @param   sptr_skb
  * @param   len
  * @retval  none
  * @note    none
  */
-static inline void *fwk_skb_pull(struct fwk_sk_buff *sprt_skb, kuint32_t len)
+static inline void *fwk_skb_pull(struct fwk_sk_buff *sptr_skb, kuint32_t len)
 {
-    kuint8_t *data = sprt_skb->data + len;
-    if (data > sprt_skb->tail)
+    kuint8_t *data = sptr_skb->data + len;
+    if (data > sptr_skb->tail)
         return ERR_PTR(-ER_LACK);
     
-    sprt_skb->data = data;
-    sprt_skb->len -= len;
+    sptr_skb->data = data;
+    sptr_skb->len -= len;
 
-    return (void *)sprt_skb->data;
+    return (void *)sptr_skb->data;
 }
 
 /*!< ---------------------------------------------------------------------------- */
-#define mrt_skb_reset_header(sprt_skb, _member)  \
-    do { (sprt_skb)->_member = (sprt_skb)->data - (sprt_skb)->head; } while (0)
+#define mr_skb_reset_header(sptr_skb, _member)  \
+    do { (sptr_skb)->_member = (sptr_skb)->data - (sptr_skb)->head; } while (0)
 
-#define mrt_skb_set_header(sprt_skb, _member, offset)   \
+#define mr_skb_set_header(sptr_skb, _member, offset)   \
     do {    \
-        mrt_skb_reset_header(sprt_skb, _member);  \
-        (sprt_skb)->_member += (offset);  \
+        mr_skb_reset_header(sptr_skb, _member);  \
+        (sptr_skb)->_member += (offset);  \
     } while (0)
 
-#define mrt_skb_get_header(sprt_skb, _member)                ((sprt_skb)->head + (sprt_skb)->_member)
+#define mr_skb_get_header(sptr_skb, _member)                ((sptr_skb)->head + (sptr_skb)->_member)
 
 /*!
  * @brief   reset mac_header
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  none
  * @note    none
  */
-static inline void fwk_skb_reset_mac_header(struct fwk_sk_buff *sprt_skb)
+static inline void fwk_skb_reset_mac_header(struct fwk_sk_buff *sptr_skb)
 {
-    /*!< sprt_skb->mac_header = sprt_skb->data - sprt_skb->head */
-    mrt_skb_reset_header(sprt_skb, mac_header);
+    /*!< sptr_skb->mac_header = sptr_skb->data - sptr_skb->head */
+    mr_skb_reset_header(sptr_skb, mac_header);
 }
 
 /*!
  * @brief   set the offset between head and mac_header
- * @param   sprt_skb
+ * @param   sptr_skb
  * @param   offset: it can be sizeof(eth_hdr) usually
  * @retval  none
  * @note    none
  */
-static inline void fwk_skb_set_mac_header(struct fwk_sk_buff *sprt_skb, const kint32_t offset)
+static inline void fwk_skb_set_mac_header(struct fwk_sk_buff *sptr_skb, const kint32_t offset)
 {
-    /*!< sprt_skb->mac_header += offset */
-    mrt_skb_set_header(sprt_skb, mac_header, offset);
+    /*!< sptr_skb->mac_header += offset */
+    mr_skb_set_header(sptr_skb, mac_header, offset);
 }
 
 /*!
  * @brief   get mac_header base address
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  mac_header base address
  * @note    none
  */
-static inline kuint8_t *fwk_skb_mac_header(struct fwk_sk_buff *sprt_skb)
+static inline kuint8_t *fwk_skb_mac_header(struct fwk_sk_buff *sptr_skb)
 {
-    /*!< sprt_skb->head + sprt_skb->mac_header */
-    return mrt_skb_get_header(sprt_skb, mac_header);
+    /*!< sptr_skb->head + sptr_skb->mac_header */
+    return mr_skb_get_header(sptr_skb, mac_header);
 }
 
 /*!
  * @brief   get the offset between data and mac_header
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  offset
  * @note    none
  */
-static inline kint32_t fwk_skb_mac_offset(struct fwk_sk_buff *sprt_skb)
+static inline kint32_t fwk_skb_mac_offset(struct fwk_sk_buff *sptr_skb)
 {
-    return fwk_skb_mac_header(sprt_skb) - sprt_skb->data;
+    return fwk_skb_mac_header(sptr_skb) - sptr_skb->data;
 }
 
 /*!
  * @brief   reset network_header
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  none
  * @note    none
  */
-static inline void fwk_skb_reset_network_header(struct fwk_sk_buff *sprt_skb)
+static inline void fwk_skb_reset_network_header(struct fwk_sk_buff *sptr_skb)
 {
-    /*!< sprt_skb->network_header = sprt_skb->data - sprt_skb->head */
-    mrt_skb_reset_header(sprt_skb, network_header);
+    /*!< sptr_skb->network_header = sptr_skb->data - sptr_skb->head */
+    mr_skb_reset_header(sptr_skb, network_header);
 }
 
 /*!
  * @brief   set the offset between head and network_header
- * @param   sprt_skb
+ * @param   sptr_skb
  * @param   offset: it can be sizeof(ip_hdr) usually
  * @retval  none
  * @note    none
  */
-static inline void fwk_skb_set_network_header(struct fwk_sk_buff *sprt_skb, const kint32_t offset)
+static inline void fwk_skb_set_network_header(struct fwk_sk_buff *sptr_skb, const kint32_t offset)
 {
-    mrt_skb_set_header(sprt_skb, network_header, offset);
+    mr_skb_set_header(sptr_skb, network_header, offset);
 }
 
 /*!
  * @brief   get network_header base address
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  network_header base address
  * @note    none
  */
-static inline kuint8_t *fwk_skb_network_header(struct fwk_sk_buff *sprt_skb)
+static inline kuint8_t *fwk_skb_network_header(struct fwk_sk_buff *sptr_skb)
 {
-    return mrt_skb_get_header(sprt_skb, network_header);
+    return mr_skb_get_header(sptr_skb, network_header);
 }
 
 /*!
  * @brief   get the offset between data and network_header
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  offset
  * @note    none
  */
-static inline kint32_t fwk_skb_network_offset(struct fwk_sk_buff *sprt_skb)
+static inline kint32_t fwk_skb_network_offset(struct fwk_sk_buff *sptr_skb)
 {
-    return fwk_skb_network_header(sprt_skb) - sprt_skb->data;
+    return fwk_skb_network_header(sptr_skb) - sptr_skb->data;
 }
 
 /*!
  * @brief   reset transport_header
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  none
  * @note    none
  */
-static inline void fwk_skb_reset_transport_header(struct fwk_sk_buff *sprt_skb)
+static inline void fwk_skb_reset_transport_header(struct fwk_sk_buff *sptr_skb)
 {
-    /*!< sprt_skb->transport_header = sprt_skb->data - sprt_skb->head */
-    mrt_skb_reset_header(sprt_skb, transport_header);
+    /*!< sptr_skb->transport_header = sptr_skb->data - sptr_skb->head */
+    mr_skb_reset_header(sptr_skb, transport_header);
 }
 
 /*!
  * @brief   set the offset between head and transport_header
- * @param   sprt_skb
+ * @param   sptr_skb
  * @param   offset: it can be sizeof(tcp_hdr) or sizeof(udp_hdr) usually
  * @retval  none
  * @note    none
  */
-static inline void fwk_skb_set_transport_header(struct fwk_sk_buff *sprt_skb, const kint32_t offset)
+static inline void fwk_skb_set_transport_header(struct fwk_sk_buff *sptr_skb, const kint32_t offset)
 {
-    mrt_skb_set_header(sprt_skb, transport_header, offset);
+    mr_skb_set_header(sptr_skb, transport_header, offset);
 }
 
 /*!
  * @brief   get transport_header base address
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  transport_header base address
  * @note    none
  */
-static inline kuint8_t *fwk_skb_transport_header(struct fwk_sk_buff *sprt_skb)
+static inline kuint8_t *fwk_skb_transport_header(struct fwk_sk_buff *sptr_skb)
 {
-    return mrt_skb_get_header(sprt_skb, transport_header);
+    return mr_skb_get_header(sptr_skb, transport_header);
 }
 
 /*!
  * @brief   get the offset between data and transport_header
- * @param   sprt_skb
+ * @param   sptr_skb
  * @retval  offset
  * @note    none
  */
-static inline kint32_t fwk_skb_transport_offset(struct fwk_sk_buff *sprt_skb)
+static inline kint32_t fwk_skb_transport_offset(struct fwk_sk_buff *sptr_skb)
 {
-    return fwk_skb_transport_header(sprt_skb) - sprt_skb->data;
+    return fwk_skb_transport_header(sptr_skb) - sptr_skb->data;
 }
 
 /*!< ---------------------------------------------------------------------------- */
 /*!
  * @brief   initialize skb list
- * @param   sprt_head
+ * @param   sptr_head
  * @retval  none
  * @note    none
  */
-static inline void fwk_skb_list_init(struct fwk_sk_buff_head *sprt_head)
+static inline void fwk_skb_list_init(struct fwk_sk_buff_head *sptr_head)
 {
-    sprt_head->sprt_prev = sprt_head->sprt_next = (struct fwk_sk_buff *)sprt_head;
-    sprt_head->qlen = 0;
+    sptr_head->sptr_prev = sptr_head->sptr_next = (struct fwk_sk_buff *)sptr_head;
+    sptr_head->qlen = 0;
 }
 
 /*!
  * @brief   add to tail of the global skb_list
- * @param   sprt_head, sprt_skb
+ * @param   sptr_head, sptr_skb
  * @retval  errno
  * @note    none
  */
-static inline kint32_t fwk_skb_add_tail(struct fwk_sk_buff_head *sprt_head, struct fwk_sk_buff *sprt_skb)
+static inline kint32_t fwk_skb_add_tail(struct fwk_sk_buff_head *sptr_head, struct fwk_sk_buff *sptr_skb)
 {
-    struct fwk_sk_buff *sprt_prev = sprt_head->sprt_prev;
+    struct fwk_sk_buff *sptr_prev = sptr_head->sptr_prev;
 
-    sprt_head->sprt_prev = sprt_skb;
-    sprt_prev->sprt_next = sprt_skb;
-    sprt_skb->sprt_prev  = sprt_prev;
-    sprt_skb->sprt_next  = (struct fwk_sk_buff *)sprt_head;
+    sptr_head->sptr_prev = sptr_skb;
+    sptr_prev->sptr_next = sptr_skb;
+    sptr_skb->sptr_prev  = sptr_prev;
+    sptr_skb->sptr_next  = (struct fwk_sk_buff *)sptr_head;
 
-    sprt_head->qlen++;
+    sptr_head->qlen++;
 
     return ER_NORMAL;
 }
 
 /*!
- * @brief   copy sprt_from to sprt_to
- * @param   sprt_to, sprt_from
+ * @brief   copy sptr_from to sptr_to
+ * @param   sptr_to, sptr_from
  * @retval  none
  * @note    none
  */
-static inline void fwk_skb_split(struct fwk_sk_buff_head *sprt_to, struct fwk_sk_buff_head *sprt_from)
+static inline void fwk_skb_split(struct fwk_sk_buff_head *sptr_to, struct fwk_sk_buff_head *sptr_from)
 {
-    struct fwk_sk_buff *sprt_next = sprt_to->sprt_prev->sprt_next;
+    struct fwk_sk_buff *sptr_next = sptr_to->sptr_prev->sptr_next;
 
-    sprt_to->sprt_prev->sprt_next = sprt_from->sprt_next;
-    sprt_from->sprt_next->sprt_prev = sprt_next;
-    sprt_to->sprt_prev = sprt_from->sprt_prev;
-    sprt_from->sprt_prev->sprt_next = (struct fwk_sk_buff *)sprt_to;
+    sptr_to->sptr_prev->sptr_next = sptr_from->sptr_next;
+    sptr_from->sptr_next->sptr_prev = sptr_next;
+    sptr_to->sptr_prev = sptr_from->sptr_prev;
+    sptr_from->sptr_prev->sptr_next = (struct fwk_sk_buff *)sptr_to;
 
-    sprt_to->qlen += sprt_from->qlen;
+    sptr_to->qlen += sptr_from->qlen;
 }
 
 /*!
  * @brief   del from the global skb_list
- * @param   sprt_head, sprt_skb
+ * @param   sptr_head, sptr_skb
  * @retval  none
  * @note    none
  */
-static inline void fwk_skb_unlink(struct fwk_sk_buff_head *sprt_head, struct fwk_sk_buff *sprt_skb)
+static inline void fwk_skb_unlink(struct fwk_sk_buff_head *sptr_head, struct fwk_sk_buff *sptr_skb)
 {
-    struct fwk_sk_buff *sprt_prev = sprt_skb->sprt_prev;
-    struct fwk_sk_buff *sprt_next = sprt_skb->sprt_next;
+    struct fwk_sk_buff *sptr_prev = sptr_skb->sptr_prev;
+    struct fwk_sk_buff *sptr_next = sptr_skb->sptr_next;
 
-    if (sprt_prev)
-        sprt_prev->sprt_next = sprt_next;
-    if (sprt_next)
-        sprt_next->sprt_prev = sprt_prev;
+    if (sptr_prev)
+        sptr_prev->sptr_next = sptr_next;
+    if (sptr_next)
+        sptr_next->sptr_prev = sptr_prev;
     
-    sprt_skb->sprt_prev = sprt_skb->sprt_next = mrt_nullptr;
-    sprt_head->qlen--;
+    sptr_skb->sptr_prev = sptr_skb->sptr_next = mr_nullptr;
+    sptr_head->qlen--;
 }
 
 #ifdef __cplusplus

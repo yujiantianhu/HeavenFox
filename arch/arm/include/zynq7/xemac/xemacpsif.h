@@ -78,11 +78,11 @@ struct xemac_s {
  * using a particular temac instance
  */
 typedef struct {
-	XEmacPs sgrt_emacps;
+	XEmacPs sgtc_emacps;
 
 	/* queue to store overflow packets */
-	srt_pq_t *sprt_rxq;
-	srt_pq_t *sprt_txq;
+	srt_pq_t *sptr_rxq;
+	srt_pq_t *sptr_txq;
 
 	/* pointers to memory holding buffer descriptors (used only with SDMA) */
 	void *rx_bdspace;

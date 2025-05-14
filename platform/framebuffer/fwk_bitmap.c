@@ -75,35 +75,35 @@ kuint32_t fwk_pixel_rgbform_convert(kint8_t srctype, kuint32_t data)
  * @retval  none
  * @note    none
  */
-void fwk_display_dot_matrix_image(struct fwk_disp_info *sprt_disp, kuint32_t x_start, kuint32_t y_start, const kuint8_t *image)
+void fwk_display_dot_matrix_image(struct fwk_disp_info *sptr_disp, kuint32_t x_start, kuint32_t y_start, const kuint8_t *image)
 {
-    struct fwk_dotmat_header *sprt_dmatx = mrt_nullptr;
-    kuint8_t *ptr_image = mrt_nullptr;
+    struct fwk_dotmat_header *sptr_dmatx = mr_nullptr;
+    kuint8_t *ptr_image = mr_nullptr;
 
     kuint32_t offset, p_cnt = 0;
     kuint8_t image_bpp;
     kuint32_t rgb_data, rgb_inc = 0;
     kuint32_t width, height, px_cnt, py_cnt;
 
-    if ((!image) || (!sprt_disp))
+    if ((!image) || (!sptr_disp))
         return;
 
-    sprt_dmatx = (struct fwk_dotmat_header *)image;
-    ptr_image = (kuint8_t *)(image + sizeof(*sprt_dmatx));
+    sptr_dmatx = (struct fwk_dotmat_header *)image;
+    ptr_image = (kuint8_t *)(image + sizeof(*sptr_dmatx));
 
-    width   = (kuint32_t)sprt_dmatx->width;
-    height  = (kuint32_t)sprt_dmatx->height;
+    width   = (kuint32_t)sptr_dmatx->width;
+    height  = (kuint32_t)sptr_dmatx->height;
 
-    if (((x_start + width) > sprt_disp->width) || ((y_start + height) > sprt_disp->height))
+    if (((x_start + width) > sptr_disp->width) || ((y_start + height) > sptr_disp->height))
         return;
 
     /*!< bytes of per pixel color (RGB24: bits = 24, bytes = 3) */
-    image_bpp = sprt_dmatx->pixelbit >> 3;
+    image_bpp = sptr_dmatx->pixelbit >> 3;
 
     /*!< horizontal scanning is default used for image dot matrix modeling, without considering vertical scanning */
     for (py_cnt = 0; py_cnt < height; py_cnt++)
     {
-        offset = fwk_display_advance_position(x_start, y_start + py_cnt, sprt_disp->width);
+        offset = fwk_display_advance_position(x_start, y_start + py_cnt, sptr_disp->width);
 
         for (px_cnt = 0; px_cnt < width; px_cnt++)
         {
@@ -117,24 +117,24 @@ void fwk_display_dot_matrix_image(struct fwk_disp_info *sprt_disp, kuint32_t x_s
             rgb_inc += image_bpp;
 
             /*!< reverse littile endian, for RGB24, such as: BGR <===> RGB */
-            rgb_data = fwk_pixel_rgbform_convert(sprt_dmatx->pixelbit, rgb_data);
-            rgb_data = fwk_display_convert_rgbbit(sprt_dmatx->pixelbit, sprt_disp->bpp, rgb_data);
-            fwk_display_write_pixel(sprt_disp->buffer, offset + px_cnt, sprt_disp->bpp, rgb_data);
+            rgb_data = fwk_pixel_rgbform_convert(sptr_dmatx->pixelbit, rgb_data);
+            rgb_data = fwk_display_convert_rgbbit(sptr_dmatx->pixelbit, sptr_disp->bpp, rgb_data);
+            fwk_display_write_pixel(sptr_disp->buffer, offset + px_cnt, sptr_disp->bpp, rgb_data);
         }
     }
 }
 
 /*!
  * @brief   check if image is bmp, and return offset
- * @param   sprt_bctl: bmp ctrl struct
+ * @param   sptr_bctl: bmp ctrl struct
  * @param   image: bmp data
  * @retval  offset of bmp pixel data
  * @note    none
  */
-kint32_t fwk_bitmap_get_and_check(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t *image)
+kint32_t fwk_bitmap_get_and_check(struct fwk_bmp_ctrl *sptr_bctl, const kuint8_t *image)
 {
-    struct fwk_bmp_file_header sgrt_file;
-    struct fwk_bmp_info_header *sprt_bi;
+    struct fwk_bmp_file_header sgtc_file;
+    struct fwk_bmp_info_header *sptr_bi;
     kuint8_t *ptr_bitmap;
 
     union fwk_bmp_type
@@ -142,20 +142,20 @@ kint32_t fwk_bitmap_get_and_check(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t
         kuint8_t bmpname[2];
         kuint16_t pic_type;
     };
-    union fwk_bmp_type ugrt_type = { .bmpname = {'B', 'M'} };
+    union fwk_bmp_type ugtr_type = { .bmpname = {'B', 'M'} };
 
-    if ((!image) || (!sprt_bctl))
+    if ((!image) || (!sptr_bctl))
         return -ER_NOMEM;
 
-    sprt_bi = &sprt_bctl->sgrt_bi;
+    sptr_bi = &sptr_bctl->sgtc_bi;
     ptr_bitmap = (kuint8_t *)image;
 
-    kmemcpy(&sgrt_file, ptr_bitmap, FWK_BMP_FILE_HDR_LEN);
+    kmemcpy(&sgtc_file, ptr_bitmap, FWK_BMP_FILE_HDR_LEN);
     ptr_bitmap += FWK_BMP_FILE_HDR_LEN;
-    kmemcpy(sprt_bi, ptr_bitmap, FWK_BMP_INFO_HDR_LEN);
+    kmemcpy(sptr_bi, ptr_bitmap, FWK_BMP_INFO_HDR_LEN);
     ptr_bitmap += FWK_BMP_INFO_HDR_LEN;
 
-    if (sgrt_file.picType != ugrt_type.pic_type)
+    if (sgtc_file.picType != ugtr_type.pic_type)
         return -ER_FAULT;
 
     return (kint32_t)(ptr_bitmap - image);
@@ -163,16 +163,16 @@ kint32_t fwk_bitmap_get_and_check(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t
 
 /*!
  * @brief   display one image (with bmp)
- * @param   sprt_bctl: bmp ctrl struct
+ * @param   sptr_bctl: bmp ctrl struct
  * @param   image: bmp data
  * @param   size: image size (bytes)
  * @retval  error code
  * @note    none
  */
-kint32_t fwk_display_bitmap(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t *image, kusize_t size)
+kint32_t fwk_display_bitmap(struct fwk_bmp_ctrl *sptr_bctl, const kuint8_t *image, kusize_t size)
 {
-    struct fwk_bmp_info_header *sprt_bi;
-    struct fwk_disp_info *sprt_disp;
+    struct fwk_bmp_info_header *sptr_bi;
+    struct fwk_disp_info *sptr_disp;
     kuint32_t offset;
     kuint32_t rgb_data, rgb_inc = 0;
     kuint8_t image_bpp;
@@ -180,60 +180,60 @@ kint32_t fwk_display_bitmap(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t *imag
     kuint8_t *ptr_bitmap;
 
     if ((!image) || 
-        (!sprt_bctl) || 
-        (!sprt_bctl->sprt_disp) ||
+        (!sptr_bctl) || 
+        (!sptr_bctl->sptr_disp) ||
         (!size))
         return -ER_NOMEM;
 
     ptr_bitmap = (kuint8_t *)image;
-    sprt_bi = &sprt_bctl->sgrt_bi;
-    sprt_disp = sprt_bctl->sprt_disp;
+    sptr_bi = &sptr_bctl->sgtc_bi;
+    sptr_disp = sptr_bctl->sptr_disp;
 
     /*!< bytes of per pixel color (RGB24: bits = 24, bytes = 3) */
-    image_bpp = sprt_bi->pixelbit >> 3;
+    image_bpp = sptr_bi->pixelbit >> 3;
 
-    width   = (kuint32_t)mrt_abs(sprt_bi->width);
-    height  = (kuint32_t)mrt_abs(sprt_bi->height);
+    width   = (kuint32_t)mr_abs(sptr_bi->width);
+    height  = (kuint32_t)mr_abs(sptr_bi->height);
 
-    if ((!sprt_bctl->x_next) && (!sprt_bctl->y_next))
+    if ((!sptr_bctl->x_next) && (!sptr_bctl->y_next))
     {
-        if (((sprt_bctl->x_start + width)  > sprt_disp->width) || 
-            ((sprt_bctl->y_start + height) > sprt_disp->height))
+        if (((sptr_bctl->x_start + width)  > sptr_disp->width) || 
+            ((sptr_bctl->y_start + height) > sptr_disp->height))
             return -ER_CHECKERR;
 
-        sprt_bctl->x_next = sprt_bctl->x_start;
-        sprt_bctl->y_next = sprt_bctl->y_start;
+        sptr_bctl->x_next = sptr_bctl->x_start;
+        sptr_bctl->y_next = sptr_bctl->y_start;
     }
     else
     {
-        if (sprt_bctl->y_next >= (sprt_bctl->y_start + height))
+        if (sptr_bctl->y_next >= (sptr_bctl->y_start + height))
             return -ER_FORBID;
     }
 
-    x_pos = sprt_bctl->x_next;
-    y_pos = sprt_bctl->y_next;
+    x_pos = sptr_bctl->x_next;
+    y_pos = sptr_bctl->y_next;
 
     /*!< draw rgb pixel */
     for (rgb_inc = 0; rgb_inc < size; x_pos++, rgb_inc += image_bpp)
     {
-        if (x_pos >= (sprt_bctl->x_start + width))
+        if (x_pos >= (sptr_bctl->x_start + width))
         {
-            x_pos = sprt_bctl->x_start;
+            x_pos = sptr_bctl->x_start;
             y_pos++;
         }
 
-        if (y_pos >= (sprt_bctl->y_start + height))
+        if (y_pos >= (sptr_bctl->y_start + height))
             break;
 
         /*!<
          * if height > 0: the image scanning method is from left to right and from bottom to top; 
-         *  y_offset = sprt_bi->height - ((y_pos - y_start) + (sprt_bi->height - (y_start + height)))
+         *  y_offset = sptr_bi->height - ((y_pos - y_start) + (sptr_bi->height - (y_start + height)))
          * Otherwise, it will be from left to right, from top to bottom 
          */
-        y_offset = (sprt_bi->height < 0) ? y_pos : ((sprt_bctl->y_start >> 1) + height - y_pos - 1);
+        y_offset = (sptr_bi->height < 0) ? y_pos : ((sptr_bctl->y_start >> 1) + height - y_pos - 1);
 
         /*!< offset = x + y * width */
-        offset = mrt_fwk_disp_advance_pos(x_pos, y_offset, sprt_disp->width);
+        offset = mr_fwk_disp_advance_pos(x_pos, y_offset, sptr_disp->width);
 
         rgb_data = 0;
 #if 0
@@ -244,16 +244,16 @@ kint32_t fwk_display_bitmap(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t *imag
         }
 
         /*!< reverse littile endian, for RGB24, such as: BGR <===> RGB */
-        rgb_data = fwk_pixel_rgbform_convert(sprt_bi->pixelbit, rgb_data);
+        rgb_data = fwk_pixel_rgbform_convert(sptr_bi->pixelbit, rgb_data);
 #else
         kmemcpy(&rgb_data, ptr_bitmap + rgb_inc, image_bpp);
 #endif
-        rgb_data = mrt_fwk_disp_convert_rgb(sprt_bi->pixelbit, sprt_disp->bpp, rgb_data);
-        mrt_fwk_disp_write_pixel(sprt_disp->buffer, offset, sprt_disp->bpp, rgb_data); 
+        rgb_data = mr_fwk_disp_convert_rgb(sptr_bi->pixelbit, sptr_disp->bpp, rgb_data);
+        mr_fwk_disp_write_pixel(sptr_disp->buffer, offset, sptr_disp->bpp, rgb_data); 
     }
 
-    sprt_bctl->x_next = x_pos;
-    sprt_bctl->y_next = y_pos;
+    sptr_bctl->x_next = x_pos;
+    sptr_bctl->y_next = y_pos;
 
     return ER_NORMAL;
 }
@@ -266,10 +266,10 @@ kint32_t fwk_display_bitmap(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t *imag
  * @retval  none
  * @note    none
  */
-kssize_t fwk_display_whole_bitmap(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t *image)
+kssize_t fwk_display_whole_bitmap(struct fwk_bmp_ctrl *sptr_bctl, const kuint8_t *image)
 {
-    struct fwk_disp_info *sprt_disp;
-    struct fwk_bmp_info_header *sprt_bi;
+    struct fwk_disp_info *sptr_disp;
+    struct fwk_bmp_info_header *sptr_bi;
     kuint32_t x_start, y_start;
     kint32_t image_offset;
     kuint8_t *ptr_bitmap;
@@ -280,31 +280,31 @@ kssize_t fwk_display_whole_bitmap(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t
     kuint32_t width, height, px_cnt, py_cnt, y_offset;
 
     if ((!image) || 
-        (!sprt_bctl) || 
-        (!sprt_bctl->sprt_disp))
+        (!sptr_bctl) || 
+        (!sptr_bctl->sptr_disp))
         return -ER_NULLPTR;
 
-    image_offset = fwk_bitmap_get_and_check(sprt_bctl, image);
+    image_offset = fwk_bitmap_get_and_check(sptr_bctl, image);
     if (image_offset < 0)
         return -ER_CHECKERR;
 
     ptr_bitmap = (kuint8_t *)(image + image_offset);
-    sprt_bi = &sprt_bctl->sgrt_bi;
-    sprt_disp = sprt_bctl->sprt_disp;
+    sptr_bi = &sptr_bctl->sgtc_bi;
+    sptr_disp = sptr_bctl->sptr_disp;
 
     /*!< deal with bmp */
-    width  = (kuint32_t)mrt_abs(sprt_bi->width);
-    height = (kuint32_t)mrt_abs(sprt_bi->height);
+    width  = (kuint32_t)mr_abs(sptr_bi->width);
+    height = (kuint32_t)mr_abs(sptr_bi->height);
 
-    x_start = sprt_bctl->x_start;
-    y_start = sprt_bctl->y_start;
+    x_start = sptr_bctl->x_start;
+    y_start = sptr_bctl->y_start;
     
-    if (((x_start + width) > sprt_disp->width) || 
-        ((y_start + height) > sprt_disp->height))
+    if (((x_start + width) > sptr_disp->width) || 
+        ((y_start + height) > sptr_disp->height))
         return -ER_MORE;
 
     /*!< bytes of per pixel color (RGB24: bits = 24, bytes = 3) */
-    image_bpp = sprt_bi->pixelbit >> 3;
+    image_bpp = sptr_bi->pixelbit >> 3;
 
     /*!< draw rgb pixel */
     for (py_cnt = 0; py_cnt < height; py_cnt++)
@@ -313,8 +313,8 @@ kssize_t fwk_display_whole_bitmap(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t
          * if height > 0: the image scanning method is from left to right and from bottom to top; 
          * Otherwise, it will be from left to right, from top to bottom 
          */
-        y_offset = (sprt_bi->height < 0) ? py_cnt : ((height - 1) - py_cnt);
-        offset = mrt_fwk_disp_advance_pos(x_start, y_start + y_offset, sprt_disp->width);
+        y_offset = (sptr_bi->height < 0) ? py_cnt : ((height - 1) - py_cnt);
+        offset = mr_fwk_disp_advance_pos(x_start, y_start + y_offset, sptr_disp->width);
 
         for (px_cnt = 0; px_cnt < width; px_cnt++)
         {
@@ -327,18 +327,18 @@ kssize_t fwk_display_whole_bitmap(struct fwk_bmp_ctrl *sprt_bctl, const kuint8_t
             }
 
             /*!< reverse littile endian, for RGB24, such as: BGR <===> RGB */
-            rgb_data = fwk_pixel_rgbform_convert(sprt_bi->pixelbit, rgb_data);
+            rgb_data = fwk_pixel_rgbform_convert(sptr_bi->pixelbit, rgb_data);
 #else
             kmemcpy(&rgb_data, ptr_bitmap + rgb_inc, image_bpp);
 #endif
-            rgb_data = mrt_fwk_disp_convert_rgb(sprt_bi->pixelbit, sprt_disp->bpp, rgb_data);
-            mrt_fwk_disp_write_pixel(sprt_disp->buffer, offset + px_cnt, sprt_disp->bpp, rgb_data);
+            rgb_data = mr_fwk_disp_convert_rgb(sptr_bi->pixelbit, sptr_disp->bpp, rgb_data);
+            mr_fwk_disp_write_pixel(sptr_disp->buffer, offset + px_cnt, sptr_disp->bpp, rgb_data);
 
             rgb_inc += image_bpp;
         }
     }
 
-    return (width * height * (sprt_disp->bpp >> 3));
+    return (width * height * (sptr_disp->bpp >> 3));
 }
 
 /*!< end of file */

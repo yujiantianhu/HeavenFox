@@ -85,12 +85,6 @@ CPU				?=	$(patsubst "%",%, $(CONFIG_CPU))
 VENDOR			?=	$(patsubst "%",%, $(CONFIG_VERDOR))
 COMPILER		?= 	$(patsubst "%",%, $(CONFIG_COMPILER))
 
-ifneq ($(CONFIG_COMPILER_PATH),)
-COMPILER_PATH	?=	$(patsubst "%",%, $(CONFIG_COMPILER_PATH))
-else
-COMPILER_PATH	?= 	/usr/bin
-endif
-
 # *********************************************************************
 MAKE			:=	make
 Q				:=	
@@ -102,6 +96,11 @@ AR				:=	$(COMPILER)ar
 OBJDUMP			:= 	$(COMPILER)objdump
 OBJCOPY			:= 	$(COMPILER)objcopy
 READELF			:= 	$(COMPILER)readelf
+
+COMPILER_PATH	?=	$(patsubst %/bin/$(CC),%, $(shell which $(CC)))
+ifeq ($(COMPILER_PATH),)
+	$(error "undefine COMPILER_PATH !")
+endif
 
 COMPILER_LIBC	:=	$(strip $(patsubst %-, $(COMPILER_PATH)/%/libc, $(COMPILER)))
 

@@ -24,29 +24,29 @@
 /*!< The defines */
 struct fwk_dev_pm_ops 
 {
-	kint32_t (*prepare)(struct fwk_device *sprt_dev);
-	void (*complete)(struct fwk_device *sprt_dev);
-	kint32_t (*suspend)(struct fwk_device *sprt_dev);
-	kint32_t (*resume)(struct fwk_device *sprt_dev);
-	kint32_t (*freeze)(struct fwk_device *sprt_dev);
-	kint32_t (*thaw)(struct fwk_device *sprt_dev);
-	kint32_t (*poweroff)(struct fwk_device *sprt_dev);
-	kint32_t (*restore)(struct fwk_device *sprt_dev);
-	kint32_t (*suspend_late)(struct fwk_device *sprt_dev);
-	kint32_t (*resume_early)(struct fwk_device *sprt_dev);
-	kint32_t (*freeze_late)(struct fwk_device *sprt_dev);
-	kint32_t (*thaw_early)(struct fwk_device *sprt_dev);
-	kint32_t (*poweroff_late)(struct fwk_device *sprt_dev);
-	kint32_t (*restore_early)(struct fwk_device *sprt_dev);
-	kint32_t (*suspend_noirq)(struct fwk_device *sprt_dev);
-	kint32_t (*resume_noirq)(struct fwk_device *sprt_dev);
-	kint32_t (*freeze_noirq)(struct fwk_device *sprt_dev);
-	kint32_t (*thaw_noirq)(struct fwk_device *sprt_dev);
-	kint32_t (*poweroff_noirq)(struct fwk_device *sprt_dev);
-	kint32_t (*restore_noirq)(struct fwk_device *sprt_dev);
-	kint32_t (*runtime_suspend)(struct fwk_device *sprt_dev);
-	kint32_t (*runtime_resume)(struct fwk_device *sprt_dev);
-	kint32_t (*runtime_idle)(struct fwk_device *sprt_dev);
+	kint32_t (*prepare)(struct fwk_device *sptr_dev);
+	void (*complete)(struct fwk_device *sptr_dev);
+	kint32_t (*suspend)(struct fwk_device *sptr_dev);
+	kint32_t (*resume)(struct fwk_device *sptr_dev);
+	kint32_t (*freeze)(struct fwk_device *sptr_dev);
+	kint32_t (*thaw)(struct fwk_device *sptr_dev);
+	kint32_t (*poweroff)(struct fwk_device *sptr_dev);
+	kint32_t (*restore)(struct fwk_device *sptr_dev);
+	kint32_t (*suspend_late)(struct fwk_device *sptr_dev);
+	kint32_t (*resume_early)(struct fwk_device *sptr_dev);
+	kint32_t (*freeze_late)(struct fwk_device *sptr_dev);
+	kint32_t (*thaw_early)(struct fwk_device *sptr_dev);
+	kint32_t (*poweroff_late)(struct fwk_device *sptr_dev);
+	kint32_t (*restore_early)(struct fwk_device *sptr_dev);
+	kint32_t (*suspend_noirq)(struct fwk_device *sptr_dev);
+	kint32_t (*resume_noirq)(struct fwk_device *sptr_dev);
+	kint32_t (*freeze_noirq)(struct fwk_device *sptr_dev);
+	kint32_t (*thaw_noirq)(struct fwk_device *sptr_dev);
+	kint32_t (*poweroff_noirq)(struct fwk_device *sptr_dev);
+	kint32_t (*restore_noirq)(struct fwk_device *sptr_dev);
+	kint32_t (*runtime_suspend)(struct fwk_device *sptr_dev);
+	kint32_t (*runtime_resume)(struct fwk_device *sptr_dev);
+	kint32_t (*runtime_idle)(struct fwk_device *sptr_dev);
 };
 
 #ifdef __cplusplus

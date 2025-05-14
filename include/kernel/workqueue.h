@@ -31,101 +31,101 @@ typedef struct workqueue
     func_work_t func;
     kutype_t data;
 
-    struct list_head sgrt_link;
+    struct list_head sgtc_link;
 
 } srt_workqueue_t;
 
-#define INIT_WORK(sprt_wq, _func)  \
+#define INIT_WORK(sptr_wq, _func)  \
     do {    \
-        (sprt_wq)->func = _func; \
-        (sprt_wq)->data = 0; \
-        init_list_head(&(sprt_wq)->sgrt_link);  \
+        (sptr_wq)->func = _func; \
+        (sptr_wq)->data = 0; \
+        init_list_head(&(sptr_wq)->sgtc_link);  \
     } while (0)
 
 #define DECLARE_WORK(name, _func)  \
     struct workqueue name = {   \
         .func = _func,   \
         .data = 0,   \
-        .sgrt_link = LIST_HEAD_INIT(&(name).sgrt_link), \
+        .sgtc_link = LIST_HEAD_INIT(&(name).sgtc_link), \
     }
 
 typedef struct workqueue_head
 {
-    struct list_head sgrt_work;
+    struct list_head sgtc_work;
 
 } srt_workqueue_head_t;
 
-#define INIT_WORKQUEUE_HEAD(sprt_wqh)   \
+#define INIT_WORKQUEUE_HEAD(sptr_wqh)   \
     do {    \
-        init_list_head(&(sprt_wqh)->sgrt_link); \
+        init_list_head(&(sptr_wqh)->sgtc_link); \
     } while (0)
 
 #define DECLARE_WORKQUEUE(name) \
     struct workqueue_head name = {  \
-        .sgrt_work = LIST_HEAD_INIT(&(name).sgrt_work),  \
+        .sgtc_work = LIST_HEAD_INIT(&(name).sgtc_work),  \
     }
 
-#define foreach_workqueue_safe(sprt_wq, sprt_temp, sprt_wqh)    \
-    foreach_list_next_entry_safe(sprt_wq, sprt_temp, &(sprt_wqh)->sgrt_work, sgrt_link)
+#define foreach_workqueue_safe(sptr_wq, sptr_temp, sptr_wqh)    \
+    foreach_list_next_entry_safe(sptr_wq, sptr_temp, &(sptr_wqh)->sgtc_work, sgtc_link)
 
 /*!< The functions */
-extern void schedule_work(struct workqueue *sprt_wq);
+extern void schedule_work(struct workqueue *sptr_wq);
 
 /*!< API functions */
 /*!
- * @brief   add sprt_wq to the list of sprt_wqh
- * @param   sprt_wqh, sprt_wq
+ * @brief   add sptr_wq to the list of sptr_wqh
+ * @param   sptr_wqh, sptr_wq
  * @retval  none
  * @note    none
  */
-static inline void queue_work(struct workqueue_head *sprt_wqh, struct workqueue *sprt_wq)
+static inline void queue_work(struct workqueue_head *sptr_wqh, struct workqueue *sptr_wq)
 {
-    if (!sprt_wqh || !sprt_wq)
+    if (!sptr_wqh || !sptr_wq)
         return;
 
-    if (!list_head_for_each(&sprt_wqh->sgrt_work, &sprt_wq->sgrt_link))
+    if (!list_head_for_each(&sptr_wqh->sgtc_work, &sptr_wq->sgtc_link))
         return;
 
-    list_head_add_tail(&sprt_wqh->sgrt_work, &sprt_wq->sgrt_link);
+    list_head_add_tail(&sptr_wqh->sgtc_work, &sptr_wq->sgtc_link);
 }
 
 /*!
- * @brief   del sprt_wq from the list
- * @param   sprt_wq
+ * @brief   del sptr_wq from the list
+ * @param   sptr_wq
  * @retval  none
  * @note    none
  */
-static inline void detach_work(struct workqueue *sprt_wq)
+static inline void detach_work(struct workqueue *sptr_wq)
 {
-    if (!sprt_wq)
+    if (!sptr_wq)
         return;
 
-    list_head_del(&sprt_wq->sgrt_link);
+    list_head_del(&sptr_wq->sgtc_link);
 }
 
 /*!
- * @brief   add sprt_wq to the list of sprt_wqh
- * @param   sprt_wqh, sprt_wq
+ * @brief   add sptr_wq to the list of sptr_wqh
+ * @param   sptr_wqh, sptr_wq
  * @retval  none
  * @note    none
  */
-static inline void detach_work_safe(struct workqueue_head *sprt_wqh, struct workqueue *sprt_wq)
+static inline void detach_work_safe(struct workqueue_head *sptr_wqh, struct workqueue *sptr_wq)
 {
-    if (!sprt_wqh || !sprt_wq)
+    if (!sptr_wqh || !sptr_wq)
         return;
 
-    list_head_del_safe(&sprt_wqh->sgrt_work, &sprt_wq->sgrt_link);
+    list_head_del_safe(&sptr_wqh->sgtc_work, &sptr_wq->sgtc_link);
 }
 
 /*!
- * @brief   check if the list of sprt_wqh is empty
- * @param   sprt_wqh
+ * @brief   check if the list of sptr_wqh is empty
+ * @param   sptr_wqh
  * @retval  empty(true) / false
  * @note    none
  */
-static inline kbool_t is_workqueue_empty(struct workqueue_head *sprt_wqh)
+static inline kbool_t is_workqueue_empty(struct workqueue_head *sptr_wqh)
 {
-    return mrt_list_head_empty(&sprt_wqh->sgrt_work);
+    return mr_list_head_empty(&sptr_wqh->sgtc_work);
 }
 
 #ifdef __cplusplus

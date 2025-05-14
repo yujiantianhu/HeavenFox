@@ -25,78 +25,78 @@
 /*!< The defines */
 
 /*!< The globals */
-static DECLARE_LIST_HEAD(sgrt_kernel_mailboxs);
+static DECLARE_LIST_HEAD(sgtc_kernel_mailboxs);
 
 /*!< API functions */
 /*!
  * @brief   find mailbox which named "name"
  * @param   name
- * @retval  sprt_mb
+ * @retval  sptr_mb
  * @note    none
  */
 struct mailbox *mailbox_find(const kchar_t *name)
 {
-    struct mailbox *sprt_mb;
+    struct mailbox *sptr_mb;
 
     if (!name || !(*name))
-        return mrt_nullptr;
+        return mr_nullptr;
 
-    foreach_list_next_entry(sprt_mb, &sgrt_kernel_mailboxs, sgrt_link)
+    foreach_list_next_entry(sptr_mb, &sgtc_kernel_mailboxs, sgtc_link)
     {
-        if (!kstrcmp(sprt_mb->name, name))
-            return sprt_mb;
+        if (!kstrcmp(sptr_mb->name, name))
+            return sptr_mb;
     }
 
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
  * @brief   add new mailbox to global list
- * @param   sprt_mb
+ * @param   sptr_mb
  * @retval  none
  * @note    none
  */
-void mailbox_insert(struct mailbox *sprt_mb)
+void mailbox_insert(struct mailbox *sptr_mb)
 {
-    struct mailbox *sprt_box;
-    struct list_head *sprt_last = mrt_nullptr;
+    struct mailbox *sptr_box;
+    struct list_head *sptr_last = mr_nullptr;
 
-    if (mrt_list_head_empty(&sgrt_kernel_mailboxs))
+    if (mr_list_head_empty(&sgtc_kernel_mailboxs))
         goto END;
 
-    foreach_list_next_entry(sprt_box, &sgrt_kernel_mailboxs, sgrt_link)
+    foreach_list_next_entry(sptr_box, &sgtc_kernel_mailboxs, sgtc_link)
     {
-        if (sprt_box->tid > sprt_mb->tid)
+        if (sptr_box->tid > sptr_mb->tid)
             break;
 
-        sprt_last = &sprt_box->sgrt_link;
+        sptr_last = &sptr_box->sgtc_link;
     }
 
-    if (!sprt_last)
+    if (!sptr_last)
         goto END;
     else
-        list_head_add_tail(sprt_last, &sprt_mb->sgrt_link);
+        list_head_add_tail(sptr_last, &sptr_mb->sgtc_link);
 
     return;
 
 END:
-    list_head_add_tail(&sgrt_kernel_mailboxs, &sprt_mb->sgrt_link);
+    list_head_add_tail(&sgtc_kernel_mailboxs, &sptr_mb->sgtc_link);
 }
 
 /*!
  * @brief   initial mailbox
- * @param   sprt_mb, tid, name
+ * @param   sptr_mb, tid, name
  * @retval  none
  * @note    none
  */
-kint32_t mailbox_init(struct mailbox *sprt_mb, tid_t tid, const kchar_t *name)
+kint32_t mailbox_init(struct mailbox *sptr_mb, tid_t tid, const kchar_t *name)
 {
-    struct thread *sprt_thread;
-    struct mailbox *sprt_box;
+    struct thread *sptr_thread;
+    struct mailbox *sptr_box;
     kchar_t label[MAILBOX_NAME_LEN] = {};
 
-    sprt_thread = get_thread_handle(tid);
-    if (sprt_thread->sprt_mb)
+    sptr_thread = get_thread_handle(tid);
+    if (sptr_thread->sptr_mb)
         return -ER_FORBID;
 
     if (name && (*name != '\0'))
@@ -105,37 +105,37 @@ kint32_t mailbox_init(struct mailbox *sprt_mb, tid_t tid, const kchar_t *name)
         sprintk(label, "mailbox-tid-%d", tid);
 
     /*!< if name is registered */
-    sprt_box = mailbox_find(label);
-    if (sprt_box)
+    sptr_box = mailbox_find(label);
+    if (sptr_box)
         return -ER_EXISTED;
 
-    sprt_mb->num_mails = 0;
-    sprt_mb->tid = tid;
-    kstrlcpy(sprt_mb->name, label, MAILBOX_NAME_LEN);
-    init_list_head(&sprt_mb->sgrt_mail);
-    mutex_init(&sprt_mb->sgrt_lock);
+    sptr_mb->num_mails = 0;
+    sptr_mb->tid = tid;
+    kstrlcpy(sptr_mb->name, label, MAILBOX_NAME_LEN);
+    init_list_head(&sptr_mb->sgtc_mail);
+    mutex_init(&sptr_mb->sgtc_lock);
     
-    mailbox_insert(sprt_mb);
-    sprt_thread->sprt_mb = sprt_mb;
+    mailbox_insert(sptr_mb);
+    sptr_thread->sptr_mb = sptr_mb;
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   delete mailbox
- * @param   sprt_mb
+ * @param   sptr_mb
  * @retval  none
  * @note    none
  */
-void mailbox_deinit(struct mailbox *sprt_mb)
+void mailbox_deinit(struct mailbox *sptr_mb)
 {
-    struct thread *sprt_thread;
+    struct thread *sptr_thread;
 
-    sprt_thread = get_thread_handle(sprt_mb->tid);
-    sprt_thread->sprt_mb = mrt_nullptr;
+    sptr_thread = get_thread_handle(sptr_mb->tid);
+    sptr_thread->sptr_mb = mr_nullptr;
 
-    list_head_del(&sprt_mb->sgrt_link);
-    mutex_init(&sprt_mb->sgrt_lock);
+    list_head_del(&sptr_mb->sgtc_link);
+    mutex_init(&sptr_mb->sgtc_lock);
 }
 
 /*!
@@ -146,168 +146,168 @@ void mailbox_deinit(struct mailbox *sprt_mb)
  */
 struct mailbox *mailbox_create(tid_t tid, const kchar_t *name)
 {
-    struct mailbox *sprt_mb;
+    struct mailbox *sptr_mb;
 
-    sprt_mb = kmalloc(sizeof(*sprt_mb), GFP_KERNEL);
-    if (!isValid(sprt_mb))
-        return sprt_mb;
+    sptr_mb = kmalloc(sizeof(*sptr_mb), GFP_KERNEL);
+    if (!isValid(sptr_mb))
+        return sptr_mb;
 
-    if (mailbox_init(sprt_mb, tid, name))
+    if (mailbox_init(sptr_mb, tid, name))
     {
-        kfree(sprt_mb);
+        kfree(sptr_mb);
         return ERR_PTR(-ER_FAILD);
     }
 
-    return sprt_mb;
+    return sptr_mb;
 }
 
 /*!
  * @brief   destroy mailbox
- * @param   sprt_mb
+ * @param   sptr_mb
  * @retval  none
  * @note    none
  */
-void mailbox_destroy(struct mailbox *sprt_mb)
+void mailbox_destroy(struct mailbox *sptr_mb)
 {
-    if (mrt_unlikely(!sprt_mb))
+    if (mr_unlikely(!sptr_mb))
         return;
 
-    mailbox_deinit(sprt_mb);
-    kfree(sprt_mb);
+    mailbox_deinit(sptr_mb);
+    kfree(sptr_mb);
 }
 
 /*!< ------------------------------------------------------------- */
 /*!
  * @brief   initialize mail
- * @param   sprt_mb, sprt_mail
+ * @param   sptr_mb, sptr_mail
  * @retval  none
  * @note    none
  */
-void mail_init(struct mailbox *sprt_mb, struct mail *sprt_mail)
+void mail_init(struct mailbox *sptr_mb, struct mail *sptr_mail)
 {
-    if (mrt_unlikely(!sprt_mb) || 
-        mrt_unlikely(!sprt_mail))
+    if (mr_unlikely(!sptr_mb) || 
+        mr_unlikely(!sptr_mail))
         return;
 
-    memset(sprt_mail, 0, sizeof(*sprt_mail));
-    sprt_mail->src_name = sprt_mb->name;
-    mutex_init(&sprt_mail->sgrt_lock);
-    init_list_head(&sprt_mail->sgrt_link);
+    memset(sptr_mail, 0, sizeof(*sptr_mail));
+    sptr_mail->src_name = sptr_mb->name;
+    mutex_init(&sptr_mail->sgtc_lock);
+    init_list_head(&sptr_mail->sgtc_link);
 }
 
 /*!
  * @brief   create mail
- * @param   sprt_mb
+ * @param   sptr_mb
  * @retval  mail created
  * @note    none
  */
-struct mail *mail_create(struct mailbox *sprt_mb)
+struct mail *mail_create(struct mailbox *sptr_mb)
 {
-    struct mail *sprt_mail;
+    struct mail *sptr_mail;
 
-    sprt_mail = kmalloc(sizeof(*sprt_mail), GFP_KERNEL);
-    if (!isValid(sprt_mail))
-        return sprt_mail;
+    sptr_mail = kmalloc(sizeof(*sptr_mail), GFP_KERNEL);
+    if (!isValid(sptr_mail))
+        return sptr_mail;
 
-    mail_init(sprt_mb, sprt_mail);
-    return sprt_mail;
+    mail_init(sptr_mb, sptr_mail);
+    return sptr_mail;
 }
 
 /*!
  * @brief   destroy mail
- * @param   sprt_mb, sprt_mail
+ * @param   sptr_mb, sptr_mail
  * @retval  none
  * @note    none
  */
-void mail_destroy(struct mailbox *sprt_mb, struct mail *sprt_mail)
+void mail_destroy(struct mailbox *sptr_mb, struct mail *sptr_mail)
 {
-    if (mrt_unlikely(!sprt_mail))
+    if (mr_unlikely(!sptr_mail))
         return;
 
-    if (sprt_mb && !strcmp(sprt_mb->name, sprt_mail->src_name))
-        kfree(sprt_mail);
+    if (sptr_mb && !strcmp(sptr_mb->name, sptr_mail->src_name))
+        kfree(sptr_mail);
 }
 
 /*!
  * @brief   send mail
- * @param   mb_name, sprt_mail
+ * @param   mb_name, sptr_mail
  * @retval  errno
  * @note    none
  */
-kint32_t mail_send(const kchar_t *mb_name, struct mail *sprt_mail)
+kint32_t mail_send(const kchar_t *mb_name, struct mail *sptr_mail)
 {
-    struct mailbox *sprt_mb;
-    struct mail *sprt_to;
-    struct mail_msg *sprt_msg;
+    struct mailbox *sptr_mb;
+    struct mail *sptr_to;
+    struct mail_msg *sptr_msg;
     kuint8_t *buffer;
     kuint32_t msg_idx;
     kusize_t msg_size, size;
 
-    if (mrt_unlikely(!sprt_mail) || mrt_unlikely(!sprt_mail->sprt_msg))
+    if (mr_unlikely(!sptr_mail) || mr_unlikely(!sptr_mail->sptr_msg))
         return -ER_NOMEM;
 
-    sprt_mb = mailbox_find(mb_name);
-    if (!isValid(sprt_mb))
-        return PTR_ERR(sprt_mb);
+    sptr_mb = mailbox_find(mb_name);
+    if (!isValid(sptr_mb))
+        return PTR_ERR(sptr_mb);
 
-    size = sizeof(*sprt_mail);
-    size = mrt_align(size, 8);
-    msg_size = sprt_mail->num_msgs * sizeof(*sprt_mail->sprt_msg);
+    size = sizeof(*sptr_mail);
+    size = mr_align(size, 8);
+    msg_size = sptr_mail->num_msgs * sizeof(*sptr_mail->sptr_msg);
 
-    sprt_to = kzalloc(size + msg_size, GFP_KERNEL);
-    if (!isValid(sprt_to))
-        return PTR_ERR(sprt_to);
+    sptr_to = kzalloc(size + msg_size, GFP_KERNEL);
+    if (!isValid(sptr_to))
+        return PTR_ERR(sptr_to);
 
     /*!< copy to new */
-    sprt_msg = (struct mail_msg *)((kuint8_t *)sprt_to + size);
-    for (msg_idx = 0; msg_idx < sprt_mail->num_msgs; msg_idx++)
+    sptr_msg = (struct mail_msg *)((kuint8_t *)sptr_to + size);
+    for (msg_idx = 0; msg_idx < sptr_mail->num_msgs; msg_idx++)
     {
-        buffer = kcalloc(sizeof(*buffer), sprt_mail->sprt_msg[msg_idx].size, GFP_KERNEL);
+        buffer = kcalloc(sizeof(*buffer), sptr_mail->sptr_msg[msg_idx].size, GFP_KERNEL);
         if (!isValid(buffer))
             goto fail;
         
-        memcpy(&sprt_msg[msg_idx], &sprt_mail->sprt_msg[msg_idx], sizeof(*sprt_mail->sprt_msg));
-        memcpy(buffer, sprt_msg[msg_idx].buffer, sizeof(*buffer) * sprt_msg[msg_idx].size);
-        sprt_msg[msg_idx].buffer = buffer;           
+        memcpy(&sptr_msg[msg_idx], &sptr_mail->sptr_msg[msg_idx], sizeof(*sptr_mail->sptr_msg));
+        memcpy(buffer, sptr_msg[msg_idx].buffer, sizeof(*buffer) * sptr_msg[msg_idx].size);
+        sptr_msg[msg_idx].buffer = buffer;           
     }
 
-    sprt_to->num_msgs = sprt_mail->num_msgs;
-    sprt_to->sprt_msg = sprt_msg;
-    sprt_to->src_name = sprt_mail->src_name;
-    sprt_to->status = NR_MAIL_NONE;
+    sptr_to->num_msgs = sptr_mail->num_msgs;
+    sptr_to->sptr_msg = sptr_msg;
+    sptr_to->src_name = sptr_mail->src_name;
+    sptr_to->status = NR_MAIL_NONE;
 
-    mutex_init(&sprt_to->sgrt_lock);
-    init_list_head(&sprt_to->sgrt_link);
+    mutex_init(&sptr_to->sgtc_lock);
+    init_list_head(&sptr_to->sgtc_link);
 
-    mutex_lock(&sprt_mb->sgrt_lock);
-    list_head_add_tail(&sprt_mb->sgrt_mail, &sprt_to->sgrt_link);
-    sprt_mb->num_mails++;
-    mutex_unlock(&sprt_mb->sgrt_lock);
+    mutex_lock(&sptr_mb->sgtc_lock);
+    list_head_add_tail(&sptr_mb->sgtc_mail, &sptr_to->sgtc_link);
+    sptr_mb->num_mails++;
+    mutex_unlock(&sptr_mb->sgtc_lock);
 
     return ER_NORMAL;
 
 fail:
     while (msg_idx)
-        kfree(sprt_msg[--msg_idx].buffer);
+        kfree(sptr_msg[--msg_idx].buffer);
 
-    kfree(sprt_to);
+    kfree(sptr_to);
     return ER_FAILD;
 }
 
 /*!
  * @brief   recieve mail
- * @param   sprt_mb, sprt_mail, timeout
+ * @param   sptr_mb, sptr_mail, timeout
  * @retval  errno
  * @note    none
  */
-struct mail *mail_recv(struct mailbox *sprt_mb, kutime_t timeout)
+struct mail *mail_recv(struct mailbox *sptr_mb, kutime_t timeout)
 {
-    struct mail *sprt_recv = mrt_nullptr;
+    struct mail *sptr_recv = mr_nullptr;
 
-    if (mrt_unlikely(!sprt_mb))
+    if (mr_unlikely(!sptr_mb))
         return ERR_PTR(-ER_NOMEM);
 
-    while (mrt_list_head_empty(&sprt_mb->sgrt_mail))
+    while (mr_list_head_empty(&sptr_mb->sgtc_mail))
     {
         if (!timeout)
             return ERR_PTR(-ER_EMPTY);
@@ -316,45 +316,45 @@ struct mail *mail_recv(struct mailbox *sprt_mb, kutime_t timeout)
     }
 
     /*!< get each mail */
-    mutex_lock(&sprt_mb->sgrt_lock);
-    sprt_recv = mrt_list_first_entry(&sprt_mb->sgrt_mail, typeof(*sprt_recv), sgrt_link);
-    if (sprt_recv->num_msgs > 1)
-        mrt_nop();
+    mutex_lock(&sptr_mb->sgtc_lock);
+    sptr_recv = mr_list_first_entry(&sptr_mb->sgtc_mail, typeof(*sptr_recv), sgtc_link);
+    if (sptr_recv->num_msgs > 1)
+        mr_nop();
     
-    /*!< make sure that sprt_recv is still valid */
-    if (mrt_list_head_empty(&sprt_recv->sgrt_link))
+    /*!< make sure that sptr_recv is still valid */
+    if (mr_list_head_empty(&sptr_recv->sgtc_link))
     {
-        mutex_unlock(&sprt_mb->sgrt_lock);
+        mutex_unlock(&sptr_mb->sgtc_lock);
         return ERR_PTR(-ER_EMPTY);
     }
 
-    sprt_mb->num_mails--;
-    list_head_del(&sprt_recv->sgrt_link);
-    mutex_unlock(&sprt_mb->sgrt_lock);
+    sptr_mb->num_mails--;
+    list_head_del(&sptr_recv->sgtc_link);
+    mutex_unlock(&sptr_mb->sgtc_lock);
 
-    return sprt_recv;
+    return sptr_recv;
 }
 
 /*!
  * @brief   deal with the aftermath
- * @param   sprt_mail
+ * @param   sptr_mail
  * @retval  none
  * @note    none
  */
-void mail_recv_finish(struct mail *sprt_mail)
+void mail_recv_finish(struct mail *sptr_mail)
 {
     kuint32_t idx;
 
-    if (sprt_mail->sprt_msg)
+    if (sptr_mail->sptr_msg)
     {
-        for (idx = 0; idx < sprt_mail->num_msgs; idx++)
+        for (idx = 0; idx < sptr_mail->num_msgs; idx++)
         {
-            if (sprt_mail->sprt_msg[idx].buffer)
-                kfree(sprt_mail->sprt_msg[idx].buffer);
+            if (sptr_mail->sptr_msg[idx].buffer)
+                kfree(sptr_mail->sptr_msg[idx].buffer);
         }
     }
 
-    kfree(sprt_mail);
+    kfree(sptr_mail);
 }
 
 /*!< end of file */

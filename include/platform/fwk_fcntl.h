@@ -44,7 +44,7 @@ struct fwk_file_table
 	struct fwk_file **fds;
 	struct fwk_file *fd_array[FILE_DESC_NUM_MAX];
 
-	struct mutex_lock sgrt_mutex;
+	struct mutex_lock sgtc_mutex;
 };
 
 /*!< for open mode */
@@ -169,9 +169,9 @@ extern kint32_t virt_munmap(void *addr, kusize_t length);
  * @retval  none
  * @note    none
  */
-static inline kint32_t fwk_get_fd_available(struct fwk_file_table *sprt_table)
+static inline kint32_t fwk_get_fd_available(struct fwk_file_table *sptr_table)
 {
-	return (sprt_table->ref_fdarr < sprt_table->max_fdarr) ? (sprt_table->ref_fdarr) : (-1);
+	return (sptr_table->ref_fdarr < sptr_table->max_fdarr) ? (sptr_table->ref_fdarr) : (-1);
 }
 
 /*!
@@ -180,9 +180,9 @@ static inline kint32_t fwk_get_fd_available(struct fwk_file_table *sprt_table)
  * @retval  none
  * @note    none
  */
-static inline void fwk_fdtable_get(struct fwk_file_table *sprt_table)
+static inline void fwk_fdtable_get(struct fwk_file_table *sptr_table)
 {
-	sprt_table->ref_fdarr = (sprt_table->ref_fdarr < sprt_table->max_fdarr) ? (sprt_table->ref_fdarr + 1) : sprt_table->max_fdarr;
+	sptr_table->ref_fdarr = (sptr_table->ref_fdarr < sptr_table->max_fdarr) ? (sptr_table->ref_fdarr + 1) : sptr_table->max_fdarr;
 }
 
 /*!
@@ -191,9 +191,9 @@ static inline void fwk_fdtable_get(struct fwk_file_table *sprt_table)
  * @retval  none
  * @note    none
  */
-static inline void fwk_fdtable_put(struct fwk_file_table *sprt_table)
+static inline void fwk_fdtable_put(struct fwk_file_table *sptr_table)
 {
-	sprt_table->ref_fdarr = (sprt_table->ref_fdarr > DEVICE_MAJOR_BASE) ? (sprt_table->ref_fdarr - 1) : DEVICE_MAJOR_BASE;
+	sptr_table->ref_fdarr = (sptr_table->ref_fdarr > DEVICE_MAJOR_BASE) ? (sptr_table->ref_fdarr - 1) : DEVICE_MAJOR_BASE;
 }
 
 #ifdef __cplusplus

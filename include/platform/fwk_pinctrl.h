@@ -54,26 +54,26 @@ typedef struct fwk_pinctrl_desc
 {
     const kchar_t *name;
 
-    /*!< npins: sizeof(sprt_pins[])*/
-    struct fwk_pinctrl_pin_desc const *sprt_pins;
+    /*!< npins: sizeof(sptr_pins[])*/
+    struct fwk_pinctrl_pin_desc const *sptr_pins;
     kuint32_t npins;
 
-    const struct fwk_pinctrl_ops *sprt_pctlops;
-    const struct fwk_pinmux_ops *sprt_pmxops;
-    const struct fwk_pinconf_ops *sprt_confops;
+    const struct fwk_pinctrl_ops *sptr_pctlops;
+    const struct fwk_pinmux_ops *sptr_pmxops;
+    const struct fwk_pinconf_ops *sptr_confops;
 
 } srt_fwk_pinctrl_desc_t;
 
 typedef struct fwk_pinctrl_dev 
 {
-    struct list_head sgrt_link;						/*!< link to global list */
-    struct fwk_pinctrl_desc *sprt_desc;
-    struct list_head sgrt_gpio_ranges;
-    struct fwk_device *sprt_dev;
-    struct fwk_pinctrl_state *sprt_hog_default;
-    struct fwk_pinctrl_state *sprt_hog_sleep;
-    struct mutex_lock sgrt_mutex;
-    struct fwk_pinctrl *sprt_pctl;
+    struct list_head sgtc_link;						/*!< link to global list */
+    struct fwk_pinctrl_desc *sptr_desc;
+    struct list_head sgtc_gpio_ranges;
+    struct fwk_device *sptr_dev;
+    struct fwk_pinctrl_state *sptr_hog_default;
+    struct fwk_pinctrl_state *sptr_hog_sleep;
+    struct mutex_lock sgtc_mutex;
+    struct fwk_pinctrl *sptr_pctl;
 
     void *driver_data;
 
@@ -105,31 +105,31 @@ typedef struct fwk_pinctrl_map
 
     union 
     {
-        struct fwk_pinctrl_map_mux sgrt_mux;
-        struct fwk_pinctrl_map_configs sgrt_configs;
-    } ugrt_data;
+        struct fwk_pinctrl_map_mux sgtc_mux;
+        struct fwk_pinctrl_map_configs sgtc_configs;
+    } ugtr_data;
 
 } srt_fwk_pinctrl_map_t;
 
 typedef struct fwk_pinctrl_maps 
 {
-    struct list_head sgrt_link;
-    struct fwk_pinctrl_map *sprt_maps;
+    struct list_head sgtc_link;
+    struct fwk_pinctrl_map *sptr_maps;
     kuint32_t num_maps;
 
 } srt_fwk_pinctrl_maps_t;
 
 typedef struct fwk_pinctrl_ops
 {
-    kint32_t 		(*get_function_groups) (struct fwk_pinctrl_dev *sprt_pctldev,
+    kint32_t 		(*get_function_groups) (struct fwk_pinctrl_dev *sptr_pctldev,
                                           kuint32_t selector, kuaddr_t **groups, kuint32_t * const num_groups);
-    kint32_t 		(*get_groups_count)(struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t func_selector);
-    const kchar_t  *(*get_group_name) (struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t func_selector, kuint32_t group_selector);
-    const kchar_t  *(*get_pin_desc)(struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t number);
+    kint32_t 		(*get_groups_count)(struct fwk_pinctrl_dev *sptr_pctldev, kuint32_t func_selector);
+    const kchar_t  *(*get_group_name) (struct fwk_pinctrl_dev *sptr_pctldev, kuint32_t func_selector, kuint32_t group_selector);
+    const kchar_t  *(*get_pin_desc)(struct fwk_pinctrl_dev *sptr_pctldev, kuint32_t number);
 
-    kint32_t 		(*dt_node_to_map) (struct fwk_pinctrl_dev *sprt_pctldev, struct fwk_device_node *sprt_node, 
-                                                struct fwk_pinctrl_map **sprt_map, kuint32_t *num_maps);
-    void 			(*dt_free_map) (struct fwk_pinctrl_dev *sprt_pctldev, struct fwk_pinctrl_map *sprt_map, kuint32_t num_maps);
+    kint32_t 		(*dt_node_to_map) (struct fwk_pinctrl_dev *sptr_pctldev, struct fwk_device_node *sptr_node, 
+                                                struct fwk_pinctrl_map **sptr_map, kuint32_t *num_maps);
+    void 			(*dt_free_map) (struct fwk_pinctrl_dev *sptr_pctldev, struct fwk_pinctrl_map *sptr_map, kuint32_t num_maps);
 
 } srt_fwk_pinctrl_ops_t;
 
@@ -137,7 +137,7 @@ typedef struct fwk_pinctrl_ops
 /*!< pinctrl pinmux operations */
 typedef struct fwk_pinctrl_gpio_range 
 {
-    struct list_head sgrt_link;
+    struct list_head sgtc_link;
     const kchar_t *name;
     kuint32_t id;
     kuint32_t base;
@@ -145,27 +145,27 @@ typedef struct fwk_pinctrl_gpio_range
     kuint32_t const *pins;
     kuint32_t npins;
 
-    struct fwk_gpio_chip *sprt_gc;
+    struct fwk_gpio_chip *sptr_gc;
 
 } srt_fwk_pinctrl_gpio_range_t;
 
 typedef struct fwk_pinmux_ops 
 {
-    kint32_t 		(*request) (struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t offset);
-    kint32_t 		(*free) (struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t offset);
+    kint32_t 		(*request) (struct fwk_pinctrl_dev *sptr_pctldev, kuint32_t offset);
+    kint32_t 		(*free) (struct fwk_pinctrl_dev *sptr_pctldev, kuint32_t offset);
 
-    kint32_t 		(*get_functions_count) (struct fwk_pinctrl_dev *sprt_pctldev);
-    const kchar_t  *(*get_function_name) (struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t selector);
-    kint32_t 		(*set_mux) (struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t func_selector, kuint32_t group_selector);
+    kint32_t 		(*get_functions_count) (struct fwk_pinctrl_dev *sptr_pctldev);
+    const kchar_t  *(*get_function_name) (struct fwk_pinctrl_dev *sptr_pctldev, kuint32_t selector);
+    kint32_t 		(*set_mux) (struct fwk_pinctrl_dev *sptr_pctldev, kuint32_t func_selector, kuint32_t group_selector);
     
-    kint32_t 		(*gpio_request_enable) (struct fwk_pinctrl_dev *sprt_pctldev, 
-                                        struct fwk_pinctrl_gpio_range *sprt_range, kuint32_t offset);
+    kint32_t 		(*gpio_request_enable) (struct fwk_pinctrl_dev *sptr_pctldev, 
+                                        struct fwk_pinctrl_gpio_range *sptr_range, kuint32_t offset);
 
-    void 			(*gpio_disable_free) (struct fwk_pinctrl_dev *sprt_pctldev, 
-                                        struct fwk_pinctrl_gpio_range *sprt_range, kuint32_t offset);
+    void 			(*gpio_disable_free) (struct fwk_pinctrl_dev *sptr_pctldev, 
+                                        struct fwk_pinctrl_gpio_range *sptr_range, kuint32_t offset);
 
-    kint32_t 		(*gpio_set_direction) (struct fwk_pinctrl_dev *sprt_pctldev, 
-                                        struct fwk_pinctrl_gpio_range *sprt_range, kuint32_t offset, kbool_t input);
+    kint32_t 		(*gpio_set_direction) (struct fwk_pinctrl_dev *sptr_pctldev, 
+                                        struct fwk_pinctrl_gpio_range *sptr_range, kuint32_t offset, kbool_t input);
     
 } srt_fwk_pinmux_ops_t;
 
@@ -173,8 +173,8 @@ typedef struct fwk_pinmux_ops
 /*!< pinctrl pin configurations operations */
 typedef struct fwk_pinconf_ops 
 {
-    kint32_t 		(*pin_config_get) (struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t pin, kuint32_t *config);
-    kint32_t 		(*pin_config_set) (struct fwk_pinctrl_dev *sprt_pctldev, kuint32_t pin, kuint32_t *configs, kuint32_t num_configs);
+    kint32_t 		(*pin_config_get) (struct fwk_pinctrl_dev *sptr_pctldev, kuint32_t pin, kuint32_t *config);
+    kint32_t 		(*pin_config_set) (struct fwk_pinctrl_dev *sptr_pctldev, kuint32_t pin, kuint32_t *configs, kuint32_t num_configs);
 
 } srt_fwk_pinconf_ops_t;
 
@@ -198,61 +198,61 @@ typedef struct fwk_pinctrl_configs
 typedef struct fwk_pinctrl_setting 
 {
     kuint32_t type;										/*!< refer to "__ERT_FWK_PINCTRL_PIN_TYPE" */
-    struct list_head sgrt_link;							/*!< link to fwk_pinctrl_state::sgrt_settings */
-    struct fwk_pinctrl_dev *sprt_pctldev;
+    struct list_head sgtc_link;							/*!< link to fwk_pinctrl_state::sgtc_settings */
+    struct fwk_pinctrl_dev *sptr_pctldev;
     const kchar_t *dev_name;
 
     union 
     {
-        struct fwk_pinctrl_mux sgrt_mux;				/*!< a group of pin mux */
-        struct fwk_pinctrl_configs sgrt_configs;		/*!< a group of pin conf */
-    } ugrt_data;
+        struct fwk_pinctrl_mux sgtc_mux;				/*!< a group of pin mux */
+        struct fwk_pinctrl_configs sgtc_configs;		/*!< a group of pin conf */
+    } ugtr_data;
 
 } srt_fwk_pinctrl_setting_t;
 
 /*!< a state represents a pinctrl (pinctrl-0, pinctrl-1, ...) */
 typedef struct fwk_pinctrl_state 
 {
-    struct list_head sgrt_link;                         /*!< pinctrl_state list, link to fwk_pinctrl::sgrt_states */
+    struct list_head sgtc_link;                         /*!< pinctrl_state list, link to fwk_pinctrl::sgtc_states */
     const kchar_t *name;                              	/*!< pinctrl-names */
-    struct list_head sgrt_settings;                     /*!< list head of fwk_pinctrl_setting::sgrt_link */
+    struct list_head sgtc_settings;                     /*!< list head of fwk_pinctrl_setting::sgtc_link */
 
 } srt_fwk_pinctrl_state_t;
 
 typedef struct fwk_pinctrl
 {
-    struct list_head sgrt_link;							/*!< link to global list */
-    struct fwk_device *sprt_dev;						/*!< sprt_dev == fwk_pinctrl_dev::sprt_dev */
-    struct list_head sgrt_states;                       /*!< list head of pinctrl_state::sgrt_link */
-    struct fwk_pinctrl_state *sprt_state;               /*!< current usage state, such as "default" */
-    struct list_head sgrt_dt_maps;
+    struct list_head sgtc_link;							/*!< link to global list */
+    struct fwk_device *sptr_dev;						/*!< sptr_dev == fwk_pinctrl_dev::sptr_dev */
+    struct list_head sgtc_states;                       /*!< list head of pinctrl_state::sgtc_link */
+    struct fwk_pinctrl_state *sptr_state;               /*!< current usage state, such as "default" */
+    struct list_head sgtc_dt_maps;
 
 } srt_fwk_pinctrl_t;
 
 /*!< The functions */
-extern struct fwk_pinctrl_dev *fwk_pinctrl_register(struct fwk_pinctrl_desc *sprt_desc, struct fwk_device *sprt_dev, void *driver_data);
-extern void fwk_pinctrl_unregister(struct fwk_pinctrl_dev *sprt_pctldev);
-extern struct fwk_pinctrl *fwk_pinctrl_get(struct fwk_device *sprt_dev);
-extern void fwk_pinctrl_put(struct fwk_pinctrl *sprt_pctl);
-extern struct fwk_pinctrl_state *fwk_pinctrl_lookup_state(struct fwk_pinctrl *sprt_pctl, const kchar_t *state_name);
-extern kint32_t fwk_pinctrl_select_state(struct fwk_pinctrl *sprt_pctl, struct fwk_pinctrl_state *sprt_state);
-extern kint32_t fwk_pinctrl_bind_pins(struct fwk_device *sprt_dev);
-extern void fwk_pinctrl_unbind_pins(struct fwk_device *sprt_dev);
+extern struct fwk_pinctrl_dev *fwk_pinctrl_register(struct fwk_pinctrl_desc *sptr_desc, struct fwk_device *sptr_dev, void *driver_data);
+extern void fwk_pinctrl_unregister(struct fwk_pinctrl_dev *sptr_pctldev);
+extern struct fwk_pinctrl *fwk_pinctrl_get(struct fwk_device *sptr_dev);
+extern void fwk_pinctrl_put(struct fwk_pinctrl *sptr_pctl);
+extern struct fwk_pinctrl_state *fwk_pinctrl_lookup_state(struct fwk_pinctrl *sptr_pctl, const kchar_t *state_name);
+extern kint32_t fwk_pinctrl_select_state(struct fwk_pinctrl *sptr_pctl, struct fwk_pinctrl_state *sptr_state);
+extern kint32_t fwk_pinctrl_bind_pins(struct fwk_device *sptr_dev);
+extern void fwk_pinctrl_unbind_pins(struct fwk_device *sptr_dev);
 
-extern kint32_t fwk_pinmux_map_to_setting(struct fwk_pinctrl_map const *sprt_map, struct fwk_pinctrl_setting *sprt_setting);
-extern kint32_t fwk_pinconf_get_by_name(struct fwk_pinctrl_dev *sprt_pctldev, const kchar_t *name);
-extern kint32_t fwk_pinconf_map_to_setting(struct fwk_pinctrl_map const *sprt_map, struct fwk_pinctrl_setting *sprt_setting);
+extern kint32_t fwk_pinmux_map_to_setting(struct fwk_pinctrl_map const *sptr_map, struct fwk_pinctrl_setting *sptr_setting);
+extern kint32_t fwk_pinconf_get_by_name(struct fwk_pinctrl_dev *sptr_pctldev, const kchar_t *name);
+extern kint32_t fwk_pinconf_map_to_setting(struct fwk_pinctrl_map const *sptr_map, struct fwk_pinctrl_setting *sptr_setting);
 
 /*!< API functions */
 /*!
  * @brief   get driver data from pinctrl device
- * @param   sprt_pctldev
+ * @param   sptr_pctldev
  * @retval  none
  * @note    none
  */
-static inline void *fwk_pinctrl_get_drvdata(struct fwk_pinctrl_dev *sprt_pctldev)
+static inline void *fwk_pinctrl_get_drvdata(struct fwk_pinctrl_dev *sptr_pctldev)
 {
-    return sprt_pctldev->driver_data;
+    return sptr_pctldev->driver_data;
 }
 
 #ifdef __cplusplus

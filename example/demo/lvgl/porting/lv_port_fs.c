@@ -107,7 +107,7 @@ static void fs_init(void)
  */
 static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
 {
-    struct fs_stream *sprt_file;
+    struct fs_stream *sptr_file;
     kuint32_t flags = 0;
 
     if (mode == LV_FS_MODE_WR) {
@@ -125,8 +125,8 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
 
     if (flags)
     {
-        sprt_file = file_open(path - 1, flags);
-        return isValid(sprt_file) ? sprt_file : NULL;
+        sptr_file = file_open(path - 1, flags);
+        return isValid(sptr_file) ? sptr_file : NULL;
     }
 
     return NULL;

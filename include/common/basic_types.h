@@ -18,7 +18,7 @@
 #endif
 
 #include <stdint.h>
-#include <stdbool.h>
+//#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -37,20 +37,20 @@
 #define true                    (1)
 #endif
 
-#define mrt_false               (false)
-#define mrt_true                (true)
-#define mrt_boolen(x)           (!!(x))
+#define mr_false               (false)
+#define mr_true                (true)
+#define mr_boolen(x)           (!!(x))
 
 #ifdef __cplusplus
-#define mrt_nullptr             (nullptr)
+#define mr_nullptr             (nullptr)
 #else
-#define mrt_nullptr             ((void *)0)
+#define mr_nullptr             ((void *)0)
 #endif
 
-#define IT_FALSE                (mrt_false)
-#define IT_TRUE                 (mrt_true)
-#define IT_BOOLEN(x)            (mrt_boolen(x))
-#define IT_NULL                 (mrt_nullptr)
+#define IT_FALSE                (mr_false)
+#define IT_TRUE                 (mr_true)
+#define IT_BOOLEN(x)            (mr_boolen(x))
+#define IT_NULL                 (mr_nullptr)
 
 typedef enum nrt_bool
 {
@@ -59,13 +59,13 @@ typedef enum nrt_bool
 
 } nrt_bool_t;
 
-#if defined(__cplusplus) || defined(bool)
-typedef bool                    kbool_t;
-#else
-typedef nrt_bool_t              kbool_t;
+#if !defined(__cplusplus) && !defined(bool)
+#define bool                    _Bool
 #endif
 
-#define mrt_to_kbool(x)         ((x) ? NR_TRUE : NR_FALSE)
+typedef bool                    kbool_t;
+
+#define mr_to_kbool(x)         ((x) ? NR_TRUE : NR_FALSE)
 
 /*!< basic types */
 typedef signed          char    kint8_t;
@@ -116,15 +116,15 @@ typedef kuint32_t               u32;
     #define __force_inline
 #endif
 
-#define mrt_likely(x)           __builtin_expect(mrt_boolen(x), true)
-#define mrt_unlikely(x)         __builtin_expect(mrt_boolen(x), false)
+#define mr_likely(x)           __builtin_expect(mr_boolen(x), true)
+#define mr_unlikely(x)         __builtin_expect(mr_boolen(x), false)
 
-#ifndef mrt_likely
-#define mrt_likely(x)           (__builtin_constant_p(x) ? mrt_boolen(x) : __branch_check__(x, true))
+#ifndef mr_likely
+#define mr_likely(x)           (__builtin_constant_p(x) ? mr_boolen(x) : __branch_check__(x, true))
 #endif
 
-#ifndef mrt_unlikely
-#define mrt_check_unlikely(x)   (__builtin_constant_p(x) ? mrt_boolen(x) : __branch_check__(x, false))
+#ifndef mr_unlikely
+#define mr_check_unlikely(x)   (__builtin_constant_p(x) ? mr_boolen(x) : __branch_check__(x, false))
 #endif
 
 #define __compiler_offsetof(a, b)   \

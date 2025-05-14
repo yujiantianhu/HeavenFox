@@ -96,7 +96,7 @@ UNION_SRT_FORMAT_DECLARE(urt_imx_io_ctl_pad, srt_imx_io_ctl_pad_t)
 #define IMX6UL_IO_CTL_PAD_HYS_DISABLE               (0U)
 #define IMX6UL_IO_CTL_PAD_HYS_OFFSET                (16U)
 #define IMX6UL_IO_CTL_PAD_HYS_MASK                  (1U)
-#define IMX6UL_IO_CTL_PAD_HYS_BIT(x)                mrt_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_HYS_MASK, IMX6UL_IO_CTL_PAD_HYS_OFFSET)
+#define IMX6UL_IO_CTL_PAD_HYS_BIT(x)                mr_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_HYS_MASK, IMX6UL_IO_CTL_PAD_HYS_OFFSET)
 
 #define IMX6UL_IO_CTL_PAD_PUS_100K_DOWN             (0U)
 #define IMX6UL_IO_CTL_PAD_PUS_47K_UP                (1U)
@@ -104,44 +104,44 @@ UNION_SRT_FORMAT_DECLARE(urt_imx_io_ctl_pad, srt_imx_io_ctl_pad_t)
 #define IMX6UL_IO_CTL_PAD_PUS_22K_UP                (3U)
 #define IMX6UL_IO_CTL_PAD_PUS_OFFSET                (14U)
 #define IMX6UL_IO_CTL_PAD_PUS_MASK                  (3U)
-#define IMX6UL_IO_CTL_PAD_PUS_BIT(x)                mrt_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_PUS_MASK, IMX6UL_IO_CTL_PAD_PUS_OFFSET)
+#define IMX6UL_IO_CTL_PAD_PUS_BIT(x)                mr_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_PUS_MASK, IMX6UL_IO_CTL_PAD_PUS_OFFSET)
 
 #define IMX6UL_IO_CTL_PAD_PUE_PULL                  (1U)
 #define IMX6UL_IO_CTL_PAD_PUE_KEEPER                (0U)
 #define IMX6UL_IO_CTL_PAD_PUE_OFFSET                (13U)
 #define IMX6UL_IO_CTL_PAD_PUE_MASK                  (1U)
-#define IMX6UL_IO_CTL_PAD_PUE_BIT(x)                mrt_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_PUE_MASK, IMX6UL_IO_CTL_PAD_PUE_OFFSET)
+#define IMX6UL_IO_CTL_PAD_PUE_BIT(x)                mr_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_PUE_MASK, IMX6UL_IO_CTL_PAD_PUE_OFFSET)
 
 #define IMX6UL_IO_CTL_PAD_PKE_ENABLE                (1U)
 #define IMX6UL_IO_CTL_PAD_PKE_DISABLE               (0U)
 #define IMX6UL_IO_CTL_PAD_PKE_OFFSET                (12U)
 #define IMX6UL_IO_CTL_PAD_PKE_MASK                  (1U)
-#define IMX6UL_IO_CTL_PAD_PKE_BIT(x)                mrt_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_PKE_MASK, IMX6UL_IO_CTL_PAD_PKE_OFFSET)
+#define IMX6UL_IO_CTL_PAD_PKE_BIT(x)                mr_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_PKE_MASK, IMX6UL_IO_CTL_PAD_PKE_OFFSET)
 
 #define IMX6UL_IO_CTL_PAD_ODE_ENABLE                (1U)
 #define IMX6UL_IO_CTL_PAD_ODE_DISABLE               (0U)
 #define IMX6UL_IO_CTL_PAD_ODE_OFFSET                (11U)
 #define IMX6UL_IO_CTL_PAD_ODE_MASK                  (1U)
-#define IMX6UL_IO_CTL_PAD_ODE_BIT(x)                mrt_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_ODE_MASK, IMX6UL_IO_CTL_PAD_ODE_OFFSET)
+#define IMX6UL_IO_CTL_PAD_ODE_BIT(x)                mr_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_ODE_MASK, IMX6UL_IO_CTL_PAD_ODE_OFFSET)
 
 #define IMX6UL_IO_CTL_PAD_SPEED_50MHZ               (0U)
 #define IMX6UL_IO_CTL_PAD_SPEED_100MHZ              (1U)
 #define IMX6UL_IO_CTL_PAD_SPEED_200MHZ              (3U)
 #define IMX6UL_IO_CTL_PAD_SPEED_OFFSET              (6U)
 #define IMX6UL_IO_CTL_PAD_SPEED_MASK                (3U)
-#define IMX6UL_IO_CTL_PAD_SPEED_BIT(x)              mrt_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_SPEED_MASK, IMX6UL_IO_CTL_PAD_SPEED_OFFSET)
+#define IMX6UL_IO_CTL_PAD_SPEED_BIT(x)              mr_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_SPEED_MASK, IMX6UL_IO_CTL_PAD_SPEED_OFFSET)
 
 #define IMX6UL_IO_CTL_PAD_DSE_DISABLE               (0U)
 #define IMX6UL_IO_CTL_PAD_DSE_RDIV(x)               (x)
 #define IMX6UL_IO_CTL_PAD_DSE_OFFSET                (3U)
 #define IMX6UL_IO_CTL_PAD_DSE_MASK                  (7U)
-#define IMX6UL_IO_CTL_PAD_DSE_BIT(x)                mrt_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_DSE_MASK, IMX6UL_IO_CTL_PAD_DSE_OFFSET)
+#define IMX6UL_IO_CTL_PAD_DSE_BIT(x)                mr_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_DSE_MASK, IMX6UL_IO_CTL_PAD_DSE_OFFSET)
 
 #define IMX6UL_IO_CTL_PAD_FAST_RATE                 (1U)
 #define IMX6UL_IO_CTL_PAD_SLOW_RATE                 (0U)
 #define IMX6UL_IO_CTL_PAD_SRE_OFFSET                (0U)
 #define IMX6UL_IO_CTL_PAD_SRE_MASK                  (1U)
-#define IMX6UL_IO_CTL_PAD_SRE_BIT(x)                mrt_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_SRE_MASK, IMX6UL_IO_CTL_PAD_SRE_OFFSET)
+#define IMX6UL_IO_CTL_PAD_SRE_BIT(x)                mr_bit_mask_nr(x, IMX6UL_IO_CTL_PAD_SRE_MASK, IMX6UL_IO_CTL_PAD_SRE_OFFSET)
 
 /*!< Mux functionality */
 #define IMX6UL_PIN_MUX_FUNC_ENABLE                  (1U)
@@ -153,7 +153,7 @@ UNION_SRT_FORMAT_DECLARE(urt_imx_io_ctl_pad, srt_imx_io_ctl_pad_t)
  * @retval  none
  * @note    initial pin configuration
  */
-static inline void hal_imx_pin_attribute_init(srt_hal_imx_pin_t *sprt_cfg, kuaddr_t base,
+static inline void hal_imx_pin_attribute_init(srt_hal_imx_pin_t *sptr_cfg, kuaddr_t base,
                                                 kuint32_t mux_offset, 
                                                 kuint32_t pad_offset,
                                                 kuint32_t input_offset,
@@ -163,7 +163,7 @@ static inline void hal_imx_pin_attribute_init(srt_hal_imx_pin_t *sprt_cfg, kuadd
                                                 kuint8_t  functionality)
 {
     /*!< clear all */
-    /* kmemzero(sprt_cfg, sizeof(srt_hal_imx_pin_t)); */
+    /* kmemzero(sptr_cfg, sizeof(srt_hal_imx_pin_t)); */
 
     /*!<
      * SW_MUX
@@ -173,22 +173,22 @@ static inline void hal_imx_pin_attribute_init(srt_hal_imx_pin_t *sprt_cfg, kuadd
      *               0, DISABLE, Determined by functionly. Suggest 0.
      *  bit[3 : 0]:  Function; ALT5 (0101 <0x5>) is generally used to configure GPIO. Refer to "imx6ul_pinfunc.h"
      */
-    sprt_cfg->mux_base   = base + mux_offset;
-    sprt_cfg->mux_data   = mrt_mask(mux_data, 0xfU) | mrt_bit_nr(functionality, 4U);
+    sptr_cfg->mux_base   = base + mux_offset;
+    sptr_cfg->mux_data   = mr_mask(mux_data, 0xfU) | mr_bit_nr(functionality, 4U);
 
     /*!<
      * SW_PAD
      * sometimes it will be set "0x10b0" ===>
      *                Hyst = 0, 100k pull down, keeper = 1, OD = 0, 100MHz, R0/6, slow slew rate
      */
-    sprt_cfg->pad_base   = base + pad_offset;
-    sprt_cfg->pad_data   = pad_data;
+    sptr_cfg->pad_base   = base + pad_offset;
+    sptr_cfg->pad_data   = pad_data;
 
     /*!<
      * INPUT
      */
-    sprt_cfg->input_base = input_offset ? (base + input_offset) : 0;
-    sprt_cfg->input_data = input_data;
+    sptr_cfg->input_base = input_offset ? (base + input_offset) : 0;
+    sptr_cfg->input_data = input_data;
 }
 
 /*!
@@ -197,13 +197,13 @@ static inline void hal_imx_pin_attribute_init(srt_hal_imx_pin_t *sprt_cfg, kuadd
  * @retval  none
  * @note    initial pin configuration
  */
-static inline void hal_imx_pin_auto_init(srt_hal_imx_pin_t *sprt_cfg, kuaddr_t base, 
+static inline void hal_imx_pin_auto_init(srt_hal_imx_pin_t *sptr_cfg, kuaddr_t base, 
                                         kuint32_t *ptr_value, kuint8_t functionality, kusize_t size)
 {
     if (size != IMX6UL_MUX_CONF_SIZE)
         return;
     
-    hal_imx_pin_attribute_init(sprt_cfg, base, ptr_value[0], ptr_value[1], 
+    hal_imx_pin_attribute_init(sptr_cfg, base, ptr_value[0], ptr_value[1], 
                             ptr_value[2], ptr_value[3], ptr_value[4], ptr_value[5], functionality);
 }
 
@@ -213,10 +213,10 @@ static inline void hal_imx_pin_auto_init(srt_hal_imx_pin_t *sprt_cfg, kuaddr_t b
  * @retval  none
  * @note    configure pin multiplex
  */
-static inline void hal_imx_pin_mux_configure(srt_hal_imx_pin_t *sprt_cfg)
+static inline void hal_imx_pin_mux_configure(srt_hal_imx_pin_t *sptr_cfg)
 {
-    if (sprt_cfg->mux_base)
-        mrt_writel(sprt_cfg->mux_data, sprt_cfg->mux_base);
+    if (sptr_cfg->mux_base)
+        mr_writel(sptr_cfg->mux_data, sptr_cfg->mux_base);
 }
 
 /*!
@@ -225,10 +225,10 @@ static inline void hal_imx_pin_mux_configure(srt_hal_imx_pin_t *sprt_cfg)
  * @retval  none
  * @note    configure pin property
  */
-static inline void hal_imx_pin_pad_configure(srt_hal_imx_pin_t *sprt_cfg)
+static inline void hal_imx_pin_pad_configure(srt_hal_imx_pin_t *sptr_cfg)
 {
-    if (sprt_cfg->pad_base)
-        mrt_writel(sprt_cfg->pad_data, sprt_cfg->pad_base);
+    if (sptr_cfg->pad_base)
+        mr_writel(sptr_cfg->pad_data, sptr_cfg->pad_base);
 }
 
 /*!
@@ -237,13 +237,13 @@ static inline void hal_imx_pin_pad_configure(srt_hal_imx_pin_t *sprt_cfg)
  * @retval  none
  * @note    configure pin property
  */
-static inline void hal_imx_pin_configure(srt_hal_imx_pin_t *sprt_cfg)
+static inline void hal_imx_pin_configure(srt_hal_imx_pin_t *sptr_cfg)
 {
-    mrt_writel(sprt_cfg->mux_data, sprt_cfg->mux_base);
-    mrt_writel(sprt_cfg->pad_data, sprt_cfg->pad_base);
+    mr_writel(sptr_cfg->mux_data, sptr_cfg->mux_base);
+    mr_writel(sptr_cfg->pad_data, sptr_cfg->pad_base);
 
-    if (sprt_cfg->input_base)
-        mrt_writel(sprt_cfg->input_data, sprt_cfg->input_base);
+    if (sptr_cfg->input_base)
+        mr_writel(sptr_cfg->input_data, sptr_cfg->input_base);
 }
 
 /*!
@@ -252,10 +252,10 @@ static inline void hal_imx_pin_configure(srt_hal_imx_pin_t *sprt_cfg)
  * @retval  none
  * @note    configure pin multiplex
  */
-static inline void hal_imx_set_pin_mux(srt_hal_imx_pin_t *sprt_cfg, kuint32_t data)
+static inline void hal_imx_set_pin_mux(srt_hal_imx_pin_t *sptr_cfg, kuint32_t data)
 {
-    sprt_cfg->mux_data = data;
-    hal_imx_pin_mux_configure(sprt_cfg);
+    sptr_cfg->mux_data = data;
+    hal_imx_pin_mux_configure(sptr_cfg);
 }
 
 /*!
@@ -264,10 +264,10 @@ static inline void hal_imx_set_pin_mux(srt_hal_imx_pin_t *sprt_cfg, kuint32_t da
  * @retval  none
  * @note    configure pin property
  */
-static inline void hal_imx_set_pin_pad(srt_hal_imx_pin_t *sprt_cfg, kuint32_t data)
+static inline void hal_imx_set_pin_pad(srt_hal_imx_pin_t *sptr_cfg, kuint32_t data)
 {
-    sprt_cfg->pad_data = data;
-    hal_imx_pin_pad_configure(sprt_cfg);
+    sptr_cfg->pad_data = data;
+    hal_imx_pin_pad_configure(sptr_cfg);
 }
 
 #ifdef __cplusplus

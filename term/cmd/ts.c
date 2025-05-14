@@ -56,63 +56,63 @@ static void term_cmd_ts_format(tid_t tid, kuint32_t stack_size, kuint32_t prio,
 
 /*!
  * @brief   cmd 'ts': excute function
- * @param   sprt_cmd, argc, argv
+ * @param   sptr_cmd, argc, argv
  * @retval  errno
  * @note    none
  */
-static kint32_t term_cmd_task_show(struct term_cmd *sprt_cmd, kint32_t argc, kchar_t **argv)
+static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kchar_t **argv)
 {
-    struct thread *sprt_thread;
-    struct thread_attr *sprt_attr;
-    struct spin_lock *sprt_lock;
+    struct thread *sptr_thread;
+    struct thread_attr *sptr_attr;
+    struct spin_lock *sptr_lock;
 
     switch (argc)
     {
         case 1:
-            sprt_lock = scheduler_lock();
-            spin_lock_irqsave(sprt_lock);
+            sptr_lock = scheduler_lock();
+            spin_lock_irqsave(sptr_lock);
 
             term_cmd_ts_title();
 
             /*!< 1. running */
-            sprt_thread = mrt_current;
-            sprt_attr = sprt_thread->sprt_attr;
-            term_cmd_ts_format(sprt_thread->tid, sprt_attr->stacksize, sprt_attr->sgrt_param.sched_curpriority,
-                        thread_get_sched_msecs(sprt_attr), sprt_thread->status, sprt_thread->name);
+            sptr_thread = mr_current;
+            sptr_attr = sptr_thread->sptr_attr;
+            term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
+                        thread_get_sched_msecs(sptr_attr), sptr_thread->status, sptr_thread->name);
             
             /*!< 2. ready */
-            sprt_thread = mrt_nullptr;
-            while ((sprt_thread = next_ready_thread(sprt_thread)))
+            sptr_thread = mr_nullptr;
+            while ((sptr_thread = next_ready_thread(sptr_thread)))
             {
-                sprt_attr = sprt_thread->sprt_attr;
-                term_cmd_ts_format(sprt_thread->tid, sprt_attr->stacksize, sprt_attr->sgrt_param.sched_curpriority,
-                        thread_get_sched_msecs(sprt_attr), sprt_thread->status, sprt_thread->name);
+                sptr_attr = sptr_thread->sptr_attr;
+                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
+                        thread_get_sched_msecs(sptr_attr), sptr_thread->status, sptr_thread->name);
             }
 
             /*!< 3. suspend */
-            sprt_thread = mrt_nullptr;
-            while ((sprt_thread = next_suspend_thread(sprt_thread)))
+            sptr_thread = mr_nullptr;
+            while ((sptr_thread = next_suspend_thread(sptr_thread)))
             {
-                sprt_attr = sprt_thread->sprt_attr;
-                term_cmd_ts_format(sprt_thread->tid, sprt_attr->stacksize, sprt_attr->sgrt_param.sched_curpriority,
-                        thread_get_sched_msecs(sprt_attr), sprt_thread->status, sprt_thread->name);
+                sptr_attr = sptr_thread->sptr_attr;
+                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
+                        thread_get_sched_msecs(sptr_attr), sptr_thread->status, sptr_thread->name);
             }
 
             /*!< 4. sleep */
-            sprt_thread = mrt_nullptr;
-            while ((sprt_thread = next_sleep_thread(sprt_thread)))
+            sptr_thread = mr_nullptr;
+            while ((sptr_thread = next_sleep_thread(sptr_thread)))
             {
-                sprt_attr = sprt_thread->sprt_attr;
-                term_cmd_ts_format(sprt_thread->tid, sprt_attr->stacksize, sprt_attr->sgrt_param.sched_curpriority,
-                        thread_get_sched_msecs(sprt_attr), sprt_thread->status, sprt_thread->name);
+                sptr_attr = sptr_thread->sptr_attr;
+                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
+                        thread_get_sched_msecs(sptr_attr), sptr_thread->status, sptr_thread->name);
             }
 
-            spin_unlock_irqrestore(sprt_lock);
+            spin_unlock_irqrestore(sptr_lock);
             break;
 
         case 2:
             if (!strcmp(argv[1], "--help"))
-                sprt_cmd->help();
+                sptr_cmd->help();
             else
                 goto fail;
 
@@ -148,14 +148,14 @@ static void term_cmd_ts_help(void)
  */
 void term_cmd_add_ts(void)
 {
-    struct term_cmd *sprt_cmd;
+    struct term_cmd *sptr_cmd;
 
-    sprt_cmd = term_cmd_allocate("ts", GFP_KERNEL);
-    if (!isValid(sprt_cmd))
+    sptr_cmd = term_cmd_allocate("ts", GFP_KERNEL);
+    if (!isValid(sptr_cmd))
         return;
 
-    sprt_cmd->do_excute = term_cmd_task_show;
-    sprt_cmd->help = term_cmd_ts_help;
+    sptr_cmd->do_excute = term_cmd_task_show;
+    sptr_cmd->help = term_cmd_ts_help;
 
-    term_cmd_add(sprt_cmd);
+    term_cmd_add(sptr_cmd);
 }

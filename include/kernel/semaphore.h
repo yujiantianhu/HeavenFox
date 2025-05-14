@@ -24,31 +24,31 @@
 /*!< The defines */
 typedef struct semaphore
 {
-	struct atomic sgrt_atc;
+	struct atomic sgtc_atc;
 
 } srt_semaphore_t;
 
 #define SEMAPHORE_INITIALIZE()	\
 { 	\
-	.sgrt_atc = ATOMIC_INIT()	\
+	.sgtc_atc = ATOMIC_INIT()	\
 }
 
 /*!< The functions */
-extern void sema_init(struct semaphore *sprt_sem, kuint32_t val);
-extern void sema_down(struct semaphore *sprt_sem);
-extern kint32_t sema_down_try_lock(struct semaphore *sprt_sem);
-extern void sema_up(struct semaphore *sprt_sem);
+extern void sema_init(struct semaphore *sptr_sem, kuint32_t val);
+extern void sema_down(struct semaphore *sptr_sem);
+extern kint32_t sema_down_try_lock(struct semaphore *sptr_sem);
+extern void sema_up(struct semaphore *sptr_sem);
 
 /*!< API functions */
 /*!
  * @brief   check if semaphore is locked
- * @param   sprt_sem
+ * @param   sptr_sem
  * @retval  locked(true) / unlocked(false)
  * @note    none
  */
-static inline kbool_t sema_is_locked(struct semaphore *sprt_sem)
+static inline kbool_t sema_is_locked(struct semaphore *sptr_sem)
 {
-	return (0 == ATOMIC_READ(&sprt_sem->sgrt_atc));
+	return (0 == ATOMIC_READ(&sptr_sem->sgtc_atc));
 }
 
 #ifdef __cplusplus

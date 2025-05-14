@@ -29,18 +29,18 @@
 /*!< The defines */
 typedef struct imx_i2c_drv_data
 {
-	struct fwk_i2c_adapter sgrt_adap;
+	struct fwk_i2c_adapter sgtc_adap;
 	void *reg;
     kuint32_t freq;
 
-    struct fwk_clk *sprt_clk;
+    struct fwk_clk *sptr_clk;
     kbool_t is_lastMsgs;
 
     kint32_t irq;
     kbool_t is_wake;
 
-    struct wait_queue_head sgrt_wqh;
-    struct mutex_lock sgrt_lock;
+    struct wait_queue_head sgtc_wqh;
+    struct mutex_lock sgtc_lock;
 
 } srt_imx_i2c_drv_data_t;
 
@@ -96,19 +96,19 @@ struct imx_i2c_idr_reg
 
 __align(4) struct imx_i2c_reg
 {
-	struct imx_i2c_iar_reg sgrt_iar;
+	struct imx_i2c_iar_reg sgtc_iar;
     kuint8_t rsvd_0[2];
 
-	struct imx_i2c_ifr_reg sgrt_ifr;
+	struct imx_i2c_ifr_reg sgtc_ifr;
     kuint8_t rsvd_1[2];
 
-	struct imx_i2c_icr_reg sgrt_icr;
+	struct imx_i2c_icr_reg sgtc_icr;
     kuint8_t rsvd_2[2];
 
-	struct imx_i2c_isr_reg sgrt_isr;
+	struct imx_i2c_isr_reg sgtc_isr;
     kuint8_t rsvd_3[2];
 
-	struct imx_i2c_idr_reg sgrt_idr;
+	struct imx_i2c_idr_reg sgtc_idr;
 };
 
 enum __ERT_IMX_I2C_ACK_STATUS
@@ -172,7 +172,7 @@ static kint16_t imx_i2c_find_frequency(kuint32_t freq)
             break;
         }
 
-        cur_temp = mrt_usub(field, div);
+        cur_temp = mr_usub(field, div);
         if (cur_temp < last_temp)
         {
             last_temp = cur_temp;
@@ -188,94 +188,94 @@ static kint16_t imx_i2c_find_frequency(kuint32_t freq)
 
 /*!
  * @brief   send ack/nack after writting
- * @param   sprt_i2c, ack
+ * @param   sptr_i2c, ack
  * @retval  none
  * @note    none
  */
-static void imx_i2c_adap_set_ack(struct imx_i2c_reg *sprt_i2c, kuint32_t ack)
+static void imx_i2c_adap_set_ack(struct imx_i2c_reg *sptr_i2c, kuint32_t ack)
 {
     if (ack == NR_I2C_NACK)
-        sprt_i2c->sgrt_icr.txak = true;
+        sptr_i2c->sgtc_icr.txak = true;
     else if (ack == NR_I2C_ACK)
-        sprt_i2c->sgrt_icr.txak = false;
+        sptr_i2c->sgtc_icr.txak = false;
 }
 
 /*!
  * @brief   recv ack/nack after reading
- * @param   sprt_i2c
+ * @param   sptr_i2c
  * @retval  none
  * @note    none
  */
-static kuint32_t imx_i2c_adap_get_ack(struct imx_i2c_reg *sprt_i2c)
+static kuint32_t imx_i2c_adap_get_ack(struct imx_i2c_reg *sptr_i2c)
 {
-    return sprt_i2c->sgrt_isr.rxak ? NR_I2C_NACK : NR_I2C_ACK;
+    return sptr_i2c->sgtc_isr.rxak ? NR_I2C_NACK : NR_I2C_ACK;
 }
 
 /*!
  * @brief   write data to i2c register
- * @param   sprt_i2c, data
+ * @param   sptr_i2c, data
  * @retval  none
  * @note    none
  */
-static void imx_i2c_adap_write_data(struct imx_i2c_reg *sprt_i2c, kuint8_t data)
+static void imx_i2c_adap_write_data(struct imx_i2c_reg *sptr_i2c, kuint8_t data)
 {
-    sprt_i2c->sgrt_idr.data = data;
+    sptr_i2c->sgtc_idr.data = data;
 }
 
 /*!
  * @brief   read data from i2c register
- * @param   sprt_i2c
+ * @param   sptr_i2c
  * @retval  none
  * @note    none
  */
-static kuint8_t imx_i2c_adap_read_data(struct imx_i2c_reg *sprt_i2c)
+static kuint8_t imx_i2c_adap_read_data(struct imx_i2c_reg *sptr_i2c)
 {
-    return sprt_i2c->sgrt_idr.data;
+    return sptr_i2c->sgtc_idr.data;
 }
 
 /*!
  * @brief   wait for transferring finished
- * @param   sprt_adap, timeout
+ * @param   sptr_adap, timeout
  * @retval  none
  * @note    none
  */
-static kbool_t imx_i2c_adap_wait_complete(struct fwk_i2c_adapter *sprt_adap, kuint32_t timeout)
+static kbool_t imx_i2c_adap_wait_complete(struct fwk_i2c_adapter *sptr_adap, kuint32_t timeout)
 {
-    struct imx_i2c_drv_data *sprt_data;
-    struct imx_i2c_reg *sprt_i2c;
+    struct imx_i2c_drv_data *sptr_data;
+    struct imx_i2c_reg *sptr_i2c;
 
-	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
+	sptr_data = fwk_i2c_adapter_get_drvdata(sptr_adap);
+	sptr_i2c = (struct imx_i2c_reg *)sptr_data->reg;
 
-    wait_event_interruptible_timeout(&sprt_data->sgrt_wqh, 
-                                    sprt_i2c->sgrt_isr.icf && (sprt_i2c->sgrt_isr.iif || sprt_data->is_wake), 
+    wait_event_interruptible_timeout(&sptr_data->sgtc_wqh, 
+                                    sptr_i2c->sgtc_isr.icf && (sptr_i2c->sgtc_isr.iif || sptr_data->is_wake), 
                                     timeout);
-    sprt_data->is_wake = false;
+    sptr_data->is_wake = false;
 
     return true;
 }
 
 /*!
  * @brief   wait for i2c become idle
- * @param   sprt_i2c, ways
+ * @param   sptr_i2c, ways
  * @retval  none
  * @note    if i2c is busy, schedule to another thread
  */
-static kint32_t imx_i2c_adap_for_busy(struct imx_i2c_reg *sprt_i2c, kbool_t ways)
+static kint32_t imx_i2c_adap_for_busy(struct imx_i2c_reg *sptr_i2c, kbool_t ways)
 {
     kutime_t expires = jiffies + msecs_to_jiffies(500);
 
     for (;;)
     {
         /*!< ways = 1: i2c is running, bus should be busy */
-        if (ways && sprt_i2c->sgrt_isr.ibb)
+        if (ways && sptr_i2c->sgtc_isr.ibb)
             break;
 
         /*!< ways = 0: i2c is stopped, bus should be idle */
-        if (!ways && !sprt_i2c->sgrt_isr.ibb)
+        if (!ways && !sptr_i2c->sgtc_isr.ibb)
             break;
 
-        if (mrt_time_after(jiffies, expires))
+        if (mr_time_after(jiffies, expires))
             return -ER_TIMEOUT;
 
         schedule_thread();
@@ -286,13 +286,13 @@ static kint32_t imx_i2c_adap_for_busy(struct imx_i2c_reg *sprt_i2c, kbool_t ways
 
 /*!
  * @brief   clear interrupt flag
- * @param   sprt_i2c
+ * @param   sptr_i2c
  * @retval  none
  * @note    none
  */
-static void imx_i2c_adap_clear_intr(struct imx_i2c_reg *sprt_i2c)
+static void imx_i2c_adap_clear_intr(struct imx_i2c_reg *sptr_i2c)
 {
-    sprt_i2c->sgrt_isr.iif = false;
+    sptr_i2c->sgtc_isr.iif = false;
 }
 
 /*!
@@ -301,22 +301,22 @@ static void imx_i2c_adap_clear_intr(struct imx_i2c_reg *sprt_i2c)
  * @retval  none
  * @note    check i2c function
  */
-static kbool_t imx_i2c_adap_check_ack(struct imx_i2c_reg *sprt_i2c)
+static kbool_t imx_i2c_adap_check_ack(struct imx_i2c_reg *sptr_i2c)
 {
     /*!< 1. check arbitration loss bit */
-    if (sprt_i2c->sgrt_isr.ial)
+    if (sptr_i2c->sgtc_isr.ial)
     {
-        sprt_i2c->sgrt_isr.ial = false;
+        sptr_i2c->sgtc_isr.ial = false;
 
         /*!< reboot i2c */
-        sprt_i2c->sgrt_icr.ien = false;
-        sprt_i2c->sgrt_icr.ien = true;
+        sptr_i2c->sgtc_icr.ien = false;
+        sptr_i2c->sgtc_icr.ien = true;
 
         return false;
     }
 
     /*!< 2. no ack */
-    if (NR_I2C_NACK == imx_i2c_adap_get_ack(sprt_i2c))
+    if (NR_I2C_NACK == imx_i2c_adap_get_ack(sptr_i2c))
         return false;
 
     return true;
@@ -329,46 +329,46 @@ static kbool_t imx_i2c_adap_check_ack(struct imx_i2c_reg *sprt_i2c)
  * @note    iic start
  *          when bus is idle, SCL & SDA are high level, if SDA is falling, indicating that i2c will start
  */
-static kint32_t imx_i2c_adap_start(struct fwk_i2c_adapter *sprt_adap)
+static kint32_t imx_i2c_adap_start(struct fwk_i2c_adapter *sptr_adap)
 {
-    struct imx_i2c_drv_data *sprt_data;
-    struct imx_i2c_reg *sprt_i2c;
+    struct imx_i2c_drv_data *sptr_data;
+    struct imx_i2c_reg *sptr_i2c;
 
-    sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-    sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
+    sptr_data = fwk_i2c_adapter_get_drvdata(sptr_adap);
+    sptr_i2c = (struct imx_i2c_reg *)sptr_data->reg;
 
     /*!< open clock */
-    fwk_clk_prepare_enable(sprt_data->sprt_clk);
+    fwk_clk_prepare_enable(sptr_data->sptr_clk);
 
-    sprt_i2c->sgrt_isr.iif = false;
-    sprt_i2c->sgrt_isr.ial = false;
+    sptr_i2c->sgtc_isr.iif = false;
+    sptr_i2c->sgtc_isr.ial = false;
 
-    sprt_i2c->sgrt_icr.ien = true;
-    mrt_resetw(&sprt_i2c->sgrt_isr);
+    sptr_i2c->sgtc_icr.ien = true;
+    mr_resetw(&sptr_i2c->sgtc_isr);
 
     delay_us(100);
     
     /*!< configure iic to work on master mode */
-    sprt_i2c->sgrt_icr.msta = true;
+    sptr_i2c->sgtc_icr.msta = true;
     
     /*!< judge if i2c is busy. idle: 0, busy: 1 */
-    if (imx_i2c_adap_for_busy(sprt_i2c, true))
+    if (imx_i2c_adap_for_busy(sptr_i2c, true))
         goto fail;
 
     /*!< set direction to "send" */
-    sprt_i2c->sgrt_icr.mtx  = true;
-//  sprt_i2c->sgrt_icr.iien = true;
+    sptr_i2c->sgtc_icr.mtx  = true;
+//  sptr_i2c->sgtc_icr.iien = true;
 
-    imx_i2c_adap_set_ack(sprt_i2c, NR_I2C_NACK);
+    imx_i2c_adap_set_ack(sptr_i2c, NR_I2C_NACK);
 
     /*!< wait for transferring finished */
-//  if (!imx_i2c_adap_wait_complete(sprt_adap, 100))
+//  if (!imx_i2c_adap_wait_complete(sptr_adap, 100))
 //        goto fail;
 
     return ER_NORMAL;
 
 fail:
-    fwk_clk_disable_unprepare(sprt_data->sprt_clk);
+    fwk_clk_disable_unprepare(sptr_data->sptr_clk);
     return -ER_NREADY;
 }
 
@@ -379,24 +379,24 @@ fail:
  * @note    iic repeat start
  *          when bus is idle, SCL & SDA are high level, if SDA is falling, indicating that i2c will start
  */
-static kint32_t imx_i2c_adap_restart(struct fwk_i2c_adapter *sprt_adap)
+static kint32_t imx_i2c_adap_restart(struct fwk_i2c_adapter *sptr_adap)
 {
-    struct imx_i2c_drv_data *sprt_data;
-    struct imx_i2c_reg *sprt_i2c;
+    struct imx_i2c_drv_data *sptr_data;
+    struct imx_i2c_reg *sptr_i2c;
 
-	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
+	sptr_data = fwk_i2c_adapter_get_drvdata(sptr_adap);
+	sptr_i2c = (struct imx_i2c_reg *)sptr_data->reg;
 
     /*!< only master mode can send restart signal */
-    if (!sprt_i2c->sgrt_icr.msta)
+    if (!sptr_i2c->sgtc_icr.msta)
         return -ER_CHECKERR;
 
     /*!< if i2c is running, bus will be busy; otherwise, i2c bus is stopped */
-    if (imx_i2c_adap_for_busy(sprt_i2c, true))
+    if (imx_i2c_adap_for_busy(sptr_i2c, true))
         return -ER_WILDPTR;
 
     /*!< set restart */
-    sprt_i2c->sgrt_icr.rsta = true;
+    sptr_i2c->sgtc_icr.rsta = true;
     delay_us(100);
 
     return ER_NORMAL;
@@ -411,26 +411,26 @@ static kint32_t imx_i2c_adap_restart(struct fwk_i2c_adapter *sprt_adap)
  *          otherwise, if the SDA changes when the SCL is high, it indicate that i2c will be stopped;
  *          finally, SDA and SCL will stay high level, i2c bus resumes to idle status
  */
-static void imx_i2c_adap_stop(struct fwk_i2c_adapter *sprt_adap)
+static void imx_i2c_adap_stop(struct fwk_i2c_adapter *sptr_adap)
 {    
-    struct imx_i2c_drv_data *sprt_data;
-    struct imx_i2c_reg *sprt_i2c;
+    struct imx_i2c_drv_data *sptr_data;
+    struct imx_i2c_reg *sptr_i2c;
 
-	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
+	sptr_data = fwk_i2c_adapter_get_drvdata(sptr_adap);
+	sptr_i2c = (struct imx_i2c_reg *)sptr_data->reg;
 
     /*!< clear configuration */
-    sprt_i2c->sgrt_icr.msta = false;
-    sprt_i2c->sgrt_icr.mtx  = false;
-    sprt_i2c->sgrt_icr.txak = false;
+    sptr_i2c->sgtc_icr.msta = false;
+    sptr_i2c->sgtc_icr.mtx  = false;
+    sptr_i2c->sgtc_icr.txak = false;
 
     /*!< wait for becoming not busy */
-    imx_i2c_adap_for_busy(sprt_i2c, false);
+    imx_i2c_adap_for_busy(sptr_i2c, false);
 
-    sprt_i2c->sgrt_icr.ien = false;
-    sprt_i2c->sgrt_icr.iien = false;
+    sptr_i2c->sgtc_icr.ien = false;
+    sptr_i2c->sgtc_icr.iien = false;
 
-    fwk_clk_disable_unprepare(sprt_data->sprt_clk);
+    fwk_clk_disable_unprepare(sptr_data->sptr_clk);
 }
 
 /*!
@@ -439,36 +439,36 @@ static void imx_i2c_adap_stop(struct fwk_i2c_adapter *sprt_adap)
  * @retval none
  * @note   i2c write
  */
-static kint32_t imx_i2c_adap_write(struct imx_i2c_drv_data *sprt_data, kuint16_t slave, const kubuffer_t *buffer, kusize_t size)
+static kint32_t imx_i2c_adap_write(struct imx_i2c_drv_data *sptr_data, kuint16_t slave, const kubuffer_t *buffer, kusize_t size)
 {
-	struct imx_i2c_reg *sprt_i2c;
+	struct imx_i2c_reg *sptr_i2c;
 
-	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
+	sptr_i2c = (struct imx_i2c_reg *)sptr_data->reg;
 
     /*!< configure direction to send */
-    sprt_i2c->sgrt_icr.mtx = true;
+    sptr_i2c->sgtc_icr.mtx = true;
 
-    imx_i2c_adap_write_data(sprt_i2c, slave << 1);
-    if (!imx_i2c_adap_wait_complete(&sprt_data->sgrt_adap, 100))
+    imx_i2c_adap_write_data(sptr_i2c, slave << 1);
+    if (!imx_i2c_adap_wait_complete(&sptr_data->sgtc_adap, 100))
         return -ER_TIMEOUT;
 
     /*!< clear interrupt flag */
-    imx_i2c_adap_clear_intr(sprt_i2c);
+    imx_i2c_adap_clear_intr(sptr_i2c);
 
-    if (!imx_i2c_adap_check_ack(sprt_i2c))
+    if (!imx_i2c_adap_check_ack(sptr_i2c))
         return -ER_RDATA_FAILD;
 
     while (size--)
     {
-        imx_i2c_adap_write_data(sprt_i2c, *buffer++);
+        imx_i2c_adap_write_data(sptr_i2c, *buffer++);
 
         /*!< wait for transmission finished */
-        if (!imx_i2c_adap_wait_complete(&sprt_data->sgrt_adap, 100))
+        if (!imx_i2c_adap_wait_complete(&sptr_data->sgtc_adap, 100))
             return -ER_TIMEOUT;
 
-        imx_i2c_adap_clear_intr(sprt_i2c);
+        imx_i2c_adap_clear_intr(sptr_i2c);
 
-        if (!imx_i2c_adap_check_ack(sprt_i2c))
+        if (!imx_i2c_adap_check_ack(sptr_i2c))
             return -ER_RDATA_FAILD;
     }
 
@@ -481,64 +481,64 @@ static kint32_t imx_i2c_adap_write(struct imx_i2c_drv_data *sprt_data, kuint16_t
  * @retval none
  * @note   i2c read
  */
-static kint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sprt_data, kuint16_t slave, kubuffer_t *buffer, kusize_t size)
+static kint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sptr_data, kuint16_t slave, kubuffer_t *buffer, kusize_t size)
 {
-	struct imx_i2c_reg *sprt_i2c;
+	struct imx_i2c_reg *sptr_i2c;
     kuint32_t count;
 
-	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
+	sptr_i2c = (struct imx_i2c_reg *)sptr_data->reg;
 
     /*!< configure direction to send (write reg at first) */
-    sprt_i2c->sgrt_icr.mtx = true;
+    sptr_i2c->sgtc_icr.mtx = true;
 
-    imx_i2c_adap_write_data(sprt_i2c, (slave << 1) | 0x01);
-    if (!imx_i2c_adap_wait_complete(&sprt_data->sgrt_adap, 100))
+    imx_i2c_adap_write_data(sptr_i2c, (slave << 1) | 0x01);
+    if (!imx_i2c_adap_wait_complete(&sptr_data->sgtc_adap, 100))
         return -ER_TIMEOUT;
 
     /*!< clear interrupt flag */
-    imx_i2c_adap_clear_intr(sprt_i2c);
+    imx_i2c_adap_clear_intr(sptr_i2c);
 
-    if (!imx_i2c_adap_check_ack(sprt_i2c))
+    if (!imx_i2c_adap_check_ack(sptr_i2c))
         return -ER_RDATA_FAILD;
 
-    imx_i2c_adap_set_ack(sprt_i2c, (size > 1) ? NR_I2C_ACK : NR_I2C_NACK);
+    imx_i2c_adap_set_ack(sptr_i2c, (size > 1) ? NR_I2C_ACK : NR_I2C_NACK);
 
     /*!< configure direction to recv */
-    sprt_i2c->sgrt_icr.mtx = false;
+    sptr_i2c->sgtc_icr.mtx = false;
 
     /*!< read dummy to clear i2c->idr automatically */
-    imx_i2c_adap_read_data(sprt_i2c);
+    imx_i2c_adap_read_data(sptr_i2c);
 
     for (count = 0; count < size; count++)
     {
         /*!< wait for transmission finished */
-        if (!imx_i2c_adap_wait_complete(&sprt_data->sgrt_adap, 100))
+        if (!imx_i2c_adap_wait_complete(&sptr_data->sgtc_adap, 100))
             return -ER_TIMEOUT;
 
-        imx_i2c_adap_clear_intr(sprt_i2c);
+        imx_i2c_adap_clear_intr(sptr_i2c);
 
         /*!< when only the last data left, reading should be stopped to prevent i2c clock misaligned */
         if (count == (size - 1))
         {
-            if (!sprt_data->is_lastMsgs)
-                sprt_i2c->sgrt_icr.mtx = true;
+            if (!sptr_data->is_lastMsgs)
+                sptr_i2c->sgtc_icr.mtx = true;
             else
             {
                 /*!< stop */
-                sprt_i2c->sgrt_icr.mtx = false;
-                sprt_i2c->sgrt_icr.msta = false;
+                sptr_i2c->sgtc_icr.mtx = false;
+                sptr_i2c->sgtc_icr.msta = false;
 
-                if (imx_i2c_adap_for_busy(sprt_i2c, false))
+                if (imx_i2c_adap_for_busy(sptr_i2c, false))
                     return -ER_BUSY;
             }
         }
         /*!< if it is the second to last data, send nack */
         else if (count == (size - 2))
-            imx_i2c_adap_set_ack(sprt_i2c, NR_I2C_NACK);
+            imx_i2c_adap_set_ack(sptr_i2c, NR_I2C_NACK);
         else
-            imx_i2c_adap_set_ack(sprt_i2c, NR_I2C_ACK);
+            imx_i2c_adap_set_ack(sptr_i2c, NR_I2C_ACK);
 
-        *(buffer++) = imx_i2c_adap_read_data(sprt_i2c);
+        *(buffer++) = imx_i2c_adap_read_data(sptr_i2c);
     }
 
     return ER_NORMAL;
@@ -546,23 +546,23 @@ static kint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sprt_data, kuint16_t 
 
 /*!
  * @brief  i2c transfer
- * @param  sprt_adap, sprt_msg
+ * @param  sptr_adap, sptr_msg
  * @retval none
  * @note   read/write
  */
-static kint32_t __imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msg)
+static kint32_t __imx_i2c_adap_xfer(struct fwk_i2c_adapter *sptr_adap, struct fwk_i2c_msg *sptr_msg)
 {
-	struct imx_i2c_drv_data *sprt_data;
+	struct imx_i2c_drv_data *sptr_data;
 
-	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
+	sptr_data = fwk_i2c_adapter_get_drvdata(sptr_adap);
 
-    if (sprt_msg->flags & FWK_I2C_M_RD)
+    if (sptr_msg->flags & FWK_I2C_M_RD)
     {
-        if (imx_i2c_adap_read(sprt_data, sprt_msg->addr, sprt_msg->ptr_buf, sprt_msg->len))
+        if (imx_i2c_adap_read(sptr_data, sptr_msg->addr, sptr_msg->ptr_buf, sptr_msg->len))
             return -ER_TRXERR;
     }
     else
-        imx_i2c_adap_write(sprt_data, sprt_msg->addr, sprt_msg->ptr_buf, sprt_msg->len);
+        imx_i2c_adap_write(sptr_data, sptr_msg->addr, sptr_msg->ptr_buf, sptr_msg->len);
 
     return ER_NORMAL;
 }
@@ -575,18 +575,18 @@ static kint32_t __imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fw
  */
 static irq_return_t imx_i2c_adap_isr(void *ptrDev)
 {
-    struct imx_i2c_drv_data *sprt_data;
-    struct imx_i2c_reg *sprt_i2c;
+    struct imx_i2c_drv_data *sptr_data;
+    struct imx_i2c_reg *sptr_i2c;
 
-	sprt_data = fwk_i2c_adapter_get_drvdata(ptrDev);
-	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
+	sptr_data = fwk_i2c_adapter_get_drvdata(ptrDev);
+	sptr_i2c = (struct imx_i2c_reg *)sptr_data->reg;
 
-    if (sprt_i2c->sgrt_isr.iif)
+    if (sptr_i2c->sgtc_isr.iif)
     {
-        sprt_data->is_wake = true;
-        imx_i2c_adap_clear_intr(sprt_i2c);
+        sptr_data->is_wake = true;
+        imx_i2c_adap_clear_intr(sptr_i2c);
 
-        wake_up_interruptible(&sprt_data->sgrt_wqh);
+        wake_up_interruptible(&sptr_data->sgtc_wqh);
     }
 
     return 0;
@@ -598,81 +598,81 @@ static irq_return_t imx_i2c_adap_isr(void *ptrDev)
  * @retval none
  * @note   i2c initialization
  */
-static void imx_i2c_adap_initial(struct fwk_i2c_adapter *sprt_adap)
+static void imx_i2c_adap_initial(struct fwk_i2c_adapter *sptr_adap)
 {
-    struct imx_i2c_drv_data *sprt_data;
-    struct imx_i2c_reg *sprt_i2c;
+    struct imx_i2c_drv_data *sptr_data;
+    struct imx_i2c_reg *sptr_i2c;
     kint16_t field;
 
-	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
-	sprt_i2c = (struct imx_i2c_reg *)sprt_data->reg;
+	sptr_data = fwk_i2c_adapter_get_drvdata(sptr_adap);
+	sptr_i2c = (struct imx_i2c_reg *)sptr_data->reg;
 
     /*!< disable i2c */
-    sprt_i2c->sgrt_icr.ien = false;
+    sptr_i2c->sgtc_icr.ien = false;
 
     /*!< write zero to clear */
-    mrt_resetw(&sprt_i2c->sgrt_isr);
+    mr_resetw(&sptr_i2c->sgtc_isr);
 
     /*!< config frequency */
-    field = imx_i2c_find_frequency(sprt_data->freq);
+    field = imx_i2c_find_frequency(sptr_data->freq);
     if (field < 0)
         return;
 
-    sprt_i2c->sgrt_ifr.freq = field;
+    sptr_i2c->sgtc_ifr.freq = field;
 
     /*!< enable i2c */
-    sprt_i2c->sgrt_icr.ien = true;
+    sptr_i2c->sgtc_icr.ien = true;
 }
 
 /*!
  * @brief  i2c transfer
- * @param  sprt_adap, sprt_msgs, num (the number of sprt_msgs)
+ * @param  sptr_adap, sptr_msgs, num (the number of sptr_msgs)
  * @retval none
  * @note   read/write
  */
-static kint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msgs, kint32_t num)
+static kint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sptr_adap, struct fwk_i2c_msg *sptr_msgs, kint32_t num)
 {
-	struct imx_i2c_drv_data *sprt_data;
+	struct imx_i2c_drv_data *sptr_data;
     kuint32_t idx;
     kint32_t retval;
 
-	sprt_data = fwk_i2c_adapter_get_drvdata(sprt_adap);
+	sptr_data = fwk_i2c_adapter_get_drvdata(sptr_adap);
 
-    mutex_lock(&sprt_data->sgrt_lock);
+    mutex_lock(&sptr_data->sgtc_lock);
 
     /*!< start */
-    retval = imx_i2c_adap_start(sprt_adap);
+    retval = imx_i2c_adap_start(sptr_adap);
     if (retval)
         goto out;
 
     for (idx = 0; idx < num; idx++) 
     {
-        sprt_data->is_lastMsgs = ((idx + 1) == num);
+        sptr_data->is_lastMsgs = ((idx + 1) == num);
 
         if (idx)
         {
             /*!< repeat */
-            retval = imx_i2c_adap_restart(sprt_adap);
+            retval = imx_i2c_adap_restart(sptr_adap);
             if (retval)
                 goto END;
         }
 
-        retval = __imx_i2c_adap_xfer(sprt_adap, sprt_msgs + idx);
+        retval = __imx_i2c_adap_xfer(sptr_adap, sptr_msgs + idx);
         if (retval < 0)
             goto END;
     }
 
 END:
     /*!< stop */
-    imx_i2c_adap_stop(sprt_adap);
-    sprt_data->is_lastMsgs = false;
+    imx_i2c_adap_stop(sptr_adap);
+    sptr_data->is_lastMsgs = false;
 
 out:
-    mutex_unlock(&sprt_data->sgrt_lock);
+    mutex_unlock(&sptr_data->sgtc_lock);
     return retval;
 }
 
-static const struct fwk_i2c_algo sgrt_imx_i2c_algo = 
+static const struct fwk_i2c_algo sgtc_imx_i2c_algo = 
 {
 	.master_xfer = imx_i2c_adap_xfer,
 };
@@ -680,124 +680,124 @@ static const struct fwk_i2c_algo sgrt_imx_i2c_algo =
 /*!< --------------------------------------------------------------------- */
 /*!
  * @brief   imx_i2c_driver_probe
- * @param   sprt_dev
+ * @param   sptr_dev
  * @retval  errno
  * @note    none
  */
-static kint32_t imx_i2c_driver_probe(struct fwk_platdev *sprt_pdev)
+static kint32_t imx_i2c_driver_probe(struct fwk_platdev *sptr_pdev)
 {
-	struct imx_i2c_drv_data *sprt_data;
-	struct fwk_i2c_adapter *sprt_adap;
-	struct fwk_device *sprt_dev;
+	struct imx_i2c_drv_data *sptr_data;
+	struct fwk_i2c_adapter *sptr_adap;
+	struct fwk_device *sptr_dev;
 	kuaddr_t reg;
 	kint32_t retval;
 
-	sprt_data = kzalloc(sizeof(*sprt_data), GFP_KERNEL);
-	if (!isValid(sprt_data))
+	sptr_data = kzalloc(sizeof(*sptr_data), GFP_KERNEL);
+	if (!isValid(sptr_data))
 		return -ER_NOMEM;
 
-	sprt_dev = &sprt_pdev->sgrt_dev;
-	sprt_adap = &sprt_data->sgrt_adap;
-    mutex_init(&sprt_data->sgrt_lock);
+	sptr_dev = &sptr_pdev->sgtc_dev;
+	sptr_adap = &sptr_data->sgtc_adap;
+    mutex_init(&sptr_data->sgtc_lock);
 
-	reg = fwk_platform_get_address(sprt_pdev, 0);
-	sprt_data->reg = fwk_io_remap((void *)reg, ARCH_PER_SIZE);
-	if (!sprt_data->reg)
+	reg = fwk_platform_get_address(sptr_pdev, 0);
+	sptr_data->reg = fwk_io_remap((void *)reg, ARCH_PER_SIZE);
+	if (!sptr_data->reg)
 		goto fail1;
 
-    sprt_data->irq = fwk_platform_get_irq(sprt_pdev, 0);
-    if (sprt_data->irq < 0)
+    sptr_data->irq = fwk_platform_get_irq(sptr_pdev, 0);
+    if (sptr_data->irq < 0)
         goto fail2;
 
-    retval = fwk_of_property_read_u32(sprt_pdev->sgrt_dev.sprt_node, "clock_frequency", &sprt_data->freq);
-    if (retval || !sprt_data->freq)
-        sprt_data->freq = 100000;
+    retval = fwk_of_property_read_u32(sptr_pdev->sgtc_dev.sptr_node, "clock_frequency", &sptr_data->freq);
+    if (retval || !sptr_data->freq)
+        sptr_data->freq = 100000;
 
-    sprt_data->sprt_clk = fwk_clk_get(sprt_dev, mrt_nullptr);
-    if (!sprt_data->sprt_clk)
+    sptr_data->sptr_clk = fwk_clk_get(sptr_dev, mr_nullptr);
+    if (!sptr_data->sptr_clk)
         goto fail2;
 
-	sprt_adap->sgrt_dev.sprt_parent = sprt_dev;
-	sprt_adap->sgrt_dev.sprt_node = sprt_dev->sprt_node;
+	sptr_adap->sgtc_dev.sptr_parent = sptr_dev;
+	sptr_adap->sgtc_dev.sptr_node = sptr_dev->sptr_node;
 
-	sprt_adap->sprt_algo = &sgrt_imx_i2c_algo;
-	sprt_adap->algo_data = sprt_data;
-	sprt_adap->id = (sprt_pdev->id < 0) ? fwk_of_get_alias_id(sprt_dev->sprt_node) : sprt_pdev->id;
-	sprintk(sprt_adap->name, "imx,i2c-%d", sprt_adap->id);
-    init_waitqueue_head(&sprt_data->sgrt_wqh);
+	sptr_adap->sptr_algo = &sgtc_imx_i2c_algo;
+	sptr_adap->algo_data = sptr_data;
+	sptr_adap->id = (sptr_pdev->id < 0) ? fwk_of_get_alias_id(sptr_dev->sptr_node) : sptr_pdev->id;
+	sprintk(sptr_adap->name, "imx,i2c-%d", sptr_adap->id);
+    init_waitqueue_head(&sptr_data->sgtc_wqh);
 
-	retval = fwk_i2c_add_adapter(sprt_adap);
+	retval = fwk_i2c_add_adapter(sptr_adap);
 	if (retval < 0)
 		goto fail3;
 
-	fwk_platform_set_drvdata(sprt_pdev, sprt_data);
-    fwk_i2c_adapter_set_drvdata(sprt_adap, sprt_data);
+	fwk_platform_set_drvdata(sptr_pdev, sptr_data);
+    fwk_i2c_adapter_set_drvdata(sptr_adap, sptr_data);
 
-    fwk_clk_prepare_enable(sprt_data->sprt_clk);
-    imx_i2c_adap_initial(sprt_adap);
-    fwk_clk_disable_unprepare(sprt_data->sprt_clk);
+    fwk_clk_prepare_enable(sptr_data->sptr_clk);
+    imx_i2c_adap_initial(sptr_adap);
+    fwk_clk_disable_unprepare(sptr_data->sptr_clk);
 
-    if (fwk_request_irq(sprt_data->irq, imx_i2c_adap_isr, IRQ_TYPE_NONE, "imx,i2c", sprt_adap))
+    if (fwk_request_irq(sptr_data->irq, imx_i2c_adap_isr, IRQ_TYPE_NONE, "imx,i2c", sptr_adap))
         goto fail4;
 
 	return ER_NORMAL;
 
 fail4:
-    fwk_platform_set_drvdata(sprt_pdev, mrt_nullptr);
-    fwk_i2c_del_adapter(sprt_adap);
+    fwk_platform_set_drvdata(sptr_pdev, mr_nullptr);
+    fwk_i2c_del_adapter(sptr_adap);
 fail3:
-    fwk_clk_put(sprt_data->sprt_clk);
+    fwk_clk_put(sptr_data->sptr_clk);
 fail2:
-	fwk_io_unmap(sprt_data->reg);
+	fwk_io_unmap(sptr_data->reg);
 fail1:
-	kfree(sprt_data);
+	kfree(sptr_data);
 
 	return -ER_ERROR;
 }
 
 /*!
  * @brief   imx_i2c_driver_remove
- * @param   sprt_dev
+ * @param   sptr_dev
  * @retval  errno
  * @note    none
  */
-static kint32_t imx_i2c_driver_remove(struct fwk_platdev *sprt_pdev)
+static kint32_t imx_i2c_driver_remove(struct fwk_platdev *sptr_pdev)
 {
-	struct imx_i2c_drv_data *sprt_data;
+	struct imx_i2c_drv_data *sptr_data;
 
-    sprt_data = fwk_platform_get_drvdata(sprt_pdev);
-    if (!sprt_data)
+    sptr_data = fwk_platform_get_drvdata(sptr_pdev);
+    if (!sptr_data)
         return ER_NORMAL;
 
-    fwk_free_irq(sprt_data->irq, &sprt_data->sgrt_adap);
-    fwk_i2c_del_adapter(&sprt_data->sgrt_adap);
-    fwk_clk_disable_unprepare(sprt_data->sprt_clk);
-    fwk_clk_put(sprt_data->sprt_clk);
-    fwk_io_unmap(sprt_data->reg);
-    kfree(sprt_data);
-    fwk_platform_set_drvdata(sprt_pdev, mrt_nullptr);
+    fwk_free_irq(sptr_data->irq, &sptr_data->sgtc_adap);
+    fwk_i2c_del_adapter(&sptr_data->sgtc_adap);
+    fwk_clk_disable_unprepare(sptr_data->sptr_clk);
+    fwk_clk_put(sptr_data->sptr_clk);
+    fwk_io_unmap(sptr_data->reg);
+    kfree(sptr_data);
+    fwk_platform_set_drvdata(sptr_pdev, mr_nullptr);
 
 	return ER_NORMAL;
 }
 
 /*!< device id for device-tree */
-static const struct fwk_of_device_id sgrt_imx_i2c_driver_ids[] =
+static const struct fwk_of_device_id sgtc_imx_i2c_driver_ids[] =
 {
 	{ .compatible = "fsl,imx6ul-i2c", },
 	{},
 };
 
 /*!< platform instance */
-static struct fwk_platdrv sgrt_imx_i2c_platdriver =
+static struct fwk_platdrv sgtc_imx_i2c_platdriver =
 {
 	.probe	= imx_i2c_driver_probe,
 	.remove	= imx_i2c_driver_remove,
 	
-	.sgrt_driver =
+	.sgtc_driver =
 	{
 		.name 	= "fsl, i2c",
 		.id 	= -1,
-		.sprt_of_match_table = sgrt_imx_i2c_driver_ids,
+		.sptr_of_match_table = sgtc_imx_i2c_driver_ids,
 	},
 };
 
@@ -810,7 +810,7 @@ static struct fwk_platdrv sgrt_imx_i2c_platdriver =
  */
 kint32_t __fwk_init imx_i2c_driver_init(void)
 {
-	return fwk_register_platdriver(&sgrt_imx_i2c_platdriver);
+	return fwk_register_platdriver(&sgtc_imx_i2c_platdriver);
 }
 
 /*!
@@ -821,7 +821,7 @@ kint32_t __fwk_init imx_i2c_driver_init(void)
  */
 void __fwk_exit imx_i2c_driver_exit(void)
 {
-	fwk_unregister_platdriver(&sgrt_imx_i2c_platdriver);
+	fwk_unregister_platdriver(&sgtc_imx_i2c_platdriver);
 }
 
 IMPORT_PATTERN_INIT(imx_i2c_driver_init);

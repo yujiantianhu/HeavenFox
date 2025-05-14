@@ -54,7 +54,7 @@ struct fwk_icmp_hdr
 
     union {
         kuint32_t info;
-        struct fwk_icmp_echo sgrt_echo;
+        struct fwk_icmp_echo sgtc_echo;
     } u;
     
 } __packed;

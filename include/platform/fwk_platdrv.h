@@ -31,43 +31,43 @@ struct fwk_id_table
 
 typedef struct fwk_platdrv
 {
-	kint32_t (*probe) 	(struct fwk_platdev *sprt_dev);
-	kint32_t (*remove) (struct fwk_platdev *sprt_dev);
+	kint32_t (*probe) 	(struct fwk_platdev *sptr_dev);
+	kint32_t (*remove) (struct fwk_platdev *sptr_dev);
 
-	struct fwk_id_table *sprt_idTable;
+	struct fwk_id_table *sptr_idTable;
 	kusize_t num_idTable;
 
-	struct fwk_driver sgrt_driver;
+	struct fwk_driver sgtc_driver;
 	
 } srt_fwk_platdrv_t;
 
 /*!< The functions */
-extern kint32_t fwk_driver_register(struct fwk_driver *sprt_driver);
-extern kint32_t fwk_driver_unregister(struct fwk_driver *sprt_driver);
-extern kint32_t fwk_register_platdriver(struct fwk_platdrv *sprt_platdrv);
-extern kint32_t fwk_unregister_platdriver(struct fwk_platdrv *sprt_platdrv);
+extern kint32_t fwk_driver_register(struct fwk_driver *sptr_driver);
+extern kint32_t fwk_driver_unregister(struct fwk_driver *sptr_driver);
+extern kint32_t fwk_register_platdriver(struct fwk_platdrv *sptr_platdrv);
+extern kint32_t fwk_unregister_platdriver(struct fwk_platdrv *sptr_platdrv);
 
 /*!< API function */
 /*!
  * @brief   fwk_platform_set_drvdata
- * @param   sprt_dev, ptrData
+ * @param   sptr_pdev, ptrData
  * @retval  errno
  * @note    none
  */
-static inline void fwk_platform_set_drvdata(struct fwk_platdev *sprt_dev, void *ptrData)
+static inline void fwk_platform_set_drvdata(struct fwk_platdev *sptr_pdev, void *ptrData)
 {
-	sprt_dev->sgrt_dev.privData = ptrData;
+	sptr_pdev->sgtc_dev.privData = ptrData;
 }
 
 /*!
  * @brief   fwk_platform_get_drvdata
- * @param   sprt_dev
+ * @param   sptr_pdev
  * @retval  privData
  * @note    none
  */
-static inline void *fwk_platform_get_drvdata(struct fwk_platdev *sprt_dev)
+static inline void *fwk_platform_get_drvdata(struct fwk_platdev *sptr_pdev)
 {
-	return sprt_dev->sgrt_dev.privData;
+	return sptr_pdev->sgtc_dev.privData;
 }
 
 #ifdef __cplusplus

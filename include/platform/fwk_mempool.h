@@ -24,14 +24,14 @@
 /*!< The defines */
 typedef enum nrt_gfp
 {
-    NR_KMEM_ZERO = mrt_bit(0),
-    NR_KMEM_WAIT = mrt_bit(1),
+    NR_KMEM_ZERO = mr_bit(0),
+    NR_KMEM_WAIT = mr_bit(1),
     NR_KMEM_NOWAIT = 0,
 
-    NR_KMEM_NORMAL = mrt_bit(25),                                /*!< memory for kernel heap */
-    NR_KMEM_FBUFFER = mrt_bit(26),                               /*!< memory for framebuffer */
-    NR_KMEM_FIXDATA = mrt_bit(27),                               /*!< memory for fixed data */
-    NR_KMEM_SK_BUFF = mrt_bit(28),                               /*!< memory for sk_buff */
+    NR_KMEM_NORMAL = mr_bit(25),                                /*!< memory for kernel heap */
+    NR_KMEM_FBUFFER = mr_bit(26),                               /*!< memory for framebuffer */
+    NR_KMEM_FIXDATA = mr_bit(27),                               /*!< memory for fixed data */
+    NR_KMEM_SK_BUFF = mr_bit(28),                               /*!< memory for sk_buff */
 
     NR_KMEM_KERNEL = NR_KMEM_WAIT | NR_KMEM_NORMAL,
     NR_KMEM_ATOMIC = NR_KMEM_NOWAIT | NR_KMEM_NORMAL,

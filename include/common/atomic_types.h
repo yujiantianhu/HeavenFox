@@ -39,11 +39,11 @@ typedef struct atomic srt_atomic_t;
 /*!< The functions */
 /*!
  * @brief   atomic_add
- * @param   i, sprt_atomic
+ * @param   i, sptr_atomic
  * @retval  none
  * @note    add of atomic
  */
-static inline void atomic_add(kint32_t i, srt_atomic_t *sprt_atomic)
+static inline void atomic_add(kint32_t i, srt_atomic_t *sptr_atomic)
 {
 	kutype_t flag;
 	kuint32_t result;
@@ -56,18 +56,18 @@ static inline void atomic_add(kint32_t i, srt_atomic_t *sprt_atomic)
 		"	teq %1, #0x0		\n\t"
 		"	bne 1b				\n\t"
 		: "=&r"(result), "=&r"(flag)
-		: "r"(i), "r"(&sprt_atomic->counter)
+		: "r"(i), "r"(&sptr_atomic->counter)
 		: "cc"
 	);
 }
 
 /*!
  * @brief   atomic_sub
- * @param   i, sprt_atomic
+ * @param   i, sptr_atomic
  * @retval  none
  * @note    subtract of atomic
  */
-static inline void atomic_sub(kint32_t i, srt_atomic_t *sprt_atomic)
+static inline void atomic_sub(kint32_t i, srt_atomic_t *sptr_atomic)
 {
 	kutype_t flag;
 	kuint32_t result;
@@ -80,18 +80,18 @@ static inline void atomic_sub(kint32_t i, srt_atomic_t *sprt_atomic)
 		"	teq %1, #0x0		\n\t"
 		"	bne 1b				\n\t"
 		: "=&r"(result), "=&r"(flag)
-		: "r"(i), "r"(&sprt_atomic->counter)
+		: "r"(i), "r"(&sptr_atomic->counter)
 		: "cc"
 	);
 }
 
 /*!
  * @brief   atomic_mul
- * @param   i, sprt_atomic
+ * @param   i, sptr_atomic
  * @retval  none
  * @note    multiply of atomic
  */
-static inline void atomic_mul(kint32_t i, srt_atomic_t *sprt_atomic)
+static inline void atomic_mul(kint32_t i, srt_atomic_t *sptr_atomic)
 {
 	kutype_t flag;
 	kuint32_t result;
@@ -104,18 +104,18 @@ static inline void atomic_mul(kint32_t i, srt_atomic_t *sprt_atomic)
 		"	teq %1, #0x0		\n\t"
 		"	bne 1b				\n\t"
 		: "=&r"(result), "=&r"(flag)
-		: "r"(i), "r"(&sprt_atomic->counter)
+		: "r"(i), "r"(&sptr_atomic->counter)
 		: "cc"
 	);
 }
 
 /*!
  * @brief   atomic_sdiv
- * @param   i, sprt_atomic
+ * @param   i, sptr_atomic
  * @retval  none
  * @note    signed divide of atomic
  */
-static inline void atomic_udiv(kuint32_t i, srt_atomic_t *sprt_atomic)
+static inline void atomic_udiv(kuint32_t i, srt_atomic_t *sptr_atomic)
 {
 #if 0
 	kutype_t flag;
@@ -129,44 +129,44 @@ static inline void atomic_udiv(kuint32_t i, srt_atomic_t *sprt_atomic)
 		"	teq %1, #0x0		\n\t"
 		"	bne 1b				\n\t"
 		: "=&r"(result), "=&r"(flag)
-		: "r"(i), "r"(&sprt_atomic->counter)
+		: "r"(i), "r"(&sptr_atomic->counter)
 		: "cc"
 	);
 
 #else
-	srt_atomic_t sgrt_temp = {};
+	srt_atomic_t sgtc_temp = {};
 
-	while (sprt_atomic->counter >= i)
+	while (sptr_atomic->counter >= i)
 	{
-		atomic_sub(i, sprt_atomic);
-		atomic_add(1, &sgrt_temp);
+		atomic_sub(i, sptr_atomic);
+		atomic_add(1, &sgtc_temp);
 	}
 
-	sprt_atomic->counter = sgrt_temp.counter;
+	sptr_atomic->counter = sgtc_temp.counter;
 
 #endif
 }
 
 /*!
  * @brief   atomic_inc
- * @param   sprt_atomic
+ * @param   sptr_atomic
  * @retval  none
  * @note    increment of atomic
  */
-static inline void atomic_inc(srt_atomic_t *sprt_atomic)
+static inline void atomic_inc(srt_atomic_t *sptr_atomic)
 {
-    atomic_add(1, sprt_atomic);
+    atomic_add(1, sptr_atomic);
 }
 
 /*!
  * @brief   atomic_dec
- * @param   sprt_atomic
+ * @param   sptr_atomic
  * @retval  none
  * @note    decrement of atomic
  */
-static inline void atomic_dec(srt_atomic_t *sprt_atomic)
+static inline void atomic_dec(srt_atomic_t *sptr_atomic)
 {
-    atomic_sub(1, sprt_atomic);
+    atomic_sub(1, sptr_atomic);
 }
 
 /*!

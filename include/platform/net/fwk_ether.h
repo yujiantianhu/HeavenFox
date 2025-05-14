@@ -87,7 +87,7 @@ struct fwk_eth_hdr
 } __packed;
 
 /*!< The functions */
-extern kint16_t fwk_eth_type_trans(struct fwk_sk_buff *sprt_skb, struct fwk_net_device *sprt_ndev);
+extern kint16_t fwk_eth_type_trans(struct fwk_sk_buff *sptr_skb, struct fwk_net_device *sptr_ndev);
 
 /*!< API functions */
 static inline void fwk_eth_random_addr(kuint8_t *addr)

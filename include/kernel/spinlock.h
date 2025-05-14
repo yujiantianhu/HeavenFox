@@ -24,39 +24,39 @@
 /*!< The defines */
 typedef struct spin_lock
 {
-	struct atomic sgrt_atc;
+	struct atomic sgtc_atc;
 	kuint32_t flag;
 
 } srt_spin_lock_t;
 
 #define DECLARE_SPIN_LOCK(lock)	\
-	struct spin_lock lock = { .sgrt_atc = ATOMIC_INIT(), .flag = 0 }
+	struct spin_lock lock = { .sgtc_atc = ATOMIC_INIT(), .flag = 0 }
 
 #define SPIN_LOCK_INIT()	\
-	{ .sgrt_atc = ATOMIC_INIT(), .flag = 0 }
+	{ .sgtc_atc = ATOMIC_INIT(), .flag = 0 }
 
 /*!< The functions */
-extern void spin_lock_init(struct spin_lock *sprt_lock);
-extern void spin_lock(struct spin_lock *sprt_lock);
-extern void spin_unlock(struct spin_lock *sprt_lock);
-extern kint32_t spin_try_lock(struct spin_lock *sprt_lock);
-extern void spin_lock_irq(struct spin_lock *sprt_lock);
-extern kint32_t spin_try_lock_irq(struct spin_lock *sprt_lock);
-extern void spin_unlock_irq(struct spin_lock *sprt_lock);
-extern void spin_lock_irqsave(struct spin_lock *sprt_lock);
-extern kint32_t spin_try_lock_irqsave(struct spin_lock *sprt_lock);
-extern void spin_unlock_irqrestore(struct spin_lock *sprt_lock);
+extern void spin_lock_init(struct spin_lock *sptr_lock);
+extern void spin_lock(struct spin_lock *sptr_lock);
+extern void spin_unlock(struct spin_lock *sptr_lock);
+extern kint32_t spin_try_lock(struct spin_lock *sptr_lock);
+extern void spin_lock_irq(struct spin_lock *sptr_lock);
+extern kint32_t spin_try_lock_irq(struct spin_lock *sptr_lock);
+extern void spin_unlock_irq(struct spin_lock *sptr_lock);
+extern void spin_lock_irqsave(struct spin_lock *sptr_lock);
+extern kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock);
+extern void spin_unlock_irqrestore(struct spin_lock *sptr_lock);
 
 /*!< API functions */
 /*!
  * @brief   check if spinlock is locked
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  locked(true) / unlocked(false)
  * @note    none
  */
-static inline kbool_t spin_is_locked(struct spin_lock *sprt_lock)
+static inline kbool_t spin_is_locked(struct spin_lock *sptr_lock)
 {
-	return !!ATOMIC_READ(&sprt_lock->sgrt_atc);
+	return !!ATOMIC_READ(&sptr_lock->sgtc_atc);
 }
 
 #ifdef __cplusplus

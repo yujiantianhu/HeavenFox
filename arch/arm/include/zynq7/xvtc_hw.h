@@ -621,7 +621,7 @@ extern "C" {
 *
 ******************************************************************************/
 #define XVtc_ReadReg(BaseAddress, RegOffset) \
-				mrt_readl(BaseAddress + RegOffset)
+				mr_readl(BaseAddress + RegOffset)
 
 /*****************************************************************************/
 /**
@@ -640,7 +640,7 @@ extern "C" {
 *
 ******************************************************************************/
 #define XVtc_WriteReg(BaseAddress, RegOffset, Data) 	\
-				mrt_writel(Data, BaseAddress + RegOffset)
+				mr_writel(Data, BaseAddress + RegOffset)
 /*@}*/
 
 /**************************** Type Definitions *******************************/

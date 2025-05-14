@@ -15,11 +15,14 @@
 #include <common/io_stream.h>
 #include <common/api_string.h>
 #include <common/mem_manage.h>
+#include <common/list_types.h>
 #include <kernel/kernel.h>
 #include <kernel/spinlock.h>
 #include <platform/fwk_mempool.h>
 
 /*!< The globals */
+static DECLARE_LIST_HEAD(sgtc_io_stream_devices);
+static struct spin_lock sgtc_io_stream_lock = SPIN_LOCK_INIT();
 
 /*!< API function */
 /*!
@@ -28,9 +31,16 @@
  * @retval  none
  * @note    character output
  */
-__weak void io_putc(const kubyte_t ch)
+void io_putc(const kubyte_t ch)
 {
+    struct io_stream_dev *sptr_stream;
 
+    foreach_list_next_entry(sptr_stream, &sgtc_io_stream_devices, sgtc_link)
+    {
+        if (sptr_stream->is_opened && 
+            sptr_stream->_putc)
+            sptr_stream->_putc(ch);
+    }
 }
 
 /*!
@@ -39,9 +49,16 @@ __weak void io_putc(const kubyte_t ch)
  * @retval  none
  * @note    string output
  */
-__weak void io_putstr(const kubyte_t *msgs, kusize_t size)
+void io_putstr(const kubyte_t *msgs, kusize_t size)
 {
+    struct io_stream_dev *sptr_stream;
 
+    foreach_list_next_entry(sptr_stream, &sgtc_io_stream_devices, sgtc_link)
+    {
+        if (sptr_stream->is_opened && 
+            sptr_stream->_putstr)
+            sptr_stream->_putstr(msgs, size);
+    }
 }
 
 /*!
@@ -50,8 +67,21 @@ __weak void io_putstr(const kubyte_t *msgs, kusize_t size)
  * @retval  none
  * @note    character read
  */
-__weak kubyte_t io_getc(kubyte_t *ch)
+kubyte_t io_getc(kubyte_t *ch)
 {
+    struct io_stream_dev *sptr_stream;
+    kubyte_t ret;
+
+    foreach_list_next_entry(sptr_stream, &sgtc_io_stream_devices, sgtc_link)
+    {
+        if (sptr_stream->is_opened && 
+            sptr_stream->_getc)
+        {
+            if ((ret = sptr_stream->_getc(ch)))
+                return ret;
+        }
+    }
+
     return 0;
 }
 
@@ -61,9 +91,122 @@ __weak kubyte_t io_getc(kubyte_t *ch)
  * @retval  none
  * @note    string read
  */
-__weak kssize_t io_getstr(kubyte_t *msgs, kusize_t size)
+kssize_t io_getstr(kubyte_t *msgs, kusize_t size)
 {
-    return 0;
+    struct io_stream_dev *sptr_stream;
+    kssize_t ret, flag = 0;
+
+    foreach_list_next_entry(sptr_stream, &sgtc_io_stream_devices, sgtc_link)
+    {
+        if (sptr_stream->is_opened && 
+            sptr_stream->_getstr)
+        {
+            ret = sptr_stream->_getstr(msgs, size);
+            if (ret > 0)
+                return ret;
+            if (ret < 0)
+                flag = ret;
+        }
+    }
+
+    return flag ? (-ER_EMPTY) : 0;
+}
+
+/*!
+ * @brief   register new IO
+ * @param   sptr_stream
+ * @retval  errno
+ * @note    none
+ */
+kint32_t register_io_stream(struct io_stream_dev *sptr_stream)
+{
+    if (!sptr_stream)
+        return -ER_NODEV;
+
+    if (!(*sptr_stream->name) || 
+        !mr_list_head_empty(&sptr_stream->sgtc_link))
+        return -ER_INVALID;
+
+    spin_lock_irqsave(&sgtc_io_stream_lock);
+    list_head_add_tail(&sgtc_io_stream_devices, &sptr_stream->sgtc_link);
+    spin_unlock_irqrestore(&sgtc_io_stream_lock);
+
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   unregister old IO
+ * @param   sptr_stream
+ * @retval  none
+ * @note    none
+ */
+void unregister_io_stream(struct io_stream_dev *sptr_stream)
+{
+    if (!sptr_stream)
+        return;
+
+    spin_lock_irqsave(&sgtc_io_stream_lock);
+    list_head_del(&sptr_stream->sgtc_link);
+    spin_unlock_irqrestore(&sgtc_io_stream_lock);
+}
+
+/*!
+ * @brief   enable io_stream device
+ * @param   name
+ * @retval  none
+ * @note    none
+ */
+void io_stream_enable(const kchar_t *name)
+{
+    struct io_stream_dev *sptr_stream;
+
+    foreach_list_next_entry(sptr_stream, &sgtc_io_stream_devices, sgtc_link)
+    {
+        if (!kstrcmp(sptr_stream->name, name))
+        {
+            sptr_stream->is_opened = true;
+            return;
+        }
+    }
+}
+
+/*!
+ * @brief   disable io_stream device
+ * @param   name
+ * @retval  none
+ * @note    none
+ */
+void io_stream_disable(const kchar_t *name)
+{
+    struct io_stream_dev *sptr_stream;
+
+    foreach_list_next_entry(sptr_stream, &sgtc_io_stream_devices, sgtc_link)
+    {
+        if (!kstrcmp(sptr_stream->name, name))
+        {
+            sptr_stream->is_opened = false;
+            return;
+        }
+    }
+}
+
+/*!
+ * @brief   find io_stream device
+ * @param   name
+ * @retval  sptr_stream
+ * @note    none
+ */
+struct io_stream_dev *find_io_stream_dev(const kchar_t *name)
+{
+    struct io_stream_dev *sptr_stream;
+
+    foreach_list_next_entry(sptr_stream, &sgtc_io_stream_devices, sgtc_link)
+    {
+        if (!kstrcmp(sptr_stream->name, name))
+            return sptr_stream;
+    }
+
+    return mr_nullptr;
 }
 
 /*!
@@ -119,8 +262,8 @@ static kint32_t bitmap_find_first_bit(kuint8_t *bitmap, kuint32_t start, kusize_
     /*!< search by per 8 bits */
     for (index = start; index < total_bits; index++)
     {
-        area_mask = mrt_udiv(index, bit_per_map);
-        bit_mask = mrt_urem(index, bit_per_map);
+        area_mask = mr_udiv(index, bit_per_map);
+        bit_mask = mr_urem(index, bit_per_map);
 
         if ((!!(*(bitmap + area_mask) & (1 << bit_mask))) == value)
             break;
@@ -172,8 +315,8 @@ static void bitmap_set_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_
 
     for (index = start; index < end; index++)
     {
-        area_mask = mrt_udiv(index, bit_per_map);
-        bit_mask = mrt_urem(index, bit_per_map);
+        area_mask = mr_udiv(index, bit_per_map);
+        bit_mask = mr_urem(index, bit_per_map);
 
         if (value)
             *(bitmap + area_mask) |= (1 << bit_mask);

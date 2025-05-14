@@ -24,79 +24,79 @@
 /*!< API functions */
 /*!
  * @brief   initial mutex lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    set count = 0
  */
-void mutex_init(struct mutex_lock *sprt_lock)
+void mutex_init(struct mutex_lock *sptr_lock)
 {
-    if (sprt_lock)
-        ATOMIC_SET(&sprt_lock->sgrt_atc, 0);
+    if (sptr_lock)
+        ATOMIC_SET(&sptr_lock->sgtc_atc, 0);
 }
 
 /*!
  * @brief   mutex lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    if it has been locked, schedule another thread; otherwise, lock it
  */
-void mutex_lock(struct mutex_lock *sprt_lock)
+void mutex_lock(struct mutex_lock *sptr_lock)
 {
-    if (!mrt_current)
+    if (!mr_current)
         return;
 
-    while (mutex_is_locked(sprt_lock))
+    while (mutex_is_locked(sptr_lock))
         schedule_thread();
     
-    atomic_inc(&sprt_lock->sgrt_atc);
+    atomic_inc(&sptr_lock->sgtc_atc);
 }
 
 /*!
  * @brief   mutex wait
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    if it has been locked, schedule another thread
  */
-void mutex_wait(struct mutex_lock *sprt_lock)
+void mutex_wait(struct mutex_lock *sptr_lock)
 {
-    if (!mrt_current)
+    if (!mr_current)
         return;
 
-    while (mutex_is_locked(sprt_lock))
+    while (mutex_is_locked(sptr_lock))
         schedule_thread();
 }
 
 /*!
  * @brief   mutex lock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    if it has been locked, return directly
  */
-kint32_t mutex_try_lock(struct mutex_lock *sprt_lock)
+kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
 {
-    if (!mrt_current)
+    if (!mr_current)
         return -ER_FORBID;
 
-    if (mutex_is_locked(sprt_lock))
+    if (mutex_is_locked(sptr_lock))
         return -ER_BUSY;
     
-    atomic_inc(&sprt_lock->sgrt_atc);
+    atomic_inc(&sptr_lock->sgtc_atc);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   mutex unlock
- * @param   sprt_lock
+ * @param   sptr_lock
  * @retval  none
  * @note    none
  */
-void mutex_unlock(struct mutex_lock *sprt_lock)
+void mutex_unlock(struct mutex_lock *sptr_lock)
 {
-    if (!mrt_current || !mutex_is_locked(sprt_lock))
+    if (!mr_current || !mutex_is_locked(sptr_lock))
         return;
     
-    atomic_dec(&sprt_lock->sgrt_atc);
+    atomic_dec(&sptr_lock->sgtc_atc);
 }
 
 /*!< end of file */

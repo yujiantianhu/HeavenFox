@@ -46,8 +46,8 @@ static void *light_task_entry(void *args)
     crt_task_t *cprt_this = (crt_task_t *)args;
     kbool_t status = 0;
     kint32_t fd;
-    struct mailbox &sgrt_mb = cprt_this->get_mailbox();
-    struct mail *sprt_mail;
+    struct mailbox &sgtc_mb = cprt_this->get_mailbox();
+    struct mail *sptr_mail;
     tid_t tid = cprt_this->get_self();
     
     cout << __FUNCTION__ << " is running, which tid is: " << tid << endl;
@@ -58,14 +58,14 @@ static void *light_task_entry(void *args)
         if (fd < 0)
             goto END1;
         
-        sprt_mail = mail_recv(&sgrt_mb, 0);
-        if (!isValid(sprt_mail))
+        sptr_mail = mail_recv(&sgtc_mb, 0);
+        if (!isValid(sptr_mail))
             goto END2;
 
-        if ((sprt_mail->sprt_msg->type == NR_MAIL_TYPE_SERIAL) ||
-            (sprt_mail->sprt_msg->type == NR_MAIL_TYPE_KEY))
+        if ((sptr_mail->sptr_msg->type == NR_MAIL_TYPE_SERIAL) ||
+            (sptr_mail->sptr_msg->type == NR_MAIL_TYPE_KEY))
         {
-            kchar_t *buffer = (kchar_t *)sprt_mail->sprt_msg[0].buffer;
+            kchar_t *buffer = (kchar_t *)sptr_mail->sptr_msg[0].buffer;
 
             if (!kstrncmp(buffer, "on", 2))
                 status = 1;
@@ -74,7 +74,7 @@ static void *light_task_entry(void *args)
         }
 
         virt_write(fd, &status, 1);
-        mail_recv_finish(sprt_mail);
+        mail_recv_finish(sptr_mail);
 
 END2:
         virt_close(fd);
@@ -102,8 +102,8 @@ kint32_t light_task_init(void)
     if (!cprt_task)
         return -ER_FAILD;
 
-    struct mailbox &sgrt_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgrt_mb, cprt_task->get_self(), "light-task-mailbox");
+    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cprt_task->get_self(), "light-task-mailbox");
 
     return ER_NORMAL;
 }

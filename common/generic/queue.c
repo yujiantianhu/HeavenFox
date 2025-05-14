@@ -29,217 +29,217 @@
  */
 struct pq_queue *pq_queue_create(kint32_t type, kusize_t data_len)
 {
-    struct pq_queue *sprt_pq;
+    struct pq_queue *sptr_pq;
 
-    sprt_pq = kmalloc(sizeof(*sprt_pq) + data_len * sizeof(struct pq_data), GFP_KERNEL);
-    if (!isValid(sprt_pq))
-        return mrt_nullptr;
+    sptr_pq = kmalloc(sizeof(*sptr_pq) + data_len * sizeof(struct pq_data), GFP_KERNEL);
+    if (!isValid(sptr_pq))
+        return mr_nullptr;
 
-    sprt_pq->type = type;
-    sprt_pq->tot_len = data_len;
-    sprt_pq->head = sprt_pq->tail = sprt_pq->len = 0;
+    sptr_pq->type = type;
+    sptr_pq->tot_len = data_len;
+    sptr_pq->head = sptr_pq->tail = sptr_pq->len = 0;
 
-    return sprt_pq;
+    return sptr_pq;
 }
 
 /*!
  * @brief   destroy queue
- * @param   sprt_pq
+ * @param   sptr_pq
  * @retval  none
- * @note    sprt_pqd->release: function used to destroy sprt_pqd
+ * @note    sptr_pqd->release: function used to destroy sptr_pqd
  */
-void pq_queue_destroy(struct pq_queue *sprt_pq)
+void pq_queue_destroy(struct pq_queue *sptr_pq)
 {
-    struct pq_data *sprt_pqd;
+    struct pq_data *sptr_pqd;
 
-    if (!sprt_pq->len)
+    if (!sptr_pq->len)
         goto END;
 
-    while (sprt_pq->len--)
+    while (sptr_pq->len--)
     {
-        sprt_pqd = sprt_pq->sprt_data[sprt_pq->tail];
-        sprt_pq->tail = (sprt_pq->tail + 1) % sprt_pq->tot_len;
+        sptr_pqd = sptr_pq->sptr_data[sptr_pq->tail];
+        sptr_pq->tail = (sptr_pq->tail + 1) % sptr_pq->tot_len;
 
-        if (sprt_pqd->release)
-            sprt_pqd->release(sprt_pqd);
+        if (sptr_pqd->release)
+            sptr_pqd->release(sptr_pqd);
     }
 
 END:
-    kfree(sprt_pq);
+    kfree(sptr_pq);
 }
 
 /*!
  * @brief   queue add new member
- * @param   sprt_pq, sprt_data (new)
+ * @param   sptr_pq, sptr_data (new)
  * @retval  error code
  * @note    if it is a ring queue and the queue is full, delete the oldest member
  */
-kint32_t pq_enqueue(struct pq_queue *sprt_pq, struct pq_data *sprt_data)
+kint32_t pq_enqueue(struct pq_queue *sptr_pq, struct pq_data *sptr_data)
 {
-    if (sprt_pq->len < sprt_pq->tot_len)
-        sprt_pq->len++;
+    if (sptr_pq->len < sptr_pq->tot_len)
+        sptr_pq->len++;
     else
     {
-        if (sprt_pq->type != NR_PQ_RING)
+        if (sptr_pq->type != NR_PQ_RING)
             return -ER_FULL;
         else
         {
-            struct pq_data *sprt_old;
+            struct pq_data *sptr_old;
 
-            sprt_old = sprt_pq->sprt_data[sprt_pq->tail];
-            sprt_pq->tail = (sprt_pq->tail + 1) % sprt_pq->tot_len;
+            sptr_old = sptr_pq->sptr_data[sptr_pq->tail];
+            sptr_pq->tail = (sptr_pq->tail + 1) % sptr_pq->tot_len;
 
-            if (sprt_old->release)
-                sprt_old->release(sprt_old);
+            if (sptr_old->release)
+                sptr_old->release(sptr_old);
         }
     }
 
-    sprt_pq->sprt_data[sprt_pq->head] = sprt_data;
-    sprt_pq->head = (sprt_pq->head + 1) % sprt_pq->tot_len;       
+    sptr_pq->sptr_data[sptr_pq->head] = sptr_data;
+    sptr_pq->head = (sptr_pq->head + 1) % sptr_pq->tot_len;       
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   get member from queue
- * @param   sprt_pq
+ * @param   sptr_pq
  * @retval  member
  * @note    none
  */
-void *pq_dequeue(struct pq_queue *sprt_pq)
+void *pq_dequeue(struct pq_queue *sptr_pq)
 {
-    struct pq_data *sprt_pqd;
+    struct pq_data *sptr_pqd;
 
-    if (!sprt_pq->len)
-        return mrt_nullptr;
+    if (!sptr_pq->len)
+        return mr_nullptr;
 
-    sprt_pqd = sprt_pq->sprt_data[sprt_pq->tail];
-    sprt_pq->tail = (sprt_pq->tail + 1) % sprt_pq->tot_len;
-    sprt_pq->len--;
+    sptr_pqd = sptr_pq->sptr_data[sptr_pq->tail];
+    sptr_pq->tail = (sptr_pq->tail + 1) % sptr_pq->tot_len;
+    sptr_pq->len--;
 
-    return sprt_pqd;
+    return sptr_pqd;
 }
 
 /*!
  * @brief   get member from queue after checking
- * @param   sprt_pq
+ * @param   sptr_pq
  * @param   limit: the size of buffer (if buffer is too small, forbiden dequeue)
  * @retval  member
  * @note    none
  */
-void *pq_dequeue_with_chk(struct pq_queue *sprt_pq, kusize_t limit)
+void *pq_dequeue_with_chk(struct pq_queue *sptr_pq, kusize_t limit)
 {
-    struct pq_data *sprt_pqd;
+    struct pq_data *sptr_pqd;
 
-    if (!sprt_pq->len)
-        return mrt_nullptr;
+    if (!sptr_pq->len)
+        return mr_nullptr;
 
-    sprt_pqd = sprt_pq->sprt_data[sprt_pq->tail];
-    if (sprt_pqd->dequeue_chk)
+    sptr_pqd = sptr_pq->sptr_data[sptr_pq->tail];
+    if (sptr_pqd->dequeue_chk)
     {
-        if (!sprt_pqd->dequeue_chk(sprt_pqd, limit))
+        if (!sptr_pqd->dequeue_chk(sptr_pqd, limit))
             return ERR_PTR(-ER_LACK);
     }
 
-    sprt_pq->tail = (sprt_pq->tail + 1) % sprt_pq->tot_len;
-    sprt_pq->len--;
+    sptr_pq->tail = (sptr_pq->tail + 1) % sptr_pq->tot_len;
+    sptr_pq->len--;
 
-    return sprt_pqd;
+    return sptr_pqd;
 }
 
 /*!
  * @brief   just read member in queue
- * @param   sprt_pq
+ * @param   sptr_pq
  * @retval  member
  * @note    none
  */
-void *pq_lookback(struct pq_queue *sprt_pq, kint32_t *base)
+void *pq_lookback(struct pq_queue *sptr_pq, kint32_t *base)
 {
     kuint32_t cur_index = 0;
 
-    if (!sprt_pq->len)
-        return mrt_nullptr;
+    if (!sptr_pq->len)
+        return mr_nullptr;
 
     if (*base < 0)
-        cur_index = (sprt_pq->head + sprt_pq->tot_len - 1) % sprt_pq->tot_len;
+        cur_index = (sptr_pq->head + sptr_pq->tot_len - 1) % sptr_pq->tot_len;
     else
     {
-        cur_index = ((*base) + sprt_pq->tot_len - 1) % sprt_pq->tot_len;
+        cur_index = ((*base) + sptr_pq->tot_len - 1) % sptr_pq->tot_len;
 
-        if (sprt_pq->head < sprt_pq->tail)
+        if (sptr_pq->head < sptr_pq->tail)
         {
-            if ((cur_index < sprt_pq->tail) &&
-                (cur_index >= sprt_pq->head))
+            if ((cur_index < sptr_pq->tail) &&
+                (cur_index >= sptr_pq->head))
                 goto fail;
         }
         else
         {
-            if ((cur_index < sprt_pq->tail) ||
-                (cur_index >= sprt_pq->head))
+            if ((cur_index < sptr_pq->tail) ||
+                (cur_index >= sptr_pq->head))
                 goto fail;
         }
     }
 
     *base = cur_index;
-    return sprt_pq->sprt_data[cur_index];
+    return sptr_pq->sptr_data[cur_index];
 
 fail:
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
  * @brief   just read member in queue
- * @param   sprt_pq
+ * @param   sptr_pq
  * @retval  member
  * @note    none
  */
-void *pq_lookfront(struct pq_queue *sprt_pq, kint32_t *base)
+void *pq_lookfront(struct pq_queue *sptr_pq, kint32_t *base)
 {
     kuint32_t cur_index = 0;
 
-    if (!sprt_pq->len)
-        return mrt_nullptr;
+    if (!sptr_pq->len)
+        return mr_nullptr;
 
     if (*base < 0)
     {
-//      cur_index = sprt_pq->tail % sprt_pq->tot_len;
-        return mrt_nullptr;
+//      cur_index = sptr_pq->tail % sptr_pq->tot_len;
+        return mr_nullptr;
     }
 
 //  else
 //  {
-        cur_index = ((*base) + 1) % sprt_pq->tot_len;
+        cur_index = ((*base) + 1) % sptr_pq->tot_len;
 
-        if (sprt_pq->head < sprt_pq->tail)
+        if (sptr_pq->head < sptr_pq->tail)
         {
-            if ((cur_index < sprt_pq->tail) &&
-                (cur_index >= sprt_pq->head))
+            if ((cur_index < sptr_pq->tail) &&
+                (cur_index >= sptr_pq->head))
                 goto fail;
         }
         else
         {
-            if ((cur_index < sprt_pq->tail) ||
-                (cur_index >= sprt_pq->head))
+            if ((cur_index < sptr_pq->tail) ||
+                (cur_index >= sptr_pq->head))
                 goto fail;
         }
 //  }
 
     *base = cur_index;
-    return sprt_pq->sprt_data[cur_index];
+    return sptr_pq->sptr_data[cur_index];
 
 fail:
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
  * @brief   get current number of members
- * @param   sprt_pq
+ * @param   sptr_pq
  * @retval  lenth
  * @note    none
  */
-kint32_t pq_queue_get_size(struct pq_queue *sprt_pq)
+kint32_t pq_queue_get_size(struct pq_queue *sptr_pq)
 {
-    return sprt_pq->len;
+    return sptr_pq->len;
 }
 
 /* end of file */

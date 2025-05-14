@@ -27,11 +27,11 @@
 /*!< API functions */
 /*!
  * @brief   cmd 'kill': excute function
- * @param   sprt_cmd, argc, argv
+ * @param   sptr_cmd, argc, argv
  * @retval  errno
  * @note    none
  */
-static kint32_t term_cmd_kill_signal(struct term_cmd *sprt_cmd, kint32_t argc, kchar_t **argv)
+static kint32_t term_cmd_kill_signal(struct term_cmd *sptr_cmd, kint32_t argc, kchar_t **argv)
 {
     kint32_t signal;
     tid_t tid;
@@ -69,7 +69,7 @@ static kint32_t term_cmd_kill_signal(struct term_cmd *sprt_cmd, kint32_t argc, k
 
         case 2:
             if (!strcmp(argv[1], "--help"))
-                sprt_cmd->help();
+                sptr_cmd->help();
             else
                 goto fail;
 
@@ -105,14 +105,14 @@ static void term_cmd_kill_help(void)
  */
 void term_cmd_add_kill(void)
 {
-    struct term_cmd *sprt_cmd;
+    struct term_cmd *sptr_cmd;
 
-    sprt_cmd = term_cmd_allocate("kill", GFP_KERNEL);
-    if (!isValid(sprt_cmd))
+    sptr_cmd = term_cmd_allocate("kill", GFP_KERNEL);
+    if (!isValid(sptr_cmd))
         return;
 
-    sprt_cmd->do_excute = term_cmd_kill_signal;
-    sprt_cmd->help = term_cmd_kill_help;
+    sptr_cmd->do_excute = term_cmd_kill_signal;
+    sptr_cmd->help = term_cmd_kill_help;
 
-    term_cmd_add(sprt_cmd);
+    term_cmd_add(sptr_cmd);
 }

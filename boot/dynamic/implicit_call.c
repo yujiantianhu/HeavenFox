@@ -109,7 +109,7 @@ kint32_t board_early_initcall(void)
 #else
 	dync_init_t *pFunc_init;
 
-	mrt_foreach_early_init(pFunc_init)
+	mr_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
 			return -ER_ERROR;
@@ -134,7 +134,7 @@ void board_early_exitcall(void)
 #else
 	dync_exit_t *pFunc_exit;
 
-	mrt_foreach_early_exit(pFunc_exit)
+	mr_foreach_early_exit(pFunc_exit)
 	{
         (*pFunc_exit)();
 	}
@@ -156,7 +156,7 @@ kint32_t board_late_initcall(void)
 #else
 	dync_init_t *pFunc_init;
 
-	mrt_foreach_early_init(pFunc_init)
+	mr_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
 			return -ER_ERROR;
@@ -181,7 +181,7 @@ void board_late_exitcall(void)
 #else
 	dync_exit_t *pFunc_exit;
 
-	mrt_foreach_early_exit(pFunc_exit)
+	mr_foreach_early_exit(pFunc_exit)
 	{
         (*pFunc_exit)();
 	}
@@ -203,7 +203,7 @@ kint32_t system_kernel_initcall(void)
 #else
 	dync_init_t *pFunc_init;
 
-	mrt_foreach_early_init(pFunc_init)
+	mr_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
 			return -ER_ERROR;
@@ -228,7 +228,7 @@ void system_kernel_exitcall(void)
 #else
 	dync_exit_t *pFunc_exit;
 
-	mrt_foreach_early_exit(pFunc_exit)
+	mr_foreach_early_exit(pFunc_exit)
 	{
         (*pFunc_exit)();
 	}
@@ -250,7 +250,7 @@ kint32_t filesystem_initcall(void)
 #else
 	dync_init_t *pFunc_init;
 
-	mrt_foreach_early_init(pFunc_init)
+	mr_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
 			return -ER_ERROR;
@@ -275,7 +275,7 @@ void filesystem_exitcall(void)
 #else
 	dync_exit_t *pFunc_exit;
 
-	mrt_foreach_early_exit(pFunc_exit)
+	mr_foreach_early_exit(pFunc_exit)
 	{
         (*pFunc_exit)();
 	}
@@ -297,7 +297,7 @@ kint32_t platform_built_initcall(void)
 #else
 	dync_init_t *pFunc_init;
 
-	mrt_foreach_early_init(pFunc_init)
+	mr_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
 			return -ER_ERROR;
@@ -322,7 +322,7 @@ void platform_built_exitcall(void)
 #else
 	dync_exit_t *pFunc_exit;
 
-	mrt_foreach_early_exit(pFunc_exit)
+	mr_foreach_early_exit(pFunc_exit)
 	{
         (*pFunc_exit)();
 	}
@@ -344,7 +344,7 @@ kint32_t platform_reality_initcall(void)
 #else
 	dync_init_t *pFunc_init;
 
-	mrt_foreach_early_init(pFunc_init)
+	mr_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
 			return -ER_ERROR;
@@ -369,7 +369,7 @@ void platform_reality_exitcall(void)
 #else
 	dync_exit_t *pFunc_exit;
 
-	mrt_foreach_early_exit(pFunc_exit)
+	mr_foreach_early_exit(pFunc_exit)
 	{
         (*pFunc_exit)();
 	}
@@ -391,7 +391,7 @@ kint32_t hardware_device_initcall(void)
 #else
 	dync_init_t *pFunc_init;
 
-	mrt_foreach_early_init(pFunc_init)
+	mr_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
 			return -ER_ERROR;
@@ -416,7 +416,7 @@ void hardware_device_exitcall(void)
 #else
 	dync_exit_t *pFunc_exit;
 
-	mrt_foreach_early_exit(pFunc_exit)
+	mr_foreach_early_exit(pFunc_exit)
 	{
         (*pFunc_exit)();
 	}
@@ -438,7 +438,7 @@ kint32_t abstract_driver_initcall(void)
 #else
 	dync_init_t *pFunc_init;
 
-	mrt_foreach_early_init(pFunc_init)
+	mr_foreach_early_init(pFunc_init)
 	{
 		if (0 > ((*pFunc_init)()))
 			return -ER_ERROR;
@@ -463,7 +463,7 @@ void abstract_driver_exitcall(void)
 #else
 	dync_exit_t *pFunc_exit;
 
-	mrt_foreach_early_exit(pFunc_exit)
+	mr_foreach_early_exit(pFunc_exit)
 	{
         (*pFunc_exit)();
 	}

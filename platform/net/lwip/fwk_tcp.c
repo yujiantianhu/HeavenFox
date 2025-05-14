@@ -31,84 +31,84 @@ typedef enum __ERT_TCP_RAW_STATE
 
 struct lwip_tcp_group
 {
-    struct tcp_pcb *sprt_tpcb;
-    struct pq_queue *sprt_pq;
+    struct tcp_pcb *sptr_tpcb;
+    struct pq_queue *sptr_pq;
 
     nrt_tpcb_state_t state;
 };
 
 struct lwip_tcp_data
 {
-    struct tcp_pcb *sprt_tpcb;
-    struct pbuf *sprt_buf;
+    struct tcp_pcb *sptr_tpcb;
+    struct pbuf *sptr_buf;
 
-    struct pq_data sgrt_pqd;
+    struct pq_data sgtc_pqd;
 };
 
 /*!< API functions */
 /*!
  * @brief   release lwip_tcp_data
- * @param   sprt_pqd (member of ring queue)
+ * @param   sptr_pqd (member of ring queue)
  * @retval  none
  * @note    none
  */
-static void lwip_tcp_data_free(struct pq_data *sprt_pqd)
+static void lwip_tcp_data_free(struct pq_data *sptr_pqd)
 {
-    struct lwip_tcp_data *sprt_data;
+    struct lwip_tcp_data *sptr_data;
 
-    sprt_data = mrt_container_of(sprt_pqd, struct lwip_tcp_data, sgrt_pqd);
-    pbuf_free(sprt_data->sprt_buf);
-    kfree(sprt_data);
+    sptr_data = mr_container_of(sptr_pqd, struct lwip_tcp_data, sgtc_pqd);
+    pbuf_free(sptr_data->sptr_buf);
+    kfree(sptr_data);
 }
 
 /*!
  * @brief   check the size of recv buffer is enough
- * @param   sprt_pqd (member of ring queue)
+ * @param   sptr_pqd (member of ring queue)
  * @param   limit (size of recv buffer)
  * @retval  1: enough; 0: no
  * @note    none
  */
-static kbool_t lwip_tcp_data_check(struct pq_data *sprt_pqd, kusize_t limit)
+static kbool_t lwip_tcp_data_check(struct pq_data *sptr_pqd, kusize_t limit)
 {
-    struct lwip_tcp_data *sprt_data;
+    struct lwip_tcp_data *sptr_data;
 
-    sprt_data = mrt_container_of(sprt_pqd, struct lwip_tcp_data, sgrt_pqd);
-    return !!(sprt_data->sprt_buf->len <= limit);
+    sptr_data = mr_container_of(sptr_pqd, struct lwip_tcp_data, sgtc_pqd);
+    return !!(sptr_data->sptr_buf->len <= limit);
 }
 
 /*!
  * @brief   get every rx data from queue with poll ways
- * @param   sprt_tpcb, len (buffer's length)
+ * @param   sptr_tpcb, len (buffer's length)
  * @retval  tcp data
  * @note    none
  */
-static struct lwip_tcp_data *lwip_tcp_raw_poll(struct tcp_pcb *sprt_tpcb, kusize_t len)
+static struct lwip_tcp_data *lwip_tcp_raw_poll(struct tcp_pcb *sptr_tpcb, kusize_t len)
 {
-    struct lwip_tcp_group *sprt_tgrp;
-    struct pq_queue *sprt_pq;
-    struct pq_data *sprt_pqd;
+    struct lwip_tcp_group *sptr_tgrp;
+    struct pq_queue *sptr_pq;
+    struct pq_data *sptr_pqd;
 
-    sprt_tgrp = (struct lwip_tcp_group *)sprt_tpcb->callback_arg;
-    if (!sprt_tgrp)
-        return mrt_nullptr;
+    sptr_tgrp = (struct lwip_tcp_group *)sptr_tpcb->callback_arg;
+    if (!sptr_tgrp)
+        return mr_nullptr;
 
-    sprt_pq = sprt_tgrp->sprt_pq;
-    sprt_pqd = pq_dequeue_with_chk(sprt_pq, len);
-    if (isValid(sprt_pqd))
-        return mrt_container_of(sprt_pqd, struct lwip_tcp_data, sgrt_pqd);
+    sptr_pq = sptr_tgrp->sptr_pq;
+    sptr_pqd = pq_dequeue_with_chk(sptr_pq, len);
+    if (isValid(sptr_pqd))
+        return mr_container_of(sptr_pqd, struct lwip_tcp_data, sgtc_pqd);
 
-    return sprt_pqd ? ERR_PTR(-ER_LACK) : mrt_nullptr;
+    return sptr_pqd ? ERR_PTR(-ER_LACK) : mr_nullptr;
 }
 
 /*!
  * @brief   called by socket_recvfrom
- * @param   sprt_tpcb, buf, ...
+ * @param   sptr_tpcb, buf, ...
  * @retval  size
  * @note    read with blocking
  */
-kssize_t lwip_tcp_raw_recv(struct tcp_pcb *sprt_tpcb, void *buf, kusize_t size)
+kssize_t lwip_tcp_raw_recv(struct tcp_pcb *sptr_tpcb, void *buf, kusize_t size)
 {
-    struct lwip_tcp_data *sprt_data;
+    struct lwip_tcp_data *sptr_data;
     void *payload;
     kssize_t len;
 
@@ -117,21 +117,21 @@ kssize_t lwip_tcp_raw_recv(struct tcp_pcb *sprt_tpcb, void *buf, kusize_t size)
 
     /*!< read one frame */
     do {
-        sprt_data = lwip_tcp_raw_poll(sprt_tpcb, size);
-        if (PTR_ERR(sprt_data) == (-ER_LACK))
+        sptr_data = lwip_tcp_raw_poll(sptr_tpcb, size);
+        if (PTR_ERR(sptr_data) == (-ER_LACK))
         {
             print_err("%s: recv buffer is too small\r\n", __FUNCTION__);
             return -ER_LACK;
         }
-        if (!sprt_data)
+        if (!sptr_data)
             continue;
 
-        payload = sprt_data->sprt_buf->payload;
-        len = sprt_data->sprt_buf->len;
+        payload = sptr_data->sptr_buf->payload;
+        len = sptr_data->sptr_buf->len;
         if (len)
             fwk_copy_to_user(buf, payload, len);
 
-        lwip_tcp_data_free(&sprt_data->sgrt_pqd);
+        lwip_tcp_data_free(&sptr_data->sgtc_pqd);
         break;
 
     } while (1);
@@ -141,31 +141,31 @@ kssize_t lwip_tcp_raw_recv(struct tcp_pcb *sprt_tpcb, void *buf, kusize_t size)
 
 /*!
  * @brief   called by socket_sendto
- * @param   sprt_tpcb, buf, ...
+ * @param   sptr_tpcb, buf, ...
  * @retval  size
  * @note    send (application layer ---> lwip ---> drivers)
  */
-kssize_t lwip_tcp_raw_send(struct tcp_pcb *sprt_tpcb, const void *buf, kusize_t size)
+kssize_t lwip_tcp_raw_send(struct tcp_pcb *sptr_tpcb, const void *buf, kusize_t size)
 {
-    struct lwip_tcp_group *sprt_tgrp;
+    struct lwip_tcp_group *sptr_tgrp;
     err_t err;
 
-    sprt_tgrp = (struct lwip_tcp_group *)sprt_tpcb->callback_arg;
-    if (!sprt_tgrp ||
-        (sprt_tgrp->state == NR_TCP_RAW_CLOSING))
+    sptr_tgrp = (struct lwip_tcp_group *)sptr_tpcb->callback_arg;
+    if (!sptr_tgrp ||
+        (sptr_tgrp->state == NR_TCP_RAW_CLOSING))
         return -ER_TRXERR;
 
-    if (size > tcp_sndbuf(sprt_tpcb))
-        size = tcp_sndbuf(sprt_tpcb);
+    if (size > tcp_sndbuf(sptr_tpcb))
+        size = tcp_sndbuf(sptr_tpcb);
 
-    err = tcp_write(sprt_tpcb, buf, size, TCP_WRITE_FLAG_COPY);
+    err = tcp_write(sptr_tpcb, buf, size, TCP_WRITE_FLAG_COPY);
     if (err != ERR_OK)
     {
         print_err("%s: tcp send data to buffer failed!\r\n", __func__);
         return -ER_SDATA_FAILD;
     }
 
-    err = tcp_output(sprt_tpcb);
+    err = tcp_output(sptr_tpcb);
     if (err != ERR_OK)
     {
         print_err("%s: tcp send data to hardware failed!\r\n", __func__);
@@ -177,162 +177,162 @@ kssize_t lwip_tcp_raw_send(struct tcp_pcb *sprt_tpcb, const void *buf, kusize_t 
 
 /*!
  * @brief   destroy tcp
- * @param   sprt_tpcb
+ * @param   sptr_tpcb
  * @retval  none
  * @note    none
  */
-static void __lwip_tcp_raw_close(struct lwip_tcp_group *sprt_tgrp)
+static void __lwip_tcp_raw_close(struct lwip_tcp_group *sptr_tgrp)
 {
-    struct tcp_pcb *sprt_tpcb;
+    struct tcp_pcb *sptr_tpcb;
 
-    if (!sprt_tgrp)
+    if (!sptr_tgrp)
         return;
 
-    sprt_tpcb = sprt_tgrp->sprt_tpcb;
+    sptr_tpcb = sptr_tgrp->sptr_tpcb;
 
-    tcp_arg(sprt_tpcb, NULL);
-    tcp_sent(sprt_tpcb, NULL);
-    tcp_recv(sprt_tpcb, NULL);
-    tcp_err(sprt_tpcb, NULL);
-    tcp_poll(sprt_tpcb, NULL, 0);
-    tcp_close(sprt_tpcb);
+    tcp_arg(sptr_tpcb, NULL);
+    tcp_sent(sptr_tpcb, NULL);
+    tcp_recv(sptr_tpcb, NULL);
+    tcp_err(sptr_tpcb, NULL);
+    tcp_poll(sptr_tpcb, NULL, 0);
+    tcp_close(sptr_tpcb);
 
-    pq_queue_destroy(sprt_tgrp->sprt_pq);
-    kfree(sprt_tgrp);
+    pq_queue_destroy(sptr_tgrp->sptr_pq);
+    kfree(sptr_tgrp);
 }
 
 /*!
  * @brief   error callback
- * @param   sprt_tpcb
+ * @param   sptr_tpcb
  * @retval  none
  * @note    none
  */
 static void __lwip_tcp_raw_error(void *arg, err_t err)
 {
-    struct lwip_tcp_group *sprt_tgrp;
+    struct lwip_tcp_group *sptr_tgrp;
 
     LWIP_UNUSED_ARG(err);
 
-    sprt_tgrp = (struct lwip_tcp_group *)arg;
+    sptr_tgrp = (struct lwip_tcp_group *)arg;
 
-    pq_queue_destroy(sprt_tgrp->sprt_pq);
-    kfree(sprt_tgrp);
+    pq_queue_destroy(sptr_tgrp->sptr_pq);
+    kfree(sptr_tgrp);
 }
 
 /*!
  * @brief   poll callback
- * @param   sprt_tpcb
+ * @param   sptr_tpcb
  * @retval  none
  * @note    none
  */
-static err_t __lwip_tcp_raw_poll(void *arg, struct tcp_pcb *sprt_tpcb)
+static err_t __lwip_tcp_raw_poll(void *arg, struct tcp_pcb *sptr_tpcb)
 {
-    struct lwip_tcp_group *sprt_tgrp;
+    struct lwip_tcp_group *sptr_tgrp;
 
-    sprt_tgrp = (struct lwip_tcp_group *)arg;
-    if (!sprt_tgrp)
+    sptr_tgrp = (struct lwip_tcp_group *)arg;
+    if (!sptr_tgrp)
     {
         /* nothing to be done */
-        tcp_abort(sprt_tpcb);
+        tcp_abort(sptr_tpcb);
         return ERR_ABRT; 
     }
 
-    if (sprt_tgrp->state == NR_TCP_RAW_CLOSING)
-        __lwip_tcp_raw_close(sprt_tgrp);
+    if (sptr_tgrp->state == NR_TCP_RAW_CLOSING)
+        __lwip_tcp_raw_close(sptr_tgrp);
 
     return ERR_OK;
 }
 
 /*!
  * @brief   sent callback
- * @param   sprt_tpcb
+ * @param   sptr_tpcb
  * @retval  none
  * @note    none
  */
-static err_t __lwip_tcp_raw_sent(void *arg, struct tcp_pcb *sprt_tpcb, u16_t len)
+static err_t __lwip_tcp_raw_sent(void *arg, struct tcp_pcb *sptr_tpcb, u16_t len)
 {
-    struct lwip_tcp_group *sprt_tgrp;
+    struct lwip_tcp_group *sptr_tgrp;
 
-    sprt_tgrp = (struct lwip_tcp_group *)arg;
-    if (sprt_tgrp->state == NR_TCP_RAW_CLOSING)
-        __lwip_tcp_raw_close(sprt_tgrp);
+    sptr_tgrp = (struct lwip_tcp_group *)arg;
+    if (sptr_tgrp->state == NR_TCP_RAW_CLOSING)
+        __lwip_tcp_raw_close(sptr_tgrp);
 
     return ERR_OK;
 }
 
 /*!
  * @brief   recv callback
- * @param   sprt_tpcb, arg, ...
+ * @param   sptr_tpcb, arg, ...
  * @retval  none
  * @note    none
  */
-static err_t __lwip_tcp_raw_recv(void *arg, struct tcp_pcb *sprt_tpcb, struct pbuf *sprt_buf, err_t err)
+static err_t __lwip_tcp_raw_recv(void *arg, struct tcp_pcb *sptr_tpcb, struct pbuf *sptr_buf, err_t err)
 {
-    struct lwip_tcp_group *sprt_tgrp;
-    struct lwip_tcp_data *sprt_data;
+    struct lwip_tcp_group *sptr_tgrp;
+    struct lwip_tcp_data *sptr_data;
 
-    sprt_tgrp = (struct lwip_tcp_group *)arg;
+    sptr_tgrp = (struct lwip_tcp_group *)arg;
 
-    if (!sprt_tgrp->sprt_pq)
+    if (!sptr_tgrp->sptr_pq)
         return ERR_MEM;
 
     /*!< remote host closed connection */
-    if (!sprt_buf)
+    if (!sptr_buf)
     {
-        sprt_tgrp->state = NR_TCP_RAW_CLOSING;
-        __lwip_tcp_raw_close(sprt_tgrp);
+        sptr_tgrp->state = NR_TCP_RAW_CLOSING;
+        __lwip_tcp_raw_close(sptr_tgrp);
         return ERR_OK;
     }
 
     if (err != ERR_OK)
     {
-        pbuf_free(sprt_buf);
+        pbuf_free(sptr_buf);
         return err;
     }
 
-    sprt_data = kmalloc(sizeof(*sprt_data), GFP_KERNEL);
-    if (!isValid(sprt_data))
+    sptr_data = kmalloc(sizeof(*sptr_data), GFP_KERNEL);
+    if (!isValid(sptr_data))
     {
-        tcp_recved(sprt_tpcb, sprt_buf->tot_len);
-        pbuf_free(sprt_buf);
+        tcp_recved(sptr_tpcb, sptr_buf->tot_len);
+        pbuf_free(sptr_buf);
 
         return ERR_MEM;
     }
 
-    sprt_data->sprt_tpcb = sprt_tpcb;
-    sprt_data->sprt_buf = sprt_buf;
+    sptr_data->sptr_tpcb = sptr_tpcb;
+    sptr_data->sptr_buf = sptr_buf;
 
-    sprt_data->sgrt_pqd.release = lwip_tcp_data_free;
-    sprt_data->sgrt_pqd.dequeue_chk = lwip_tcp_data_check;
+    sptr_data->sgtc_pqd.release = lwip_tcp_data_free;
+    sptr_data->sgtc_pqd.dequeue_chk = lwip_tcp_data_check;
 
-    pq_enqueue(sprt_tgrp->sprt_pq, &sprt_data->sgrt_pqd);
-    tcp_recved(sprt_tpcb, sprt_buf->tot_len);
+    pq_enqueue(sptr_tgrp->sptr_pq, &sptr_data->sgtc_pqd);
+    tcp_recved(sptr_tpcb, sptr_buf->tot_len);
 
     return ERR_OK;
 }
 
 /*!
  * @brief   accept callback
- * @param   sprt_tpcb
+ * @param   sptr_tpcb
  * @retval  none
  * @note    none
  */
-static err_t __lwip_tcp_raw_accept(void *arg, struct tcp_pcb *sprt_tpcb, err_t err)
+static err_t __lwip_tcp_raw_accept(void *arg, struct tcp_pcb *sptr_tpcb, err_t err)
 {
-    struct lwip_tcp_group *sprt_tgrp;
-    struct pq_queue *sprt_pq;
+    struct lwip_tcp_group *sptr_tgrp;
+    struct pq_queue *sptr_pq;
 
-    if ((err != ERR_OK) || (sprt_tpcb == NULL))
+    if ((err != ERR_OK) || (sptr_tpcb == NULL))
         return ERR_VAL;
 
-    sprt_tgrp = kmalloc(sizeof(*sprt_tgrp), GFP_KERNEL);
-    if (!isValid(sprt_tgrp))
+    sptr_tgrp = kmalloc(sizeof(*sptr_tgrp), GFP_KERNEL);
+    if (!isValid(sptr_tgrp))
         return ERR_MEM;
     
-    sprt_pq = pq_queue_create(NR_PQ_RING, 1024);
-    if (!isValid(sprt_pq))
+    sptr_pq = pq_queue_create(NR_PQ_RING, 1024);
+    if (!isValid(sptr_pq))
     {
-        kfree(sprt_tgrp);
+        kfree(sptr_tgrp);
         return ERR_MEM;
     }
 
@@ -341,45 +341,45 @@ static err_t __lwip_tcp_raw_accept(void *arg, struct tcp_pcb *sprt_tpcb, err_t e
      * When running out of pcbs, low priority pcbs can be aborted to create
      * new pcbs of higher priority. 
      */
-    tcp_setprio(sprt_tpcb, TCP_PRIO_MIN);
+    tcp_setprio(sptr_tpcb, TCP_PRIO_MIN);
     
-    sprt_tgrp->sprt_tpcb = sprt_tpcb;
-    sprt_tgrp->sprt_pq = sprt_pq;
-    sprt_tgrp->state = NR_TCP_RAW_ACCEPTED;
+    sptr_tgrp->sptr_tpcb = sptr_tpcb;
+    sptr_tgrp->sptr_pq = sptr_pq;
+    sptr_tgrp->state = NR_TCP_RAW_ACCEPTED;
 
-    tcp_arg(sprt_tpcb, sprt_tgrp);
-    tcp_recv(sprt_tpcb, __lwip_tcp_raw_recv);
-    tcp_err(sprt_tpcb, __lwip_tcp_raw_error);
-    tcp_poll(sprt_tpcb, __lwip_tcp_raw_poll, 0);
-    tcp_sent(sprt_tpcb, __lwip_tcp_raw_sent);
+    tcp_arg(sptr_tpcb, sptr_tgrp);
+    tcp_recv(sptr_tpcb, __lwip_tcp_raw_recv);
+    tcp_err(sptr_tpcb, __lwip_tcp_raw_error);
+    tcp_poll(sptr_tpcb, __lwip_tcp_raw_poll, 0);
+    tcp_sent(sptr_tpcb, __lwip_tcp_raw_sent);
 
     return ERR_OK;
 }
 
 /*!
  * @brief   tcp pcb init
- * @param   sprt_ip, port
+ * @param   sptr_ip, port
  * @retval  tcp_pcb
  * @note    create rx ring queue for application layer
  */
-struct tcp_pcb *lwip_tcp_raw_bind(const ip_addr_t *sprt_ip, u16_t port)
+struct tcp_pcb *lwip_tcp_raw_bind(const ip_addr_t *sptr_ip, u16_t port)
 {
-    struct tcp_pcb *sprt_tpcb;
+    struct tcp_pcb *sptr_tpcb;
     err_t err;
 
-    sprt_tpcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
-    if (!sprt_tpcb)
+    sptr_tpcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
+    if (!sptr_tpcb)
         goto fail;
 
     /*!< 
-     * API function "socket_bind" will get "mrt_htons(port)", but "tcp_bind" will convert port again with "lwip_htons";
+     * API function "socket_bind" will get "mr_htons(port)", but "tcp_bind" will convert port again with "lwip_htons";
      * therefore, port must be convert to it's original format
      */
-    err = tcp_bind(sprt_tpcb, sprt_ip, mrt_ntohs(port));
+    err = tcp_bind(sptr_tpcb, sptr_ip, mr_ntohs(port));
     if (err == ERR_OK)
-        return sprt_tpcb;
+        return sptr_tpcb;
 
-    tcp_close(sprt_tpcb);
+    tcp_close(sptr_tpcb);
 
 fail:
     return ERR_PTR(-ER_FAILD);
@@ -387,27 +387,27 @@ fail:
 
 /*!
  * @brief   tcp listen
- * @param   sprt_tpcb
+ * @param   sptr_tpcb
  * @retval  none
  * @note    none
  */
-struct tcp_pcb *lwip_tcp_raw_listen(struct tcp_pcb *sprt_tpcb)
+struct tcp_pcb *lwip_tcp_raw_listen(struct tcp_pcb *sptr_tpcb)
 {
-    if (!sprt_tpcb)
-        return mrt_nullptr;
+    if (!sptr_tpcb)
+        return mr_nullptr;
 
-    return tcp_listen(sprt_tpcb);
+    return tcp_listen(sptr_tpcb);
 }
 
 /*!
  * @brief   tcp accept
- * @param   sprt_tpcb
+ * @param   sptr_tpcb
  * @retval  none
  * @note    none
  */
-kint32_t lwip_tcp_raw_accept(struct tcp_pcb *sprt_tpcb)
+kint32_t lwip_tcp_raw_accept(struct tcp_pcb *sptr_tpcb)
 {
-    tcp_accept(sprt_tpcb, __lwip_tcp_raw_accept);
+    tcp_accept(sptr_tpcb, __lwip_tcp_raw_accept);
     return ER_NORMAL;
 }
 

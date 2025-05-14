@@ -23,8 +23,8 @@
 #include <common/generic.h>
 
 /*!< The defines */
-#define mrt_to_str(x)                                           #x
-#define mrt_to_split_str(x, y, z)                               x##y##z
+#define mr_to_str(x)                                           #x
+#define mr_to_split_str(x, y, z)                               x##y##z
 
 typedef struct
 {
@@ -44,14 +44,16 @@ extern kuint32_t do_string_n_copy_safe(void *ptr_dst, const void *ptr_src, kuint
 extern kbool_t do_string_compare(void *ptr_dst, const void *ptr_src);
 extern kbool_t do_string_n_compare(void *ptr_dst, const void *ptr_src, kuint32_t size);
 extern void do_string_reverse(void *ptr_src, kuint32_t size);
-extern kusize_t convert_number_to_string(void *ptr_dst, kuint64_t value);
+extern kusize_t uint_to_str(void *ptr_dst, kuint64_t value);
+extern kusize_t int_to_str(void *ptr_dst, kint64_t value);
 extern kchar_t *seek_char_in_string(const void *ptr_src, kchar_t ch);
-extern kchar_t *seek_char_by_pos(const void *ptr_src, kuint32_t index);
+extern kchar_t *seek_char_by_pos(const void *ptr_src, kuint32_t offset);
+extern kchar_t *seek_n_char_in_string(const void *ptr_src, kchar_t ch, kint32_t n);
 extern kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_fmt, va_list ptr_list, kusize_t size);
 
-extern kchar_t *vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, va_list sprt_list);
-extern kchar_t *lv_vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, kubyte_t *ptr_lv, va_list sprt_list);
-extern kint32_t vasprintk(void *ptr_buf, const kchar_t *ptr_fmt, va_list sprt_list);
+extern kchar_t *vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, va_list sptr_list);
+extern kchar_t *lv_vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, kubyte_t *ptr_lv, va_list sptr_list);
+extern kint32_t vasprintk(void *ptr_buf, const kchar_t *ptr_fmt, va_list sptr_list);
 extern kint32_t sprintk(void *ptr_buf, const kchar_t *ptr_fmt, ...);
 extern kchar_t *sprintk_safe(const kchar_t *ptr_fmt, ...);
 extern void fmt_free(kchar_t *ptr);
@@ -63,6 +65,7 @@ extern kchar_t *kstrncpyr(kchar_t *__dest, const kchar_t *__src, kusize_t __n);
 extern kint32_t kstrcmp(kchar_t *__s1, const kchar_t *__s2);
 extern kint32_t kstrncmp(kchar_t *__s1, const kchar_t *__s2, kusize_t __n);
 extern kchar_t *kstrchr(const kchar_t *__s1, kchar_t ch);
+extern kchar_t *kstrnchr(const kchar_t *__s1, kchar_t ch, kint32_t n);
 extern kchar_t *kstrcat(const kchar_t *__s1, kuint32_t index);
 
 #ifdef __cplusplus

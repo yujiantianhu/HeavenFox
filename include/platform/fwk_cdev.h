@@ -28,17 +28,17 @@ struct fwk_cdev
     kuint32_t devNum;
     kuint32_t count;
 
-    struct fwk_file_oprts *sprt_oprts;
-    struct fwk_cdev *sprt_next;
+    struct fwk_file_oprts *sptr_oprts;
+    struct fwk_cdev *sptr_next;
 
     void *privData;
 };
 
 /*!< The functions */
-extern kint32_t fwk_cdev_init(struct fwk_cdev *sprt_cdev, const struct fwk_file_oprts *sprt_oprts);
-extern struct fwk_cdev *fwk_cdev_alloc(const struct fwk_file_oprts *sprt_oprts);
-extern kint32_t fwk_cdev_add(struct fwk_cdev *sprt_cdev, kuint32_t devNum, kuint32_t count);
-extern kint32_t fwk_cdev_del(struct fwk_cdev *sprt_cdev);
+extern kint32_t fwk_cdev_init(struct fwk_cdev *sptr_cdev, const struct fwk_file_oprts *sptr_oprts);
+extern struct fwk_cdev *fwk_cdev_alloc(const struct fwk_file_oprts *sptr_oprts);
+extern kint32_t fwk_cdev_add(struct fwk_cdev *sptr_cdev, kuint32_t devNum, kuint32_t count);
+extern kint32_t fwk_cdev_del(struct fwk_cdev *sptr_cdev);
 
 #ifdef __cplusplus
     }

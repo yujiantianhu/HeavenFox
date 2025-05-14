@@ -21,8 +21,8 @@
 #include <platform/fwk_basic.h>
 
 /*!< The defines */
-#define USB_DT_ENDIAN_BYTE32(x)								mrt_le32_to_cpu(x)
-#define USB_DT_ENDIAN_BYTE16(x)								mrt_le16_to_cpu(x)
+#define USB_DT_ENDIAN_BYTE32(x)								mr_le32_to_cpu(x)
+#define USB_DT_ENDIAN_BYTE16(x)								mr_le16_to_cpu(x)
 
 /*!< Desciptor types */
 enum __ERT_USB_DESC_TYPE
@@ -84,7 +84,7 @@ enum __ERT_USB_DESC_TYPE
 enum __ERT_USB_DEVICE_STATUS
 {
     /*!< 连接状态, 即USB设备是否与主机连接或断开 */
-    NR_USB_DevStatusAttached = mrt_bit(0),
+    NR_USB_DevStatusAttached = mr_bit(0),
 
     /*!< 
      * 上电状态
@@ -92,7 +92,7 @@ enum __ERT_USB_DEVICE_STATUS
      * USB设备电源若来自自身集线器, 则称之为总线供电设备(配置描述符的bmAttributes表示了供电方式)
      * 只有当设备连接到USB总线上, 且Vbus电源给设备上电时设备才进入上电状态
      */
-    NR_USB_DevStatusPowered = mrt_bit(1),
+    NR_USB_DevStatusPowered = mr_bit(1),
 
     /*!<
      * 默认状态
@@ -100,7 +100,7 @@ enum __ERT_USB_DEVICE_STATUS
      * 2) 设备复位完成后, 设备进入默认状态;
      * 3) HS 和 FS设备的电气环境一样, 只是设备复位成功后, HS设备还必须要成功地响应特定描述符并返回正确信息
      */
-    NR_USB_DevStatusDefault = mrt_bit(2),
+    NR_USB_DevStatusDefault = mr_bit(2),
 
     /*!<
      * 地址状态
@@ -109,13 +109,13 @@ enum __ERT_USB_DEVICE_STATUS
      * 当USB设备被挂起时, 设备的地址保持不变;
      * 无论设备当前是否分配了唯一地址或正在使用默认地址, 在地址状态下, USB设备只响应其默认管道上的请求
      */
-    NR_USB_DevStatusAddress = mrt_bit(3),
+    NR_USB_DevStatusAddress = mr_bit(3),
 
     /*!<
      * 配置状态
      * 在使用USB设备的功能之前, 必须配置该设备; 配置完成后, 设备进入配置状态
      */
-    NR_USB_DevStatusConfigured = mrt_bit(4),
+    NR_USB_DevStatusConfigured = mr_bit(4),
 
     /*!<
      * 挂起状态
@@ -124,7 +124,7 @@ enum __ERT_USB_DEVICE_STATUS
      * 在所连接的集线器端口挂起时, USB设备自身也将进入挂起状态;
      * USB设备可通过远程唤醒电信号请求主机, 让自己退出挂起状态. 在配置描述符中, USB设备会将是否支持远程唤醒的能力报告给主机
      */
-    NR_USB_DevStatusSuspended = mrt_bit(5),
+    NR_USB_DevStatusSuspended = mr_bit(5),
 
     /*!< 正常运行, 此时主机和设备可以正常收发数据 */
     NR_USB_DevStatusNormal = (NR_USB_DevStatusAttached | NR_USB_DevStatusPowered |
@@ -218,16 +218,16 @@ typedef struct fwk_usb_config_desc
 /*!< for bmAttributes */
 enum __ERT_USB_CONFIG_DESC_ATTR
 {
-    NR_USB_ConfigDescAttrBattery = mrt_bit(4),
+    NR_USB_ConfigDescAttrBattery = mr_bit(4),
 
     /*!< 1: 设备支持远程唤醒 */
-    NR_USB_ConfigDescAttrWakeUp = mrt_bit(5),
+    NR_USB_ConfigDescAttrWakeUp = mr_bit(5),
 
     /*!< 0: 自供电; 1: 总线供电 */
-    NR_USB_ConfigDescAttrSelfPower = mrt_bit(6),
+    NR_USB_ConfigDescAttrSelfPower = mr_bit(6),
 
     /*!< 保留位, 默认为1 */
-    NR_USB_ConfigDescAttrDefault = mrt_bit(7),
+    NR_USB_ConfigDescAttrDefault = mr_bit(7),
 };
 
 /*!< for bMaxPower */
@@ -309,16 +309,16 @@ enum __ERT_USB_ENDPOINT_DIRECTION
 enum __ERT_USB_ENDPOINT_DESC_ATTR
 {
     /*!< Control: 控制传输 */
-    NR_USB_EndPointDescXferCtrl = mrt_bit(0),
+    NR_USB_EndPointDescXferCtrl = mr_bit(0),
 
     /*!< Isochronous: 同步传输 */
-    NR_USB_EndPointDescXferIsoc = mrt_bit(1),
+    NR_USB_EndPointDescXferIsoc = mr_bit(1),
 
     /*!< Bulk: 批量传输 */
-    NR_USB_EndPointDescXferBulk = mrt_bit(2),
+    NR_USB_EndPointDescXferBulk = mr_bit(2),
 
     /*!< Interrupt: 中断传输 */
-    NR_USB_EndPointDescXferInterrupt = mrt_bit(0) | mrt_bit(1),
+    NR_USB_EndPointDescXferInterrupt = mr_bit(0) | mr_bit(1),
 
 #define FWK_USB_ENDPOINT_XFERTYPE_MASK	            		(0x03)
 };

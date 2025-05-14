@@ -16,113 +16,113 @@
 #include <kernel/spinlock.h>
 
 /*!< The globals */
-static struct fwk_kset sgrt_fwk_kset_root;
+static struct fwk_kset sgtc_fwk_kset_root;
 static kbool_t is_fwk_root_existed = false;
 
 /*!< API function */
 /*!
  * @brief   join the new kobject to kset
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  errno
  * @note    none
  */
-static kint32_t fwk_kobject_join_to_kset(struct fwk_kobject *sprt_kobj)
+static kint32_t fwk_kobject_join_to_kset(struct fwk_kobject *sptr_kobj)
 {
-    struct fwk_kobject *sprt_parent;
-    struct fwk_kobject *sprt_each;
+    struct fwk_kobject *sptr_parent;
+    struct fwk_kobject *sptr_each;
     kint32_t retval;
 
-    if (!sprt_kobj->sprt_kset)
+    if (!sptr_kobj->sptr_kset)
         return -ER_FAULT;
 
-    spin_lock(&sprt_kobj->sgrt_lock);
+    spin_lock(&sptr_kobj->sgtc_lock);
     
-    foreach_list_next_entry(sprt_each, &sprt_kobj->sprt_kset->sgrt_list, sgrt_link)
+    foreach_list_next_entry(sptr_each, &sptr_kobj->sptr_kset->sgtc_list, sgtc_link)
     {
-        if (!sprt_each->name && !sprt_kobj->name)
+        if (!sptr_each->name && !sptr_kobj->name)
         {
             retval = -ER_EMPTY;
             goto fail;
         }
 
-        if (!strcmp(sprt_kobj->name, sprt_each->name))
+        if (!strcmp(sptr_kobj->name, sptr_each->name))
         {
             retval = -ER_EXISTED;
             goto fail;
         }
     }
     
-    sprt_parent = sprt_kobj->sprt_parent;
-    if (!sprt_parent)
-        sprt_parent = &sprt_kobj->sprt_kset->sgrt_kobj;
+    sptr_parent = sptr_kobj->sptr_parent;
+    if (!sptr_parent)
+        sptr_parent = &sptr_kobj->sptr_kset->sgtc_kobj;
     
-    list_head_add_tail(&sprt_kobj->sprt_kset->sgrt_list, &sprt_kobj->sgrt_link);
-    sprt_kobj->sprt_parent = sprt_parent;
-    spin_unlock(&sprt_kobj->sgrt_lock);
+    list_head_add_tail(&sptr_kobj->sptr_kset->sgtc_list, &sptr_kobj->sgtc_link);
+    sptr_kobj->sptr_parent = sptr_parent;
+    spin_unlock(&sptr_kobj->sgtc_lock);
 
     return ER_NORMAL;
 
 fail:
-    spin_unlock(&sprt_kobj->sgrt_lock);
+    spin_unlock(&sptr_kobj->sgtc_lock);
     return retval;
 }
 
 /*!
  * @brief   delete the kobject from kset
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  none
  * @note    none
  */
-static void fwk_kobject_detach_from_kset(struct fwk_kobject *sprt_kobj)
+static void fwk_kobject_detach_from_kset(struct fwk_kobject *sptr_kobj)
 {
-    if (!sprt_kobj->sprt_kset)
+    if (!sptr_kobj->sptr_kset)
         return;
 
-    spin_lock(&sprt_kobj->sgrt_lock);
-    list_head_del_safe(&sprt_kobj->sprt_kset->sgrt_list, &sprt_kobj->sgrt_link);
-    spin_unlock(&sprt_kobj->sgrt_lock);
+    spin_lock(&sptr_kobj->sgtc_lock);
+    list_head_del_safe(&sptr_kobj->sptr_kset->sgtc_list, &sptr_kobj->sgtc_link);
+    spin_unlock(&sptr_kobj->sgtc_lock);
 }
 
 /*!
  * @brief   join the new kobject to kset, and create inode
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  errno
  * @note    none
  */
-static kint32_t fwk_kobject_build_inode(struct fwk_kobject *sprt_kobj)
+static kint32_t fwk_kobject_build_inode(struct fwk_kobject *sptr_kobj)
 {
-    struct fwk_inode *sprt_inode;
+    struct fwk_inode *sptr_inode;
     kint32_t retval;
 
-    retval = fwk_kobject_join_to_kset(sprt_kobj);
+    retval = fwk_kobject_join_to_kset(sptr_kobj);
     if (retval)
         return retval;
 
-    sprt_inode = fwk_mk_inode(sprt_kobj, NR_TYPE_NONE, -1);
-    if (!isValid(sprt_inode))
+    sptr_inode = fwk_mk_inode(sptr_kobj, NR_TYPE_NONE, -1);
+    if (!isValid(sptr_inode))
     {
-        fwk_kobject_detach_from_kset(sprt_kobj);
-        return PTR_ERR(sprt_inode);
+        fwk_kobject_detach_from_kset(sptr_kobj);
+        return PTR_ERR(sptr_inode);
     }
 
-    sprt_kobj->sprt_inode = sprt_inode;
+    sptr_kobj->sptr_inode = sptr_inode;
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   initialize kobject
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  none
  * @note    none
  */
-void fwk_kobject_init(struct fwk_kobject *sprt_kobj)
+void fwk_kobject_init(struct fwk_kobject *sptr_kobj)
 {
-    fwk_kref_init(&sprt_kobj->sgrt_ref);
-    init_list_head(&sprt_kobj->sgrt_link);
-    spin_lock_init(&sprt_kobj->sgrt_lock);
-    sprt_kobj->is_dir = false;
-    sprt_kobj->sprt_kset = mrt_nullptr;
+    fwk_kref_init(&sptr_kobj->sgtc_ref);
+    init_list_head(&sptr_kobj->sgtc_link);
+    spin_lock_init(&sptr_kobj->sgtc_lock);
+    sptr_kobj->is_dir = false;
+    sptr_kobj->sptr_kset = mr_nullptr;
 }
 
 /*!
@@ -133,188 +133,188 @@ void fwk_kobject_init(struct fwk_kobject *sprt_kobj)
  */
 struct fwk_kobject *fwk_kobject_create(void)
 {
-    struct fwk_kobject *sprt_kobj;
+    struct fwk_kobject *sptr_kobj;
 
-    sprt_kobj = kzalloc(sizeof(*sprt_kobj), GFP_KERNEL);
-    if (!isValid(sprt_kobj))
-        return mrt_nullptr;
+    sptr_kobj = kzalloc(sizeof(*sptr_kobj), GFP_KERNEL);
+    if (!isValid(sptr_kobj))
+        return mr_nullptr;
 
-    fwk_kobject_init(sprt_kobj);
+    fwk_kobject_init(sptr_kobj);
 
-    return sprt_kobj;
+    return sptr_kobj;
 }
 
 /*!
  * @brief   add a new kobject
- * @param   sprt_kobj, sprt_parent, fmt (name)
+ * @param   sptr_kobj, sptr_parent, fmt (name)
  * @retval  errno
  * @note    none
  */
-kint32_t fwk_kobject_add(struct fwk_kobject *sprt_kobj, struct fwk_kobject *sprt_parent, const kchar_t *fmt, ...)
+kint32_t fwk_kobject_add(struct fwk_kobject *sptr_kobj, struct fwk_kobject *sptr_parent, const kchar_t *fmt, ...)
 {
-    va_list sprt_list;
+    va_list sptr_list;
     kint32_t retval;
 
-    if (!sprt_kobj || !is_fwk_root_existed)
+    if (!sptr_kobj || !is_fwk_root_existed)
         return -ER_NOMEM;
 
-    sprt_kobj->sprt_parent = sprt_parent;
+    sptr_kobj->sptr_parent = sptr_parent;
 
-    va_start(sprt_list, fmt);
-    fwk_kobject_set_name_args(sprt_kobj, fmt, sprt_list);
-    va_end(sprt_list);
+    va_start(sptr_list, fmt);
+    fwk_kobject_set_name_args(sptr_kobj, fmt, sptr_list);
+    va_end(sptr_list);
 
-    if (!sprt_kobj->sprt_kset)
-        sprt_kobj->sprt_kset = &sgrt_fwk_kset_root;
+    if (!sptr_kobj->sptr_kset)
+        sptr_kobj->sptr_kset = &sgtc_fwk_kset_root;
 
-    retval = fwk_kobject_build_inode(sprt_kobj);
+    retval = fwk_kobject_build_inode(sptr_kobj);
     if (retval)
-        fwk_kobject_del_name(sprt_kobj);
+        fwk_kobject_del_name(sptr_kobj);
 
     return retval;
 }
 
 /*!
  * @brief   add a new kobject
- * @param   sprt_kobj, sprt_parent, fmt (unformatted name)
+ * @param   sptr_kobj, sptr_parent, fmt (unformatted name)
  * @retval  errno
  * @note    none
  */
-kint32_t fwk_kobject_add_vargs(struct fwk_kobject *sprt_kobj, struct fwk_kobject *sprt_parent, const kchar_t *fmt, va_list sprt_list)
+kint32_t fwk_kobject_add_vargs(struct fwk_kobject *sptr_kobj, struct fwk_kobject *sptr_parent, const kchar_t *fmt, va_list sptr_list)
 {
     kint32_t retval;
 
-    if (!sprt_kobj || !is_fwk_root_existed)
+    if (!sptr_kobj || !is_fwk_root_existed)
         return -ER_NOMEM;
 
-    sprt_kobj->sprt_parent = sprt_parent;
-    fwk_kobject_set_name_args(sprt_kobj, fmt, sprt_list);
+    sptr_kobj->sptr_parent = sptr_parent;
+    fwk_kobject_set_name_args(sptr_kobj, fmt, sptr_list);
 
-    if (!sprt_kobj->sprt_kset)
-        sprt_kobj->sprt_kset = &sgrt_fwk_kset_root;
+    if (!sptr_kobj->sptr_kset)
+        sptr_kobj->sptr_kset = &sgtc_fwk_kset_root;
 
-    retval = fwk_kobject_build_inode(sprt_kobj);
+    retval = fwk_kobject_build_inode(sptr_kobj);
     if (retval)
-        fwk_kobject_del_name(sprt_kobj);
+        fwk_kobject_del_name(sptr_kobj);
 
     return retval;
 }
 
 /*!
  * @brief   delete kobject
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  none
  * @note    none
  */
-void fwk_kobject_del(struct fwk_kobject *sprt_kobj)
+void fwk_kobject_del(struct fwk_kobject *sptr_kobj)
 {
-    fwk_rm_inode(sprt_kobj->sprt_inode);
-    fwk_kobject_del_name(sprt_kobj);
-    fwk_kobject_detach_from_kset(sprt_kobj);
+    fwk_rm_inode(sptr_kobj->sptr_inode);
+    fwk_kobject_del_name(sptr_kobj);
+    fwk_kobject_detach_from_kset(sptr_kobj);
 
-    sprt_kobj->sprt_inode = mrt_nullptr;
+    sptr_kobj->sptr_inode = mr_nullptr;
 }
 
 /*!
  * @brief   release kobject
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  none
  * @note    none
  */
-void fwk_kobject_destroy(struct fwk_kobject *sprt_kobj)
+void fwk_kobject_destroy(struct fwk_kobject *sptr_kobj)
 {
-    fwk_kobject_del(sprt_kobj);
-    kfree(sprt_kobj);
+    fwk_kobject_del(sptr_kobj);
+    kfree(sptr_kobj);
 }
 
 /*!
  * @brief   create directory or file
- * @param   sprt_parent, name
+ * @param   sptr_parent, name
  * @retval  kobject created
  * @note    dir: the format of name is "xxx/xxx", such as "dev/"; file: '/' should be moved, such as "dev"
  */
-static struct fwk_kobject *__fwk_kobject_populate_dir(struct fwk_kobject *sprt_parent, const kchar_t *name)
+static struct fwk_kobject *__fwk_kobject_populate_dir(struct fwk_kobject *sptr_parent, const kchar_t *name)
 {
-    struct fwk_kset *sprt_kset;
-    struct fwk_kobject *sprt_kobj;
+    struct fwk_kset *sptr_kset;
+    struct fwk_kobject *sptr_kobj;
     kchar_t *new_name;
     kuint32_t lenth;
     
-    if (!sprt_parent)
-        sprt_parent = &sgrt_fwk_kset_root.sgrt_kobj;
+    if (!sptr_parent)
+        sptr_parent = &sgtc_fwk_kset_root.sgtc_kobj;
     new_name = kstrchr(name, '/');
     
     if (new_name)
     {
-        sprt_kset = fwk_kset_create(name, sprt_parent);
-        if (!isValid(sprt_kset))
+        sptr_kset = fwk_kset_create(name, sptr_parent);
+        if (!isValid(sptr_kset))
             goto fail;
         
-        sprt_kobj = &sprt_kset->sgrt_kobj;
+        sptr_kobj = &sptr_kset->sgtc_kobj;
 
         lenth = (kuint32_t)(new_name - name);
-        fwk_kobject_del_name(sprt_kobj);
+        fwk_kobject_del_name(sptr_kobj);
         
         new_name = kmalloc(lenth + 1, GFP_KERNEL);
         if (!isValid(new_name))
             goto dir_fail;
         
         kstrlcpy(new_name, name, lenth + 1);
-        sprt_kobj->name = new_name;
+        sptr_kobj->name = new_name;
 
-        sprt_kobj->sprt_kset = mrt_fwk_kset_get(sprt_parent);
-        if (!sprt_kobj->sprt_kset || fwk_kset_register(sprt_kset))
+        sptr_kobj->sptr_kset = mr_fwk_kset_get(sptr_parent);
+        if (!sptr_kobj->sptr_kset || fwk_kset_register(sptr_kset))
             goto dir_fail;
         
         goto pass;
         
 dir_fail:
-        fwk_kobject_del(sprt_kobj);
-        kfree(sprt_kset);
+        fwk_kobject_del(sptr_kobj);
+        kfree(sptr_kset);
         goto fail;
     }
     
-    sprt_kobj = fwk_kobject_create();
-    if (!isValid(sprt_kobj))
+    sptr_kobj = fwk_kobject_create();
+    if (!isValid(sptr_kobj))
         goto fail;
     
-    sprt_kobj->sprt_kset = mrt_fwk_kset_get(sprt_parent);
-    if (!sprt_kobj->sprt_kset || fwk_kobject_add(sprt_kobj, sprt_parent, name))
+    sptr_kobj->sptr_kset = mr_fwk_kset_get(sptr_parent);
+    if (!sptr_kobj->sptr_kset || fwk_kobject_add(sptr_kobj, sptr_parent, name))
     {
-        kfree(sprt_kobj);
+        kfree(sptr_kobj);
         goto fail;
     }
     
 pass:
-    return sprt_kobj;
+    return sptr_kobj;
     
 fail:
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
  * @brief   populate directory or file
- * @param   sprt_head, name
+ * @param   sptr_head, name
  * @retval  kobject created
  * @note    dir: the format of name is "xxx/xxx", such as "dev/"; file: '/' should be moved, such as "dev"
  */
-struct fwk_kobject *fwk_kobject_populate(struct fwk_kobject *sprt_head, const kchar_t *name)
+struct fwk_kobject *fwk_kobject_populate(struct fwk_kobject *sptr_head, const kchar_t *name)
 {
     kchar_t *str_start, *str_end;
     kusize_t lenth;
-    struct fwk_kobject *sprt_kobj;
-    struct fwk_kset *sprt_kset;
+    struct fwk_kobject *sptr_kobj;
+    struct fwk_kset *sptr_kset;
     kbool_t found, is_root;
 
     if (!is_fwk_root_existed)
         return ERR_PTR(-ER_FORBID);
 
-    sprt_kobj = sprt_head;
-    sprt_kset = sprt_kobj ? mrt_fwk_kset_get(sprt_kobj) : &sgrt_fwk_kset_root;
-    if (!sprt_kset)
+    sptr_kobj = sptr_head;
+    sptr_kset = sptr_kobj ? mr_fwk_kset_get(sptr_kobj) : &sgtc_fwk_kset_root;
+    if (!sptr_kset)
         return ERR_PTR(-ER_NOMEM);
 
-    is_root = (sprt_kset == (&sgrt_fwk_kset_root));
+    is_root = (sptr_kset == (&sgtc_fwk_kset_root));
     str_start = str_end = (kchar_t *)name;
 
     if (is_root)
@@ -331,7 +331,7 @@ struct fwk_kobject *fwk_kobject_populate(struct fwk_kobject *sprt_head, const kc
     {
         str_start = is_root ? (str_end + 1) : str_end;
         if (*str_start == '\0')
-            return sprt_kobj;
+            return sptr_kobj;
         
         /*!< if *(str_end + 1) == '/', the format of name maybe "//" */
         if (*str_start == '/')
@@ -343,20 +343,20 @@ struct fwk_kobject *fwk_kobject_populate(struct fwk_kobject *sprt_head, const kc
         found = false;
         lenth = str_end ? (kusize_t)(str_end - str_start) : kstrlen(str_start);
 
-        spin_lock(&sprt_kset->sgrt_kobj.sgrt_lock);
-        foreach_list_next_entry(sprt_kobj, &sprt_kset->sgrt_list, sgrt_link)
+        spin_lock(&sptr_kset->sgtc_kobj.sgtc_lock);
+        foreach_list_next_entry(sptr_kobj, &sptr_kset->sgtc_list, sgtc_link)
         {
-            if (!sprt_kobj->name)
+            if (!sptr_kobj->name)
                 continue;
 
-            if (!strncmp(str_start, sprt_kobj->name, lenth))
+            if (!strncmp(str_start, sptr_kobj->name, lenth))
             {
                 /*!< str_end ? directory : file; if file is existed, file is repeated */
                 if (!str_end)
                 {
-                    if (!sprt_kobj->is_dir)
+                    if (!sptr_kobj->is_dir)
                     {
-                        spin_unlock(&sprt_kset->sgrt_kobj.sgrt_lock);
+                        spin_unlock(&sptr_kset->sgtc_kobj.sgtc_lock);
                         return ERR_PTR(-ER_EXISTED);
                     }
                     
@@ -365,31 +365,31 @@ struct fwk_kobject *fwk_kobject_populate(struct fwk_kobject *sprt_head, const kc
                 
                 /*!< otherwise, it is a directory */
                 /*!< it is possible that file and directory have the same name */
-                if (!sprt_kobj->is_dir)
+                if (!sptr_kobj->is_dir)
                     continue;
 
-                spin_unlock(&sprt_kset->sgrt_kobj.sgrt_lock);
+                spin_unlock(&sptr_kset->sgtc_kobj.sgtc_lock);
                 
                 found = true;
-                sprt_kset = mrt_fwk_kset_get(sprt_kobj);
+                sptr_kset = mr_fwk_kset_get(sptr_kobj);
                 goto out;
             }
         }
 
-        spin_unlock(&sprt_kset->sgrt_kobj.sgrt_lock);
+        spin_unlock(&sptr_kset->sgtc_kobj.sgtc_lock);
 
 out:
         if (!found)
         {
-            sprt_kobj = __fwk_kobject_populate_dir(&sprt_kset->sgrt_kobj, str_start);
-            if (!isValid(sprt_kobj))
+            sptr_kobj = __fwk_kobject_populate_dir(&sptr_kset->sgtc_kobj, str_start);
+            if (!isValid(sptr_kobj))
                 goto fail;
             
-            sprt_kset = mrt_fwk_kset_get(sprt_kobj);
+            sptr_kset = mr_fwk_kset_get(sptr_kobj);
         }
     }
     
-    return sprt_kobj;
+    return sptr_kobj;
 
 fail:
     return ERR_PTR(-ER_ERROR);
@@ -397,32 +397,32 @@ fail:
 
 /*!
  * @brief   find kobject by directory path (name)
- * @param   sprt_head, name
+ * @param   sptr_head, name
  * @retval  kobject found
  * @note    dir: the format of name is "xxx/xxx", such as "dev/"; file: '/' should be moved, such as "dev"
  */
-struct fwk_kobject *fwk_find_kobject_by_path(struct fwk_kobject *sprt_head, const kchar_t *name)
+struct fwk_kobject *fwk_find_kobject_by_path(struct fwk_kobject *sptr_head, const kchar_t *name)
 {
     kchar_t *str_start, *str_end;
     kusize_t lenth;
-    struct fwk_kobject *sprt_kobj;
-    struct fwk_kset *sprt_kset;
+    struct fwk_kobject *sptr_kobj;
+    struct fwk_kset *sptr_kset;
     kbool_t found, is_root;
 
-    sprt_kset = sprt_head ? mrt_fwk_kset_get(sprt_head) : &sgrt_fwk_kset_root;
-    if (!sprt_kset || !is_fwk_root_existed)
-        return mrt_nullptr;
+    sptr_kset = sptr_head ? mr_fwk_kset_get(sptr_head) : &sgtc_fwk_kset_root;
+    if (!sptr_kset || !is_fwk_root_existed)
+        return mr_nullptr;
 
-    is_root = (sprt_kset == (&sgrt_fwk_kset_root));
+    is_root = (sptr_kset == (&sgtc_fwk_kset_root));
     str_start = str_end = (kchar_t *)name;
 
     if (is_root)
     {
         if (*str_start != '/')
-            return mrt_nullptr;
+            return mr_nullptr;
 
         if (*(str_start + 1) == '\0')
-            return &sprt_kset->sgrt_kobj;
+            return &sptr_kset->sgtc_kobj;
     }
 
     /*!< for example: 123/yyx.txt, or 123/, or /123/, ... */
@@ -431,7 +431,7 @@ struct fwk_kobject *fwk_find_kobject_by_path(struct fwk_kobject *sprt_head, cons
         /*!< (*str_end) must be '/', if *(str_end + 1) is also '/', error occurred */
         str_start = is_root ? (str_end + 1) : str_end;
         if (*str_start == '\0')
-            return &sprt_kset->sgrt_kobj;
+            return &sptr_kset->sgtc_kobj;
         
         /*!< if *(str_end + 1) == '/', the format of name maybe "//" */
         if (*str_start == '/')
@@ -443,22 +443,22 @@ struct fwk_kobject *fwk_find_kobject_by_path(struct fwk_kobject *sprt_head, cons
         found = false;
         lenth = str_end ? (kusize_t)(str_end - str_start) : kstrlen(str_start);
 
-        spin_lock(&sprt_kset->sgrt_kobj.sgrt_lock);
+        spin_lock(&sptr_kset->sgtc_kobj.sgtc_lock);
 
-        foreach_list_next_entry(sprt_kobj, &sprt_kset->sgrt_list, sgrt_link)
+        foreach_list_next_entry(sptr_kobj, &sptr_kset->sgtc_list, sgtc_link)
         {
-            if (!sprt_kobj->name)
+            if (!sptr_kobj->name)
                 continue;
 
-            if (!strncmp(str_start, sprt_kobj->name, lenth))
+            if (!strncmp(str_start, sptr_kobj->name, lenth))
             {               
                 /*!< str_end ? directory : file; if file is existed, file is repeated */
                 if (!str_end)
                 {
-                    if (!sprt_kobj->is_dir)
+                    if (!sptr_kobj->is_dir)
                     {
-                        spin_unlock(&sprt_kset->sgrt_kobj.sgrt_lock);
-                        return sprt_kobj;
+                        spin_unlock(&sptr_kset->sgtc_kobj.sgtc_lock);
+                        return sptr_kobj;
                     }
                     
                     continue;
@@ -466,267 +466,267 @@ struct fwk_kobject *fwk_find_kobject_by_path(struct fwk_kobject *sprt_head, cons
                 
                 /*!< otherwise, it is a directory */
                 /*!< it is possible that file and directory have the same name */
-                if (!sprt_kobj->is_dir)
+                if (!sptr_kobj->is_dir)
                     continue;
 
-                spin_unlock(&sprt_kset->sgrt_kobj.sgrt_lock);
+                spin_unlock(&sptr_kset->sgtc_kobj.sgtc_lock);
                 
                 found = true;
-                sprt_kset = mrt_fwk_kset_get(sprt_kobj);
+                sptr_kset = mr_fwk_kset_get(sptr_kobj);
                 goto out;
             }
         }
 
-        spin_unlock(&sprt_kset->sgrt_kobj.sgrt_lock);
+        spin_unlock(&sptr_kset->sgtc_kobj.sgtc_lock);
 
 out:
-        if (!found || !sprt_kset)
+        if (!found || !sptr_kset)
             break;
     }
 
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
  * @brief   set kobject's name (unformatted)
- * @param   sprt_kobj, fmt
+ * @param   sptr_kobj, fmt
  * @retval  errno
  * @note    none
  */
-kint32_t fwk_kobject_set_name_args(struct fwk_kobject *sprt_kobj, const kchar_t *fmt, va_list sprt_list)
+kint32_t fwk_kobject_set_name_args(struct fwk_kobject *sptr_kobj, const kchar_t *fmt, va_list sptr_list)
 {
     kchar_t *ptr;
     
     /*!< name is already defined */
-    if (sprt_kobj->name && !fmt)
+    if (sptr_kobj->name && !fmt)
         return ER_NORMAL;
 
-    ptr = vasprintk_safe(fmt, mrt_nullptr, sprt_list);
+    ptr = vasprintk_safe(fmt, mr_nullptr, sptr_list);
     if (!isValid(ptr))
         return -ER_NOMEM;
 
-    if (sprt_kobj->name)
-        kfree(sprt_kobj->name);
+    if (sptr_kobj->name)
+        kfree(sptr_kobj->name);
 
-    sprt_kobj->name = ptr;
+    sptr_kobj->name = ptr;
     return ER_NORMAL;
 }
 
 /*!
  * @brief   set kobject's name (unformatted)
- * @param   sprt_kobj, fmt
+ * @param   sptr_kobj, fmt
  * @retval  errno
  * @note    none
  */
-kint32_t fwk_kobject_set_name(struct fwk_kobject *sprt_kobj, const kchar_t *fmt, ...)
+kint32_t fwk_kobject_set_name(struct fwk_kobject *sptr_kobj, const kchar_t *fmt, ...)
 {
-    va_list sprt_list;
+    va_list sptr_list;
     kint32_t retval;
 
-    va_start(sprt_list, fmt);
-    retval = fwk_kobject_set_name_args(sprt_kobj, fmt, sprt_list);
-    va_end(sprt_list);
+    va_start(sptr_list, fmt);
+    retval = fwk_kobject_set_name_args(sptr_kobj, fmt, sptr_list);
+    va_end(sptr_list);
 
     return retval;
 }
 
 /*!
  * @brief   re-set kobject's name (unformatted)
- * @param   sprt_kobj, fmt
+ * @param   sptr_kobj, fmt
  * @retval  errno
  * @note    none
  */
-kint32_t fwk_kobject_rename(struct fwk_kobject *sprt_kobj, const kchar_t *fmt, ...)
+kint32_t fwk_kobject_rename(struct fwk_kobject *sptr_kobj, const kchar_t *fmt, ...)
 {
-    va_list sprt_list;
+    va_list sptr_list;
     kint32_t retval;
 
-    va_start(sprt_list, fmt);
-    retval = fwk_kobject_set_name_args(sprt_kobj, fmt, sprt_list);
-    va_end(sprt_list);
+    va_start(sptr_list, fmt);
+    retval = fwk_kobject_set_name_args(sptr_kobj, fmt, sptr_list);
+    va_end(sptr_list);
 
     return retval;
 }
 
 /*!
  * @brief   delete kobject's name
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  none
  * @note    none
  */
-void fwk_kobject_del_name(struct fwk_kobject *sprt_kobj)
+void fwk_kobject_del_name(struct fwk_kobject *sptr_kobj)
 {
-    if (sprt_kobj->name)
-        kfree(sprt_kobj->name);
+    if (sptr_kobj->name)
+        kfree(sptr_kobj->name);
 
-    sprt_kobj->name = mrt_nullptr;
+    sptr_kobj->name = mr_nullptr;
 }
 
 /*!
  * @brief   get kobject's name
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  name
  * @note    none
  */
-kchar_t *fwk_kobject_get_name(struct fwk_kobject *sprt_kobj)
+kchar_t *fwk_kobject_get_name(struct fwk_kobject *sptr_kobj)
 {
-    return sprt_kobj->name;
+    return sptr_kobj->name;
 }
 
 /*!
  * @brief   kobject get
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  kobject
  * @note    none
  */
-struct fwk_kobject *fwk_kobject_get(struct fwk_kobject *sprt_kobj)
+struct fwk_kobject *fwk_kobject_get(struct fwk_kobject *sptr_kobj)
 {
-    fwk_kref_get(&sprt_kobj->sgrt_ref);
-    return sprt_kobj;
+    fwk_kref_get(&sptr_kobj->sgtc_ref);
+    return sptr_kobj;
 }
 
 /*!
  * @brief   kobject put
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  none
  * @note    none
  */
-void fwk_kobject_put(struct fwk_kobject *sprt_kobj)
+void fwk_kobject_put(struct fwk_kobject *sptr_kobj)
 {
-    fwk_kref_put(&sprt_kobj->sgrt_ref);
+    fwk_kref_put(&sptr_kobj->sgtc_ref);
 }
 
 /*!
  * @brief   check if kobject is using now
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  non-zero: using; 0: closed
  * @note    none
  */
-kbool_t fwk_kobject_is_referrd(struct fwk_kobject *sprt_kobj)
+kbool_t fwk_kobject_is_referrd(struct fwk_kobject *sptr_kobj)
 {
-    return !fwk_kref_is_zero(&sprt_kobj->sgrt_ref);
+    return !fwk_kref_is_zero(&sptr_kobj->sgtc_ref);
 }
 
 /*!
  * @brief   initialize kset
- * @param   sprt_kset
+ * @param   sptr_kset
  * @retval  none
  * @note    none
  */
-void fwk_kset_init(struct fwk_kset *sprt_kset)
+void fwk_kset_init(struct fwk_kset *sptr_kset)
 {
-    init_list_head(&sprt_kset->sgrt_list);
-    fwk_kobject_init(&sprt_kset->sgrt_kobj);
+    init_list_head(&sptr_kset->sgtc_list);
+    fwk_kobject_init(&sptr_kset->sgtc_kobj);
 }
 
 /*!
  * @brief   create kset
- * @param   name, sprt_parent
+ * @param   name, sptr_parent
  * @retval  kset created
  * @note    none
  */
-struct fwk_kset *fwk_kset_create(const kchar_t *name, struct fwk_kobject *sprt_parent)
+struct fwk_kset *fwk_kset_create(const kchar_t *name, struct fwk_kobject *sptr_parent)
 {
-    struct fwk_kset *sprt_kset;
+    struct fwk_kset *sptr_kset;
 
-    sprt_kset = kzalloc(sizeof(*sprt_kset), GFP_KERNEL);
-    if (!isValid(sprt_kset))
-        return mrt_nullptr;
+    sptr_kset = kzalloc(sizeof(*sptr_kset), GFP_KERNEL);
+    if (!isValid(sptr_kset))
+        return mr_nullptr;
 
-    if (fwk_kobject_set_name(&sprt_kset->sgrt_kobj, "%s", name))
+    if (fwk_kobject_set_name(&sptr_kset->sgtc_kobj, "%s", name))
     {
-        kfree(sprt_kset);
-        return mrt_nullptr;
+        kfree(sptr_kset);
+        return mr_nullptr;
     }
 
-    sprt_kset->sgrt_kobj.sprt_parent = sprt_parent;
-    sprt_kset->sgrt_kobj.sprt_kset = mrt_nullptr;
+    sptr_kset->sgtc_kobj.sptr_parent = sptr_parent;
+    sptr_kset->sgtc_kobj.sptr_kset = mr_nullptr;
 
-    return sprt_kset;
+    return sptr_kset;
 }
 
 /*!
  * @brief   register kset
- * @param   sprt_kset
+ * @param   sptr_kset
  * @retval  errno
  * @note    none
  */
-kint32_t fwk_kset_register(struct fwk_kset *sprt_kset)
+kint32_t fwk_kset_register(struct fwk_kset *sptr_kset)
 {
-    struct fwk_kobject *sprt_kobj;
-    struct fwk_kset *sprt_temp;
+    struct fwk_kobject *sptr_kobj;
+    struct fwk_kset *sptr_temp;
 
     if (!is_fwk_root_existed)
         return -ER_FORBID;
 
-    sprt_kobj = &sprt_kset->sgrt_kobj;
-    sprt_temp = sprt_kobj->sprt_kset;
+    sptr_kobj = &sptr_kset->sgtc_kobj;
+    sptr_temp = sptr_kobj->sptr_kset;
 
-    fwk_kset_init(sprt_kset);
-    sprt_kobj->is_dir = true;
-    sprt_kobj->sprt_kset = sprt_temp;
+    fwk_kset_init(sptr_kset);
+    sptr_kobj->is_dir = true;
+    sptr_kobj->sptr_kset = sptr_temp;
 
-    if (!sprt_temp)
-        sprt_kobj->sprt_kset = &sgrt_fwk_kset_root;
+    if (!sptr_temp)
+        sptr_kobj->sptr_kset = &sgtc_fwk_kset_root;
     
-    return fwk_kobject_build_inode(&sprt_kset->sgrt_kobj);
+    return fwk_kobject_build_inode(&sptr_kset->sgtc_kobj);
 }
 
 /*!
  * @brief   create and register kset
- * @param   name, sprt_parent
+ * @param   name, sptr_parent
  * @retval  kset created
  * @note    none
  */
-struct fwk_kset *fwk_kset_create_and_register(const kchar_t *name, struct fwk_kobject *sprt_parent)
+struct fwk_kset *fwk_kset_create_and_register(const kchar_t *name, struct fwk_kobject *sptr_parent)
 {
-    struct fwk_kset *sprt_kset;
+    struct fwk_kset *sptr_kset;
 
-    sprt_kset = fwk_kset_create(name, sprt_parent);
-    if (!isValid(sprt_kset))
-        return mrt_nullptr;
+    sptr_kset = fwk_kset_create(name, sptr_parent);
+    if (!isValid(sptr_kset))
+        return mr_nullptr;
 
-    if (fwk_kset_register(sprt_kset))
+    if (fwk_kset_register(sptr_kset))
     {
-        fwk_kobject_del_name(&sprt_kset->sgrt_kobj);
-        kfree(sprt_kset);
+        fwk_kobject_del_name(&sptr_kset->sgtc_kobj);
+        kfree(sptr_kset);
 
-        return mrt_nullptr;
+        return mr_nullptr;
     }
 
-    return sprt_kset;
+    return sptr_kset;
 }
 
 /*!
  * @brief   unregister kset
- * @param   sprt_kset
+ * @param   sptr_kset
  * @retval  none
  * @note    none
  */
-void fwk_kset_unregister(struct fwk_kset *sprt_kset)
+void fwk_kset_unregister(struct fwk_kset *sptr_kset)
 {
-    if (!mrt_list_head_empty(&sprt_kset->sgrt_list))
+    if (!mr_list_head_empty(&sptr_kset->sgtc_list))
         return;
 
-    fwk_kobject_del(&sprt_kset->sgrt_kobj);
-    fwk_kset_init(sprt_kset);
+    fwk_kobject_del(&sptr_kset->sgtc_kobj);
+    fwk_kset_init(sptr_kset);
 }
 
 /*!
  * @brief   unregister kset and kobject
- * @param   sprt_kobj
+ * @param   sptr_kobj
  * @retval  none
  * @note    none
  */
-void fwk_kset_kobject_remove(struct fwk_kobject *sprt_kobj)
+void fwk_kset_kobject_remove(struct fwk_kobject *sptr_kobj)
 {
-    if (!sprt_kobj->is_dir)
-        fwk_kobject_destroy(sprt_kobj);
+    if (!sptr_kobj->is_dir)
+        fwk_kobject_destroy(sptr_kobj);
     else
     {
-        struct fwk_kset *sprt_kset = mrt_fwk_kset_get(sprt_kobj);
-        fwk_kset_unregister(sprt_kset);
-        kfree(sprt_kset);
+        struct fwk_kset *sptr_kset = mr_fwk_kset_get(sptr_kobj);
+        fwk_kset_unregister(sptr_kset);
+        kfree(sptr_kset);
     }
 }
 
@@ -738,7 +738,7 @@ void fwk_kset_kobject_remove(struct fwk_kobject *sprt_kobj)
  */
 struct fwk_kset *fwk_kset_get_root(void)
 {
-    return &sgrt_fwk_kset_root;
+    return &sgtc_fwk_kset_root;
 }
 
 /*!< ------------------------------------------------------- */
@@ -750,13 +750,13 @@ struct fwk_kset *fwk_kset_get_root(void)
  */
 kint32_t __plat_init fwk_kobject_root_init(void)
 {
-    struct fwk_kset *sprt_kset = &sgrt_fwk_kset_root;
+    struct fwk_kset *sptr_kset = &sgtc_fwk_kset_root;
     
-    fwk_kset_init(sprt_kset);
-    fwk_kobject_set_name(&sprt_kset->sgrt_kobj, "/");
-    sprt_kset->sgrt_kobj.sprt_parent = mrt_nullptr;
-    sprt_kset->sgrt_kobj.sprt_kset = mrt_nullptr;
-    sprt_kset->sgrt_kobj.is_dir = true;
+    fwk_kset_init(sptr_kset);
+    fwk_kobject_set_name(&sptr_kset->sgtc_kobj, "/");
+    sptr_kset->sgtc_kobj.sptr_parent = mr_nullptr;
+    sptr_kset->sgtc_kobj.sptr_kset = mr_nullptr;
+    sptr_kset->sgtc_kobj.is_dir = true;
 
     is_fwk_root_existed = true;
 

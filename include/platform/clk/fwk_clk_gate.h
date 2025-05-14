@@ -24,7 +24,7 @@
 /*!< The defines */
 typedef struct fwk_clk_gate 
 {
-	struct fwk_clk_hw sgrt_hw;
+	struct fwk_clk_hw sgtc_hw;
 	void *reg;
 	kuint8_t bit_idx;
 	kuint8_t flags;
@@ -32,9 +32,9 @@ typedef struct fwk_clk_gate
 } srt_fwk_clk_gate_t;
 
 /*!< The functions */
-extern struct fwk_clk *fwk_clk_gate_register(struct fwk_clk *sprt_clk, const struct fwk_clk_ops *sprt_ops,
+extern struct fwk_clk *fwk_clk_gate_register(struct fwk_clk *sptr_clk, const struct fwk_clk_ops *sptr_ops,
                                 const kchar_t *name, const kchar_t *parent, void *reg, kuint8_t shift);
-extern void fwk_clk_gate_unregister(struct fwk_clk *sprt_clk);
+extern void fwk_clk_gate_unregister(struct fwk_clk *sptr_clk);
 
 #ifdef __cplusplus
     }

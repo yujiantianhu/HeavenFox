@@ -46,21 +46,21 @@ using namespace tsk;
  */
 static void *lvgl_task_entry(void *args)
 {
-    struct fwk_disp_ctrl sgrt_dctrl;
-    struct fwk_disp_info sgrt_disp;
+    struct fwk_disp_ctrl sgtc_dctrl;
+    struct fwk_disp_info sgtc_disp;
 
-    sgrt_dctrl.sprt_di = &sgrt_disp;
+    sgtc_dctrl.sptr_di = &sgtc_disp;
 
     lv_init();
-    lv_port_disp_init(&sgrt_dctrl);
+    lv_port_disp_init(&sgtc_dctrl);
     lv_port_fs_init();
 
-    lvgl_task_setup(&sgrt_dctrl);
+    lvgl_task_setup(&sgtc_dctrl);
     msleep(1);
 
     for (;;)
     {
-        lvgl_task(&sgrt_dctrl);
+        lvgl_task(&sgtc_dctrl);
         msleep(100);
     }
 
@@ -86,8 +86,8 @@ kint32_t lvgl_task_init(void)
     if (!cprt_task)
         return -ER_FAILD;
 
-    struct mailbox &sgrt_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgrt_mb, cprt_task->get_self(), "lvgl-task-mailbox");
+    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cprt_task->get_self(), "lvgl-task-mailbox");
 
     return ER_NORMAL;
 }

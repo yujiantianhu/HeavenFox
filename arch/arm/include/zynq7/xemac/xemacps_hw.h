@@ -605,7 +605,7 @@ typedef enum { MDC_DIV_8 = 0U, MDC_DIV_16, MDC_DIV_32, MDC_DIV_48,
 *
 *****************************************************************************/
 #define XEmacPs_ReadReg(BaseAddress, RegOffset) \
-                mrt_readl((BaseAddress) + (RegOffset))
+                mr_readl((BaseAddress) + (RegOffset))
 
 
 /****************************************************************************/
@@ -626,7 +626,7 @@ typedef enum { MDC_DIV_8 = 0U, MDC_DIV_16, MDC_DIV_32, MDC_DIV_48,
 *
 *****************************************************************************/
 #define XEmacPs_WriteReg(BaseAddress, RegOffset, Data) \
-                mrt_writel(Data, (BaseAddress) + (RegOffset))
+                mr_writel(Data, (BaseAddress) + (RegOffset))
 
 /************************** Function Prototypes *****************************/
 

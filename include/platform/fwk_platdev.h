@@ -55,25 +55,25 @@ struct fwk_platdev
 	kchar_t *name;
 	kint32_t id;
 
-	struct fwk_resources *sprt_resources;
+	struct fwk_resources *sptr_resources;
 	kusize_t num_resources;
 
-	struct fwk_enums *sprt_enums;
+	struct fwk_enums *sptr_enums;
 	kusize_t num_enums;
 
 	kchar_t *driver_override;
-	struct fwk_device sgrt_dev;
+	struct fwk_device sgtc_dev;
 };
 
-#define RESOURCE_SIZE(sprt_res)						(sprt_res ? (sprt_res->end - sprt_res->start + 1) : 0)
+#define RESOURCE_SIZE(sptr_res)						(sptr_res ? (sptr_res->end - sptr_res->start + 1) : 0)
 
 /*!< The functions */
-extern kint32_t fwk_device_add(struct fwk_device *sprt_dev);
-extern kint32_t fwk_device_del(struct fwk_device *sprt_dev);
+extern kint32_t fwk_device_add(struct fwk_device *sptr_dev);
+extern kint32_t fwk_device_del(struct fwk_device *sptr_dev);
 extern struct fwk_platdev *fwk_platdevice_alloc(const kchar_t *name, kint32_t id);
-extern kint32_t fwk_platdevice_add(struct fwk_platdev *sprt_platdev);
-extern kint32_t fwk_register_platdevice(struct fwk_platdev *sprt_platdev);
-extern kint32_t fwk_unregister_platdevice(struct fwk_platdev *sprt_platdev);
+extern kint32_t fwk_platdevice_add(struct fwk_platdev *sptr_platdev);
+extern kint32_t fwk_register_platdevice(struct fwk_platdev *sptr_platdev);
+extern kint32_t fwk_unregister_platdevice(struct fwk_platdev *sptr_platdev);
 
 /*!< API functions */
 /*!
@@ -82,9 +82,9 @@ extern kint32_t fwk_unregister_platdevice(struct fwk_platdev *sprt_platdev);
  * @retval  none
  * @note    none
  */
-static inline kusize_t fwk_resource_size(struct fwk_resources *sprt_res)
+static inline kusize_t fwk_resource_size(struct fwk_resources *sptr_res)
 {
-	return sprt_res ? (sprt_res->end - sprt_res->start + 1) : 0;
+	return sptr_res ? (sptr_res->end - sptr_res->start + 1) : 0;
 }
 
 /*!
@@ -93,9 +93,9 @@ static inline kusize_t fwk_resource_size(struct fwk_resources *sprt_res)
  * @retval  none
  * @note    none
  */
-static inline kuaddr_t fwk_address_map(struct fwk_resources *sprt_res)
+static inline kuaddr_t fwk_address_map(struct fwk_resources *sptr_res)
 {
-	return sprt_res ? sprt_res->start : 0;
+	return sptr_res ? (kuaddr_t)fwk_io_remap((void *)sptr_res->start, sptr_res->end - sptr_res->start + 1) : 0;
 }
 
 #ifdef __cplusplus

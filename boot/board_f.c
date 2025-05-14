@@ -23,10 +23,10 @@
 kuaddr_t board_init_f_alloc_reserve(kuaddr_t base)
 {
     base -= CONFIG_BOOT_MALLOC_LEN;
-    base  = mrt_align(base, 16);
+    base  = mr_align(base, 16);
 
     base -= sizeof(srt_gd_t);
-    base  = mrt_align(base, 16);
+    base  = mr_align(base, 16);
 
     return base;
 }
@@ -39,19 +39,19 @@ kuaddr_t board_init_f_alloc_reserve(kuaddr_t base)
  */
 void board_init_f_init_reserve(kuaddr_t base)
 {
-    srt_gd_t *sprt_gd;
+    srt_gd_t *sptr_gd;
 
-    sprt_gd = (srt_gd_t *)base;
-    kmemzero(sprt_gd, sizeof(srt_gd_t));
+    sptr_gd = (srt_gd_t *)base;
+    kmemzero(sptr_gd, sizeof(srt_gd_t));
 
     /*!< save stack base address */
-    sprt_gd->iboot_sp = (kuaddr_t)base;
+    sptr_gd->iboot_sp = (kuaddr_t)base;
 
     base += sizeof(srt_gd_t);
-    base  = mrt_align(base, 16);
+    base  = mr_align(base, 16);
 
-    sprt_gd->malloc_addr = base;
-    sprt_gd->malloc_len  = CONFIG_BOOT_MALLOC_LEN;
+    sptr_gd->malloc_addr = base;
+    sptr_gd->malloc_len  = CONFIG_BOOT_MALLOC_LEN;
 
 }
 
@@ -63,12 +63,12 @@ void board_init_f_init_reserve(kuaddr_t base)
  */
 kint32_t board_init_malloc_space(void)
 {
-    srt_gd_t *sprt_gd;
+    srt_gd_t *sptr_gd;
     kbool_t retval;
 
-    sprt_gd = board_get_gd();
+    sptr_gd = board_get_gd();
 
-    retval = memory_block_self_defines(-1, sprt_gd->malloc_addr, sprt_gd->malloc_len);
+    retval = memory_block_self_defines(-1, sptr_gd->malloc_addr, sptr_gd->malloc_len);
     return (retval) ? RET_BOOT_PASS : RET_BOOT_ERR;
 }
 
@@ -84,7 +84,7 @@ board_init_t board_init_sequence_f[] =
     /*!< init sdio peripheral */
     board_init_sdmmc,
     
-    mrt_nullptr,
+    mr_nullptr,
 };
 
 /*!

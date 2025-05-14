@@ -25,11 +25,11 @@
 /*!< API functions */
 /*!
  * @brief   cmd 'info': excute function
- * @param   sprt_cmd, argc, argv
+ * @param   sptr_cmd, argc, argv
  * @retval  errno
  * @note    none
  */
-static kint32_t term_cmd_show_info(struct term_cmd *sprt_cmd, kint32_t argc, kchar_t **argv)
+static kint32_t term_cmd_show_info(struct term_cmd *sptr_cmd, kint32_t argc, kchar_t **argv)
 {
     switch (argc)
     {
@@ -46,7 +46,7 @@ static kint32_t term_cmd_show_info(struct term_cmd *sprt_cmd, kint32_t argc, kch
 
         case 2:
             if (!strcmp(argv[1], "--help"))
-                sprt_cmd->help();
+                sptr_cmd->help();
             else
                 goto fail;
 
@@ -82,14 +82,14 @@ static void term_cmd_info_help(void)
  */
 void term_cmd_add_info(void)
 {
-    struct term_cmd *sprt_cmd;
+    struct term_cmd *sptr_cmd;
 
-    sprt_cmd = term_cmd_allocate("info", GFP_KERNEL);
-    if (!isValid(sprt_cmd))
+    sptr_cmd = term_cmd_allocate("info", GFP_KERNEL);
+    if (!isValid(sptr_cmd))
         return;
 
-    sprt_cmd->do_excute = term_cmd_show_info;
-    sprt_cmd->help = term_cmd_info_help;
+    sptr_cmd->do_excute = term_cmd_show_info;
+    sptr_cmd->help = term_cmd_info_help;
 
-    term_cmd_add(sprt_cmd);
+    term_cmd_add(sptr_cmd);
 }

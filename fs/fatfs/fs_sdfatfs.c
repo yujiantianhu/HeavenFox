@@ -15,8 +15,8 @@
 #include <fs/fs_fatfs.h>
 
 /*!< The globals */
-static struct fwk_sdcard sgrt_fwk_sddisk;
-static struct fatfs_disk *sprt_fatfs_sddisk;
+static struct fwk_sdcard sgtc_fwk_sddisk;
+static struct fatfs_disk *sptr_fatfs_sddisk;
 
 /*!< API function */
 /*!
@@ -30,7 +30,7 @@ DRESULT fs_sdfatfs_write(kuint8_t physicalDrive, const kuint8_t *buffer, kuint32
     if (physicalDrive != SDDISK)
         return RES_PARERR;
 
-    if (!fwk_sdcard_rw_blocks(&sgrt_fwk_sddisk, (void *)buffer, sector, count, NR_SdCard_WriteToCard))
+    if (!fwk_sdcard_rw_blocks(&sgtc_fwk_sddisk, (void *)buffer, sector, count, NR_SdCard_WriteToCard))
         return RES_ERROR;
 
     return RES_OK;
@@ -47,7 +47,7 @@ DRESULT fs_sdfatfs_read(kuint8_t physicalDrive, kuint8_t *buffer, kuint32_t sect
     if (physicalDrive != SDDISK)
         return RES_PARERR;
 
-    if (!fwk_sdcard_rw_blocks(&sgrt_fwk_sddisk, buffer, sector, count, NR_SdCard_ReadToHost))
+    if (!fwk_sdcard_rw_blocks(&sgtc_fwk_sddisk, buffer, sector, count, NR_SdCard_ReadToHost))
         return RES_ERROR;
 
     return RES_OK;
@@ -70,21 +70,21 @@ DRESULT fs_sdfatfs_ioctl(kuint8_t physicalDrive, kuint8_t command, void *buffer)
     {
         case GET_SECTOR_COUNT:
             if (buffer)
-                *(kuint32_t *)buffer = sgrt_fwk_sddisk.blockCount;
+                *(kuint32_t *)buffer = sgtc_fwk_sddisk.blockCount;
             else
                 result = RES_PARERR;
             break;
 
         case GET_SECTOR_SIZE:
             if (buffer)
-                *(kuint32_t *)buffer = sgrt_fwk_sddisk.blockSize;
+                *(kuint32_t *)buffer = sgtc_fwk_sddisk.blockSize;
             else
                 result = RES_PARERR;
             break;
 
         case GET_BLOCK_SIZE:
             if (buffer)
-                *(kuint32_t *)buffer = sgrt_fwk_sddisk.sgrt_csd.eraseSectorSize;
+                *(kuint32_t *)buffer = sgtc_fwk_sddisk.sgtc_csd.eraseSectorSize;
             else
                 result = RES_PARERR;
             break;
@@ -111,7 +111,7 @@ DSTATUS fs_sdfatfs_status(kuint8_t physicalDrive)
     if (physicalDrive != SDDISK)
         return STA_NOINIT;
 
-	if (mrt_isBitResetl(NR_SdCard_Transfer_State, &sgrt_fwk_sddisk.mode))
+	if (mr_isBitResetl(NR_SdCard_Transfer_State, &sgtc_fwk_sddisk.mode))
 		return STA_NOINIT;
 
     return 0;
@@ -125,22 +125,22 @@ DSTATUS fs_sdfatfs_status(kuint8_t physicalDrive)
  */
 DSTATUS fs_sdfatfs_initial(kuint8_t physicalDrive)
 {
-    struct fwk_sdcard *sprt_card;
+    struct fwk_sdcard *sptr_card;
     kint32_t iRetval;
 
     if (physicalDrive != SDDISK)
         return STA_NOINIT;
 
     /*!< allocate sdcard structure or get host */
-    sprt_card = fwk_sdcard_allocate_device(&sgrt_fwk_sddisk);
-    if (!isValid(sprt_card))
+    sptr_card = fwk_sdcard_allocate_device(&sgtc_fwk_sddisk);
+    if (!isValid(sptr_card))
         return STA_NOINIT;
 
     /*!< detect and initial */
-    iRetval = fwk_sdcard_initial_device(sprt_card);
+    iRetval = fwk_sdcard_initial_device(sptr_card);
     if (iRetval)
     {
-       fwk_sdcard_free_device(sprt_card);
+       fwk_sdcard_free_device(sptr_card);
        return STA_NOINIT;
     }
 
@@ -158,7 +158,7 @@ DSTATUS fs_sdfatfs_release(kuint8_t physicalDrive)
     if (physicalDrive != SDDISK)
         return STA_NOINIT;
 
-	fwk_sdcard_inactive_device(&sgrt_fwk_sddisk);
+	fwk_sdcard_inactive_device(&sgtc_fwk_sddisk);
 
 	return 0;
 }
@@ -172,22 +172,22 @@ DSTATUS fs_sdfatfs_release(kuint8_t physicalDrive)
  */
 kint32_t __plat_init fs_sdfatfs_init(void)
 {
-    struct fatfs_disk *sprt_fdisk;
-    struct fwk_sdcard *sprt_card;
+    struct fatfs_disk *sptr_fdisk;
+    struct fwk_sdcard *sptr_card;
     kint32_t retval = 0;
 
-    sprt_fdisk = fs_alloc_fatfs(SDDISK);
-    if (!isValid(sprt_fdisk))
+    sptr_fdisk = fs_alloc_fatfs(SDDISK);
+    if (!isValid(sptr_fdisk))
         return -ER_NOMEM;
 
-    retval = fs_register_fatfs(sprt_fdisk);
+    retval = fs_register_fatfs(sptr_fdisk);
     if (retval)
     {
-        sprt_card = &sgrt_fwk_sddisk;
-        if (!sprt_card->sgrt_if.sprt_host)
+        sptr_card = &sgtc_fwk_sddisk;
+        if (!sptr_card->sgtc_if.sptr_host)
             goto fail;
 
-        if (fwk_sdcard_is_insert(sprt_card))
+        if (fwk_sdcard_is_insert(sptr_card))
         {
             print_err("sd card detected, but initialize fatfs failed!\r\n");
             goto fail;
@@ -197,13 +197,13 @@ kint32_t __plat_init fs_sdfatfs_init(void)
         return ER_NORMAL;
     }
 
-    sprt_fatfs_sddisk = sprt_fdisk;
+    sptr_fatfs_sddisk = sptr_fdisk;
 
     print_info("sd card detected, and initialize fatfs successfully!\r\n");
     return ER_NORMAL;
 
 fail:
-    kfree(sprt_fdisk);
+    kfree(sptr_fdisk);
     return retval;
 }
 
@@ -215,13 +215,13 @@ fail:
  */
 void __plat_exit fs_sdfatfs_exit(void)
 {
-    struct fatfs_disk *sprt_fdisk;
+    struct fatfs_disk *sptr_fdisk;
 
-    sprt_fdisk = sprt_fatfs_sddisk;
-    sprt_fatfs_sddisk = mrt_nullptr;
+    sptr_fdisk = sptr_fatfs_sddisk;
+    sptr_fatfs_sddisk = mr_nullptr;
 
-    fs_unregister_fatfs(sprt_fdisk);
-    sprt_fdisk = mrt_nullptr;
+    fs_unregister_fatfs(sptr_fdisk);
+    sptr_fdisk = mr_nullptr;
 }
 
 IMPORT_ROOTFS_INIT(fs_sdfatfs_init);

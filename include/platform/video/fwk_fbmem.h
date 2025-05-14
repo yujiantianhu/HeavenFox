@@ -113,12 +113,12 @@ typedef struct fwk_fb_info
     kint32_t node;										/*!< minor */
     kint32_t flags;
 
-    struct fwk_fb_fix_screen_info sgrt_fix;				/*!< fix parameters */
-    struct fwk_fb_var_screen_info sgrt_var;				/*!< variadics */
+    struct fwk_fb_fix_screen_info sgtc_fix;				/*!< fix parameters */
+    struct fwk_fb_var_screen_info sgtc_var;				/*!< variadics */
 
-    const struct fwk_fb_oprts *sprt_fbops;				/*!< operation API */
-    struct fwk_device *sprt_dev;						/*!< device */
-    struct fwk_device *sprt_idev;
+    const struct fwk_fb_oprts *sptr_fbops;				/*!< operation API */
+    struct fwk_device *sptr_dev;						/*!< device */
+    struct fwk_device *sptr_idev;
 
     kuint8_t *screen_base;								/*!< base address of the virtual memory */
     kuint32_t screen_size;								/*!< virtual memory size */
@@ -129,13 +129,13 @@ typedef struct fwk_fb_info
 
 struct fwk_fb_oprts
 {
-    kint32_t (*fb_open) (struct fwk_fb_info *sprt_info, kint32_t user);
-    kint32_t (*fb_release) (struct fwk_fb_info *sprt_info, kint32_t user);
+    kint32_t (*fb_open) (struct fwk_fb_info *sptr_info, kint32_t user);
+    kint32_t (*fb_release) (struct fwk_fb_info *sptr_info, kint32_t user);
 
-    kssize_t (*fb_read) (struct fwk_fb_info *sprt_info, kbuffer_t *ptr_buf, kusize_t count, kuint8_t *ptr_offset);
-    kssize_t (*fb_write) (struct fwk_fb_info *sprt_info, const kbuffer_t *ptr_buf, kusize_t count, kuint8_t *ptr_offset);
-    kint32_t (*fb_ioctl) (struct fwk_fb_info *sprt_info, kuint32_t cmd, kuaddr_t arg);
-    kint32_t (*fb_mmap) (struct fwk_fb_info *sprt_info, struct fwk_vm_area *vma);
+    kssize_t (*fb_read) (struct fwk_fb_info *sptr_info, kbuffer_t *ptr_buf, kusize_t count, kuint8_t *ptr_offset);
+    kssize_t (*fb_write) (struct fwk_fb_info *sptr_info, const kbuffer_t *ptr_buf, kusize_t count, kuint8_t *ptr_offset);
+    kint32_t (*fb_ioctl) (struct fwk_fb_info *sptr_info, kuint32_t cmd, kuaddr_t arg);
+    kint32_t (*fb_mmap) (struct fwk_fb_info *sptr_info, struct fwk_vm_area *vma);
 };
 
 /*!< Notifier */
@@ -144,13 +144,13 @@ struct fwk_fb_oprts
 
 struct fwk_fb_notifier_param
 {
-    struct fwk_fb_fix_screen_info *sprt_fix;			/*!< fix parameters */
-    struct fwk_fb_var_screen_info *sprt_var;			/*!< variadics */
+    struct fwk_fb_fix_screen_info *sptr_fix;			/*!< fix parameters */
+    struct fwk_fb_var_screen_info *sptr_var;			/*!< variadics */
     kuint32_t bus_width;
 };
 
 /*!< The globals */
-BLOCKING_NOTIFIER_DECLARE(sgrt_fbmem_notifier_chain);
+BLOCKING_NOTIFIER_DECLARE(sgtc_fbmem_notifier_chain);
 
 /*!< The functions */
 /*!< -------------------------------------------------------------- */
@@ -158,23 +158,23 @@ extern kint32_t fwk_fbmem_init(void);
 extern void fwk_fbmem_exit(void);
 
 /*!< -------------------------------------------------------------- */
-extern struct fwk_fb_info *fwk_framebuffer_alloc(kusize_t size, struct fwk_device *sprt_dev);
-extern void fwk_framebuffer_release(struct fwk_fb_info *sprt_fb_info);
-extern kint32_t fwk_register_framebuffer(struct fwk_fb_info *sprt_fb_info);
-extern void fwk_unregister_framebuffer(struct fwk_fb_info *sprt_fb_info);
+extern struct fwk_fb_info *fwk_framebuffer_alloc(kusize_t size, struct fwk_device *sptr_dev);
+extern void fwk_framebuffer_release(struct fwk_fb_info *sptr_fb_info);
+extern kint32_t fwk_register_framebuffer(struct fwk_fb_info *sptr_fb_info);
+extern void fwk_unregister_framebuffer(struct fwk_fb_info *sptr_fb_info);
 extern struct fwk_fb_info *fwk_get_fb_info(kuint32_t idx);
-extern struct fwk_fb_info *fwk_file_fb_info(struct fwk_file *sprt_file);
+extern struct fwk_fb_info *fwk_file_fb_info(struct fwk_file *sptr_file);
 
 /*!< API functions */
 /*!
  * @brief   get driver data from fb device
- * @param   sprt_fb_info
+ * @param   sptr_fb_info
  * @retval  ptr_par
  * @note    none
  */
-static inline void *fwk_fb_get_drvdata(struct fwk_fb_info *sprt_fb_info)
+static inline void *fwk_fb_get_drvdata(struct fwk_fb_info *sptr_fb_info)
 {
-    return sprt_fb_info ? sprt_fb_info->ptr_par : mrt_nullptr;
+    return sptr_fb_info ? sptr_fb_info->ptr_par : mr_nullptr;
 }
 
 #ifdef __cplusplus

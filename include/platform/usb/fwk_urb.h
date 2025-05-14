@@ -84,10 +84,10 @@ enum __ERT_URB_PID_TYPE
 #define FWK_URB_PID_TRANS_NUMBER(x)                                     (reverse_bit(FWK_URB_PID_NUMBER(x)))
 
 #define FWK_URB_CHECK_PACKET_TYPE(pid)                                  ((pid) & (0x03))
-#define FWK_URB_IS_SUPER_PACKET(pid)                                    mrt_is_bitequal(pid, FWK_URB_SUPER_PACKET_MASK)
-#define FWK_URB_IS_TOKEN_PACKET(pid)                                    mrt_is_bitequal(pid, FWK_URB_TOKEN_PACKET_MASK)
-#define FWK_URB_IS_HANDSHAKE_PACKET(pid)                                mrt_is_bitequal(pid, FWK_URB_HANDSHAKE_PACKET_MASK)
-#define FWK_URB_IS_DATA_PACKET(pid)                                     mrt_is_bitequal(pid, FWK_URB_DATA_PACKET_MASK)
+#define FWK_URB_IS_SUPER_PACKET(pid)                                    mr_is_bitequal(pid, FWK_URB_SUPER_PACKET_MASK)
+#define FWK_URB_IS_TOKEN_PACKET(pid)                                    mr_is_bitequal(pid, FWK_URB_TOKEN_PACKET_MASK)
+#define FWK_URB_IS_HANDSHAKE_PACKET(pid)                                mr_is_bitequal(pid, FWK_URB_HANDSHAKE_PACKET_MASK)
+#define FWK_URB_IS_DATA_PACKET(pid)                                     mr_is_bitequal(pid, FWK_URB_DATA_PACKET_MASK)
 };
 
 /*!< Frame number maximum */
@@ -183,12 +183,12 @@ typedef struct fwk_urb_packet
     
     union
     {
-        struct fwk_urb_sof sgrt_sof;
-        struct fwk_urb_token sgrt_token;
-        struct fwk_urb_data sgrt_data;
-        struct fwk_urb_handshake sgrt_hsk;
+        struct fwk_urb_sof sgtc_sof;
+        struct fwk_urb_token sgtc_token;
+        struct fwk_urb_data sgtc_data;
+        struct fwk_urb_handshake sgtc_hsk;
 
-    } ugrt_frame;
+    } ugtr_frame;
 
     kuint8_t eop;
 
@@ -198,7 +198,7 @@ typedef struct fwk_urb_packet
 /*!<
  * Control Transmission
  *  (Consist of 3 transactions)
- *  1) SETUP transaction: SETUP token packet(sgrt_token) + DATA0 packet(sgrt_data) + ACK handshake packet(sgrt_hsk)
+ *  1) SETUP transaction: SETUP token packet(sgtc_token) + DATA0 packet(sgtc_data) + ACK handshake packet(sgtc_hsk)
  *  2) Data transaction: consist of 0 or more IN/OUT transaction (Bulk transmission)
  *  3) Status transaction: consist of 1 OUT/IN transaction (Bulk transmission)
  */
@@ -217,19 +217,19 @@ typedef struct fwk_urb_setup_data
 enum __ERT_URB_SETUP_REQTYPE
 {
     /*!< Data transfer direction */
-    NR_URB_SetupReqTransDir = mrt_bit(7),                          /*!< 0: host to device; 1: device to host */
+    NR_URB_SetupReqTransDir = mr_bit(7),                          /*!< 0: host to device; 1: device to host */
 
     /*!< Command Type */
     NR_URB_SetupReqTypeStd = 0,                                    /*!< Standard Command */
-    NR_URB_SetupReqTypeClass = mrt_bit(5),                         /*!< Class Request Command */
-    NR_URB_SetupReqTypeVendor = mrt_bit(6),                        /*!< User-Defined Command */
-    NR_URB_SetupReqTypeResvd = mrt_bit(5) | mrt_bit(6),            /*!< Reserved Command */
+    NR_URB_SetupReqTypeClass = mr_bit(5),                         /*!< Class Request Command */
+    NR_URB_SetupReqTypeVendor = mr_bit(6),                        /*!< User-Defined Command */
+    NR_URB_SetupReqTypeResvd = mr_bit(5) | mr_bit(6),            /*!< Reserved Command */
 
     /*!< Recipient Type */
     NR_URB_SetupReqRecDevice = 0,                                  /*!< to device */
-    NR_URB_SetupReqRecInterface = mrt_bit(0),                      /*!< to interface */
-    NR_URB_SetupReqRecEndpoint = mrt_bit(1),                       /*!< to endpoint */
-    NR_URB_SetupReqRecOther = mrt_bit(0) | mrt_bit(1),
+    NR_URB_SetupReqRecInterface = mr_bit(0),                      /*!< to interface */
+    NR_URB_SetupReqRecEndpoint = mr_bit(1),                       /*!< to endpoint */
+    NR_URB_SetupReqRecOther = mr_bit(0) | mr_bit(1),
 };
 
 /*!< for bRequest */

@@ -24,64 +24,64 @@
 /*!< API functions */
 /*!
  * @brief   initial semaphore
- * @param   sprt_sem
+ * @param   sptr_sem
  * @retval  none
  * @note    set count = sem
  */
-void sema_init(struct semaphore *sprt_sem, kuint32_t val)
+void sema_init(struct semaphore *sptr_sem, kuint32_t val)
 {
-    if (sprt_sem)
-        ATOMIC_SET(&sprt_sem->sgrt_atc, val);
+    if (sptr_sem)
+        ATOMIC_SET(&sptr_sem->sgtc_atc, val);
 }
 
 /*!
  * @brief   semaphore lock
- * @param   sprt_sem
+ * @param   sptr_sem
  * @retval  none
  * @note    if it has been locked, schedule another thread
  */
-void sema_down(struct semaphore *sprt_sem)
+void sema_down(struct semaphore *sptr_sem)
 {
-    if (!mrt_current)
+    if (!mr_current)
         return;
 
-    while (sema_is_locked(sprt_sem))
+    while (sema_is_locked(sptr_sem))
         schedule_thread();
     
-    atomic_dec(&sprt_sem->sgrt_atc);
+    atomic_dec(&sptr_sem->sgtc_atc);
 }
 
 /*!
  * @brief   semaphore lock
- * @param   sprt_sem
+ * @param   sptr_sem
  * @retval  none
  * @note    if it has been locked, return directly
  */
-kint32_t sema_down_try_lock(struct semaphore *sprt_sem)
+kint32_t sema_down_try_lock(struct semaphore *sptr_sem)
 {
-    if (!mrt_current)
+    if (!mr_current)
         return -ER_FORBID;
 
-    if (sema_is_locked(sprt_sem))
+    if (sema_is_locked(sptr_sem))
         return -ER_BUSY;
     
-    atomic_dec(&sprt_sem->sgrt_atc);
+    atomic_dec(&sptr_sem->sgtc_atc);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   semaphore unlock
- * @param   sprt_sem
+ * @param   sptr_sem
  * @retval  none
  * @note    none
  */
-void sema_up(struct semaphore *sprt_sem)
+void sema_up(struct semaphore *sptr_sem)
 {
-    if (!mrt_current || !sema_is_locked(sprt_sem))
+    if (!mr_current || !sema_is_locked(sptr_sem))
         return;
     
-    atomic_inc(&sprt_sem->sgrt_atc);
+    atomic_inc(&sptr_sem->sgtc_atc);
 }
 
 /*!< end of file */

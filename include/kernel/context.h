@@ -60,13 +60,13 @@ extern void __switch_to(kuaddr_t info);
 /*!< API functions */
 /*!
  * @brief	switch context
- * @param  	sprt_info: prev and next thread information (stack, entry, ...)
+ * @param  	sptr_info: prev and next thread information (stack, entry, ...)
  * @retval 	none
  * @note   	jump to asm
  */
-static inline void context_switch(struct scheduler_context *sprt_info)
+static inline void context_switch(struct scheduler_context *sptr_info)
 {
-	__switch_to((kuaddr_t)sprt_info);
+	__switch_to((kuaddr_t)sptr_info);
 }
 
 #ifdef __cplusplus

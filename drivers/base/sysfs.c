@@ -18,11 +18,11 @@
 #include <platform/fwk_kobj.h>
 
 /*!< The globals */
-struct fwk_kset *sprt_sys_fs;
-struct fwk_kset *sprt_devices_fs;
-struct fwk_kobject *sprt_kobj_in;
-struct fwk_kobject *sprt_kobj_out;
-struct fwk_kobject *sprt_kobj_err;
+struct fwk_kset *sptr_sys_fs;
+struct fwk_kset *sptr_devices_fs;
+struct fwk_kobject *sptr_kobj_in;
+struct fwk_kobject *sptr_kobj_out;
+struct fwk_kobject *sptr_kobj_err;
 
 /*!< API function */
 /*!
@@ -31,56 +31,56 @@ struct fwk_kobject *sprt_kobj_err;
  * @retval  none
  * @note    none
  */
-kint32_t devfs_stdio_init(struct fwk_kset *sprt_head)
+kint32_t devfs_stdio_init(struct fwk_kset *sptr_head)
 {
 	kint32_t retval;
 
-	sprt_kobj_in = fwk_kobject_create();
-	if (!isValid(sprt_kobj_in))
+	sptr_kobj_in = fwk_kobject_create();
+	if (!isValid(sptr_kobj_in))
 		return -ER_NOMEM;
 
-	sprt_kobj_out = fwk_kobject_create();
-	if (!isValid(sprt_kobj_out))
+	sptr_kobj_out = fwk_kobject_create();
+	if (!isValid(sptr_kobj_out))
 	{
-		retval = PTR_ERR(sprt_kobj_out);
+		retval = PTR_ERR(sptr_kobj_out);
 		goto fail1;
 	}
 
-	sprt_kobj_err = fwk_kobject_create();
-	if (!isValid(sprt_kobj_err))
+	sptr_kobj_err = fwk_kobject_create();
+	if (!isValid(sptr_kobj_err))
 	{
-		retval = PTR_ERR(sprt_kobj_out);
+		retval = PTR_ERR(sptr_kobj_out);
 		goto fail2;
 	}
 
-	sprt_kobj_in->sprt_kset  = sprt_head;
-	sprt_kobj_out->sprt_kset = sprt_head;
-	sprt_kobj_err->sprt_kset = sprt_head;
+	sptr_kobj_in->sptr_kset  = sptr_head;
+	sptr_kobj_out->sptr_kset = sptr_head;
+	sptr_kobj_err->sptr_kset = sptr_head;
 
-	retval = fwk_kobject_add(sprt_kobj_in, &sprt_head->sgrt_kobj, "stdin");
+	retval = fwk_kobject_add(sptr_kobj_in, &sptr_head->sgtc_kobj, "stdin");
 	if (retval)
 		goto fail3;
 
-	retval = fwk_kobject_add(sprt_kobj_out, &sprt_head->sgrt_kobj, "stdout");
+	retval = fwk_kobject_add(sptr_kobj_out, &sptr_head->sgtc_kobj, "stdout");
 	if (retval)
 		goto fail4;
 
-	retval = fwk_kobject_add(sprt_kobj_err, &sprt_head->sgrt_kobj, "stderr");
+	retval = fwk_kobject_add(sptr_kobj_err, &sptr_head->sgtc_kobj, "stderr");
 	if (retval)
 		goto fail5;
 
 	return ER_NORMAL;
 
 fail5:
-	fwk_kobject_del(sprt_kobj_out);
+	fwk_kobject_del(sptr_kobj_out);
 fail4:
-	fwk_kobject_del(sprt_kobj_in);
+	fwk_kobject_del(sptr_kobj_in);
 fail3:
-	kfree(sprt_kobj_err);
+	kfree(sptr_kobj_err);
 fail2:
-	kfree(sprt_kobj_out);
+	kfree(sptr_kobj_out);
 fail1:
-	kfree(sprt_kobj_in);
+	kfree(sptr_kobj_in);
 
 	return retval;
 }
@@ -93,11 +93,11 @@ fail1:
  */
 void devfs_stdio_destroy(void)
 {
-	fwk_kobject_destroy(sprt_kobj_err);
-	fwk_kobject_destroy(sprt_kobj_out);
-	fwk_kobject_destroy(sprt_kobj_in);
+	fwk_kobject_destroy(sptr_kobj_err);
+	fwk_kobject_destroy(sptr_kobj_out);
+	fwk_kobject_destroy(sptr_kobj_in);
 
-	sprt_kobj_in = sprt_kobj_out = sprt_kobj_err = mrt_nullptr;
+	sptr_kobj_in = sptr_kobj_out = sptr_kobj_err = mr_nullptr;
 }
 
 /*!
@@ -114,15 +114,15 @@ kint32_t __fwk_init sysfs_init(void)
 	if (fwk_kobject_root_init())
 		return -ER_FAILD;
 
-	sprt_sys_fs = fwk_kset_create_and_register("sys", mrt_nullptr);
-	if (!isValid(sprt_sys_fs))
+	sptr_sys_fs = fwk_kset_create_and_register("sys", mr_nullptr);
+	if (!isValid(sptr_sys_fs))
 		return -ER_NOMEM;
 
-	sprt_devices_fs = fwk_kset_create_and_register("dev", mrt_nullptr);
-	if (!isValid(sprt_devices_fs))
+	sptr_devices_fs = fwk_kset_create_and_register("dev", mr_nullptr);
+	if (!isValid(sptr_devices_fs))
 		goto fail1;
 
-	retval = devfs_stdio_init(sprt_devices_fs);
+	retval = devfs_stdio_init(sptr_devices_fs);
 	if (retval)
 		goto fail2;
 
@@ -135,11 +135,11 @@ kint32_t __fwk_init sysfs_init(void)
 fail3:
 	devfs_stdio_destroy();
 fail2:
-	fwk_kset_unregister(sprt_devices_fs);
-	kfree(sprt_devices_fs);
+	fwk_kset_unregister(sptr_devices_fs);
+	kfree(sptr_devices_fs);
 fail1:
-	fwk_kset_unregister(sprt_sys_fs);
-	kfree(sprt_sys_fs);
+	fwk_kset_unregister(sptr_sys_fs);
+	kfree(sptr_sys_fs);
 
 	return -ER_FAILD;
 }

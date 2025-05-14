@@ -19,7 +19,7 @@
 /*!< The defines */
 
 /*!< The globals */
-BLOCKING_NOTIFIER_HEAD(sgrt_fbmem_notifier_chain);
+BLOCKING_NOTIFIER_HEAD(sgtc_fbmem_notifier_chain);
 
 /*!< API function */
 /*!

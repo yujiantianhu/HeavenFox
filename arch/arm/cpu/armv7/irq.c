@@ -25,20 +25,20 @@
 #define CA7_MAX_GPC_NR                  (128)
 
 /*!< The functions */
-static kint32_t fwk_gic_of_init(struct fwk_device_node *sprt_node, struct fwk_device_node *sprt_parent);
-static kint32_t fwk_gpc_of_init(struct fwk_device_node *sprt_node, struct fwk_device_node *sprt_parent);
+static kint32_t fwk_gic_of_init(struct fwk_device_node *sptr_node, struct fwk_device_node *sptr_parent);
+static kint32_t fwk_gpc_of_init(struct fwk_device_node *sptr_node, struct fwk_device_node *sptr_parent);
 
 /*!< The globals */
 static kuint32_t g_iHal_gic_cnts = 0;
-static srt_gic_t sgrt_gic_global_data[GIC_MAX_NR] = {0};
+static srt_gic_t sgtc_gic_global_data[GIC_MAX_NR] = {0};
 
-const struct fwk_of_device_id sgrt_fwk_irq_intcs_table[] =
+const struct fwk_of_device_id sgtc_fwk_irq_intcs_table[] =
 {
     { .compatible = "arm,cortex-a7-gic", .data = fwk_gic_of_init },
     { .compatible = "arm,cortex-a9-gic", .data = fwk_gic_of_init },
 
     { .compatible = "fsl,imx6ul-gpc", .data = fwk_gpc_of_init },
-    { .compatible = mrt_nullptr, .data = mrt_nullptr },
+    { .compatible = mr_nullptr, .data = mr_nullptr },
 };
 
 static kbool_t g_isIntcGicDirect = true;
@@ -53,7 +53,7 @@ static kbool_t g_isIntcGicDirect = true;
 void __plat_init initIRQ(void)
 {
 #if CONFIG_OF
-    fwk_of_irq_init(sgrt_fwk_irq_intcs_table);
+    fwk_of_irq_init(sgtc_fwk_irq_intcs_table);
 
 #else
     local_irq_initial(GIC_NULL);
@@ -71,25 +71,25 @@ void __plat_init initIRQ(void)
  */
 srt_gic_t *fwk_get_gic_data(kuint32_t gic_nr)
 {
-    return (gic_nr >= GIC_MAX_NR) ? mrt_nullptr : &sgrt_gic_global_data[gic_nr];
+    return (gic_nr >= GIC_MAX_NR) ? mr_nullptr : &sgtc_gic_global_data[gic_nr];
 }
 
 /*!
  * @brief   hardware irqnumber translate
- * @param   sprt_domain: parent interrupt controller
- * @param   sprt_intc: parent interrupt controller's device-node
+ * @param   sptr_domain: parent interrupt controller
+ * @param   sptr_intc: parent interrupt controller's device-node
  * @param   intspec: of_handle_args::args[]
  * @param   intsize: property "interrupts" cell number
  * @retval  none
  * @note    none
  */
-static kint32_t gic_irq_domain_xlate(struct fwk_irq_domain *sprt_domain, struct fwk_device_node *sprt_intc,
+static kint32_t gic_irq_domain_xlate(struct fwk_irq_domain *sptr_domain, struct fwk_device_node *sptr_intc,
 				const kuint32_t *intspec, kuint32_t intsize, kuint32_t *out_hwirq, kuint32_t *out_type)
 {
-	if (sprt_domain->sprt_node != sprt_intc)
-		return -ER_UNVALID;
+	if (sptr_domain->sptr_node != sptr_intc)
+		return -ER_INVALID;
 	if (intsize < 3)
-		return -ER_UNVALID;
+		return -ER_INVALID;
 
 	*out_hwirq = intspec[1];
 
@@ -108,131 +108,131 @@ static kint32_t gic_irq_domain_xlate(struct fwk_irq_domain *sprt_domain, struct 
 
 /*!
  * @brief   enable IRQ
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  none
  * @note    none
  */
-static void gic_irq_chip_enable(struct fwk_irq_data *sprt_data)
+static void gic_irq_chip_enable(struct fwk_irq_data *sptr_data)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_dist_t *sprt_dest;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_dist_t *sptr_dest;
 
-    if (!sprt_data || (sprt_data->hwirq < 0))
+    if (!sptr_data || (sptr_data->hwirq < 0))
         return;
 
-    sprt_dest = mrt_get_gic_distributor(sprt_gic);
-    mrt_setbit_towords(sprt_data->hwirq + sprt_data->sprt_domain->hwirq, 
-                    &sprt_dest->D_ISENABLER);
+    sptr_dest = mr_get_gic_distributor(sptr_gic);
+    mr_setbit_towords(sptr_data->hwirq + sptr_data->sptr_domain->hwirq, 
+                    &sptr_dest->D_ISENABLER);
 }
 
 /*!
  * @brief   disable IRQ
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  none
  * @note    none
  */
-static void gic_irq_chip_disable(struct fwk_irq_data *sprt_data)
+static void gic_irq_chip_disable(struct fwk_irq_data *sptr_data)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_dist_t *sprt_dest;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_dist_t *sptr_dest;
 
-    if (!sprt_data || (sprt_data->hwirq < 0))
+    if (!sptr_data || (sptr_data->hwirq < 0))
         return;
 
-    sprt_dest = mrt_get_gic_distributor(sprt_gic);
-    mrt_setbit_towords(sprt_data->hwirq + sprt_data->sprt_domain->hwirq, 
-                    &sprt_dest->D_ICENABLER);
+    sptr_dest = mr_get_gic_distributor(sptr_gic);
+    mr_setbit_towords(sptr_data->hwirq + sptr_data->sptr_domain->hwirq, 
+                    &sptr_dest->D_ICENABLER);
 }
 
 /*!
  * @brief   get IRQ status
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  none
  * @note    none
  */
-static kbool_t gic_irq_chip_ack(struct fwk_irq_data *sprt_data)
+static kbool_t gic_irq_chip_ack(struct fwk_irq_data *sptr_data)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_cpu_t *sprt_cpu;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_cpu_t *sptr_cpu;
     kuint32_t hwirq;
 
-    if (!sprt_data || (sprt_data->hwirq < 0))
+    if (!sptr_data || (sptr_data->hwirq < 0))
         return false;
 
-    sprt_cpu = mrt_get_gic_interface(sprt_gic);
-    hwirq = mrt_mask(sprt_cpu->C_IAR, 0x1fffU);
+    sptr_cpu = mr_get_gic_interface(sptr_gic);
+    hwirq = mr_mask(sptr_cpu->C_IAR, 0x1fffU);
 
-    return !!(hwirq & mrt_bit(sprt_data->hwirq + sprt_data->sprt_domain->hwirq));
+    return !!(hwirq & mr_bit(sptr_data->hwirq + sptr_data->sptr_domain->hwirq));
 }
 
 /*!
  * @brief   check if IRQ is enabled
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  none
  * @note    none
  */
-static kbool_t gic_irq_chip_is_enabled(struct fwk_irq_data *sprt_data)
+static kbool_t gic_irq_chip_is_enabled(struct fwk_irq_data *sptr_data)
 {
-    srt_gic_t *sprt_gic = fwk_get_gic_data(0);
-    srt_gic_dist_t *sprt_dest;
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_dist_t *sptr_dest;
 
-    if (!sprt_data || (sprt_data->hwirq < 0))
+    if (!sptr_data || (sptr_data->hwirq < 0))
         return false;
 
-    sprt_dest = mrt_get_gic_distributor(sprt_gic);
-    return !!mrt_getbit_fromwords(sprt_data->hwirq + sprt_data->sprt_domain->hwirq, 
-                                &sprt_dest->D_ISENABLER);
+    sptr_dest = mr_get_gic_distributor(sptr_gic);
+    return !!mr_getbit_fromwords(sptr_data->hwirq + sptr_data->sptr_domain->hwirq, 
+                                &sptr_dest->D_ISENABLER);
 }
 
 /*!
  * @brief   allocate irq_domain for gic
- * @param   sprt_domain
+ * @param   sptr_domain
  * @retval  error code
  * @note    none
  */
-kint32_t gic_irq_domain_alloc(struct fwk_irq_domain *sprt_domain, kuint32_t virq, kuint32_t nr_irqs, void *arg)
+kint32_t gic_irq_domain_alloc(struct fwk_irq_domain *sptr_domain, kuint32_t virq, kuint32_t nr_irqs, void *arg)
 {
-    struct fwk_irq_generic *sprt_gc;
+    struct fwk_irq_generic *sptr_gc;
 
-    if (!sprt_domain)
+    if (!sptr_domain)
         return -ER_NODEV;
 
-	sprt_gc = kzalloc(sizeof(*sprt_gc), GFP_KERNEL);
-	if (!isValid(sprt_gc))
+	sptr_gc = kzalloc(sizeof(*sptr_gc), GFP_KERNEL);
+	if (!isValid(sptr_gc))
         return -ER_NOMEM;
 
-    sprt_gc->sgrt_chip.irq_enable = gic_irq_chip_enable;
-    sprt_gc->sgrt_chip.irq_disable = gic_irq_chip_disable;
-    sprt_gc->sgrt_chip.irq_ack = gic_irq_chip_ack;
-    sprt_gc->sgrt_chip.irq_is_enabled = gic_irq_chip_is_enabled;
+    sptr_gc->sgtc_chip.irq_enable = gic_irq_chip_enable;
+    sptr_gc->sgtc_chip.irq_disable = gic_irq_chip_disable;
+    sptr_gc->sgtc_chip.irq_ack = gic_irq_chip_ack;
+    sptr_gc->sgtc_chip.irq_is_enabled = gic_irq_chip_is_enabled;
 
-    fwk_irq_setup_generic_chip(virq, nr_irqs, sprt_gc, mrt_nullptr);
+    fwk_irq_setup_generic_chip(virq, nr_irqs, sptr_gc, mr_nullptr);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   free irq_domain of gpc
- * @param   sprt_domain
+ * @param   sptr_domain
  * @retval  none
  * @note    none
  */
-void gic_irq_domain_free(struct fwk_irq_domain *sprt_domain, kuint32_t virq, kuint32_t nr_irqs)
+void gic_irq_domain_free(struct fwk_irq_domain *sptr_domain, kuint32_t virq, kuint32_t nr_irqs)
 {
-    struct fwk_irq_generic *sprt_gc;
-    struct fwk_irq_data *sprt_data;
+    struct fwk_irq_generic *sptr_gc;
+    struct fwk_irq_data *sptr_data;
 
-    sprt_data = fwk_irq_get_data(virq);
-    if (!isValid(sprt_data))
+    sptr_data = fwk_irq_get_data(virq);
+    if (!isValid(sptr_data))
         return;
     
-    sprt_gc = fwk_irq_get_generic_data(sprt_data);
+    sptr_gc = fwk_irq_get_generic_data(sptr_data);
     fwk_irq_shutdown_generic_chip(virq, nr_irqs);
 
-    kfree(sprt_gc);
+    kfree(sptr_gc);
 }
 
-static const struct fwk_irq_domain_ops sgrt_gic_domain_hierarchy_ops = 
+static const struct fwk_irq_domain_ops sgtc_gic_domain_hierarchy_ops = 
 {
 	.xlate = gic_irq_domain_xlate,
 	.alloc = gic_irq_domain_alloc,
@@ -245,42 +245,42 @@ static const struct fwk_irq_domain_ops sgrt_gic_domain_hierarchy_ops =
  * @retval  none
  * @note    For simplicity, we only use group0 of GIC
  */
-static void fwk_gic_initial(srt_gic_t *sprt_gic)
+static void fwk_gic_initial(srt_gic_t *sptr_gic)
 {
-    srt_gic_dist_t *sprt_dest;
-    srt_gic_cpu_t *sprt_cpu;
+    srt_gic_dist_t *sptr_dest;
+    srt_gic_cpu_t *sptr_cpu;
     kuint32_t i;
     kuint32_t irqRegs;
 
-    sprt_gic->dest_base = fwk_io_remap(sprt_gic->dest_base, ARCH_PER_SIZE);
-    if (!isValid(sprt_gic->dest_base))
+    sptr_gic->dest_base = fwk_io_remap(sptr_gic->dest_base, ARCH_PER_SIZE);
+    if (!isValid(sptr_gic->dest_base))
         return;
 
-    sprt_gic->cpu_base = fwk_io_remap(sprt_gic->cpu_base, ARCH_PER_SIZE);
-    if (!isValid(sprt_gic->cpu_base))
+    sptr_gic->cpu_base = fwk_io_remap(sptr_gic->cpu_base, ARCH_PER_SIZE);
+    if (!isValid(sptr_gic->cpu_base))
         return;
 
-    sprt_dest = mrt_get_gic_distributor(sprt_gic);
-    sprt_cpu = mrt_get_gic_interface(sprt_gic);
+    sptr_dest = mr_get_gic_distributor(sptr_gic);
+    sptr_cpu = mr_get_gic_interface(sptr_gic);
 
     /*!< Disable group0 distribution */
-    mrt_writel(0U, &sprt_dest->D_CTLR);
+    mr_writel(0U, &sptr_dest->D_CTLR);
 
-    irqRegs = mrt_mask(sprt_dest->D_TYPER, 0x1fU) + 1;
+    irqRegs = mr_mask(sptr_dest->D_TYPER, 0x1fU) + 1;
 
-    if (isValid(sprt_gic))
+    if (isValid(sptr_gic))
     {
-        /*!< irq number = ((sprt_dest->D_TYPER & 0x1fU) + 1) * 32 */
-        sprt_gic->gic_irqs = irqRegs << 5;
-        if (sprt_gic->gic_irqs > __GIC_MAX_IRQS)
-            sprt_gic->gic_irqs = __GIC_MAX_IRQS;
+        /*!< irq number = ((sptr_dest->D_TYPER & 0x1fU) + 1) * 32 */
+        sptr_gic->gic_irqs = irqRegs << 5;
+        if (sptr_gic->gic_irqs > __GIC_MAX_IRQS)
+            sptr_gic->gic_irqs = __GIC_MAX_IRQS;
     }
 
     /*!< On POR, all SPI is in group 0, level-sensitive and using 1-N model */
 
     /*!< Disable all PPI, SGI and SPI */
     for (i = 0; i < irqRegs; i++)
-        mrt_writel(0xffffffffU, &sprt_dest->D_ICENABLER[i]);
+        mr_writel(0xffffffffU, &sptr_dest->D_ICENABLER[i]);
 
 	/*!< The trigger mode in the int_config register, only write to the SPI interrupts, so start at 32 */
     for (i = 32U; i < __GIC_MAX_SPI_IRQS; i += 16U)
@@ -298,7 +298,7 @@ static void fwk_gic_initial(srt_gic_t *sprt_gic)
          * ...
          * D_ICFGR[2]: irq32 ~ irq47
 		 */
-        mrt_writel(0U, &sprt_dest->D_ICFGR[i >> 4]);
+        mr_writel(0U, &sptr_dest->D_ICFGR[i >> 4]);
     }
 
     for (i = 0; i < 512; i++)
@@ -309,7 +309,7 @@ static void fwk_gic_initial(srt_gic_t *sprt_gic)
 		 * INT_ID.
 		 * Write a default value that can be changed elsewhere.
 		 */
-        mrt_writeb(0xa0, &sprt_dest->D_IPRIORITYR[i]);
+        mr_writeb(0xa0, &sptr_dest->D_IPRIORITYR[i]);
     }
 
     for (i = 32U; i < 512; i++)
@@ -318,20 +318,20 @@ static void fwk_gic_initial(srt_gic_t *sprt_gic)
 		 * The CPU interface in the spi_target register
 		 * Only write to the SPI interrupts, so start at 32
 		 */
-        mrt_writeb(0x01, &sprt_dest->D_ITARGETSR[i]);
+        mr_writeb(0x01, &sptr_dest->D_ITARGETSR[i]);
     }
 
     /*!< Make all interrupts have higher priority */
-    mrt_writel(mrt_bit_mask(0xffU, 0xffU, 8 - __GIC_PRIO_BITS), &sprt_cpu->C_PMR);
+    mr_writel(mr_bit_mask(0xffU, 0xffU, 8 - __GIC_PRIO_BITS), &sptr_cpu->C_PMR);
 
     /*!< No subpriority, all priority level allows preemption */
-    mrt_writel(7 - __GIC_PRIO_BITS, &sprt_cpu->C_BPR);
+    mr_writel(7 - __GIC_PRIO_BITS, &sptr_cpu->C_BPR);
 
     /*!< Enable group0 distribution */
-    mrt_writel(1U, &sprt_dest->D_CTLR);
+    mr_writel(1U, &sptr_dest->D_CTLR);
 
     /*!< Enable group0 signaling */
-    mrt_writel(1U, &sprt_cpu->C_CTLR);
+    mr_writel(1U, &sptr_cpu->C_CTLR);
 
     /*!< if program has run to main, do not set VBAR again */
 //  __set_cp15_vbar(VECTOR_TABLE_BASE);
@@ -339,61 +339,61 @@ static void fwk_gic_initial(srt_gic_t *sprt_gic)
 
 /*!
  * @brief   initial GIC
- * @param   sprt_node: current interrupt-controller
+ * @param   sptr_node: current interrupt-controller
  * @retval  none
  * @note    none
  */
 static void fwk_gic_init_bases(kuint32_t gic_nr, kuint32_t irq_start,
 			                void *dest_base, void *cpu_base,
-			                kuint32_t percpu_offset, struct fwk_device_node *sprt_node)
+			                kuint32_t percpu_offset, struct fwk_device_node *sptr_node)
 {
-    srt_gic_t *sprt_gic;
-    struct fwk_irq_domain *sprt_domain;
+    srt_gic_t *sptr_gic;
+    struct fwk_irq_domain *sptr_domain;
 
-    sprt_gic = fwk_get_gic_data(gic_nr);
-    if (!isValid(sprt_gic))
+    sptr_gic = fwk_get_gic_data(gic_nr);
+    if (!isValid(sptr_gic))
         return;
 
-    sprt_gic->dest_base = dest_base;
-    sprt_gic->cpu_base = cpu_base;
+    sptr_gic->dest_base = dest_base;
+    sptr_gic->cpu_base = cpu_base;
 
     /*!< Initial GIC */
-    fwk_gic_initial(sprt_gic);
+    fwk_gic_initial(sptr_gic);
 
-    /*!< sprt_gic->gic_irqs will be get on local_irq_initial */
-    if (!sprt_gic->gic_irqs)
+    /*!< sptr_gic->gic_irqs will be get on local_irq_initial */
+    if (!sptr_gic->gic_irqs)
         print_err("Get IRQ Controller Number failed\r\n");
 
-    if (!isValid(sprt_node))
+    if (!isValid(sptr_node))
         return;
     
-    sprt_domain = fwk_irq_domain_add_hierarchy(mrt_nullptr, sprt_node, 
-                            sprt_gic->gic_irqs, &sgrt_gic_domain_hierarchy_ops, sprt_gic);
-    sprt_domain->hwirq = 16;
-    sprt_gic->sprt_domain = sprt_domain;
+    sptr_domain = fwk_irq_domain_add_hierarchy(mr_nullptr, sptr_node, 
+                            sptr_gic->gic_irqs, &sgtc_gic_domain_hierarchy_ops, sptr_gic);
+    sptr_domain->hwirq = 16;
+    sptr_gic->sptr_domain = sptr_domain;
 }
 
 /*!
  * @brief   initial GIC
- * @param   sprt_node: current interrupt-controller
- * @param   sprt_parent: interrupt-controller parent
+ * @param   sptr_node: current interrupt-controller
+ * @param   sptr_parent: interrupt-controller parent
  * @retval  none
  * @note    none
  */
-kint32_t fwk_gic_of_init(struct fwk_device_node *sprt_node, struct fwk_device_node *sprt_parent)
+kint32_t fwk_gic_of_init(struct fwk_device_node *sptr_node, struct fwk_device_node *sptr_parent)
 {
     kuint32_t destributor = 0, cpu_interface = 0;
 
-    if (isValid(sprt_parent))
-        return -ER_UNVALID;
+    if (isValid(sptr_parent))
+        return -ER_INVALID;
 
-    fwk_of_property_read_u32_index(sprt_node, "reg", 0, &destributor);
-    fwk_of_property_read_u32_index(sprt_node, "reg", 2, &cpu_interface);
+    fwk_of_property_read_u32_index(sptr_node, "reg", 0, &destributor);
+    fwk_of_property_read_u32_index(sptr_node, "reg", 2, &cpu_interface);
 
     if ((!destributor) || (!cpu_interface))
         return -ER_NOTFOUND;
 
-    fwk_gic_init_bases(g_iHal_gic_cnts, -1, (void *)destributor, (void *)cpu_interface, 0, sprt_node);
+    fwk_gic_init_bases(g_iHal_gic_cnts, -1, (void *)destributor, (void *)cpu_interface, 0, sptr_node);
     g_iHal_gic_cnts++;
 
     return ER_NORMAL;
@@ -431,33 +431,33 @@ kint32_t fwk_gic_to_actual_irq(kint32_t hwirq)
  */
 kint32_t fwk_gpc_to_gic_irq(kint32_t virq)
 {
-    struct fwk_irq_data *sprt_data;
+    struct fwk_irq_data *sptr_data;
 
-    sprt_data = fwk_irq_get_data(virq);
-    return isValid(sprt_data) ? (sprt_data->hwirq + 32) : -1;
+    sptr_data = fwk_irq_get_data(virq);
+    return isValid(sptr_data) ? (sptr_data->hwirq + 32) : -1;
 }
 
 /*!< --------------------------------------------------------------------------- */
 /*!
  * @brief   hardware irqnumber translate
- * @param   sprt_domain: parent interrupt controller
- * @param   sprt_intc: parent interrupt controller's device-node
+ * @param   sptr_domain: parent interrupt controller
+ * @param   sptr_intc: parent interrupt controller's device-node
  * @param   intspec: of_handle_args::args[]
  * @param   intsize: property "interrupts" cell number
  * @retval  none
  * @note    none
  */
-static kint32_t gpc_irq_domain_xlate(struct fwk_irq_domain *sprt_domain, struct fwk_device_node *sprt_intc,
+static kint32_t gpc_irq_domain_xlate(struct fwk_irq_domain *sptr_domain, struct fwk_device_node *sptr_intc,
 				const kuint32_t *intspec, kuint32_t intsize, kuint32_t *out_hwirq, kuint32_t *out_type)
 {
-	if (sprt_domain->sprt_node != sprt_intc)
-		return -ER_UNVALID;
+	if (sptr_domain->sptr_node != sptr_intc)
+		return -ER_INVALID;
 	if (intsize != 3)
-		return -ER_UNVALID;
+		return -ER_INVALID;
 
     /*!< not allow GIC_SGI */
     if (intspec[0] != 0)
-        return -ER_UNVALID;
+        return -ER_INVALID;
 
 	*out_hwirq = intspec[1];
     *out_type = intspec[2];
@@ -465,7 +465,7 @@ static kint32_t gpc_irq_domain_xlate(struct fwk_irq_domain *sprt_domain, struct 
 	return ER_NORMAL;
 }
 
-static const struct fwk_irq_domain_ops sgrt_gpc_domain_hierarchy_ops = 
+static const struct fwk_irq_domain_ops sgtc_gpc_domain_hierarchy_ops = 
 {
 	.xlate = gpc_irq_domain_xlate,
 	.alloc = gic_irq_domain_alloc,
@@ -474,28 +474,28 @@ static const struct fwk_irq_domain_ops sgrt_gpc_domain_hierarchy_ops =
 
 /*!
  * @brief   initial GPC
- * @param   sprt_node: current interrupt-controller
- * @param   sprt_parent: interrupt-controller parent
+ * @param   sptr_node: current interrupt-controller
+ * @param   sptr_parent: interrupt-controller parent
  * @retval  none
  * @note    none
  */
-kint32_t fwk_gpc_of_init(struct fwk_device_node *sprt_node, struct fwk_device_node *sprt_parent)
+kint32_t fwk_gpc_of_init(struct fwk_device_node *sptr_node, struct fwk_device_node *sptr_parent)
 {
-    struct fwk_irq_domain *sprt_domain, *sprt_par;
+    struct fwk_irq_domain *sptr_domain, *sptr_par;
 
-    if (!isValid(sprt_parent) || !isValid(sprt_node))
-        return -ER_UNVALID;
+    if (!isValid(sptr_parent) || !isValid(sptr_node))
+        return -ER_INVALID;
 
     /*! get gic */
-    sprt_par = fwk_of_irq_host(sprt_parent);
-    if (!isValid(sprt_par))
-        return -ER_UNVALID;
+    sptr_par = fwk_of_irq_host(sptr_parent);
+    if (!isValid(sptr_par))
+        return -ER_INVALID;
 
-    sprt_domain = fwk_irq_domain_add_hierarchy(sprt_par, sprt_node, CA7_MAX_GPC_NR, &sgrt_gpc_domain_hierarchy_ops, mrt_nullptr);
-    if (!isValid(sprt_domain))
+    sptr_domain = fwk_irq_domain_add_hierarchy(sptr_par, sptr_node, CA7_MAX_GPC_NR, &sgtc_gpc_domain_hierarchy_ops, mr_nullptr);
+    if (!isValid(sptr_domain))
         return -ER_FAILD;
 
-    sprt_domain->hwirq = 32;
+    sptr_domain->hwirq = 32;
     g_isIntcGicDirect = false;
 
     return ER_NORMAL;

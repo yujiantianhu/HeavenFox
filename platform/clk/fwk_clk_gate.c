@@ -18,57 +18,57 @@
 /*!< API function */
 /*!
  * @brief   create and register a new clk gate
- * @param   sprt_clk, sprt_ops, ...
- * @retval  sprt_clk
- * @note    if sprt_clk is not NULL, it will use sprt_clk and does not create new sprt_clk (sprt_rc = sprt_clk);
- *          otherwise, a new sprt_rc will be allocated
+ * @param   sptr_clk, sptr_ops, ...
+ * @retval  sptr_clk
+ * @note    if sptr_clk is not NULL, it will use sptr_clk and does not create new sptr_clk (sptr_rc = sptr_clk);
+ *          otherwise, a new sptr_rc will be allocated
  */
-struct fwk_clk *fwk_clk_gate_register(struct fwk_clk *sprt_clk, const struct fwk_clk_ops *sprt_ops,
+struct fwk_clk *fwk_clk_gate_register(struct fwk_clk *sptr_clk, const struct fwk_clk_ops *sptr_ops,
                                 const kchar_t *name, const kchar_t *parent, void *reg, kuint8_t shift)
 {
-    struct fwk_clk_gate *sprt_gate;
-    struct fwk_clk_init_data sgrt_init;
-    struct fwk_clk *sprt_rc;
+    struct fwk_clk_gate *sptr_gate;
+    struct fwk_clk_init_data sgtc_init;
+    struct fwk_clk *sptr_rc;
 
-    sprt_gate = kzalloc(sizeof(*sprt_gate), GFP_KERNEL);
-    if (!isValid(sprt_gate))
-        return mrt_nullptr;
+    sptr_gate = kzalloc(sizeof(*sptr_gate), GFP_KERNEL);
+    if (!isValid(sptr_gate))
+        return mr_nullptr;
 
-    sgrt_init.name = name;
-    sgrt_init.parent_names = &parent;
-    sgrt_init.num_parents = 1;
-    sgrt_init.sprt_ops = sprt_ops;
+    sgtc_init.name = name;
+    sgtc_init.parent_names = &parent;
+    sgtc_init.num_parents = 1;
+    sgtc_init.sptr_ops = sptr_ops;
 
-    sprt_gate->reg = reg;
-    sprt_gate->bit_idx = shift;
-    sprt_gate->flags = 0;
-    sprt_gate->sgrt_hw.sprt_init = (const struct fwk_clk_init_data *)&sgrt_init;
-    sprt_gate->sgrt_hw.sprt_clk = sprt_clk;
+    sptr_gate->reg = reg;
+    sptr_gate->bit_idx = shift;
+    sptr_gate->flags = 0;
+    sptr_gate->sgtc_hw.sptr_init = (const struct fwk_clk_init_data *)&sgtc_init;
+    sptr_gate->sgtc_hw.sptr_clk = sptr_clk;
 
     /*!< register clk */
-    sprt_rc = fwk_clk_register(mrt_nullptr, &sprt_gate->sgrt_hw);
-    if (!isValid(sprt_rc))
-        kfree(sprt_gate);
+    sptr_rc = fwk_clk_register(mr_nullptr, &sptr_gate->sgtc_hw);
+    if (!isValid(sptr_rc))
+        kfree(sptr_gate);
 
-    return sprt_rc;
+    return sptr_rc;
 }
 
 /*!
  * @brief   unregister and destroy clk gate
- * @param   sprt_clk
+ * @param   sptr_clk
  * @retval  none
  * @note    none
  */
-void fwk_clk_gate_unregister(struct fwk_clk *sprt_clk)
+void fwk_clk_gate_unregister(struct fwk_clk *sptr_clk)
 {
-    struct fwk_clk_hw *sprt_hw;
-    struct fwk_clk_gate *sprt_gate;
+    struct fwk_clk_hw *sptr_hw;
+    struct fwk_clk_gate *sptr_gate;
 
-    sprt_hw = fwk_clk_to_hw(sprt_clk);
-    sprt_gate = mrt_container_of(sprt_hw, typeof(*sprt_gate), sgrt_hw);
+    sptr_hw = fwk_clk_to_hw(sptr_clk);
+    sptr_gate = mr_container_of(sptr_hw, typeof(*sptr_gate), sgtc_hw);
 
-    fwk_clk_unregister(sprt_clk);
-    kfree(sprt_gate);
+    fwk_clk_unregister(sptr_clk);
+    kfree(sptr_gate);
 }
 
 /*!< end of file */

@@ -21,117 +21,117 @@
 /*!< The globals */
 struct lwip_udp_data
 {
-    struct udp_pcb *sprt_upcb;
-    struct pbuf *sprt_buf;
+    struct udp_pcb *sptr_upcb;
+    struct pbuf *sptr_buf;
 
-    ip_addr_t *sprt_ipaddr;
+    ip_addr_t *sptr_ipaddr;
     kuint16_t port;
 
-    struct pq_data sgrt_pqd;
+    struct pq_data sgtc_pqd;
 };
 
 struct lwip_udp_priv
 {
-    struct pq_queue *sprt_pq;
-    struct wait_queue_head sgrt_wqh;
+    struct pq_queue *sptr_pq;
+    struct wait_queue_head sgtc_wqh;
     kbool_t isComing;
 };
 
 /*!< API functions */
 /*!
  * @brief   release lwip_udp_data
- * @param   sprt_pqd (member of ring queue)
+ * @param   sptr_pqd (member of ring queue)
  * @retval  none
  * @note    none
  */
-static void lwip_udp_raw_free(struct pq_data *sprt_pqd)
+static void lwip_udp_raw_free(struct pq_data *sptr_pqd)
 {
-    struct lwip_udp_data *sprt_data;
+    struct lwip_udp_data *sptr_data;
 
-    sprt_data = mrt_container_of(sprt_pqd, struct lwip_udp_data, sgrt_pqd);
-    pbuf_free(sprt_data->sprt_buf);
-    kfree(sprt_data);
+    sptr_data = mr_container_of(sptr_pqd, struct lwip_udp_data, sgtc_pqd);
+    pbuf_free(sptr_data->sptr_buf);
+    kfree(sptr_data);
 }
 
 /*!
  * @brief   check the size of recv buffer is enough
- * @param   sprt_pqd (member of ring queue)
+ * @param   sptr_pqd (member of ring queue)
  * @param   limit (size of recv buffer)
  * @retval  1: enough; 0: no
  * @note    none
  */
-static kbool_t lwip_udp_raw_check(struct pq_data *sprt_pqd, kusize_t limit)
+static kbool_t lwip_udp_raw_check(struct pq_data *sptr_pqd, kusize_t limit)
 {
-    struct lwip_udp_data *sprt_data;
+    struct lwip_udp_data *sptr_data;
 
-    sprt_data = mrt_container_of(sprt_pqd, struct lwip_udp_data, sgrt_pqd);
-    return !!(sprt_data->sprt_buf->len <= limit);
+    sptr_data = mr_container_of(sptr_pqd, struct lwip_udp_data, sgtc_pqd);
+    return !!(sptr_data->sptr_buf->len <= limit);
 }
 
 /*!
  * @brief   get every rx data from queue with poll ways
- * @param   sprt_upcb, len (buffer's length)
+ * @param   sptr_upcb, len (buffer's length)
  * @retval  udp data
  * @note    none
  */
-static struct lwip_udp_data *lwip_udp_raw_poll(struct udp_pcb *sprt_upcb, kusize_t len)
+static struct lwip_udp_data *lwip_udp_raw_poll(struct udp_pcb *sptr_upcb, kusize_t len)
 {
-    struct lwip_udp_priv *sprt_priv = (struct lwip_udp_priv *)sprt_upcb->recv_arg;
-    struct pq_queue *sprt_pq = sprt_priv->sprt_pq;
-    struct pq_data *sprt_pqd;
+    struct lwip_udp_priv *sptr_priv = (struct lwip_udp_priv *)sptr_upcb->recv_arg;
+    struct pq_queue *sptr_pq = sptr_priv->sptr_pq;
+    struct pq_data *sptr_pqd;
 
-    sprt_pqd = pq_dequeue_with_chk(sprt_pq, len);
-    if (isValid(sprt_pqd))
-        return mrt_container_of(sprt_pqd, struct lwip_udp_data, sgrt_pqd);
+    sptr_pqd = pq_dequeue_with_chk(sptr_pq, len);
+    if (isValid(sptr_pqd))
+        return mr_container_of(sptr_pqd, struct lwip_udp_data, sgtc_pqd);
 
-    return sprt_pqd ? ERR_PTR(-ER_LACK) : mrt_nullptr;
+    return sptr_pqd ? ERR_PTR(-ER_LACK) : mr_nullptr;
 }
 
 /*!
  * @brief   recv callback
- * @param   sprt_upcb, arg, ...
+ * @param   sptr_upcb, arg, ...
  * @retval  none
  * @note    none
  */
-static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sprt_upcb, struct pbuf *sprt_buf,
-                            const ip_addr_t *sprt_ipaddr, u16_t port)
+static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sptr_upcb, struct pbuf *sptr_buf,
+                            const ip_addr_t *sptr_ipaddr, u16_t port)
 {
-    struct lwip_udp_priv *sprt_priv = (struct lwip_udp_priv *)arg;
-    struct pq_queue *sprt_pq = sprt_priv->sprt_pq;
-    struct lwip_udp_data *sprt_data;
+    struct lwip_udp_priv *sptr_priv = (struct lwip_udp_priv *)arg;
+    struct pq_queue *sptr_pq = sptr_priv->sptr_pq;
+    struct lwip_udp_data *sptr_data;
 
-    if (!sprt_buf || !sprt_pq)
+    if (!sptr_buf || !sptr_pq)
         return;
     
-    sprt_data = kmalloc(sizeof(*sprt_data), GFP_KERNEL);
-    if (!isValid(sprt_data))
+    sptr_data = kmalloc(sizeof(*sptr_data), GFP_KERNEL);
+    if (!isValid(sptr_data))
         return;
 
-    sprt_data->sprt_upcb = sprt_upcb;
-    sprt_data->sprt_ipaddr = (ip_addr_t *)sprt_ipaddr;
-    sprt_data->port = mrt_ntohs(port);
-    sprt_data->sprt_buf = sprt_buf;
+    sptr_data->sptr_upcb = sptr_upcb;
+    sptr_data->sptr_ipaddr = (ip_addr_t *)sptr_ipaddr;
+    sptr_data->port = mr_ntohs(port);
+    sptr_data->sptr_buf = sptr_buf;
 
-    sprt_data->sgrt_pqd.release = lwip_udp_raw_free;
-    sprt_data->sgrt_pqd.dequeue_chk = lwip_udp_raw_check;
+    sptr_data->sgtc_pqd.release = lwip_udp_raw_free;
+    sptr_data->sgtc_pqd.dequeue_chk = lwip_udp_raw_check;
 
-    pq_enqueue(sprt_pq, &sprt_data->sgrt_pqd);
+    pq_enqueue(sptr_pq, &sptr_data->sgtc_pqd);
 
-    sprt_priv->isComing = true;
-    wake_up_interruptible(&sprt_priv->sgrt_wqh);
+    sptr_priv->isComing = true;
+    wake_up_interruptible(&sptr_priv->sgtc_wqh);
 }
 
 /*!
  * @brief   called by socket_recvfrom
- * @param   sprt_upcb, buf, ...
+ * @param   sptr_upcb, buf, ...
  * @retval  size
  * @note    read with blocking
  */
-kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sprt_upcb, void *buf, 
-                            kusize_t size, ip_addr_t *sprt_src, u16_t *port)
+kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sptr_upcb, void *buf, 
+                            kusize_t size, ip_addr_t *sptr_src, u16_t *port)
 {
-    struct lwip_udp_priv *sprt_priv = (struct lwip_udp_priv *)sprt_upcb->recv_arg;
-    struct lwip_udp_data *sprt_data;
+    struct lwip_udp_priv *sptr_priv = (struct lwip_udp_priv *)sptr_upcb->recv_arg;
+    struct lwip_udp_data *sptr_data;
     void *payload;
     kssize_t len;
 
@@ -140,27 +140,27 @@ kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sprt_upcb, void *buf,
 
     /*!< read one frame */
     do {
-        wait_event_interruptible(&sprt_priv->sgrt_wqh, sprt_priv->isComing);
-        sprt_priv->isComing = false;
+        wait_event_interruptible(&sptr_priv->sgtc_wqh, sptr_priv->isComing);
+        sptr_priv->isComing = false;
 
-        sprt_data = lwip_udp_raw_poll(sprt_upcb, size);
-        if (PTR_ERR(sprt_data) == (-ER_LACK))
+        sptr_data = lwip_udp_raw_poll(sptr_upcb, size);
+        if (PTR_ERR(sptr_data) == (-ER_LACK))
         {
             print_err("%s: recv buffer is too small\r\n", __FUNCTION__);
             return -ER_LACK;
         }
-        if (!sprt_data)
+        if (!sptr_data)
             continue;
 
-        payload = sprt_data->sprt_buf->payload;
-        len = sprt_data->sprt_buf->len;
+        payload = sptr_data->sptr_buf->payload;
+        len = sptr_data->sptr_buf->len;
         
-        memcpy(sprt_src, sprt_data->sprt_ipaddr, sizeof(*sprt_src));
-        *port = sprt_data->port;
+        memcpy(sptr_src, sptr_data->sptr_ipaddr, sizeof(*sptr_src));
+        *port = sptr_data->port;
         if (len)
             fwk_copy_to_user(buf, payload, len);
 
-        lwip_udp_raw_free(&sprt_data->sgrt_pqd);
+        lwip_udp_raw_free(&sptr_data->sgtc_pqd);
         break;
 
     } while (1);
@@ -170,28 +170,28 @@ kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sprt_upcb, void *buf,
 
 /*!
  * @brief   called by socket_sendto
- * @param   sprt_upcb, buf, ...
+ * @param   sptr_upcb, buf, ...
  * @retval  size
  * @note    send (application layer ---> lwip ---> drivers)
  */
-kssize_t lwip_udp_raw_sendto(struct udp_pcb *sprt_upcb, const ip_addr_t *sprt_dest, 
+kssize_t lwip_udp_raw_sendto(struct udp_pcb *sptr_upcb, const ip_addr_t *sptr_dest, 
                             u16_t dest_port, const void *buf, kusize_t size)
 {
-    struct pbuf *sprt_buf;
+    struct pbuf *sptr_buf;
     err_t err;
 
-    sprt_buf = pbuf_alloc(PBUF_TRANSPORT, size, PBUF_POOL);
-    if (!sprt_buf)
+    sptr_buf = pbuf_alloc(PBUF_TRANSPORT, size, PBUF_POOL);
+    if (!sptr_buf)
     {
         print_err("%s: allocate lwip pbuf failed!\r\n", __func__);
         return -ER_NOMEM;
     }
 
-    memcpy(sprt_buf->payload, buf, size);
-    err = udp_sendto(sprt_upcb, sprt_buf, sprt_dest, mrt_ntohs(dest_port));
+    memcpy(sptr_buf->payload, buf, size);
+    err = udp_sendto(sptr_upcb, sptr_buf, sptr_dest, mr_ntohs(dest_port));
     if (err != ERR_OK)
     {
-        pbuf_free(sprt_buf);
+        pbuf_free(sptr_buf);
         print_err("%s: udp send lwip pbuf failed!\r\n", __func__);
 
         return -ER_SDATA_FAILD;
@@ -202,52 +202,52 @@ kssize_t lwip_udp_raw_sendto(struct udp_pcb *sprt_upcb, const ip_addr_t *sprt_de
 
 /*!
  * @brief   udp pcb init
- * @param   sprt_ip, port
+ * @param   sptr_ip, port
  * @retval  udp_pcb
  * @note    create rx ring queue for application layer
  */
-struct udp_pcb *lwip_udp_raw_bind(const ip_addr_t *sprt_ip, u16_t port)
+struct udp_pcb *lwip_udp_raw_bind(const ip_addr_t *sptr_ip, u16_t port)
 {
-    struct udp_pcb *sprt_upcb;
-    struct pq_queue *sprt_pq;
-    struct lwip_udp_priv *sprt_priv;
+    struct udp_pcb *sptr_upcb;
+    struct pq_queue *sptr_pq;
+    struct lwip_udp_priv *sptr_priv;
     err_t err;
 
-    sprt_priv = (struct lwip_udp_priv *)kmalloc(sizeof(*sprt_priv), GFP_KERNEL);
-    if (!isValid(sprt_priv))
+    sptr_priv = (struct lwip_udp_priv *)kmalloc(sizeof(*sptr_priv), GFP_KERNEL);
+    if (!isValid(sptr_priv))
         return ERR_PTR(-ER_NOMEM);
     
-    sprt_pq = pq_queue_create(NR_PQ_RING, 1024);
-    if (!isValid(sprt_pq))
+    sptr_pq = pq_queue_create(NR_PQ_RING, 1024);
+    if (!isValid(sptr_pq))
     {
-        kfree(sprt_priv);
+        kfree(sptr_priv);
         return ERR_PTR(-ER_NOMEM);
     }
 
-    sprt_upcb = udp_new_ip_type(IPADDR_TYPE_ANY);
-    if (!sprt_upcb)
+    sptr_upcb = udp_new_ip_type(IPADDR_TYPE_ANY);
+    if (!sptr_upcb)
         goto fail;
 
     /*!< 
-     * API function "socket_bind" will get "mrt_htons(port)", but "udp_bind" will convert port again with "lwip_htons";
+     * API function "socket_bind" will get "mr_htons(port)", but "udp_bind" will convert port again with "lwip_htons";
      * therefore, port must be convert to it's original format
      */
-    err = udp_bind(sprt_upcb, sprt_ip, mrt_ntohs(port));
+    err = udp_bind(sptr_upcb, sptr_ip, mr_ntohs(port));
     if (err == ERR_OK) 
     {
-        sprt_priv->sprt_pq = sprt_pq;
-        sprt_priv->isComing = false;
-        init_waitqueue_head(&sprt_priv->sgrt_wqh);
+        sptr_priv->sptr_pq = sptr_pq;
+        sptr_priv->isComing = false;
+        init_waitqueue_head(&sptr_priv->sgtc_wqh);
 
-        udp_recv(sprt_upcb, __lwip_udp_raw_recv, sprt_priv);
-        return sprt_upcb;
+        udp_recv(sptr_upcb, __lwip_udp_raw_recv, sptr_priv);
+        return sptr_upcb;
     }
 
-    udp_remove(sprt_upcb);
+    udp_remove(sptr_upcb);
 
 fail:
-    kfree(sprt_priv);
-    pq_queue_destroy(sprt_pq);
+    kfree(sptr_priv);
+    pq_queue_destroy(sptr_pq);
 
     return ERR_PTR(-ER_FAILD);
 }

@@ -24,17 +24,17 @@
 /*!< The defines */
 typedef struct fwk_clk_one_cell
 {
-	struct fwk_clk *sprt_clks;
+	struct fwk_clk *sptr_clks;
 	kuint32_t clks_size;
 
 } srt_fwk_clk_one_cell_t;
 
 /*!< The functions */
-extern struct fwk_clk *fwk_of_clk_src_onecell_get(struct fwk_of_phandle_args *sprt_args, void *data);
-extern kint32_t fwk_clk_add_provider(struct fwk_device_node *sprt_node, 
+extern struct fwk_clk *fwk_of_clk_src_onecell_get(struct fwk_of_phandle_args *sptr_args, void *data);
+extern kint32_t fwk_clk_add_provider(struct fwk_device_node *sptr_node, 
                     struct fwk_clk *(*get)(struct fwk_of_phandle_args *, void *), void *data);
-extern void fwk_clk_del_provider(struct fwk_device_node *sprt_node);
-extern struct fwk_clk *fwk_clk_provider_look_up(struct fwk_of_phandle_args *sprt_args);
+extern void fwk_clk_del_provider(struct fwk_device_node *sptr_node);
+extern struct fwk_clk *fwk_clk_provider_look_up(struct fwk_of_phandle_args *sptr_args);
 
 #ifdef __cplusplus
     }

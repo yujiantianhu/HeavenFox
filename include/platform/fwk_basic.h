@@ -35,35 +35,36 @@
 /*!< The defines */
 enum __ERT_DEVICE_TYPE
 {
-	NR_TYPE_NONE = 0,
+    NR_TYPE_NONE = 0,
 
-	/*!< character device */
-	NR_TYPE_CHRDEV	= 1,
-	/*!< block device */
-	NR_TYPE_BLKDEV,
-	/*!< network device */
-	NR_TYPE_NETDEV,
+    /*!< character device */
+    NR_TYPE_CHRDEV	= 1,
+    /*!< block device */
+    NR_TYPE_BLKDEV,
+    /*!< network device */
+    NR_TYPE_NETDEV,
 };
 
 enum __ERT_CHRDEV_MAJOR
 {
-	NR_CHRDEV_DUMMY_MAJOR = 0,
+    NR_CHRDEV_DUMMY_MAJOR = 0,
 
-	NR_STDIN_MAJOR,
-	NR_STDOUT_MAJOR,
-	NR_STDERR_MAJOR,
-	NR_DEBUG_MAJOR,
+    NR_STDIN_MAJOR,
+    NR_STDOUT_MAJOR,
+    NR_STDERR_MAJOR,
+    NR_DEBUG_MAJOR,
 
-	NR_LED_MAJOR,
-	NR_KEY_MAJOR,
-	NR_INPUT_MAJOR,
-	NR_RTC_MAJOR,
-	NR_FBDEV_MAJOR,
-	NR_MISC_MAJOR,
-	NR_TSC_MAJOR,
-	NR_USB_MAJOR,
+    NR_LED_MAJOR,
+    NR_KEY_MAJOR,
+    NR_INPUT_MAJOR,
+    NR_UART_MAJOR,
+    NR_RTC_MAJOR,
+    NR_FBDEV_MAJOR,
+    NR_MISC_MAJOR,
+    NR_TSC_MAJOR,
+    NR_USB_MAJOR,
 
-	NR_CHRDEV_MAJOR_MAX,
+    NR_CHRDEV_MAJOR_MAX,
 };
 
 #define USE_VIRTUAL_MEM_ADDR						(0)						/*!< Whether virtual memory is used. 0: not use, virtual memory = physic memory */
@@ -103,8 +104,8 @@ enum __ERT_CHRDEV_MAJOR
 #define FWK_IOC_TYPECHECK(t)           				sizeof(t)
 
 #define FWK_IOC(dir, type, nr, size) \
-	(((dir)  << FWK_IOC_DIRSHIFT) | ((type) << FWK_IOC_TYPESHIFT) | \
-	 ((nr)   << FWK_IOC_NRSHIFT)  | ((size) << FWK_IOC_SIZESHIFT))
+    (((dir)  << FWK_IOC_DIRSHIFT) | ((type) << FWK_IOC_TYPESHIFT) | \
+     ((nr)   << FWK_IOC_NRSHIFT)  | ((size) << FWK_IOC_SIZESHIFT))
 
 #define FWK_IOWR(type, nr, size)           			FWK_IOC(FWK_IOC_READ | FWK_IOC_WRITE, (type), (nr), (FWK_IOC_TYPECHECK(size)))
 #define FWK_IOW(type, nr, size)           			FWK_IOC(FWK_IOC_WRITE, (type), (nr), (FWK_IOC_TYPECHECK(size)))
@@ -117,13 +118,13 @@ enum __ERT_CHRDEV_MAJOR
 #define FWK_IOC_NR(nr)   							(((nr) >> FWK_IOC_NRSHIFT) & FWK_IOC_NRMASK)
 
 /*!< delete and free all nodes */
-#define mrt_list_delete_all(head, prev, list)	\
+#define mr_list_delete_all(head, prev, list)	\
 {	\
     list = head;	\
     while (isValid(list))	\
     {	\
         prev	= list;	\
-        list	= list->sprt_next;	\
+        list	= list->sptr_next;	\
         kfree(prev);	\
     }	\
 }
@@ -132,15 +133,15 @@ enum __ERT_CHRDEV_MAJOR
 #define TAG_PARAM_VIDEO         0
 struct video_params
 {
-    struct m_area sgrt_hz12x12;
-    struct m_area sgrt_hz16x16;
-    struct m_area sgrt_hz32x32;
+    struct m_area sgtc_hz12x12;
+    struct m_area sgtc_hz16x16;
+    struct m_area sgtc_hz32x32;
 };
 
 #define TAG_PARAM_FDT			1
 struct fdt_params
 {
-	struct m_area sgrt_fdt;
+    struct m_area sgtc_fdt;
 };
 
 struct tag_header
@@ -151,20 +152,20 @@ struct tag_header
 
 struct tag_params
 {
-    struct tag_header sgrt_hdr;
+    struct tag_header sgtc_hdr;
 
     union
     {
-        struct video_params sgrt_vdp;
-		struct fdt_params sgrt_fdt;
+        struct video_params sgtc_vdp;
+        struct fdt_params sgtc_fdt;
     } u;
 };
 #define TAG_PARAM_NEXT(tag) \
-            (struct tag_params *)((void *)(tag) + (tag)->sgrt_hdr.size)
+            (struct tag_params *)((void *)(tag) + (tag)->sgtc_hdr.size)
 
 /*!< The globals */
-extern struct video_params *sprt_fwk_video_params;
-extern struct fdt_params *sprt_fwk_fdt_params;
+extern struct video_params *sptr_fwk_video_params;
+extern struct fdt_params *sptr_fwk_fdt_params;
 
 /*!< API functions */
 /*!
@@ -175,7 +176,7 @@ extern struct fdt_params *sprt_fwk_fdt_params;
  */
 static inline void *fwk_io_remap(void *phy_addr, kusize_t size)
 {
-	return (phy_addr && size) ? phy_addr : mrt_nullptr;
+    return (phy_addr && size) ? phy_addr : mr_nullptr;
 }
 
 /*!
@@ -187,6 +188,28 @@ static inline void *fwk_io_remap(void *phy_addr, kusize_t size)
 static inline void fwk_io_unmap(void *virt_addr)
 {
 
+}
+
+/*!
+ * @brief   convert virtual address to physical
+ * @param   virt_addr
+ * @retval  none
+ * @note    reserved interface
+ */
+static inline void *fwk_virt_to_phys(void *virt_addr)
+{
+    return virt_addr;
+}
+
+/*!
+ * @brief   convert physical address to virtual
+ * @param   virt_addr
+ * @retval  none
+ * @note    reserved interface
+ */
+static inline void *fwk_phys_to_virt(void *phy_addr)
+{
+    return phy_addr;
 }
 
 #ifdef __cplusplus

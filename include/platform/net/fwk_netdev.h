@@ -55,9 +55,9 @@ struct fwk_netdev_stats
 
 struct fwk_netdev_queue
 {
-    struct fwk_sk_buff *sprt_skb;
+    struct fwk_sk_buff *sptr_skb;
 
-    struct fwk_net_device *sprt_ndev;								/*!< destination/source network device */
+    struct fwk_net_device *sptr_ndev;								/*!< destination/source network device */
     kuint64_t tx_maxrate;
     kuint64_t trans_timeout;										/*!< statistics on the number of times the queue times out */
     kuint64_t trans_start;											/*!< The time of the last sent */
@@ -66,7 +66,7 @@ struct fwk_netdev_queue
 
 enum __ERT_FWK_NETDEVICE_PRIV
 {
-    NR_NETDEV_PRIV_AINDEX = mrt_bit(0),
+    NR_NETDEV_PRIV_AINDEX = mr_bit(0),
 };
 
 struct fwk_net_device
@@ -77,10 +77,10 @@ struct fwk_net_device
     kuint64_t state;												/*!< network device interface state */
     kint32_t ifindex;												/*!< network Device Interface Index Value: Network device identifier */
 
-    struct list_head sgrt_link;										/*!< network device list */
-    struct fwk_netdev_stats sgrt_stats;							    /*!< statistics on network device interfaces */
-    const struct fwk_netdev_ops *sprt_netdev_oprts;					/*!< network device operation API */
-    const struct fwk_ethtool_ops *sprt_ethtool_oprts;				/*!< ether tool operation API */
+    struct list_head sgtc_link;										/*!< network device list */
+    struct fwk_netdev_stats sgtc_stats;							    /*!< statistics on network device interfaces */
+    const struct fwk_netdev_ops *sptr_netdev_oprts;					/*!< network device operation API */
+    const struct fwk_ethtool_ops *sptr_ethtool_oprts;				/*!< ether tool operation API */
 
     kuint32_t flags;												/*!< Network device Interface identifier */
     kuint16_t priv_flags;											/*!< Network device Interface identifier; However, it is not visible to user space */
@@ -98,32 +98,32 @@ struct fwk_net_device
     kuint8_t dev_addr[NET_MAC_ETH_ALEN];							/*!< MAC address of the network device interface */
 
     kuint8_t broadcast[NET_MAX_ADDR_LEN];							/*!< hardware broadcast address */
-    struct fwk_netdev_queue *sprt_tx;								/*!< packet send queue for network device interfaces */
+    struct fwk_netdev_queue *sptr_tx;								/*!< packet send queue for network device interfaces */
 
     kuint32_t num_tx_queues;										/*!< number of TX queues allocated at alloc_netdev_mq() time */
     kuint32_t real_num_tx_queues;									/*!< number of TX queues currently active in device */
     kuint64_t tx_queue_len;											/*!< max frame per queue allowned */
 
-    struct fwk_device sgrt_dev;
-//	struct fwk_phy_device *sprt_phydev;
+    struct fwk_device sgtc_dev;
+//	struct fwk_phy_device *sptr_phydev;
     void *private_data;
 };
 
 struct fwk_netdev_ops
 {
-    kint32_t (*ndo_init) (struct fwk_net_device *sprt_ndev);
-    void (*ndo_uninit) (struct fwk_net_device *sprt_ndev);
-    kint32_t (*ndo_open) (struct fwk_net_device *sprt_ndev);
-    kint32_t (*ndo_stop) (struct fwk_net_device *sprt_ndev);
-    netdev_tx_t (*ndo_start_xmit) (struct fwk_sk_buff *sprt_skb, struct fwk_net_device *sprt_ndev);
-    void (*ndo_set_rx_mode) (struct fwk_net_device *sprt_ndev);
-    kint32_t (*ndo_set_mac_address) (struct fwk_net_device *sprt_ndev, void *ptr_addr);
-    kint32_t (*ndo_do_ioctl) (struct fwk_net_device *sprt_ndev, struct fwk_ifreq *sprt_ifr, kint32_t cmd);
-    void (*ndo_tx_timeout) (struct fwk_net_device *sprt_ndev);
-    struct fwk_netdev_stats* (*ndo_get_stats) (struct fwk_net_device *sprt_ndev);
-    kint32_t (*ndo_add_slave) (struct fwk_net_device *sprt_ndev, struct fwk_net_device *sprt_slave_dev);
-    kint32_t (*ndo_del_slave) (struct fwk_net_device *sprt_ndev, struct fwk_net_device *sprt_slave_dev);
-    kint32_t (*ndo_set_tx_maxrate) (struct fwk_net_device *sprt_ndev, kint32_t queue_index, kuint32_t maxrate);
+    kint32_t (*ndo_init) (struct fwk_net_device *sptr_ndev);
+    void (*ndo_uninit) (struct fwk_net_device *sptr_ndev);
+    kint32_t (*ndo_open) (struct fwk_net_device *sptr_ndev);
+    kint32_t (*ndo_stop) (struct fwk_net_device *sptr_ndev);
+    netdev_tx_t (*ndo_start_xmit) (struct fwk_sk_buff *sptr_skb, struct fwk_net_device *sptr_ndev);
+    void (*ndo_set_rx_mode) (struct fwk_net_device *sptr_ndev);
+    kint32_t (*ndo_set_mac_address) (struct fwk_net_device *sptr_ndev, void *ptr_addr);
+    kint32_t (*ndo_do_ioctl) (struct fwk_net_device *sptr_ndev, struct fwk_ifreq *sptr_ifr, kint32_t cmd);
+    void (*ndo_tx_timeout) (struct fwk_net_device *sptr_ndev);
+    struct fwk_netdev_stats* (*ndo_get_stats) (struct fwk_net_device *sptr_ndev);
+    kint32_t (*ndo_add_slave) (struct fwk_net_device *sptr_ndev, struct fwk_net_device *sptr_slave_dev);
+    kint32_t (*ndo_del_slave) (struct fwk_net_device *sptr_ndev, struct fwk_net_device *sptr_slave_dev);
+    kint32_t (*ndo_set_tx_maxrate) (struct fwk_net_device *sptr_ndev, kint32_t queue_index, kuint32_t maxrate);
 };
 
 struct fwk_ethtool_ops
@@ -134,16 +134,16 @@ struct fwk_ethtool_ops
 
 /*!< The functions */
 extern struct fwk_net_device *fwk_alloc_netdev_mq(kint32_t sizeof_priv, const kchar_t *name,
-                                                    void (*setup) (struct fwk_net_device *sprt_ndev), kuint32_t queue_count);
-extern void fwk_free_netdev(struct fwk_net_device *sprt_ndev);
+                                                    void (*setup) (struct fwk_net_device *sptr_ndev), kuint32_t queue_count);
+extern void fwk_free_netdev(struct fwk_net_device *sptr_ndev);
 extern struct fwk_net_device *fwk_ifname_to_ndev(const kchar_t *name);
-extern kint32_t fwk_register_netdevice(struct fwk_net_device *sprt_ndev);
-extern kint32_t fwk_unregister_netdevice(struct fwk_net_device *sprt_ndev);
-extern struct fwk_net_device *next_netdevice(struct fwk_net_device *sprt_ndev);
+extern kint32_t fwk_register_netdevice(struct fwk_net_device *sptr_ndev);
+extern kint32_t fwk_unregister_netdevice(struct fwk_net_device *sptr_ndev);
+extern struct fwk_net_device *next_netdevice(struct fwk_net_device *sptr_ndev);
 
 #define fwk_alloc_netdev(sizeof_priv, name, setup)	\
                 fwk_alloc_netdev_mq(sizeof_priv, name, setup, 1)
-#define fwk_netdev_priv(sprt_ndev)				((sprt_ndev)->private_data)
+#define fwk_netdev_priv(sptr_ndev)				((sptr_ndev)->private_data)
 
 #ifdef __cplusplus
     }

@@ -219,17 +219,17 @@ typedef struct {
 // extern void XEmacPsIf_DmaTxDescsClean(void *args);
 // extern kint32_t XEmacPs_DmaInit(void *args);
 
-extern kint32_t XEmacPs_BdRingCreate(XEmacPs_BdRing *sprt_bdring, kuint32_t PhysAddr,
+extern kint32_t XEmacPs_BdRingCreate(XEmacPs_BdRing *sptr_bdring, kuint32_t PhysAddr,
                             kuint32_t VirtAddr, kuint32_t Alignment, kuint32_t BdCount);
-extern void XEmacPs_BdRingInitial(XEmacPs_BdRing *sprt_bdring, kuint32_t PhysAddr,
+extern void XEmacPs_BdRingInitial(XEmacPs_BdRing *sptr_bdring, kuint32_t PhysAddr,
                             kuint32_t VirtAddr, kuint32_t Alignment, kuint32_t BdCount);
-extern kint32_t XEmacPs_BdRingClone(XEmacPs_BdRing *sprt_bdring, XEmacPs_Bd *sprt_bd, kuint8_t Direction);
-extern kint32_t XEmacPs_BdRingAlloc(XEmacPs_BdRing *sprt_bdring, kuint32_t NumBd, XEmacPs_Bd **sprt_bd);
-extern kint32_t XEmacPs_BdRingUnAlloc(XEmacPs_BdRing *sprt_bdring, kuint32_t NumBd, XEmacPs_Bd *sprt_bd);
-extern kint32_t XEmacPs_BdRingFree(XEmacPs_BdRing *sprt_bdring, kuint32_t NumBd, XEmacPs_Bd *sprt_bd);
-extern kuint32_t XEmacPs_BdRingFromHwTx(XEmacPs_BdRing *sprt_bdring, kuint32_t BdLimit, XEmacPs_Bd **sprt_bd);
-extern kuint32_t XEmacPs_BdRingFromHwRx(XEmacPs_BdRing *sprt_bdring, kuint32_t BdLimit, XEmacPs_Bd **sprt_bd);
-extern kint32_t XEmacPs_BdRingToHw(XEmacPs_BdRing *sprt_bdring, kuint32_t NumBd, XEmacPs_Bd *sprt_bd);
+extern kint32_t XEmacPs_BdRingClone(XEmacPs_BdRing *sptr_bdring, XEmacPs_Bd *sptr_bd, kuint8_t Direction);
+extern kint32_t XEmacPs_BdRingAlloc(XEmacPs_BdRing *sptr_bdring, kuint32_t NumBd, XEmacPs_Bd **sptr_bd);
+extern kint32_t XEmacPs_BdRingUnAlloc(XEmacPs_BdRing *sptr_bdring, kuint32_t NumBd, XEmacPs_Bd *sptr_bd);
+extern kint32_t XEmacPs_BdRingFree(XEmacPs_BdRing *sptr_bdring, kuint32_t NumBd, XEmacPs_Bd *sptr_bd);
+extern kuint32_t XEmacPs_BdRingFromHwTx(XEmacPs_BdRing *sptr_bdring, kuint32_t BdLimit, XEmacPs_Bd **sptr_bd);
+extern kuint32_t XEmacPs_BdRingFromHwRx(XEmacPs_BdRing *sptr_bdring, kuint32_t BdLimit, XEmacPs_Bd **sptr_bd);
+extern kint32_t XEmacPs_BdRingToHw(XEmacPs_BdRing *sptr_bdring, kuint32_t NumBd, XEmacPs_Bd *sptr_bd);
 
 #ifdef __cplusplus
 	}

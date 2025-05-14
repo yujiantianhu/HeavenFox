@@ -22,35 +22,35 @@
  */
 struct fwk_file *fwk_do_filp_open(kchar_t *name, kuint32_t mode)
 {
-    struct fwk_file  *sprt_file;
-    struct fwk_inode *sprt_inode;
+    struct fwk_file  *sptr_file;
+    struct fwk_inode *sptr_inode;
     kint32_t retval;
 
-    sprt_inode = fwk_inode_find(name);
-    if (!isValid(sprt_inode))
+    sptr_inode = fwk_inode_find(name);
+    if (!isValid(sptr_inode))
         goto fail1;
     
-    sprt_file = (struct fwk_file *)kzalloc(sizeof(struct fwk_file), GFP_KERNEL);
-    if (!isValid(sprt_file))
+    sptr_file = (struct fwk_file *)kzalloc(sizeof(struct fwk_file), GFP_KERNEL);
+    if (!isValid(sptr_file))
         goto fail1;
 
-    sprt_file->mode = mode;
-    sprt_file->sprt_inode = sprt_inode;
-    sprt_file->sprt_foprts = sprt_inode->sprt_foprts;
-    if (sprt_file->sprt_foprts->open)
+    sptr_file->mode = mode;
+    sptr_file->sptr_inode = sptr_inode;
+    sptr_file->sptr_foprts = sptr_inode->sptr_foprts;
+    if (sptr_file->sptr_foprts->open)
     {
-        retval = sprt_file->sprt_foprts->open(sprt_inode, sprt_file);
+        retval = sptr_file->sptr_foprts->open(sptr_inode, sptr_file);
         if (retval)
             goto fail2;
     }
 
-    return sprt_file;
+    return sptr_file;
 
 fail2:
-    kfree(sprt_file);
+    kfree(sptr_file);
 
 fail1:
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
@@ -59,28 +59,28 @@ fail1:
  * @retval  none
  * @note    none
  */
-void fwk_do_filp_close(struct fwk_file *sprt_file)
+void fwk_do_filp_close(struct fwk_file *sptr_file)
 {
-    struct fwk_inode *sprt_inode;
+    struct fwk_inode *sptr_inode;
 
-    if (!isValid(sprt_file))
+    if (!isValid(sptr_file))
         return;
 
-    sprt_inode = sprt_file->sprt_inode;
+    sptr_inode = sptr_file->sptr_inode;
 
     /*!< Close device */
-    if (sprt_file->sprt_foprts->close)
-        sprt_file->sprt_foprts->close(sprt_inode, sprt_file);
+    if (sptr_file->sptr_foprts->close)
+        sptr_file->sptr_foprts->close(sptr_inode, sptr_file);
 
     /*!< 
      * Legacy bug: 
      * If the file is not closed after opening, and the inode node is suddenly deleted, 
      * what should we do with the file? How to release the occupied fd? 
      */
-    if (sprt_inode->sprt_foprts->close)
-        sprt_inode->sprt_foprts->close(sprt_inode, sprt_file);
+    if (sptr_inode->sptr_foprts->close)
+        sptr_inode->sptr_foprts->close(sptr_inode, sptr_file);
 
-    kfree(sprt_file);
+    kfree(sptr_file);
 }
 
 /*!< end of file */

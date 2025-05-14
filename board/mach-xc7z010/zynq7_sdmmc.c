@@ -17,7 +17,7 @@
 #include <platform/mmc/fwk_sdcard.h>
 
 /*!< The globals */
-static XSdPs sgrt_xsd_ps_data;
+static XSdPs sgtc_xsd_ps_data;
 
 /*!< API function */
 /*!
@@ -28,14 +28,14 @@ static XSdPs sgrt_xsd_ps_data;
  */
 void zynq7_sdmmc_init(void)
 {
-    XSdPs *sprt_sd = &sgrt_xsd_ps_data;
-    XSdPs_Config *sprt_cfg;
+    XSdPs *sptr_sd = &sgtc_xsd_ps_data;
+    XSdPs_Config *sptr_cfg;
 
-    sprt_cfg = XSdPs_LookupConfig(XPAR_PS7_SD_0_DEVICE_ID);
-    if (!isValid(sprt_cfg))
+    sptr_cfg = XSdPs_LookupConfig(XPAR_PS7_SD_0_DEVICE_ID);
+    if (!isValid(sptr_cfg))
         return;
 
-    XSdPs_CfgInitialize(sprt_sd, sprt_cfg, sprt_cfg->BaseAddress);
+    XSdPs_CfgInitialize(sptr_sd, sptr_cfg, sptr_cfg->BaseAddress);
 }
 
 /*!< ---------------------------------------------------- */
@@ -45,23 +45,23 @@ void zynq7_sdmmc_init(void)
  * @retval  none
  * @note    read data by ADMA
  */
-static kint32_t XSdPs_ReadADMA_Data(XSdPs *sprt_sd, struct fwk_sdcard_data *sprt_data)
+static kint32_t XSdPs_ReadADMA_Data(XSdPs *sptr_sd, struct fwk_sdcard_data *sptr_data)
 {
     kuint8_t *Buff;
     kint32_t BlkCnt, BlkSize;
     kuint32_t StatusReg;
     kuaddr_t BaseAddress;
 
-    if (!sprt_sd || !sprt_data)
+    if (!sptr_sd || !sptr_data)
         return -ER_NOMEM;
 
-    if (!XSdPs_IsCardDetected(sprt_sd))
+    if (!XSdPs_IsCardDetected(sptr_sd))
         return -ER_FAILD;
 
-    BaseAddress = sprt_sd->sgrt_cfg.BaseAddress;
-    Buff = (kuint8_t *)sprt_data->rxBuffer;
-    BlkCnt = sprt_data->blockCount;
-    BlkSize = sprt_data->blockSize & XSDPS_BLK_SIZE_MASK;
+    BaseAddress = sptr_sd->sgtc_cfg.BaseAddress;
+    Buff = (kuint8_t *)sptr_data->rxBuffer;
+    BlkCnt = sptr_data->blockCount;
+    BlkSize = sptr_data->blockSize & XSDPS_BLK_SIZE_MASK;
 
     /* Check for transfer complete */
     do {
@@ -78,7 +78,7 @@ static kint32_t XSdPs_ReadADMA_Data(XSdPs *sprt_sd, struct fwk_sdcard_data *sprt
     /* Write to clear bit */
     XSdPs_WriteReg16(BaseAddress, XSDPS_NORM_INTR_STS_OFFSET, XSDPS_INTR_TC_MASK);
 
-    if (!sprt_sd->sgrt_cfg.IsCacheCoherent)
+    if (!sptr_sd->sgtc_cfg.IsCacheCoherent)
         Xil_DCacheInvalidateRange((kuaddr_t)Buff, BlkCnt * BlkSize);
 
     return ER_NORMAL;
@@ -90,18 +90,18 @@ static kint32_t XSdPs_ReadADMA_Data(XSdPs *sprt_sd, struct fwk_sdcard_data *sprt
  * @retval  none
  * @note    write data by ADMA
  */
-static kint32_t XSdPs_WriteADMA_Data(XSdPs *sprt_sd, struct fwk_sdcard_data *sprt_data)
+static kint32_t XSdPs_WriteADMA_Data(XSdPs *sptr_sd, struct fwk_sdcard_data *sptr_data)
 {
     kuint32_t StatusReg;
     kuaddr_t BaseAddress;
 
-    if (!sprt_sd || !sprt_data)
+    if (!sptr_sd || !sptr_data)
         return -ER_NOMEM;
 
-    if (!XSdPs_IsCardDetected(sprt_sd))
+    if (!XSdPs_IsCardDetected(sptr_sd))
         return -ER_FAILD;
 
-    BaseAddress = sprt_sd->sgrt_cfg.BaseAddress;
+    BaseAddress = sptr_sd->sgtc_cfg.BaseAddress;
 
     /*
      * Check for transfer complete
@@ -125,13 +125,13 @@ static kint32_t XSdPs_WriteADMA_Data(XSdPs *sprt_sd, struct fwk_sdcard_data *spr
     return ER_NORMAL;
 }
 
-static void zynq7_sdmmc_reset(struct fwk_sdcard_host *sprt_host)
+static void zynq7_sdmmc_reset(struct fwk_sdcard_host *sptr_host)
 {
-    XSdPs *sprt_sd = (XSdPs *)sprt_host->iHostIfBase;
+    XSdPs *sptr_sd = (XSdPs *)sptr_host->iHostIfBase;
     kuint8_t ReadReg;
     kuaddr_t BaseAddress;
 
-    BaseAddress = sprt_sd->sgrt_cfg.BaseAddress;
+    BaseAddress = sptr_sd->sgtc_cfg.BaseAddress;
 
     XSdPs_WriteReg16(BaseAddress, XSDPS_NORM_INTR_STS_OFFSET, XSDPS_NORM_INTR_ALL_MASK);
     XSdPs_WriteReg16(BaseAddress, XSDPS_ERR_INTR_STS_OFFSET, XSDPS_ERROR_INTR_ALL_MASK);
@@ -153,11 +153,11 @@ static void zynq7_sdmmc_reset(struct fwk_sdcard_host *sprt_host)
  * @retval  none
  * @note    detect if card insert
  */
-static kbool_t zynq7_sdmmc_is_card_insert(struct fwk_sdcard_host *sprt_host)
+static kbool_t zynq7_sdmmc_is_card_insert(struct fwk_sdcard_host *sptr_host)
 {
-    XSdPs *sprt_sd = (XSdPs *)sprt_host->iHostCDBase;
+    XSdPs *sptr_sd = (XSdPs *)sptr_host->iHostCDBase;
 
-    return XSdPs_IsCardDetected(sprt_sd);
+    return XSdPs_IsCardDetected(sptr_sd);
 }
 
 /*!
@@ -166,24 +166,24 @@ static kbool_t zynq7_sdmmc_is_card_insert(struct fwk_sdcard_host *sprt_host)
  * @retval  none
  * @note    configure card bus width
  */
-static void zynq7_sdmmc_set_bus_width(struct fwk_sdcard_host *sprt_host, kuint32_t option)
+static void zynq7_sdmmc_set_bus_width(struct fwk_sdcard_host *sptr_host, kuint32_t option)
 {
-    XSdPs *sprt_sd = (XSdPs *)sprt_host->iHostIfBase;
+    XSdPs *sptr_sd = (XSdPs *)sptr_host->iHostIfBase;
 
     switch (option)
     {
         case NR_SdCard_BusWidth_8Bit:
-        	sprt_sd->BusWidth = XSDPS_8_BIT_WIDTH;
+        	sptr_sd->BusWidth = XSDPS_8_BIT_WIDTH;
             break;
         case NR_SdCard_BusWidth_1Bit:
-        	sprt_sd->BusWidth = XSDPS_1_BIT_WIDTH;
+        	sptr_sd->BusWidth = XSDPS_1_BIT_WIDTH;
             break;
         default:
-        	sprt_sd->BusWidth = XSDPS_4_BIT_WIDTH;
+        	sptr_sd->BusWidth = XSDPS_4_BIT_WIDTH;
             break;
     }
 
-    XSdPs_Change_BusWidth(sprt_sd, sprt_sd->BusWidth);
+    XSdPs_Change_BusWidth(sptr_sd, sptr_sd->BusWidth);
 }
 
 /*!
@@ -192,30 +192,30 @@ static void zynq7_sdmmc_set_bus_width(struct fwk_sdcard_host *sprt_host, kuint32
  * @retval  none
  * @note    configure sdcard clock frequency
  */
-static void zynq7_sdmmc_set_clk_freq(struct fwk_sdcard_host *sprt_host, kuint32_t option)
+static void zynq7_sdmmc_set_clk_freq(struct fwk_sdcard_host *sptr_host, kuint32_t option)
 {
-    XSdPs *sprt_sd = (XSdPs *)sprt_host->iHostIfBase;
+    XSdPs *sptr_sd = (XSdPs *)sptr_host->iHostIfBase;
 
     if (option > NR_SdCard_ClkFreq_50MHz)
         option = NR_SdCard_ClkFreq_25MHz;
 
-    if (sprt_sd->HC_Version == XSDPS_HC_SPEC_V3)
-        sprt_sd->BusSpeed = SD_CLK_19_MHZ;
+    if (sptr_sd->HC_Version == XSDPS_HC_SPEC_V3)
+        sptr_sd->BusSpeed = SD_CLK_19_MHZ;
     else
     {
         switch (option)
         {
             case NR_SdCard_ClkFreq_400KHz:
-                sprt_sd->BusSpeed = XSDPS_CLK_400_KHZ;
+                sptr_sd->BusSpeed = XSDPS_CLK_400_KHZ;
                 break;
 
             default:
-                sprt_sd->BusSpeed = SD_CLK_25_MHZ;
+                sptr_sd->BusSpeed = SD_CLK_25_MHZ;
                 break;
         }
     }
 
-    XSdPs_Change_ClkFreq(sprt_sd, sprt_sd->BusSpeed);
+    XSdPs_Change_ClkFreq(sptr_sd, sptr_sd->BusSpeed);
 }
 
 /*!
@@ -224,7 +224,7 @@ static void zynq7_sdmmc_set_clk_freq(struct fwk_sdcard_host *sprt_host, kuint32_
  * @retval  none
  * @note    initial active card; it will make card enter idle status
  */
-static kbool_t zynq7_sdmmc_initial_active(struct fwk_sdcard_host *sprt_host, kuint32_t timeout)
+static kbool_t zynq7_sdmmc_initial_active(struct fwk_sdcard_host *sptr_host, kuint32_t timeout)
 {
     /*!< for zynq ps7, 74 CLK delay after card is powered up, before the first command */
     /*!< not to do anything here */
@@ -239,10 +239,10 @@ static kbool_t zynq7_sdmmc_initial_active(struct fwk_sdcard_host *sprt_host, kui
  * @retval  none
  * @note    send command by SD
  */
-static kint32_t zynq7_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds)
+static kint32_t zynq7_sdmmc_send_command(struct fwk_sdcard_cmd *sptr_cmds)
 {
-    struct fwk_sdcard_host *sprt_host;
-    XSdPs *sprt_sd;
+    struct fwk_sdcard_host *sptr_host;
+    XSdPs *sptr_sd;
 
     kuint32_t PresentStateReg;
     kuint32_t CommandReg;
@@ -251,17 +251,17 @@ static kint32_t zynq7_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds)
     kuint32_t Index, Argument;
     kuaddr_t BaseAddress;
 
-    sprt_host = (struct fwk_sdcard_host *)sprt_cmds->ptrHost;
-    if (!isValid(sprt_host))
+    sptr_host = (struct fwk_sdcard_host *)sptr_cmds->ptrHost;
+    if (!isValid(sptr_host))
         return -ER_NOMEM;
 
-    sprt_sd = (XSdPs *)sprt_host->iHostIfBase;  
-    if (!sprt_sd || !sprt_sd->IsReady)
+    sptr_sd = (XSdPs *)sptr_host->iHostIfBase;  
+    if (!sptr_sd || !sptr_sd->IsReady)
         return -ER_NOMEM;
 
-    BaseAddress = sprt_sd->sgrt_cfg.BaseAddress;
-    Index = sprt_cmds->index & FWK_SDCARD_CMD_MASK;
-    Argument = mrt_be32_to_cpu(sprt_cmds->args);
+    BaseAddress = sptr_sd->sgtc_cfg.BaseAddress;
+    Index = sptr_cmds->index & FWK_SDCARD_CMD_MASK;
+    Argument = mr_be32_to_cpu(sptr_cmds->args);
 
     /*
      * Check the command inhibit to make sure no other
@@ -276,10 +276,10 @@ static kint32_t zynq7_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds)
     XSdPs_WriteReg16(BaseAddress, XSDPS_ERR_INTR_STS_OFFSET, XSDPS_ERROR_INTR_ALL_MASK);
 
     CommandReg = Index << 8;
-    Index |= ((sprt_cmds->cmdType == FWK_SDCARD_CMDTYPE_APPLICATION) ? FWK_SDCARD_CMD_APP : 0U);
+    Index |= ((sptr_cmds->cmdType == FWK_SDCARD_CMDTYPE_APPLICATION) ? FWK_SDCARD_CMD_APP : 0U);
 
     /*!< set/reset bits according to response type */
-    switch (sprt_cmds->respType)
+    switch (sptr_cmds->respType)
     {
         case NR_SdCard_Response_0:
             break;
@@ -316,7 +316,7 @@ static kint32_t zynq7_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds)
             break;
 
         default:
-            mrt_assert(false);
+            mr_assert(false);
             break;
     }
 
@@ -339,7 +339,7 @@ static kint32_t zynq7_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds)
     /* Write argument register */
     XSdPs_WriteReg(BaseAddress, XSDPS_ARGMT_OFFSET, Argument);
     XSdPs_WriteReg(BaseAddress, XSDPS_XFER_MODE_OFFSET,
-                            (CommandReg << 16) | sprt_sd->TransferMode);
+                            (CommandReg << 16) | sptr_sd->TransferMode);
 
     /* Polling for response for now */
     do {
@@ -369,47 +369,47 @@ static kint32_t zynq7_sdmmc_send_command(struct fwk_sdcard_cmd *sprt_cmds)
  * @retval  none
  * @note    receive response by uSDHC
  */
-static void zynq7_sdmmc_recv_response(struct fwk_sdcard_cmd *sprt_cmds)
+static void zynq7_sdmmc_recv_response(struct fwk_sdcard_cmd *sptr_cmds)
 {
-    struct fwk_sdcard_host *sprt_host;
-    XSdPs *sprt_sd;
+    struct fwk_sdcard_host *sptr_host;
+    XSdPs *sptr_sd;
     kuint8_t rsp_cnt = 3U;
     kuaddr_t BaseAddress;
 
-    sprt_host = (struct fwk_sdcard_host *)sprt_cmds->ptrHost;
-    if (!isValid(sprt_host))
+    sptr_host = (struct fwk_sdcard_host *)sptr_cmds->ptrHost;
+    if (!isValid(sptr_host))
         return;
 
-    sprt_sd = (XSdPs *)sprt_host->iHostIfBase;
-    BaseAddress = sprt_sd->sgrt_cfg.BaseAddress;
+    sptr_sd = (XSdPs *)sptr_host->iHostIfBase;
+    BaseAddress = sptr_sd->sgtc_cfg.BaseAddress;
 
-    if (NR_SdCard_Response_0 == sprt_cmds->respType)
+    if (NR_SdCard_Response_0 == sptr_cmds->respType)
         return;
 
     /*!< for CID/CSD: CMD_RSP0->bit[31:0] is CID/CSD bit[39:8] */
-    *(sprt_cmds->resp) = XSdPs_ReadReg(BaseAddress, XSDPS_RESP0_OFFSET);
+    *(sptr_cmds->resp) = XSdPs_ReadReg(BaseAddress, XSDPS_RESP0_OFFSET);
 
     /*!< R2 args = CID/CSD (bit[127:8]) */
-    if (NR_SdCard_Response_2 == sprt_cmds->respType)
+    if (NR_SdCard_Response_2 == sptr_cmds->respType)
     {
         /*!< CMD_RSP3: bit[23:0] is CID/CSD bit[127:104]; CMD_RSP3 bit[31:24] is reserved */
-        *(sprt_cmds->resp + 3U) = XSdPs_ReadReg(BaseAddress, XSDPS_RESP3_OFFSET);
+        *(sptr_cmds->resp + 3U) = XSdPs_ReadReg(BaseAddress, XSDPS_RESP3_OFFSET);
 
         /*!< CMD_RSP2: bit[31:0] is CID/CSD bit[103:72] */
-        *(sprt_cmds->resp + 2U) = XSdPs_ReadReg(BaseAddress, XSDPS_RESP2_OFFSET);
+        *(sptr_cmds->resp + 2U) = XSdPs_ReadReg(BaseAddress, XSDPS_RESP2_OFFSET);
 
         /*!< CMD_RSP1: bit[31:0] is CID/CSD bit[71:40] */
-        *(sprt_cmds->resp + 1U) = XSdPs_ReadReg(BaseAddress, XSDPS_RESP1_OFFSET);
+        *(sptr_cmds->resp + 1U) = XSdPs_ReadReg(BaseAddress, XSDPS_RESP1_OFFSET);
 
         /*!< make resp similar to CID/CSD(bit[127:8]) */
         do
         {
-            sprt_cmds->resp[rsp_cnt] = mrt_bit_mask(sprt_cmds->resp[rsp_cnt], 0xffffff00U, 8U);
-            mrt_setbitl(sprt_cmds->resp[rsp_cnt - 1] >> 24U, &sprt_cmds->resp[rsp_cnt]);
+            sptr_cmds->resp[rsp_cnt] = mr_bit_mask(sptr_cmds->resp[rsp_cnt], 0xffffff00U, 8U);
+            mr_setbitl(sptr_cmds->resp[rsp_cnt - 1] >> 24U, &sptr_cmds->resp[rsp_cnt]);
             
         } while (--rsp_cnt);
 
-        sprt_cmds->resp[0] = mrt_bit_mask(sprt_cmds->resp[0], 0xffffff00U, 8U);
+        sptr_cmds->resp[0] = mr_bit_mask(sptr_cmds->resp[0], 0xffffff00U, 8U);
     }
 }
 
@@ -419,57 +419,57 @@ static void zynq7_sdmmc_recv_response(struct fwk_sdcard_cmd *sprt_cmds)
  * @retval  none
  * @note    setup dma before transfer
  */
-static kint32_t zynq7_sdmmc_setup_dma(struct fwk_sdcard_data *sprt_data)
+static kint32_t zynq7_sdmmc_setup_dma(struct fwk_sdcard_data *sptr_data)
 {
-    struct fwk_sdcard_host *sprt_host;
-    XSdPs *sprt_sd;
+    struct fwk_sdcard_host *sptr_host;
+    XSdPs *sptr_sd;
     kuint8_t *Buff;
     kuint32_t BlkCnt, BlkSize;
 
-    if (!sprt_data)
+    if (!sptr_data)
         return -ER_NULLPTR;
 
-    sprt_host = (struct fwk_sdcard_host *)sprt_data->ptrHost;
-    if (!isValid(sprt_host))
+    sptr_host = (struct fwk_sdcard_host *)sptr_data->ptrHost;
+    if (!isValid(sptr_host))
         return -ER_NULLPTR;
 
-    sprt_sd = (XSdPs *)sprt_host->iHostIfBase;
-    if (!sprt_sd || !sprt_sd->IsReady)
+    sptr_sd = (XSdPs *)sptr_host->iHostIfBase;
+    if (!sptr_sd || !sptr_sd->IsReady)
         return -ER_NREADY;
 
-    Buff = (kuint8_t *)(sprt_data->txBuffer ? sprt_data->txBuffer : sprt_data->rxBuffer);
+    Buff = (kuint8_t *)(sptr_data->txBuffer ? sptr_data->txBuffer : sptr_data->rxBuffer);
     if (!Buff)
         return -ER_NOMEM;
 
-    BlkCnt = sprt_data->blockCount;
-    BlkSize = sprt_data->blockSize & XSDPS_BLK_SIZE_MASK;
+    BlkCnt = sptr_data->blockCount;
+    BlkSize = sptr_data->blockSize & XSDPS_BLK_SIZE_MASK;
 
     if (!BlkCnt || !BlkSize)
         return -ER_FAULT;
 
     /* Write block count register */
-    XSdPs_SetBlkSize(sprt_sd, BlkCnt, BlkSize);
-    XSdPs_SetupADMA2DescTbl(sprt_sd, BlkCnt, Buff);
+    XSdPs_SetBlkSize(sptr_sd, BlkCnt, BlkSize);
+    XSdPs_SetupADMA2DescTbl(sptr_sd, BlkCnt, Buff);
 
     /*!< TransferMode will be used in "send_command" function */
-    sprt_sd->TransferMode = XSDPS_TM_DMA_EN_MASK;
+    sptr_sd->TransferMode = XSDPS_TM_DMA_EN_MASK;
 
-    if (mrt_isBitSetl(NR_SdCard_CmdFlagsWithBlock, &sprt_data->flags))
-    	sprt_sd->TransferMode |= XSDPS_TM_BLK_CNT_EN_MASK;
+    if (mr_isBitSetl(NR_SdCard_CmdFlagsWithBlock, &sptr_data->flags))
+    	sptr_sd->TransferMode |= XSDPS_TM_BLK_CNT_EN_MASK;
 
     /*!< direction: recv */
-    if (!sprt_data->txBuffer)
-        sprt_sd->TransferMode |= XSDPS_TM_DAT_DIR_SEL_MASK;
+    if (!sptr_data->txBuffer)
+        sptr_sd->TransferMode |= XSDPS_TM_DAT_DIR_SEL_MASK;
 
     if (BlkCnt > 1U)
     {
-        sprt_sd->TransferMode |= XSDPS_TM_MUL_SIN_BLK_SEL_MASK;
+        sptr_sd->TransferMode |= XSDPS_TM_MUL_SIN_BLK_SEL_MASK;
 
-        if (mrt_isBitSetl(NR_SdCard_CmdFlagsAuto12Enable, &sprt_data->flags))
-        	sprt_sd->TransferMode |= XSDPS_TM_AUTO_CMD12_EN_MASK;
+        if (mr_isBitSetl(NR_SdCard_CmdFlagsAuto12Enable, &sptr_data->flags))
+        	sptr_sd->TransferMode |= XSDPS_TM_AUTO_CMD12_EN_MASK;
     }
 
-    if (!sprt_sd->sgrt_cfg.IsCacheCoherent) 
+    if (!sptr_sd->sgtc_cfg.IsCacheCoherent) 
         Xil_DCacheInvalidateRange((kuaddr_t)Buff, BlkSize);
 
     return ER_NORMAL;
@@ -481,26 +481,26 @@ static kint32_t zynq7_sdmmc_setup_dma(struct fwk_sdcard_data *sprt_data)
  * @retval  none
  * @note    send data by uSDHC
  */
-static kint32_t zynq7_sdmmc_transfer_data(struct fwk_sdcard_data *sprt_data)
+static kint32_t zynq7_sdmmc_transfer_data(struct fwk_sdcard_data *sptr_data)
 {
-    struct fwk_sdcard_host *sprt_host;
-    XSdPs *sprt_sd;
+    struct fwk_sdcard_host *sptr_host;
+    XSdPs *sptr_sd;
     kint32_t iRetval;
 
-    if (!sprt_data)
+    if (!sptr_data)
         return -ER_NULLPTR;
 
-    sprt_host = (struct fwk_sdcard_host *)sprt_data->ptrHost;
-    if (!isValid(sprt_host))
+    sptr_host = (struct fwk_sdcard_host *)sptr_data->ptrHost;
+    if (!isValid(sptr_host))
         return -ER_NULLPTR;
 
-    sprt_sd = (XSdPs *)sprt_host->iHostIfBase;
-    if (!sprt_sd || !sprt_sd->IsReady)
+    sptr_sd = (XSdPs *)sptr_host->iHostIfBase;
+    if (!sptr_sd || !sptr_sd->IsReady)
         return -ER_NREADY;
 
-    iRetval = sprt_data->txBuffer ? XSdPs_WriteADMA_Data(sprt_sd, sprt_data) : XSdPs_ReadADMA_Data(sprt_sd, sprt_data);
+    iRetval = sptr_data->txBuffer ? XSdPs_WriteADMA_Data(sptr_sd, sptr_data) : XSdPs_ReadADMA_Data(sptr_sd, sptr_data);
     if (iRetval)
-        zynq7_sdmmc_reset(sprt_host);
+        zynq7_sdmmc_reset(sptr_host);
 
     return iRetval;
 }
@@ -511,14 +511,14 @@ static kint32_t zynq7_sdmmc_transfer_data(struct fwk_sdcard_data *sprt_data)
  * @retval  none
  * @note    switch voltage by uSDHC
  */
-static kint32_t zynq7_sdmmc_switch_voltage(struct fwk_sdcard_host *sprt_host, kuint32_t voltage)
+static kint32_t zynq7_sdmmc_switch_voltage(struct fwk_sdcard_host *sptr_host, kuint32_t voltage)
 {
-    XSdPs *sprt_sd = (XSdPs *)sprt_host->iHostIfBase;
+    XSdPs *sptr_sd = (XSdPs *)sptr_host->iHostIfBase;
     kuint16_t CtrlReg;
     kuint32_t ReadReg, ClockReg;
     kuaddr_t BaseAddress;
 
-    BaseAddress = sprt_sd->sgrt_cfg.BaseAddress;
+    BaseAddress = sptr_sd->sgtc_cfg.BaseAddress;
 
     /* Wait for CMD and DATA line to go low */
     do {
@@ -574,62 +574,62 @@ static kint32_t zynq7_sdmmc_switch_voltage(struct fwk_sdcard_host *sprt_host, ku
  * @retval  none
  * @note    initial host of SD Card
  */
-void *host_sdmmc_card_initial(struct fwk_sdcard *sprt_card)
+void *host_sdmmc_card_initial(struct fwk_sdcard *sptr_card)
 {
-    XSdPs *sprt_sd;
-    struct fwk_sdcard_if *sprt_if;
-    struct fwk_sdcard_host *sprt_host;
+    XSdPs *sptr_sd;
+    struct fwk_sdcard_if *sptr_if;
+    struct fwk_sdcard_host *sptr_host;
 
-    if (!isValid(sprt_card))
-        return mrt_nullptr;
+    if (!isValid(sptr_card))
+        return mr_nullptr;
 
-    sprt_sd = &sgrt_xsd_ps_data;
-    sprt_if = &sprt_card->sgrt_if;
+    sptr_sd = &sgtc_xsd_ps_data;
+    sptr_if = &sptr_card->sgtc_if;
 
-    sprt_host = (struct fwk_sdcard_host *)kzalloc(sizeof(struct fwk_sdcard_host), GFP_KERNEL);
-    if (!isValid(sprt_host))
-        return mrt_nullptr;
+    sptr_host = (struct fwk_sdcard_host *)kzalloc(sizeof(struct fwk_sdcard_host), GFP_KERNEL);
+    if (!isValid(sptr_host))
+        return mr_nullptr;
 
-    sprt_host->iHostIfBase = (kuaddr_t)sprt_sd;
-    sprt_host->iHostCDBase = (kuaddr_t)sprt_sd;
-    sprt_host->isSelfDync = true;
+    sptr_host->iHostIfBase = (kuaddr_t)sptr_sd;
+    sptr_host->iHostCDBase = (kuaddr_t)sptr_sd;
+    sptr_host->isSelfDync = true;
 
     /*!< Default settings */
-    sprt_sd->BusWidth = XSDPS_1_BIT_WIDTH;
-    sprt_sd->CardType = XSDPS_CARD_SD;
-    sprt_sd->Switch1v8 = 0U;
-    sprt_sd->BusSpeed = XSDPS_CLK_400_KHZ;
+    sptr_sd->BusWidth = XSDPS_1_BIT_WIDTH;
+    sptr_sd->CardType = XSDPS_CARD_SD;
+    sptr_sd->Switch1v8 = 0U;
+    sptr_sd->BusSpeed = XSDPS_CLK_400_KHZ;
 
     /*!< get support */
-    sprt_host->maxBlockLength = mrt_getbitw(XSDPS_BLK_SIZE_MASK, sprt_sd->sgrt_cfg.BaseAddress + XSDPS_BLK_SIZE_OFFSET);
-    sprt_host->maxBlockCount  = 0xffffU;
+    sptr_host->maxBlockLength = mr_getbitw(XSDPS_BLK_SIZE_MASK, sptr_sd->sgtc_cfg.BaseAddress + XSDPS_BLK_SIZE_OFFSET);
+    sptr_host->maxBlockCount  = 0xffffU;
 
-    mrt_resetl(&sprt_host->flagBit);
-    if (!mrt_isBitResetl(XSDPS_CAP_VOLT_1V8_MASK, &sprt_sd->Host_Caps))
-        mrt_setbitl(NR_SdCard_SupportVoltage1_8V, &sprt_host->flagBit);
+    mr_resetl(&sptr_host->flagBit);
+    if (!mr_isBitResetl(XSDPS_CAP_VOLT_1V8_MASK, &sptr_sd->Host_Caps))
+        mr_setbitl(NR_SdCard_SupportVoltage1_8V, &sptr_host->flagBit);
 
-    mrt_setbitl(NR_SdCard_Support4BitWidth, &sprt_host->flagBit);
+    mr_setbitl(NR_SdCard_Support4BitWidth, &sptr_host->flagBit);
 
     /*!< interface initial */
-    sprt_if->is_insert      = zynq7_sdmmc_is_card_insert;
-    sprt_if->setBusWidth    = zynq7_sdmmc_set_bus_width;
-    sprt_if->setClkFreq     = zynq7_sdmmc_set_clk_freq;
-    sprt_if->cardActive     = zynq7_sdmmc_initial_active;
-    sprt_if->sendCommand    = zynq7_sdmmc_send_command;
-    sprt_if->recvResp       = zynq7_sdmmc_recv_response;
-    sprt_if->sendData       = zynq7_sdmmc_transfer_data;
-    sprt_if->recvData       = zynq7_sdmmc_transfer_data;
-    sprt_if->switchVoltage  = zynq7_sdmmc_switch_voltage;
-    sprt_if->addHeadTail    = mrt_nullptr;
-    sprt_if->setup_dma      = zynq7_sdmmc_setup_dma;
+    sptr_if->is_insert      = zynq7_sdmmc_is_card_insert;
+    sptr_if->setBusWidth    = zynq7_sdmmc_set_bus_width;
+    sptr_if->setClkFreq     = zynq7_sdmmc_set_clk_freq;
+    sptr_if->cardActive     = zynq7_sdmmc_initial_active;
+    sptr_if->sendCommand    = zynq7_sdmmc_send_command;
+    sptr_if->recvResp       = zynq7_sdmmc_recv_response;
+    sptr_if->sendData       = zynq7_sdmmc_transfer_data;
+    sptr_if->recvData       = zynq7_sdmmc_transfer_data;
+    sptr_if->switchVoltage  = zynq7_sdmmc_switch_voltage;
+    sptr_if->addHeadTail    = mr_nullptr;
+    sptr_if->setup_dma      = zynq7_sdmmc_setup_dma;
 
-    if ((sprt_sd->HC_Version == XSDPS_HC_SPEC_V3) &&
-        ((sprt_sd->Host_Caps & XSDPS_CAPS_SLOT_TYPE_MASK) == XSDPS_CAPS_EMB_SLOT))
-        sprt_sd->CardType = XSDPS_CHIP_EMMC;
+    if ((sptr_sd->HC_Version == XSDPS_HC_SPEC_V3) &&
+        ((sptr_sd->Host_Caps & XSDPS_CAPS_SLOT_TYPE_MASK) == XSDPS_CAPS_EMB_SLOT))
+        sptr_sd->CardType = XSDPS_CHIP_EMMC;
 
-    zynq7_sdmmc_reset(sprt_host);
+    zynq7_sdmmc_reset(sptr_host);
 
-    return sprt_host;
+    return sptr_host;
 }
 
 /* end of file*/

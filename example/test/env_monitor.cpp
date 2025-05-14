@@ -46,7 +46,7 @@ static void *env_monitor_entry(void *args)
 {
     kint32_t fd, eep_fd;
     kuint32_t info[3] = {};
-    struct fwk_eeprom sgrt_eep;
+    struct fwk_eeprom sgtc_eep;
     kssize_t retval;
 
     do 
@@ -57,10 +57,10 @@ static void *env_monitor_entry(void *args)
 
     } while (fd < 0);
 
-    sgrt_eep.addr = 0x26;
-    sgrt_eep.offset = 0;
-    sgrt_eep.buf = (kuint8_t *)&info[0];
-    sgrt_eep.size = sizeof(info);
+    sgtc_eep.addr = 0x26;
+    sgtc_eep.offset = 0;
+    sgtc_eep.buf = (kuint8_t *)&info[0];
+    sgtc_eep.size = sizeof(info);
 
     for (;;)
     {
@@ -72,7 +72,7 @@ static void *env_monitor_entry(void *args)
         if (eep_fd < 0)
             goto END;
 
-        retval = virt_ioctl(eep_fd, FWK_EEPROM_WRITE, &sgrt_eep);
+        retval = virt_ioctl(eep_fd, FWK_EEPROM_WRITE, &sgtc_eep);
         if (retval < 0)
         {
             virt_close(eep_fd);
@@ -80,7 +80,7 @@ static void *env_monitor_entry(void *args)
         }
 
         memset(info, 0, sizeof(info));
-        retval = virt_ioctl(eep_fd, FWK_EEPROM_READ, &sgrt_eep);
+        retval = virt_ioctl(eep_fd, FWK_EEPROM_READ, &sgtc_eep);
         if (retval < 0)
         {
             virt_close(eep_fd);
@@ -120,8 +120,8 @@ kint32_t env_monitor_init(void)
     if (!cprt_task)
         return -ER_FAILD;
 
-    struct mailbox &sgrt_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgrt_mb, cprt_task->get_self(), "env_monitor-task-mailbox");
+    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cprt_task->get_self(), "env_monitor-task-mailbox");
 
     return ER_NORMAL;
 }

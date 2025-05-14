@@ -18,189 +18,189 @@
 
 /*!< The functions */
 static struct mem_block *check_employ_memory(void *ptr_head, void *ptr_mem);
-static void *alloc_spare_memory(struct mem_info *sprt_info, kusize_t size);
-static void free_employ_memory(struct mem_info *sprt_info, void *ptr_mem);
+static void *alloc_spare_memory(struct mem_info *sptr_info, kusize_t size);
+static void free_employ_memory(struct mem_info *sptr_info, void *ptr_mem);
 
 /*!< API function */
 /*!
  * @brief   select a correct hash list
- * @param   sprt_info, total_size
+ * @param   sptr_info, total_size
  * @retval  mem_hash
  * @note    determine a hash list to add a new block
  */
-static struct mem_hash *memory_block_get_hash(struct mem_info *sprt_info, kusize_t total_size)
+static struct mem_hash *memory_block_get_hash(struct mem_info *sptr_info, kusize_t total_size)
 {
     kint32_t index = NR_MEM_HighBytes;
 
     if (total_size >= NR_MEM_HighLimit)
-        return &sprt_info->sgrt_hash[NR_MEM_HighBytes];
+        return &sptr_info->sgtc_hash[NR_MEM_HighBytes];
 
     if (total_size < NR_MEM_LowerLimit)
-        return &sprt_info->sgrt_hash[NR_MEM_LowerBytes];
+        return &sptr_info->sgtc_hash[NR_MEM_LowerBytes];
 
     while (!(total_size & (1U << index)))
         index--;
 
-    return &sprt_info->sgrt_hash[index];
+    return &sptr_info->sgtc_hash[index];
 }
 
 /*!
  * @brief   add the new block to hash list
- * @param   sprt_info, sprt_hash, sprt_block
+ * @param   sptr_info, sptr_hash, sptr_block
  * @retval  none
- * @note    if sprt_hash is valid, add to it directly
+ * @note    if sptr_hash is valid, add to it directly
  */
-static void memory_block_attach(struct mem_info *sprt_info, struct mem_hash *sprt_hash, struct mem_block *sprt_block)
+static void memory_block_attach(struct mem_info *sptr_info, struct mem_hash *sptr_hash, struct mem_block *sptr_block)
 {
-    struct mem_block *sprt_per;
+    struct mem_block *sptr_per;
 
-    if (!sprt_block->remain)
+    if (!sptr_block->remain)
         return;
 
-    if (!sprt_hash)
-        sprt_hash = memory_block_get_hash(sprt_info, sprt_block->remain);
+    if (!sptr_hash)
+        sptr_hash = memory_block_get_hash(sptr_info, sptr_block->remain);
     
-    init_list_head(&sprt_block->sgrt_link);
+    init_list_head(&sptr_block->sgtc_link);
 
     /*!< case 1: list is empty */
-    if (mrt_list_head_empty(&sprt_hash->sgrt_list))
+    if (mr_list_head_empty(&sptr_hash->sgtc_list))
     {
-        list_head_add_head(&sprt_hash->sgrt_list, &sprt_block->sgrt_link);
+        list_head_add_head(&sptr_hash->sgtc_list, &sptr_block->sgtc_link);
         return;
     }
 
     /*!< case 2: head < adress of block < tail */
-    foreach_list_next_entry(sprt_per, &sprt_hash->sgrt_list, sgrt_link)
+    foreach_list_next_entry(sptr_per, &sptr_hash->sgtc_list, sgtc_link)
     {
         /*!< low address in front for easy access next time */
-        if (sprt_block < sprt_per)
+        if (sptr_block < sptr_per)
         {
-            list_head_add_tail(&sprt_per->sgrt_link, &sprt_block->sgrt_link);
+            list_head_add_tail(&sptr_per->sgtc_link, &sptr_block->sgtc_link);
             return;
         }
     }
 
     /*!< case 3: block's address is the largest */
-    list_head_add_tail(&sprt_hash->sgrt_list, &sprt_block->sgrt_link);
+    list_head_add_tail(&sptr_hash->sgtc_list, &sptr_block->sgtc_link);
 }
 
 /*!
  * @brief   detached from hash list
- * @param   sprt_block
+ * @param   sptr_block
  * @retval  none
  * @note    none
  */
-static void memory_block_detach(struct mem_block *sprt_block)
+static void memory_block_detach(struct mem_block *sptr_block)
 {
-    list_head_del(&sprt_block->sgrt_link);
+    list_head_del(&sptr_block->sgtc_link);
 }
 
 /*!
  * @brief   memory_block_create
- * @param   sprt_info, mem_addr, size
+ * @param   sptr_info, mem_addr, size
  * @retval  none
  * @note    build memory block
  */
-kint32_t memory_block_create(struct mem_info *sprt_info, kuaddr_t mem_addr, kusize_t size)
+kint32_t memory_block_create(struct mem_info *sptr_info, kuaddr_t mem_addr, kusize_t size)
 {
-    struct mem_block *sprt_block;
+    struct mem_block *sptr_block;
     kusize_t header_size;
 
     /*!< header size */
     header_size	= MEM_BLOCK_HEADER_SIZE;
 
-    if ((!isValid(sprt_info)) || (size <= header_size))
-        return -ER_UNVALID;
+    if ((!isValid(sptr_info)) || (size <= header_size))
+        return -ER_INVALID;
 
-    /*!< if sprt_mem is exsited, it is not allow to create again */
-    if (isValid(sprt_info->sprt_mem))
-        return -ER_UNVALID;
+    /*!< if sptr_mem is exsited, it is not allow to create again */
+    if (isValid(sptr_info->sptr_mem))
+        return -ER_INVALID;
 
     /*!< 8 bytes align */
-    sprt_info->base	= mrt_num_align8(mem_addr);
-    sprt_info->lenth = size - (sprt_info->base - mem_addr);
+    sptr_info->base	= mr_num_align8(mem_addr);
+    sptr_info->lenth = size - (sptr_info->base - mem_addr);
     
-    sprt_block = (struct mem_block *)sprt_info->base;
-    sprt_block->base = sprt_info->base + header_size;
+    sptr_block = (struct mem_block *)sptr_info->base;
+    sptr_block->base = sptr_info->base + header_size;
 
-    /*!< size = header size + memory size, so we can let sprt_block->lenth equal to total lenth */
-    sprt_block->lenth = sprt_info->lenth;
-    sprt_block->remain = sprt_info->lenth;
-    sprt_block->sprt_prev = mrt_nullptr;
-    sprt_block->sprt_next = mrt_nullptr;
-    sprt_block->magic = MEMORY_POOL_MAGIC;
+    /*!< size = header size + memory size, so we can let sptr_block->lenth equal to total lenth */
+    sptr_block->lenth = sptr_info->lenth;
+    sptr_block->remain = sptr_info->lenth;
+    sptr_block->sptr_prev = mr_nullptr;
+    sptr_block->sptr_next = mr_nullptr;
+    sptr_block->magic = MEMORY_POOL_MAGIC;
 
-    sprt_info->sprt_mem	= sprt_block;
+    sptr_info->sptr_mem	= sptr_block;
     for (kint32_t index = 0; index < NR_MEM_NUM; index++)
     {
-        struct mem_hash *sprt_hash;
+        struct mem_hash *sptr_hash;
 
-        sprt_hash = &sprt_info->sgrt_hash[index];
-        init_list_head(&sprt_hash->sgrt_list);
+        sptr_hash = &sptr_info->sgtc_hash[index];
+        init_list_head(&sptr_hash->sgtc_list);
     }
 
-    sprt_info->alloc = alloc_spare_memory;
-    sprt_info->free = free_employ_memory;
+    sptr_info->alloc = alloc_spare_memory;
+    sptr_info->free = free_employ_memory;
 
-    memory_block_attach(sprt_info, mrt_nullptr, sprt_block);
+    memory_block_attach(sptr_info, mr_nullptr, sptr_block);
     return ER_NORMAL;
 }
 
 /*!
  * @brief   memory_block_destroy
- * @param   sprt_info
+ * @param   sptr_info
  * @retval  none
  * @note    destroy memory block which is created
  */
-void memory_block_destroy(struct mem_info *sprt_info)
+void memory_block_destroy(struct mem_info *sptr_info)
 {
-    if (!isValid(sprt_info))
+    if (!isValid(sptr_info))
         return;
 
     /*!< clear all memory blocks */
-    kmemzero((void *)sprt_info->base, sprt_info->lenth);
-    kmemzero((void *)sprt_info, sizeof(struct mem_info));
+    kmemzero((void *)sptr_info->base, sptr_info->lenth);
+    kmemzero((void *)sptr_info, sizeof(struct mem_info));
 }
 
 /*!
  * @brief   find a hash list with enough space
- * @param   sprt_info, index(index of hash list), total_size
+ * @param   sptr_info, index(index of hash list), total_size
  * @retval  none
  * @note    none
  */
-static struct mem_block *__memory_block_get_avaliable(struct mem_info *sprt_info, kint32_t index, kusize_t total_size)
+static struct mem_block *__memory_block_get_avaliable(struct mem_info *sptr_info, kint32_t index, kusize_t total_size)
 {
-    struct mem_block *sprt_block;
-    struct mem_hash *sprt_hash = &sprt_info->sgrt_hash[index];
+    struct mem_block *sptr_block;
+    struct mem_hash *sptr_hash = &sptr_info->sgtc_hash[index];
 
-    foreach_list_next_entry(sprt_block, &sprt_hash->sgrt_list, sgrt_link) 
+    foreach_list_next_entry(sptr_block, &sptr_hash->sgtc_list, sgtc_link) 
     {
-        if (sprt_block->remain >= total_size)
-            return sprt_block;
+        if (sptr_block->remain >= total_size)
+            return sptr_block;
     }
 
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
  * @brief   find a hash list with enough space
- * @param   sprt_info, index(index of hash list), total_size
+ * @param   sptr_info, index(index of hash list), total_size
  * @retval  mem_block
  * @note    if the preferred hash list space is insufficient, select the next hash list
  */
-static struct mem_block *memory_block_get_avaliable(struct mem_info *sprt_info, kusize_t total_size)
+static struct mem_block *memory_block_get_avaliable(struct mem_info *sptr_info, kusize_t total_size)
 {
-    struct mem_block *sprt_block;
+    struct mem_block *sptr_block;
     kint32_t index = NR_MEM_HighBytes;
 
     if (total_size >= NR_MEM_HighLimit)
-        return __memory_block_get_avaliable(sprt_info, NR_MEM_HighBytes, total_size);
+        return __memory_block_get_avaliable(sptr_info, NR_MEM_HighBytes, total_size);
 
     if (total_size < NR_MEM_LowerLimit)
     {
-        sprt_block = __memory_block_get_avaliable(sprt_info, NR_MEM_LowerBytes, total_size);
-        if (sprt_block)
-            return sprt_block;
+        sptr_block = __memory_block_get_avaliable(sptr_info, NR_MEM_LowerBytes, total_size);
+        if (sptr_block)
+            return sptr_block;
 
         total_size = NR_MEM_LowerLimit;
     }
@@ -211,14 +211,14 @@ static struct mem_block *memory_block_get_avaliable(struct mem_info *sprt_info, 
 
     while (index < NR_MEM_NUM)
     {
-        sprt_block = __memory_block_get_avaliable(sprt_info, index, total_size);
-        if (sprt_block)
-            return sprt_block;
+        sptr_block = __memory_block_get_avaliable(sptr_info, index, total_size);
+        if (sptr_block)
+            return sptr_block;
 
         index++;
     }
 
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
@@ -227,22 +227,22 @@ static struct mem_block *memory_block_get_avaliable(struct mem_info *sprt_info, 
  * @retval  avaliable memory block pointer
  * @note    allocate spare memory space
  */
-static void *alloc_spare_memory(struct mem_info *sprt_info, kusize_t size)
+static void *alloc_spare_memory(struct mem_info *sptr_info, kusize_t size)
 {
-    struct mem_block *sprt_block;
-    struct mem_block *sprt_new;
+    struct mem_block *sptr_block;
+    struct mem_block *sptr_new;
     kusize_t header_size, lenth, offset;
-    void *ptr_mem = mrt_nullptr;
+    void *ptr_mem = mr_nullptr;
 
-    if (!isValid(sprt_info) ||
-        !sprt_info->sprt_mem)
-        return mrt_nullptr;
+    if (!isValid(sptr_info) ||
+        !sptr_info->sptr_mem)
+        return mr_nullptr;
 
     header_size	= MEM_BLOCK_HEADER_SIZE;
 
     /*!< 8 bytes alignment for memory block lenth */
-    /*!< Build complete space: lenth + header size, adapted to sprt_block->lenth */
-    lenth  = mrt_num_align8(size);
+    /*!< Build complete space: lenth + header size, adapted to sptr_block->lenth */
+    lenth  = mr_num_align8(size);
     lenth += header_size;
 
     /*!< Several methods for dividing memory:
@@ -255,46 +255,46 @@ static void *alloc_spare_memory(struct mem_info *sprt_info, kusize_t size)
      */
 
     /*!< find a block with enough space left */
-    sprt_block = memory_block_get_avaliable(sprt_info, lenth);
-    if (!sprt_block)
-        return mrt_nullptr;
+    sptr_block = memory_block_get_avaliable(sptr_info, lenth);
+    if (!sptr_block)
+        return mr_nullptr;
 
-    memory_block_detach(sprt_block);
+    memory_block_detach(sptr_block);
 
     /*!< p = base + (lenth - header_size - remain) + header_size = base + lenth - remain */
-    offset 	= sprt_block->lenth - sprt_block->remain;
-    ptr_mem = (void *)((kuint8_t *)sprt_block->base + offset);
+    offset 	= sptr_block->lenth - sptr_block->remain;
+    ptr_mem = (void *)((kuint8_t *)sptr_block->base + offset);
 
     /*!< Build a new memory block */
-    if (sprt_block->lenth != sprt_block->remain)
+    if (sptr_block->lenth != sptr_block->remain)
     {
         /*!< Move to the head of memory block */
-        sprt_new = (struct mem_block *)((kuint8_t *)ptr_mem - header_size);
-        sprt_new->base = (kuaddr_t)ptr_mem;
-        sprt_new->lenth = sprt_block->remain;
-        sprt_new->remain = sprt_block->remain - lenth;
-        sprt_new->sprt_prev = sprt_block;
-        sprt_new->sprt_next = sprt_block->sprt_next;
-        sprt_new->magic = MEMORY_POOL_MAGIC;
+        sptr_new = (struct mem_block *)((kuint8_t *)ptr_mem - header_size);
+        sptr_new->base = (kuaddr_t)ptr_mem;
+        sptr_new->lenth = sptr_block->remain;
+        sptr_new->remain = sptr_block->remain - lenth;
+        sptr_new->sptr_prev = sptr_block;
+        sptr_new->sptr_next = sptr_block->sptr_next;
+        sptr_new->magic = MEMORY_POOL_MAGIC;
 
-        sprt_block->lenth = offset;
-        sprt_block->remain -= sprt_new->lenth;
+        sptr_block->lenth = offset;
+        sptr_block->remain -= sptr_new->lenth;
 
-        if (sprt_block->sprt_next)
-            sprt_block->sprt_next->sprt_prev = sprt_new;
+        if (sptr_block->sptr_next)
+            sptr_block->sptr_next->sptr_prev = sptr_new;
         
-        sprt_block->sprt_next = sprt_new;
-        memory_block_attach(sprt_info, mrt_nullptr, sprt_new);
+        sptr_block->sptr_next = sptr_new;
+        memory_block_attach(sptr_info, mr_nullptr, sptr_new);
     }
     else
     {
-    	sprt_block->magic = MEMORY_POOL_MAGIC;
+    	sptr_block->magic = MEMORY_POOL_MAGIC;
 
         /*!< Update the lenth of memory that is avaliable */
-        sprt_block->remain -= lenth;
+        sptr_block->remain -= lenth;
     }
 
-    memory_block_attach(sprt_info, mrt_nullptr, sprt_block);
+    memory_block_attach(sptr_info, mr_nullptr, sptr_block);
     return ptr_mem;
 }
 
@@ -306,31 +306,31 @@ static void *alloc_spare_memory(struct mem_info *sprt_info, kusize_t size)
  */
 static struct mem_block *check_employ_memory(void *ptr_head, void *ptr_mem)
 {
-    struct mem_block *sprt_block;
+    struct mem_block *sptr_block;
 
     /*!< Point to the head of info */
-    sprt_block = (struct mem_block *)((kuint8_t *)ptr_mem - MEM_BLOCK_HEADER_SIZE);
-    if ((!isValid(sprt_block)) || (!IS_MEMORYPOOL_VALID(sprt_block)))
-        return mrt_nullptr;
+    sptr_block = (struct mem_block *)((kuint8_t *)ptr_mem - MEM_BLOCK_HEADER_SIZE);
+    if ((!isValid(sptr_block)) || (!IS_MEMORYPOOL_VALID(sptr_block)))
+        return mr_nullptr;
 
 #if 1
     __RESERVED(ptr_head);
 
-    if (sprt_block->base != (kuaddr_t)ptr_mem)
-        return mrt_nullptr;
+    if (sptr_block->base != (kuaddr_t)ptr_mem)
+        return mr_nullptr;
 
-    return sprt_block;
+    return sptr_block;
 
 #else
     /*!< check if ptr_mem was allocated from ptr_head */
-    for (struct mem_block *sprt_start = (struct mem_block *)ptr_head; 
-        isValid(sprt_start); sprt_start = sprt_start->sprt_next)
+    for (struct mem_block *sptr_start = (struct mem_block *)ptr_head; 
+        isValid(sptr_start); sptr_start = sptr_start->sptr_next)
     {
-        if (sprt_start->base == (kuaddr_t)ptr_mem)
-            return sprt_block;
+        if (sptr_start->base == (kuaddr_t)ptr_mem)
+            return sptr_block;
     }
 
-    return mrt_nullptr;
+    return mr_nullptr;
 #endif
 }
 
@@ -340,55 +340,55 @@ static struct mem_block *check_employ_memory(void *ptr_head, void *ptr_mem)
  * @retval  none
  * @note    free memory block which is employed
  */
-static void free_employ_memory(struct mem_info *sprt_info, void *ptr_mem)
+static void free_employ_memory(struct mem_info *sptr_info, void *ptr_mem)
 {
-    struct mem_block *sprt_prev;
-    struct mem_block *sprt_next;
-    struct mem_block *sprt_block;
+    struct mem_block *sptr_prev;
+    struct mem_block *sptr_next;
+    struct mem_block *sptr_block;
 
     if (!isValid(ptr_mem))
         return;
 
     /*!< Point to the head of info */
-    sprt_block = check_employ_memory(sprt_info->sprt_mem, ptr_mem);
-    if (!sprt_block)
+    sptr_block = check_employ_memory(sptr_info->sptr_mem, ptr_mem);
+    if (!sptr_block)
         return;
 
-    sprt_block->magic = 0;
+    sptr_block->magic = 0;
 
-    sprt_prev = sprt_block->sprt_prev;
-    sprt_next = sprt_block->sprt_next;
+    sptr_prev = sptr_block->sptr_prev;
+    sptr_next = sptr_block->sptr_next;
 
     /*!< Update memory space */
-    sprt_block->remain = sprt_block->lenth;
-    memory_block_detach(sprt_block);
+    sptr_block->remain = sptr_block->lenth;
+    memory_block_detach(sptr_block);
 
-    if (isValid(sprt_prev))
+    if (isValid(sptr_prev))
     {
         /*!< Check if the current memory block is idle, if yes, merge into the last neighboring memory block */
-        sprt_prev->lenth += sprt_block->lenth;
-        sprt_prev->remain += sprt_block->remain;
-        sprt_prev->sprt_next = sprt_next;
+        sptr_prev->lenth += sptr_block->lenth;
+        sptr_prev->remain += sptr_block->remain;
+        sptr_prev->sptr_next = sptr_next;
 
-        sprt_block->sprt_prev = mrt_nullptr;
-        sprt_block = sprt_prev;
-        memory_block_detach(sprt_block);
+        sptr_block->sptr_prev = mr_nullptr;
+        sptr_block = sptr_prev;
+        memory_block_detach(sptr_block);
     }
 
-    if (isValid(sprt_next))
+    if (isValid(sptr_next))
     {
 //      /*!< Check if the next neighboring memory block is idle, if yes, the idle memory block should be merged */
-//      if (sprt_next->lenth == sprt_next->remain)
+//      if (sptr_next->lenth == sptr_next->remain)
 //      {
-//          sprt_block->sprt_next = sprt_next->sprt_next;
-//          sprt_block->lenth += sprt_next->lenth;
-//          sprt_block->remain += sprt_next->remain;
+//          sptr_block->sptr_next = sptr_next->sptr_next;
+//          sptr_block->lenth += sptr_next->lenth;
+//          sptr_block->remain += sptr_next->remain;
 //      }
 
-        sprt_next->sprt_prev = sprt_block;
+        sptr_next->sptr_prev = sptr_block;
     }
   
-    memory_block_attach(sprt_info, mrt_nullptr, sprt_block);
+    memory_block_attach(sptr_info, mr_nullptr, sptr_block);
 }
 
 /* end of file */

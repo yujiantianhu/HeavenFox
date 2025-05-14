@@ -127,11 +127,11 @@ typedef struct ap3216c_data
 typedef struct ap3216c_drv_info
 {
     kchar_t *name;
-    struct fwk_i2c_client *sprt_client;
+    struct fwk_i2c_client *sptr_client;
 
     kint32_t devnum;
-    struct fwk_cdev *sprt_cdev;
-    struct fwk_device *sprt_idev;
+    struct fwk_cdev *sptr_cdev;
+    struct fwk_device *sptr_idev;
 
 } ap3216c_drv_info_t;
 
@@ -142,18 +142,18 @@ typedef struct ap3216c_drv_info
  * @retval none
  * @note   write data by i2c
  */
-static kuint16_t ap3216c_write_value(struct ap3216c_drv_info *sprt_info, kuint8_t reg, kuint8_t value)
+static kuint16_t ap3216c_write_value(struct ap3216c_drv_info *sptr_info, kuint8_t reg, kuint8_t value)
 {
-    struct fwk_i2c_msg sgrt_msgs;
+    struct fwk_i2c_msg sgtc_msgs = {};
     kuint8_t buf[2] = { reg, value };
     kint32_t retval;
 
-    sgrt_msgs.addr = sprt_info->sprt_client->addr;
-    sgrt_msgs.flags = 0;
-    sgrt_msgs.ptr_buf = buf;
-    sgrt_msgs.len = sizeof(buf);
+    sgtc_msgs.addr = sptr_info->sptr_client->addr;
+    sgtc_msgs.flags = 0;
+    sgtc_msgs.ptr_buf = buf;
+    sgtc_msgs.len = sizeof(buf);
 
-    retval = fwk_i2c_transfer(sprt_info->sprt_client, &sgrt_msgs, 1);
+    retval = fwk_i2c_transfer(sptr_info->sptr_client, &sgtc_msgs, 1);
     if (retval)
         return (AP3216C_DATA_MAX + 1);
 
@@ -166,23 +166,23 @@ static kuint16_t ap3216c_write_value(struct ap3216c_drv_info *sprt_info, kuint8_
  * @retval none
  * @note   read data by i2c
  */
-static kuint16_t ap3216c_read_value(struct ap3216c_drv_info *sprt_info, kuint8_t reg)
+static kuint16_t ap3216c_read_value(struct ap3216c_drv_info *sptr_info, kuint8_t reg)
 {
-    struct fwk_i2c_msg sgrt_msgs[2];
+    struct fwk_i2c_msg sgtc_msgs[2] = {};
     kuint8_t value = 0;
     kint32_t retval;
 
-    sgrt_msgs[0].addr = sprt_info->sprt_client->addr;
-    sgrt_msgs[0].flags = 0;
-    sgrt_msgs[0].ptr_buf = &reg;
-    sgrt_msgs[0].len = 1;
+    sgtc_msgs[0].addr = sptr_info->sptr_client->addr;
+    sgtc_msgs[0].flags = 0;
+    sgtc_msgs[0].ptr_buf = &reg;
+    sgtc_msgs[0].len = 1;
 
-    sgrt_msgs[1].addr = sprt_info->sprt_client->addr;
-    sgrt_msgs[1].flags |= FWK_I2C_M_RD;
-    sgrt_msgs[1].ptr_buf = &value;
-    sgrt_msgs[1].len = sizeof(value);
+    sgtc_msgs[1].addr = sptr_info->sptr_client->addr;
+    sgtc_msgs[1].flags |= FWK_I2C_M_RD;
+    sgtc_msgs[1].ptr_buf = &value;
+    sgtc_msgs[1].len = sizeof(value);
 
-    retval = fwk_i2c_transfer(sprt_info->sprt_client, &sgrt_msgs[0], ARRAY_SIZE(sgrt_msgs));
+    retval = fwk_i2c_transfer(sptr_info->sptr_client, &sgtc_msgs[0], ARRAY_SIZE(sgtc_msgs));
     if (retval)
         return (AP3216C_DATA_MAX + 1);
 
@@ -191,22 +191,22 @@ static kuint16_t ap3216c_read_value(struct ap3216c_drv_info *sprt_info, kuint8_t
 
 /*!
  * @brief  read ap3216c's ir register
- * @param  sprt_info
+ * @param  sptr_info
  * @retval ir's data
  * @note   none
  */
-static kint32_t ap3216c_read_ir(struct ap3216c_drv_info *sprt_info)
+static kint32_t ap3216c_read_ir(struct ap3216c_drv_info *sptr_info)
 {
     kuint16_t value[2];
 
-    value[0] = ap3216c_read_value(sprt_info, AP3216C_REG_IR_LOW);
+    value[0] = ap3216c_read_value(sptr_info, AP3216C_REG_IR_LOW);
     if (value[0] > AP3216C_DATA_MAX)
         return -ER_RDATA_FAILD;
     
     if (AP3216C_IS_IR_VALID(value[0]))
-        return -ER_UNVALID;
+        return -ER_INVALID;
 
-    value[1] = ap3216c_read_value(sprt_info, AP3216C_REG_IR_HIGH);
+    value[1] = ap3216c_read_value(sptr_info, AP3216C_REG_IR_HIGH);
     if (value[1] > AP3216C_DATA_MAX)
         return -ER_RDATA_FAILD;
 
@@ -215,19 +215,19 @@ static kint32_t ap3216c_read_ir(struct ap3216c_drv_info *sprt_info)
 
 /*!
  * @brief  read ap3216c's als register
- * @param  sprt_info
+ * @param  sptr_info
  * @retval als's data
  * @note   none
  */
-static kint32_t ap3216c_read_als(struct ap3216c_drv_info *sprt_info)
+static kint32_t ap3216c_read_als(struct ap3216c_drv_info *sptr_info)
 {
     kuint16_t value[2];
 
-    value[0] = ap3216c_read_value(sprt_info, AP3216C_REG_ALS_LOW);
+    value[0] = ap3216c_read_value(sptr_info, AP3216C_REG_ALS_LOW);
     if (value[0] > AP3216C_DATA_MAX)
         return -ER_RDATA_FAILD;
 
-    value[1] = ap3216c_read_value(sprt_info, AP3216C_REG_ALS_HIGH);
+    value[1] = ap3216c_read_value(sptr_info, AP3216C_REG_ALS_HIGH);
     if (value[1] > AP3216C_DATA_MAX)
         return -ER_RDATA_FAILD;
 
@@ -236,43 +236,43 @@ static kint32_t ap3216c_read_als(struct ap3216c_drv_info *sprt_info)
 
 /*!
  * @brief  read ap3216c's ps register
- * @param  sprt_info
+ * @param  sptr_info
  * @retval ps's data
  * @note   none
  */
-static kint32_t ap3216c_read_ps(struct ap3216c_drv_info *sprt_info)
+static kint32_t ap3216c_read_ps(struct ap3216c_drv_info *sptr_info)
 {
     kuint16_t value[2];
 
-    value[0] = ap3216c_read_value(sprt_info, AP3216C_REG_PS_LOW);
+    value[0] = ap3216c_read_value(sptr_info, AP3216C_REG_PS_LOW);
     if (value[0] > AP3216C_DATA_MAX)
         return -ER_RDATA_FAILD;
     
     if (AP3216C_IS_PS_VALID(value[0]))
-        return -ER_UNVALID;
+        return -ER_INVALID;
 
-    value[1] = ap3216c_read_value(sprt_info, AP3216C_REG_PS_HIGH);
+    value[1] = ap3216c_read_value(sptr_info, AP3216C_REG_PS_HIGH);
     if (value[1] > AP3216C_DATA_MAX)
         return -ER_RDATA_FAILD;
 
     if (AP3216C_IS_PS_VALID(value[1]))
-        return -ER_UNVALID;
+        return -ER_INVALID;
 
     return AP3216C_PS_DATA(value[0], value[1]);
 }
 
 /*!
  * @brief  initialize ap3216c
- * @param  sprt_info
+ * @param  sptr_info
  * @retval errno
  * @note   none
  */
-static kint32_t ap3216c_init(struct ap3216c_drv_info *sprt_info)
+static kint32_t ap3216c_init(struct ap3216c_drv_info *sptr_info)
 {
     kuint16_t value;
 
     /*!< reset ap3216c */
-    value = ap3216c_write_value(sprt_info, AP3216C_REG_SYSCONFIG, AP3216C_RESET);
+    value = ap3216c_write_value(sptr_info, AP3216C_REG_SYSCONFIG, AP3216C_RESET);
     if (value > AP3216C_DATA_MAX)
         return -ER_FAILD;
 
@@ -280,12 +280,12 @@ static kint32_t ap3216c_init(struct ap3216c_drv_info *sprt_info)
 	msleep(50);
     
     /*!< configure ap3216c, enable als, ps and ir */
-	value = ap3216c_write_value(sprt_info, AP3216C_REG_SYSCONFIG, AP3216C_ALS_IR_PS_ACTIVE);
+	value = ap3216c_write_value(sptr_info, AP3216C_REG_SYSCONFIG, AP3216C_ALS_IR_PS_ACTIVE);
     if (value > AP3216C_DATA_MAX)
         return -ER_FAILD;
 
     /*!< verify configuration register*/
-	value = ap3216c_read_value(sprt_info, AP3216C_REG_SYSCONFIG);
+	value = ap3216c_read_value(sptr_info, AP3216C_REG_SYSCONFIG);
     if (value > AP3216C_DATA_MAX)
         return -ER_RDATA_FAILD;
     if (value != AP3216C_ALS_IR_PS_ACTIVE)
@@ -296,69 +296,69 @@ static kint32_t ap3216c_init(struct ap3216c_drv_info *sprt_info)
 
 /*!
  * @brief  driver open
- * @param  sprt_inode, sprt_file
+ * @param  sptr_inode, sptr_file
  * @retval errno
  * @note   none
  */
-static kint32_t ap3216c_driver_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t ap3216c_driver_open(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
 {
-    struct ap3216c_drv_info *sprt_info;
+    struct ap3216c_drv_info *sptr_info;
 
-    sprt_info = sprt_inode->sprt_cdev->privData;
-    sprt_file->private_data = sprt_info;
+    sptr_info = sptr_inode->sptr_cdev->privData;
+    sptr_file->private_data = sptr_info;
 
-    ap3216c_init(sprt_info);
+    ap3216c_init(sptr_info);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief  driver close
- * @param  sprt_inode, sprt_file
+ * @param  sptr_inode, sptr_file
  * @retval errno
  * @note   none
  */
-static kint32_t ap3216c_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t ap3216c_driver_close(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
 {
-    sprt_file->private_data = mrt_nullptr;
+    sptr_file->private_data = mr_nullptr;
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief  driver read
- * @param  sprt_file, buffer, size
+ * @param  sptr_file, buffer, size
  * @retval size
  * @note   none
  */
-static kssize_t ap3216c_driver_read(struct fwk_file *sprt_file, kbuffer_t *buffer, kssize_t size)
+static kssize_t ap3216c_driver_read(struct fwk_file *sptr_file, kbuffer_t *buffer, kssize_t size)
 {
-    struct ap3216c_drv_info *sprt_info;
-    struct ap3216c_data sgrt_data;
+    struct ap3216c_drv_info *sptr_info;
+    struct ap3216c_data sgtc_data;
 
-    if (size < sizeof(sgrt_data))
+    if (size < sizeof(sgtc_data))
         return -ER_RETRY;
 
-    sprt_info = sprt_file->private_data;
+    sptr_info = sptr_file->private_data;
 
-    sgrt_data.ir = ap3216c_read_ir(sprt_info);
-    if (sgrt_data.ir < 0)
-        sgrt_data.ir = 0;
+    sgtc_data.ir = ap3216c_read_ir(sptr_info);
+    if (sgtc_data.ir < 0)
+        sgtc_data.ir = 0;
 
-    sgrt_data.als = ap3216c_read_als(sprt_info);
-    if (sgrt_data.ir < 0)
-        sgrt_data.ir = 0;
+    sgtc_data.als = ap3216c_read_als(sptr_info);
+    if (sgtc_data.ir < 0)
+        sgtc_data.ir = 0;
 
-    sgrt_data.ps = ap3216c_read_ps(sprt_info);
-    if (sgrt_data.ir < 0)
-        sgrt_data.ir = 0;
+    sgtc_data.ps = ap3216c_read_ps(sptr_info);
+    if (sgtc_data.ir < 0)
+        sgtc_data.ir = 0;
 
-    fwk_copy_to_user(buffer, &sgrt_data, sizeof(sgrt_data));
+    fwk_copy_to_user(buffer, &sgtc_data, sizeof(sgtc_data));
 
-    return sizeof(sgrt_data);
+    return sizeof(sgtc_data);
 }
 
-static const struct fwk_file_oprts sgrt_ap3216c_driver_oprts =
+static const struct fwk_file_oprts sgtc_ap3216c_driver_oprts =
 {
     .open = ap3216c_driver_open,
     .close = ap3216c_driver_close,
@@ -368,105 +368,105 @@ static const struct fwk_file_oprts sgrt_ap3216c_driver_oprts =
 /*!< --------------------------------------------------------------------- */
 /*!
  * @brief   ap3216c_driver_probe
- * @param   sprt_client
+ * @param   sptr_client
  * @retval  errno
  * @note    none
  */
-static kint32_t ap3216c_driver_probe(struct fwk_i2c_client *sprt_client, const struct fwk_i2c_device_id *sprt_id)
+static kint32_t ap3216c_driver_probe(struct fwk_i2c_client *sptr_client, const struct fwk_i2c_device_id *sptr_id)
 {
-    struct ap3216c_drv_info *sprt_info;
-    struct fwk_device *sprt_idev;
+    struct ap3216c_drv_info *sptr_info;
+    struct fwk_device *sptr_idev;
     kint32_t devnum;
 
-    sprt_info = kzalloc(sizeof(*sprt_info), GFP_KERNEL);
-    if (!isValid(sprt_info))
+    sptr_info = kzalloc(sizeof(*sptr_info), GFP_KERNEL);
+    if (!isValid(sptr_info))
         return -ER_NOMEM;
 
     devnum = MKE_DEV_NUM(AP3216C_DRVIVER_MAJOR, 0);
-    sprt_info->devnum = devnum;
-    sprt_info->name = "ap3216c";
-    sprt_info->sprt_client = sprt_client;
+    sptr_info->devnum = devnum;
+    sptr_info->name = "ap3216c";
+    sptr_info->sptr_client = sptr_client;
 
-    if (fwk_register_chrdev(devnum, 1, sprt_info->name))
+    if (fwk_register_chrdev(devnum, 1, sptr_info->name))
         goto fail1;
 
-    sprt_info->sprt_cdev = fwk_cdev_alloc(&sgrt_ap3216c_driver_oprts);
-    if (!isValid(sprt_info->sprt_cdev))
+    sptr_info->sptr_cdev = fwk_cdev_alloc(&sgtc_ap3216c_driver_oprts);
+    if (!isValid(sptr_info->sptr_cdev))
         goto fail2;
 
-    if (fwk_cdev_add(sprt_info->sprt_cdev, devnum, 1))
+    if (fwk_cdev_add(sptr_info->sptr_cdev, devnum, 1))
         goto fail3;
 
-    sprt_idev = fwk_device_create(NR_TYPE_CHRDEV, devnum, "ap3216c");
-    if (!isValid(sprt_idev))
+    sptr_idev = fwk_device_create(NR_TYPE_CHRDEV, devnum, "ap3216c");
+    if (!isValid(sptr_idev))
         goto fail4;
 
-    sprt_info->sprt_idev = sprt_idev;
-    sprt_info->sprt_cdev->privData = sprt_info;
-    fwk_i2c_set_client_data(sprt_client, sprt_info);
+    sptr_info->sptr_idev = sptr_idev;
+    sptr_info->sptr_cdev->privData = sptr_info;
+    fwk_i2c_set_client_data(sptr_client, sptr_info);
 
 	return ER_NORMAL;
     
 fail4:
-    fwk_cdev_del(sprt_info->sprt_cdev);
+    fwk_cdev_del(sptr_info->sptr_cdev);
 fail3:
-    kfree(sprt_info->sprt_cdev);
+    kfree(sptr_info->sptr_cdev);
 fail2:
     fwk_unregister_chrdev(devnum, 0);
 fail1:
-    kfree(sprt_info);
+    kfree(sptr_info);
 
     return -ER_ERROR;
 }
 
 /*!
  * @brief   ap3216c_driver_remove
- * @param   sprt_client
+ * @param   sptr_client
  * @retval  errno
  * @note    none
  */
-static kint32_t ap3216c_driver_remove(struct fwk_i2c_client *sprt_client)
+static kint32_t ap3216c_driver_remove(struct fwk_i2c_client *sptr_client)
 {
-    struct ap3216c_drv_info *sprt_info;
+    struct ap3216c_drv_info *sptr_info;
 
-    sprt_info = fwk_i2c_get_client_data(sprt_client);
+    sptr_info = fwk_i2c_get_client_data(sptr_client);
 
-    fwk_device_destroy(sprt_info->sprt_idev);
-    fwk_cdev_del(sprt_info->sprt_cdev);
-    kfree(sprt_info->sprt_cdev);
-    fwk_unregister_chrdev(sprt_info->devnum, 0);
-    kfree(sprt_info);
-    fwk_i2c_set_client_data(sprt_client, mrt_nullptr);
+    fwk_device_destroy(sptr_info->sptr_idev);
+    fwk_cdev_del(sptr_info->sptr_cdev);
+    kfree(sptr_info->sptr_cdev);
+    fwk_unregister_chrdev(sptr_info->devnum, 0);
+    kfree(sptr_info);
+    fwk_i2c_set_client_data(sptr_client, mr_nullptr);
 
     return ER_NORMAL;
 }
 
-static const struct fwk_i2c_device_id sgrt_ap3216c_driver_ids[] =
+static const struct fwk_i2c_device_id sgtc_ap3216c_driver_ids[] =
 {
     { .name = "ap3216c", .driver_data = -1 },
     {},
 };
 
 /*!< device id for device-tree */
-static const struct fwk_of_device_id sgrt_ap3216c_driver_dts[] =
+static const struct fwk_of_device_id sgtc_ap3216c_driver_dts[] =
 {
 	{ .compatible = "liteon,ap3216c", },
 	{},
 };
 
 /*!< platform instance */
-static struct fwk_i2c_driver sgrt_ap3216c_driver =
+static struct fwk_i2c_driver sgtc_ap3216c_driver =
 {
 	.probe	= ap3216c_driver_probe,
 	.remove	= ap3216c_driver_remove,
 
-    .sprt_id_table = sgrt_ap3216c_driver_ids,
+    .sptr_id_table = sgtc_ap3216c_driver_ids,
 	
-	.sgrt_driver =
+	.sgtc_driver =
 	{
 		.name 	= "ap3216c,env-sensor",
 		.id 	= -1,
-		.sprt_of_match_table = sgrt_ap3216c_driver_dts,
+		.sptr_of_match_table = sgtc_ap3216c_driver_dts,
 	},
 };
 
@@ -479,7 +479,7 @@ static struct fwk_i2c_driver sgrt_ap3216c_driver =
  */
 kint32_t __fwk_init ap3216c_driver_init(void)
 {
-	return fwk_i2c_add_driver(&sgrt_ap3216c_driver);
+	return fwk_i2c_add_driver(&sgtc_ap3216c_driver);
 }
 
 /*!
@@ -490,7 +490,7 @@ kint32_t __fwk_init ap3216c_driver_init(void)
  */
 void __fwk_exit ap3216c_driver_exit(void)
 {
-	fwk_i2c_del_driver(&sgrt_ap3216c_driver);
+	fwk_i2c_del_driver(&sgtc_ap3216c_driver);
 }
 
 IMPORT_DRIVER_INIT(ap3216c_driver_init);

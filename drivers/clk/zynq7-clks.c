@@ -22,8 +22,8 @@
 /*!< The defines */
 typedef struct zynq7_clks_data
 {
-    struct fwk_device_node *sprt_clkc;
-    struct fwk_device_node *sprt_sclr;
+    struct fwk_device_node *sptr_clkc;
+    struct fwk_device_node *sptr_sclr;
 
     void *sclr_base;
     void *clkc_base;
@@ -70,17 +70,17 @@ typedef struct zynq7_sclr
 } srt_zynq7_sclr_t;
 
 /*!< The globals */
-static struct zynq7_clks_data sgrt_zynq7_clks_data;
+static struct zynq7_clks_data sgtc_zynq7_clks_data;
 
 /*!< device id for device-tree */
-static struct fwk_of_device_id sgrt_zynq7_clks_driver_ids[] =
+static struct fwk_of_device_id sgtc_zynq7_clks_driver_ids[] =
 {
 	{ .compatible = "xlnx,ps7-clkc", },
 	{},
 };
 
 #define ZYNQ7_CLKS(num, sym)        [num] = { .number = num, .name = sym }
-static const struct zynq7_clk_grp sgrt_zynq7_clks_gate_name[] =
+static const struct zynq7_clk_grp sgtc_zynq7_clks_gate_name[] =
 {
     ZYNQ7_CLKS(0,  "armpll"),
     ZYNQ7_CLKS(1,  "ddrpll"),
@@ -136,51 +136,51 @@ static const struct zynq7_clk_grp sgrt_zynq7_clks_gate_name[] =
 /*!< API function */
 /*!
  * @brief   enable clk
- * @param   sprt_hw
+ * @param   sptr_hw
  * @retval  errono
  * @note    none
  */
-static kint32_t zynq7_clks_gate_enable(struct fwk_clk_hw *sprt_hw)
+static kint32_t zynq7_clks_gate_enable(struct fwk_clk_hw *sptr_hw)
 {
-//    struct fwk_clk_gate *sprt_gate;
+//    struct fwk_clk_gate *sptr_gate;
 //
-//    sprt_gate = mrt_container_of(sprt_hw, struct fwk_clk_gate, sgrt_hw);
+//    sptr_gate = mr_container_of(sptr_hw, struct fwk_clk_gate, sgtc_hw);
 
     return ER_NORMAL;
 }
 
 /*!
  * @brief   disable clk
- * @param   sprt_hw
+ * @param   sptr_hw
  * @retval  none
  * @note    none
  */
-static void	zynq7_clks_gate_disable(struct fwk_clk_hw *sprt_hw)
+static void	zynq7_clks_gate_disable(struct fwk_clk_hw *sptr_hw)
 {
-//    struct fwk_clk_gate *sprt_gate;
+//    struct fwk_clk_gate *sptr_gate;
 
-//    sprt_gate = mrt_container_of(sprt_hw, struct fwk_clk_gate, sgrt_hw);
+//    sptr_gate = mr_container_of(sptr_hw, struct fwk_clk_gate, sgtc_hw);
 
 }
 
 /*!
  * @brief   get clk status
- * @param   sprt_hw
+ * @param   sptr_hw
  * @retval  errono
  * @note    none
  */
-static kint32_t zynq7_clks_gate_is_enabled(struct fwk_clk_hw *sprt_hw)
+static kint32_t zynq7_clks_gate_is_enabled(struct fwk_clk_hw *sptr_hw)
 {
-//    struct fwk_clk_gate *sprt_gate;
+//    struct fwk_clk_gate *sptr_gate;
     kuint32_t value = 0;
 
-//    sprt_gate = mrt_container_of(sprt_hw, struct fwk_clk_gate, sgrt_hw);
+//    sptr_gate = mr_container_of(sptr_hw, struct fwk_clk_gate, sgtc_hw);
 
 
     return !!value;
 }
 
-static const struct fwk_clk_ops sgrt_zynq7_clks_gate_oprts =
+static const struct fwk_clk_ops sgtc_zynq7_clks_gate_oprts =
 {
     .enable = zynq7_clks_gate_enable,
     .disable = zynq7_clks_gate_disable,
@@ -189,15 +189,15 @@ static const struct fwk_clk_ops sgrt_zynq7_clks_gate_oprts =
 
 /*!
  * @brief   create clk global data from device_tree
- * @param   sprt_data
+ * @param   sptr_data
  * @retval  errono
  * @note    none
  */
-static kint32_t zynq7_clks_driver_of_init(struct zynq7_clks_data *sprt_data)
+static kint32_t zynq7_clks_driver_of_init(struct zynq7_clks_data *sptr_data)
 {
-//    struct zynq7_sclr *sprt_zsclr;
+//    struct zynq7_sclr *sptr_zsclr;
 
-//    sprt_zsclr = (struct zynq7_sclr *)sprt_data->sclr_base;
+//    sptr_zsclr = (struct zynq7_sclr *)sptr_data->sclr_base;
 
     return 0;
 }
@@ -210,41 +210,44 @@ static kint32_t zynq7_clks_driver_of_init(struct zynq7_clks_data *sprt_data)
  */
 kint32_t __fwk_init zynq7_clks_driver_init(void)
 {
-    struct zynq7_clks_data *sprt_data;
-    struct fwk_device_node *sprt_clkc, *sprt_sclr;
-    struct zynq7_clk_grp *sprt_grps;
+    struct zynq7_clks_data *sptr_data;
+    struct fwk_device_node *sptr_clkc, *sptr_sclr;
+    struct zynq7_clk_grp *sptr_grps;
     kuint32_t grps_size;
     kuaddr_t clkc_reg, sclr_reg;
     kuint32_t index;
+    struct fwk_resources sgtc_res1, sgtc_res2;
 
-    sprt_data = &sgrt_zynq7_clks_data;
-    sprt_grps = (struct zynq7_clk_grp *)sgrt_zynq7_clks_gate_name;
-    grps_size = ARRAY_SIZE(sgrt_zynq7_clks_gate_name);
+    sptr_data = &sgtc_zynq7_clks_data;
+    sptr_grps = (struct zynq7_clk_grp *)sgtc_zynq7_clks_gate_name;
+    grps_size = ARRAY_SIZE(sgtc_zynq7_clks_gate_name);
 
     /*!< check */
     for (index = 0; index < grps_size; index++)
     {
-        if (index != sprt_grps[index].number)
+        if (index != sptr_grps[index].number)
         {
-            print_err("array sgrt_zynq7_clks_gate_name[%d] is unvalid!\r\n", index);
-            return -ER_UNVALID;
+            print_err("array sgtc_zynq7_clks_gate_name[%d] is unvalid!\r\n", index);
+            return -ER_INVALID;
         }
     }
 
-    sprt_clkc = fwk_of_find_matching_node_and_match(mrt_nullptr, sgrt_zynq7_clks_driver_ids, mrt_nullptr);
-    if (!isValid(sprt_clkc))
+    sptr_clkc = fwk_of_find_matching_node_and_match(mr_nullptr, sgtc_zynq7_clks_driver_ids, mr_nullptr);
+    if (!isValid(sptr_clkc))
         return -ER_NOTFOUND;
 
-    sprt_sclr = fwk_of_get_parent(sprt_clkc);
-    sclr_reg  = (kuaddr_t)fwk_of_iomap(sprt_sclr, 0);
-    clkc_reg  = sclr_reg + (kuaddr_t)fwk_of_iomap(sprt_clkc, 0);
+    sptr_sclr = fwk_of_get_parent(sptr_clkc);
+    fwk_of_address_to_resource(sptr_sclr, 0, &sgtc_res1);
+    fwk_of_address_to_resource(sptr_clkc, 0, &sgtc_res2);
+    sgtc_res2.start += sgtc_res1.start;
+    sgtc_res2.end   += sgtc_res1.start;
 
-    sprt_data->sprt_clkc = sprt_clkc;
-    sprt_data->sprt_sclr = sprt_sclr;
-    sprt_data->clkc_base = fwk_io_remap((void *)clkc_reg, ARCH_PER_SIZE);
-    sprt_data->sclr_base = fwk_io_remap((void *)sclr_reg, ARCH_PER_SIZE);
+    sptr_data->sptr_clkc = sptr_clkc;
+    sptr_data->sptr_sclr = sptr_sclr;
+    sptr_data->clkc_base = (void *)fwk_address_map(&sgtc_res1);
+    sptr_data->sclr_base = (void *)fwk_address_map(&sgtc_res2);
 
-    return zynq7_clks_driver_of_init(sprt_data);
+    return zynq7_clks_driver_of_init(sptr_data);
 }
 
 /*!

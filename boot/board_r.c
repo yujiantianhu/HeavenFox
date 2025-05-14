@@ -21,15 +21,15 @@ struct boot_images
 {
     kuaddr_t os_entry;
 
-    struct global_data *sprt_gd;
-    struct tag_params *sprt_params;
-    struct m_area sgrt_fdt;
+    struct global_data *sptr_gd;
+    struct tag_params *sptr_params;
+    struct m_area sgtc_fdt;
 
-    struct fatfs_disk *sprt_fdisk;
+    struct fatfs_disk *sptr_fdisk;
 };
 
 /*!< The globals */
-struct boot_images sgrt_boot_images;
+struct boot_images sgtc_boot_images;
 
 /*!< API function */
 /*!
@@ -82,22 +82,22 @@ kint32_t fix_data_mempool_initial(void)
  * @retval  none
  * @note    mount disk
  */
-kint32_t extdisk_mount(struct boot_images *sprt_image)
+kint32_t extdisk_mount(struct boot_images *sptr_image)
 {
-    struct fatfs_disk *sprt_fdisk;
-    struct fwk_gendisk *sprt_gdisk;
+    struct fatfs_disk *sptr_fdisk;
+    struct fwk_gendisk *sptr_gdisk;
     kint32_t retval;
 
-    sprt_fdisk = fs_alloc_fatfs(SDDISK);
-    if (!isValid(sprt_fdisk))
+    sptr_fdisk = fs_alloc_fatfs(SDDISK);
+    if (!isValid(sptr_fdisk))
         return RET_BOOT_ERR;
 
-    sprt_gdisk = &sprt_fdisk->sgrt_gdisk;
-    retval = sprt_gdisk->mount(sprt_gdisk);
+    sptr_gdisk = &sptr_fdisk->sgtc_gdisk;
+    retval = sptr_gdisk->mount(sptr_gdisk);
     if (retval)
         return RET_BOOT_ERR;
 
-    sprt_image->sprt_fdisk = sprt_fdisk;
+    sptr_image->sptr_fdisk = sptr_fdisk;
     return RET_BOOT_PASS;
 }
 
@@ -107,112 +107,112 @@ kint32_t extdisk_mount(struct boot_images *sprt_image)
  * @retval  none
  * @note    mount disk
  */
-void extdisk_unmount(struct boot_images *sprt_image)
+void extdisk_unmount(struct boot_images *sptr_image)
 {
-    struct fatfs_disk *sprt_fdisk;
-    struct fwk_gendisk *sprt_gdisk;
+    struct fatfs_disk *sptr_fdisk;
+    struct fwk_gendisk *sptr_gdisk;
 
-    sprt_fdisk = sprt_image->sprt_fdisk;
-    if (!isValid(sprt_fdisk))
+    sptr_fdisk = sptr_image->sptr_fdisk;
+    if (!isValid(sptr_fdisk))
         return;
 
-    sprt_gdisk = &sprt_fdisk->sgrt_gdisk;
-    sprt_gdisk->unmount(sprt_gdisk);
-    kfree(sprt_fdisk);
+    sptr_gdisk = &sptr_fdisk->sgtc_gdisk;
+    sptr_gdisk->unmount(sptr_gdisk);
+    kfree(sptr_fdisk);
 
-    sprt_image->sprt_fdisk = mrt_nullptr;
+    sptr_image->sptr_fdisk = mr_nullptr;
 }
 
 /*!
  * @brief   prepare video params
- * @param   sprt_image, sprt_params
+ * @param   sptr_image, sptr_params
  * @retval  none
- * @note    fill sprt_params
+ * @note    fill sptr_params
  */
-kint32_t tag_params_video(struct boot_images *sprt_image, struct tag_params *sprt_params)
+kint32_t tag_params_video(struct boot_images *sptr_image, struct tag_params *sptr_params)
 {
-    struct fatfs_disk *sprt_fdisk;
-    struct fwk_gendisk *sprt_gdisk;
-    struct fs_stream sgrt_file;
-    struct fwk_block_device sgrt_blkdev;
-    struct video_params *sprt_vdp;
+    struct fatfs_disk *sptr_fdisk;
+    struct fwk_gendisk *sptr_gdisk;
+    struct fs_stream sgtc_file;
+    struct fwk_block_device sgtc_blkdev;
+    struct video_params *sptr_vdp;
     void *fontlib;
     kssize_t size;
 
-    sprt_fdisk = sprt_image->sprt_fdisk;
-    if (!isValid(sprt_fdisk))
+    sptr_fdisk = sptr_image->sptr_fdisk;
+    if (!isValid(sptr_fdisk))
         return RET_BOOT_ERR;
 
-    sprt_gdisk = &sprt_fdisk->sgrt_gdisk;
-    sgrt_blkdev.sprt_gdisk = sprt_gdisk;
+    sptr_gdisk = &sptr_fdisk->sgtc_gdisk;
+    sgtc_blkdev.sptr_gdisk = sptr_gdisk;
 
-    sprt_vdp = &sprt_params->u.sgrt_vdp;
-    sprt_params->sgrt_hdr.size = sizeof(*sprt_vdp);
-    sprt_params->sgrt_hdr.type = TAG_PARAM_VIDEO;
+    sptr_vdp = &sptr_params->u.sgtc_vdp;
+    sptr_params->sgtc_hdr.size = sizeof(*sptr_vdp);
+    sptr_params->sgtc_hdr.type = TAG_PARAM_VIDEO;
 
-    sgrt_file.full_name = "/lib/font/HZK16";
-    sgrt_file.mode = O_RDONLY;
-    if (!sprt_gdisk->sprt_bops->open(&sgrt_blkdev, &sgrt_file))
+    sgtc_file.full_name = "/lib/font/HZK16";
+    sgtc_file.mode = O_RDONLY;
+    if (!sptr_gdisk->sptr_bops->open(&sgtc_blkdev, &sgtc_file))
     {
-        size = sprt_gdisk->sprt_bops->fsize(&sgrt_file);
+        size = sptr_gdisk->sptr_bops->fsize(&sgtc_file);
         if (size <= 0)
             goto END;
 
-        fontlib = kmalloc(mrt_align(size, 8), GFP_FIXED);
+        fontlib = kmalloc(mr_align(size, 8), GFP_FIXED);
         if (!isValid(fontlib))
             goto END;
         
-        size = sprt_gdisk->sprt_bops->read(&sgrt_file, fontlib, size, 0);
+        size = sptr_gdisk->sptr_bops->read(&sgtc_file, fontlib, size, 0);
         if (size > 0)
         {
-            sprt_vdp->sgrt_hz16x16.base = fontlib;
-            sprt_vdp->sgrt_hz16x16.size = size;
-            sprt_vdp->sgrt_hz16x16.offset = 0;
+            sptr_vdp->sgtc_hz16x16.base = fontlib;
+            sptr_vdp->sgtc_hz16x16.size = size;
+            sptr_vdp->sgtc_hz16x16.offset = 0;
         }
     }
 
 END:
-    sprt_gdisk->sprt_bops->close(&sgrt_blkdev, &sgrt_file);
+    sptr_gdisk->sptr_bops->close(&sgtc_blkdev, &sgtc_file);
     return RET_BOOT_PASS;
 }
 
 /*!
  * @brief   prepare params for kernel
- * @param   sprt_image
+ * @param   sptr_image
  * @retval  none
- * @note    fill sprt_params
+ * @note    fill sptr_params
  */
-kint32_t boot_params_prep(struct boot_images *sprt_image)
+kint32_t boot_params_prep(struct boot_images *sptr_image)
 {
-    struct global_data *sprt_gd;
-    struct tag_params *sprt_params;
+    struct global_data *sptr_gd;
+    struct tag_params *sptr_params;
     kint32_t retval;
 
-    sprt_gd = sprt_image->sprt_gd;
-    sprt_image->os_entry = sprt_gd->os_entry;
+    sptr_gd = sptr_image->sptr_gd;
+    sptr_image->os_entry = sptr_gd->os_entry;
 
-    sprt_params = (struct tag_params *)CONFIG_B2K_PARAM_BASE;
-    sprt_image->sprt_params = sprt_params;
+    sptr_params = (struct tag_params *)CONFIG_B2K_PARAM_BASE;
+    sptr_image->sptr_params = sptr_params;
     
-    sprt_params->sgrt_hdr.size = 0;
-    sprt_params->sgrt_hdr.type = 0;
+    sptr_params->sgtc_hdr.size = 0;
+    sptr_params->sgtc_hdr.type = 0;
 
     /*!< ---------------------------------------------------------*/
-    sprt_params = TAG_PARAM_NEXT(sprt_params);
-    retval = tag_params_video(sprt_image, sprt_params);
+    sptr_params = TAG_PARAM_NEXT(sptr_params);
+    retval = tag_params_video(sptr_image, sptr_params);
     if (retval)
         goto fail;
 
     /*!< ---------------------------------------------------------*/
-    sprt_params = TAG_PARAM_NEXT(sprt_params);
-    sprt_params->sgrt_hdr.size = sizeof(sprt_params->u.sgrt_fdt);
-    sprt_params->sgrt_hdr.type = TAG_PARAM_FDT;
-    memcpy(&sprt_params->u.sgrt_fdt.sgrt_fdt, &sprt_image->sgrt_fdt, sizeof(struct m_area));
+    sptr_params = TAG_PARAM_NEXT(sptr_params);
+    sptr_params->sgtc_hdr.size = sizeof(sptr_params->u.sgtc_fdt);
+    sptr_params->sgtc_hdr.type = TAG_PARAM_FDT;
+    memcpy(&sptr_params->u.sgtc_fdt.sgtc_fdt, &sptr_image->sgtc_fdt, sizeof(struct m_area));
 
     /*!< ---------------------------------------------------------*/
-    sprt_params = TAG_PARAM_NEXT(sprt_params);
-    sprt_params->sgrt_hdr.size = 0;
-    sprt_params->sgrt_hdr.type = -1;
+    sptr_params = TAG_PARAM_NEXT(sptr_params);
+    sptr_params->sgtc_hdr.size = 0;
+    sptr_params->sgtc_hdr.type = -1;
 
     return RET_BOOT_PASS;
 
@@ -226,33 +226,33 @@ fail:
  * @retval  none
  * @note    copy dtb to ram
  */
-kint32_t fdt_boot_initial(struct boot_images *sprt_image)
+kint32_t fdt_boot_initial(struct boot_images *sptr_image)
 {
-    struct fs_stream sgrt_file;
-    struct fatfs_disk *sprt_fdisk;
-    struct fwk_gendisk *sprt_gdisk;
-    struct fwk_block_device sgrt_blkdev;
+    struct fs_stream sgtc_file;
+    struct fatfs_disk *sptr_fdisk;
+    struct fwk_gendisk *sptr_gdisk;
+    struct fwk_block_device sgtc_blkdev;
     kssize_t size;
     kint32_t retval;
 
     if ((PROGRAM_RAM_START <= (CONFIG_DEVICE_TREE_BASE + CONFIG_FDT_MAX_SIZE - 1)))
         return RET_BOOT_ERR;
 
-    sprt_fdisk = sprt_image->sprt_fdisk;
-    if (!isValid(sprt_fdisk))
+    sptr_fdisk = sptr_image->sptr_fdisk;
+    if (!isValid(sptr_fdisk))
         return RET_BOOT_ERR;
 
-    sprt_gdisk = &sprt_fdisk->sgrt_gdisk;
-    sgrt_blkdev.sprt_gdisk = sprt_gdisk;
-    sgrt_file.full_name = "/boot/firmware.dtb";
-    sgrt_file.mode = O_RDONLY;
-    retval = sprt_gdisk->sprt_bops->open(&sgrt_blkdev, &sgrt_file);
+    sptr_gdisk = &sptr_fdisk->sgtc_gdisk;
+    sgtc_blkdev.sptr_gdisk = sptr_gdisk;
+    sgtc_file.full_name = "/boot/firmware.dtb";
+    sgtc_file.mode = O_RDONLY;
+    retval = sptr_gdisk->sptr_bops->open(&sgtc_blkdev, &sgtc_file);
     if (retval)
         return RET_BOOT_ERR;
 
-    size = sprt_gdisk->sprt_bops->read(&sgrt_file, 
+    size = sptr_gdisk->sptr_bops->read(&sgtc_file, 
                                     (void *)CONFIG_DEVICE_TREE_BASE, CONFIG_FDT_MAX_SIZE, 0);
-    sprt_gdisk->sprt_bops->close(&sgrt_blkdev, &sgrt_file);
+    sptr_gdisk->sptr_bops->close(&sgtc_blkdev, &sgtc_file);
 
     if (size <= 0)
     {
@@ -260,8 +260,8 @@ kint32_t fdt_boot_initial(struct boot_images *sprt_image)
         return RET_BOOT_ERR;
     }
 
-    sprt_image->sgrt_fdt.base = (void *)CONFIG_DEVICE_TREE_BASE;
-    sprt_image->sgrt_fdt.size = size;
+    sptr_image->sgtc_fdt.base = (void *)CONFIG_DEVICE_TREE_BASE;
+    sptr_image->sgtc_fdt.size = size;
 
     return RET_BOOT_PASS;
 }
@@ -272,13 +272,13 @@ kint32_t fdt_boot_initial(struct boot_images *sprt_image)
  * @retval  none
  * @note    jump to assembly entry: kernel_entry
  */
-void jump_to_kernel(struct boot_images *sprt_image)
+void jump_to_kernel(struct boot_images *sptr_image)
 {
     kuint32_t r2;
     void (*kernel_entry)(kint32_t zero, kint32_t arch, kuint32_t params);
 
-    r2 = (kuint32_t)sprt_image->sprt_params;
-    kernel_entry = (void (*)(kint32_t, kint32_t, kuint32_t))sprt_image->os_entry;
+    r2 = (kuint32_t)sptr_image->sptr_params;
+    kernel_entry = (void (*)(kint32_t, kint32_t, kuint32_t))sptr_image->os_entry;
 
     /*!< jump to head.S */
     kernel_entry(0, 0, r2);
@@ -292,11 +292,11 @@ void jump_to_kernel(struct boot_images *sprt_image)
  */
 kint32_t boot_main_loop(void)
 {
-    struct boot_images *sprt_image;
+    struct boot_images *sptr_image;
     kint32_t retval;
 
-    sprt_image = &sgrt_boot_images;
-    if (extdisk_mount(sprt_image))
+    sptr_image = &sgtc_boot_images;
+    if (extdisk_mount(sptr_image))
         return RET_BOOT_ERR;
 
     for (;;)
@@ -305,16 +305,16 @@ kint32_t boot_main_loop(void)
     }
 
     /*!< device-tree prepare */
-    retval = fdt_boot_initial(sprt_image);
+    retval = fdt_boot_initial(sptr_image);
     if (retval)
         goto exit;
 
-    retval = boot_params_prep(sprt_image);
+    retval = boot_params_prep(sptr_image);
     if (retval)
         goto exit;
 
 exit:
-    extdisk_unmount(sprt_image);
+    extdisk_unmount(sptr_image);
 
     /*!< Destroy Memory Pool of Bootloader */
     memory_block_self_destroy(-1);
@@ -337,7 +337,7 @@ board_init_t board_init_sequence_r[] =
     /*!< boot main loop */
     boot_main_loop,
 
-    mrt_nullptr,
+    mr_nullptr,
 };
 
 /*!
@@ -348,26 +348,26 @@ board_init_t board_init_sequence_r[] =
  */
 void board_init_r(void)
 {
-    struct boot_images *sprt_image;
-    srt_gd_t *sprt_gd;
+    struct boot_images *sptr_image;
+    srt_gd_t *sptr_gd;
 
-    sprt_gd = board_get_gd();
+    sptr_gd = board_get_gd();
 
     /*!< save kernel entry address */
     __asm__ __volatile__ (
         " mov %0, r10 \n"
-        : "=&r"(sprt_gd->os_entry)
+        : "=&r"(sptr_gd->os_entry)
     );
 
-    sprt_image = &sgrt_boot_images;
-    sprt_image->sprt_gd = sprt_gd;
+    sptr_image = &sgtc_boot_images;
+    sptr_image->sptr_gd = sptr_gd;
 
     /*!< initial */
     if (board_initcall_run_list(board_init_sequence_r))
-        mrt_assert(false);
+        mr_assert(false);
 
     /*!< if initialize finished, start kernel */
-    jump_to_kernel(sprt_image);
+    jump_to_kernel(sptr_image);
 }
 
 /* end of file */

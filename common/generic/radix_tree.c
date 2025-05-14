@@ -27,26 +27,17 @@
  */
 static kuint16_t radix_tree_numlen(kuint32_t number)
 {
-    kint16_t i;
-    kuint16_t result, count = 0;
-
-    /*!< get the numer of zero-bit from high to low */
-    for (i = 31; i >= 0; i--) 
-    {
-        if (number & (1UL << i))
-            break;
-
-        count++;
-    }
-
-    count = 32 - count;
+    kuint16_t count, result;
+    
+    count = parse_valid_u32_bits(number);
     if (count <= MAX_BRANCH)
         return MAX_BRANCH;
 
     /*!< if it is the n-power of 2, such as 1, 2, 4, 8, ... */
     if (isPower2(MAX_BRANCH))
-        return mrt_align(count, MAX_BRANCH);
+        return mr_align(count, MAX_BRANCH);
     
+    /*!< result = count % default_valids */
     result = udiv_remainder(count, MAX_BRANCH);
     return result ? (count + MAX_BRANCH - result) : count;
 }
@@ -75,157 +66,157 @@ kuint16_t get_radix_node_branch(kuint32_t number)
 
 /*!
  * @brief   allocate one radix_node
- * @param   sprt_tree, sprt_par
+ * @param   sptr_tree, sptr_par
  * @retval  none
  * @note    none
  */
-struct radix_node *allocate_radix_node(struct radix_tree *sprt_tree, struct radix_node *sprt_par)
+struct radix_node *allocate_radix_node(struct radix_tree *sptr_tree, struct radix_node *sptr_par)
 {
-    struct radix_node *sprt_node;
+    struct radix_node *sptr_node;
     kuint32_t i;
 
-    sprt_node = (struct radix_node *)sprt_tree->alloc(sizeof(*sprt_node));
-    if (!isValid(sprt_node))
-        return mrt_nullptr;
+    sptr_node = (struct radix_node *)sptr_tree->alloc(sizeof(*sptr_node));
+    if (!isValid(sptr_node))
+        return mr_nullptr;
     
-    sprt_node->sprt_parent = sprt_par;
-    sprt_node->sprt_link = mrt_nullptr;
+    sptr_node->sptr_parent = sptr_par;
+    sptr_node->sptr_link = mr_nullptr;
 
     for (i = 0; i < (1 << MAX_BRANCH); i++)
-        sprt_node->sgrt_branches[i] = mrt_nullptr;
+        sptr_node->sgtc_branches[i] = mr_nullptr;
 
-    return sprt_node;
+    return sptr_node;
 }
 
 /*!
- * @brief   find a radix_node in sprt_tree
- * @param   sprt_tree, number
+ * @brief   find a radix_node in sptr_tree
+ * @param   sptr_tree, number
  * @retval  none
  * @note    none
  */
-struct radix_node *find_radix_node(struct radix_tree *sprt_tree, kuint32_t number)
+struct radix_node *find_radix_node(struct radix_tree *sptr_tree, kuint32_t number)
 {
-    struct radix_node *sprt_node;
+    struct radix_node *sptr_node;
     kuint32_t value = number;
     kuint16_t lenth = radix_tree_numlen(number);
     kuint16_t i = 0, offset = 0;
 
-    foreach_radix_tree(sprt_node, sprt_tree, offset)
+    foreach_radix_tree(sptr_node, sptr_tree, offset)
     {
         if (i >= lenth)
             break;
 
         i += MAX_BRANCH;
-        offset = sprt_tree->get(value);
+        offset = sptr_tree->get(value);
         value = radix_tree_advance(value);
     }
 
-    if (sprt_node)
-        return sprt_node->sprt_link ? sprt_node : mrt_nullptr;
+    if (sptr_node)
+        return sptr_node->sptr_link ? sptr_node : mr_nullptr;
 
 //  print_debug("find node failed, index is: 0x%x\r\n", number);
 
-    return mrt_nullptr;
+    return mr_nullptr;
 }
 
 /*!
- * @brief   find a radix_node in sprt_tree
- * @param   sprt_tree, number
+ * @brief   find a radix_node in sptr_tree
+ * @param   sptr_tree, number
  * @retval  none
  * @note    none
  */
-struct radix_link *radix_tree_look_up(struct radix_tree *sprt_tree, kuint32_t number)
+struct radix_link *radix_tree_look_up(struct radix_tree *sptr_tree, kuint32_t number)
 {
-    struct radix_node *sprt_node;
+    struct radix_node *sptr_node;
 
-    sprt_node = find_radix_node(sprt_tree, number);
-    if (!sprt_node)
-        return mrt_nullptr;
+    sptr_node = find_radix_node(sptr_tree, number);
+    if (!sptr_node)
+        return mr_nullptr;
 
-    return sprt_node->sprt_link;
+    return sptr_node->sptr_link;
 }
 
 /*!
- * @brief   add a new radix_node to sprt_tree
- * @param   sprt_tree, number
+ * @brief   add a new radix_node to sptr_tree
+ * @param   sptr_tree, number
  * @retval  none
  * @note    none
  */
-void radix_tree_add(struct radix_tree *sprt_tree, kuint32_t number, struct radix_link *sprt_link)
+void radix_tree_add(struct radix_tree *sptr_tree, kuint32_t number, struct radix_link *sptr_link)
 {
-    struct radix_node *sprt_node, *sprt_temp;
+    struct radix_node *sptr_node, *sptr_temp;
     kuint32_t value = number;
     kuint16_t lenth = radix_tree_numlen(number);
     kuint16_t i, offset = 0;
 
-    if (!sprt_link)
+    if (!sptr_link)
         return;
 
-    if (find_radix_node(sprt_tree, number))
+    if (find_radix_node(sptr_tree, number))
         return;
 
-    for (i = 0, sprt_node = &sprt_tree->sgrt_node; i < lenth; i += MAX_BRANCH) 
+    for (i = 0, sptr_node = &sptr_tree->sgtc_node; i < lenth; i += MAX_BRANCH) 
     {
-        offset = sprt_tree->get(value);
+        offset = sptr_tree->get(value);
         value = radix_tree_advance(value);
 
-        if (!sprt_node->sgrt_branches[offset]) 
+        if (!sptr_node->sgtc_branches[offset]) 
         {
-            sprt_temp = allocate_radix_node(sprt_tree, sprt_node);
-            if (!isValid(sprt_temp))
+            sptr_temp = allocate_radix_node(sptr_tree, sptr_node);
+            if (!isValid(sptr_temp))
                 return;
 
-            sprt_node->sgrt_branches[offset] = sprt_temp;
+            sptr_node->sgtc_branches[offset] = sptr_temp;
         }
 
-//      print_debug("%s: lenth: %d, i = %d, sprt_node: %p, offset: 0x%x\r\n", __FUNCTION__, lenth, i, sprt_node->sgrt_branches[offset], offset);
+//      print_debug("%s: lenth: %d, i = %d, sptr_node: %p, offset: 0x%x\r\n", __FUNCTION__, lenth, i, sptr_node->sgtc_branches[offset], offset);
 
-        sprt_link->depth = i;
-        sprt_node = sprt_node->sgrt_branches[offset];
+        sptr_link->depth = i;
+        sptr_node = sptr_node->sgtc_branches[offset];
     }
 
-    if (sprt_node != &sprt_tree->sgrt_node)
-        sprt_node->sprt_link = sprt_link;
+    if (sptr_node != &sptr_tree->sgtc_node)
+        sptr_node->sptr_link = sptr_link;
 
 //  print_debug("add new node successfully, index is: 0x%x\r\n", number);
 }
 
 /*!
- * @brief   delete radix_node from sprt_tree with recursion
- * @param   sprt_tree, number
+ * @brief   delete radix_node from sptr_tree with recursion
+ * @param   sptr_tree, number
  * @retval  none
  * @note    none
  */
-static void __del_radix_node(struct radix_tree *sprt_tree, struct radix_node *sprt_node, struct radix_node *sprt_child)
+static void __del_radix_node(struct radix_tree *sptr_tree, struct radix_node *sptr_node, struct radix_node *sptr_child)
 {
     kuint32_t i, count = 0;
     
-    if (!sprt_node)
+    if (!sptr_node)
         return;
 
     for (i = 0; i < (1 << MAX_BRANCH); i++) 
     {
-        if (sprt_node->sgrt_branches[i] == sprt_child) 
+        if (sptr_node->sgtc_branches[i] == sptr_child) 
         {
-            sprt_node->sgrt_branches[i] = mrt_nullptr;
+            sptr_node->sgtc_branches[i] = mr_nullptr;
 
             if (count)
                 goto out;
         }
 
-        if (sprt_node->sgrt_branches[i])
+        if (sptr_node->sgtc_branches[i])
             count++;
     }
 
     if (count)
         goto out;
 
-    if (!sprt_node->sprt_link) 
+    if (!sptr_node->sptr_link) 
     {
-        __del_radix_node(sprt_tree, sprt_node->sprt_parent, sprt_node);
+        __del_radix_node(sptr_tree, sptr_node->sptr_parent, sptr_node);
 
-        if (sprt_node != &sprt_tree->sgrt_node)
-            sprt_tree->free(sprt_node);
+        if (sptr_node != &sptr_tree->sgtc_node)
+            sptr_tree->free(sptr_node);
     }
 
 out:
@@ -233,38 +224,38 @@ out:
 }
 
 /*!
- * @brief   delete a group of radix_nodes from sprt_tree
- * @param   sprt_tree, number
+ * @brief   delete a group of radix_nodes from sptr_tree
+ * @param   sptr_tree, number
  * @retval  none
  * @note    none
  */
-void radix_tree_del(struct radix_tree *sprt_tree, kuint32_t number)
+void radix_tree_del(struct radix_tree *sptr_tree, kuint32_t number)
 {
-    struct radix_node *sprt_node;
+    struct radix_node *sptr_node;
     kuint32_t value = number;
     kuint32_t lenth = radix_tree_numlen(number);
     kuint32_t i, offset = 0;
 
-    for (i = 0, sprt_node = &sprt_tree->sgrt_node; i < lenth; i += MAX_BRANCH) 
+    for (i = 0, sptr_node = &sptr_tree->sgtc_node; i < lenth; i += MAX_BRANCH) 
     {
-        if (!sprt_node)
+        if (!sptr_node)
             return;
         
-        offset = sprt_tree->get(value);
+        offset = sptr_tree->get(value);
         value = radix_tree_advance(value);
-        sprt_node = sprt_node->sgrt_branches[offset];
+        sptr_node = sptr_node->sgtc_branches[offset];
     }
 
-    if (!sprt_node ||
-        !sprt_node->sprt_link ||
-        (sprt_node == &sprt_tree->sgrt_node)) 
+    if (!sptr_node ||
+        !sptr_node->sptr_link ||
+        (sptr_node == &sptr_tree->sgtc_node)) 
     {
         print_debug("nothing needs to delete\r\n");
         return;
     }
 
-    sprt_node->sprt_link = mrt_nullptr;
-    __del_radix_node(sprt_tree, sprt_node, mrt_nullptr);
+    sptr_node->sptr_link = mr_nullptr;
+    __del_radix_node(sptr_tree, sptr_node, mr_nullptr);
 }
 
 

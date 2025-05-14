@@ -48,7 +48,7 @@ static void display_task_clear(crt_disp_base_t &cgrt_this);
 static void display_task_cursor(crt_disp_base_t &cgrt_this, 
                         kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end);
 static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &cgrt_text,
-                        struct fs_stream *sprt_file);
+                        struct fs_stream *sptr_file);
 
 /*!< The defines */
 /*!< base class for display */
@@ -63,8 +63,8 @@ public:
     ~crt_disp_base_t() {}
 
 protected:
-    struct fwk_disp_ctrl sgrt_dctrl;
-    struct fwk_disp_info sgrt_disp;
+    struct fwk_disp_ctrl sgtc_dctrl;
+    struct fwk_disp_info sgtc_disp;
 };
 
 /*!< bmp class */
@@ -73,7 +73,7 @@ class crt_disp_bmp_t : virtual public crt_disp_base_t
 public:
     crt_disp_bmp_t(crt_disp_task_t &cgrt_dtsk) 
         : crt_disp_base_t(cgrt_dtsk)
-        , bmp(mrt_nullptr) 
+        , bmp(mr_nullptr) 
     {}
     ~crt_disp_bmp_t() {}
 
@@ -91,12 +91,12 @@ private:
 class crt_disp_text_t : virtual public crt_disp_base_t
 {
     friend kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &cgrt_text,
-                        struct fs_stream *sprt_file);
+                        struct fs_stream *sptr_file);
     
 public:
     crt_disp_text_t(crt_disp_task_t &cgrt_dtsk, kuint32_t pages)
         : crt_disp_base_t(cgrt_dtsk)
-        , text(mrt_nullptr)
+        , text(mr_nullptr)
         , num(0)
         , cur_text(0)
         , pages(pages)
@@ -145,8 +145,8 @@ public:
     kint32_t fd;
 
 private:
-    struct fwk_fb_fix_screen_info sgrt_fix;
-	struct fwk_fb_var_screen_info sgrt_var;
+    struct fwk_fb_fix_screen_info sgtc_fix;
+	struct fwk_fb_var_screen_info sgtc_var;
     kuint32_t *fb_buffer1;
     kuint32_t *fb_buffer2;
 };
@@ -171,34 +171,34 @@ static const kchar_t *g_display_logo = "/media/FAT32_2/home/fox/picture/1.bmp";
  */
 crt_disp_task_t::crt_disp_task_t(crt_task_t *cprt_task, const kchar_t *file, kuint32_t mode)
     : cprt_task(cprt_task)
-    , fb_buffer1(mrt_nullptr)
-    , fb_buffer2(mrt_nullptr)
+    , fb_buffer1(mr_nullptr)
+    , fb_buffer2(mr_nullptr)
 {
     fd = virt_open(file, mode);
     if (fd < 0)
         return;
 
-    virt_ioctl(fd, NR_FB_IOGET_VARINFO, &sgrt_var);
-    virt_ioctl(fd, NR_FB_IOGET_FIXINFO, &sgrt_fix);
+    virt_ioctl(fd, NR_FB_IOGET_VARINFO, &sgtc_var);
+    virt_ioctl(fd, NR_FB_IOGET_FIXINFO, &sgtc_fix);
 
-    fb_buffer1 = (kuint32_t *)virt_mmap(mrt_nullptr, sgrt_fix.smem_len, 0, 0, fd, 0);
+    fb_buffer1 = (kuint32_t *)virt_mmap(mr_nullptr, sgtc_fix.smem_len, 0, 0, fd, 0);
     if (!isValid(fb_buffer1))
         goto fail2;
 
-    fb_buffer2 = (kuint32_t *)virt_mmap(mrt_nullptr, sgrt_fix.smem_len, 0, 0, fd, sgrt_fix.smem_len);
+    fb_buffer2 = (kuint32_t *)virt_mmap(mr_nullptr, sgtc_fix.smem_len, 0, 0, fd, sgtc_fix.smem_len);
     if (!isValid(fb_buffer2))
         goto fail3;
 
     return;
 
-    virt_munmap(fb_buffer2, sgrt_fix.smem_len);
+    virt_munmap(fb_buffer2, sgtc_fix.smem_len);
 fail3:
-    virt_munmap(fb_buffer1, sgrt_fix.smem_len);
+    virt_munmap(fb_buffer1, sgtc_fix.smem_len);
 fail2:
     virt_close(fd);
 
     fd = -1;
-    fb_buffer1 = fb_buffer2 = mrt_nullptr;
+    fb_buffer1 = fb_buffer2 = mr_nullptr;
 }
 
 /*!
@@ -212,8 +212,8 @@ crt_disp_task_t::~crt_disp_task_t()
     if (fd < 0)
         return;
 
-    virt_munmap(fb_buffer2, sgrt_fix.smem_len);
-    virt_munmap(fb_buffer1, sgrt_fix.smem_len);
+    virt_munmap(fb_buffer2, sgtc_fix.smem_len);
+    virt_munmap(fb_buffer1, sgtc_fix.smem_len);
     virt_close(fd);
 }
 
@@ -223,21 +223,21 @@ crt_disp_task_t::~crt_disp_task_t()
  * @retval none
  * @note   do display
  */
-static void display_task_settings_init(struct fwk_font_setting *sprt_set)
+static void display_task_settings_init(struct fwk_font_setting *sptr_set)
 {
-    sprt_set->color = RGB_BLACK;
-    sprt_set->background = RGB_WHITE;
-    sprt_set->font = NR_FWK_FONT_SONG;
-    sprt_set->line_spacing = 8;
-    sprt_set->word_spacing = 2;
-    sprt_set->ptr_ascii = (void *)g_font_ascii_song16;
-    sprt_set->ptr_hz = fwk_font_hz_song16_get()->base;
-    sprt_set->size = FWK_FONT_16;
+    sptr_set->color = RGB_BLACK;
+    sptr_set->background = RGB_WHITE;
+    sptr_set->font = NR_FWK_FONT_SONG;
+    sptr_set->line_spacing = 8;
+    sptr_set->word_spacing = 2;
+    sptr_set->ptr_ascii = (void *)g_font_ascii_song16;
+    sptr_set->ptr_hz = fwk_font_hz_song16_get()->base;
+    sptr_set->size = FWK_FONT_16;
 
-    sprt_set->left_spacing  = 16;
-    sprt_set->right_spacing = 8;
-    sprt_set->upper_spacing = 8;
-    sprt_set->down_spacing  = 16;
+    sptr_set->left_spacing  = 16;
+    sptr_set->right_spacing = 8;
+    sptr_set->upper_spacing = 8;
+    sptr_set->down_spacing  = 16;
 }
 
 /*!
@@ -248,8 +248,8 @@ static void display_task_settings_init(struct fwk_font_setting *sprt_set)
  */
 static void display_task_clear(crt_disp_base_t &cgrt_this)
 {
-    struct fwk_disp_ctrl &sgrt_dctrl = cgrt_this.sgrt_dctrl;
-    fwk_display_clear(sgrt_dctrl.sprt_di, sgrt_dctrl.sgrt_set.background);
+    struct fwk_disp_ctrl &sgtc_dctrl = cgrt_this.sgtc_dctrl;
+    fwk_display_clear(sgtc_dctrl.sptr_di, sgtc_dctrl.sgtc_set.background);
 }
 
 /*!
@@ -261,13 +261,13 @@ static void display_task_clear(crt_disp_base_t &cgrt_this)
 static void display_task_cursor(crt_disp_base_t &cgrt_this, 
                         kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end)
 {
-    struct fwk_disp_ctrl &sgrt_dctrl = cgrt_this.sgrt_dctrl;
-    struct fwk_disp_info *sprt_disp = sgrt_dctrl.sprt_di;
-    struct fwk_font_setting *sprt_set = &sgrt_dctrl.sgrt_set;
+    struct fwk_disp_ctrl &sgtc_dctrl = cgrt_this.sgtc_dctrl;
+    struct fwk_disp_info *sptr_disp = sgtc_dctrl.sptr_di;
+    struct fwk_font_setting *sptr_set = &sgtc_dctrl.sgtc_set;
 
-    fwk_display_set_cursor(&sgrt_dctrl, x_start, y_start, x_end, y_end);
-    fwk_display_fill_rectangle(sprt_disp, x_start, y_start, 
-                                        x_end, y_end, sprt_set->background);
+    fwk_display_set_cursor(&sgtc_dctrl, x_start, y_start, x_end, y_end);
+    fwk_display_fill_rectangle(sptr_disp, x_start, y_start, 
+                                        x_end, y_end, sptr_set->background);
 }
 
 /*!
@@ -278,21 +278,21 @@ static void display_task_cursor(crt_disp_base_t &cgrt_this,
  */
 crt_disp_base_t::crt_disp_base_t(crt_disp_task_t &cgrt_dtsk)
 {
-    struct fwk_disp_ctrl &sgrt_dctrl = this->sgrt_dctrl;
-    struct fwk_font_setting &sgrt_set = this->sgrt_dctrl.sgrt_set;
+    struct fwk_disp_ctrl &sgtc_dctrl = this->sgtc_dctrl;
+    struct fwk_font_setting &sgtc_set = this->sgtc_dctrl.sgtc_set;
 
-    sgrt_dctrl.sprt_di = &this->sgrt_disp;
+    sgtc_dctrl.sptr_di = &this->sgtc_disp;
     if (cgrt_dtsk.fd < 0)
         return;
 
-    display_task_settings_init(&sgrt_set);
-    fwk_display_ctrl_init(&this->sgrt_disp, 
+    display_task_settings_init(&sgtc_set);
+    fwk_display_ctrl_init(&this->sgtc_disp, 
                     cgrt_dtsk.fb_buffer1, 
                     cgrt_dtsk.fb_buffer2, 
-                    cgrt_dtsk.sgrt_fix.smem_len, 
-                    cgrt_dtsk.sgrt_var.xres, 
-                    cgrt_dtsk.sgrt_var.yres, 
-                    cgrt_dtsk.sgrt_var.bits_per_pixel);
+                    cgrt_dtsk.sgtc_fix.smem_len, 
+                    cgrt_dtsk.sgtc_var.xres, 
+                    cgrt_dtsk.sgtc_var.yres, 
+                    cgrt_dtsk.sgtc_var.bits_per_pixel);
 }
 
 /*!
@@ -303,10 +303,10 @@ crt_disp_base_t::crt_disp_base_t(crt_disp_task_t &cgrt_dtsk)
  */
 void crt_disp_bmp_t::show(void)
 {
-    struct fwk_disp_ctrl &sgrt_dctrl = this->sgrt_dctrl;
-    struct fwk_disp_info *sprt_disp = sgrt_dctrl.sprt_di;
-    struct fs_stream *sprt_file;
-    struct fwk_bmp_ctrl sgrt_bctl;
+    struct fwk_disp_ctrl &sgtc_dctrl = this->sgtc_dctrl;
+    struct fwk_disp_info *sptr_disp = sgtc_dctrl.sptr_di;
+    struct fs_stream *sptr_file;
+    struct fwk_bmp_ctrl sgtc_bctl;
     kuint8_t bytes_per_pixel;
     kssize_t size;
 
@@ -314,23 +314,23 @@ void crt_disp_bmp_t::show(void)
         return;
 
     display_task_clear(*this);
-    display_task_cursor(*this, 0, 0, sprt_disp->width, sprt_disp->height);
+    display_task_cursor(*this, 0, 0, sptr_disp->width, sptr_disp->height);
 
-    sprt_file = file_open(this->bmp, O_RDONLY);
-    if (!isValid(sprt_file))
+    sptr_file = file_open(this->bmp, O_RDONLY);
+    if (!isValid(sptr_file))
         return;
 
-    bytes_per_pixel = sprt_disp->bpp >> 3;
-    size = file_read(sprt_file, sprt_disp->buffer_bak, 
-                sprt_disp->width * sprt_disp->height * bytes_per_pixel);
+    bytes_per_pixel = sptr_disp->bpp >> 3;
+    size = file_read(sptr_file, sptr_disp->buffer_bak, 
+                sptr_disp->width * sptr_disp->height * bytes_per_pixel);
     if (size <= 0)
         goto END;
 
-    fwk_bitmap_ctrl_init(&sgrt_bctl, sprt_disp, 0, 0);
-    fwk_display_whole_bitmap(&sgrt_bctl, (const kuint8_t *)sprt_disp->buffer_bak);
+    fwk_bitmap_ctrl_init(&sgtc_bctl, sptr_disp, 0, 0);
+    fwk_display_whole_bitmap(&sgtc_bctl, (const kuint8_t *)sptr_disp->buffer_bak);
 
 END:
-    file_close(sprt_file);
+    file_close(sptr_file);
 }
 
 /*!
@@ -340,54 +340,54 @@ END:
  * @note   do display
  */
 static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &cgrt_text,
-                        struct fs_stream *sprt_file)
+                        struct fs_stream *sptr_file)
 {
-    struct mailbox &sgrt_mb = cgrt_dtsk.cprt_task->get_mailbox();
-    struct fwk_disp_ctrl &sgrt_dctrl = cgrt_text.sgrt_dctrl;
-    struct fwk_disp_info *sprt_disp = sgrt_dctrl.sprt_di;
-    struct mail *sprt_mail;
-    struct fwk_fb_var_screen_info sgrt_var;
+    struct mailbox &sgtc_mb = cgrt_dtsk.cprt_task->get_mailbox();
+    struct fwk_disp_ctrl &sgtc_dctrl = cgrt_text.sgtc_dctrl;
+    struct fwk_disp_info *sptr_disp = sgtc_dctrl.sptr_di;
+    struct mail *sptr_mail;
+    struct fwk_fb_var_screen_info sgtc_var;
     kuint8_t op = 0;
     kssize_t size, offset = 0;
     kusize_t page_index = 0;
 
-    fwk_display_frame_exchange(sprt_disp);
+    fwk_display_frame_exchange(sptr_disp);
     display_task_clear(cgrt_text);
-    display_task_cursor(cgrt_text, 0, 0, sprt_disp->width, sprt_disp->height);
+    display_task_cursor(cgrt_text, 0, 0, sptr_disp->width, sptr_disp->height);
 
     page_index = cgrt_text.cur_page;
     offset = cgrt_text.text_pages[page_index];
-    while (!IS_DISP_FRAME_FULL(&sgrt_dctrl))
+    while (!IS_DISP_FRAME_FULL(&sgtc_dctrl))
     {
-        file_lseek(sprt_file, offset);
-        size = file_read(sprt_file, g_display_buffer, sizeof(g_display_buffer) - 4);
+        file_lseek(sptr_file, offset);
+        size = file_read(sptr_file, g_display_buffer, sizeof(g_display_buffer) - 4);
         if (size <= 0)
             return 0;
 
         g_display_buffer[size] = '\0';
-        offset += fwk_display_word(&sgrt_dctrl, g_display_buffer);
+        offset += fwk_display_word(&sgtc_dctrl, g_display_buffer);
     }
 
-    virt_ioctl(cgrt_dtsk.fd, NR_FB_IOGET_VARINFO, &sgrt_var);
-    if (!sgrt_var.yoffset)
-        sgrt_var.yoffset += sgrt_var.yres;
+    virt_ioctl(cgrt_dtsk.fd, NR_FB_IOGET_VARINFO, &sgtc_var);
+    if (!sgtc_var.yoffset)
+        sgtc_var.yoffset += sgtc_var.yres;
     else
-        sgrt_var.yoffset = 0;
+        sgtc_var.yoffset = 0;
     
-    virt_ioctl(cgrt_dtsk.fd, NR_FB_IOSET_VARINFO, &sgrt_var);
+    virt_ioctl(cgrt_dtsk.fd, NR_FB_IOSET_VARINFO, &sgtc_var);
 
     do {
-        sprt_mail = mail_recv(&sgrt_mb, 0);
-        if (!isValid(sprt_mail))
+        sptr_mail = mail_recv(&sgtc_mb, 0);
+        if (!isValid(sptr_mail))
         {
             msleep(200);
             continue;
         }
 
         op = 1;
-        if (sprt_mail->sprt_msg->type == NR_MAIL_TYPE_SERIAL)
+        if (sptr_mail->sptr_msg->type == NR_MAIL_TYPE_SERIAL)
         {
-            kchar_t *buffer = (kchar_t *)sprt_mail->sprt_msg[0].buffer;
+            kchar_t *buffer = (kchar_t *)sptr_mail->sptr_msg[0].buffer;
 
             if (!kstrncmp(buffer, "up", 2))
                 page_index = page_index ? (page_index - 1) : 0;
@@ -401,7 +401,7 @@ static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &c
                 op = 0;
         }
 
-        mail_recv_finish(sprt_mail);
+        mail_recv_finish(sptr_mail);
 
     } while (!op);
 
@@ -417,20 +417,20 @@ static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &c
  */
 void crt_disp_text_t::show(crt_disp_task_t &cgrt_dtsk)
 {
-    struct fs_stream *sprt_file;
+    struct fs_stream *sptr_file;
 
     if (!this->text_pages)
         return;
 
-    sprt_file = file_open(this->text[this->cur_text], O_RDONLY);
-    if (!isValid(sprt_file))
+    sptr_file = file_open(this->text[this->cur_text], O_RDONLY);
+    if (!isValid(sptr_file))
         goto END;
 
     this->cur_page = 0;
     memset_ex(this->text_pages, 0, this->pages);
 
-    while (display_task_text(cgrt_dtsk, *this, sprt_file) > 0);
-    file_close(sprt_file);
+    while (display_task_text(cgrt_dtsk, *this, sptr_file) > 0);
+    file_close(sptr_file);
 
 END:
     if ((this->cur_text++) >= this->num)
@@ -456,9 +456,9 @@ static void *display_task_entry(void *args)
     cgrt_logo.set_src(g_display_logo);
     cgrt_txt.set_src(g_display_ebook_list, ARRAY_SIZE(g_display_ebook_list));
 
-    mrt_preempt_disable();
+    mr_preempt_disable();
     cgrt_logo.show();
-    mrt_preempt_enable();
+    mr_preempt_enable();
     sleep(5);
 
     for (;;)
@@ -492,8 +492,8 @@ kint32_t display_task_init(void)
     if (!cprt_task)
         return -ER_FAILD;
 
-    struct mailbox &sgrt_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgrt_mb, cprt_task->get_self(), "display-task-mailbox");
+    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cprt_task->get_self(), "display-task-mailbox");
 
     return ER_NORMAL;
 }

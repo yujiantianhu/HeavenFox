@@ -54,11 +54,11 @@
  */
 static void imx6ull_main_freq_configure(void)
 {
-    srt_hal_imx_ccm_t *sprt_clkRegs;
-    srt_hal_imx_ccm_pll_t *sprt_ccmPll;
+    srt_hal_imx_ccm_t *sptr_clkRegs;
+    srt_hal_imx_ccm_pll_t *sptr_ccmPll;
 
-    sprt_clkRegs = IMX_CCM_PORT_ENTRY();
-    sprt_ccmPll  = IMX_CCM_PLL_PORT_ENTRY();
+    sptr_clkRegs = IMX_CCM_PORT_ENTRY();
+    sptr_ccmPll  = IMX_CCM_PLL_PORT_ENTRY();
 
     /*!<
      * CCSR:
@@ -68,9 +68,9 @@ static void imx6ull_main_freq_configure(void)
      * bit2:		PLL1_SW_CLK_SEL. 0: pll1_main_clk; 1: step_clk
      * bit0:		PLL3_SW_CLK_SEL. 0: pll3_main_clk; 1: pll3 bypass clock
      */
-    mrt_clrbitl(mrt_bit(8), &sprt_clkRegs->CCSR);
-    mrt_setbitl(mrt_bit(2), &sprt_clkRegs->CCSR);
-    while (!mrt_isBitSetl(mrt_bit(2), &sprt_clkRegs->CCSR));
+    mr_clrbitl(mr_bit(8), &sptr_clkRegs->CCSR);
+    mr_setbitl(mr_bit(2), &sptr_clkRegs->CCSR);
+    while (!mr_isBitSetl(mr_bit(2), &sptr_clkRegs->CCSR));
 
     /*!< 
      * PLL_ARMn:
@@ -81,35 +81,35 @@ static void imx6ull_main_freq_configure(void)
      * bit12:		Power down the PLL
      * bit[6:0]:	div_select. PLL divider, Fout = Fin * div_select / 2.0
      */
-    mrt_clrbitl(mrt_bit(13), &sprt_ccmPll->PLL_ARM);
+    mr_clrbitl(mr_bit(13), &sptr_ccmPll->PLL_ARM);
 
     /*!< 
      * CACRR
      * bit[2:0]:	ARM_PODF. divide by (ARM_PODF + 1), ARM_PODF = 000, 001, ..., 111
      */
-    mrt_clrbitl(mrt_bit(0) | mrt_bit(1) | mrt_bit(2), &sprt_clkRegs->CACRR);
-    mrt_setbitl(mrt_bit(0), &sprt_clkRegs->CACRR);
+    mr_clrbitl(mr_bit(0) | mr_bit(1) | mr_bit(2), &sptr_clkRegs->CACRR);
+    mr_setbitl(mr_bit(0), &sptr_clkRegs->CACRR);
 
     /*!<
      * Fin = osc_clk = 24MHz. Because Main_Freq = PLL1 devided (ARM_PODF + 1), if target Main_Freq = 528MHz,
      * ARM_PODF = 1, the PLL1 should be configure 1056MHz. That is to say, Fout = 1056MHz.
      * ===> div_select = (1056 * 2.0) / 24 = 88
      */
-    mrt_clrbitl(0x7f, &sprt_ccmPll->PLL_ARM);
-    mrt_setbitl(88, &sprt_ccmPll->PLL_ARM);
+    mr_clrbitl(0x7f, &sptr_ccmPll->PLL_ARM);
+    mr_setbitl(88, &sptr_ccmPll->PLL_ARM);
 
     /*!< delay nop */
-    mrt_delay_nop();
+    mr_delay_nop();
 
     /*!< Enable PLL */
-    mrt_setbitl(mrt_bit(13), &sprt_ccmPll->PLL_ARM);
+    mr_setbitl(mr_bit(13), &sptr_ccmPll->PLL_ARM);
 
     /*!< switch pll1_sw_clk to PLL1 */
-    mrt_clrbitl(mrt_bit(2), &sprt_clkRegs->CCSR);
-    while (!mrt_isBitResetl(mrt_bit(2), &sprt_clkRegs->CCSR));
+    mr_clrbitl(mr_bit(2), &sptr_clkRegs->CCSR);
+    while (!mr_isBitResetl(mr_bit(2), &sptr_clkRegs->CCSR));
 
     /*!< delay nop */
-    mrt_delay_nop();
+    mr_delay_nop();
 }
 
 /*!
@@ -120,10 +120,10 @@ static void imx6ull_main_freq_configure(void)
  */
 static void imx6ull_sys_freq_configure(void)
 {
-    srt_hal_imx_ccm_pll_t *sprt_ccmPll;
+    srt_hal_imx_ccm_pll_t *sptr_ccmPll;
     kuint32_t reg_temp;
 
-    sprt_ccmPll = IMX_CCM_PLL_PORT_ENTRY();
+    sptr_ccmPll = IMX_CCM_PLL_PORT_ENTRY();
 
     /*!< 
      * PLL_SYSn:
@@ -136,8 +136,8 @@ static void imx6ull_sys_freq_configure(void)
      * 
      * PLL_SYS = Fref * 22 = 528MHz
      */
-    mrt_setbitl(mrt_bit(0), &sprt_ccmPll->PLL_SYS);
-    while (!mrt_isBitSetl(mrt_bit(0), &sprt_ccmPll->PLL_SYS));
+    mr_setbitl(mr_bit(0), &sptr_ccmPll->PLL_SYS);
+    while (!mr_isBitSetl(mr_bit(0), &sptr_ccmPll->PLL_SYS));
 
     /*!<
      * PFD_528n:
@@ -149,29 +149,29 @@ static void imx6ull_sys_freq_configure(void)
      * bit[5:0]: PFD0_FRAC. This field controls the fractional divide value. 
      * 			 The resulting frequency shall be 528 * 18 / PFD0_FRAC where PFD0_FRAC is in the range 12 ~ 35
      */
-    reg_temp = mrt_readl(&sprt_ccmPll->PFD_528);
+    reg_temp = mr_readl(&sptr_ccmPll->PFD_528);
 
     /*!< if set PFD0 = 352MHz, PFD0_FRAC = (528 * 18) / 352 = 27 */
-    mrt_clrbitl(0x3f << 0, &reg_temp);
-    mrt_setbitl(27   << 0, &reg_temp);
+    mr_clrbitl(0x3f << 0, &reg_temp);
+    mr_setbitl(27   << 0, &reg_temp);
 
     /*!< if set PFD1 = 594MHz, PFD1_FRAC = (528 * 18) / 594 = 16 */
-    mrt_clrbitl(0x3f << 8, &reg_temp);
-    mrt_setbitl(16   << 8, &reg_temp);
+    mr_clrbitl(0x3f << 8, &reg_temp);
+    mr_setbitl(16   << 8, &reg_temp);
 
     /*!< if set PFD2 = 396MHz, PFD2_FRAC = (528 * 18) / 396 = 24 */
-    mrt_clrbitl(0x3f << 16, &reg_temp);
-    mrt_setbitl(24   << 16, &reg_temp);
+    mr_clrbitl(0x3f << 16, &reg_temp);
+    mr_setbitl(24   << 16, &reg_temp);
 
     /*!< if set PFD3 = 297MHz, PFD3_FRAC = (528 * 18) / 297 = 32*/
-    mrt_clrbitl(0x3f << 24, &reg_temp);
-    mrt_setbitl(32   << 24, &reg_temp);
+    mr_clrbitl(0x3f << 24, &reg_temp);
+    mr_setbitl(32   << 24, &reg_temp);
 
     /*!< update PFD_528 register */
-    mrt_writel(reg_temp, &sprt_ccmPll->PFD_528);
+    mr_writel(reg_temp, &sptr_ccmPll->PFD_528);
 
     /*!< delay nop */
-    mrt_delay_nop();
+    mr_delay_nop();
 }
 
 /*!
@@ -182,12 +182,12 @@ static void imx6ull_sys_freq_configure(void)
  */
 static void imx6ull_periph_freq_configure(void)
 {
-    srt_hal_imx_ccm_t *sprt_clkRegs;
-    srt_hal_imx_ccm_pll_t *sprt_ccmPll;
+    srt_hal_imx_ccm_t *sptr_clkRegs;
+    srt_hal_imx_ccm_pll_t *sptr_ccmPll;
     kuint32_t reg_temp;
 
-    sprt_clkRegs = IMX_CCM_PORT_ENTRY();
-    sprt_ccmPll  = IMX_CCM_PLL_PORT_ENTRY();
+    sptr_clkRegs = IMX_CCM_PORT_ENTRY();
+    sptr_ccmPll  = IMX_CCM_PLL_PORT_ENTRY();
 
     /*!< 
      * PLL_USB1n:
@@ -201,45 +201,45 @@ static void imx6ull_periph_freq_configure(void)
      * 
      * PLL_USB1n = Fref * 20 = 480MHz
      */
-    mrt_clrbitl(mrt_bit(0), &sprt_ccmPll->PLL_USB1);
-    while (!mrt_isBitResetl(mrt_bit(0), &sprt_ccmPll->PLL_USB1));
+    mr_clrbitl(mr_bit(0), &sptr_ccmPll->PLL_USB1);
+    while (!mr_isBitResetl(mr_bit(0), &sptr_ccmPll->PLL_USB1));
 
     /*!<
      * PFD_480n:
      *	The same as PFD_520n
      */
-    reg_temp = mrt_readl(&sprt_ccmPll->PFD_480);
+    reg_temp = mr_readl(&sptr_ccmPll->PFD_480);
 
     /*!< if set PFD0 = 720MHz, PFD0_FRAC = (480 * 18) / 720 = 12 */
-    mrt_clrbitl(0x3f << 0, &reg_temp);
-    mrt_setbitl(12   << 0, &reg_temp);
+    mr_clrbitl(0x3f << 0, &reg_temp);
+    mr_setbitl(12   << 0, &reg_temp);
 
     /*!< if set PFD1 = 540MHz, PFD1_FRAC = (480 * 18) / 540 = 16 */
-    mrt_clrbitl(0x3f << 8, &reg_temp);
-    mrt_setbitl(16   << 8, &reg_temp);
+    mr_clrbitl(0x3f << 8, &reg_temp);
+    mr_setbitl(16   << 8, &reg_temp);
 
     /*!< if set PFD2 = 508.2MHz, PFD2_FRAC = (480 * 18) / 508.2 = 17 */
-    mrt_clrbitl(0x3f << 16, &reg_temp);
-    mrt_setbitl(17   << 16, &reg_temp);
+    mr_clrbitl(0x3f << 16, &reg_temp);
+    mr_setbitl(17   << 16, &reg_temp);
 
     /*!< if set PFD3 = 454.7MHz, PFD3_FRAC = (480 * 18) / 454.7 = 19*/
-    mrt_clrbitl(0x3f << 24, &reg_temp);
-    mrt_setbitl(19   << 24, &reg_temp);
+    mr_clrbitl(0x3f << 24, &reg_temp);
+    mr_setbitl(19   << 24, &reg_temp);
 
     /*!< update PFD_480 register */
-    mrt_writel(reg_temp, &sprt_ccmPll->PFD_480);
+    mr_writel(reg_temp, &sptr_ccmPll->PFD_480);
 
     /*!< delay nop */
-    mrt_delay_nop();
+    mr_delay_nop();
 
     /*!< Disable clock unused */
-    mrt_writel(0, &sprt_ccmPll->PLL_USB2);
-    mrt_writel(0, &sprt_ccmPll->PLL_AUDIO);
-    mrt_writel(0, &sprt_ccmPll->PLL_VIDEO);
-    mrt_writel(0, &sprt_ccmPll->PLL_ENET);
+    mr_writel(0, &sptr_ccmPll->PLL_USB2);
+    mr_writel(0, &sptr_ccmPll->PLL_AUDIO);
+    mr_writel(0, &sptr_ccmPll->PLL_VIDEO);
+    mr_writel(0, &sptr_ccmPll->PLL_ENET);
 
     /*!< select pll3_main_clk for pll3_sw_clk */
-    mrt_clrbitl(mrt_bit(0), &sprt_clkRegs->CCSR);
+    mr_clrbitl(mr_bit(0), &sptr_clkRegs->CCSR);
 
     /*!< AHB Clock */
     /*!< 
@@ -262,12 +262,12 @@ static void imx6ull_periph_freq_configure(void)
      * default divider: 3
      * ===> AHB clk = 396MHz / 3 = 132MHz
      */
-    mrt_clrbitl(mrt_bit(18) | mrt_bit(19), &sprt_clkRegs->CBCMR);
-    mrt_setbitl(mrt_bit(18), &sprt_clkRegs->CBCMR);
-    mrt_clrbitl(mrt_bit(25), &sprt_clkRegs->CBCDR);
+    mr_clrbitl(mr_bit(18) | mr_bit(19), &sptr_clkRegs->CBCMR);
+    mr_setbitl(mr_bit(18), &sptr_clkRegs->CBCMR);
+    mr_clrbitl(mr_bit(25), &sptr_clkRegs->CBCDR);
 
     /*!< delay nop */
-    mrt_delay_nop();
+    mr_delay_nop();
 
     /*!< 
      * IPG_Clk
@@ -278,11 +278,11 @@ static void imx6ull_periph_freq_configure(void)
      * 
      * here set IPG_PODF = 0x01, so divider = 2, ipg_clk = 132MHz / 2 = 66MHz
      */
-    mrt_clrbitl(mrt_bit(8) | mrt_bit(9), &sprt_clkRegs->CBCDR);
-    mrt_setbitl(mrt_bit(8), &sprt_clkRegs->CBCDR);
+    mr_clrbitl(mr_bit(8) | mr_bit(9), &sptr_clkRegs->CBCDR);
+    mr_setbitl(mr_bit(8), &sptr_clkRegs->CBCDR);
 
     /*!< delay nop */
-    mrt_delay_nop();
+    mr_delay_nop();
 
     /*!<
      * PERCLK_CLK
@@ -294,11 +294,11 @@ static void imx6ull_periph_freq_configure(void)
      * 
      * here set PERCLK_CLK_SEL = 0, PERCLK_PODF = 0, perclk_clk = ipg_clk
      */
-    mrt_clrbitl(mrt_bit(6), &sprt_clkRegs->CSCMR1);
-    mrt_clrbitl(0x3f, &sprt_clkRegs->CSCMR1);
+    mr_clrbitl(mr_bit(6), &sptr_clkRegs->CSCMR1);
+    mr_clrbitl(0x3f, &sptr_clkRegs->CSCMR1);
 
     /*!< delay nop */
-    mrt_delay_nop();
+    mr_delay_nop();
 }
 
 /*!
@@ -331,39 +331,39 @@ static void imx6ull_clk_initial(void)
 
     /*!< Enable/Disable Clock */
     /*!< CCM_CCGR0 */
-    mrt_writel(IMX6UL_CCM_CCGR_BIT(0)  | IMX6UL_CCM_CCGR_BIT(1)  | 		/*!< aips_tz1 and aips_tz2 */
+    mr_writel(IMX6UL_CCM_CCGR_BIT(0)  | IMX6UL_CCM_CCGR_BIT(1)  | 		/*!< aips_tz1 and aips_tz2 */
                IMX6UL_CCM_CCGR_BIT(11), 								/*!< cpu debug */
                g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR0]);
 
     /*!< CCM_CCGR1 */
-    mrt_writel(IMX6UL_CCM_CCGR_BIT(9) | IMX6UL_CCM_CCGR_BIT(14), 		/*!< sim_s and csu */
+    mr_writel(IMX6UL_CCM_CCGR_BIT(9) | IMX6UL_CCM_CCGR_BIT(14), 		/*!< sim_s and csu */
                g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR1]);
 
     /*!< CCM_CCGR2 */
-    mrt_writel(IMX6UL_CCM_CCGR_BIT(2)  | IMX6UL_CCM_CCGR_BIT(8) | 		/*!< iomuxc_snvs and ipmux1 */
+    mr_writel(IMX6UL_CCM_CCGR_BIT(2)  | IMX6UL_CCM_CCGR_BIT(8) | 		/*!< iomuxc_snvs and ipmux1 */
                IMX6UL_CCM_CCGR_BIT(9) | IMX6UL_CCM_CCGR_BIT(10), 		/*!< ipmux2 and ipmux3 */
                g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR2]);
 
     /*!< CCM_CCGR3 */
-    mrt_writel(IMX6UL_CCM_CCGR_BIT(4)  | IMX6UL_CCM_CCGR_BIT(7) |		/*!< CA7 CCM DAP and iomux_ipt_clk_io */
+    mr_writel(IMX6UL_CCM_CCGR_BIT(4)  | IMX6UL_CCM_CCGR_BIT(7) |		/*!< CA7 CCM DAP and iomux_ipt_clk_io */
                IMX6UL_CCM_CCGR_BIT(9) | IMX6UL_CCM_CCGR_BIT(10) |		/*!< a7 clkdiv patch and mmdc_core_aclk_fast_core_p0 */
                IMX6UL_CCM_CCGR_BIT(13) | IMX6UL_CCM_CCGR_BIT(14) |		/*!< mmdc_core_ipg_clk_p1 and ocram */
                IMX6UL_CCM_CCGR_BIT(15), 								/*!< iomuxc_snvs_gpr */
                g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR3]);
 
     /*!< CCM_CCGR4 */
-    mrt_writel(IMX6UL_CCM_CCGR_BIT(1)  | IMX6UL_CCM_CCGR_BIT(2)  |		/*!< iomuxc and iomuxc gpr */
+    mr_writel(IMX6UL_CCM_CCGR_BIT(1)  | IMX6UL_CCM_CCGR_BIT(2)  |		/*!< iomuxc and iomuxc gpr */
                IMX6UL_CCM_CCGR_BIT(3)  | IMX6UL_CCM_CCGR_BIT(4)  |		/*!< sim_cpu and cxapbsyncbridge slave */
                IMX6UL_CCM_CCGR_BIT(6) | IMX6UL_CCM_CCGR_BIT(7), 		/*!< pl301_mx6qper1_bch and pl301_mx6qper2_mainclk */
                g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR4]);
 
     /*!< CCM_CCGR5 */
-    mrt_writel(IMX6UL_CCM_CCGR_BIT(0)  | IMX6UL_CCM_CCGR_BIT(2)  |		/*!< rom and snvs dryice */
+    mr_writel(IMX6UL_CCM_CCGR_BIT(0)  | IMX6UL_CCM_CCGR_BIT(2)  |		/*!< rom and snvs dryice */
                IMX6UL_CCM_CCGR_BIT(8) | IMX6UL_CCM_CCGR_BIT(10), 		/*!< sim_main and snvs_lp */
                g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR5]);
 
     /*!< CCM_CCGR6 */
-    mrt_writel(IMX6UL_CCM_CCGR_BIT(4)  | IMX6UL_CCM_CCGR_BIT(9) |		/*!< ipmux4 and aips_tz3 */
+    mr_writel(IMX6UL_CCM_CCGR_BIT(4)  | IMX6UL_CCM_CCGR_BIT(9) |		/*!< ipmux4 and aips_tz3 */
                IMX6UL_CCM_CCGR_BIT(11) | IMX6UL_CCM_CCGR_BIT(14), 		/*!< anadig and csu */
                g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR6]);
 }

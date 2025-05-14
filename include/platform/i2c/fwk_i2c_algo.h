@@ -42,7 +42,7 @@ struct fwk_i2c_msg
 
 struct fwk_i2c_algo
 {
-	kint32_t (*master_xfer)(struct fwk_i2c_adapter *sprt_adap, struct fwk_i2c_msg *sprt_msgs, kint32_t num);
+	kint32_t (*master_xfer)(struct fwk_i2c_adapter *sptr_adap, struct fwk_i2c_msg *sptr_msgs, kint32_t num);
 //	kint32_t (*smbus_xfer) (struct fwk_i2c_adapter *adap, kuint16_t addr, kuint16_t flags, kuint8_t read_write, kuint8_t command, kssize_t size, union i2c_smbus_data *data);
 
 	/*!< To determine what the adapter supports */

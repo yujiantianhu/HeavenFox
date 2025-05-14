@@ -31,7 +31,7 @@ struct fsl_mouse_drv
 	kuint32_t major;
 	kuint32_t minor;
 
-	struct fwk_cdev *sprt_cdev;
+	struct fwk_cdev *sptr_cdev;
 
 	void *ptrData;
 };
@@ -50,17 +50,17 @@ struct fsl_mouse_drv
 
 typedef struct fsl_mouse_desc
 {
-    const struct fwk_usb_endpoint_desc *sprt_ep_dt;
-    const struct fwk_usb_interface_desc *sprt_if_dt;
-    const struct fwk_usb_config_desc *sprt_config_dt;
-    const struct fwk_usb_device_desc *sprt_device_dt;
-    const struct fwk_usb_hid_desc *sprt_hid_dt;
+    const struct fwk_usb_endpoint_desc *sptr_ep_dt;
+    const struct fwk_usb_interface_desc *sptr_if_dt;
+    const struct fwk_usb_config_desc *sptr_config_dt;
+    const struct fwk_usb_device_desc *sptr_device_dt;
+    const struct fwk_usb_hid_desc *sptr_hid_dt;
 
 } srt_fsl_mouse_desc_t;
 
 /*!< The globals */
 /*!< Hid mouse endpoint descriptor */
-static const struct fwk_usb_endpoint_desc sgrt_fsl_mouse_ep_dt[] =
+static const struct fwk_usb_endpoint_desc sgtc_fsl_mouse_ep_dt[] =
 {
     {
         .bLength = FWK_USB_DT_ENDPOINT_SIZE,
@@ -74,7 +74,7 @@ static const struct fwk_usb_endpoint_desc sgrt_fsl_mouse_ep_dt[] =
 };
 
 /*!< Hid mouse interface descriptor */
-static const struct fwk_usb_interface_desc sgrt_fsl_mouse_if_dt[] =
+static const struct fwk_usb_interface_desc sgtc_fsl_mouse_if_dt[] =
 {
     {
         .bLength = FWK_USB_DT_INTERFACE_SIZE,
@@ -82,7 +82,7 @@ static const struct fwk_usb_interface_desc sgrt_fsl_mouse_if_dt[] =
 
         .bInterfaceNumber = 0U,
         .bAlternateSetting = 0U,
-        .bNumEndpoints = ARRAY_SIZE(sgrt_fsl_mouse_ep_dt),
+        .bNumEndpoints = ARRAY_SIZE(sgtc_fsl_mouse_ep_dt),
         .bInterfaceClass = FWK_USB_HID_CLASS,
         .bInterfaceSubClass = FWK_USB_HID_SUBCLASS_GRUB,
         .bInterfaceProtocol = FWK_USB_HID_PROTOCOL_MOUSE,
@@ -91,14 +91,14 @@ static const struct fwk_usb_interface_desc sgrt_fsl_mouse_if_dt[] =
 };
 
 /*!< Hid mouse configuration descriptor */
-static const struct fwk_usb_config_desc sgrt_fsl_mouse_config_dt[] =
+static const struct fwk_usb_config_desc sgtc_fsl_mouse_config_dt[] =
 {
     {
         .bLength = FWK_USB_DT_CONFIG_SIZE,
         .bDescriptorType = FWK_USB_DT_CONFIG,
 
         .wTotalLength = 1U,
-        .bNumInterfaces = ARRAY_SIZE(sgrt_fsl_mouse_if_dt),
+        .bNumInterfaces = ARRAY_SIZE(sgtc_fsl_mouse_if_dt),
         .bConfigurationValue = 0U,
         .iConfiguration = 0U,
         .bmAttributes = NR_USB_ConfigDescAttrSelfPower | NR_USB_ConfigDescAttrWakeUp,
@@ -107,7 +107,7 @@ static const struct fwk_usb_config_desc sgrt_fsl_mouse_config_dt[] =
 };
 
 /*!< Hid mouse device descriptor */
-static const struct fwk_usb_device_desc sgrt_fsl_mouse_device_dt =
+static const struct fwk_usb_device_desc sgtc_fsl_mouse_device_dt =
 {
     .bLength = FWK_USB_DT_DEVICE_SIZE,
     .bDescriptorType = FWK_USB_DT_DEVICE,
@@ -123,11 +123,11 @@ static const struct fwk_usb_device_desc sgrt_fsl_mouse_device_dt =
     .iManufacturer = 0,
     .iProduct = 0,
     .iSerialNumber = 0,
-    .bNumConfigurations = ARRAY_SIZE(sgrt_fsl_mouse_config_dt),
+    .bNumConfigurations = ARRAY_SIZE(sgtc_fsl_mouse_config_dt),
 };
 
 /*!< Hid mouse hid descriptor */
-static const struct fwk_usb_hid_desc sgrt_fsl_mouse_hid_dt =
+static const struct fwk_usb_hid_desc sgtc_fsl_mouse_hid_dt =
 {
     .bLenth = FWK_USB_DT_HID_SIZE,
     .bDescriptorType = FWK_USB_DT_HID,
@@ -141,13 +141,13 @@ static const struct fwk_usb_hid_desc sgrt_fsl_mouse_hid_dt =
 
 /*!< Gather all */
 static __unused
-srt_fsl_mouse_desc_t sgrt_fsl_mouse_dt =
+srt_fsl_mouse_desc_t sgtc_fsl_mouse_dt =
 {
-    .sprt_ep_dt = &sgrt_fsl_mouse_ep_dt[0],
-    .sprt_if_dt = &sgrt_fsl_mouse_if_dt[0],
-    .sprt_config_dt = &sgrt_fsl_mouse_config_dt[0],
-    .sprt_device_dt = &sgrt_fsl_mouse_device_dt,
-    .sprt_hid_dt = &sgrt_fsl_mouse_hid_dt,
+    .sptr_ep_dt = &sgtc_fsl_mouse_ep_dt[0],
+    .sptr_if_dt = &sgtc_fsl_mouse_if_dt[0],
+    .sptr_config_dt = &sgtc_fsl_mouse_config_dt[0],
+    .sptr_device_dt = &sgtc_fsl_mouse_device_dt,
+    .sptr_hid_dt = &sgtc_fsl_mouse_hid_dt,
 };
 
 /*!< API function */
@@ -167,57 +167,57 @@ irq_return_t fsl_mouse_driver_isr(void *ptrDev)
 
 /*!
  * @brief   fsl_mouse_driver_open
- * @param   sprt_inode, sprt_file
+ * @param   sptr_inode, sptr_file
  * @retval  errno
  * @note    none
  */
-static kint32_t fsl_mouse_driver_open(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fsl_mouse_driver_open(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
 {
-	struct fsl_mouse_drv *sprt_privdata;
+	struct fsl_mouse_drv *sptr_privdata;
 
-	sprt_privdata = sprt_inode->sprt_cdev->privData;
-	sprt_file->private_data = sprt_privdata;
+	sptr_privdata = sptr_inode->sptr_cdev->privData;
+	sptr_file->private_data = sptr_privdata;
 
 	return 0;
 }
 
 /*!
  * @brief   fsl_mouse_driver_close
- * @param   sprt_inode, sprt_file
+ * @param   sptr_inode, sptr_file
  * @retval  errno
  * @note    none
  */
-static kint32_t fsl_mouse_driver_close(struct fwk_inode *sprt_inode, struct fwk_file *sprt_file)
+static kint32_t fsl_mouse_driver_close(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
 {
-	sprt_file->private_data = mrt_nullptr;
+	sptr_file->private_data = mr_nullptr;
 
 	return 0;
 }
 
 /*!
  * @brief   fsl_mouse_driver_write
- * @param   sprt_file, ptrBuffer, size
+ * @param   sptr_file, ptrBuffer, size
  * @retval  errno
  * @note    none
  */
-static kssize_t fsl_mouse_driver_write(struct fwk_file *sprt_file, const kbuffer_t *ptrBuffer, kssize_t size)
+static kssize_t fsl_mouse_driver_write(struct fwk_file *sptr_file, const kbuffer_t *ptrBuffer, kssize_t size)
 {
     return 0;
 }
 
 /*!
  * @brief   fsl_mouse_driver_read
- * @param   sprt_file, ptrBuffer, size
+ * @param   sptr_file, ptrBuffer, size
  * @retval  errno
  * @note    none
  */
-static kssize_t fsl_mouse_driver_read(struct fwk_file *sprt_file, kbuffer_t *ptrBuffer, kssize_t size)
+static kssize_t fsl_mouse_driver_read(struct fwk_file *sptr_file, kbuffer_t *ptrBuffer, kssize_t size)
 {
 	return 0;
 }
 
 /*!< led-template driver operation */
-const struct fwk_file_oprts sgrt_fsl_mouse_driver_oprts =
+const struct fwk_file_oprts sgtc_fsl_mouse_driver_oprts =
 {
 	.open	= fsl_mouse_driver_open,
 	.close	= fsl_mouse_driver_close,
@@ -228,16 +228,16 @@ const struct fwk_file_oprts sgrt_fsl_mouse_driver_oprts =
 /*!< --------------------------------------------------------------------- */
 /*!
  * @brief   fsl_mouse_driver_probe
- * @param   sprt_dev
+ * @param   sptr_dev
  * @retval  errno
  * @note    none
  */
-static kint32_t fsl_mouse_driver_probe(struct fwk_platdev *sprt_dev)
+static kint32_t fsl_mouse_driver_probe(struct fwk_platdev *sptr_dev)
 {
 	kint32_t retval;
 
     /*!< Register interrupt handler */
-	retval = fwk_request_irq(75, fsl_mouse_driver_isr, 0, FSL_MOUSE_DRIVER_NAME, mrt_nullptr);
+	retval = fwk_request_irq(75, fsl_mouse_driver_isr, 0, FSL_MOUSE_DRIVER_NAME, mr_nullptr);
 	if (retval < 0)
         return -ER_FAILD;
 
@@ -246,23 +246,23 @@ static kint32_t fsl_mouse_driver_probe(struct fwk_platdev *sprt_dev)
 
 /*!
  * @brief   fsl_mouse_driver_remove
- * @param   sprt_dev
+ * @param   sptr_dev
  * @retval  errno
  * @note    none
  */
-static kint32_t fsl_mouse_driver_remove(struct fwk_platdev *sprt_dev)
+static kint32_t fsl_mouse_driver_remove(struct fwk_platdev *sptr_dev)
 {
 
 	return ER_NORMAL;
 }
 
 /*!< platform instance */
-static struct fwk_platdrv sgrt_fsl_mouse_platdriver =
+static struct fwk_platdrv sgtc_fsl_mouse_platdriver =
 {
 	.probe	= fsl_mouse_driver_probe,
 	.remove	= fsl_mouse_driver_remove,
 	
-	.sgrt_driver =
+	.sgtc_driver =
 	{
 		.name 	= FSL_MOUSE_DRIVER_NAME,
 		.id 	= -1,
@@ -278,7 +278,7 @@ static struct fwk_platdrv sgrt_fsl_mouse_platdriver =
  */
 kint32_t __fwk_init fsl_mouse_driver_init(void)
 {
-	return fwk_register_platdriver(&sgrt_fsl_mouse_platdriver);
+	return fwk_register_platdriver(&sgtc_fsl_mouse_platdriver);
 }
 
 /*!
@@ -289,7 +289,7 @@ kint32_t __fwk_init fsl_mouse_driver_init(void)
  */
 void __fwk_exit fsl_mouse_driver_exit(void)
 {
-	fwk_unregister_platdriver(&sgrt_fsl_mouse_platdriver);
+	fwk_unregister_platdriver(&sgtc_fsl_mouse_platdriver);
 }
 
 // IMPORT_DRIVER_INIT(fsl_mouse_driver_init);

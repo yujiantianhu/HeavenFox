@@ -19,26 +19,26 @@
 
 /*!< API functions */
 /*!
- * @brief   map sprt_map(type = conf) to sprt_setting
- * @param   sprt_pctldev: pinctrl_dev
+ * @brief   map sptr_map(type = conf) to sptr_setting
+ * @param   sptr_pctldev: pinctrl_dev
  * @param   name: pin name (struct fwk_pinctrl_desc::name)
  * @retval  error code
  * @note    none
  */
-kint32_t fwk_pinconf_get_by_name(struct fwk_pinctrl_dev *sprt_pctldev, const kchar_t *name)
+kint32_t fwk_pinconf_get_by_name(struct fwk_pinctrl_dev *sptr_pctldev, const kchar_t *name)
 {
-    struct fwk_pinctrl_desc *sprt_desc;
-    const struct fwk_pinctrl_ops *sprt_pctlops;
+    struct fwk_pinctrl_desc *sptr_desc;
+    const struct fwk_pinctrl_ops *sptr_pctlops;
     const kchar_t *pin_name;
     kuint32_t i, pin;
 
-    sprt_desc = sprt_pctldev->sprt_desc;
-    sprt_pctlops = sprt_desc->sprt_pctlops;
+    sptr_desc = sptr_pctldev->sptr_desc;
+    sptr_pctlops = sptr_desc->sptr_pctlops;
 
-    for (i = 0; i < sprt_desc->npins; i++)
+    for (i = 0; i < sptr_desc->npins; i++)
     {
-        pin = sprt_desc->sprt_pins[i].number;
-        pin_name = sprt_pctlops->get_pin_desc(sprt_pctldev, pin);
+        pin = sptr_desc->sptr_pins[i].number;
+        pin_name = sptr_pctlops->get_pin_desc(sptr_pctldev, pin);
 
         if (!strcmp(name, pin_name))
             return pin;
@@ -48,28 +48,28 @@ kint32_t fwk_pinconf_get_by_name(struct fwk_pinctrl_dev *sprt_pctldev, const kch
 }
 
 /*!
- * @brief   map sprt_map(type = conf) to sprt_setting
- * @param   sprt_map: current map (source data)
- * @param   sprt_setting: destination data
+ * @brief   map sptr_map(type = conf) to sptr_setting
+ * @param   sptr_map: current map (source data)
+ * @param   sptr_setting: destination data
  * @retval  error code
  * @note    none
  */
-kint32_t fwk_pinconf_map_to_setting(struct fwk_pinctrl_map const *sprt_map, struct fwk_pinctrl_setting *sprt_setting)
+kint32_t fwk_pinconf_map_to_setting(struct fwk_pinctrl_map const *sptr_map, struct fwk_pinctrl_setting *sptr_setting)
 {
-    struct fwk_pinctrl_dev *sprt_pctldev;
+    struct fwk_pinctrl_dev *sptr_pctldev;
     kint32_t pin;
 
-    if (sprt_setting->type != NR_FWK_PINCTRL_PIN_CONF)
+    if (sptr_setting->type != NR_FWK_PINCTRL_PIN_CONF)
         return -ER_FAULT;
 
-    sprt_pctldev = sprt_setting->sprt_pctldev;
-    pin = fwk_pinconf_get_by_name(sprt_pctldev, sprt_map->ugrt_data.sgrt_configs.group_or_pin);
+    sptr_pctldev = sptr_setting->sptr_pctldev;
+    pin = fwk_pinconf_get_by_name(sptr_pctldev, sptr_map->ugtr_data.sgtc_configs.group_or_pin);
     if (pin < 0)
         return pin;
 
-    sprt_setting->ugrt_data.sgrt_configs.group_or_pin = pin;
-    sprt_setting->ugrt_data.sgrt_configs.configs = sprt_map->ugrt_data.sgrt_configs.configs;
-    sprt_setting->ugrt_data.sgrt_configs.num_configs = sprt_map->ugrt_data.sgrt_configs.num_configs;
+    sptr_setting->ugtr_data.sgtc_configs.group_or_pin = pin;
+    sptr_setting->ugtr_data.sgtc_configs.configs = sptr_map->ugtr_data.sgtc_configs.configs;
+    sptr_setting->ugtr_data.sgtc_configs.num_configs = sptr_map->ugtr_data.sgtc_configs.num_configs;
 
     return ER_NORMAL;
 }

@@ -24,7 +24,7 @@
 
 /*!< The functions */
 extern void initIRQ(void);
-extern void fwk_of_irq_init(const struct fwk_of_device_id *sprt_matches);
+extern void fwk_of_irq_init(const struct fwk_of_device_id *sptr_matches);
 
 #ifdef __cplusplus
 	}

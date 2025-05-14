@@ -99,42 +99,42 @@ extern const dync_init_t *dync_init_sections[];
 extern const dync_exit_t *dync_exit_sections[];
 
 /*!< take every member from start to end */
-#define mrt_foreach_member(ptr, start, end)	\
+#define mr_foreach_member(ptr, start, end)	\
 	for (ptr = start; ptr < end; ptr++)
 
 /*!< take every member from start to end */
 /*!< add judgement: if (ptr != 0) */
-#define mrt_foreach_dync_secs(ptr, start, end)	\
-	mrt_foreach_member(ptr, start, end)	\
+#define mr_foreach_dync_secs(ptr, start, end)	\
+	mr_foreach_member(ptr, start, end)	\
 		if (ptr)
 
-#define FOREACH_DYNC_SEC_ALL(ptr, start, end)		mrt_foreach_dync_secs(ptr, start, end)
-#define FOREACH_DYNC_SEC_ANY(ptr, domain, level)	mrt_foreach_dync_secs(ptr, (domain)[level], (domain)[level + 1])
+#define FOREACH_DYNC_SEC_ALL(ptr, start, end)		mr_foreach_dync_secs(ptr, start, end)
+#define FOREACH_DYNC_SEC_ANY(ptr, domain, level)	mr_foreach_dync_secs(ptr, (domain)[level], (domain)[level + 1])
 #define FOREACH_DYNC_SEC_INIT(ptr, level)			FOREACH_DYNC_SEC_ANY(ptr, dync_init_sections, level)
 #define FOREACH_DYNC_SEC_EXIT(ptr, level)			FOREACH_DYNC_SEC_ANY(ptr, dync_exit_sections, level)
 
 /* for recycle */
 /* init */
-#define mrt_foreach_init(ptr)						FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_START)
-#define mrt_foreach_early_init(ptr)					FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_EARLY)
-#define mrt_foreach_late_init(ptr)					FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_LATE)
-#define mrt_foreach_kernel_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_KERNEL)
-#define mrt_foreach_rootfs_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_ROOTFS)
-#define mrt_foreach_platform_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_PLATFORM)
-#define mrt_foreach_pattern_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_PATTERN)
-#define mrt_foreach_device_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_DEVICE)
-#define mrt_foreach_driver_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_DRIVER)
+#define mr_foreach_init(ptr)						FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_START)
+#define mr_foreach_early_init(ptr)					FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_EARLY)
+#define mr_foreach_late_init(ptr)					FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_LATE)
+#define mr_foreach_kernel_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_KERNEL)
+#define mr_foreach_rootfs_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_ROOTFS)
+#define mr_foreach_platform_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_PLATFORM)
+#define mr_foreach_pattern_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_PATTERN)
+#define mr_foreach_device_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_DEVICE)
+#define mr_foreach_driver_init(ptr)				FOREACH_DYNC_SEC_INIT(ptr, NR_DYNC_SEC_DRIVER)
 
 /* exit */
-#define mrt_foreach_exit(ptr)						FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_START)
-#define mrt_foreach_early_exit(ptr)					FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_EARLY)
-#define mrt_foreach_late_exit(ptr)					FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_LATE)
-#define mrt_foreach_kernel_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_KERNEL)
-#define mrt_foreach_rootfs_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_ROOTFS)
-#define mrt_foreach_platform_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_PLATFORM)
-#define mrt_foreach_pattern_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_PATTERN)
-#define mrt_foreach_device_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_DEVICE)
-#define mrt_foreach_driver_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_DRIVER)
+#define mr_foreach_exit(ptr)						FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_START)
+#define mr_foreach_early_exit(ptr)					FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_EARLY)
+#define mr_foreach_late_exit(ptr)					FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_LATE)
+#define mr_foreach_kernel_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_KERNEL)
+#define mr_foreach_rootfs_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_ROOTFS)
+#define mr_foreach_platform_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_PLATFORM)
+#define mr_foreach_pattern_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_PATTERN)
+#define mr_foreach_device_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_DEVICE)
+#define mr_foreach_driver_exit(ptr)				FOREACH_DYNC_SEC_EXIT(ptr, NR_DYNC_SEC_DRIVER)
 
 /* import */
 /* init */
