@@ -46,13 +46,13 @@ typedef struct fwk_clk
 
 typedef struct fwk_clk_core
 {
-	const kchar_t	*name;
+	const kchar_t *name;
 	const struct fwk_clk_ops *sptr_ops;
 	struct fwk_clk_hw *sptr_hw;
 
 	struct fwk_clk_core	*sptr_parent;
 
-	const kchar_t	**parent_names;
+	const kchar_t **parent_names;
 	struct fwk_clk_core	**sptr_parents;
 
 	kuint32_t rate;

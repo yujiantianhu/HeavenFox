@@ -26,14 +26,16 @@
 struct imx_sdma_domain;
 struct imx_sdma_channel;
 
-enum __ERT_IMX_SDMA_SWITCH_MODE {
+enum __ERT_IMX_SDMA_SWITCH_MODE 
+{
     NR_IMX_SDMA_MODE_STATIC = 0U,                           /*!< SDMA context switch mode static */
     NR_IMX_SDMA_MODE_DYNC_LOW_PWR,                          /*!< SDMA context switch mode dynamic with low power */
     NR_IMX_SDMA_MODE_DYNC_NO_LOOP,                          /*!< SDMA context switch mode dynamic with no loop */
     NR_IMX_SDMA_MODE_DYNC,                                  /*!< SDMA context switch mode dynamic */
 };
 
-struct imx_sdma_script_context {
+struct imx_sdma_script_context 
+{
     kuint32_t PC : 14;
     kuint32_t unused1 : 1;
     kuint32_t T : 1;
@@ -71,14 +73,16 @@ struct imx_sdma_script_context {
 };
 
 /*!< sdma channel control descriptor structure */
-struct imx_sdma_ctrl_desc {
+struct imx_sdma_ctrl_desc 
+{
     kuint32_t cur_bd;                                       /*!< Address of current buffer descriptor processed  */
     kuint32_t base_bd;                                      /*!< The start address of the buffer descriptor array */
     kuint32_t chan_desc;                                    /*!< Optional for transfer */
     kuint32_t status;                                       /*!< Channel status */
 };
 
-enum __ERT_IMX_SDMA_BD_STATUS {
+enum __ERT_IMX_SDMA_BD_STATUS 
+{
     NR_IMX_SDMA_BD_DONE = mr_bit(0U),                       /*!< BD ownership, 0 means ARM core owns the BD, while 1 means SDMA owns BD. */
     NR_IMX_SDMA_BD_WRAP = mr_bit(1U),                       /*!< While this BD is last one, the next BD will be the first one */
     NR_IMX_SDMA_BD_CONTINUE = mr_bit(2U),                   /*!< Buffer is allowed to transfer/receive to/from multiple buffers */
@@ -88,7 +92,8 @@ enum __ERT_IMX_SDMA_BD_STATUS {
     NR_IMX_SDMA_BD_EXTEND = mr_bit(6U),                     /*!< Buffer descriptor extend status for SDMA scripts */
 };
 
-enum __ERT_IMX_SDMA_BD_COMMAND {
+enum __ERT_IMX_SDMA_BD_COMMAND 
+{
     NR_IMX_SDMA_BD_SETDM = 0U,                              /*!< Load SDMA data memory from ARM core memory buffer. */
     NR_IMX_SDMA_BD_GETDM,                                   /*!< Copy SDMA data memory to ARM core memory buffer. */
     NR_IMX_SDMA_BD_SETPM,                                   /*!< Load SDMA program memory from ARM core memory buffer. */
@@ -98,7 +103,8 @@ enum __ERT_IMX_SDMA_BD_COMMAND {
 };
 
 /*!< sdma channel buffer descriptor (BD) structure */
-struct imx_sdma_buffer_desc {
+struct imx_sdma_buffer_desc 
+{
     kuint16_t count;                                        /*!< Bytes of the buffer length for this buffer descriptor. */
     kuint8_t status;                                        /*!< E,R,I,C,W,D status bits stored here */
     kuint8_t command;                                       /*!< command mostlky used for channel 0 */
@@ -108,7 +114,8 @@ struct imx_sdma_buffer_desc {
 
 #define IMX_SDMA_CHANNEL(x)                                 (x)
 
-struct imx_sdma_desc {
+struct imx_sdma_desc 
+{
     kuaddr_t self_phy;
 
     struct imx_sdma_buffer_desc *sptr_bds;
@@ -125,7 +132,8 @@ struct imx_sdma_desc {
 #define IMX_SDMA_TRANSFER_1BYTES                            (1U)
 #define IMX_SDMA_TRANSFER_2BYTES                            (2U)
 
-struct imx_sdma_channel {
+struct imx_sdma_channel 
+{
     struct fwk_dma_chan sgtc_chan;
     struct imx_sdma_domain *sptr_chip;
     struct imx_sdma_desc *sptr_desc;                        /*!< Current Desc Running */
@@ -153,7 +161,8 @@ struct imx_sdma_channel {
 #define mr_imx_sdma_to_chan(sptr_chan)  \
         mr_container_of(sptr_chan, struct imx_sdma_channel, sgtc_chan)
 
-struct imx_sdma_domain {
+struct imx_sdma_domain 
+{
     struct fwk_dma_device sgtc_madev;
     srt_imx_sdma_t *sptr_sdma;
 
@@ -162,10 +171,12 @@ struct imx_sdma_domain {
     struct imx_sdma_buffer_desc *sptr_bd0;                  /*!< Buffer Desc of Channel 0 */
 
     struct imx_sdma_script_context *sptr_context;           /*!< Context Desc Array[IMX6UL_SDMA_MODULE_CHANNEL] */
+    kuint32_t ref;
 };
 
 /*!< script address */
-struct imx_sdma_script_type {
+struct imx_sdma_script_type 
+{
     kint32_t periph;
     kuaddr_t script_addr;
 };
@@ -177,13 +188,15 @@ struct imx_sdma_script_type {
 #define IMX_SDMA_PERIPH_UART_SP                             (3U)
 #define IMX_SDMA_PERPH_SPDIF                                (4U)
 
-struct imx_sdma_platform_data {
+struct imx_sdma_platform_data 
+{
     kuint32_t event_num;
     const struct imx_sdma_script_type (*sptr_scripts)[5U];
 };
 
 /*!< Driver Data Structure */
-struct imx_sdma_drv_data {
+struct imx_sdma_drv_data 
+{
     struct imx_sdma_domain sgtc_domain;
     const struct imx_sdma_platform_data *sptr_priv;
 
@@ -215,7 +228,8 @@ struct imx_sdma_drv_data {
     })
 
 /*!< The globals */
-static const struct imx_sdma_script_type sgtc_imx_sdma_script_table[3][5] = {
+static const struct imx_sdma_script_type sgtc_imx_sdma_script_table[3][5] = 
+{
     [DMA_MEM_TO_MEM] = {
         { .periph = -1,                         .script_addr = IMX6UL_SDMA_M2M_ADDR         },
     },
@@ -237,13 +251,15 @@ static const struct imx_sdma_script_type sgtc_imx_sdma_script_table[3][5] = {
     },
 };
 
-static const struct imx_sdma_platform_data sgtc_imx_sdma_platform_data = {
+static const struct imx_sdma_platform_data sgtc_imx_sdma_platform_data = 
+{
     .event_num = IMX6UL_SDMA_EVENT_NUM,
     .sptr_scripts = sgtc_imx_sdma_script_table,
 };
 
 /*!< device id for device-tree */
-static const struct fwk_of_device_id sgtc_imx_dma_driver_id[] = {
+static const struct fwk_of_device_id sgtc_imx_dma_driver_id[] = 
+{
     { .compatible = "fsl,imx6ul-sdma", .data = &sgtc_imx_sdma_platform_data },
     {},
 };
@@ -336,7 +352,8 @@ static void imx_sdma_bd0_release(struct imx_sdma_domain *sptr_domain)
 {
     kuaddr_t bd0_phys;
 
-    if (sptr_domain && sptr_domain->sptr_bd0) {
+    if (sptr_domain && sptr_domain->sptr_bd0) 
+    {
         bd0_phys = sptr_domain->sptr_cds[0U].base_bd;
         fwk_dma_free_coherent(mr_nullptr, 
                     sizeof(*sptr_domain->sptr_bd0), sptr_domain->sptr_bd0, &bd0_phys);
@@ -386,7 +403,8 @@ static kint32_t imx_sdma_domain_initial(struct imx_sdma_domain *sptr_domain, con
     mr_writel(1U, &sptr_sdma->EVTOVR);
 
     /*!< Configure Ctrl Desc */
-    if (imx_sdma_bd0_request(sptr_domain)) {
+    if (imx_sdma_bd0_request(sptr_domain)) 
+    {
         fwk_dma_free_coherent(mr_nullptr, alloc_size, sptr_domain->sptr_cds, &cds_phys);
         return -ER_FAILD;
     }
@@ -467,7 +485,8 @@ static kint32_t imx_sdma_get_map_periph(kuint32_t peripheral_type)
 {
     kint32_t periph = 0;
 
-    switch (peripheral_type) {
+    switch (peripheral_type) 
+    {
         case NR_IMX_DMATYPE_MEMORY:
             periph = -1;
             break;
@@ -539,6 +558,7 @@ static void imx_sdma_load_context(struct imx_sdma_channel *sptr_channel)
     sptr_context = sptr_channel->sptr_context;
     sptr_bd0 = sptr_channel->sptr_chip->sptr_bd0;
 
+    memset(sptr_context, 0, sizeof(*sptr_context));
     sptr_context->PC = sptr_channel->script_addr;
 
     /*!< Set the request source into context */
@@ -548,10 +568,13 @@ static void imx_sdma_load_context(struct imx_sdma_channel *sptr_channel)
         sptr_context->GeneralReg[1] = mr_bit(sptr_channel->event_source);
 
     /*!< Set source address and dest address for p2p, m2p and p2m */
-    if (sptr_channel->direction == DMA_MEM_TO_DEVICE) {
+    if (sptr_channel->direction == DMA_MEM_TO_DEVICE) 
+    {
         sptr_context->GeneralReg[2] = (kuint32_t)sptr_channel->dst_addr;
         sptr_context->GeneralReg[6] = (kuint32_t)sptr_channel->dst_addr;
-    } else {
+    }
+    else 
+    {
         sptr_context->GeneralReg[2] = (kuint32_t)sptr_channel->src_addr;
         sptr_context->GeneralReg[6] = (kuint32_t)sptr_channel->src_addr;
     }
@@ -588,16 +611,18 @@ static kint32_t imx_sdma_start_transfer(struct imx_sdma_channel *sptr_channel)
 
     reg_value = imx_sdma_get_channel_priority(sptr_sdma, channel);
 
-    if (!sptr_channel->priority) {
+    if (!sptr_channel->priority) 
+    {
         /*!< Set the channel priority */
         sptr_channel->priority = reg_value;
-
-    } else if (!reg_value) {
+    }
+    else if (!reg_value) 
+    {
         /*!< Set priority if regsiter bit is 0*/
         imx_sdma_set_channel_priority(sptr_sdma, channel, sptr_channel->priority);
     }
     
-    if (!sptr_channel->event_source)
+    if (sptr_channel->event_source)
         imx_sdma_start_channel_event(sptr_sdma, channel);
     else
         imx_sdma_start_channel_software(sptr_sdma, channel);
@@ -632,16 +657,13 @@ static void imx_sdma_abort_transfer(struct imx_sdma_channel *sptr_channel)
 {
     srt_imx_sdma_t *sptr_sdma;
     kuint32_t channel;
-    kuint32_t reg_value;
 
     imx_sdma_stop_transfer(sptr_channel);
 
     sptr_sdma = sptr_channel->sptr_chip->sptr_sdma;
     channel = mr_imx_sdma_handle_to_channel(sptr_channel);
 
-    reg_value = imx_sdma_get_source_channel(sptr_sdma, sptr_channel->event_source);
-    mr_clrbit(reg_value, mr_bit(channel));
-    imx_sdma_set_source_channel(sptr_sdma, sptr_channel->event_source, reg_value);
+    imx_sdma_clr_source_channel(sptr_sdma, sptr_channel->event_source, mr_bit(channel));
 
     /*!< Clear the channel priority */
     imx_sdma_set_channel_priority(sptr_sdma, channel, 0U);
@@ -783,6 +805,7 @@ static kint32_t imx_sdma_desc_load(struct imx_sdma_desc *sptr_desc)
 
     sptr_domain->sptr_cds[channel].cur_bd = (kuint32_t)sptr_desc->bd_phys;
     sptr_domain->sptr_cds[channel].base_bd = (kuint32_t)sptr_desc->bd_phys;
+
     return ER_NORMAL;
 }
 
@@ -801,7 +824,8 @@ static void imx_sdma_desc_prepare(struct imx_sdma_desc *sptr_desc)
     sptr_channel = mr_imx_sdma_to_chan(sptr_desc->sgtc_txdesc.sptr_chan);
 
     spin_lock_irqsave(&sptr_channel->sgtc_lock);
-    if (imx_sdma_desc_load(sptr_desc)) {
+    if (imx_sdma_desc_load(sptr_desc)) 
+    {
         spin_unlock_irqrestore(&sptr_channel->sgtc_lock);
         return;
     }
@@ -814,11 +838,14 @@ static void imx_sdma_desc_prepare(struct imx_sdma_desc *sptr_desc)
     /*!< DO register shall always set */
     mr_setbitl(mr_bit(channel), &sptr_sdma->DSPOVR);
 
-    if (sptr_channel->direction == DMA_MEM_TO_MEM) {
+    if (sptr_channel->direction == DMA_MEM_TO_MEM) 
+    {
         /*!< Configure EO bit */
         mr_setbitl(mr_bit(channel), &sptr_sdma->EVTOVR);
         mr_clrbitl(mr_bit(channel), &sptr_sdma->HOSTOVR);
-    } else {
+    }
+    else 
+    {
         /*!< Configure HO bits */
         mr_clrbitl(mr_bit(channel), &sptr_sdma->EVTOVR);
         mr_setbitl(mr_bit(channel), &sptr_sdma->HOSTOVR);
@@ -852,25 +879,23 @@ static irq_return_t imx_sdma_isr(void *args)
 {
     struct imx_sdma_drv_data *sptr_data;
     srt_imx_sdma_t *sptr_sdma;
-    kuint32_t reg_value, channel = 0;
+    kuint32_t reg_value, channel = 1U;
 
     sptr_data = (struct imx_sdma_drv_data *)args;
     sptr_sdma = sptr_data->sgtc_domain.sptr_sdma;
 
     /*!< Get Interrupt Status */
     reg_value = mr_readl(&sptr_sdma->INTR);
-
-    /*!< Ignore Channel 0 */
-    reg_value &= (~1);
-
     /*!< Clear Interrupt Status */
     mr_writel(reg_value, &sptr_sdma->INTR);
 
-    while (reg_value) {
-        channel++;
-        reg_value >>= 1;
+    /*!< Ignore Channel 0 */
+    reg_value >>= 1;
 
-        if (reg_value & 1U) {
+    while (reg_value) 
+    {
+        if (reg_value & 1U) 
+        {
             struct imx_sdma_channel *sptr_channel;
             struct imx_sdma_desc *sptr_desc;
 
@@ -884,18 +909,24 @@ static irq_return_t imx_sdma_isr(void *args)
             /*!< Current desc is completed, move to "completed list" */
             list_head_add_tail(&sptr_channel->sgtc_completed, &sptr_desc->sgtc_link);
 
-            if (mr_list_head_empty(&sptr_channel->sgtc_pending)) {
+            if (mr_list_head_empty(&sptr_channel->sgtc_pending)) 
+            {
                 /*!< No desc needs to load */
                 sptr_channel->sptr_desc = mr_nullptr;
-                imx_sdma_abort_transfer(sptr_channel);
-            } else {
+                imx_sdma_stop_transfer(sptr_channel);
+                spin_unlock(&sptr_channel->sgtc_lock);
+            }
+            else
+            {
                 /*!< take next desc, and set sptr_channel->sptr_desc = sptr_desc */
                 sptr_desc = mr_list_first_entry(&sptr_channel->sgtc_pending, struct imx_sdma_desc, sgtc_link);
+                spin_unlock(&sptr_channel->sgtc_lock);
                 imx_sdma_desc_start(sptr_desc);
             }
-
-            spin_unlock(&sptr_channel->sgtc_lock);
         }
+
+        channel++;
+        reg_value >>= 1;
     }
 
     return NR_IRQ_WAKE_THREAD;
@@ -914,21 +945,23 @@ static irq_return_t imx_sdma_thread_isr(void *args)
     struct imx_sdma_desc *sptr_desc, *sprt_temp;
 
     sptr_data = (struct imx_sdma_drv_data *)args;
-    for (kint32_t channel = 0; channel < sptr_data->sgtc_domain.n_channels; channel++) {
+    for (kint32_t channel = 0; channel < sptr_data->sgtc_domain.n_channels; channel++) 
+    {
         DECLARE_LIST_HEAD(sgtc_copy);
 
         sptr_channel = &sptr_data->sgtc_channels[channel];
 
         /*!< copy sgtc_completed to sgtc_copy, and initialize sgtc_completed */
         spin_lock_irqsave(&sptr_channel->sgtc_lock);
-        list_head_splice(&sptr_channel->sgtc_completed, &sgtc_copy);
+        list_head_splice_init(&sptr_channel->sgtc_completed, &sgtc_copy);
         spin_unlock_irqrestore(&sptr_channel->sgtc_lock);
 
         if (mr_list_head_empty(&sgtc_copy))
             continue;
 
         /*!< detach and destroy desc */
-        foreach_list_next_entry_safe(sptr_desc, sprt_temp, &sgtc_copy, sgtc_link) {
+        foreach_list_next_entry_safe(sptr_desc, sprt_temp, &sgtc_copy, sgtc_link) 
+        {
             if (sptr_desc->sgtc_txdesc.transfer_callback)
                 sptr_desc->sgtc_txdesc.transfer_callback(sptr_desc->sgtc_txdesc.callback_param);
             
@@ -1039,6 +1072,9 @@ static kint32_t imx_alloc_chan_resources(struct fwk_dma_chan *sptr_chan)
     if (sptr_channel->priority)
         imx_sdma_set_channel_priority(sptr_sdma, channel, sptr_channel->priority);
 
+    fwk_enable_irq(sptr_data->irq);
+    sptr_data->sgtc_domain.ref++;
+
     return ER_NORMAL;
 }
 
@@ -1057,8 +1093,15 @@ static kint32_t imx_free_chan_resources(struct fwk_dma_chan *sptr_chan)
     sptr_channel = mr_imx_sdma_to_chan(sptr_chan);
     sptr_data = mr_imx_sdma_domain_to_data(sptr_channel->sptr_chip);
 
-    fwk_clk_disable(sptr_data->sptr_ahbclk);
-    fwk_clk_disable(sptr_data->sptr_ipgclk);
+    /*!< All channels are idle */
+    if (!(sptr_data->sgtc_domain.ref--)) 
+    {
+        fwk_disable_irq(sptr_data->irq);
+        imx_sdma_abort_transfer(sptr_channel);
+
+        fwk_clk_disable(sptr_data->sptr_ahbclk);
+        fwk_clk_disable(sptr_data->sptr_ipgclk);
+    }
 
     return ER_NORMAL;
 }
@@ -1078,44 +1121,37 @@ static kint32_t imx_sdma_config(struct fwk_dma_chan *sptr_chan, struct fwk_dma_s
 
     sptr_channel = mr_imx_sdma_to_chan(sptr_chan);
 
-    if ((sptr_config->direction == DMA_MEM_TO_DEVICE) ||
-        (sptr_config->direction == DMA_MEM_TO_MEM)) {
-        
-        switch (sptr_config->dst_addr_width) {
-            case NR_DMA_TRX_WIDTH_1BYTE:
-                sptr_channel->dst_addr_width = IMX_SDMA_TRANSFER_1BYTES;
-                break;
-            case NR_DMA_TRX_WIDTH_2BYTE:
-                sptr_channel->dst_addr_width = IMX_SDMA_TRANSFER_2BYTES;
-                break;
-            default:
-                sptr_channel->dst_addr_width = IMX_SDMA_TRANSFER_4BYTES;
-                break;
-        }
-
-        sptr_channel->dst_addr = sptr_config->dst_addr;
+    switch (sptr_config->src_addr_width) 
+    {
+        case NR_DMA_TRX_WIDTH_1BYTE:
+            sptr_channel->src_addr_width = IMX_SDMA_TRANSFER_1BYTES;
+            break;
+        case NR_DMA_TRX_WIDTH_2BYTE:
+            sptr_channel->src_addr_width = IMX_SDMA_TRANSFER_2BYTES;
+            break;
+        default:
+            sptr_channel->src_addr_width = IMX_SDMA_TRANSFER_4BYTES;
+            break;
     }
 
-    if ((sptr_config->direction == DMA_DEVICE_TO_MEM) ||
-        (sptr_config->direction == DMA_MEM_TO_MEM)) {
-        
-        switch (sptr_config->src_addr_width) {
-            case NR_DMA_TRX_WIDTH_1BYTE:
-                sptr_channel->src_addr_width = IMX_SDMA_TRANSFER_1BYTES;
-                break;
-            case NR_DMA_TRX_WIDTH_2BYTE:
-                sptr_channel->src_addr_width = IMX_SDMA_TRANSFER_2BYTES;
-                break;
-            default:
-                sptr_channel->src_addr_width = IMX_SDMA_TRANSFER_4BYTES;
-                break;
-        }
-
-        sptr_channel->src_addr = sptr_config->src_addr;
+    switch (sptr_config->dst_addr_width) 
+    {
+        case NR_DMA_TRX_WIDTH_1BYTE:
+            sptr_channel->dst_addr_width = IMX_SDMA_TRANSFER_1BYTES;
+            break;
+        case NR_DMA_TRX_WIDTH_2BYTE:
+            sptr_channel->dst_addr_width = IMX_SDMA_TRANSFER_2BYTES;
+            break;
+        default:
+            sptr_channel->dst_addr_width = IMX_SDMA_TRANSFER_4BYTES;
+            break;
     }
+
+    sptr_channel->src_addr = sptr_config->src_addr;
+    sptr_channel->dst_addr = sptr_config->dst_addr;
 
     /*!< minimum bytes is 1 (kuint8_t) */
-    sptr_channel->watermark = 1;
+    sptr_channel->watermark = sizeof(kuint8_t);
 
     sptr_dt = (struct imx6_sdma_dt_data *)sptr_chan->private_data;
     periph = imx_sdma_get_map_periph(sptr_dt->peripheral_type);
@@ -1153,18 +1189,22 @@ struct fwk_dma_transfer_desc *imx_sdma_transfer_prepare(struct fwk_dma_chan *spt
 
     sptr_channel = mr_imx_sdma_to_chan(sptr_chan);
 
-    if (direction == DMA_MEM_TO_MEM) {
+    if (direction == DMA_MEM_TO_MEM) 
+    {
         if (!sptr_src || !src_count ||
             !sptr_dst || !dst_count)
             return ERR_PTR(-ER_EMPTY);
 
         /*!< Reserved */
-    } else {
+    }
+    else
+    {
         struct fwk_dma_block_data *sptr_bdata;
         struct imx_sdma_buffer_desc *sptr_bd;
         kuint32_t data_count;
         kuint32_t bd_index = 0;
 
+        /*!< Get Memory (Not prepheral) */
         sptr_bdata = (direction == DMA_MEM_TO_DEVICE) ? sptr_src : sptr_dst;
         data_count = (direction == DMA_MEM_TO_DEVICE) ? src_count : dst_count;
 
@@ -1175,21 +1215,22 @@ struct fwk_dma_transfer_desc *imx_sdma_transfer_prepare(struct fwk_dma_chan *spt
         if (!isValid(sptr_desc))
             return ERR_PTR(-ER_NOMEM);
 
-        if (imx_sdma_desc_alloc_bds(sptr_desc)) {
+        if (imx_sdma_desc_alloc_bds(sptr_desc)) 
+        {
             imx_sdma_desc_destroy(sptr_desc);
             return mr_nullptr;
         }
 
         /*!< Configure every BD */
         for (; sptr_bdata && (bd_index < sptr_desc->bd_count); 
-               sptr_bdata = sptr_bdata->sptr_next, bd_index++) {
-
+               sptr_bdata = sptr_bdata->sptr_next, bd_index++) 
+        {
             sptr_bd = &sptr_desc->sptr_bds[bd_index];
             sptr_bd->buffer_addr = sptr_bdata->dma_address + sptr_bdata->offset;
             sptr_bd->extend_addr = 0U;
             sptr_bd->count = sptr_bdata->length;
             sptr_bd->command = (direction == DMA_MEM_TO_DEVICE) ? sptr_channel->dst_addr_width : sptr_channel->src_addr_width;
-            sptr_bd->status = NR_IMX_SDMA_BD_DONE | NR_IMX_SDMA_BD_EXTEND;
+            sptr_bd->status = NR_IMX_SDMA_BD_DONE;
 
             /*!< Last BD */
             if ((bd_index + 1) == sptr_desc->bd_count)
@@ -1374,7 +1415,8 @@ static kint32_t imx_dma_driver_probe(struct fwk_platdev *sptr_pdev)
     sptr_madev->transfer_prepare = imx_sdma_transfer_prepare;
 
     /*!< Initialize All Channels */
-    for (kint32_t channel = 0; channel < sptr_madev->n_channels; channel++) {
+    for (kint32_t channel = 0; channel < sptr_madev->n_channels; channel++) 
+    {
         sptr_chans = &sptr_data->sgtc_channels[channel];
 
         sptr_chans->sptr_chip = sptr_domain;
@@ -1390,8 +1432,6 @@ static kint32_t imx_dma_driver_probe(struct fwk_platdev *sptr_pdev)
 
     if (fwk_request_threaded_irq(sptr_data->irq, imx_sdma_isr, imx_sdma_thread_isr, 0, "imx-sdma", sptr_data))
         goto fail3;
-
-    fwk_disable_irq(sptr_data->irq);
 
     /*!< Register DMA Controller */
     if (fwk_dma_device_register(sptr_madev))
@@ -1449,11 +1489,13 @@ static kint32_t imx_dma_driver_remove(struct fwk_platdev *sptr_pdev)
 }
 
 /*!< platform instance */
-static struct fwk_platdrv sgtc_imx_sdma_platdrv = {
+static struct fwk_platdrv sgtc_imx_sdma_platdrv = 
+{
     .probe	= imx_dma_driver_probe,
     .remove	= imx_dma_driver_remove,
     
-    .sgtc_driver = {
+    .sgtc_driver = 
+    {
         .name 	= "fsl,sdma",
         .id 	= -1,
         .sptr_of_match_table = sgtc_imx_dma_driver_id,

@@ -162,7 +162,7 @@ EXT_LIB_EXEC	:=	$(PROJECT_DIR)/lib/objects
 
 OUTPUT_PATH		:=	$(PROJECT_DIR)/boot
 IMAGE_PATH		:=	$(OUTPUT_PATH)/image
-LINK_SCRIPT		:=	$(PROJECT_DIR)/arch/$(ARCH)/cpu/$(TYPE)/$(CPU)/cpu_ramboot.lds
+LINK_SCRIPT		:=	$(PROJECT_DIR)/arch/$(ARCH)/lib/linkscript.lds.S
 DTC				:=	$(PROJECT_DIR)/scripts/dtc/dtc
 BUILD_SCRIPT	:=	$(PROJECT_DIR)/scripts/Makefile.build
 
@@ -174,6 +174,7 @@ TARGET_LASM		:=	$(IMAGE_PATH)/$(TARGET).lst
 TARGET_MMAP		:=	$(IMAGE_PATH)/$(TARGET).map
 
 INCLUDE_DIRS	:= 	$(PROJECT_DIR)/	\
+					$(PROJECT_DIR)/configs	\
 					$(PROJECT_DIR)/arch/$(ARCH)/include	\
 					$(PROJECT_DIR)/include	\
 					$(PROJECT_DIR)/board/mach-$(CPU)	\

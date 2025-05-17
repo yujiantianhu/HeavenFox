@@ -34,7 +34,8 @@
  */
 static void term_cmd_ts_title(void)
 {
-    printk("tid     stack_size     priority  slice   status      name\r\n");
+    printk("----------------------------------------------------------\r\n");
+    printk("tid  stack_size(B) priority slice(ms) status  name\r\n");
     printk("----------------------------------------------------------\r\n");
     printk("status: (1)running, (2)ready, (3)suspend, (4)sleep\r\n");
     printk("----------------------------------------------------------\r\n");
@@ -49,9 +50,7 @@ static void term_cmd_ts_title(void)
 static void term_cmd_ts_format(tid_t tid, kuint32_t stack_size, kuint32_t prio, 
                         kutime_t expires, kuint32_t status, kchar_t *name)
 {
-    printk("%d      %d (Bytes)      %d      %d (ms)", 
-            tid,    stack_size,     prio,   expires);
-    printk("    %d      %s\r\n", status,  name);
+    printk("%-10d%-10d%-10d%-10d%-6d%s\r\n", tid, stack_size, prio, expires, status, name);
 }
 
 /*!

@@ -1,7 +1,7 @@
 /*
- * Link Script for XC7Z010
+ * Link Script Assembly (> arch/$(ARCH)/cpu/$(TYPE)/$(CPU)/linkscript.lds)
  *
- * File Name:   cpu_ramboot.lds
+ * File Name:   linkscript.lds.S
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2023.09.12
@@ -10,48 +10,127 @@
  *
  */
 
+#include <configs/mach_configs.h>
+
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 
-/*!< ------------------------ core 0: 256MB ------------------------------- */
+/*!< Program base address (DDR) */
+#if (defined(CONFIG_RAM_DDR_BASE) && defined(CONFIG_RAM_DDR_SIZE) && \
+     defined(CONFIG_PROGRAM_BASE) && defined(CONFIG_PROGRAM_SIZE))
 
-/*!< Program base address */
-/*!< 0x00100000 ~ 0x040fffff (64MB) is used as memory space and dtb */
-_RAM_DDR_BASE  = DEFINED(CONFIG_RAM_DDR_BASE) ? CONFIG_RAM_DDR_BASE : 0x00100000;
-_RAM_DDR_SIZE  = DEFINED(CONFIG_RAM_DDR_SIZE) ? CONFIG_RAM_DDR_SIZE : 0x0FF00000;
-_PROGRAM_START = DEFINED(CONFIG_PROGRAM_BASE) ? CONFIG_PROGRAM_BASE : 0x04100000;
+_RAM_DDR_BASE  = CONFIG_RAM_DDR_BASE;
+_RAM_DDR_SIZE  = CONFIG_RAM_DDR_SIZE;
+_PROGRAM_START = CONFIG_PROGRAM_BASE;
+_PROGRAM_SIZE  = CONFIG_PROGRAM_SIZE;
 
-/*!< Reserve Memory: 4MB (4K = 1page, 4MB = 1024pages) */
-_RESERVE_MEMORY_SIZE = DEFINED(CONFIG_RESERVE_MEMORY_SIZE) ? CONFIG_RESERVE_MEMORY_SIZE : 0x400000;
-/*!< 0xfc00000 */
+#else
+/*!<
+ * Example: DDR's total size is 512MB
+ * size = 512MB = 536870912(Bytes), origin = 0x80000000, end = 0xA0000000
+ * 0x80000000 ~ 0x87ffffff is used as memory space, and program basic address needs to be after 0x88000000
+ * lenth = (0xA0000000 - 0x88000000) = 0x18000000
+ */
+_RAM_DDR_BASE  = 0x80000000;
+_RAM_DDR_SIZE  = 0x20000000;
+_PROGRAM_START = 0x88000000;
+_PROGRAM_SIZE  = 0x18000000;
+#endif
+
+/*!< Reserve Memory */
+#ifdef CONFIG_RESERVE_MEMORY_SIZE
+_RESERVE_MEMORY_SIZE = CONFIG_RESERVE_MEMORY_SIZE;
+#else
+/*!< 4MB (4K = 1page, 4MB = 1024pages) */
+_RESERVE_MEMORY_SIZE = 0x400000;
+#endif
+
+/*!< 0xA0000000 - 0x400000 */
 _PROGRAM_END = (_RAM_DDR_BASE + _RAM_DDR_SIZE - _RESERVE_MEMORY_SIZE);
 
-/*!< Heap and Stack size (12.514MB) */
-_HEAP_SIZE = DEFINED(CONFIG_HEAP_SIZE) ? CONFIG_HEAP_SIZE : (8 * 1024 * 1024);
-_SVC_STACK_SIZE = DEFINED(CONFIG_SVC_STACK_SIZE) ? CONFIG_SVC_STACK_SIZE : (2 * 1024 * 1024);
-_SYS_STACK_SIZE = DEFINED(CONFIG_SYS_STACK_SIZE) ? CONFIG_SYS_STACK_SIZE : (2 * 1024 * 1024);
-_IRQ_STACK_SIZE = DEFINED(CONFIG_IRQ_STACK_SIZE) ? CONFIG_IRQ_STACK_SIZE : (2 * 1024 * 1024);
-_FIQ_STACK_SIZE = DEFINED(CONFIG_FIQ_STACK_SIZE) ? CONFIG_FIQ_STACK_SIZE : (2 * 1024 * 1024);
-_ABT_STACK_SIZE = DEFINED(CONFIG_ABT_STACK_SIZE) ? CONFIG_ABT_STACK_SIZE : (1024);
-_UND_STACK_SIZE = DEFINED(CONFIG_UND_STACK_SIZE) ? CONFIG_UND_STACK_SIZE : (1024);
+/*!< Heap and Stack size */
+#ifdef CONFIG_HEAP_SIZE
+_HEAP_SIZE = CONFIG_HEAP_SIZE;
+#else
+/*!< 8MB */
+_HEAP_SIZE = 8 * 1024 * 1024;
+#endif
 
+#ifdef CONFIG_SVC_STACK_SIZE
+_SVC_STACK_SIZE = CONFIG_SVC_STACK_SIZE;
+#else
+/*!< 2MB */
+_SVC_STACK_SIZE = 2 * 1024 * 1024;
+#endif
+
+#ifdef CONFIG_SYS_STACK_SIZE
+_SYS_STACK_SIZE = CONFIG_SYS_STACK_SIZE;
+#else
+/*!< 2MB */
+_SYS_STACK_SIZE = 2 * 1024 * 1024;
+#endif
+
+#ifdef CONFIG_IRQ_STACK_SIZE
+_IRQ_STACK_SIZE = CONFIG_IRQ_STACK_SIZE;
+#else
+/*!< 2MB */
+_IRQ_STACK_SIZE = 2 * 1024 * 1024;
+#endif
+
+#ifdef CONFIG_FIQ_STACK_SIZE
+_FIQ_STACK_SIZE = CONFIG_FIQ_STACK_SIZE;
+#else
+/*!< 2MB */
+_FIQ_STACK_SIZE = 2 * 1024 * 1024;
+#endif
+
+#ifdef CONFIG_ABT_STACK_SIZE
+_ABT_STACK_SIZE = CONFIG_ABT_STACK_SIZE;
+#else
+/*!< 1KB */
+_ABT_STACK_SIZE = 1024;
+#endif
+
+#ifdef CONFIG_UND_STACK_SIZE
+_UND_STACK_SIZE = CONFIG_UND_STACK_SIZE;
+#else
+/*!< 1KB */
+_UND_STACK_SIZE = 1024;
+#endif
+
+/*!< framebuffer ram */
+#ifdef CONFIG_FB_DRAM_SIZE
+_FB_DRAM_SIZE = CONFIG_FB_DRAM_SIZE;
+#else
 /*!< 
- * framebuffer ram (support double buffer with 1080p) 
- * 1080p = 1920 * 1080 * 4 ≈ 8MB, double buffer is 16MB
+ * Default: support three buffer with 1080p
+ * 1080p = 1920 * 1080 * 4 ≈ 8MB, three buffer is 24MB
  * 2K = 2560 * 1440 * 4 = 14MB
  * 4K = 3840 * 2160 * 4 = 31.65MB
  * therefore, support at less 2K
  */
-_FB_DRAM_SIZE   = DEFINED(CONFIG_FB_DRAM_SIZE) ? CONFIG_FB_DRAM_SIZE : (16 * 1024 * 1024);
+_FB_DRAM_SIZE = 24 * 1024 * 1024;
+#endif
 
-/*!< NetWork Tx/Rx Buffer: 8MB */
-_NETWORK_BUFF_SIZE = DEFINED(CONFIG_NETWORK_BUFF_SIZE) ? CONFIG_NETWORK_BUFF_SIZE : (8 * 1024 * 1024);
+/*!< NetWork Tx/Rx Buffer */
+#ifdef CONFIG_NETWORK_BUFF_SIZE
+_NETWORK_BUFF_SIZE = CONFIG_NETWORK_BUFF_SIZE;
+#else
+/*!< 8MB */
+_NETWORK_BUFF_SIZE = 8 * 1024 * 1024;
+#endif
 
+/*!< RAM DDR Configuration  */
 MEMORY
 {
-    ram_ddr_0 : ORIGIN = 0x04100000, LENGTH = 0x0FF00000
+#if (defined(CONFIG_PROGRAM_BASE) && defined(CONFIG_PROGRAM_SIZE))
+    ram_ddr_0 : ORIGIN = CONFIG_PROGRAM_BASE, LENGTH = CONFIG_PROGRAM_SIZE
+#else
+    ram_ddr_0 : ORIGIN = 0x88000000, LENGTH = 0x18000000
+#endif
 }
 
+/*!< Sections  */
 ENTRY(_start)
 SECTIONS
 {
@@ -62,6 +141,7 @@ SECTIONS
 
     .text :
     {
+        . = ALIGN(16);
         __vector_table = .;
 
         KEEP(*(.vectors))

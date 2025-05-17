@@ -1,75 +1,34 @@
-/*
- * Link Script for I.MX6ULL
- *
- * File Name:   cpu_ramboot.lds
- * Author:      Yang Yujun
- * E-mail:      <yujiantianhu@163.com>
- * Created on:  2023.09.12
- *
- * Copyright (c) 2023   Yang Yujun <yujiantianhu@163.com>
- *
- */
-
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
-
-/*!< ------------------------ core: 512MB ------------------------------- */
-
-/*!< Program base address */
-/*!<
- * DDR: size = 512MB = 536870912(Bytes), origin = 0x80000000, end = 0xA0000000
- * 0x80000000 ~ 0x87ffffff is used as memory space, and program basic address needs to be after 0x88000000
- * lenth = (0xA0000000 - 0x88000000) = 0x18000000
- */
-_RAM_DDR_BASE  = DEFINED(CONFIG_RAM_DDR_BASE) ? CONFIG_RAM_DDR_BASE : 0x80000000;
-_RAM_DDR_SIZE  = DEFINED(CONFIG_RAM_DDR_SIZE) ? CONFIG_RAM_DDR_SIZE : 0x20000000;
-_PROGRAM_START = DEFINED(CONFIG_PROGRAM_BASE) ? CONFIG_PROGRAM_BASE : 0x88000000;
-_PROGRAM_SIZE  = DEFINED(CONFIG_PROGRAM_SIZE) ? CONFIG_PROGRAM_SIZE : 0x18000000;
-
-/*!< Reserve Memory: 4MB (4K = 1page, 4MB = 1024pages) */
-_RESERVE_MEMORY_SIZE = DEFINED(CONFIG_RESERVE_MEMORY_SIZE) ? CONFIG_RESERVE_MEMORY_SIZE : 0x400000;
-/*!< 0xA0000000 - 0x400000 */
+_RAM_DDR_BASE = (0x00100000);
+_RAM_DDR_SIZE = (0x0FF00000);
+_PROGRAM_START = ((0x00100000) + (0x04000000));
+_PROGRAM_SIZE = ((0x0FF00000) - (0x04000000));
+_RESERVE_MEMORY_SIZE = 0x400000;
 _PROGRAM_END = (_RAM_DDR_BASE + _RAM_DDR_SIZE - _RESERVE_MEMORY_SIZE);
-
-/*!< Heap and Stack size */
-_HEAP_SIZE = DEFINED(CONFIG_HEAP_SIZE) ? CONFIG_HEAP_SIZE : (8 * 1024 * 1024);
-_SVC_STACK_SIZE = DEFINED(CONFIG_SVC_STACK_SIZE) ? CONFIG_SVC_STACK_SIZE : (2 * 1024 * 1024);
-_SYS_STACK_SIZE = DEFINED(CONFIG_SYS_STACK_SIZE) ? CONFIG_SYS_STACK_SIZE : (2 * 1024 * 1024);
-_IRQ_STACK_SIZE = DEFINED(CONFIG_IRQ_STACK_SIZE) ? CONFIG_IRQ_STACK_SIZE : (2 * 1024 * 1024);
-_FIQ_STACK_SIZE = DEFINED(CONFIG_FIQ_STACK_SIZE) ? CONFIG_FIQ_STACK_SIZE : (2 * 1024 * 1024);
-_ABT_STACK_SIZE = DEFINED(CONFIG_ABT_STACK_SIZE) ? CONFIG_ABT_STACK_SIZE : (1024);
-_UND_STACK_SIZE = DEFINED(CONFIG_UND_STACK_SIZE) ? CONFIG_UND_STACK_SIZE : (1024);
-
-/*!< 
- * framebuffer ram (support three buffer with 1080p) 
- * 1080p = 1920 * 1080 * 4 ≈ 8MB, three buffer is 24MB
- * 2K = 2560 * 1440 * 4 = 14MB
- * 4K = 3840 * 2160 * 4 = 31.65MB
- * therefore, support at less 2K
- */
-_FB_DRAM_SIZE   = DEFINED(CONFIG_FB_DRAM_SIZE) ? CONFIG_FB_DRAM_SIZE : (24 * 1024 * 1024);
-
-/*!< NetWork Tx/Rx Buffer: 8MB */
-_NETWORK_BUFF_SIZE = DEFINED(CONFIG_NETWORK_BUFF_SIZE) ? CONFIG_NETWORK_BUFF_SIZE : (8 * 1024 * 1024);
-
+_HEAP_SIZE = 8 * 1024 * 1024;
+_SVC_STACK_SIZE = (2 * 1024 * 1024);
+_SYS_STACK_SIZE = (2 * 1024 * 1024);
+_IRQ_STACK_SIZE = (2 * 1024 * 1024);
+_FIQ_STACK_SIZE = (2 * 1024 * 1024);
+_ABT_STACK_SIZE = (1 * 1024);
+_UND_STACK_SIZE = (1 * 1024);
+_FB_DRAM_SIZE = (16 * 1024 * 1024);
+_NETWORK_BUFF_SIZE = (8 * 1024 * 1024);
 MEMORY
 {
-    ram_ddr_0 : ORIGIN = 0x88000000, LENGTH = 0x18000000
+    ram_ddr_0 : ORIGIN = ((0x00100000) + (0x04000000)), LENGTH = ((0x0FF00000) - (0x04000000))
 }
-
 ENTRY(_start)
 SECTIONS
 {
     . = _PROGRAM_START;
     . = ALIGN(16);
-
     __ram_ddr_start = .;
-
     .text :
     {
         . = ALIGN(16);
         __vector_table = .;
-
         KEEP(*(.vectors))
         KEEP(*(.start))
         KEEP(*(.head))
@@ -86,10 +45,8 @@ SECTIONS
         *(.gnu.linkonce.armextab.*)
         *(.note.gnu.build-id)
     } > ram_ddr_0
-
     __text_sec_end = .;
-
-    .dync_init : 
+    .dync_init :
     {
         . = ALIGN(16);
         __dync_init_start = .;
@@ -117,8 +74,7 @@ SECTIONS
         __dync_init_9_end = .;
         __dync_init_end = .;
     } > ram_ddr_0
-
-    .dync_exit : 
+    .dync_exit :
     {
         . = ALIGN(16);
         __dync_exit_start = .;
@@ -146,9 +102,7 @@ SECTIONS
         __dync_exit_9_end = .;
         __dync_exit_end = .;
     } > ram_ddr_0
-
     __dync_sec_end = .;
-
     . = ALIGN(16);
     .rodata :
     {
@@ -157,7 +111,6 @@ SECTIONS
         *(.rodata.*)
         __rodata_end = .;
     } > ram_ddr_0
-
     . = ALIGN(16);
     .data :
     {
@@ -166,42 +119,35 @@ SECTIONS
         *(.data.*)
         __data_end = .;
     } > ram_ddr_0
-
     . = ALIGN(16);
-    .ARM.exidx : 
+    .ARM.exidx :
     {
         __exidx_start = .;
         *(.ARM.exidx*)
         *(.gnu.linkonce.armexidix.*.*)
         __exidx_end = .;
     } > ram_ddr_0
-
     . = ALIGN(16);
-    .ARM.attributes 0 : 
-    { 
+    .ARM.attributes 0 :
+    {
         __ARM_attributes_start = .;
         *(.ARM.attributes)
         __ARM_attributes_end = .;
     } > ram_ddr_0
-
     .sdata :
     {
         __sdata_start = .;
         *(.sdata)
         *(.sdata.*)
         __sdata_end = .;
-
     } > ram_ddr_0
-
     .tdata :
     {
         __tdata_start = .;
         *(.tdata)
         *(.tdata.*)
         __tdata_end = .;
-
     } > ram_ddr_0
-
     . = ALIGN(16);
     .bss (NOLOAD) :
     {
@@ -211,8 +157,6 @@ SECTIONS
         *(COMMON)
         __bss_end = .;
     } > ram_ddr_0
-    
-    /*!< heap */
     .heap (NOLOAD) :
     {
         . = ALIGN(16);
@@ -220,8 +164,6 @@ SECTIONS
         . += _HEAP_SIZE;
         __heap_end = .;
     } > ram_ddr_0
-
-    /*!< stack */
     .stack (NOLOAD) :
     {
         . = ALIGN(16);
@@ -252,8 +194,6 @@ SECTIONS
         __und_stack_end = .;
         __stack_end = .;
     } > ram_ddr_0
-
-    /*!< DRAM */
     .fb_dram (NOLOAD) :
     {
         . = ALIGN(16);
@@ -261,8 +201,6 @@ SECTIONS
         . += _FB_DRAM_SIZE;
         __fb_dram_end = .;
     } > ram_ddr_0
-
-    /*!< Network Buffer */
     .network_buffer (NOLOAD) :
     {
         . = ALIGN(16);
@@ -270,17 +208,13 @@ SECTIONS
         . += _NETWORK_BUFF_SIZE;
         __sk_buffer_end = .;
     } > ram_ddr_0
-
-    /*!< memory pool: must at the end of RAM */
     . = ALIGN(16);
     __mem_pool_size = _PROGRAM_END - .;
-
     .mem_pool (NOLOAD) :
     {
         __mem_pool_start = .;
         . += __mem_pool_size;
         __mem_pool_end = .;
     } > ram_ddr_0
-
     __ram_ddr_end = .;
 }

@@ -117,8 +117,10 @@ kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kint32_t mode)
         
     } while (number);
 
-    if (buf) {
-        if (offset == 2) {
+    if (buf) 
+    {
+        if (offset == 2) 
+        {
             *buf = '0';
             *(buf + 1) = (mode == 1) ? 'X' : 'x';
         }
@@ -152,8 +154,10 @@ kutype_t dec_to_binary(kchar_t *buf, kutype_t number, kint32_t mode)
         
     } while (number);
 
-    if (buf) {
-        if (offset == 2) {
+    if (buf) 
+    {
+        if (offset == 2) 
+        {
             *buf = '0';
             *(buf + 1) = 'b';
         }
@@ -178,7 +182,7 @@ kint32_t ascii_to_dec(const kchar_t *str)
     kchar_t type = -1;
 
     p = (kchar_t *)str;
-    if (p) 
+    if (p)
     {
         if ((*(p) == '0') && 
             ((*(p + 1) == 'X') || (*(p + 1) == 'x')))

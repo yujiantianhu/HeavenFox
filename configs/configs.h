@@ -42,7 +42,7 @@
 #define CONFIG_DEFAULT_HOST                     "heavenfox"
 
 #define CONFIG_POWER_LOGO                       "/media/FAT32_2/boot/logo/logo.bmp"
-#define CONFIG_WALL_PAPER                     "/media/FAT32_2/boot/windows/fox.bmp"
+#define CONFIG_WALL_PAPER                       "/media/FAT32_2/boot/windows/fox.bmp"
 
 /*!< armv7 */
 #if defined(CONFIG_ARCH_ARMV7)

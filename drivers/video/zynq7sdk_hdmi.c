@@ -488,7 +488,7 @@ static kint32_t xsdk_hdmi_driver_probe(struct fwk_platdev *sptr_pdev)
     
     retval = fwk_register_framebuffer(sptr_fb);
     if (retval < 0)
-        goto fail3;
+        goto fail4;
 
     print_info("register a new framebuffer (hdmi)\r\n");
 

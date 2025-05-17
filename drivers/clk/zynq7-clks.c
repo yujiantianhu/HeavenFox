@@ -214,7 +214,6 @@ kint32_t __fwk_init zynq7_clks_driver_init(void)
     struct fwk_device_node *sptr_clkc, *sptr_sclr;
     struct zynq7_clk_grp *sptr_grps;
     kuint32_t grps_size;
-    kuaddr_t clkc_reg, sclr_reg;
     kuint32_t index;
     struct fwk_resources sgtc_res1, sgtc_res2;
 

@@ -189,7 +189,21 @@ static inline kuint32_t imx_sdma_get_channel_priority(srt_imx_sdma_t *sptr_sdma,
  */
 static inline void imx_sdma_set_source_channel(srt_imx_sdma_t *sptr_sdma, kuint32_t source, kuint32_t mask)
 {
-    mr_writel(mask, &sptr_sdma->CHNENBL[source]);
+    mr_setbitl(mask, &sptr_sdma->CHNENBL[source]);
+}
+
+/*!
+ * @brief   reset sdma request source mapping channel
+ * @param   sptr_sdma: base address of sdma
+ * @param   source: request source number
+ * @param   mask: channel mask, e.g. 0x3 is channel 0 and 1
+ * @retval  none
+ * @note    reset CHNENBL; sdma supports an event trigger multi-channel. 
+ *          A channel can also be triggered by several source events
+ */
+static inline void imx_sdma_clr_source_channel(srt_imx_sdma_t *sptr_sdma, kuint32_t source, kuint32_t mask)
+{
+    mr_clrbitl(mask, &sptr_sdma->CHNENBL[source]);
 }
 
 /*!

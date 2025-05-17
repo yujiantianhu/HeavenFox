@@ -573,7 +573,7 @@ kint32_t term_init(void)
     if (g_term_fd < 0)
     {
         g_term_fd = -1;
-        printk("Open console device \"%s\" failed!\n");
+        printk("Open console device \"%s\" failed!\r\n", CONFIG_CONSOLE_DEVICE);
     }
     else
     {

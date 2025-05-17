@@ -232,12 +232,19 @@ void fwk_clk_put(struct fwk_clk *sptr_clk)
  */
 void fwk_clk_enable(struct fwk_clk *sptr_clk)
 {
-    const struct fwk_clk_ops *sptr_ops;
+    if (!sptr_clk || !sptr_clk->sptr_core)
+        return;
 
-    sptr_ops = sptr_clk->sptr_core->sptr_ops;
+    /*!< Enable Clock Only Once */
+    if (!(sptr_clk->sptr_core->enable_count++)) 
+    {
+        const struct fwk_clk_ops *sptr_ops;
 
-    if (sptr_ops && sptr_ops->enable)
-        sptr_ops->enable(fwk_clk_to_hw(sptr_clk));
+        sptr_ops = sptr_clk->sptr_core->sptr_ops;
+
+        if (sptr_ops && sptr_ops->enable)
+            sptr_ops->enable(fwk_clk_to_hw(sptr_clk));
+    }
 }
 
 /*!
@@ -248,12 +255,22 @@ void fwk_clk_enable(struct fwk_clk *sptr_clk)
  */
 void fwk_clk_disable(struct fwk_clk *sptr_clk)
 {
-    const struct fwk_clk_ops *sptr_ops;
+    if (!sptr_clk || !sptr_clk->sptr_core)
+        return;
 
-    sptr_ops = sptr_clk->sptr_core->sptr_ops;
+    /*!< Clock was closed, do not excute again */
+    if (!sptr_clk->sptr_core->enable_count)
+        return;
 
-    if (sptr_ops && sptr_ops->disable)
-        sptr_ops->disable(fwk_clk_to_hw(sptr_clk));
+    if (!(--sptr_clk->sptr_core->enable_count)) 
+    {
+        const struct fwk_clk_ops *sptr_ops;
+
+        sptr_ops = sptr_clk->sptr_core->sptr_ops;
+
+        if (sptr_ops && sptr_ops->disable)
+            sptr_ops->disable(fwk_clk_to_hw(sptr_clk));
+    }
 }
 
 /*!
@@ -264,12 +281,19 @@ void fwk_clk_disable(struct fwk_clk *sptr_clk)
  */
 void fwk_clk_prepare(struct fwk_clk *sptr_clk)
 {
-    const struct fwk_clk_ops *sptr_ops;
+    if (!sptr_clk || !sptr_clk->sptr_core)
+        return;
 
-    sptr_ops = sptr_clk->sptr_core->sptr_ops;
+    /*!< Prepare Clock Only Once */
+    if (!(sptr_clk->sptr_core->prepare_count++)) 
+    {
+        const struct fwk_clk_ops *sptr_ops;
 
-    if (sptr_ops && sptr_ops->prepare)
-        sptr_ops->prepare(fwk_clk_to_hw(sptr_clk));
+        sptr_ops = sptr_clk->sptr_core->sptr_ops;
+
+        if (sptr_ops && sptr_ops->prepare)
+            sptr_ops->prepare(fwk_clk_to_hw(sptr_clk));
+    }
 }
 
 /*!
@@ -280,12 +304,22 @@ void fwk_clk_prepare(struct fwk_clk *sptr_clk)
  */
 void fwk_clk_unprepare(struct fwk_clk *sptr_clk)
 {
-    const struct fwk_clk_ops *sptr_ops;
+    if (!sptr_clk || !sptr_clk->sptr_core)
+        return;
 
-    sptr_ops = sptr_clk->sptr_core->sptr_ops;
+    /*!< Clock was released, do not excute again */
+    if (!sptr_clk->sptr_core->prepare_count)
+        return;
 
-    if (sptr_ops && sptr_ops->unprepare)
-        sptr_ops->unprepare(fwk_clk_to_hw(sptr_clk));
+    if (!(--sptr_clk->sptr_core->prepare_count)) 
+    {
+        const struct fwk_clk_ops *sptr_ops;
+
+        sptr_ops = sptr_clk->sptr_core->sptr_ops;
+
+        if (sptr_ops && sptr_ops->unprepare)
+            sptr_ops->unprepare(fwk_clk_to_hw(sptr_clk));
+    }
 }
 
 /*!

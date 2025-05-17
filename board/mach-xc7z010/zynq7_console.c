@@ -18,33 +18,12 @@ static XUartPs sgtc_ps7_xuart_ps_data;
 
 /*!< API function */
 /*!
- * @brief   initial and start serial
- * @param   none
- * @retval  none
- * @note    none
- */
-void zynq7_console_init(void)
-{
-    XUartPs *sptr_uart;
-    XUartPs_Config *sptr_cfg;
-
-    sptr_uart = &sgtc_ps7_xuart_ps_data;
-
-    sptr_cfg = XUartPs_LookupConfig(XPAR_PS7_UART_0_DEVICE_ID);
-    if (!isValid(sptr_cfg))
-        return;
-
-    XUartPs_CfgInitialize(sptr_uart, sptr_cfg, sptr_cfg->BaseAddress);
-    XUartPs_SetBaudRate(sptr_uart, 115200);
-}
-
-/*!
  * @brief   io_putc
  * @param   none
  * @retval  none
  * @note    printk typedef
  */
-void io_putc(const kubyte_t ch)
+void zynq7_console_putc(const kubyte_t ch)
 {
     XUartPs *sptr_uart;
 
@@ -58,7 +37,7 @@ void io_putc(const kubyte_t ch)
  * @retval  none
  * @note    printk typedef
  */
-void io_putstr(const kubyte_t *msgs, kusize_t size)
+void zynq7_console_putstr(const kubyte_t *msgs, kusize_t size)
 {
     XUartPs *sptr_uart;
     kusize_t len, offset = 0;
@@ -82,7 +61,7 @@ void io_putstr(const kubyte_t *msgs, kusize_t size)
  * @retval  none
  * @note    character read
  */
-kubyte_t io_getc(kubyte_t *ch)
+kubyte_t zynq7_console_getc(kubyte_t *ch)
 {
     XUartPs *sptr_uart;
     kubyte_t val;
@@ -103,7 +82,7 @@ kubyte_t io_getc(kubyte_t *ch)
  * @retval  none
  * @note    string read
  */
-kssize_t io_getstr(kubyte_t *msgs, kusize_t size)
+kssize_t zynq7_console_getstr(kubyte_t *msgs, kusize_t size)
 {
     XUartPs *sptr_uart;
     kssize_t retval;
@@ -117,6 +96,46 @@ kssize_t io_getstr(kubyte_t *msgs, kusize_t size)
         *(msgs + retval) = '\0';
 
     return retval;
+}
+
+/*!< io stream reality */
+static struct io_stream_dev sgtc_zynq7_io_stream =
+{
+    .name = CONFIG_CONSOLE_DEVICE,
+
+    ._putc = zynq7_console_putc,
+    ._putstr = zynq7_console_putstr,
+    ._getc = zynq7_console_getc,
+    ._getstr = zynq7_console_getstr,
+};
+
+/*!
+ * @brief   initial and start serial
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void zynq7_console_init(void)
+{
+    XUartPs *sptr_uart;
+    XUartPs_Config *sptr_cfg;
+    struct io_stream_dev *sptr_stream;
+
+    sptr_uart = &sgtc_ps7_xuart_ps_data;
+
+    sptr_cfg = XUartPs_LookupConfig(XPAR_PS7_UART_0_DEVICE_ID);
+    if (!isValid(sptr_cfg))
+        return;
+
+    XUartPs_CfgInitialize(sptr_uart, sptr_cfg, sptr_cfg->BaseAddress);
+    XUartPs_SetBaudRate(sptr_uart, 115200);
+
+    /*!< Register IO Stream */
+    sptr_stream = &sgtc_zynq7_io_stream;
+    init_list_head(&sptr_stream->sgtc_link);
+    sptr_stream->is_opened = true;
+
+    register_io_stream(sptr_stream);
 }
 
 /* end of file*/

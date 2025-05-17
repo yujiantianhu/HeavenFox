@@ -19,6 +19,8 @@ obj-y		+=	cpu/
 obj-y		+=	kernel/
 obj-y		+=	lib/
 
+lds-y		:=	cpu/$(TYPE)/$(CPU)/linkscript.lds
+
 vector-y	:= 	lib/vectors.o
 start-y		:=	cpu/$(TYPE)/start.o
 head-y		:=	kernel/head.o
@@ -65,8 +67,8 @@ $(TARGET_BINY) : $(TARGET_EXEC) force
 	$(OBJDUMP) -D -m $(ARCH) $(TARGET_EXEC) > $(TARGET_NASM)
 	$(OBJDUMP) -D -m $(ARCH) -S -l $(TARGET_EXEC) > $(TARGET_LASM)
 
-$(TARGET_EXEC) : $(head-objs) force
-	$(CXX) -T$(LINK_SCRIPT) $(CXX_FLAGS) $(EXTRA_FLAGS) -Wl,-Map=$(TARGET_MMAP) -o $@ $(head-objs) $(OBJECT_EXEC) $(LIBS_PATH) $(LIBS)
+$(TARGET_EXEC) : $(head-objs) $(lds-y) force
+	$(CXX) -T$(lds-y) $(CXX_FLAGS) $(EXTRA_FLAGS) -Wl,-Map=$(TARGET_MMAP) -o $@ $(head-objs) $(OBJECT_EXEC) $(LIBS_PATH) $(LIBS)
 
 $(arch_output)/%.o : %.S force
 	$(call arch_build, $(CC), $@, $<)
@@ -77,11 +79,15 @@ $(arch_output)/%.o : %.c force
 $(arch_output)/%.o : %.cpp force
 	$(call arch_cxx_build, $(CXX), $@, $<)
 
+$(lds-y) : $(LINK_SCRIPT) force
+	$(CC) -E -P -x c $(INCLUDE_DIRS) -o $@ $<
+
 clean:
 	rm -rf $(head-objs) $(depd-objs)
+	rm -rf $(lds-y)
 
 distclean: clean
-	rm -rf $(TARGET_EXEC) $(TARGET_BINY) $(TARGET_IMGE) 
+	rm -rf $(TARGET_EXEC) $(TARGET_BINY) $(TARGET_IMGE)
 	rm -rf $(TARGET_NASM) $(TARGET_LASM) $(TARGET_MMAP)
 
 debug:

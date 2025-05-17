@@ -301,7 +301,7 @@ static inline void list_head_del_safe(struct list_head *sptr_head, struct list_h
  * @retval  none
  * @note    none
  */
-static inline void list_head_splice(struct list_head *sptr_src, struct list_head *sptr_dst)
+static inline void list_head_splice_init(struct list_head *sptr_src, struct list_head *sptr_dst)
 {
     struct list_head *sptr_prev;
 
