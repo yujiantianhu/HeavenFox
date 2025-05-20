@@ -33,7 +33,7 @@ static kuint16_t g_term_cmd_login_len;
  */
 void term_cmd_print_login(void)
 {
-    io_putstr((const kubyte_t *)g_term_cmd_login, g_term_cmd_login_len);
+    io_putstr_async((const kubyte_t *)g_term_cmd_login, g_term_cmd_login_len);
 }
 
 /*!

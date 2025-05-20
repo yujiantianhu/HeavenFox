@@ -1009,10 +1009,16 @@ static kint32_t imx_sdma_desc_submit(struct fwk_dma_transfer_desc *sptr_txdesc)
 static kbool_t imx_sdma_filter(struct fwk_dma_chan *sptr_chan, void *filter_param)
 {
     struct imx6_sdma_dt_data *sptr_dt;
-    struct imx_sdma_channel *sptr_channel; 
+    struct imx_sdma_channel *sptr_channel;
+    kuint32_t channel;
 
     sptr_dt = (struct imx6_sdma_dt_data *)filter_param;
     sptr_channel = mr_imx_sdma_to_chan(sptr_chan);
+    channel = mr_imx_sdma_handle_to_channel(sptr_channel);
+
+    /*!< Channel0 can not be requested */
+    if (0 == channel)
+        return false;
 
     memcpy(&sptr_channel->sgtc_dt, sptr_dt, sizeof(sptr_channel->sgtc_dt));
     sptr_chan->private_data = &sptr_channel->sgtc_dt;
@@ -1421,6 +1427,7 @@ static kint32_t imx_dma_driver_probe(struct fwk_platdev *sptr_pdev)
 
         sptr_chans->sptr_chip = sptr_domain;
         sptr_chans->sptr_context = sptr_domain->sptr_context + channel;
+        sptr_chans->sgtc_chan.sptr_device = sptr_madev;
 
         init_list_head(&sptr_chans->sgtc_pending);
         init_list_head(&sptr_chans->sgtc_completed);
@@ -1437,6 +1444,9 @@ static kint32_t imx_dma_driver_probe(struct fwk_platdev *sptr_pdev)
     if (fwk_dma_device_register(sptr_madev))
         goto fail4;
 
+    fwk_clk_disable_unprepare(sptr_data->sptr_ahbclk);
+    fwk_clk_disable_unprepare(sptr_data->sptr_ipgclk);
+    
     return ER_NORMAL;
 
 fail4:

@@ -115,7 +115,7 @@ kint32_t button_task_init(void)
 {
     static kuint8_t g_button_task_stack[BUTTON_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("button task", 
+    crt_task_t *cprt_task = new crt_task_t("button_task", 
                                             button_task_entry, 
                                             g_button_task_stack, 
                                             sizeof(g_button_task_stack),

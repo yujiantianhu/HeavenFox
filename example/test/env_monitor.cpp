@@ -87,11 +87,13 @@ static void *env_monitor_entry(void *args)
             goto END;
         }
 
+#if 0
         cout << __FUNCTION__ 
              << ": ir: "    << info[0] 
              << ", als: "   << info[1] 
              << ", ps: "    << info[2] 
              << endl;
+#endif
         
         virt_close(eep_fd);
         
@@ -113,7 +115,7 @@ kint32_t env_monitor_init(void)
 {
     static kuint8_t g_env_monitor_stack[ENV_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("env_monitor task", 
+    crt_task_t *cprt_task = new crt_task_t("env_monitor_task", 
                                             env_monitor_entry, 
                                             g_env_monitor_stack, 
                                             sizeof(g_env_monitor_stack));

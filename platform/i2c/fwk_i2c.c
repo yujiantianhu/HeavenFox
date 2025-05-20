@@ -247,7 +247,7 @@ struct fwk_i2c_client *fwk_i2c_new_device(struct fwk_i2c_adapter *sptr_adap, str
     sptr_client->sgtc_dev.sptr_bus = &sgtc_fwk_i2c_bus_type;
     sptr_client->sgtc_dev.sptr_type = &sgtc_fwk_i2c_client_type;
     sptr_client->sgtc_dev.sptr_node = sptr_info->sptr_node;
-    mr_dev_set_name(&sptr_client->sgtc_dev, "%d-%d", 
+    mr_dev_set_name(&sptr_client->sgtc_dev, "i2c%d-%d", 
                 sptr_adap->nr, sptr_client->addr | ((sptr_client->flags & FWK_I2C_M_TEN) ? 0xa000 : 0));
 
     /*!< verify machine address */

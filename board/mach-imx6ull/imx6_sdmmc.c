@@ -17,6 +17,7 @@
 #include <platform/mmc/fwk_sdcard.h>
 
 #include "imx6_common.h"
+#include <imx6/imx6ull_usdhc.h>
 
 /*!< The defines */
 /*!< Mux */

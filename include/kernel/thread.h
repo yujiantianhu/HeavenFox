@@ -68,12 +68,12 @@ typedef kint32_t tid_t;
 
 /*!<
  * priority
- * kernel thread requires higher priority (0 ~ 19)
+ * kernel thread requires higher priority (1 ~ 19)
  * The lower the value, the higher the priority
  */
 #define THREAD_PROTY_START					(99)
 #define THREAD_PROTY_DEFAULT				(80)
-#define THREAD_PROTY_MAX					(0)
+#define THREAD_PROTY_MAX					(1)
 
 #define THREAD_PROTY_IDLE				    (98)
 #define THREAD_PROTY_KERNEL				    (THREAD_PROTY_MAX)

@@ -125,6 +125,8 @@ do {   \
 #define PRINT_LEVEL_DEBUG                               PRINT_LEVEL_SOH "7"
 
 /*!< Input/Output Stream Interface */
+#define IO_STREAM_ASYNC                                 (0x00000001U)
+
 struct io_stream_dev
 {
     kchar_t name[32];
@@ -137,6 +139,9 @@ struct io_stream_dev
     kssize_t (*_getstr)(kubyte_t *msgs, kusize_t size);
 };
 
+/*!< The globals */
+extern kuint32_t g_io_stream_flags;
+
 /*!< The functions */
 extern void iostream_init(void);
 extern kint32_t register_io_stream(struct io_stream_dev *sptr_stream);
@@ -145,10 +150,21 @@ extern void io_stream_enable(const kchar_t *name);
 extern void io_stream_disable(const kchar_t *name);
 extern struct io_stream_dev *find_io_stream_dev(const kchar_t *name);
 
+/*!< Logs buffer */
+extern struct pq_buffer *io_stream_logs_ptr(void);
+extern void io_stream_logs_lock(void);
+extern void io_stream_logs_unlock(void);
+
+/*!< Hardware transfer */
 extern void io_putc(const kubyte_t ch);
 extern void io_putstr(const kubyte_t *msgs, kusize_t size);
 extern kubyte_t io_getc(kubyte_t *ch);
 extern kssize_t io_getstr(kubyte_t *msgs, kusize_t size);
+extern void io_putstr_async(const kubyte_t *msgs, kusize_t size);
+extern kssize_t io_stream_logs_extract(void *buffer, kusize_t size);
+extern void kprintf(void);
+
+/*!< Log out */
 extern void printk(const kchar_t *ptr_fmt, ...);
 
 #define print_err(fmt, ...)                             printk(PRINT_LEVEL_ERR fmt, ##__VA_ARGS__)
@@ -180,6 +196,7 @@ extern void printk(const kchar_t *ptr_fmt, ...);
             print_debug("%s: %d: " fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__);   \
     } while (0)
 
+/*!< Bitmap */
 extern kint32_t bitmap_find_first_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits);
 extern kint32_t bitmap_find_first_valid_bit(void *bitmap, kuint32_t start, kusize_t total_bits);
 extern kint32_t bitmap_find_nr_zero_bit(void *bitmap, kuint32_t start, kusize_t total_bits, kuint32_t nr);

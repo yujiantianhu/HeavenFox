@@ -85,7 +85,7 @@ struct pq_queue *term_cmd_queue_get(void)
  */
 void term_cmd_wrap_line(void)
 {
-    io_putstr((const kubyte_t *)"\r\n", 3);
+    io_putstr_async((const kubyte_t *)"\r\n", 3);
 }
 
 /*!
@@ -110,7 +110,7 @@ static void term_cmd_queue_free(struct pq_data *sptr_pqd)
  */
 static void term_cursor_toleft(void)
 {
-//  io_putstr((const kubyte_t *)"\033[1C", 5);
+//  io_putstr_async((const kubyte_t *)"\033[1C", 5);
     io_putc(CHAR_ASC_BS);
 }
 
@@ -123,7 +123,7 @@ static void term_cursor_toleft(void)
 static __unused
 void term_cursor_toright(void)
 {
-    io_putstr((const kubyte_t *)"\033[1D", 5);
+    io_putstr_async((const kubyte_t *)"\033[1D", 5);
 }
 
 /*!
@@ -134,7 +134,7 @@ void term_cursor_toright(void)
  */
 static void term_clear_line(void)
 {
-    io_putstr((const kubyte_t *)"\033[2K\r", 6);
+    io_putstr_async((const kubyte_t *)"\033[2K\r", 6);
 }
 
 /*!
@@ -146,7 +146,7 @@ static void term_clear_line(void)
 static __unused
 void term_clear_screen(void)
 {
-    io_putstr((const kubyte_t *)"\033[2J\r", 6);
+    io_putstr_async((const kubyte_t *)"\033[2J\r", 6);
 }
 
 /*!
@@ -301,7 +301,7 @@ static void term_kbd_dir_up(struct term_kbd_priv *sptr_priv, kuint32_t *offset)
     /*!< echo is the first task */
     term_cmd_print_login();
 
-    io_putstr(msg, sptr_his->length);
+    io_putstr_async(msg, sptr_his->length);
 }
 
 /*!
@@ -334,7 +334,7 @@ static void term_kbd_dir_down(struct term_kbd_priv *sptr_priv, kuint32_t *offset
     /*!< echo is the first task */
     term_cmd_print_login();
 
-    io_putstr(msg, sptr_his->length);
+    io_putstr_async(msg, sptr_his->length);
 }
 
 /*!< super key */
@@ -591,6 +591,8 @@ kint32_t term_init(void)
 
         if (register_io_stream(sptr_stream))
             return -ER_ERROR;
+
+        g_io_stream_flags |= IO_STREAM_ASYNC;
     }
 
     sptr_attr->detachstate = THREAD_CREATE_JOINABLE;

@@ -66,7 +66,7 @@ private:
 
 static inline void endl(void)
 {
-    io_putstr((const kubyte_t *)"\r\n", 2);
+    io_putstr_async((const kubyte_t *)"\r\n", 3);
 }
 
 class ostream {
@@ -82,13 +82,13 @@ public:
 
     ostream &operator<<(const kchar_t *str)
     {
-        io_putstr((const kubyte_t *)str, strlen(str));
+        io_putstr_async((const kubyte_t *)str, strlen(str) + 1);
         return *this;
     }
 
     ostream &operator<<(const kubyte_t *str)
     {
-        io_putstr(str, strlen((const kchar_t *)str));
+        io_putstr_async(str, strlen((const kchar_t *)str) + 1);
         return *this;
     }
 

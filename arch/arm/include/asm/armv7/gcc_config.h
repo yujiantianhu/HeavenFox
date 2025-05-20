@@ -92,8 +92,8 @@
  * @retval 	none
  * @note   	do nothing
  */
-#define mr_nop()                                   do { __asm__ __volatile__ ("nop"); } while (0)
-#define mr_delay_nop()                             mr_nop()
+#define mr_nop()                                    do { __asm__ __volatile__ ("nop"); } while (0)
+#define mr_delay_nop()                              mr_nop()
 
 /*!
  * @brief  	mr_wfi
@@ -101,7 +101,7 @@
  * @retval 	none
  * @note   	wait for Interrupt
  */
-#define mr_wfi()                                   do { __asm__ __volatile__ ("wfi"); } while (0)
+#define mr_wfi()                                    do { __asm__ __volatile__ ("wfi"); } while (0)
 
 /*!
  * @brief  	mr_wfe
@@ -109,7 +109,7 @@
  * @retval 	none
  * @note   	wait for Event
  */
-#define mr_wfe()                                   do { __asm__ __volatile__ ("wfe"); } while (0)
+#define mr_wfe()                                    do { __asm__ __volatile__ ("wfe"); } while (0)
 
 /*!
  * @brief  	mr_sev
@@ -117,7 +117,7 @@
  * @retval 	none
  * @note   	send Event
  */
-#define mr_sev()                                   do { __asm__ __volatile__ ("sev"); } while (0)
+#define mr_sev()                                    do { __asm__ __volatile__ ("sev"); } while (0)
 
 /*!
  * @brief  	mr_barrier
@@ -125,7 +125,7 @@
  * @retval 	none
  * @note   	barrier
  */
-#define mr_barrier()                               do { __asm__ __volatile__ ("": : : "memory"); } while (0)
+#define mr_barrier()                                do { __asm__ __volatile__ ("": : : "memory"); } while (0)
 
 /*!
  * @brief  	mr_isb

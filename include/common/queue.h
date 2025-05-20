@@ -58,6 +58,18 @@ extern void *pq_lookback(struct pq_queue *sptr_pq, kint32_t *base);
 extern void *pq_lookfront(struct pq_queue *sptr_pq, kint32_t *base);
 extern kint32_t pq_queue_get_size(struct pq_queue *sptr_pq);
 
+/*!< API functions */
+/*!
+ * @brief   create ring queue
+ * @param   data_len: length of queue member
+ * @retval  pq_queue
+ * @note    none
+ */
+static inline struct pq_queue *ring_queue_create(kusize_t data_len)
+{
+    return pq_queue_create(NR_PQ_RING, data_len);
+}
+
 #ifdef __cplusplus
     }
 #endif

@@ -16,6 +16,7 @@
 #include <common/api_string.h>
 #include <common/mem_manage.h>
 #include <common/list_types.h>
+#include <common/buffer.h>
 #include <kernel/kernel.h>
 #include <kernel/spinlock.h>
 #include <platform/fwk_mempool.h>
@@ -24,7 +25,47 @@
 static DECLARE_LIST_HEAD(sgtc_io_stream_devices);
 static struct spin_lock sgtc_io_stream_lock = SPIN_LOCK_INIT();
 
+/*!< Log msgs: 128KB */
+static kuint8_t g_io_stream_buffer[128 * 1024];
+static struct pq_buffer sgtc_io_stream_logs = PQ_RING_BUFFER_INIT(g_io_stream_buffer, sizeof(g_io_stream_buffer));
+static struct spin_lock sgtc_io_stream_logs_lock = SPIN_LOCK_INIT();
+
+kuint32_t g_io_stream_flags = 0;
+
 /*!< API function */
+/*!
+ * @brief   get logs handler
+ * @param   none
+ * @retval  &sgtc_io_stream_logs
+ * @note    none
+ */
+struct pq_buffer *io_stream_logs_ptr(void)
+{
+    return &sgtc_io_stream_logs;
+}
+
+/*!
+ * @brief   logs buffer lock (spin lock)
+ * @param   none
+ * @retval  none
+ * @note    spin_lock_irqsave(&sgtc_io_stream_logs_lock)
+ */
+void io_stream_logs_lock(void)
+{
+    spin_lock_irqsave(&sgtc_io_stream_logs_lock);
+}
+
+/*!
+ * @brief   logs buffer unlock (spin lock)
+ * @param   none
+ * @retval  none
+ * @note    spin_unlock_irqrestore(&sgtc_io_stream_logs_lock)
+ */
+void io_stream_logs_unlock(void)
+{
+    spin_unlock_irqrestore(&sgtc_io_stream_logs_lock);
+}
+
 /*!
  * @brief   io_putc
  * @param   ch
@@ -210,6 +251,74 @@ struct io_stream_dev *find_io_stream_dev(const kchar_t *name)
 }
 
 /*!
+ * @brief   Save msgs to buffer, not output right away
+ * @param   msgs
+ * @retval  none
+ * @note    kthread task will put string
+ */
+void io_putstr_async(const kubyte_t *msgs, kusize_t size)
+{
+    kssize_t ret = -1;
+
+    if (g_io_stream_flags & IO_STREAM_ASYNC)
+    {
+        spin_lock_irqsave(&sgtc_io_stream_logs_lock);
+        ret = pq_message_write(&sgtc_io_stream_logs, msgs, size);
+        spin_unlock_irqrestore(&sgtc_io_stream_logs_lock);
+    }
+
+    /*!< Not async, or message write fail, re-send message by hardware directlly */
+    if (ret < 0)
+        io_putstr(msgs, size);
+}
+
+/*!
+ * @brief   Extract message
+ * @param   buffer
+ * @retval  none
+ * @note    size can be larger than sgtc_io_stream_logs.buffer, then extract all
+ */
+kssize_t io_stream_logs_extract(void *buffer, kusize_t size)
+{
+    kssize_t ret;
+
+    if (!(g_io_stream_flags & IO_STREAM_ASYNC))
+        return -ER_PERMIT;
+
+    spin_lock_irqsave(&sgtc_io_stream_logs_lock);
+    ret = pq_message_read(&sgtc_io_stream_logs, buffer, size);
+    spin_unlock_irqrestore(&sgtc_io_stream_logs_lock);
+
+    return ret;
+}
+
+/*!
+ * @brief   kprintf
+ * @param   none
+ * @retval  none
+ * @note    string output (from sgtc_io_stream_logs.buffer)
+ */
+void kprintf(void)
+{
+    /*!< 4KB */
+    kubyte_t log_buffer[4096];
+    kssize_t size;
+    struct pq_message *sptr_msg;
+
+    sptr_msg = (struct pq_message *)log_buffer;
+    size = io_stream_logs_extract(log_buffer, sizeof(log_buffer));
+    
+    while (size > 0) 
+    {
+        /*!< Put every string one by one */
+        io_putstr(sptr_msg->data, sptr_msg->len);
+
+        size -= (sptr_msg->len + sizeof(sptr_msg->len));
+        sptr_msg = (void *)sptr_msg + sptr_msg->len + sizeof(sptr_msg->len);
+    }
+}
+
+/*!
  * @brief   printk
  * @param   ptr_fmt
  * @retval  none
@@ -240,7 +349,7 @@ void printk(const kchar_t *ptr_fmt, ...)
 //	for (i = 0; i < size; i++)
 //		io_putc(*(ptr_buf + i));
 
-    io_putstr(ptr_buf, size);
+    io_putstr_async(ptr_buf, size + 1);
     kfree(ptr_buf);
 #endif
 }

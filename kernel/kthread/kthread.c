@@ -122,8 +122,6 @@ static void *kthread_entry(void *args)
     add_timer(sptr_tim);
 #endif
 
-    kworker_init();                         /*!< create kworker task */
-
     print_info("%s is enter, which tid is: %d\r\n", __FUNCTION__, tid);
     mr_preempt_enable();
 
@@ -132,15 +130,18 @@ static void *kthread_entry(void *args)
     print_info("platform initialization finished\r\n");
 
     term_init();                            /*!< create term task */
+    kworker_init();                         /*!< create kworker task */
 
     /*!< build application */
     init_proc_init();                       /*!< create init task */
 
     for (;;)
-    {        
+    {
         kthread_systime_record();
         kthread_kill_zombie();              /*!< kill zombie thread */
-        sleep(1);
+
+        kprintf();
+        msleep(50);
     }
 
     return args;

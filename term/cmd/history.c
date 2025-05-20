@@ -52,8 +52,8 @@ static kint32_t term_cmd_show_history(struct term_cmd *sptr_cmd, kint32_t argc, 
                 cur_index[size + 1] = ' ';
                 cur_index[size + 2] = '\0';
 
-                io_putstr(cur_index, size + 2);
-                io_putstr(sptr_his->cmd, sptr_his->length);
+                io_putstr_async(cur_index, size + 2);
+                io_putstr_async(sptr_his->cmd, sptr_his->length);
                 term_cmd_wrap_line();
             }
 

@@ -41,17 +41,21 @@ void zynq7_console_putstr(const kubyte_t *msgs, kusize_t size)
 {
     XUartPs *sptr_uart;
     kusize_t len, offset = 0;
+    kint32_t ret;
 
     sptr_uart = &sgtc_ps7_xuart_ps_data;
 
     while (size)
     {
         len = CMP_MIN2(size, 64);
-        XUartPs_Send(sptr_uart, (kuint8_t *)msgs + offset, len);
+        ret = XUartPs_Send(sptr_uart, (kuint8_t *)msgs + offset, len);
+        if (ret < 0)
+            break;
+
         mr_delay_nop();
 
-        size -= len;
-        offset += len;
+        size -= ret;
+        offset += ret;
     };
 }
 

@@ -32,6 +32,9 @@ CONFIG_OPTIMIZE_CLASS = 0
 
 # Console
 CONFIG_CONSOLE_DEVICE = "/dev/uart0"
+# Use DMA to Receive or Send for Console ?
+CONFIG_CONSOLE_RXDMA = n
+CONFIG_CONSOLE_TXDMA = n
 
 # Clock */
 # ---------------------------------------------------------------

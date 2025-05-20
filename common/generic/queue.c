@@ -31,7 +31,7 @@ struct pq_queue *pq_queue_create(kint32_t type, kusize_t data_len)
 {
     struct pq_queue *sptr_pq;
 
-    sptr_pq = kmalloc(sizeof(*sptr_pq) + data_len * sizeof(struct pq_data), GFP_KERNEL);
+    sptr_pq = kmalloc(sizeof(*sptr_pq) + data_len * sizeof(struct pq_data *), GFP_KERNEL);
     if (!isValid(sptr_pq))
         return mr_nullptr;
 

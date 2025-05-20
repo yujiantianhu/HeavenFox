@@ -21,10 +21,11 @@
 #include <platform/fwk_chrdev.h>
 #include <platform/fwk_inode.h>
 #include <platform/fwk_fs.h>
+#include <platform/fwk_fcntl.h>
 #include <kernel/spinlock.h>
 #include <kernel/wait.h>
 
-#include <imx6/imx6ull_periph.h>
+#include <imx6/imx6ull_uart.h>
 
 /*!< The defines */
 enum __ERT_IMX_UART_DRV_FLAG 
@@ -32,6 +33,7 @@ enum __ERT_IMX_UART_DRV_FLAG
     NR_IMX_UART_DRV_CONSOLE = mr_bit(0U),
     NR_IMX_UART_DRV_RXDMA = mr_bit(1U),
     NR_IMX_UART_DRV_TXDMA = mr_bit(2U),
+    NR_IMX_UART_DRV_IRQEN = mr_bit(3U),
 };
 
 struct imx_uart_drv_data 
@@ -48,19 +50,22 @@ struct imx_uart_drv_data
     struct fwk_dma_slave_config sgtc_rxcfg;
     struct fwk_dma_slave_config sgtc_txcfg;
 
+    struct pq_queue *sptr_ring;
+
     kuint32_t devnum;
     struct fwk_cdev *sptr_cdev;
     struct fwk_device *sptr_idev;
 
-    struct wait_queue_head sgtc_wqh;
-    kuint32_t priority;
+    struct wait_queue_head sgtc_txwqh;
+    struct wait_queue_head sgtc_rxwqh;
+    kuint32_t flags;
 };
 
-#define IMX_UART_DRIVER_MAJOR                           (NR_UART_MAJOR)
-#define IMX_UART_DMA_RXBD_SIZE                          (128)
-#define IMX_UART_DMA_TXBD_SIZE                          (128)
-#define IMX_UART_RX_WATERMARK                           (16)
-#define IMX_UART_TX_WATERMARK                           (16)
+#define IMX_UART_DRIVER_MAJOR                                   (NR_UART_MAJOR)
+#define IMX_UART_DMA_RXBD_SIZE                                  (128)
+#define IMX_UART_DMA_TXBD_SIZE                                  (128)
+#define IMX_UART_RX_WATERMARK                                   (16)
+#define IMX_UART_TX_WATERMARK                                   (16)
 
 /*!< device id for device-tree */
 static const struct fwk_of_device_id sgtc_imx_uart_driver_id[] =
@@ -115,31 +120,22 @@ static void imx_uart_tx_complete(void *callback_param)
 }
 
 /*!
- * @brief   imx_uart_driver_open
- * @param   sptr_inode, sptr_file
- * @retval  errno
+ * @brief   Uart hardware initialization
+ * @param   sptr_data: driver data
+ * @retval  none
  * @note    none
  */
-static kint32_t imx_uart_driver_open(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
+static void imx_uart_initial(struct imx_uart_drv_data *sptr_data)
 {
-    struct imx_uart_drv_data *sptr_data;
-    srt_imx_uart_t *sptr_uart;
-
-    sptr_data = sptr_inode->sptr_cdev->privData;
-    sptr_file->private_data = sptr_data;
-
-    fwk_clk_enable(sptr_data->sptr_ipgclk);
-    fwk_clk_enable(sptr_data->sptr_perclk);
-
-    sptr_uart = sptr_data->sptr_uart;
+    srt_imx_uart_t *sptr_uart = sptr_data->sptr_uart;
 
     /*!< Disable Uart, and clear all settings (including automatic baud rate detection) */
     mr_writel(0, &sptr_uart->UCR1);
 
     /*!< Reset the Tx and Rx state machines, all FIFOs and USR1/2, UBIR, UBMR, UBRC, URXD, UTXD, UTS */
-    mr_clrbitl(mr_bit(0), &sptr_uart->UCR2);
+    mr_clrbitl(NR_IMX_UART_UCR2_SRST, &sptr_uart->UCR2);
     /*!< Wating for reseting finished */
-//	while (!mr_isBitResetl(mr_bit(0), &sptr_Uart->UCR2));
+//	while (!mr_isBitResetl(NR_IMX_UART_UCR2_SRST, &sptr_Uart->UCR2));
 
     /*!<
      * bit14: Ignore RTS Pin
@@ -149,14 +145,15 @@ static kint32_t imx_uart_driver_open(struct fwk_inode *sptr_inode, struct fwk_fi
      * bit2: TXEN. Enable the transmitter
      * bit1: RXEN. Enable the receiver
      */
-    mr_clrbitl(mr_bit(8)  | mr_bit(6), &sptr_uart->UCR2);
-    mr_setbitl(mr_bit(14) | mr_bit(5) | mr_bit(2) | mr_bit(1), &sptr_uart->UCR2);
+    mr_clrbitl(NR_IMX_UART_UCR2_PREN  | NR_IMX_UART_UCR2_STPB, &sptr_uart->UCR2);
+    mr_setbitl(NR_IMX_UART_UCR2_IRTS | NR_IMX_UART_UCR2_WS | 
+               NR_IMX_UART_UCR2_TXEN | NR_IMX_UART_UCR2_RXEN, &sptr_uart->UCR2);
 
     /*!<
      * RXD Muxed Input Selected
      * 	<In I.MX6ULL, UARTs are used in MUXED mode, so that this bit should always be set>
      */
-    mr_setbitl(mr_bit(2), &sptr_uart->UCR3); 
+    mr_setbitl(NR_IMX_UART_UCR3_RXDMUXSEL, &sptr_uart->UCR3); 
 
     /*!< Clear Others */
     mr_resetl(&sptr_uart->UTIM);
@@ -172,30 +169,49 @@ static kint32_t imx_uart_driver_open(struct fwk_inode *sptr_inode, struct fwk_fi
      * ===> UBIR = 71
      * Baud Rate = 80000000 / (16 * (3124 + 1) / (71 + 1)) = (80000000 * 72) / (16 * 3125) = 115200
      */
-    mr_setbitl(mr_bit(9) | mr_bit(7), &sptr_uart->UFCR);
-    mr_writel(71, &sptr_uart->UBIR);
-    mr_writel(3124, &sptr_uart->UBMR);
+    mr_setbitl(IMX_UART_UFCR_RFDIV_1, &sptr_uart->UFCR);
+    mr_writel(IMX_UART_UBIR_INC(71), &sptr_uart->UBIR);
+    mr_writel(IMX_UART_UBMR_INC(3124), &sptr_uart->UBMR);
 
     /*!< FIFO: Watermark */
-    mr_clrbitl(0xFC3FU, &sptr_uart->UFCR);
-    mr_setbitl(mr_bit_mask(IMX_UART_TX_WATERMARK, 0xFC00U, 10U), &sptr_uart->UFCR);
-    mr_setbitl(mr_bit_mask(IMX_UART_RX_WATERMARK, 0x003FU, 0U),  &sptr_uart->UFCR);
+    mr_clrbitl(NR_IMX_UART_UFCR_RXTL | NR_IMX_UART_UFCR_TXTL, &sptr_uart->UFCR);
+    mr_setbitl(IMX_UART_UFCR_RXTL_RxFIFO(IMX_UART_TX_WATERMARK), &sptr_uart->UFCR);
+    mr_setbitl(IMX_UART_UFCR_TXTL_TxFIFO(IMX_UART_RX_WATERMARK),  &sptr_uart->UFCR);
 
     /*!<
+     * Clear status
      * bit6: Tx FIFO Empty, 0 (not empty), 1 (empty)
      * bit5: Rx FIFO Empty, 0 (not empty), 1 (empty)
      */
-    mr_writel(mr_bit(6) | mr_bit(5), &sptr_uart->UTS);
+    mr_writel(NR_IMX_UART_UTS_RXEMPTY | NR_IMX_UART_UTS_TXEMPTY, &sptr_uart->UTS);
 
     /*!< Enable Uart */
-    mr_setbitl(mr_bit(0), &sptr_uart->UCR1);
+    mr_setbitl(NR_IMX_UART_UCR1_UARTEN, &sptr_uart->UCR1);
 
     /*!< Enable Uart with DMA */
-    if (sptr_data->priority & NR_IMX_UART_DRV_TXDMA)
-        mr_setbitl(mr_bit(3), &sptr_uart->UCR1);
-    if (sptr_data->priority & NR_IMX_UART_DRV_RXDMA)
-        mr_setbitl(mr_bit(8), &sptr_uart->UCR1);
+    if (sptr_data->flags & NR_IMX_UART_DRV_TXDMA)
+        mr_setbitl(NR_IMX_UART_UCR1_TXDMAEN, &sptr_uart->UCR1);
+    if (sptr_data->flags & NR_IMX_UART_DRV_RXDMA)
+        mr_setbitl(NR_IMX_UART_UCR1_RXDMAEN, &sptr_uart->UCR1);
+}
 
+/*!
+ * @brief   imx_uart_driver_open
+ * @param   sptr_inode, sptr_file
+ * @retval  errno
+ * @note    none
+ */
+static kint32_t imx_uart_driver_open(struct fwk_inode *sptr_inode, struct fwk_file *sptr_file)
+{
+    struct imx_uart_drv_data *sptr_data;
+
+    sptr_data = sptr_inode->sptr_cdev->privData;
+    sptr_file->private_data = sptr_data;
+
+    fwk_clk_enable(sptr_data->sptr_ipgclk);
+    fwk_clk_enable(sptr_data->sptr_perclk);
+
+    imx_uart_initial(sptr_data);
     return 0;
 }
 
@@ -213,7 +229,7 @@ static kint32_t imx_uart_driver_close(struct fwk_inode *sptr_inode, struct fwk_f
     sptr_file->private_data = mr_nullptr;
 
     /*!< Serial console should not be closed */
-    if (!(sptr_data->priority & NR_IMX_UART_DRV_CONSOLE)) 
+    if (!(sptr_data->flags & NR_IMX_UART_DRV_CONSOLE)) 
     {
         srt_imx_uart_t *sptr_uart = sptr_data->sptr_uart;
 
@@ -221,10 +237,10 @@ static kint32_t imx_uart_driver_close(struct fwk_inode *sptr_inode, struct fwk_f
         mr_writel(0, &sptr_uart->UCR1);
 
         /*!< Disable Uart with DMA */
-        if (sptr_data->priority & NR_IMX_UART_DRV_TXDMA)
-            mr_clrbitl(mr_bit(3), &sptr_uart->UCR1);
-        if (sptr_data->priority & NR_IMX_UART_DRV_RXDMA)
-            mr_clrbitl(mr_bit(8), &sptr_uart->UCR1);
+        if (sptr_data->flags & NR_IMX_UART_DRV_TXDMA)
+            mr_clrbitl(NR_IMX_UART_UCR1_TXDMAEN, &sptr_uart->UCR1);
+        if (sptr_data->flags & NR_IMX_UART_DRV_RXDMA)
+            mr_clrbitl(NR_IMX_UART_UCR1_RXDMAEN, &sptr_uart->UCR1);
 
         fwk_clk_disable(sptr_data->sptr_ipgclk);
         fwk_clk_disable(sptr_data->sptr_perclk);
@@ -246,34 +262,28 @@ static kssize_t imx_uart_driver_write(struct fwk_file *sptr_file, const kbuffer_
     sptr_data = (struct imx_uart_drv_data *)sptr_file->private_data;
     
     if ((size < 64) ||
-        !(sptr_data->priority & NR_IMX_UART_DRV_TXDMA)) 
+        !(sptr_data->flags & NR_IMX_UART_DRV_TXDMA)) 
     {
         srt_imx_uart_t *sptr_uart = sptr_data->sptr_uart;
-        kchar_t msgs[64];
+        kchar_t msgs[4096];
 
         fwk_copy_from_user(msgs, ptrBuffer, size);
+
+        /*!< Wait for last fifo send finished */
+        if (!mr_imx_uart_tx_empty(sptr_uart))
+            wait_event(&sptr_data->sgtc_txwqh, mr_imx_uart_tx_empty(sptr_uart));
+
         for (kusize_t i = 0; i < size; i++) 
         {
-            kuint32_t count = 0;
+            /*!< If TxFIFO is full, waitting for a while */
+            while (mr_imx_uart_tx_full(sptr_uart))
+                mr_delay_nop();
 
             /*!< Send Data */
-            mr_writel(msgs[i] & 0xff, &sptr_uart->UTXD);
-
-            /*!< 
-             * Wait for sending finished
-             * bit3: 0: Transmit is incomplete; 1: Transmit is complete
-             */
-            while (!mr_isBitSetl(mr_bit(3), &sptr_uart->USR2)) 
-            {
-                if ((count++) < 10)
-                    continue;
-
-                wait_event(&sptr_data->sgtc_wqh, mr_isBitSetl(mr_bit(3), &sptr_uart->USR2));
-                break;
-            }
+            mr_imx_uart_send_byte(sptr_uart, msgs[i]);
         }
-    } 
-    else 
+    }
+    else
     {
         struct fwk_dma_transfer_desc *sptr_txdesc;
         struct fwk_dma_block_data *sptr_bdata;
@@ -321,7 +331,33 @@ static kssize_t imx_uart_driver_write(struct fwk_file *sptr_file, const kbuffer_
  */
 static kssize_t imx_uart_driver_read(struct fwk_file *sptr_file, kbuffer_t *ptrBuffer, kssize_t size)
 {
-    return 0;
+    struct imx_uart_drv_data *sptr_data;
+    srt_imx_uart_t *sptr_uart;
+    kchar_t *msgs;
+    kuint32_t count = 0;
+    
+    sptr_data = (struct imx_uart_drv_data *)sptr_file->private_data;
+    sptr_uart = sptr_data->sptr_uart;
+
+    if (mr_imx_uart_rx_empty(sptr_uart))
+    {
+        if (sptr_file->mode & O_NONBLOCK)
+            return -ER_EMPTY;
+
+        wait_event(&sptr_data->sgtc_rxwqh, !mr_imx_uart_rx_empty(sptr_uart));
+    }
+
+    msgs = kmalloc(size, GFP_KERNEL);
+    if (!isValid(msgs))
+        return -ER_NOMEM;
+
+    while (!mr_imx_uart_rx_empty(sptr_uart))
+        msgs[count++] = mr_imx_uart_recv_byte(sptr_uart);
+
+    fwk_copy_to_user(ptrBuffer, msgs, count);
+    kfree(msgs);
+
+    return count;
 }
 
 /*!< imx_uart driver operation */
@@ -444,6 +480,7 @@ static kint32_t imx_uart_driver_register(struct imx_uart_drv_data *sptr_data)
 
     sptr_data->devnum = devnum;
     sptr_data->sptr_cdev = sptr_cdev;
+    sptr_cdev->privData = sptr_data;
     sptr_data->sptr_idev = sptr_idev;
 
     return ER_NORMAL;
@@ -509,7 +546,7 @@ static kint32_t imx_uart_driver_probe(struct fwk_platdev *sptr_pdev)
 
     /*!< If not serial console */
     if (!kstrcmp(dev_name, mr_dev_get_name(sptr_data->sptr_idev)))
-        sptr_data->priority |= NR_IMX_UART_DRV_CONSOLE;
+        sptr_data->flags |= NR_IMX_UART_DRV_CONSOLE;
 
     /*!< Enable clock */
     fwk_clk_enable(sptr_data->sptr_ipgclk);
@@ -522,7 +559,7 @@ static kint32_t imx_uart_driver_probe(struct fwk_platdev *sptr_pdev)
         sptr_data->sgtc_rxcfg.src_addr_width = NR_DMA_TRX_WIDTH_1BYTE;
 
         if (!fwk_dma_config(sptr_data->sptr_rxchan, &sptr_data->sgtc_rxcfg))
-            sptr_data->priority |= NR_IMX_UART_DRV_RXDMA;
+            sptr_data->flags |= NR_IMX_UART_DRV_RXDMA;
     }
 
     if (sptr_data->sptr_txchan) 
@@ -532,16 +569,26 @@ static kint32_t imx_uart_driver_probe(struct fwk_platdev *sptr_pdev)
         sptr_data->sgtc_txcfg.dst_addr_width = NR_DMA_TRX_WIDTH_1BYTE;
         
         if (!fwk_dma_config(sptr_data->sptr_txchan, &sptr_data->sgtc_txcfg))
-            sptr_data->priority |= NR_IMX_UART_DRV_TXDMA;
+            sptr_data->flags |= NR_IMX_UART_DRV_TXDMA;
     }
 
-    if (!(sptr_data->priority & NR_IMX_UART_DRV_CONSOLE)) 
+    if (!(sptr_data->flags & NR_IMX_UART_DRV_CONSOLE)) 
     {
         fwk_clk_disable(sptr_data->sptr_ipgclk);
         fwk_clk_disable(sptr_data->sptr_perclk);
     }
 
-    if (!(sptr_data->priority & NR_IMX_UART_DRV_RXDMA)) 
+#if (!defined(CONFIG_CONSOLE_RXDMA) || !CONFIG_CONSOLE_RXDMA)
+    if (sptr_data->flags & NR_IMX_UART_DRV_CONSOLE)
+        sptr_data->flags &= ~NR_IMX_UART_DRV_RXDMA;
+#endif
+
+#if (!defined(CONFIG_CONSOLE_TXDMA) || !CONFIG_CONSOLE_TXDMA)
+    if (sptr_data->flags & NR_IMX_UART_DRV_CONSOLE)
+        sptr_data->flags &= ~NR_IMX_UART_DRV_TXDMA;
+#endif
+
+    if (!(sptr_data->flags & NR_IMX_UART_DRV_RXDMA)) 
     {
         if (fwk_request_irq(sptr_data->irq, imx_uart_isr, 0, mr_dev_get_name(sptr_data->sptr_idev), sptr_data))
             goto fail2;
@@ -549,7 +596,8 @@ static kint32_t imx_uart_driver_probe(struct fwk_platdev *sptr_pdev)
         fwk_disable_irq(sptr_data->irq);
     }
 
-    init_waitqueue_head(&sptr_data->sgtc_wqh);
+    init_waitqueue_head(&sptr_data->sgtc_txwqh);
+    init_waitqueue_head(&sptr_data->sgtc_rxwqh);
     fwk_platform_set_drvdata(sptr_pdev, sptr_data);
     
     return ER_NORMAL;
@@ -573,13 +621,13 @@ static kint32_t imx_uart_driver_remove(struct fwk_platdev *sptr_pdev)
 
     sptr_data = fwk_platform_get_drvdata(sptr_pdev);
 
-    if (!(sptr_data->priority & NR_IMX_UART_DRV_CONSOLE)) 
+    if (!(sptr_data->flags & NR_IMX_UART_DRV_CONSOLE)) 
     {
         fwk_clk_disable(sptr_data->sptr_ipgclk);
         fwk_clk_disable(sptr_data->sptr_perclk);
     }
 
-    if (!(sptr_data->priority & NR_IMX_UART_DRV_RXDMA)) 
+    if (!(sptr_data->flags & NR_IMX_UART_DRV_RXDMA)) 
     {
         fwk_disable_irq(sptr_data->irq);
         fwk_free_irq(sptr_data->irq, sptr_data);

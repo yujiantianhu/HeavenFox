@@ -103,7 +103,7 @@ struct fwk_dma_chan *fwk_of_dma_request_chan(struct fwk_device *sptr_dev, const 
     struct fwk_dma_device *sptr_mdev;
     struct fwk_device_node *sptr_node;
     struct fwk_of_phandle_args sgtc_args;
-    kuint32_t index;
+    kint32_t index;
 
     sptr_node = sptr_dev->sptr_node;
 
@@ -135,7 +135,7 @@ struct fwk_dma_chan *fwk_of_dma_request_chan(struct fwk_device *sptr_dev, const 
  */
 static kint32_t fwk_dma_chan_get(struct fwk_dma_chan *sptr_chan)
 {
-    if (!sptr_chan)
+    if (!sptr_chan || !sptr_chan->sptr_device)
         return -ER_NODEV;
 
     if (!sptr_chan->client_count)
@@ -185,6 +185,9 @@ struct fwk_dma_chan *fwk_dma_find_candidate(struct fwk_dma_device *sptr_mdev,
                                 kbool_t (*dma_filter_fn)(struct fwk_dma_chan *sptr_chan, void *filter_param), void *filter_param)
 {
     struct fwk_dma_chan *sptr_chan;
+
+    if (!sptr_mdev)
+        return ERR_PTR(-ER_NODEV);
 
     foreach_list_next_entry(sptr_chan, &sptr_mdev->sgtc_channels, sgtc_link)
     {
