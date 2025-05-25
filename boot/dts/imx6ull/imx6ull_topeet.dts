@@ -161,9 +161,15 @@
         status = "okay";
     };
 
-	sil9022a: sil9022a@72 {
+	sil9022a: sil9022a@39 {
 		compatible = "silicon,sil9022a";
-		reg = <0x72>;
+		reg = <0x39>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_sil9022a_intr
+					 &pinctrl_sil9022a_reset>;
+		reset-gpios = <&gpio3 21 GPIO_ACTIVE_HIGH>;
+		interrupt-parent = <&gpio5>;
+		interrupts = <3 IRQ_TYPE_EDGE_FALLING>;
 		status = "okay";
 	};
 };
@@ -231,7 +237,7 @@
 				MX6UL_PAD_LCD_DATA13__LCDIF_DATA13  	0x79
 				MX6UL_PAD_LCD_DATA14__LCDIF_DATA14  	0x79
 				MX6UL_PAD_LCD_DATA15__LCDIF_DATA15  	0x79
-				MX6UL_PAD_LCD_DATA16__LCDIF_DATA16  	0x79
+//				MX6UL_PAD_LCD_DATA16__LCDIF_DATA16  	0x79
 				MX6UL_PAD_LCD_DATA17__LCDIF_DATA17  	0x79
 				MX6UL_PAD_LCD_DATA18__LCDIF_DATA18  	0x79
 				MX6UL_PAD_LCD_DATA19__LCDIF_DATA19  	0x79
@@ -254,6 +260,12 @@
 		pinctrl_gpio_backlight: gpio_backlightgrp {
 			fsl,pins = <
 				MX6UL_PAD_GPIO1_IO08__GPIO1_IO08		0x10b0
+			>;
+		};
+
+		pinctrl_sil9022a_reset: pinctrl_sil9022a_resetgrp {
+			fsl,pins = <
+				MX6UL_PAD_LCD_DATA16__GPIO3_IO21		0x10b0	/*!< Reset pin */
 			>;
 		};
 
@@ -429,6 +441,11 @@
 			>;
 		};
 
+		pinctrl_sil9022a_intr: pinctrl_sil9022a_intrgrp {
+			fsl,pins = <
+				MX6UL_PAD_SNVS_TAMPER3__GPIO5_IO03		0x10b0	/*!< Interrupt pin */
+			>;
+		};
 	};
 };
 
@@ -570,6 +587,8 @@
 &uart1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart1>;
+	dmas = <&sdma 25 4 0>, <&sdma 26 4 0>;
+	dma-names = "rx", "tx";
 	status = "okay";
 };
 

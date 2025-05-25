@@ -2,7 +2,7 @@
 
 # sudo /opt/SEGGER/JLink/JLinkGDBServerCLExe -device MCIMX6Y2 -JLinkScriptFile ./scripts/jlink/MCIMX6Y2/jlink_init.jlinkscript
 # cd scripts/jlink
-# aem-linux-gnueabihf-gdb
+# arm-linux-gnueabihf-gdb
 # source jlink.sh
 
 target remote localhost:2331

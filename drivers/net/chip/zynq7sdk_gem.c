@@ -1383,7 +1383,7 @@ static void xsdk_gem_driver_setup(struct fwk_net_device *sptr_ndev)
  * @retval  irq enum
  * @note    none
  */
-static irq_return_t xsdk_gem_driver_isr(void *args)
+static irq_return_t xsdk_gem_driver_isr(kint32_t irq, void *args)
 {
     struct xsdk_gem_drv_data *sptr_data;
     XEmacPs *sptr_emacps;
@@ -1505,7 +1505,7 @@ static irq_return_t xsdk_gem_driver_isr(void *args)
  * @retval  irq enum
  * @note    none
  */
-static irq_return_t xsdk_gem_driver_bottom_isr(void *args)
+static irq_return_t xsdk_gem_driver_bottom_isr(kint32_t irq, void *args)
 {
     struct xsdk_gem_drv_data *sptr_data;
     nrt_gem_irq_stat_t status;

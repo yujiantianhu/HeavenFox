@@ -101,7 +101,7 @@
  * @retval 	none
  * @note   	wait for Interrupt
  */
-#define mr_wfi()                                    do { __asm__ __volatile__ ("wfi"); } while (0)
+#define mr_wfi()                                    __asm__ __volatile__ ("wfi")
 
 /*!
  * @brief  	mr_wfe
@@ -109,7 +109,7 @@
  * @retval 	none
  * @note   	wait for Event
  */
-#define mr_wfe()                                    do { __asm__ __volatile__ ("wfe"); } while (0)
+#define mr_wfe()                                    __asm__ __volatile__ ("wfe")
 
 /*!
  * @brief  	mr_sev
@@ -117,7 +117,7 @@
  * @retval 	none
  * @note   	send Event
  */
-#define mr_sev()                                    do { __asm__ __volatile__ ("sev"); } while (0)
+#define mr_sev()                                    __asm__ __volatile__ ("sev")
 
 /*!
  * @brief  	mr_barrier
@@ -125,7 +125,7 @@
  * @retval 	none
  * @note   	barrier
  */
-#define mr_barrier()                                do { __asm__ __volatile__ ("": : : "memory"); } while (0)
+#define mr_barrier()                                __asm__ __volatile__ ("": : : "memory")
 
 /*!
  * @brief  	mr_isb
@@ -133,15 +133,7 @@
  * @retval 	none
  * @note   	Instruction Synchronization Barrier
  */
-#define mr_isb()    \
-    do {   \
-        __asm__ __volatile__ (  \
-            " isb 0xf   "   \
-            :   \
-            :   \
-            : "memory"  \
-        );   \
-    } while (0)
+#define mr_isb()                                    __asm__ __volatile__ ("isb 0xf" : : : "memory")
 
 /*!
  * @brief  	mr_dsb
@@ -149,15 +141,7 @@
  * @retval 	none
  * @note   	Data Synchronization Barrier
  */
-#define mr_dsb()    \
-    do {   \
-        __asm__ __volatile__ (  \
-            " dsb 0xf   "   \
-            :   \
-            :   \
-            : "memory"  \
-        );   \
-    } while (0)
+#define mr_dsb()                                    __asm__ __volatile__ ("dsb 0xf" : : : "memory")
 
 /*!
  * @brief  	mr_dmb
@@ -165,15 +149,7 @@
  * @retval 	none
  * @note   	Data Memory Synchronization Barrier
  */
-#define mr_dmb()    \
-    do {   \
-        __asm__ __volatile__ (  \
-            " dmb 0xf   "   \
-            :   \
-            :   \
-            : "memory"  \
-        );   \
-    } while (0)
+#define mr_dmb()                                    __asm__ __volatile__ ("dmb 0xf" : : : "memory")
 
 /*!
  * @brief  	mr_set_cp15

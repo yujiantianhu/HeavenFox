@@ -141,6 +141,10 @@ void start_kernel(void)
 
 #endif
 
+    for (;;) {
+        /*!< do nothing */
+    }
+
 fail:
     print_info("start kernel failed!\r\n");
     mr_assert(false);

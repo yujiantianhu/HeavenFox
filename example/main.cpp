@@ -38,7 +38,7 @@ const thread_init_t proc_table::g_test_tables[] =
 //  console_task_init,
     light_task_init,
     button_task_init,
-//  display_task_init,
+    display_task_init,
     tsc_task_init,
     env_monitor_init,
 

@@ -34,9 +34,11 @@ extern volatile kutime_t jiffies_out;
 extern kutime_t *ptr_systick_counter;
 extern kutime_t g_delay_timer_counter;
 
+extern kutime_t g_schedule_prd;
+
 /*!< The defines */
 #define TICK_HZ                                             CONFIG_HZ
-#define mr_jiffies                                         (*ptr_systick_counter)
+#define SYSTICK_CNT()                                       (ptr_systick_counter ? (*ptr_systick_counter) : 0)
 
 #define JIFFIES_INITVAL                                     (86400000 - 1)
 #define JIFFIES_MAX                                         ((kutime_t)(~0))

@@ -62,6 +62,8 @@ enum __ERT_ERROR_CODE
 
 	/*!< comunication */
 	ER_TRXERR,
+	ER_TXERR,
+	ER_RXERR,
 	ER_SEND_FAILD,
 	ER_RECV_FAILD,
 	ER_SCMD_FAILD,

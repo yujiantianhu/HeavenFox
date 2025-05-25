@@ -68,7 +68,7 @@ void exec_software_irq_handler(void)
 
     /*!< read IAR, enable IRQ */
     hardirq = hw_irq_acknowledge();
-//  fwk_handle_softirq(hardirq, event);
+    fwk_handle_softirq(hardirq, event);
 
     /*!< write IAR, disable IRQ */
     hw_irq_deactivate(hardirq);

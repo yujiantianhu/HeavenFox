@@ -47,6 +47,9 @@ typedef struct fwk_i2c_adapter
 
 /*!< The functions */
 extern kint32_t fwk_i2c_transfer(struct fwk_i2c_client *sptr_client, struct fwk_i2c_msg *sptr_msgs, kint32_t num);
+extern kint32_t fwk_i2c_check_slave(struct fwk_i2c_client *sptr_client);
+extern kint32_t fwk_i2c_write_byte_data(struct fwk_i2c_client *sptr_client, kuint8_t reg, kuint8_t value);
+extern kint32_t fwk_i2c_read_byte_data(struct fwk_i2c_client *sptr_client, kuint8_t reg);
 
 /*!< API functions */
 /*!

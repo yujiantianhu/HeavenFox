@@ -276,7 +276,7 @@ static void imx_sdma_run_channel0(srt_imx_sdma_t *sptr_sdma)
     imx_sdma_start_channel_software(sptr_sdma, 0);
 
     /*!< Waitting for "sptr_sdma->STOP_STAT & mr_bit(1)" reset */
-    while (imx_sdma_get_channel_stop_status(sptr_sdma, 0));
+//  while (imx_sdma_get_channel_stop_status(sptr_sdma, 0));
 
     /*!< clear interrupt status, and set context switch mode to dynamic */
     imx_sdma_clear_channel_int_status(sptr_sdma, 0);
@@ -302,15 +302,14 @@ static void imx_sdma_reset_module(srt_imx_sdma_t *sptr_sdma, kuint32_t channel_n
     mr_resetl(&sptr_sdma->EVTOVR);
     mr_writel(IMX6UL_SDMA_DSPOVR_DO_U32(~0U), &sptr_sdma->DSPOVR);
     mr_resetl(&sptr_sdma->HOSTOVR);
-
-    /*!< set sptr_sdma->EVTPEND to 0 */
-    imx_sdma_clear_all_pend_status(sptr_sdma);
-
     mr_resetl(&sptr_sdma->INTRMASK);
 
     /*!< set sptr_sdma->CHNENBL[0-47] to 0, disable all events */
     for (kuint32_t event = 0; event < event_num; event++)
-        imx_sdma_set_source_channel(sptr_sdma, event, 0);
+        imx_sdma_clr_source_channel(sptr_sdma, event, 0xFFFFFFFFU);
+
+    /*!< set sptr_sdma->EVTPEND to 0 */
+    imx_sdma_clear_all_pend_status(sptr_sdma);
 
     /*!< set sptr_sdma->SDMA_CHNPRI[0-31] to 0, clear all channel's priority */
     for (kuint32_t chan = 0; chan < channel_num; chan++)
@@ -875,11 +874,12 @@ static void imx_sdma_desc_start(struct imx_sdma_desc *sptr_desc)
  * @retval  irq status
  * @note    none
  */
-static irq_return_t imx_sdma_isr(void *args)
+static irq_return_t imx_sdma_isr(kint32_t irq, void *args)
 {
     struct imx_sdma_drv_data *sptr_data;
     srt_imx_sdma_t *sptr_sdma;
     kuint32_t reg_value, channel = 1U;
+    kuint32_t chan_mask;
 
     sptr_data = (struct imx_sdma_drv_data *)args;
     sptr_sdma = sptr_data->sgtc_domain.sptr_sdma;
@@ -890,11 +890,11 @@ static irq_return_t imx_sdma_isr(void *args)
     mr_writel(reg_value, &sptr_sdma->INTR);
 
     /*!< Ignore Channel 0 */
-    reg_value >>= 1;
+    chan_mask = reg_value >> 1;
 
-    while (reg_value) 
+    while (chan_mask) 
     {
-        if (reg_value & 1U) 
+        if (chan_mask & 1U) 
         {
             struct imx_sdma_channel *sptr_channel;
             struct imx_sdma_desc *sptr_desc;
@@ -926,10 +926,14 @@ static irq_return_t imx_sdma_isr(void *args)
         }
 
         channel++;
-        reg_value >>= 1;
+        chan_mask >>= 1;
     }
 
-    return NR_IRQ_WAKE_THREAD;
+    /*!< At least one channel that is not channel 0 */
+    if (reg_value != 1)
+        return NR_IRQ_WAKE_THREAD;
+
+    return NR_IRQ_HANDLED;
 }
 
 /*!
@@ -938,7 +942,7 @@ static irq_return_t imx_sdma_isr(void *args)
  * @retval  irq status
  * @note    none
  */
-static irq_return_t imx_sdma_thread_isr(void *args)
+static irq_return_t imx_sdma_thread_isr(kint32_t irq, void *args)
 {
     struct imx_sdma_drv_data *sptr_data;
     struct imx_sdma_channel *sptr_channel;

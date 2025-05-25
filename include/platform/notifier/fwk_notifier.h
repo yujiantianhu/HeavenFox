@@ -47,6 +47,7 @@ typedef kint32_t (*notifier_fn_t)(struct fwk_notifier_block *sptr_nb, kuint32_t 
 struct fwk_notifier_block
 {
     notifier_fn_t notifier_call;
+    notifier_fn_t pengding_call;
     kuint32_t expect_event;
     void *data;
 
@@ -61,6 +62,8 @@ extern kint32_t fwk_blocking_notifier_chain_register(
 extern void fwk_blocking_notifier_chain_unregister(
                         struct fwk_notifier_chain *sptr_chain, struct fwk_notifier_block *sptr_nb);
 extern kint32_t fwk_blocking_notifier_call_chain(
+                        struct fwk_notifier_chain *sptr_chain, kuint32_t event, void *args);
+extern kint32_t fwk_blocking_pengding_call_chain(
                         struct fwk_notifier_chain *sptr_chain, kuint32_t event, void *args);
 
 #ifdef __cplusplus

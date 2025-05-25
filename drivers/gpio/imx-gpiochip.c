@@ -50,13 +50,14 @@ static DECLARE_LIST_HEAD(sgtc_imx_gpio_ports_list);
  * @retval  errno
  * @note    none
  */
-static irq_return_t imx_gpiochip_driver_isr(void *ptrDev)
+static irq_return_t imx_gpiochip_driver_isr(kint32_t irq, void *ptrDev)
 {
 	struct imx_gpio_port *sptr_port;
 	struct fwk_irq_domain *sptr_domain;
 	srt_hal_imx_gpio_t *sptr_reg;
 	kbool_t irq_ena, irq_sta;
-	kuint32_t idx, irq;
+	kuint32_t idx;
+	kint32_t pin_irq;
 
 	sptr_port = (struct imx_gpio_port *)ptrDev;
 	sptr_reg = (srt_hal_imx_gpio_t *)sptr_port->base;
@@ -70,8 +71,8 @@ static irq_return_t imx_gpiochip_driver_isr(void *ptrDev)
 		if (!irq_ena || !irq_sta)
 			continue;
 		
-		irq = fwk_irq_get_by_domain(sptr_domain, idx);
-		fwk_do_irq_handler(irq);
+		pin_irq = fwk_irq_get_by_domain(sptr_domain, idx);
+		fwk_do_irq_handler(pin_irq);
 
 		/*!< clear status bit */
 		mr_setbitl(mr_bit(idx), &sptr_reg->ISR);

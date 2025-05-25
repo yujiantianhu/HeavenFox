@@ -26,6 +26,7 @@ struct fwk_irq_group
     tid_t tid;
     srt_atomic_t sgtc_rec;
 
+    kint32_t irq;
     struct fwk_irq_action sgtc_action;
     irq_handler_t thread_fn;
 };
@@ -39,7 +40,7 @@ struct fwk_irq_group
  * @retval none
  * @note   default irq handler
  */
-static irq_return_t fwk_default_irq_isr(void *ptrDev)
+static irq_return_t fwk_default_irq_isr(kint32_t irq, void *ptrDev)
 {
     return NR_IRQ_NONE;
 }
@@ -93,7 +94,7 @@ static void *irq_thread(void *args)
     for (;;)
     {
         /*!< no additional judgement on whether thread_fn exsits */
-        sptr_grp->thread_fn(sptr_grp->sgtc_action.ptrArgs);
+        sptr_grp->thread_fn(sptr_grp->irq, sptr_grp->sgtc_action.ptrArgs);
         atomic_dec(&sptr_grp->sgtc_rec);
 
         if (!ATOMIC_READ(&sptr_grp->sgtc_rec))
@@ -110,17 +111,17 @@ static void *irq_thread(void *args)
  * @note   irq register
  */
 kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
-                                kuint32_t flags, const kchar_t *name, void *ptrDev)
+                                kuint32_t flags, const kchar_t *name, void *args)
 {
     struct fwk_irq_group *sptr_grp;
     struct fwk_irq_desc *sptr_desc;
     struct fwk_irq_action *sptr_action;
     kuint32_t len = kstrlen(name);
 
-    if ((!name) || (!ptrDev))
+    if ((!name) || (!args))
         return -ER_FAULT;
 
-    if (fwk_find_irq_action(irq, name, ptrDev))
+    if (fwk_find_irq_action(irq, name, args))
         return -ER_EXISTED;
 
     sptr_desc = fwk_irq_to_desc(irq);
@@ -134,13 +135,14 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
     sptr_action = &sptr_grp->sgtc_action;
     sptr_action->handler = handler ? handler : fwk_default_irq_isr;
     sptr_action->flags = flags;
-    sptr_action->ptrArgs = ptrDev;
+    sptr_action->ptrArgs = args;
 
     if (len >= sizeof(sptr_action->name))
         goto fail;
 
     sptr_grp->tid = -1;
     ATOMIC_SET(&sptr_grp->sgtc_rec, 0);
+    sptr_grp->irq = irq;
     sptr_grp->thread_fn = thread_fn;
 
     if (thread_fn)
@@ -182,9 +184,9 @@ fail:
  * @retval none
  * @note   irq register
  */
-kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, const kchar_t *name, void *ptrDev)
+kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, const kchar_t *name, void *args)
 {
-    return fwk_request_threaded_irq(irq, handler, mr_nullptr, flags, name, ptrDev);
+    return fwk_request_threaded_irq(irq, handler, mr_nullptr, flags, name, args);
 }
 
 /*!
@@ -193,13 +195,13 @@ kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, c
  * @retval none
  * @note   irq unregister
  */
-void fwk_free_irq(kint32_t irq, void *ptrDev)
+void fwk_free_irq(kint32_t irq, void *args)
 {
     struct fwk_irq_group *sptr_grp;
     struct fwk_irq_desc *sptr_desc;
     struct fwk_irq_action *sptr_action;
 
-    if ((irq < 0) || (!ptrDev))
+    if ((irq < 0) || (!args))
         return;
 
     sptr_desc = fwk_irq_to_desc(irq);
@@ -208,7 +210,7 @@ void fwk_free_irq(kint32_t irq, void *ptrDev)
 
     fwk_disable_irq(irq);
 
-    sptr_action = fwk_find_irq_action(irq, mr_nullptr, ptrDev);
+    sptr_action = fwk_find_irq_action(irq, mr_nullptr, args);
     if (isValid(sptr_action))
     {
         sptr_grp = mr_container_of(sptr_action, struct fwk_irq_group, sgtc_action);
@@ -280,7 +282,7 @@ void fwk_do_irq_handler(kint32_t softIrq)
         
     foreach_list_next_entry(sptr_action, &sptr_desc->sgtc_action, sgtc_link)
     {
-        retval = sptr_action->handler ? sptr_action->handler(sptr_action->ptrArgs) : NR_IRQ_WAKE_THREAD;
+        retval = sptr_action->handler ? sptr_action->handler(softIrq, sptr_action->ptrArgs) : NR_IRQ_WAKE_THREAD;
         switch (retval)
         {
             case NR_IRQ_HANDLED:
@@ -313,11 +315,11 @@ void fwk_handle_softirq(kint32_t softIrq, kuint32_t event)
     switch (event)
     {
         case SWI_EVENT_SCHEDULED:
-            print_info("trigger NR_EVENT_SCHEDULED \r\n");
+            kprintf(PRINT_LEVEL_DEBUG"trigger NR_EVENT_SCHEDULED \r\n");
             break;
         
         case SWI_EVENT_SYSCALL:
-            print_info("trigger NR_EVENT_SYSCALL \r\n");
+            kprintf(PRINT_LEVEL_DEBUG"trigger NR_EVENT_SYSCALL \r\n");
             break;
 
         default: break;

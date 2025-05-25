@@ -81,7 +81,7 @@ static const struct fwk_of_device_id sgtc_imx_uart_driver_id[] =
  * @retval  irq code
  * @note    none
  */
-static irq_return_t imx_uart_isr(void *args)
+static irq_return_t imx_uart_isr(kint32_t irq, void *args)
 {
     struct imx_uart_drv_data *sptr_data;
     srt_imx_uart_t *sptr_uart;
@@ -261,8 +261,7 @@ static kssize_t imx_uart_driver_write(struct fwk_file *sptr_file, const kbuffer_
     
     sptr_data = (struct imx_uart_drv_data *)sptr_file->private_data;
     
-    if ((size < 64) ||
-        !(sptr_data->flags & NR_IMX_UART_DRV_TXDMA)) 
+    if (!(sptr_data->flags & NR_IMX_UART_DRV_TXDMA)) 
     {
         srt_imx_uart_t *sptr_uart = sptr_data->sptr_uart;
         kchar_t msgs[4096];
@@ -588,7 +587,7 @@ static kint32_t imx_uart_driver_probe(struct fwk_platdev *sptr_pdev)
         sptr_data->flags &= ~NR_IMX_UART_DRV_TXDMA;
 #endif
 
-    if (!(sptr_data->flags & NR_IMX_UART_DRV_RXDMA)) 
+    if (!(sptr_data->flags & NR_IMX_UART_DRV_RXDMA))
     {
         if (fwk_request_irq(sptr_data->irq, imx_uart_isr, 0, mr_dev_get_name(sptr_data->sptr_idev), sptr_data))
             goto fail2;

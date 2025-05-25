@@ -483,7 +483,7 @@ kint32_t display_task_init(void)
 {
     static kuint8_t g_display_task_stack[DISPLAY_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("display task", 
+    crt_task_t *cprt_task = new crt_task_t("display_task", 
                                             display_task_entry, 
                                             g_display_task_stack, 
                                             sizeof(g_display_task_stack),

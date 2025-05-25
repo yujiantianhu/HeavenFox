@@ -29,14 +29,11 @@
 #define	SWI_EVENT_SCHEDULED						0x00000001
 #define	SWI_EVENT_SYSCALL						0x00000002
 
-#define	_SWI_EVENT_SCHEDULED					" swi 0x00000001 "
-#define	_SWI_EVENT_SYSCALL						" swi 0x00000002 "
+#define _SWI(x)                                 __asm__ __volatile__ ("swi" #x : :)
+#define	_SWI_EVENT_SCHEDULED					_SWI(0x00000001)
+#define	_SWI_EVENT_SYSCALL						_SWI(0x00000002)
 
-#define mr_rasie_schedule_event()	\
-    do {	\
-        __asm__ __volatile__ (	\
-            _SWI_EVENT_SCHEDULED : : );	\
-    } while (0)
+#define mr_rasie_schedule_event()               _SWI_EVENT_SCHEDULED
 
 #define FWK_IRQ_DESC_NAME_LENTH					(16)
 
@@ -73,7 +70,7 @@ enum __ER_IRQ_RETURN_VAL
 };
 
 typedef enum __ER_IRQ_RETURN_VAL irq_return_t;
-typedef irq_return_t (*irq_handler_t)(void *ptrDev);
+typedef irq_return_t (*irq_handler_t)(kint32_t irq, void *args);
 
 typedef struct fwk_irq_action
 {
@@ -115,11 +112,11 @@ extern void fwk_irq_desc_free(kint32_t irq);
 extern void fwk_irq_domain_free_irqs(struct fwk_irq_domain *sptr_domain);
 extern kint32_t fwk_of_irq_get(struct fwk_device_node *sptr_node, kuint32_t index);
 
-extern void *fwk_find_irq_action(kint32_t irq, const kchar_t *name, void *ptrDev);
+extern void *fwk_find_irq_action(kint32_t irq, const kchar_t *name, void *args);
 extern kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
-                                kuint32_t flags, const kchar_t *name, void *ptrDev);
+                                kuint32_t flags, const kchar_t *name, void *args);
 extern kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, const kchar_t *name, void *ptrDev);
-extern void fwk_free_irq(kint32_t irq, void *ptrDev);
+extern void fwk_free_irq(kint32_t irq, void *args);
 extern void fwk_destroy_irq_action(kint32_t irq);
 extern void fwk_do_irq_handler(kint32_t softIrq);
 extern void fwk_handle_softirq(kint32_t softIrq, kuint32_t event);

@@ -232,7 +232,7 @@ static kbool_t tsc2007_read_ad_value(struct tsc2007_data *sptr_data)
  * @retval  none
  * @note    upper isr: start half isr
  */
-static irq_return_t tsc2007_touch_isr(void *ptrDev)
+static irq_return_t tsc2007_touch_isr(kint32_t irq, void *ptrDev)
 {
     struct tsc2007_drv_info *sptr_info;
 

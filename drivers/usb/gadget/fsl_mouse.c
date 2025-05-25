@@ -157,7 +157,7 @@ srt_fsl_mouse_desc_t sgtc_fsl_mouse_dt =
  * @retval  error code
  * @note    none
  */
-irq_return_t fsl_mouse_driver_isr(void *ptrDev)
+irq_return_t fsl_mouse_driver_isr(kint32_t irq, void *ptrDev)
 {
     if (!ptrDev)
         return -ER_NULLPTR;

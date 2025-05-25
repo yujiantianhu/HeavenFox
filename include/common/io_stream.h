@@ -20,6 +20,7 @@
 /*!< The includes */
 #include <common/generic.h>
 #include <common/list_types.h>
+#include <configs/configs.h>
 
 /*!< The defines */
 #define __IO                                            volatile
@@ -42,11 +43,11 @@ typedef union urt_name  \
 #define mr_write_urt_bits(urt, member, data)  			((urt)->bit.member = (data))
 
 /*!< for a word */
-#define mr_writel(data, addr)                           do { *((volatile kuint32_t *)(addr)) = (kuint32_t)(data); } while (0)
+#define mr_writel(data, addr)                           do { *((volatile kuint32_t *)(addr)) = (kuint32_t)(data); mr_dmb(); } while (0)
 #define mr_readl(addr)                                  ( (*((volatile kuint32_t *)(addr))))
-#define mr_resetl(addr)                                 do { *((volatile kuint32_t *)(addr)) = 0U; } while (0)
-#define mr_setbitl(bit, addr)                           do { *((volatile kuint32_t *)(addr)) |= (kuint32_t)(bit); } while (0)
-#define mr_clrbitl(bit, addr)                           do { *((volatile kuint32_t *)(addr)) &= ~((kuint32_t)(bit)); } while (0)
+#define mr_resetl(addr)                                 do { *((volatile kuint32_t *)(addr)) = 0U; mr_dmb(); } while (0)
+#define mr_setbitl(bit, addr)                           do { *((volatile kuint32_t *)(addr)) |= (kuint32_t)(bit); mr_dmb(); } while (0)
+#define mr_clrbitl(bit, addr)                           do { *((volatile kuint32_t *)(addr)) &= ~((kuint32_t)(bit)); mr_dmb(); } while (0)
 #define mr_getbitl(bit, addr)                           ( (*((volatile kuint32_t *)(addr)) & ((kuint32_t)(bit))))
 #define mr_getbit_u32(mask, nr, addr)                   ( (mr_getbitl(mask, addr) >> (nr)))
 #define mr_setfieldl(bit, mask, addr)  \
@@ -56,11 +57,11 @@ do {   \
 } while (0)
 
 /*!< for a half word */
-#define mr_writew(data, addr)                           do { *((volatile kuint16_t *)(addr)) = (kuint16_t)(data); } while (0)
+#define mr_writew(data, addr)                           do { *((volatile kuint16_t *)(addr)) = (kuint16_t)(data); mr_dmb(); } while (0)
 #define mr_readw(addr)                                  ( (*((volatile kuint16_t *)(addr))))
-#define mr_resetw(addr)                                 do { *((volatile kuint16_t *)(addr)) = 0U; } while (0)
-#define mr_setbitw(bit, addr)                           do { *((volatile kuint16_t *)(addr)) |= (kuint16_t)(bit); } while (0)
-#define mr_clrbitw(bit, addr)                           do { *((volatile kuint16_t *)(addr)) &= ~((kuint16_t)(bit)); } while (0)
+#define mr_resetw(addr)                                 do { *((volatile kuint16_t *)(addr)) = 0U; mr_dmb(); } while (0)
+#define mr_setbitw(bit, addr)                           do { *((volatile kuint16_t *)(addr)) |= (kuint16_t)(bit); mr_dmb(); } while (0)
+#define mr_clrbitw(bit, addr)                           do { *((volatile kuint16_t *)(addr)) &= ~((kuint16_t)(bit)); mr_dmb(); } while (0)
 #define mr_getbitw(bit, addr)                           ( (*((volatile kuint16_t *)(addr)) & ((kuint16_t)(bit))))
 #define mr_getbit_u16(mask, nr, addr)                   ( (mr_getbitw(mask, addr) >> (nr)))
 #define mr_setfieldw(bit, mask, addr)  \
@@ -70,11 +71,11 @@ do {   \
 }
 
 /*!< for a byte */
-#define mr_writeb(data, addr)                           do { *((volatile kuint8_t *)(addr)) = (kuint8_t)(data); } while (0)
+#define mr_writeb(data, addr)                           do { *((volatile kuint8_t *)(addr)) = (kuint8_t)(data); mr_dmb(); } while (0)
 #define mr_readb(addr)                                  ( (*((volatile kuint8_t *)(addr))))
-#define mr_resetb(addr)                                 do { *((volatile kuint8_t *)(addr)) = 0U; } while (0)
-#define mr_setbitb(bit, addr)                           do { *((volatile kuint8_t *)(addr)) |= (kuint8_t)(bit); } while (0)
-#define mr_clrbitb(bit, addr)                           do { *((volatile kuint8_t *)(addr)) &= ~((kuint8_t)(bit)); } while (0)
+#define mr_resetb(addr)                                 do { *((volatile kuint8_t *)(addr)) = 0U; mr_dmb(); } while (0)
+#define mr_setbitb(bit, addr)                           do { *((volatile kuint8_t *)(addr)) |= (kuint8_t)(bit); mr_dmb(); } while (0)
+#define mr_clrbitb(bit, addr)                           do { *((volatile kuint8_t *)(addr)) &= ~((kuint8_t)(bit)); mr_dmb(); } while (0)
 #define mr_getbitb(bit, addr)                           ( (*((volatile kuint8_t *)(addr)) & ((kuint8_t)(bit))))
 #define mr_getbit_u8(mask, nr, addr)                    ( (mr_getbitb(mask, addr) >> (nr)))
 #define mr_setfieldb(bit, mask, addr)  \
@@ -126,6 +127,7 @@ do {   \
 
 /*!< Input/Output Stream Interface */
 #define IO_STREAM_ASYNC                                 (0x00000001U)
+#define IO_STREAM_TXING                                 (0x00000002U)
 
 struct io_stream_dev
 {
@@ -162,10 +164,10 @@ extern kubyte_t io_getc(kubyte_t *ch);
 extern kssize_t io_getstr(kubyte_t *msgs, kusize_t size);
 extern void io_putstr_async(const kubyte_t *msgs, kusize_t size);
 extern kssize_t io_stream_logs_extract(void *buffer, kusize_t size);
-extern void kprintf(void);
+extern void io_stream_logs_print(void);
 
-/*!< Log out */
 extern void printk(const kchar_t *ptr_fmt, ...);
+extern void kprintf(const kchar_t *ptr_fmt, ...);
 
 #define print_err(fmt, ...)                             printk(PRINT_LEVEL_ERR fmt, ##__VA_ARGS__)
 #define print_warn(fmt, ...)                            printk(PRINT_LEVEL_WARNING fmt, ##__VA_ARGS__)

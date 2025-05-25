@@ -34,6 +34,8 @@ static kuint32_t g_simple_timeout_cnt = 0;
 static DECLARE_LIST_HEAD(sgtc_global_timer_list);
 static DECLARE_SPIN_LOCK(sgtc_global_timer_lock);
 
+kutime_t g_schedule_prd = 0;
+
 /*!< API function */
 /*!
  * @brief   simple_delay_timer_initial

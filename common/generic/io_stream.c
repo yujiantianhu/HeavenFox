@@ -96,9 +96,13 @@ void io_putstr(const kubyte_t *msgs, kusize_t size)
 
     foreach_list_next_entry(sptr_stream, &sgtc_io_stream_devices, sgtc_link)
     {
+        g_io_stream_flags |= IO_STREAM_TXING;
+
         if (sptr_stream->is_opened && 
             sptr_stream->_putstr)
             sptr_stream->_putstr(msgs, size);
+
+        g_io_stream_flags &= ~IO_STREAM_TXING;
     }
 }
 
@@ -298,7 +302,7 @@ kssize_t io_stream_logs_extract(void *buffer, kusize_t size)
  * @retval  none
  * @note    string output (from sgtc_io_stream_logs.buffer)
  */
-void kprintf(void)
+void io_stream_logs_print(void)
 {
     /*!< 4KB */
     kubyte_t log_buffer[4096];
@@ -322,7 +326,7 @@ void kprintf(void)
  * @brief   printk
  * @param   ptr_fmt
  * @retval  none
- * @note    string output
+ * @note    perhaps sleep, because it calls "kmalloc" to save fmt, don't use in IRQ_handler!!!
  */
 void printk(const kchar_t *ptr_fmt, ...)
 {
@@ -351,6 +355,38 @@ void printk(const kchar_t *ptr_fmt, ...)
 
     io_putstr_async(ptr_buf, size + 1);
     kfree(ptr_buf);
+#endif
+}
+
+/*!
+ * @brief   kprintf
+ * @param   ptr_fmt
+ * @retval  none
+ * @note    Not sleep, but fmt must less than 1024 bytes!!!
+ */
+void kprintf(const kchar_t *ptr_fmt, ...)
+{
+#if defined(CONFIG_PRINT_LEVEL)
+    va_list ptr_list;
+    kubyte_t level[2] = {};
+    kusize_t size;
+    kubyte_t logs_buf[1024];
+    
+    va_start(ptr_list, ptr_fmt);
+    size = do_fmt_convert(logs_buf, level, ptr_fmt, ptr_list, sizeof(logs_buf));
+    va_end(ptr_list);
+
+    if (!size)
+        return;
+
+    /*!< if level is not set, default PRINT_LEVEL_WARNING */
+    if (*(PRINT_LEVEL_SOH) != *level)
+        memcpy(level, PRINT_LEVEL_WARNING, sizeof(level));
+
+    if (*(level + 1) > *((kubyte_t *)(CONFIG_PRINT_LEVEL)))
+        return;
+
+    io_putstr(logs_buf, size + 1);
 #endif
 }
 

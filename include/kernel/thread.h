@@ -76,15 +76,15 @@ typedef kint32_t tid_t;
 #define THREAD_PROTY_MAX					(1)
 
 #define THREAD_PROTY_IDLE				    (98)
-#define THREAD_PROTY_KERNEL				    (THREAD_PROTY_MAX)
+#define THREAD_PROTY_KERNEL				    (32)
 #define THREAD_PROTY_INIT					(THREAD_PROTY_KERNEL + 1)
-#define THREAD_PROTY_KWORKER				(THREAD_PROTY_KERNEL + 2)
 
 #define THREAD_PROTY_TERM                   (THREAD_PROTY_DEFAULT)
 
 #define THREAD_PROTY_SOCKRX                 (19)
 #define THREAD_PROTY_SOCKTX                 (20)
-#define THREAD_PROTY_IRQ                    (THREAD_PROTY_KERNEL + 1)
+#define THREAD_PROTY_IRQ                    (THREAD_PROTY_MAX)
+#define THREAD_PROTY_KWORKER				(THREAD_PROTY_MAX + 1)
 
 #define __THREAD_IS_LOW_PRIO(prio, prio2)	((prio2) <= (prio))
 #define __THREAD_HIGHER_DEFAULT(val)		(THREAD_PROTY_DEFAULT - (val))	

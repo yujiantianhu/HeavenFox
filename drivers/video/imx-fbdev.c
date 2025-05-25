@@ -23,6 +23,7 @@
 #include <platform/fwk_uaccess.h>
 #include <platform/video/fwk_fbmem.h>
 #include <kernel/sleep.h>
+#include <kernel/wait.h>
 
 #include <imx6/imx6ull_periph.h>
 #include <imx6/imx6ull_pins.h>
@@ -67,6 +68,8 @@ struct imx_fbdev_drv
 
     kuint32_t interface_type;
     struct imx_fbdev_backlight sgtc_blight;
+
+    struct wait_queue_head sgtc_wqh;
 };
 
 #define FBDEV_IMX_DRIVER_MINOR					0
@@ -113,7 +116,7 @@ static void imx_fbdev_init(void *base, struct imx_fbdev_drv *sptr_drv)
     mr_writel(mr_bit(31), &sptr_lcdif->CTRL_SET);
     while (mr_isBitResetl(mr_bit(31), &sptr_lcdif->CTRL));
 
-    delay_ms(100);
+    msleep(100);
 
     /*!< clear bit30 & bit31 */
     mr_writel(mr_bit(31), &sptr_lcdif->CTRL_CLR);
@@ -273,34 +276,38 @@ static void imx_fbdev_backlight_enable(struct imx_fbdev_drv *sptr_drv)
  * @retval  errno
  * @note    none
  */
-static void imx_fbdev_wake_interface(struct imx_fbdev_drv *sptr_drv)
+static kint32_t imx_fbdev_wake_interface(struct imx_fbdev_drv *sptr_drv)
 {
     struct fwk_fb_notifier_param *sptr_param;
+    kint32_t dev_cnt = 0;
 
     switch (sptr_drv->interface_type)
     {
         case NR_IMX_FBDEV_ELCDIF:
             /*!< open backlight */
             imx_fbdev_backlight_enable(sptr_drv);
+            dev_cnt++;
             break;
         
         case NR_IMX_FBDEV_HDMI:
             sptr_param = kmalloc(sizeof(*sptr_param), GFP_KERNEL);
             if (!isValid(sptr_param))
-                return;
+                return -ER_NOMEM;
 
             sptr_param->sptr_fix = &sptr_drv->sptr_fb->sgtc_fix;
             sptr_param->sptr_var = &sptr_drv->sptr_fb->sgtc_var;
             sptr_param->bus_width = sptr_drv->sgtc_phase.bus_width;
 
-            fwk_blocking_notifier_call_chain(
-                &sgtc_fbmem_notifier_chain, FB_NOTIFIER_HDMI_OPEN, sptr_param);
+            dev_cnt = fwk_blocking_notifier_call_chain(
+                            &sgtc_fbmem_notifier_chain, FB_NOTIFIER_HDMI_OPEN, sptr_param);
             
             kfree(sptr_param);
             break;
 
         default: break;
     }
+
+    return (dev_cnt >= 0) ? dev_cnt : (-ER_NODEV);
 }
 
 /*!
@@ -328,6 +335,33 @@ static void imx_fbdev_quit_interface(struct imx_fbdev_drv *sptr_drv)
 }
 
 /*!
+ * @brief   call notifier: waitting for interface
+ * @param   sptr_drv
+ * @retval  errno
+ * @note    none
+ */
+static kbool_t imx_fbdev_wait_interface(struct imx_fbdev_drv *sptr_drv)
+{
+    kint32_t dev_cnt = 0;
+
+    switch (sptr_drv->interface_type)
+    {
+        case NR_IMX_FBDEV_ELCDIF:
+            dev_cnt++;
+            break;
+        
+        case NR_IMX_FBDEV_HDMI:
+            dev_cnt = fwk_blocking_pengding_call_chain(
+                            &sgtc_fbmem_notifier_chain, FB_NOTIFIER_HDMI_OPEN, mr_nullptr);
+            break;
+
+        default: break;
+    }
+
+    return !!(dev_cnt > 0);
+}
+
+/*!
  * @brief   driver open
  * @param   sptr_inode, user
  * @retval  errno
@@ -337,12 +371,18 @@ static kint32_t imx_fbdev_open(struct fwk_fb_info *sptr_info, kint32_t user)
 {
     struct imx_fbdev_drv *sptr_drv;
     srt_imx_lcdif_t *sptr_lcdif;
+    kint32_t retval;
 
     sptr_drv = fwk_fb_get_drvdata(sptr_info);
     sptr_lcdif = (srt_imx_lcdif_t *)sptr_drv->base;
 
     /*!< Enable interface */
-    imx_fbdev_wake_interface(sptr_drv);
+    retval = imx_fbdev_wake_interface(sptr_drv);
+    if (retval < 0)
+        return retval;
+    else if (retval == 0)
+        wait_event_interruptible_timeout(&sptr_drv->sgtc_wqh, 
+                            imx_fbdev_wait_interface(sptr_drv), msecs_to_jiffies(100));
 
     /*!< Enable LCD */
     mr_writel(mr_bit(17) | mr_bit(0), &sptr_lcdif->CTRL_SET);
@@ -641,6 +681,7 @@ static kint32_t imx_fbdev_driver_probe(struct fwk_platdev *sptr_pdev)
     sptr_drv->sptr_fb = sptr_fb;
     sptr_drv->sptr_dev = &sptr_pdev->sgtc_dev;
     sptr_drv->interface_type = NR_IMX_FBDEV_ELCDIF;
+    init_waitqueue_head(&sptr_drv->sgtc_wqh);
 
     sptr_drv->sptr_clk[0] = fwk_clk_get(&sptr_pdev->sgtc_dev, "pix");
     if (!isValid(sptr_drv->sptr_clk[0]))

@@ -19,8 +19,6 @@
 
 /*!< The includes */
 #include <common/generic.h>
-#include <common/io_stream.h>
-#include <boot/boot_text.h>
 #include "asm_config.h"
 #include "gcc_config.h"
 
@@ -140,185 +138,17 @@ extern srt_gic_t *fwk_get_gic_data(kuint32_t gic_nr);
 extern kint32_t fwk_gic_to_actual_irq(kint32_t hwirq);
 extern kint32_t fwk_gpc_to_gic_irq(kint32_t virq);
 
-/*!< API function */
-/*!
- * @brief   gic enbale irq
- * @param   none
- * @retval  none
- * @note    enable IRQ: group0
- */
-static inline void hw_enable_irq(kint32_t hwirq)
-{
-    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
-    srt_gic_dist_t *sptr_dist;
-
-    sptr_dist = mr_get_gic_distributor(sptr_gic);
-    mr_setbit_towords(hwirq, &sptr_dist->D_ISENABLER);
-}
-
-/*!
- * @brief   gic disable irq
- * @param   none
- * @retval  none
- * @note    disable IRQ: group0
- */
-static inline void hw_disable_irq(kint32_t hwirq)
-{
-    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
-    srt_gic_dist_t *sptr_dist;
-
-    sptr_dist = mr_get_gic_distributor(sptr_gic);
-    mr_setbit_towords(hwirq, &sptr_dist->D_ICENABLER);
-}
-
-/*!
- * @brief   gic enbale irq
- * @param   none
- * @retval  none
- * @note    enable IRQ: group0
- */
-static inline void local_irq_enable(kint32_t irq_number)
-{
-    kint32_t hwirq;
-
-    hwirq = fwk_gpc_to_gic_irq(irq_number);
-    if (hwirq < 0)
-        return;
-
-    hw_enable_irq(hwirq);
-}
-
-/*!
- * @brief   gic disable irq
- * @param   none
- * @retval  none
- * @note    disable IRQ: group0
- */
-static inline void local_irq_disable(kint32_t irq_number)
-{
-    kint32_t hwirq;
-
-    hwirq = fwk_gpc_to_gic_irq(irq_number);
-    if (hwirq < 0)
-        return;
-
-    hw_disable_irq(hwirq);
-}
-
-/*!
- * @brief   gic acknowledge irq
- * @param   none
- * @retval  none
- * @note    return IRQ number (and CPU source in SGI case)
- */
-static inline kint32_t hw_irq_acknowledge(void)
-{
-    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
-    srt_gic_cpu_t *sptr_cpu;
-
-    sptr_cpu = mr_get_gic_interface(sptr_gic);
-    return mr_mask(sptr_cpu->C_IAR, 0x1fffU);
-}
-
-/*!
- * @brief   gic deactivate irq
- * @param   none
- * @retval  none
- * @note    value should be got from gic_acknowledge_irq()
- */
-static inline void hw_irq_deactivate(kuint32_t value)
-{
-    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
-    srt_gic_cpu_t *sptr_cpu;
-
-    sptr_cpu = mr_get_gic_interface(sptr_gic);
-    mr_writel(value, &sptr_cpu->C_EOIR);
-}
-
-/*!
- * @brief   gic get running priority
- * @param   none
- * @retval  none
- * @note    get current interrupt priority
- */
-static inline kuint32_t hw_irq_get_running_priority(void)
-{
-    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
-    srt_gic_cpu_t *sptr_cpu;
-
-    sptr_cpu = mr_get_gic_interface(sptr_gic);
-    return mr_mask(sptr_cpu->C_RPR, 0xffU);
-}
-
-/*!
- * @brief   gic set priority grouping
- * @param   none
- * @retval  none
- * @note    configure priority group
- */
-static inline void hw_irq_set_priority_grouping(kuint32_t priorityGroup)
-{
-    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
-    srt_gic_cpu_t *sptr_cpu;
-
-    sptr_cpu = mr_get_gic_interface(sptr_gic);
-    mr_writel(mr_mask(priorityGroup, 0x7U), &sptr_cpu->C_BPR);
-}
-
-/*!
- * @brief   gic get priority grouping
- * @param   none
- * @retval  none
- * @note    get priority group
- */
-static inline kuint32_t hw_irq_get_priority_grouping(void)
-{
-    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
-    srt_gic_cpu_t *sptr_cpu;
-
-    sptr_cpu = mr_get_gic_interface(sptr_gic);
-    return mr_mask(sptr_cpu->C_BPR, 0x7U);
-}
-
-/*!
- * @brief   gic set priority
- * @param   none
- * @retval  none
- * @note    set "irq_number" interrupt priority
- */
-static inline void hw_irq_set_priority(kuint32_t irq_number, kuint32_t priority)
-{
-    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
-    srt_gic_dist_t *sptr_dist;
-    kint32_t hwirq;
-
-    hwirq = fwk_gpc_to_gic_irq(irq_number);
-    if (hwirq < 0)
-        return;
-
-    sptr_dist = mr_get_gic_distributor(sptr_gic);
-    mr_writeb(mr_bit_mask(priority, 0xffU, 8U - __GIC_PRIO_BITS), &sptr_dist->D_IPRIORITYR[hwirq]);
-}
-
-/*!
- * @brief   gic get priority
- * @param   none
- * @retval  none
- * @note    get "irq_number" interrupt priority
- */
-static inline kuint32_t hw_irq_get_priority(kuint32_t irq_number)
-{
-    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
-    srt_gic_dist_t *sptr_dist;
-    kint32_t hwirq;
-
-    hwirq = fwk_gpc_to_gic_irq(irq_number);
-    if (hwirq < 0)
-        return 0;
-
-    sptr_dist = mr_get_gic_distributor(sptr_gic);
-    return (kuint32_t)mr_getbit_u8(0xffU, 8U - __GIC_PRIO_BITS, &sptr_dist->D_IPRIORITYR[hwirq]);
-}
+extern void hw_enable_irq(kint32_t hwirq);
+extern void hw_disable_irq(kint32_t hwirq);
+extern void local_irq_enable(kint32_t irq_number);
+extern void local_irq_disable(kint32_t irq_number);
+extern kint32_t hw_irq_acknowledge(void);
+extern void hw_irq_deactivate(kuint32_t value);
+extern kuint32_t hw_irq_get_running_priority(void);
+extern void hw_irq_set_priority_grouping(kuint32_t priorityGroup);
+extern kuint32_t hw_irq_get_priority_grouping(void);
+extern void hw_irq_set_priority(kuint32_t irq_number, kuint32_t priority);
+extern kuint32_t hw_irq_get_priority(kuint32_t irq_number);
 
 #ifdef __cplusplus
     }

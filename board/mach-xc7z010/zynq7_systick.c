@@ -32,7 +32,7 @@ static const struct fwk_of_device_id sgtc_zynq7_systick_ids[] =
 #endif
 
 /*!< The functions */
-irq_return_t zynq7_systick_isr(void *ptrDev);
+irq_return_t zynq7_systick_isr(kint32_t irq, void *ptrDev);
 
 /*!< API function */
 /*!
@@ -96,7 +96,7 @@ void zynq7_systick_init(void)
  * @retval  none
  * @note    increase jiffies
  */
-irq_return_t zynq7_systick_isr(void *ptrDev)
+irq_return_t zynq7_systick_isr(kint32_t irq, void *ptrDev)
 {
     XScuTimer *sptr_timer = (XScuTimer *)ptrDev;
 

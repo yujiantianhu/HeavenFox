@@ -33,7 +33,7 @@ static const struct fwk_of_device_id sgtc_imx_systick_ids[] =
 };
 
 /*!< The functions */
-irq_return_t imx6_systick_isr(void *ptrDev);
+irq_return_t imx6_systick_isr(kint32_t irq, void *ptrDev);
 
 /*!< API function */
 /*!
@@ -169,7 +169,7 @@ void imx6ull_systick_init(void)
  * @retval  none
  * @note    increase jiffies
  */
-irq_return_t imx6_systick_isr(void *ptrDev)
+irq_return_t imx6_systick_isr(kint32_t irq, void *ptrDev)
 {
 	srt_hal_imx_gptimer_t *sptr_tick = (srt_hal_imx_gptimer_t *)ptrDev;
 

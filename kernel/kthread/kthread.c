@@ -140,7 +140,7 @@ static void *kthread_entry(void *args)
         kthread_systime_record();
         kthread_kill_zombie();              /*!< kill zombie thread */
 
-        kprintf();
+        io_stream_logs_print();
         msleep(50);
     }
 

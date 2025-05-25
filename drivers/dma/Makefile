@@ -9,6 +9,6 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-obj-$(CONFIG_SDMA_IMX6) += imx-dma.o
+#obj-$(CONFIG_SDMA_IMX6) += imx-dma.o
 
 # end of file

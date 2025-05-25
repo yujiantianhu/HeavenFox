@@ -247,7 +247,7 @@ struct fwk_i2c_client *fwk_i2c_new_device(struct fwk_i2c_adapter *sptr_adap, str
     sptr_client->sgtc_dev.sptr_bus = &sgtc_fwk_i2c_bus_type;
     sptr_client->sgtc_dev.sptr_type = &sgtc_fwk_i2c_client_type;
     sptr_client->sgtc_dev.sptr_node = sptr_info->sptr_node;
-    mr_dev_set_name(&sptr_client->sgtc_dev, "i2c%d-%d", 
+    mr_dev_set_name(&sptr_client->sgtc_dev, "i2c%d-%#x", 
                 sptr_adap->nr, sptr_client->addr | ((sptr_client->flags & FWK_I2C_M_TEN) ? 0xa000 : 0));
 
     /*!< verify machine address */
@@ -445,6 +445,92 @@ kint32_t fwk_i2c_transfer(struct fwk_i2c_client *sptr_client, struct fwk_i2c_msg
         return sptr_algo->master_xfer(sptr_client->sptr_adapter, sptr_msgs, num);
 
     return -ER_NSUPPORT;
+}
+
+/*!
+ * @brief   i2c write byte
+ * @param   sptr_client: i2c device
+ * @param   reg: register will operate
+ * @param   value: data will be write to reg
+ * @retval  errno
+ * @note    none
+ */
+kint32_t fwk_i2c_check_slave(struct fwk_i2c_client *sptr_client)
+{
+    const struct fwk_i2c_algo *sptr_algo = sptr_client->sptr_adapter->sptr_algo;
+    struct fwk_i2c_msg sgtc_msgs;
+
+    if (!sptr_algo ||
+        !sptr_algo->master_xfer)
+        return -ER_NSUPPORT;
+
+    sgtc_msgs.addr = sptr_client->addr;
+    sgtc_msgs.flags = 0;
+    sgtc_msgs.ptr_buf = mr_nullptr;
+    sgtc_msgs.len = 0;
+
+    return sptr_algo->master_xfer(sptr_client->sptr_adapter, &sgtc_msgs, 1);
+}
+
+/*!
+ * @brief   i2c write byte
+ * @param   sptr_client: i2c device
+ * @param   reg: register will operate
+ * @param   value: data will be write to reg
+ * @retval  errno
+ * @note    none
+ */
+kint32_t fwk_i2c_write_byte_data(struct fwk_i2c_client *sptr_client, kuint8_t reg, kuint8_t value)
+{
+    const struct fwk_i2c_algo *sptr_algo = sptr_client->sptr_adapter->sptr_algo;
+    struct fwk_i2c_msg sgtc_msgs;
+    kuint8_t buf[2];
+
+    if (!sptr_algo ||
+        !sptr_algo->master_xfer)
+        return -ER_NSUPPORT;
+
+    buf[0] = reg;
+    buf[1] = value;
+
+    sgtc_msgs.addr = sptr_client->addr;
+    sgtc_msgs.flags = 0;
+    sgtc_msgs.ptr_buf = buf;
+    sgtc_msgs.len = sizeof(buf);
+
+    return sptr_algo->master_xfer(sptr_client->sptr_adapter, &sgtc_msgs, 1);
+}
+
+/*!
+ * @brief   i2c read byte
+ * @param   sptr_client: i2c device
+ * @param   reg: register will operate
+ * @retval  errno/value
+ * @note    none
+ */
+kint32_t fwk_i2c_read_byte_data(struct fwk_i2c_client *sptr_client, kuint8_t reg)
+{
+    const struct fwk_i2c_algo *sptr_algo = sptr_client->sptr_adapter->sptr_algo;
+    struct fwk_i2c_msg sgtc_msgs[2];
+    kuint8_t value = 0;
+    kint32_t retval;
+
+    if (!sptr_algo ||
+        !sptr_algo->master_xfer)
+        return -ER_NSUPPORT;
+
+    sgtc_msgs[0].addr = sptr_client->addr;
+    sgtc_msgs[0].flags = 0;
+    sgtc_msgs[0].ptr_buf = &reg;
+    sgtc_msgs[0].len = 1;
+
+    sgtc_msgs[1].addr = sptr_client->addr;
+    sgtc_msgs[1].flags = FWK_I2C_M_RD;
+    sgtc_msgs[1].ptr_buf = &value;
+    sgtc_msgs[1].len = sizeof(value);
+
+    retval = sptr_algo->master_xfer(sptr_client->sptr_adapter, &sgtc_msgs[0], ARRAY_SIZE(sgtc_msgs));
+    return retval ? retval : value;
 }
 
 /*!< end of file */

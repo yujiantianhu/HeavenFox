@@ -61,12 +61,14 @@ void fwk_blocking_notifier_chain_unregister(struct fwk_notifier_chain *sptr_chai
  * @brief   call notifier
  * @param   sptr_chain
  * @param   event, args
- * @retval  errno
+ * @retval  errno / chain count
  * @note    none
  */
 kint32_t fwk_blocking_notifier_call_chain(struct fwk_notifier_chain *sptr_chain, kuint32_t event, void *args)
 {
     struct fwk_notifier_block *sptr_nb;
+    kint32_t re_event;
+    kint32_t count = 0;
 
     if (!sptr_chain ||
         mr_list_head_empty(&sptr_chain->sgtc_nbs))
@@ -77,12 +79,48 @@ kint32_t fwk_blocking_notifier_call_chain(struct fwk_notifier_chain *sptr_chain,
     foreach_list_next_entry(sptr_nb, &sptr_chain->sgtc_nbs, sgtc_link)
     {
         if (sptr_nb->expect_event & event)
-            sptr_nb->notifier_call(sptr_nb, event, args);
+        {
+            re_event = sptr_nb->notifier_call(sptr_nb, event, args);
+            if (re_event == event)
+                count++;
+        }
     }
 
     mutex_unlock(&sptr_chain->sgtc_lock);
+    return count;
+}
 
-    return ER_NORMAL;
+/*!
+ * @brief   wait pengding
+ * @param   sptr_chain
+ * @param   event, args
+ * @retval  errno / chain count
+ * @note    none
+ */
+kint32_t fwk_blocking_pengding_call_chain(struct fwk_notifier_chain *sptr_chain, kuint32_t event, void *args)
+{
+    struct fwk_notifier_block *sptr_nb;
+    kint32_t re_event;
+    kint32_t count = 0;
+
+    if (!sptr_chain ||
+        mr_list_head_empty(&sptr_chain->sgtc_nbs))
+        return -ER_PERMIT;
+
+    mutex_lock(&sptr_chain->sgtc_lock);
+
+    foreach_list_next_entry(sptr_nb, &sptr_chain->sgtc_nbs, sgtc_link)
+    {
+        if (sptr_nb->expect_event & event)
+        {
+            re_event = sptr_nb->pengding_call(sptr_nb, event, args);
+            if (re_event == event)
+                count++;
+        }
+    }
+
+    mutex_unlock(&sptr_chain->sgtc_lock);
+    return count;
 }
 
 /* end of file */

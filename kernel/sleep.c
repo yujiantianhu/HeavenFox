@@ -57,7 +57,7 @@ void schedule_timeout(kutime_t count)
 	
 	spin_lock_irqsave(sptr_lock);
     setup_timer(&sgtc_tm, thread_sleep_timeout, (kuint32_t)sptr_thread);
-    mod_timer(&sgtc_tm, count);
+    mod_timer(&sgtc_tm, jiffies + count);
     spin_unlock_irqrestore(sptr_lock);
     
     /*!< suspend current thread, and schedule others */
@@ -76,16 +76,17 @@ void schedule_timeout(kutime_t count)
  */
 kuint32_t sleep(kuint32_t seconds)
 {
-    kutime_t count = jiffies + secs_to_jiffies(seconds);
+    kutime_t count = secs_to_jiffies(seconds);
+    kutime_t expires = jiffies + count;
 
     if (mr_likely(mr_current))
     {
     #if CONFIG_ROLL_POLL
-        while (mr_time_after(count, jiffies))
+        while (mr_time_after(expires, jiffies))
             schedule_thread();
 
     #else
-        if (mr_time_after(count, jiffies))
+        if (mr_time_after(expires, jiffies))
             schedule_timeout(count);
         
     #endif
@@ -93,7 +94,7 @@ kuint32_t sleep(kuint32_t seconds)
     else
     {
         /*!< wait_secs(seconds); */
-        while (mr_time_after(count, jiffies));
+        while (mr_time_after(expires, jiffies));
     }
 
     return (kuint32_t)count;
@@ -107,16 +108,17 @@ kuint32_t sleep(kuint32_t seconds)
  */
 kuint32_t msleep(kuint32_t milseconds)
 {
-    kutime_t count = jiffies + msecs_to_jiffies(milseconds);
+    kutime_t count = msecs_to_jiffies(milseconds);
+    kutime_t expires = jiffies + count;
     
     if (mr_likely(mr_current))
     {
     #if CONFIG_ROLL_POLL
-        while (mr_time_after(count, jiffies))
+        while (mr_time_after(expires, jiffies))
             schedule_thread();
 
     #else
-        if (mr_time_after(count, jiffies))
+        if (mr_time_after(expires, jiffies))
             schedule_timeout(count);
         
     #endif
@@ -124,7 +126,7 @@ kuint32_t msleep(kuint32_t milseconds)
     else
     {
         /*!< wait_msecs(milseconds); */
-        while (mr_time_after(count, jiffies));
+        while (mr_time_after(expires, jiffies));
     }
 
     return (kuint32_t)count;
@@ -138,16 +140,17 @@ kuint32_t msleep(kuint32_t milseconds)
  */
 kint32_t usleep(kuint32_t useconds)
 {
-    kutime_t count = jiffies + usecs_to_jiffies(useconds);
+    kutime_t count = usecs_to_jiffies(useconds);
+    kutime_t expires = jiffies + count;
     
     if (mr_likely(mr_current))
     {
     #if CONFIG_ROLL_POLL
-        while (mr_time_after(count, jiffies))
+        while (mr_time_after(expires, jiffies))
             schedule_thread();
 
     #else
-        if (mr_time_after(count, jiffies))
+        if (mr_time_after(expires, jiffies))
             schedule_timeout(count);
         
     #endif
@@ -155,7 +158,7 @@ kint32_t usleep(kuint32_t useconds)
     else
     {
         /*!< wait_usecs(useconds); */
-        while (mr_time_after(count, jiffies));
+        while (mr_time_after(expires, jiffies));
     }
 
     return (kint32_t)count;

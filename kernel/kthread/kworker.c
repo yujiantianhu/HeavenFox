@@ -48,6 +48,7 @@ void schedule_work(struct workqueue *sptr_wq)
  */
 static void *kworker_entry(void *args)
 {
+    DECLARE_WORKQUEUE(sgtc_copy);
     struct workqueue *sptr_wq;
     struct workqueue *sptr_temp;
 
@@ -58,12 +59,14 @@ static void *kworker_entry(void *args)
         if (is_workqueue_empty(&sgtc_kworker_wqh))
             goto END;
 
-        foreach_workqueue_safe(sptr_wq, sptr_temp, &sgtc_kworker_wqh)
+        work_splice_and_init(&sgtc_kworker_wqh, &sgtc_copy);
+
+        foreach_workqueue_safe(sptr_wq, sptr_temp, &sgtc_copy)
         {
             if (sptr_wq->func)
                 sptr_wq->func(sptr_wq);
 
-            detach_work(sptr_wq);
+            detach_work_safe(&sgtc_copy, sptr_wq);
         }
 
         continue;
