@@ -326,7 +326,7 @@ static void *fwk_fdt_populate_node(struct fwk_fdt_header *ptr_blob,
      */
     ptr_move   += 4;
     ptr_path	= (kchar_t *)ptr_move;
-    ipathLenth	= strlen(ptr_path) + 1;
+    ipathLenth	= kstrlen(ptr_path) + 1;
     iLenthNeed	= ipathLenth;
 
     /*!<
@@ -351,7 +351,7 @@ static void *fwk_fdt_populate_node(struct fwk_fdt_header *ptr_blob,
         else
         {
             /*!< The full-path name of the parent node + '/' (ipathLenth already contains the character '\0', and then add '/') */
-            iLenthNeed	= ipathLenth + 1 + strlen(sptr_parent->full_name);
+            iLenthNeed	= ipathLenth + 1 + kstrlen(sptr_parent->full_name);
         }
     }
 
@@ -386,8 +386,8 @@ static void *fwk_fdt_populate_node(struct fwk_fdt_header *ptr_blob,
         if (isValid(sptr_parent) && isValid(sptr_parent->parent))
         {
             /*!< Copies the pathname of the parent node */
-            strcpy(ptr_fullName, sptr_parent->full_name);
-            ptr_fullName += strlen(sptr_parent->full_name);
+            kstrcpy(ptr_fullName, sptr_parent->full_name);
+            ptr_fullName += kstrlen(sptr_parent->full_name);
         }
 
         *(ptr_fullName++) = '/';
@@ -573,7 +573,7 @@ static void *fwk_fdt_populate_properties(struct fwk_fdt_header *ptr_blob,
      */
     ptr_str_start	= (void *)((void *)ptr_blob + FDT_TO_ARCH_ENDIAN32(ptr_blob->off_dt_strings));
     ptr_name		= (kchar_t *)(ptr_str_start + iPropOffset);
-    *has_name		= (!strcmp("name", ptr_name)) ? true : (*has_name);
+    *has_name		= (!kstrcmp("name", ptr_name)) ? true : (*has_name);
 
     /*!< Record this property */
     sptr_prop = fwk_fdt_memory_calculate(&ptr_mem, sizeof(struct fwk_of_property), __alignof__(struct fwk_of_property));
@@ -589,11 +589,11 @@ static void *fwk_fdt_populate_properties(struct fwk_fdt_header *ptr_blob,
         sptr_prop->sptr_next = mr_nullptr;
 
         /*!< Fill node information */
-        if (!strcmp("name", sptr_prop->name))
+        if (!kstrcmp("name", sptr_prop->name))
             sptr_node->name	= (kchar_t *)sptr_prop->value;
-        else if (!strcmp("device_type", sptr_prop->name))
+        else if (!kstrcmp("device_type", sptr_prop->name))
             sptr_node->type	= (kchar_t *)sptr_prop->value;
-        else if (!strcmp("phandle", sptr_prop->name))
+        else if (!kstrcmp("phandle", sptr_prop->name))
             sptr_node->phandle = FDT_TO_ARCH_ENDIAN32(*(kuint32_t *)sptr_prop->value);
     }
 
@@ -645,9 +645,9 @@ static void *fwk_fdt_add_string_properties(void **mem, void *node, kchar_t *name
         *(kchar_t *)(sptr_prop->value + size - 1)	= '\0';
 
         /*!< Fill node information */
-        if (!strcmp("name", sptr_prop->name))
+        if (!kstrcmp("name", sptr_prop->name))
             sptr_node->name	= (kchar_t *)sptr_prop->value;
-        else if (!strcmp("device_type", sptr_prop->name))
+        else if (!kstrcmp("device_type", sptr_prop->name))
             sptr_node->type	= (kchar_t *)sptr_prop->value;
     }
 
@@ -705,7 +705,7 @@ struct fwk_device_node *fwk_of_find_node_by_path(const kchar_t *ptr_path)
 
     foreach_list_odd(sptr_head, sptr_list, allnext)
     {
-        if (!strcmp(ptr_path, sptr_list->full_name))
+        if (!kstrcmp(ptr_path, sptr_list->full_name))
             break;
     }
 
@@ -725,7 +725,7 @@ struct fwk_device_node *fwk_of_find_node_by_name(struct fwk_device_node *sptr_fr
 
     foreach_list_odd(sptr_head, sptr_list, allnext)
     {
-        if (!strcmp(ptr_name, sptr_list->name))
+        if (!kstrcmp(ptr_name, sptr_list->name))
             break;
     }
 
@@ -745,7 +745,7 @@ struct fwk_device_node *fwk_of_find_node_by_type(struct fwk_device_node *sptr_fr
 
     foreach_list_odd(sptr_head, sptr_list, allnext)
     {
-        if (!strcmp(ptr_type, sptr_list->type))
+        if (!kstrcmp(ptr_type, sptr_list->type))
             break;
     }
 
@@ -786,7 +786,7 @@ struct fwk_device_node *fwk_of_find_compatible_node(struct fwk_device_node *sptr
 
     foreach_list_odd(sptr_head, sptr_list, allnext)
     {
-        if (ptr_type && strcmp(ptr_type, sptr_list->type))
+        if (ptr_type && kstrcmp(ptr_type, sptr_list->type))
             continue;
 
         if (fwk_of_device_is_compatible(sptr_list, ptr_compat))
@@ -955,10 +955,10 @@ kbool_t fwk_of_device_is_avaliable(struct fwk_device_node *sptr_node)
 
     ptr_value = (kchar_t *)fwk_of_get_property(sptr_node, "status", mr_nullptr);
 
-    if ((!ptr_value) || !strcmp(ptr_value, "ok") || !strcmp(ptr_value, "okay"))
+    if ((!ptr_value) || !kstrcmp(ptr_value, "ok") || !kstrcmp(ptr_value, "okay"))
         return true;
 
-    else if (!strcmp(ptr_value, "disabled"))
+    else if (!kstrcmp(ptr_value, "disabled"))
         return false;
 
     return false;
@@ -1093,10 +1093,10 @@ kint32_t fwk_of_get_alias_id(struct fwk_device_node *sptr_node)
     foreach_list_odd_head(sptr_alias->properties, sptr_prop)
     {
         str = (kchar_t *)sptr_prop->value;
-        if (strcmp(sptr_node->full_name, str))
+        if (kstrcmp(sptr_node->full_name, str))
             continue;
         
-        lenth = strlen(sptr_prop->name);
+        lenth = kstrlen(sptr_prop->name);
         if (!lenth)
             goto fail;
 
@@ -1135,10 +1135,10 @@ kint32_t fwk_of_modalias_node(struct fwk_device_node *sptr_node, kchar_t *modali
     kuint32_t cplen;
 
     compatible = fwk_of_get_property(sptr_node, "compatible", &cplen);
-    if (!compatible || (strlen(compatible) > cplen))
+    if (!compatible || (kstrlen(compatible) > cplen))
         return -ER_CHECKERR;
     
-    p = strchr(compatible, ',');
+    p = kstrchr(compatible, ',');
     kstrlcpy(modalias, p ? p + 1 : compatible, len);
 
     return ER_NORMAL;

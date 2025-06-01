@@ -77,13 +77,13 @@ static void *button_task_entry(void *args)
 
         if (status)
         {
-            strcpy(msgs, "on");
+            kstrcpy(msgs, "on");
             sgtc_msg[0].size = 2;
             msgs[2] = '\0';
         }
         else
         {
-            strcpy(msgs, "off");
+            kstrcpy(msgs, "off");
             sgtc_msg[0].size = 3;
             msgs[3] = '\0';
         }

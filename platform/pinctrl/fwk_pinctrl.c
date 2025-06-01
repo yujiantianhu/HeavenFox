@@ -95,7 +95,7 @@ static struct fwk_pinctrl_dev *fwk_get_pinctrl_dev_from_name(const kchar_t *name
 
     foreach_list_next_entry(sptr_pctldev, &sgtc_fwk_pinctrl_dev_list, sgtc_link)
     {
-        if (!strcmp(mr_dev_get_name(sptr_pctldev->sptr_dev), name))
+        if (!kstrcmp(mr_dev_get_name(sptr_pctldev->sptr_dev), name))
             return sptr_pctldev;
     }
 
@@ -211,7 +211,7 @@ static struct fwk_pinctrl_state *fwk_pinctrl_find_state(struct fwk_pinctrl *sptr
 
     foreach_list_next_entry(sptr_state, &sptr_pctl->sgtc_states, sgtc_link)
     {
-        if (!strcmp(name, sptr_state->name))
+        if (!kstrcmp(name, sptr_state->name))
             return sptr_state;
     }
 
@@ -424,7 +424,7 @@ static kint32_t fwk_pinctrl_add_setting(struct fwk_pinctrl *sptr_pctl)
         for (i = 0; i < sptr_maps->num_maps; i++, sptr_map++)
         {
             /*!< judge if it is belongs to current device */
-            if (strcmp(sptr_map->dev_name, mr_dev_get_name(sptr_pctl->sptr_dev)))
+            if (kstrcmp(sptr_map->dev_name, mr_dev_get_name(sptr_pctl->sptr_dev)))
                 continue;
 
             /*!< found sptr_map; find state next*/
@@ -742,12 +742,12 @@ struct fwk_pinctrl_state *fwk_pinctrl_lookup_state(struct fwk_pinctrl *sptr_pctl
     if (!sptr_pctl || mr_list_head_empty(&sptr_pctl->sgtc_states))
         return mr_nullptr;
 
-    if (sptr_pctl->sptr_state && !strcmp(sptr_pctl->sptr_state->name, state_name))
+    if (sptr_pctl->sptr_state && !kstrcmp(sptr_pctl->sptr_state->name, state_name))
         return sptr_pctl->sptr_state;
 
     foreach_list_next_entry(sptr_state, &sptr_pctl->sgtc_states, sgtc_link)
     {
-        if (!strcmp(sptr_state->name, state_name))
+        if (!kstrcmp(sptr_state->name, state_name))
             return sptr_state;
     }
 

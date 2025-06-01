@@ -40,7 +40,7 @@ kint32_t fwk_pinconf_get_by_name(struct fwk_pinctrl_dev *sptr_pctldev, const kch
         pin = sptr_desc->sptr_pins[i].number;
         pin_name = sptr_pctlops->get_pin_desc(sptr_pctldev, pin);
 
-        if (!strcmp(name, pin_name))
+        if (!kstrcmp(name, pin_name))
             return pin;
     }
 

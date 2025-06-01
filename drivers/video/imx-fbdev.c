@@ -22,6 +22,7 @@
 #include <platform/gpio/fwk_gpiodesc.h>
 #include <platform/fwk_uaccess.h>
 #include <platform/video/fwk_fbmem.h>
+#include <platform/video/fwk_rgbmap.h>
 #include <kernel/sleep.h>
 #include <kernel/wait.h>
 
@@ -90,7 +91,7 @@ static void imx_fbdev_init(void *base, struct imx_fbdev_drv *sptr_drv)
     struct fwk_fb_var_screen_info *sptr_var;
     kuaddr_t reg;
 
-    if (!isValid(sptr_lcdif) || !isValid(sptr_drv))
+    if (!sptr_lcdif || !sptr_drv)
         return;
 
     sptr_fix = &sptr_drv->sptr_fb->sgtc_fix;
@@ -388,7 +389,7 @@ static kint32_t imx_fbdev_open(struct fwk_fb_info *sptr_info, kint32_t user)
     mr_writel(mr_bit(17) | mr_bit(0), &sptr_lcdif->CTRL_SET);
     print_info("fbdev is opened\r\n");
 
-    memset_ex(sptr_info->screen_base, 0x00000000, sptr_info->screen_size);
+    memset_ex(sptr_info->screen_base, RGB_WHITE, sptr_info->screen_size);
     print_info("clear full screen with black color\r\n");
 
     return ER_NORMAL;
@@ -639,7 +640,7 @@ static kint32_t imx_fbdev_driver_probe_timings(struct fwk_platdev *sptr_pdev)
         if (fwk_of_property_read_string(sptr_disp, "backlight-ways", &blight_ways))
             goto fail;
 
-        if (blight_ways && (!strcmp(blight_ways, "gpio")))
+        if (blight_ways && (!kstrcmp(blight_ways, "gpio")))
         {
             sptr_drv->sgtc_blight.sptr_par = &sptr_pdev->sgtc_dev;
             imx_fbdev_probe_backlight(&sptr_drv->sgtc_blight, sptr_blnode);

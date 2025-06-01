@@ -66,7 +66,7 @@ void *fwk_find_irq_action(kint32_t irq, const kchar_t *name, void *ptrDev)
     foreach_list_next_entry(sptr_action, &sptr_desc->sgtc_action, sgtc_link)
     {
         if (name)
-            retval = strncmp(sptr_action->name, name, FWK_IRQ_DESC_NAME_LENTH);
+            retval = kstrncmp(sptr_action->name, name, FWK_IRQ_DESC_NAME_LENTH);
 
         if (!retval && (sptr_action->ptrArgs == ptrDev))
         {
@@ -301,28 +301,6 @@ void fwk_do_irq_handler(kint32_t softIrq)
             default:
                 break;
         }
-    }
-}
-
-/*!
- * @brief   fwk_handle_softirq
- * @param   none
- * @retval  none
- * @note    excute irq handler
- */
-void fwk_handle_softirq(kint32_t softIrq, kuint32_t event)
-{
-    switch (event)
-    {
-        case SWI_EVENT_SCHEDULED:
-            kprintf(PRINT_LEVEL_DEBUG"trigger NR_EVENT_SCHEDULED \r\n");
-            break;
-        
-        case SWI_EVENT_SYSCALL:
-            kprintf(PRINT_LEVEL_DEBUG"trigger NR_EVENT_SYSCALL \r\n");
-            break;
-
-        default: break;
     }
 }
 

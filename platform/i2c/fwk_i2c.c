@@ -37,7 +37,7 @@ static const struct fwk_i2c_device_id *fwk_i2c_match_id(const struct fwk_i2c_dev
 {
     while (sptr_idTable->name && *(sptr_idTable->name))
     {
-        if (!strcmp((char *)sptr_client->name, (char *)sptr_idTable->name))
+        if (!kstrcmp((char *)sptr_client->name, (char *)sptr_idTable->name))
             return sptr_idTable;
 
         sptr_idTable++;

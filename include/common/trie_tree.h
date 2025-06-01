@@ -68,18 +68,18 @@ extern void trie_node_del(struct trie_tree *sptr_tree, const kchar_t *name);
         .alloc = alloc_func,    \
         .free = free_func,  \
         .size = max, \
-        .sgtc_node = { NULL, branch, 0, NULL },    \
+        .sgtc_node = { mr_nullptr, branch, 0, mr_nullptr },    \
     }
 
 #define foreach_trie_tree(sptr_node, sptr_tree, offset) \
     for (sptr_node = &(sptr_tree)->sgtc_node, offset = 0; \
          sptr_node; \
-         sptr_node = (sptr_node)->sptr_branches ? (sptr_node)->sptr_branches[offset] : NULL)
+         sptr_node = (sptr_node)->sptr_branches ? (sptr_node)->sptr_branches[offset] : mr_nullptr)
 
 #define trie_tree_entry(tree, type, member, name)  \
 ({  \
     void *ptr_member = (void *)trie_tree_look_up(tree, name);  \
-    ptr_member ? mr_container_of(ptr_member, type, member) : NULL; \
+    ptr_member ? mr_container_of(ptr_member, type, member) : mr_nullptr; \
 })
 
 #ifdef __cplusplus

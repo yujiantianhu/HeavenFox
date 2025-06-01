@@ -255,7 +255,7 @@ struct fwk_inode *fwk_inode_find_disk(const kchar_t *name)
     if (!name || (*name != '/'))
         return mr_nullptr;
 
-    lenth = strlen(name);
+    lenth = kstrlen(name);
     if (*(name + lenth - 1) == '/')
         return mr_nullptr;
 
@@ -263,7 +263,7 @@ struct fwk_inode *fwk_inode_find_disk(const kchar_t *name)
     if (!isValid(disk_name))
         return mr_nullptr;
 
-    strcpy(disk_name, name);
+    kstrcpy(disk_name, name);
 
     while (lenth > 1)
     {

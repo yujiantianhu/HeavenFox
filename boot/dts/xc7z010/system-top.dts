@@ -26,6 +26,24 @@
     };
     
     video_timings {
+        timing_1366x768: timing-720p {
+            clock-freq = <70000000>;
+            height = <1366>;
+            width = <768>;
+            
+            h-back-porch = <20>;
+            h-sync-width = <32>;
+            h-front-porch = <48>;
+            v-back-porch = <13>;
+            v-sync-width = <6>;
+            v-front-porch = <3>;
+            
+            h-sync-active = <0>;
+            v-sync-active = <0>;
+            de-active = <1>;
+            pixelclk-active = <1>;
+        };
+
         timing_1920x1080: timing-1080p {
             clock-freq = <148500000>;
             height = <1920>;
@@ -84,7 +102,8 @@
         status = "okay";
         
         is-hdmi-device = <1>;
-        display-timings = <&timing_1920x1080>;
+//      display-timings = <&timing_1920x1080>;
+        display-timings = <&timing_1366x768>;
         xlnx,pixel-format = "bgr24";
 
         #address-cells = <1>;

@@ -82,7 +82,7 @@
 
 /***************************** Include Files *********************************/
 
-#include <string.h>
+// #include <string.h>
 #include <common/generic.h>
 
 /************************** Constant Definitions *****************************/

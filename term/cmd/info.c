@@ -45,7 +45,7 @@ static kint32_t term_cmd_show_info(struct term_cmd *sptr_cmd, kint32_t argc, kch
             break;
 
         case 2:
-            if (!strcmp(argv[1], "--help"))
+            if (!kstrcmp(argv[1], "--help"))
                 sptr_cmd->help();
             else
                 goto fail;

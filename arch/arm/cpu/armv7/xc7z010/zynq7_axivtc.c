@@ -16,6 +16,7 @@
 #include <zynq7/zynq7_periph.h>
 #include <common/time.h>
 #include <common/api_string.h>
+#include <common/mem_manage.h>
 
 /*!< The defines */
 /* The polling upon starting the hardware
@@ -395,7 +396,7 @@ kfloat_t ClkFindParams(float freq, ClkMode *sptr_bestPick)
         {
             curClkDiv = (kuint32_t) ((curClkMult * (kfloat_t)curFb) + 0.5);
             curFreq = ((100.0 / (kfloat_t) curDiv) / (kfloat_t) curClkDiv) * (kfloat_t) curFb;
-            curError = fabs(curFreq - freq);
+            curError = mr_abs(curFreq - freq);
             if (curError < bestError)
             {
                 bestError = curError;

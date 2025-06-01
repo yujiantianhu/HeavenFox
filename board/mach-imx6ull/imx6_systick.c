@@ -160,7 +160,7 @@ void imx6ull_systick_init(void)
 	/*!< EN: bit0, GPT Enable */
 	mr_setbitl(mr_bit(0U), &sptr_tick->CR);
 
-	ptr_systick_counter = (kutime_t *)&sptr_tick->CNT;
+	ptr_systick_counter = (volatile kutime_t *)&sptr_tick->CNT;
 }
 
 /*!

@@ -164,7 +164,7 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_addr)
     XEmacPs_PhyWrite(sptr_xemacps, phy_addr, 0, phyregtemp);
 
     /*!< Delay */
-    sleep(2);
+    msleep(20);
 
     RetStatus = XEmacPs_PhyRead(sptr_xemacps, phy_addr, 0, (kuint16_t *)&phyregtemp);
     if (RetStatus) {
@@ -259,7 +259,7 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_addr)
     print_debug("Waiting for PHY to complete autonegotiation.\r\n");
 
     while (!(status & IEEE_STAT_AUTONEGOTIATE_COMPLETE)) {
-        sleep(1);
+        msleep(10);
         timeout_counter++;
 
         if (timeout_counter == 30) {
@@ -329,7 +329,7 @@ static kint32_t xsdk_get_realtek_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_
     print_debug("Waiting for PHY to complete autonegotiation.\r\n");
 
     while (!(status & IEEE_STAT_AUTONEGOTIATE_COMPLETE)) {
-        sleep(1);
+        msleep(10);
         timeout_counter++;
 
         if (timeout_counter == 30) {
@@ -419,7 +419,7 @@ static kint32_t xsdk_get_marvell_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_
     print_debug("Waiting for PHY to complete autonegotiation.\r\n");
 
     while (!(status & IEEE_STAT_AUTONEGOTIATE_COMPLETE)) {
-        sleep(1);
+        msleep(10);
         XEmacPs_PhyRead(sptr_xemacps, 
                 phy_addr, IEEE_COPPER_SPECIFIC_STATUS_REG_2, &temp);
         timeout_counter++;

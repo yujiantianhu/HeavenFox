@@ -164,7 +164,7 @@ void lv_port_disp_logo(struct fwk_disp_ctrl *sptr_dctrl)
     void *buffer;
     kuint8_t bytes_per_pixel;
     kssize_t size;
-    kuint32_t flags;
+    kutype_t flags;
 
     bytes_per_pixel = sptr_disp->bpp >> 3;
     size = sptr_disp->width * sptr_disp->height * bytes_per_pixel;

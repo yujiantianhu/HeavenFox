@@ -248,7 +248,7 @@ struct fwk_irq_domain *fwk_irq_get_domain_by_name(kchar_t *name, kint32_t hwirq)
 
 	foreach_list_next_entry(sptr_domain, &sgtc_fwk_irq_domain, sgtc_link)
 	{
-		retval = sptr_domain->name && (!strcmp(sptr_domain->name, name));
+		retval = sptr_domain->name && (!kstrcmp(sptr_domain->name, name));
 		if (retval && (hwirq < sptr_domain->hwirq_max))
 		{
 			rd_unlock(&sgtc_irq_domain_lock);

@@ -112,7 +112,12 @@ extern void malloc_block_destroy(void);
 /*!< assembly */
 extern kuaddr_t __memset_ex(kuaddr_t _start, kuaddr_t _end, kuint32_t data);
 
+extern void *malloc(size_t __size);
+extern void free(void *__ptr);
+extern void *memset(void *__s, int __c, size_t __n);
 extern void *memset_ex(void *__s, unsigned int __c, size_t __n);
+extern int memcmp(const void *__s1, const void *__s2, size_t __n);
+extern void *memcpy(void *__dest, const void *__src, size_t __n);
 
 /*!< API function */
 /*!

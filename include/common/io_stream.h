@@ -144,6 +144,17 @@ struct io_stream_dev
 /*!< The globals */
 extern kuint32_t g_io_stream_flags;
 
+#define IO_STREAM_INTR_ENTER(flags) \
+    do {    \
+        (flags) = g_io_stream_flags;  \
+        g_io_stream_flags &= ~IO_STREAM_ASYNC;  \
+    } while (0)
+
+#define IO_STREAM_INTR_LEAVE(flags) \
+    do {    \
+        g_io_stream_flags = (flags);  \
+    } while (0)
+
 /*!< The functions */
 extern void iostream_init(void);
 extern kint32_t register_io_stream(struct io_stream_dev *sptr_stream);

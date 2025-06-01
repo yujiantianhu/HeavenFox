@@ -26,15 +26,6 @@
 #include "fwk_irq_chip.h"
 
 /*!< The defines */
-#define	SWI_EVENT_SCHEDULED						0x00000001
-#define	SWI_EVENT_SYSCALL						0x00000002
-
-#define _SWI(x)                                 __asm__ __volatile__ ("swi" #x : :)
-#define	_SWI_EVENT_SCHEDULED					_SWI(0x00000001)
-#define	_SWI_EVENT_SYSCALL						_SWI(0x00000002)
-
-#define mr_rasie_schedule_event()               _SWI_EVENT_SCHEDULED
-
 #define FWK_IRQ_DESC_NAME_LENTH					(16)
 
 #define IRQ_TYPE_NONE							0x00000000
@@ -100,6 +91,39 @@ typedef struct fwk_irq_desc
 
 } srt_fwk_irq_desc_t;
 
+/*!< SoftIRQ */
+enum __ERT_SOFTIRQ_EVENT
+{
+    NR_SOFTIRQ_TIMER = 0,
+    NR_SOFTIRQ_NET_TX,
+    NR_SOFTIRQ_NET_RX,
+    NR_SOFTIRQ_TASKLET,
+    NR_SOFTIRQ_SCHEDULE,
+    NR_SOFTIRQ_RCU,
+
+    NR_SOFTIRQ_NUM,
+};
+
+struct fwk_softirq_action
+{
+    void (*action)(kint32_t event);
+};
+
+/*!< Tasklet */
+struct fwk_tasklet
+{
+    struct fwk_tasklet *sptr_next;
+
+    kuint32_t state;
+    srt_atomic_t count;
+
+    void (*func)(kutype_t args);
+    kutype_t data;
+};
+
+#define DECLEARE_TASKLET(name, _func, _data)    \
+    struct fwk_tasklet name = { mr_nullptr, 0, ATOMIC_INIT(0), _func, _data }
+
 /*!< The functions */
 extern struct fwk_irq_desc *fwk_irq_to_desc(kuint32_t virq);
 extern struct fwk_irq_desc *fwk_irq_data_to_desc(struct fwk_irq_data *sptr_data);
@@ -119,7 +143,16 @@ extern kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t f
 extern void fwk_free_irq(kint32_t irq, void *args);
 extern void fwk_destroy_irq_action(kint32_t irq);
 extern void fwk_do_irq_handler(kint32_t softIrq);
-extern void fwk_handle_softirq(kint32_t softIrq, kuint32_t event);
+
+extern kuint32_t fwk_softirq_avaliable(void);
+extern void fwk_handle_softirq(void);
+extern void fwk_open_softirq(kint32_t nr, void (*action)(kint32_t event));
+extern void fwk_raise_softirq(kint32_t nr);
+extern void fwk_softirq_init(void);
+
+extern void fwk_tasklet_init(struct fwk_tasklet *sptr_tsk, void (*func)(kutype_t args), kutype_t data);
+extern void fwk_tasklet_schedule(struct fwk_tasklet *sptr_tsk);
+extern void fwk_tasklet_kill(struct fwk_tasklet *sptr_tsk);
 
 #ifdef __cplusplus
     }

@@ -185,7 +185,7 @@ static err_t lwip_enet_init(struct netif *sptr_netif)
     if (fwk_netif_open(sptr_if->ifname))
         return ERR_IF;
 
-    strcpy(sgtc_ifr.mr_ifr_name, sptr_if->ifname);
+    kstrcpy(sgtc_ifr.mr_ifr_name, sptr_if->ifname);
     retval = virt_ioctl(sockfd, NETWORK_IFR_GET_HWADDR, &sgtc_ifr);
     if (retval)
         return ERR_IF;

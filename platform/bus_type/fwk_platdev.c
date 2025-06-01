@@ -74,7 +74,7 @@ struct fwk_platdev *fwk_platdevice_alloc(const kchar_t *name, kint32_t id)
     struct fwk_platdev_object *sptr_platobj;
     struct fwk_platdev *sptr_platdev;
 
-    sptr_platobj = kzalloc(sizeof(*sptr_platobj) + strlen(name) + 1, GFP_KERNEL);
+    sptr_platobj = kzalloc(sizeof(*sptr_platobj) + kstrlen(name) + 1, GFP_KERNEL);
     if (!isValid(sptr_platobj))
         return ERR_PTR(-ER_NOMEM);
 
@@ -160,7 +160,7 @@ static kint32_t fwk_device_find(struct fwk_device *sptr_dev)
         if (sptr_leaf == sptr_dev)
             goto succ;
 
-        if (!strcmp(mr_dev_get_name(sptr_leaf), mr_dev_get_name(sptr_dev)))
+        if (!kstrcmp(mr_dev_get_name(sptr_leaf), mr_dev_get_name(sptr_dev)))
             goto succ;
     }
 

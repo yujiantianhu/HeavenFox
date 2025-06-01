@@ -16,6 +16,11 @@
 #include <common/io_stream.h>
 #include <asm/interrupt.h>
 #include <platform/irq/fwk_irq_types.h>
+#include <kernel/kernel.h>
+
+/*!< The globals */
+extern kbool_t g_sched_flag;
+extern kuint32_t g_asm_sched_flag;
 
 /*!< API function */
 /*!
@@ -26,7 +31,11 @@
  */
 void exec_fiq_handler(void)
 {
-    
+    g_interrupt_flags |= 0x1C;
+
+    /*!< Entry */
+
+    g_interrupt_flags &= ~0x1C;
 }
 
 /*!
@@ -39,6 +48,8 @@ void exec_irq_handler(void)
 {
     kint32_t hardirq, softIrq;
 
+    g_interrupt_flags |= 0x18;
+
     /*!< read IAR, enable IRQ */
     hardirq = hw_irq_acknowledge();
 
@@ -48,6 +59,18 @@ void exec_irq_handler(void)
 
     /*!< write IAR, disable IRQ */
     hw_irq_deactivate(hardirq);
+
+    /*!< check and excute softirq (irq will be open) */
+    fwk_handle_softirq();
+
+    /*!< preemptetion allowd, update schedule flag */
+    if (!mr_preempt_is_locked())
+    {
+        g_asm_sched_flag = g_sched_flag;
+        g_sched_flag = false;
+    }
+
+    g_interrupt_flags &= ~0x18;
 }
 
 /*!
@@ -58,7 +81,7 @@ void exec_irq_handler(void)
  */
 void exec_software_irq_handler(void)
 {
-    kint32_t hardirq;
+//  kint32_t hardirq;
     kuint32_t event = 0;
 
     __asm__ __volatile__ (
@@ -66,12 +89,16 @@ void exec_software_irq_handler(void)
         : "=&r"(event) 
     );
 
+    g_interrupt_flags |= 0x08;
+
     /*!< read IAR, enable IRQ */
-    hardirq = hw_irq_acknowledge();
-    fwk_handle_softirq(hardirq, event);
+//  hardirq = hw_irq_acknowledge();
+//  fwk_handle_softirq();
 
     /*!< write IAR, disable IRQ */
-    hw_irq_deactivate(hardirq);
+//  hw_irq_deactivate(hardirq);
+
+    g_interrupt_flags &= ~0x08;
 }
 
 /* end of file*/

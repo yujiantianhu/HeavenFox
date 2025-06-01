@@ -84,8 +84,15 @@ void zynq7_systick_init(void)
 
     /*!< 10ms */
     XScuTimer_LoadTimer(sptr_timer, ZYNQ7_SCUTIMER0_FREQ_HZ / TICK_HZ);
+
+#if 1
     XScuTimer_EnableAutoReload(sptr_timer);
+#else
+    XScuTimer_DisableAutoReload(sptr_timer);
+#endif
+
     XScuTimer_Start(sptr_timer);
+    ptr_systick_counter = (volatile kutime_t *)(sptr_timer->Config.BaseAddr + XSCUTIMER_COUNTER_OFFSET);
 
     print_info("System Tick start to run, frequency is: %d\r\n", TICK_HZ);
 }

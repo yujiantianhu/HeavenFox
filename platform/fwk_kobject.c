@@ -45,7 +45,7 @@ static kint32_t fwk_kobject_join_to_kset(struct fwk_kobject *sptr_kobj)
             goto fail;
         }
 
-        if (!strcmp(sptr_kobj->name, sptr_each->name))
+        if (!kstrcmp(sptr_kobj->name, sptr_each->name))
         {
             retval = -ER_EXISTED;
             goto fail;
@@ -349,7 +349,7 @@ struct fwk_kobject *fwk_kobject_populate(struct fwk_kobject *sptr_head, const kc
             if (!sptr_kobj->name)
                 continue;
 
-            if (!strncmp(str_start, sptr_kobj->name, lenth))
+            if (!kstrncmp(str_start, sptr_kobj->name, lenth))
             {
                 /*!< str_end ? directory : file; if file is existed, file is repeated */
                 if (!str_end)
@@ -450,7 +450,7 @@ struct fwk_kobject *fwk_find_kobject_by_path(struct fwk_kobject *sptr_head, cons
             if (!sptr_kobj->name)
                 continue;
 
-            if (!strncmp(str_start, sptr_kobj->name, lenth))
+            if (!kstrncmp(str_start, sptr_kobj->name, lenth))
             {               
                 /*!< str_end ? directory : file; if file is existed, file is repeated */
                 if (!str_end)

@@ -114,6 +114,187 @@ static kint32_t imx_clk_init_gate(kuint32_t number, const kchar_t *name,
     return isValid(sptr_clk) ? 0 : (-ER_NOMEM);
 }
 
+/*!< 
+ * PLL5 (PLL_VIDEO), output clock (pixel clock) is :
+ *      OSC24MHz * (PLL_VIDEO[6:0] + (PLL_VIDEO_DENOM / PLL_VIDEO_NUM)) / post_divider
+ *
+ * Examples:
+ * --------------------------------------------------------------------------------------------------
+ *                  |   PLL_VIDEO[6:0]  |   PLL_VIDEO_DENOM |   PLL_VIDEO_NUM   |   post_divider
+ * --------------------------------------------------------------------------------------------------
+ *      93MHz       |       31          |           0       |       0           |       8
+ * --------------------------------------------------------------------------------------------------
+ *      1485MHz     |       61          |           7       |       8          |        1
+ * --------------------------------------------------------------------------------------------------
+ */
+enum __ERT_IMX_VIDEO_PIXEL_CLK
+{
+    NR_IMX_VIDEO_PCLK_93MHZ = 0,
+    NR_IMX_VIDEO_PCLK_1485MHZ,
+
+    NR_IMX_VIDEO_PCLK_NUM,
+};
+
+struct imx_clks_video_pclk
+{
+    kuint32_t pixel_clock;                                  /*!< unit: Hz */
+
+    kuint32_t pll_video;                                    /*!< PLL_VIDEO[6:0] */
+    kuint32_t video_denom;                                  /*!< PLL_VIDEO_DENOM */
+    kuint32_t video_num;                                    /*!< PLL_VIDEO_NUM */
+    kuint32_t post_divider;                                 /*!< post_divider */
+};
+
+struct imx_clks_video_pclk sgtc_imx_video_post_divider[NR_IMX_VIDEO_PCLK_NUM] =
+{
+    [NR_IMX_VIDEO_PCLK_93MHZ]   = { 9200000,    31, 0, 0, 8 },
+    [NR_IMX_VIDEO_PCLK_1485MHZ] = { 148500000,  61, 7, 8, 1 },
+};
+
+/*!
+ * @brief   get suitable divider
+ * @param   index: if index is 0 ~ ARRAY_SIZE(sgtc_imx_video_post_divider), return imediately
+ * @param   pixel_clock: if index < 0, serach sgtc_imx_video_post_divider and return
+ * @retval  &sptr_pclk[idx_satisfy]
+ * @note    none
+ */
+struct imx_clks_video_pclk *imx_clks_get_video_divider(kint32_t index, kuint32_t pixel_clock)
+{
+    struct imx_clks_video_pclk *sptr_pclk = &sgtc_imx_video_post_divider[0];
+    kusize_t num_field = NR_IMX_VIDEO_PCLK_NUM;
+    kuint32_t field, last_temp, cur_temp; 
+    kuint16_t idx, idx_satisfy;
+
+    if ((index >= 0) && (index < num_field))
+        return &sptr_pclk[index];
+
+    last_temp = (kuint16_t)(~0);
+    idx_satisfy = last_temp;
+
+    for (idx = 0; idx < num_field; idx++)
+    {
+        field = sptr_pclk[idx].pixel_clock;
+        if (field == pixel_clock)
+        {
+            idx_satisfy = idx;
+            break;
+        }
+
+        cur_temp = mr_usub(field, pixel_clock);
+        if (cur_temp < last_temp)
+        {
+            last_temp = cur_temp;
+            idx_satisfy = idx;
+        }
+    }
+
+    if (idx_satisfy < num_field)
+        return &sptr_pclk[idx_satisfy];
+
+    return mr_nullptr;
+}
+
+/*!
+ * @brief   configure pll clock
+ * @param   sptr_data
+ * @retval  none
+ * @note    none
+ */
+static void imx_clks_video_pixelclk(struct imx_clks_data *sptr_data, struct imx_clks_video_pclk *sptr_pclk)
+{
+    srt_hal_imx_ccm_pll_t *sptr_pll;
+    kuint32_t misc_reg = 0, video_reg = 0;
+
+    sptr_pll = sptr_data->sptr_pll;
+
+    /*!<
+     * PLL_VIDEO_NUM: Numerator of Video PLL Fractional Loop Divider Register
+     *  bit[31:30]: set to zero
+     *  bit[29:0]:  30 bit numerator of fractional loop divider(Signed number), absolute value should be less than denominator
+     */
+    mr_writel(sptr_pclk->video_num, &sptr_pll->PLL_VIDEO_NUM);
+
+    /*!<
+     * PLL_VIDEO_DENOM: Denominator of Video PLL Fractional Loop Divider Register
+     *  bit[31:30]: set to zero
+     *  bit[29:0]:  30 bit Denominator of fractional loop divider.
+     */
+    mr_writel(sptr_pclk->video_denom, &sptr_pll->PLL_VIDEO_DENOM);
+
+	/*!<
+     * MISC2: Miscellaneous Register 2
+     * bit[31:30]: Post-divider for video. 
+     *      The output clock of the video PLL should be gated prior to changing this divider to prevent glitches. 
+     *      This divider is feed by PLL_VIDEOn[POST_DIV_SELECT] to achieve division ratios of /1, /2, /4, /8, and /16.
+     *      value: 00(1), 01(2), 10(4), 11(8)
+	 */
+    mr_clrbitl(mr_bit_nr(0x3, 30), &sptr_pll->MISC2);
+
+	/*!<
+     * PLL_VIDEO (PLL5): Analog Video PLL control Register
+     * bit31:       1: pll is currently locked; 0: pll is not currently locked
+     * bit[20:19]:  These bits implement a divider after the PLL, but before the enable and bypass mux. value: 00(4), 01(2), 10(1)
+     * bit[13]:     Enalbe PLL output
+     * bit[6:0]:    pll loop divider, value: 27 ~ 54
+	 */
+    mr_writel(0, &sptr_pll->PLL_VIDEO);
+
+    /*!
+     * @instruction:
+     * ------------------------------------------------------------------------
+     *      post_divider     |      PLL_VIDEO[20:19]       |    MISC2[31:30]  
+     * ------------------------------------------------------------------------
+     *           1           |            2                |        0         
+     * ------------------------------------------------------------------------
+     *           2           |            1                |        0         
+     * ------------------------------------------------------------------------
+     *           4           |            2                |        3         
+     * ------------------------------------------------------------------------
+     *           8           |            1                |        3         
+     * ------------------------------------------------------------------------
+     *           16          |            0                |        3         
+     * ------------------------------------------------------------------------
+     */
+    switch (sptr_pclk->post_divider)
+    {
+        case 2:
+            video_reg = 0x01;
+            misc_reg = 0x00;
+            break;
+
+        case 4:
+            video_reg = 0x02;
+            misc_reg = 0x03;
+            break;
+
+        case 8:
+            video_reg = 0x01;
+            misc_reg = 0x03;
+            break;
+
+        case 16:
+            video_reg = 0x00;
+            misc_reg = 0x03;
+            break;
+
+        default:
+            video_reg = 0x02;
+            misc_reg = 0x00;
+            break;
+    }
+
+    /*!< Enalbe PLL output, and set divider */
+    mr_setbitl(mr_bit_nr(misc_reg, 30), &sptr_pll->MISC2);
+    mr_setbitl(mr_bit_nr(video_reg, 19) | mr_bit(13), &sptr_pll->PLL_VIDEO);
+
+    /*!< pll loop divider */
+    mr_clrbitl(0x7f, &sptr_pll->PLL_VIDEO);
+    mr_setbitl(sptr_pclk->pll_video, &sptr_pll->PLL_VIDEO);
+
+    /*!< check if locked */
+    while (mr_isBitResetl(mr_bit(31), &sptr_pll->PLL_VIDEO));
+}
+
 /*!
  * @brief   initial video clock
  * @param   sptr_data
@@ -123,56 +304,13 @@ static kint32_t imx_clk_init_gate(kuint32_t number, const kchar_t *name,
 static void imx_clks_video_init(struct imx_clks_data *sptr_data)
 {
 	srt_hal_imx_ccm_t *sptr_ccm;
-	srt_hal_imx_ccm_pll_t *sptr_pll;
+    struct imx_clks_video_pclk *sptr_pclk;
 
     sptr_ccm = sptr_data->sptr_ccm;
-    sptr_pll = sptr_data->sptr_pll;
 
-    /* PLL5 (PLL_VIDEO), output clock is (OSC24MHz / (PLL_VIDEO[20:19] + (PLL_VIDEO_NUM / PLL_VIDEO_DENOM)) / MISC2[31:30]) */
-
-    /*!<
-     * PLL_VIDEO_NUM: Numerator of Video PLL Fractional Loop Divider Register
-     *  bit[31:30]: set to zero
-     *  bit[29:0]:  30 bit numerator of fractional loop divider(Signed number), absolute value should be less than denominator
-     */
-    mr_writel(0, &sptr_pll->PLL_VIDEO_NUM);
-
-    /*!<
-     * PLL_VIDEO_DENOM: Denominator of Video PLL Fractional Loop Divider Register
-     *  bit[31:30]: set to zero
-     *  bit[29:0]:  30 bit Denominator of fractional loop divider.
-     */
-    mr_writel(0, &sptr_pll->PLL_VIDEO_DENOM);
-
-	/*!<
-     * MISC2: Miscellaneous Register 2
-     * bit[31:30]: Post-divider for video. 
-     *      The output clock of the video PLL should be gated prior to changing this divider to prevent glitches. 
-     *      This divider is feed by PLL_VIDEOn[POST_DIV_SELECT] to achieve division ratios of /1, /2, /4, /8, and /16.
-     *      value: 00(1), 01(2), 10(4), 11(8)
-     * 
-     * here set to 11, divied by 8
-	 */
-    mr_clrbitl(mr_bit_nr(0x3, 30), &sptr_pll->MISC2);
-    mr_setbitl(mr_bit(31) | mr_bit(30), &sptr_pll->MISC2);
-
-	/*!<
-     * PLL_VIDEO (PLL5): Analog Video PLL control Register
-     * bit31:       1: pll is currently locked; 0: pll is not currently locked
-     * bit[20:19]:  These bits implement a divider after the PLL, but before the enable and bypass mux. value: 00(4), 01(2), 10(1)
-     * bit[13]:     Enalbe PLL output
-     * bit[6:0]:    pll loop divider, value: 27 ~ 54
-     * 
-     * here set bit19 (divied by 2) and bit 13, 
-	 */
-    mr_writel(mr_bit(19) | mr_bit(13), &sptr_pll->PLL_VIDEO);
-
-    /*!< pll loop divider */
-    mr_clrbitl(0x7f, &sptr_pll->PLL_VIDEO);
-    mr_setbitl(31, &sptr_pll->PLL_VIDEO);
-
-    /*!< check if locked */
-    while (mr_isBitResetl(mr_bit(31), &sptr_pll->PLL_VIDEO));
+    /*!< Set to 1485MHz (148.5MHz) */
+    sptr_pclk = imx_clks_get_video_divider(NR_IMX_VIDEO_PCLK_1485MHZ, 148500000);
+    imx_clks_video_pixelclk(sptr_data, sptr_pclk);
 
 	/*!<
      * CSCDR2: CCM Serial Clock Divider Register 2

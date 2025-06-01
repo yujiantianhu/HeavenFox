@@ -22,7 +22,7 @@
 #define KERL_THREAD_STACK_SIZE                          THREAD_STACK_PAGE(1)   /*!< 1 page (4 kbytes) */
 
 /*!< The globals */
-extern kuint32_t g_asm_sched_flag;
+kbool_t g_sched_flag = false;
 
 static struct thread_attr sgtc_kthread_attr;
 static kuint32_t g_kthread_stack[KERL_THREAD_STACK_SIZE];
@@ -41,6 +41,10 @@ static void kthread_schedule_timeout(kuint32_t args)
     struct timer_list *sptr_tim = (struct timer_list *)args;
     struct thread *sptr_work, *sptr_ready;
     kuint32_t work_prio, next_prio;
+
+    /*!< if not in thread context or preempt is disable */
+    if (mr_preempt_is_locked())
+        return;
 
     sptr_work = mr_current;
     
@@ -63,7 +67,7 @@ static void kthread_schedule_timeout(kuint32_t args)
    
     /*!< there is a higher priority thread ready */
     if (__THREAD_IS_LOW_PRIO(work_prio, next_prio))
-        g_asm_sched_flag = true;
+        g_sched_flag = true;
     
 END:
     mod_timer(sptr_tim, jiffies + msecs_to_jiffies(THREAD_PREEMPT_PERIOD));

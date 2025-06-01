@@ -99,6 +99,9 @@ void start_kernel(void)
 {
     sptr_tag_params = mr_tag_params_get();
 
+    /*!< close irq */
+    local_irq_disable();
+
     /*!< initial memory pool */
     fwk_mempool_initial();
     iostream_init();
@@ -125,8 +128,11 @@ void start_kernel(void)
     if (fwk_of_platform_populate_init())
         goto fail;
 
+    /*!< softirq init */
+    fwk_softirq_init();
+
     /*!< enable interrupt */
-    mr_enable_cpu_irq();
+    local_irq_enable();
 
 #if CONFIG_SCHDULE
     /*!< create thread */
@@ -137,6 +143,7 @@ void start_kernel(void)
     print_info("initial system finished, start scheduler now\r\n");
 
     /*!< start */
+    
     schedule_thread();
 
 #endif

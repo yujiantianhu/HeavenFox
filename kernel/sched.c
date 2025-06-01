@@ -52,28 +52,20 @@ static kuint32_t thread_schedule_ref = 0;
 #define __SET_THREAD_STATUS(tid, value)	\
     do {	\
         if ((value) < NR_THREAD_STATUS_MAX)	\
-        {	\
-            struct thread *sptr_task = SCHED_THREAD_HANDLER(tid);	\
-            sptr_task->to_status = (value);	\
-        }	\
+            SCHED_THREAD_HANDLER(tid)->to_status = (value);	\
     } while (0)
 
 #define __SYNC_THREAD_STATUS(tid, value)	\
     do {	\
         if ((value) < NR_THREAD_STATUS_MAX)	\
         {	\
-            struct thread *sptr_task = SCHED_THREAD_HANDLER(tid);	\
-            sptr_task->status = (value);	\
-            sptr_task->to_status = NR_THREAD_NONE;    \
+            SCHED_THREAD_HANDLER(tid)->status = (value);	\
+            SCHED_THREAD_HANDLER(tid)->to_status = NR_THREAD_NONE;    \
         }	\
     } while (0)
 
 /*!< get thread status */
-#define __GET_THREAD_STATUS(tid)	\
-({	\
-    struct thread *sptr_task = SCHED_THREAD_HANDLER(tid);	\
-    sptr_task->status;	\
-})
+#define __GET_THREAD_STATUS(tid)	            (SCHED_THREAD_HANDLER(tid)->status)
 
 /*!< The functions */
 static kint32_t __find_thread_from_scheduler(tid_t tid, struct list_head *sptr_head);
@@ -509,7 +501,8 @@ kint32_t schedule_thread_switch(tid_t tid)
     kuint32_t src, dst;
     kint32_t retval;
     
-    mr_preempt_disable();
+    /*!< Protected by caller, do not disable again */
+//  mr_preempt_disable();
 
     src = SCHED_THREAD_HANDLER(tid)->status;
     dst = SCHED_THREAD_HANDLER(tid)->to_status;
@@ -596,13 +589,13 @@ kint32_t schedule_thread_switch(tid_t tid)
 
     /*!< update thread status */
     __SYNC_THREAD_STATUS(tid, dst);
-    mr_preempt_enable();
+//  mr_preempt_enable();
 
     return ER_NORMAL;
     
 fail:
     __SYNC_THREAD_STATUS(tid, src);
-    mr_preempt_enable();
+//  mr_preempt_enable();
 
     return -ER_INVALID;
 }
@@ -657,16 +650,16 @@ static kint32_t schedule_reinstall_work_role(tid_t tid)
 {
     struct thread *sptr_thread;
 
-    if (tid != SCHED_RUNNING_THREAD->tid)
+    if (mr_unlikely(tid != SCHED_RUNNING_THREAD->tid))
         return -ER_INVALID;
 
     /*!< no thread ready; current should be set to idle thread */
-    if (mr_list_head_empty(SCHED_READY_LIST))
-        return -ER_FAULT;
+//  if (mr_list_head_empty(SCHED_READY_LIST))
+//      return -ER_FAULT;
 
     /*!< get the first ready thread */
     sptr_thread = mr_list_first_valid_entry(SCHED_READY_LIST, struct thread, sgtc_link);
-    if (sptr_thread)
+    if (mr_likely(sptr_thread))
     {
         /*!< detached from ready list */
         schedule_detach_ready_list(sptr_thread->tid);
@@ -692,11 +685,11 @@ static kint32_t schedule_add_ready_list(tid_t tid)
 
     sptr_thread = SCHED_THREAD_HANDLER(tid);
 
-    if (!sptr_thread)
+    if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
     /*!< avoid duplicate additions */
-    if (NR_THREAD_READY == sptr_thread->status)
+    if (mr_unlikely(NR_THREAD_READY == sptr_thread->status))
         return -ER_INVALID;
 
     return __schedule_add_status_list(sptr_thread, SCHED_READY_LIST);
@@ -716,11 +709,11 @@ static kint32_t schedule_detach_ready_list(tid_t tid)
 
     sptr_thread = SCHED_THREAD_HANDLER(tid);
 
-    if (!sptr_thread)
+    if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
     /*!< check if is in ready status */
-    if (NR_THREAD_READY != sptr_thread->status)
+    if (mr_unlikely(NR_THREAD_READY != sptr_thread->status))
         return -ER_INVALID;
 
     /*!< delete it */
@@ -834,6 +827,7 @@ static kint32_t schedule_detach_sleep_list(tid_t tid)
  * @retval 	err code
  * @note   	find thread if it is exsited
  */
+__unused
 static kint32_t __find_thread_from_scheduler(tid_t tid, struct list_head *sptr_head)
 {
     struct thread *sptr_anyTask;
@@ -874,8 +868,13 @@ static kint32_t __schedule_add_status_list(struct thread *sptr_thread, struct li
         goto END;
 
     /*!< fault tolerance mechanism: check if this thread has been added to the list, and exit directly if it has been added */
+#if 0
     if (__find_thread_from_scheduler(sptr_thread->tid, sptr_head) >= 0)
         return ER_NORMAL;
+#else
+    if (!mr_list_head_empty(&sptr_thread->sgtc_link))
+        return -ER_EXISTED;
+#endif
 
 #if CONFIG_ROLL_POLL
     list_head_add_tail(sptr_head, &sptr_thread->sgtc_link);
@@ -912,11 +911,13 @@ END:
  */
 static void __schedule_del_status_list(struct thread *sptr_thread, struct list_head *sptr_head)
 {
-    if ((!sptr_thread) || (!sptr_head))
+    if (mr_unlikely(!sptr_thread) || 
+        mr_unlikely(!sptr_head))
         return;
 
-    /*!< check if target link is in the list before deleting */
-    list_head_del_safe(sptr_head, &sptr_thread->sgtc_link);
+    /*!< check if target link is in the list before deleting, but needs lot of time */
+//  list_head_del_safe(sptr_head, &sptr_thread->sgtc_link);
+    list_head_del(&sptr_thread->sgtc_link);
 }
 
 /*!
@@ -1029,17 +1030,14 @@ struct scheduler_context *__schedule_thread(void)
 
     /*!< get the current thread */
     sptr_prev = SCHED_RUNNING_THREAD;
-    if (!sptr_prev)
+    if (mr_unlikely(!sptr_prev))
     {
-        if (thread_schedule_ref)
+        if (mr_unlikely(thread_schedule_ref))
             goto fail;
         else
         {
             /*!< scheduled by "start_kernel" for the first time */
-            sptr_prev = mr_list_first_valid_entry(SCHED_READY_LIST, struct thread, sgtc_link);
-            if (!sptr_prev)
-                goto fail;
-            
+            sptr_prev = mr_list_first_entry(SCHED_READY_LIST, struct thread, sgtc_link);           
             __SET_THREAD_STATUS(sptr_prev->tid, NR_THREAD_RUNNING);
         }
     }
@@ -1051,7 +1049,8 @@ struct scheduler_context *__schedule_thread(void)
     /*!< select next valid thread */
     retval = schedule_thread_switch(sptr_prev->tid);
     sptr_thread = SCHED_RUNNING_THREAD;
-    if ((retval < 0) || (!sptr_thread))
+    if (mr_unlikely(retval < 0) || 
+        mr_unlikely(!sptr_thread))
         goto fail;
     
     sgtc_context.first = (kuaddr_t)&thread_schedule_ref;
@@ -1060,7 +1059,7 @@ struct scheduler_context *__schedule_thread(void)
     sgtc_context.prev_sp = 0;
     sgtc_context.next_sp = thread_get_stack(sptr_thread->sptr_attr);
 
-    if (thread_schedule_ref)
+    if (mr_likely(thread_schedule_ref))
         sgtc_context.prev_sp = thread_get_stack(sptr_prev->sptr_attr);
 
     scheduler_record();
@@ -1085,7 +1084,7 @@ void schedule_thread(void)
     mr_preempt_disable();
     __push_psr();
     mr_disable_cpu_irq();
-
+    
     sptr_context = __schedule_thread();
     if (!sptr_context)
         goto END;

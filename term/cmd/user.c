@@ -45,13 +45,13 @@ void term_cmd_print_login(void)
 void term_cmd_login_init(const kchar_t *login, const kchar_t *host)
 {
     kchar_t *msg = &g_term_cmd_login[0];
-    kssize_t len = strlen(login);
+    kssize_t len = kstrlen(login);
 
     memcpy(msg, login, len);
     msg += len;
     *(msg++) = '@';
 
-    len = strlen(host);
+    len = kstrlen(host);
     memcpy(msg, host, len);
 
     msg += len;
@@ -82,7 +82,7 @@ void term_cmd_set_login(const kchar_t *login)
     mark = kstrchr(host, ':');
     host_len = (kssize_t)(mark - host);
 
-    login_len = strlen(login);
+    login_len = kstrlen(login);
     if ((login_len + 1) > (kssize_t)(host - cmdline))
         kstrncpyr(cmdline + login_len + 1, host, host_len);
     else
@@ -116,7 +116,7 @@ void term_cmd_set_host(const kchar_t *host)
         return;
 
     base++;
-    host_len = strlen(host);
+    host_len = kstrlen(host);
     memcpy(base, host, host_len);
 
     base[host_len] = ':';
@@ -137,9 +137,9 @@ static kint32_t term_cmd_set_user(struct term_cmd *sptr_cmd, kint32_t argc, kcha
     switch (argc)
     {
         case 3:
-            if (!strcmp(argv[1], "login"))
+            if (!kstrcmp(argv[1], "login"))
                 term_cmd_set_login(argv[2]);
-            else if (!strcmp(argv[1], "host"))
+            else if (!kstrcmp(argv[1], "host"))
                 term_cmd_set_host(argv[2]);
             else
                 goto fail;
@@ -147,7 +147,7 @@ static kint32_t term_cmd_set_user(struct term_cmd *sptr_cmd, kint32_t argc, kcha
             break;
 
         case 2:
-            if (!strcmp(argv[1], "--help"))
+            if (!kstrcmp(argv[1], "--help"))
                 sptr_cmd->help();
             else
                 goto fail;

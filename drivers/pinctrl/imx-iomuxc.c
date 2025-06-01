@@ -286,7 +286,7 @@ static void *imx_iomuxc_get_group_by_name(srt_imx_iomuxc_data_t *sptr_data, cons
         {
             sptr_pingrp = &sptr_pinfunc->sptr_pingrps[j];
 
-            if (!strcmp(sptr_pingrp->name, name))
+            if (!kstrcmp(sptr_pingrp->name, name))
                 return sptr_pingrp;
         }
     }

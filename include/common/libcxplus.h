@@ -82,13 +82,13 @@ public:
 
     ostream &operator<<(const kchar_t *str)
     {
-        io_putstr_async((const kubyte_t *)str, strlen(str) + 1);
+        io_putstr_async((const kubyte_t *)str, kstrlen(str) + 1);
         return *this;
     }
 
     ostream &operator<<(const kubyte_t *str)
     {
-        io_putstr_async(str, strlen((const kchar_t *)str) + 1);
+        io_putstr_async(str, kstrlen((const kchar_t *)str) + 1);
         return *this;
     }
 

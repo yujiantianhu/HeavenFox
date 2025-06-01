@@ -27,19 +27,56 @@
     #define CPU_INTC_COMPATIBLE                             "arm,cortex-a7-gic"
 #endif
 
-#define mr_enable_irq(irqNumber)                           local_irq_enable(irqNumber)
-#define mr_disable_irq(irqNumber)                          local_irq_disable(irqNumber)
-#define mr_get_irq_pri(irqNumber)                          hw_irq_get_priority(irqNumber)
-#define mr_set_irq_pri(irqNumber, pri)                     hw_irq_set_priority(irqNumber, pri)
+#define SOFTIRQ_CALL(x)                                     __asm__ __volatile__ ("svc %0" : : "i"(x))
+
+#define mr_get_irq_pri(irqNumber)                           hw_irq_get_priority(irqNumber)
+#define mr_set_irq_pri(irqNumber, pri)                      hw_irq_set_priority(irqNumber, pri)
+
+#define mr_local_irq_enable()                               mr_enable_cpu_irq()
+#define mr_local_irq_disable()                              mr_disable_cpu_irq()
+
+#define mr_local_irq_save(flags)   \
+    do {    \
+        flags = __get_cpsr();   \
+        mr_disable_cpu_irq();   \
+    } while (0)
+
+#define mr_local_irq_restore(flags)   \
+    do {    \
+        if (!(flags & CPSR_BIT_I)) \
+            mr_enable_cpu_irq();    \
+    } while (0)
 
 /*!< API function */
+/*!
+ * @brief   disable irq
+ * @param   none
+ * @retval  none
+ * @note    GIC Interrupt
+ */
+__force_inline static inline void local_irq_enable(void)
+{
+    mr_enable_cpu_irq();
+}
+
+/*!
+ * @brief   enable irq
+ * @param   none
+ * @retval  none
+ * @note    GIC Interrupt
+ */
+__force_inline static inline void local_irq_disable(void)
+{
+    mr_disable_cpu_irq();
+}
+
 /*!
  * @brief   disable irq and save
  * @param   none
  * @retval  none
  * @note    GIC Interrupt
  */
-static inline void local_irq_save(kuint32_t *flags)
+__force_inline static inline void local_irq_save(kutype_t *flags)
 {
     *flags = __get_cpsr();
     mr_disable_cpu_irq();
@@ -51,7 +88,7 @@ static inline void local_irq_save(kuint32_t *flags)
  * @retval  none
  * @note    GIC Interrupt
  */
-static inline void local_irq_restore(kuint32_t *flags)
+__force_inline static inline void local_irq_restore(kutype_t *flags)
 {
     if (!(*flags & CPSR_BIT_I))
         mr_enable_cpu_irq();

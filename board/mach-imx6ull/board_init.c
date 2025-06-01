@@ -28,7 +28,8 @@ kint32_t board_init_console(void)
     /*!< Output Board Information */
     print_info("\r\n");
     print_info("Console Initial Finished ...\r\n");
-    print_info("Welcome to Use Real-Kernel!\r\n");
+    print_info("Welcome to Use HeavenFox OS!\r\n");
+    print_info("\r\n");
 
     return RET_BOOT_PASS;
 }

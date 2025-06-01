@@ -44,7 +44,7 @@ static kint32_t term_cmd_ttc_mail(struct term_cmd *sptr_cmd, kint32_t argc, kcha
     switch (argc)
     {
         case 2:
-            if (!strcmp(argv[1], "--help"))
+            if (!kstrcmp(argv[1], "--help"))
                 sptr_cmd->help();
             else
                 goto fail;
@@ -73,7 +73,7 @@ static kint32_t term_cmd_ttc_mail(struct term_cmd *sptr_cmd, kint32_t argc, kcha
             mail_init(mr_current->sptr_mb, &sgtc_mail);
             
             sgtc_msg[0].buffer = (kuint8_t *)argv[2];
-            sgtc_msg[0].size = strlen(argv[2]) + 1;
+            sgtc_msg[0].size = kstrlen(argv[2]) + 1;
             sgtc_msg[0].type = NR_MAIL_TYPE_SERIAL;
 
             sgtc_mail.sptr_msg = &sgtc_msg[0];

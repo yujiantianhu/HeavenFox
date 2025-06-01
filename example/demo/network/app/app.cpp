@@ -110,7 +110,7 @@ void crt_lwip_data_t::excute(void)
     sgtc_remote.sin_addr.s_addr = fwk_inet_addr(REMOTE_IP_ADDRESS);
     memset(sgtc_remote.zero, 0, sizeof(sgtc_remote.zero));
 
-    len = socket_sendto(this->fd, msg, strlen(msg) + 1, 0, 
+    len = socket_sendto(this->fd, msg, kstrlen(msg) + 1, 0, 
                     (struct fwk_sockaddr *)&sgtc_remote, sizeof(struct fwk_sockaddr));
     if (len <= 0)
     {

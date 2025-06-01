@@ -81,7 +81,7 @@ static struct fwk_block_major_name *__fwk_register_blkdev(kuint32_t major, const
         return ERR_PTR(-ER_FAILD);
 
     sptr_blkdev->major = major;
-    strncpy(sptr_blkdev->name, (const char *)name, sizeof(sptr_blkdev->name));
+    kstrncpy(sptr_blkdev->name, (const char *)name, sizeof(sptr_blkdev->name));
     *sptr_Dst = sptr_blkdev;
 
     return sptr_blkdev;
@@ -110,7 +110,7 @@ static struct fwk_block_major_name *__fwk_unregister_blkdev(kuint32_t major, con
         return ERR_PTR(-ER_EMPTY);
 
     sptr_Rlt = *sptr_Dst;
-    if (strcmp(sptr_Rlt->name, name))
+    if (kstrcmp(sptr_Rlt->name, name))
         return ERR_PTR(-ER_CHECKERR);
 
     *sptr_Dst = mr_nullptr;

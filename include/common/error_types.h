@@ -87,6 +87,13 @@ extern void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
 		goto label;	\
 	} while (0)
 
+/*!< The globals */
+extern volatile kuint32_t g_interrupt_flags;
+
+#define EXCEPTION_BIT								(0x80)
+#define IS_IN_INTERRUPT()							(!!g_interrupt_flags)
+#define IS_IN_EXCEPTION()							((g_interrupt_flags & EXCEPTION_BIT) == EXCEPTION_BIT)
+
 /*!< API functions */
 /*!
  * @brief   judge if ptr is valid

@@ -14,6 +14,7 @@
 #include <common/generic.h>
 #include <common/trie_tree.h>
 #include <common/io_stream.h>
+#include <common/api_string.h>
 #include <platform/fwk_mempool.h>
 
 /*!< The defines */
@@ -139,7 +140,7 @@ void trie_node_add(struct trie_tree *sptr_tree, const kchar_t *name, struct trie
 {
     struct trie_node *sptr_node, *sptr_temp;
     const kchar_t *str = name;
-    kuint32_t lenth = strlen(name);
+    kuint32_t lenth = kstrlen(name);
     kuint32_t i;
     kint32_t offset;
 
@@ -244,7 +245,7 @@ void trie_node_del(struct trie_tree *sptr_tree, const kchar_t *name)
 {
     struct trie_node *sptr_node;
     const kchar_t *str = name;
-    kuint32_t lenth = strlen(name);
+    kuint32_t lenth = kstrlen(name);
     kuint32_t i;
     kint32_t offset = 0;
 

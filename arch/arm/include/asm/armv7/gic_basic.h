@@ -140,8 +140,6 @@ extern kint32_t fwk_gpc_to_gic_irq(kint32_t virq);
 
 extern void hw_enable_irq(kint32_t hwirq);
 extern void hw_disable_irq(kint32_t hwirq);
-extern void local_irq_enable(kint32_t irq_number);
-extern void local_irq_disable(kint32_t irq_number);
 extern kint32_t hw_irq_acknowledge(void);
 extern void hw_irq_deactivate(kuint32_t value);
 extern kuint32_t hw_irq_get_running_priority(void);

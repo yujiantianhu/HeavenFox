@@ -153,7 +153,7 @@ static kint32_t fwk_driver_find(struct fwk_driver *sptr_driver, struct fwk_bus_t
 
 	foreach_list_next_entry(sptr_drv, FWK_GET_BUS_DRIVER(sptr_bus_type), sgtc_link)
 	{
-		if (!strcmp((char *)sptr_drv->name, (char *)sptr_driver->name))
+		if (!kstrcmp((char *)sptr_drv->name, (char *)sptr_driver->name))
 		{
 			__BUS_DRIVER_RD_UNLOCK(sptr_bus_type);
 			return ER_NORMAL;

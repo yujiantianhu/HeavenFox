@@ -33,7 +33,7 @@ typedef struct fwk_of_property
 	kchar_t *name;
 	/*!< Property lenth */
 	kint32_t length;
-	/*!< Property value, such as compatible = "myBoard", ===> value = "myBoard", lenth = strlen(value) */
+	/*!< Property value, such as compatible = "myBoard", ===> value = "myBoard", lenth = kstrlen(value) */
 	void *value;
 	/*!< Next property */
 	struct fwk_of_property *sptr_next;

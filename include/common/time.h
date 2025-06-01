@@ -31,14 +31,13 @@ typedef kstype_t 	kstime_t;
 extern volatile kutime_t jiffies;
 extern volatile kutime_t jiffies_out;
 
-extern kutime_t *ptr_systick_counter;
+extern volatile kutime_t *ptr_systick_counter;
 extern kutime_t g_delay_timer_counter;
-
-extern kutime_t g_schedule_prd;
 
 /*!< The defines */
 #define TICK_HZ                                             CONFIG_HZ
-#define SYSTICK_CNT()                                       (ptr_systick_counter ? (*ptr_systick_counter) : 0)
+//#define SYSTICK_CNT()                                       (ptr_systick_counter ? (*ptr_systick_counter) : 0)
+#define SYSTICK_CNT()                                       (*ptr_systick_counter)
 
 #define JIFFIES_INITVAL                                     (86400000 - 1)
 #define JIFFIES_MAX                                         ((kutime_t)(~0))
@@ -218,7 +217,7 @@ static inline kutime_t secs_to_jiffies(const kuint32_t s)
  */
 static inline kutime_t msecs_to_jiffies(const kuint32_t m)
 {
-    return m ? (((m * TICK_HZ) / 1000) + 1) : 0;
+    return m ? (((m * TICK_HZ) + 999) / 1000) : 0;
 }
 
 /*!
@@ -229,7 +228,7 @@ static inline kutime_t msecs_to_jiffies(const kuint32_t m)
  */
 static inline kutime_t usecs_to_jiffies(const kuint32_t u)
 {
-    return u ? (((u * TICK_HZ) / 1000 / 1000) + 1) : 0;
+    return u ? (((u * TICK_HZ) + 999999) / 1000000) : 0;
 }
 
 /*!
@@ -240,7 +239,7 @@ static inline kutime_t usecs_to_jiffies(const kuint32_t u)
  */
 static inline kutime_t nsecs_to_jiffies(const kuint64_t n)
 {
-    return n ? (((n * TICK_HZ) / 1000 / 1000 / 1000) + 1) : 0;
+    return n ? (((n * TICK_HZ) + 999999999) / 1000000000) : 0;
 }
 
 /*!

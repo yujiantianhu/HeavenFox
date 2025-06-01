@@ -44,7 +44,7 @@ static kint32_t fwk_pinmux_get_function_by_name(struct fwk_pinctrl_dev *sptr_pct
         if (!func_name)
             continue;
 
-        if (!strcmp(name, func_name))
+        if (!kstrcmp(name, func_name))
             return i;
     }
 
@@ -79,7 +79,7 @@ static kint32_t fwk_pinmux_get_group_by_name(struct fwk_pinctrl_dev *sptr_pctlde
         if (!grp_name)
             continue;
 
-        if (!strcmp(name, grp_name))
+        if (!kstrcmp(name, grp_name))
             return i;
     }
 

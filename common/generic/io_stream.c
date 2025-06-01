@@ -262,9 +262,13 @@ struct io_stream_dev *find_io_stream_dev(const kchar_t *name)
  */
 void io_putstr_async(const kubyte_t *msgs, kusize_t size)
 {
+    kbool_t is_prohibit;
     kssize_t ret = -1;
 
-    if (g_io_stream_flags & IO_STREAM_ASYNC)
+    /*!< In exception ? */
+    is_prohibit = g_interrupt_flags ? IS_IN_EXCEPTION() : false;
+
+    if ((g_io_stream_flags & IO_STREAM_ASYNC) && (!is_prohibit))
     {
         spin_lock_irqsave(&sgtc_io_stream_logs_lock);
         ret = pq_message_write(&sgtc_io_stream_logs, msgs, size);
@@ -323,12 +327,12 @@ void io_stream_logs_print(void)
 }
 
 /*!
- * @brief   printk
+ * @brief   kprintf
  * @param   ptr_fmt
  * @retval  none
  * @note    perhaps sleep, because it calls "kmalloc" to save fmt, don't use in IRQ_handler!!!
  */
-void printk(const kchar_t *ptr_fmt, ...)
+void kprintf(const kchar_t *ptr_fmt, ...)
 {
 #if defined(CONFIG_PRINT_LEVEL)
     va_list ptr_list;
@@ -359,12 +363,12 @@ void printk(const kchar_t *ptr_fmt, ...)
 }
 
 /*!
- * @brief   kprintf
+ * @brief   printk
  * @param   ptr_fmt
  * @retval  none
  * @note    Not sleep, but fmt must less than 1024 bytes!!!
  */
-void kprintf(const kchar_t *ptr_fmt, ...)
+void printk(const kchar_t *ptr_fmt, ...)
 {
 #if defined(CONFIG_PRINT_LEVEL)
     va_list ptr_list;
@@ -386,7 +390,7 @@ void kprintf(const kchar_t *ptr_fmt, ...)
     if (*(level + 1) > *((kubyte_t *)(CONFIG_PRINT_LEVEL)))
         return;
 
-    io_putstr(logs_buf, size + 1);
+    io_putstr_async(logs_buf, size + 1);
 #endif
 }
 

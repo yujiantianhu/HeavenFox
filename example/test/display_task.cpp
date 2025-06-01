@@ -36,7 +36,7 @@ using namespace tsk;
 using namespace bsc;
 
 /*!< The defines */
-#define DISPLAY_TASK_STACK_SIZE                      THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
+#define DISPLAY_TASK_STACK_SIZE                      THREAD_STACK_PAGE(2)    /*!< 2 page (2kbytes) */
 
 class crt_disp_task_t;
 class crt_disp_base_t;
@@ -64,7 +64,6 @@ public:
 
 protected:
     struct fwk_disp_ctrl sgtc_dctrl;
-    struct fwk_disp_info sgtc_disp;
 };
 
 /*!< bmp class */
@@ -81,7 +80,7 @@ public:
     {
         this->bmp = bmp;
     }
-    void show(void);
+    void show(crt_disp_task_t &cgrt_dtsk);
 
 private:
     const kchar_t *bmp;
@@ -112,8 +111,9 @@ public:
             delete[] this->text_pages;
     }
 
-    void set_src(const kchar_t **text, kuint32_t num)
+    void set_src(const kchar_t *path, const kchar_t **text, kuint32_t num)
     {
+        this->path = path;
         this->text = text;
         this->num  = num;
     }
@@ -121,6 +121,7 @@ public:
     void show(crt_disp_task_t &cgrt_dtsk);
 
 private:
+    const kchar_t *path;
     const kchar_t **text;
     kuint32_t num;
     kuint32_t cur_text;
@@ -149,18 +150,21 @@ private:
 	struct fwk_fb_var_screen_info sgtc_var;
     kuint32_t *fb_buffer1;
     kuint32_t *fb_buffer2;
+
+    struct fwk_disp_info sgtc_disp;
 };
 
 /*!< The globals */
-static kchar_t g_display_buffer[((1920 * 1080) / (FWK_FONT_16 * FWK_FONT_16)) * 2 + 4] __align(4);
+static kchar_t g_display_buffer[(1920 * 1080) * 4 + 4] __align(4);
+static const kchar_t *g_display_text_path = "/media/FAT32_2/home/fox/text";
 static const kchar_t *g_display_ebook_list[] =
 {
-    "/media/FAT32_2/home/fox/text/tangzhan.txt",
-    "/media/FAT32_2/home/fox/text/lianjian.txt",
-    "/media/FAT32_2/home/fox/text/feidao.txt",
-    "/media/FAT32_2/home/fox/text/tianlong.txt",
+    "tangzhan.txt",
+    "lianjian.txt",
+    "feidao.txt",
+    "tianlong.txt",
 };
-static const kchar_t *g_display_logo = "/media/FAT32_2/home/fox/picture/1.bmp";
+static const kchar_t *g_display_logo = "/media/FAT32_2/boot/logo/logo768.bmp";// CONFIG_POWER_LOGO;
 
 /*!< API functions */
 /*!
@@ -188,6 +192,14 @@ crt_disp_task_t::crt_disp_task_t(crt_task_t *cprt_task, const kchar_t *file, kui
     fb_buffer2 = (kuint32_t *)virt_mmap(mr_nullptr, sgtc_fix.smem_len, 0, 0, fd, sgtc_fix.smem_len);
     if (!isValid(fb_buffer2))
         goto fail3;
+
+    fwk_display_ctrl_init(&sgtc_disp, 
+                    fb_buffer1, 
+                    fb_buffer2, 
+                    sgtc_fix.smem_len, 
+                    sgtc_var.xres, 
+                    sgtc_var.yres, 
+                    sgtc_var.bits_per_pixel);
 
     return;
 
@@ -281,18 +293,11 @@ crt_disp_base_t::crt_disp_base_t(crt_disp_task_t &cgrt_dtsk)
     struct fwk_disp_ctrl &sgtc_dctrl = this->sgtc_dctrl;
     struct fwk_font_setting &sgtc_set = this->sgtc_dctrl.sgtc_set;
 
-    sgtc_dctrl.sptr_di = &this->sgtc_disp;
+    sgtc_dctrl.sptr_di = &cgrt_dtsk.sgtc_disp;
     if (cgrt_dtsk.fd < 0)
         return;
 
     display_task_settings_init(&sgtc_set);
-    fwk_display_ctrl_init(&this->sgtc_disp, 
-                    cgrt_dtsk.fb_buffer1, 
-                    cgrt_dtsk.fb_buffer2, 
-                    cgrt_dtsk.sgtc_fix.smem_len, 
-                    cgrt_dtsk.sgtc_var.xres, 
-                    cgrt_dtsk.sgtc_var.yres, 
-                    cgrt_dtsk.sgtc_var.bits_per_pixel);
 }
 
 /*!
@@ -301,18 +306,20 @@ crt_disp_base_t::crt_disp_base_t(crt_disp_task_t &cgrt_dtsk)
  * @retval none
  * @note   do display
  */
-void crt_disp_bmp_t::show(void)
+void crt_disp_bmp_t::show(crt_disp_task_t &cgrt_dtsk)
 {
     struct fwk_disp_ctrl &sgtc_dctrl = this->sgtc_dctrl;
     struct fwk_disp_info *sptr_disp = sgtc_dctrl.sptr_di;
     struct fs_stream *sptr_file;
     struct fwk_bmp_ctrl sgtc_bctl;
+    struct fwk_fb_var_screen_info sgtc_var;
     kuint8_t bytes_per_pixel;
     kssize_t size;
 
     if (!this->bmp)
         return;
 
+    fwk_display_frame_exchange(sptr_disp);
     display_task_clear(*this);
     display_task_cursor(*this, 0, 0, sptr_disp->width, sptr_disp->height);
 
@@ -321,13 +328,21 @@ void crt_disp_bmp_t::show(void)
         return;
 
     bytes_per_pixel = sptr_disp->bpp >> 3;
-    size = file_read(sptr_file, sptr_disp->buffer_bak, 
+    size = file_read(sptr_file, g_display_buffer, 
                 sptr_disp->width * sptr_disp->height * bytes_per_pixel);
     if (size <= 0)
         goto END;
 
     fwk_bitmap_ctrl_init(&sgtc_bctl, sptr_disp, 0, 0);
-    fwk_display_whole_bitmap(&sgtc_bctl, (const kuint8_t *)sptr_disp->buffer_bak);
+    fwk_display_whole_bitmap(&sgtc_bctl, (const kuint8_t *)g_display_buffer);
+
+    virt_ioctl(cgrt_dtsk.fd, NR_FB_IOGET_VARINFO, &sgtc_var);
+    if (!sgtc_var.yoffset)
+        sgtc_var.yoffset += sgtc_var.yres;
+    else
+        sgtc_var.yoffset = 0;
+    
+    virt_ioctl(cgrt_dtsk.fd, NR_FB_IOSET_VARINFO, &sgtc_var);
 
 END:
     file_close(sptr_file);
@@ -418,11 +433,13 @@ static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &c
 void crt_disp_text_t::show(crt_disp_task_t &cgrt_dtsk)
 {
     struct fs_stream *sptr_file;
+    kchar_t full_path[128];
 
     if (!this->text_pages)
         return;
 
-    sptr_file = file_open(this->text[this->cur_text], O_RDONLY);
+    sprintk(full_path, "%s/%s", this->path, this->text[this->cur_text]);
+    sptr_file = file_open(full_path, O_RDONLY);
     if (!isValid(sptr_file))
         goto END;
 
@@ -454,10 +471,10 @@ static void *display_task_entry(void *args)
         goto fail;
 
     cgrt_logo.set_src(g_display_logo);
-    cgrt_txt.set_src(g_display_ebook_list, ARRAY_SIZE(g_display_ebook_list));
+    cgrt_txt.set_src(g_display_text_path, g_display_ebook_list, ARRAY_SIZE(g_display_ebook_list));
 
     mr_preempt_disable();
-    cgrt_logo.show();
+    cgrt_logo.show(cgrt_dtsk);
     mr_preempt_enable();
     sleep(5);
 

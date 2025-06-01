@@ -224,7 +224,7 @@ void mail_destroy(struct mailbox *sptr_mb, struct mail *sptr_mail)
     if (mr_unlikely(!sptr_mail))
         return;
 
-    if (sptr_mb && !strcmp(sptr_mb->name, sptr_mail->src_name))
+    if (sptr_mb && !kstrcmp(sptr_mb->name, sptr_mail->src_name))
         kfree(sptr_mail);
 }
 

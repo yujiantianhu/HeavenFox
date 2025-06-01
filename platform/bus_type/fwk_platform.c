@@ -48,7 +48,7 @@ static kint32_t fwk_platform_match(struct fwk_device *sptr_dev, struct fwk_drive
 
     /*!< Matching priority 1: override, where override is set, all other matching methods will be invalidated */
     if (sptr_platdev->driver_override)
-        return ((!strcmp(sptr_platdev->driver_override, sptr_driver->name)) ? ER_NORMAL : (-ER_FAILD));
+        return ((!kstrcmp(sptr_platdev->driver_override, sptr_driver->name)) ? ER_NORMAL : (-ER_FAILD));
 
     /*!< Match Priority 2: Device Tree */
     sptr_np = fwk_of_node_try_matches(sptr_dev->sptr_node, sptr_driver->sptr_of_match_table, mr_nullptr);
@@ -60,7 +60,7 @@ static kint32_t fwk_platform_match(struct fwk_device *sptr_dev, struct fwk_drive
     {
         sptr_idTable = sptr_platdrv->sptr_idTable + idTable_cnt;
 
-        if (!strcmp((char *)sptr_platdev->name, (char *)sptr_idTable->name))
+        if (!kstrcmp((char *)sptr_platdev->name, (char *)sptr_idTable->name))
             return ER_NORMAL;
     }
 
@@ -68,7 +68,7 @@ static kint32_t fwk_platform_match(struct fwk_device *sptr_dev, struct fwk_drive
     /*!< 
      * Each device is not allowed to have the same name;
      * So you can exit immediately after finding it, and there will be no more devices with the same name in the future */
-    if (!strcmp((char *)sptr_platdev->name, (char *)sptr_driver->name))
+    if (!kstrcmp((char *)sptr_platdev->name, (char *)sptr_driver->name))
         return ER_NORMAL;
 
     return -ER_NOTFOUND;

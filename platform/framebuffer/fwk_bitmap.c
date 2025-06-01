@@ -153,7 +153,7 @@ kint32_t fwk_bitmap_get_and_check(struct fwk_bmp_ctrl *sptr_bctl, const kuint8_t
     kmemcpy(&sgtc_file, ptr_bitmap, FWK_BMP_FILE_HDR_LEN);
     ptr_bitmap += FWK_BMP_FILE_HDR_LEN;
     kmemcpy(sptr_bi, ptr_bitmap, FWK_BMP_INFO_HDR_LEN);
-    ptr_bitmap += FWK_BMP_INFO_HDR_LEN;
+    ptr_bitmap += sptr_bi->infoSize;
 
     if (sgtc_file.picType != ugtr_type.pic_type)
         return -ER_FAULT;
@@ -220,6 +220,9 @@ kint32_t fwk_display_bitmap(struct fwk_bmp_ctrl *sptr_bctl, const kuint8_t *imag
         {
             x_pos = sptr_bctl->x_start;
             y_pos++;
+
+            /*!< stride: bmp needs 4bytes alignment for per line */
+            rgb_inc = mr_align4(rgb_inc);
         }
 
         if (y_pos >= (sptr_bctl->y_start + height))
@@ -315,6 +318,9 @@ kssize_t fwk_display_whole_bitmap(struct fwk_bmp_ctrl *sptr_bctl, const kuint8_t
          */
         y_offset = (sptr_bi->height < 0) ? py_cnt : ((height - 1) - py_cnt);
         offset = mr_fwk_disp_advance_pos(x_start, y_start + y_offset, sptr_disp->width);
+
+        /*!< stride: bmp needs 4bytes alignment for per line */
+        rgb_inc = mr_align4(rgb_inc);
 
         for (px_cnt = 0; px_cnt < width; px_cnt++)
         {

@@ -17,6 +17,9 @@
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 
+/*!< The globals */
+volatile kuint32_t g_interrupt_flags = 0;
+
 /*!< API function */
 /*!
  * @brief   deal_assert_fail
@@ -27,13 +30,13 @@
 void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
                                kuint32_t __line, const kchar_t *__function)
 {
-    kprintf(PRINT_LEVEL_ERR"\r\n");
-    kprintf(PRINT_LEVEL_ERR"Program Aborted. Here is Error Information:\r\n");
+    printk(PRINT_LEVEL_ERR"\r\n");
+    printk(PRINT_LEVEL_ERR"Program Aborted. Here is Error Information:\r\n");
 
-    kprintf(PRINT_LEVEL_ERR"---> assertion: %s\r\n", __assertion);
-    kprintf(PRINT_LEVEL_ERR"---> file     : %s\r\n", __file);
-    kprintf(PRINT_LEVEL_ERR"---> line     : %d\r\n", __line);
-    kprintf(PRINT_LEVEL_ERR"---> function : %s\r\n", __function);
+    printk(PRINT_LEVEL_ERR"---> assertion: %s\r\n", __assertion);
+    printk(PRINT_LEVEL_ERR"---> file     : %s\r\n", __file);
+    printk(PRINT_LEVEL_ERR"---> line     : %d\r\n", __line);
+    printk(PRINT_LEVEL_ERR"---> function : %s\r\n", __function);
 
     if (mr_current)
     {
@@ -41,18 +44,18 @@ void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
         struct scheduler_context_regs *sptr_regs = thread_get_context(sptr_thread->sptr_attr);
 
         if (*sptr_thread->name)
-            kprintf(PRINT_LEVEL_ERR"current thread name: %s\r\n", sptr_thread->name);
-        kprintf(PRINT_LEVEL_ERR"current thread id: %d ==== < === > \r\n\t", sptr_thread->tid);
+            printk(PRINT_LEVEL_ERR"current thread name: %s\r\n", sptr_thread->name);
+        printk(PRINT_LEVEL_ERR"current thread id: %d ==== < === > \r\n\t", sptr_thread->tid);
 
         for (kint32_t idx = 0; idx < 9; idx++)
         {
             if (idx < 10)
-                kprintf(PRINT_LEVEL_ERR"r%d:    0x%x\r\n\t", idx, *((kuaddr_t *)(&sptr_regs->r0) + idx));
+                printk(PRINT_LEVEL_ERR"r%d:    0x%x\r\n\t", idx, *((kuaddr_t *)(&sptr_regs->r0) + idx));
             else
-                kprintf(PRINT_LEVEL_ERR"r%d:   0x%x\r\n\t",  idx, *((kuaddr_t *)(&sptr_regs->r0) + idx));
+                printk(PRINT_LEVEL_ERR"r%d:   0x%x\r\n\t",  idx, *((kuaddr_t *)(&sptr_regs->r0) + idx));
         }
 
-        kprintf(PRINT_LEVEL_ERR
+        printk(PRINT_LEVEL_ERR
                 	"lr:    0x%x\r\n\t"
                     "sp:    0x%x\r\n\t"
                     "pc:    0x%x\r\n\t"
@@ -61,8 +64,8 @@ void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
                     sptr_regs->lr, sptr_regs->sp, sptr_regs->pc, sptr_regs->psr, sptr_regs->flags);
     }
 
-    kprintf(PRINT_LEVEL_ERR"\r\n");
-    kprintf(PRINT_LEVEL_ERR"Please check for errors in time !\r\n");
+    printk(PRINT_LEVEL_ERR"\r\n");
+    printk(PRINT_LEVEL_ERR"Please check for errors in time !\r\n");
 
     /*!< quit program */
     while (true)

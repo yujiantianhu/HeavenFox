@@ -59,7 +59,7 @@ kuint32_t fwk_inet_addr(const kchar_t *addr)
             if (!len)
                 goto fail;
 
-            strncpy(temp, str, len);
+            kstrncpy(temp, str, len);
             str = p + 1;
             temp[len] = '\0';
 
@@ -459,7 +459,7 @@ static void *fwk_netif_rx_entry(void *args)
 {
     struct fwk_netif_tcb *sptr_tcb;
     struct fwk_sk_buff_head *sptr_head;
-    kuint32_t flags;
+    kutype_t flags;
 
     sptr_head = fwk_netif_rxq_get();
     sptr_tcb = (struct fwk_netif_tcb *)args;

@@ -72,9 +72,10 @@ extern kuint32_t g_sched_preempt_cnt;
 
 #define mr_preempt_cnt_dec()						COUNT_DEC(g_sched_preempt_cnt)
 #define mr_preempt_cnt_inc()						COUNT_INC(g_sched_preempt_cnt)
+#define mr_preempt_is_locked()						(!!g_sched_preempt_cnt)
 
 #ifdef CONFIG_PREEMPT_NESTING
-#define mr_preempt_enable()						mr_barrier()
+#define mr_preempt_enable()							mr_barrier()
 #define mr_preempt_disable()						mr_barrier()
 #define mr_preempt_is_locked()						(!!g_sched_preempt_cnt)
 
@@ -91,7 +92,6 @@ extern kuint32_t g_sched_preempt_cnt;
 		mr_barrier();	\
 	} while (0)
 
-#define mr_preempt_is_locked()						(!!g_sched_preempt_cnt)
 #endif
 
 #ifdef __cplusplus

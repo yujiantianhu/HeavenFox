@@ -18,11 +18,12 @@
 #endif
 
 /*!< The includes */
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <math.h>
-#include <malloc.h>
+// #include <stdio.h>
+// #include <string.h>
+// #include <stdarg.h>
+// #include <math.h>
+// #include <malloc.h>
+// #include <unistd.h>
 
 #include "basic_types.h"
 #include "error_types.h"
@@ -80,7 +81,7 @@
 #define mr_ret_max2(a, b)								mr_cmp_gt(a, b, a, b)
 #define mr_ret_min2(a, b)								mr_cmp_lt(a, b, a, b)
 
-#define mr_abs(a)										((typeof(a))(((a) < 0) ? -(a) : (a)))
+#define mr_abs(a)										(((a) < 0) ? -(a) : (a))
 #define mr_usub(a, b)	\
 ({	\
     const typeof(a) _a = (a);	\

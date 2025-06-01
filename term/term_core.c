@@ -39,7 +39,7 @@ struct term_cmd *term_cmd_find_by_name(kchar_t *name)
 
     foreach_list_next_entry(sptr_cmd, &sgtc_term_cmd_lists, sgtc_link)
     {
-        if (!strcmp(sptr_cmd->name, name))
+        if (!kstrcmp(sptr_cmd->name, name))
             return sptr_cmd;
     }
 
@@ -62,7 +62,7 @@ struct term_cmd *term_cmd_allocate(const kchar_t *name, nrt_gfp_t gfp_mask)
     if (!isValid(sptr_cmd))
         return sptr_cmd;
 
-    size = strlen(name);
+    size = kstrlen(name);
     memcpy(sptr_cmd->name, name, size);
     sptr_cmd->name[size] = '\0';
 
@@ -134,7 +134,7 @@ void term_cmdline_excute(kint32_t argc, kchar_t **argv)
 
     foreach_list_next_entry(sptr_cmd, &sgtc_term_cmd_lists, sgtc_link)
     {
-        if (!strcmp(sptr_cmd->name, argv[0]))
+        if (!kstrcmp(sptr_cmd->name, argv[0]))
             goto succ;
     }
 
@@ -159,7 +159,7 @@ void term_cmdline_distribute(const kchar_t *cmdline)
     kint32_t argc = 0;
     kchar_t *argv[32];
 
-    cmdlen = strlen(cmdline);
+    cmdlen = kstrlen(cmdline);
     if (!cmdlen)
         return;
 

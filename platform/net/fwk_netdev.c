@@ -82,7 +82,7 @@ static kint32_t fwk_net_validate_name(struct fwk_net_device *sptr_ndev)
     }
 
     sprintk(new_name, "%s%d", name, index);
-    strncpy(name, new_name, NET_IFNAME_SIZE);
+    kstrncpy(name, new_name, NET_IFNAME_SIZE);
 
 END:
     return ER_NORMAL;
@@ -106,7 +106,7 @@ static void fwk_net_invalidate_name(struct fwk_net_device *sptr_ndev)
         memset(old_name, 0, NET_IFNAME_SIZE);
         sprintk(old_name, "%d", index);
 
-        p = name + strlen(name) - strlen(old_name);
+        p = name + kstrlen(name) - kstrlen(old_name);
         *p = '%';
         *(p + 1) = '\0';
 
@@ -196,7 +196,7 @@ struct fwk_net_device *fwk_ifname_to_ndev(const kchar_t *name)
     mutex_lock(&sgtc_fwk_netdev_mutex);
     foreach_list_next_entry(sptr_ndev, &sgtc_fwk_net_device_list, sgtc_link)
     {
-        if (!strcmp(sptr_ndev->name, name))
+        if (!kstrcmp(sptr_ndev->name, name))
         {
             mutex_unlock(&sgtc_fwk_netdev_mutex);
             return sptr_ndev;

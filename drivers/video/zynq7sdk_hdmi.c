@@ -22,6 +22,7 @@
 #include <platform/gpio/fwk_gpiodesc.h>
 #include <platform/fwk_uaccess.h>
 #include <platform/video/fwk_fbmem.h>
+#include <platform/video/fwk_rgbmap.h>
 
 #include <zynq7/zynq7_periph.h>
 
@@ -385,11 +386,11 @@ static kint32_t xsdk_hdmi_driver_probe_timings(struct fwk_platdev *sptr_pdev)
         sptr_var->bits_per_pixel = 32;
     else
     {
-        if (!strcmp(format, "8"))
+        if (!kstrcmp(format, "8"))
             sptr_var->bits_per_pixel = 8;
-        else if (!strcmp(format, "16"))
+        else if (!kstrcmp(format, "16"))
             sptr_var->bits_per_pixel = 16;
-        else if (!strcmp(format, "24"))
+        else if (!kstrcmp(format, "24"))
             sptr_var->bits_per_pixel = 32;
         else
             sptr_var->bits_per_pixel = 32;

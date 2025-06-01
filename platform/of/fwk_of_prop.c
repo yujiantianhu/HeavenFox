@@ -29,7 +29,7 @@ struct fwk_of_property *fwk_of_find_property(struct fwk_device_node *sptr_node, 
 
 	foreach_list_odd_head(sptr_head, sptr_list)
 	{
-		if (!strcmp(ptr_name, sptr_list->name))
+		if (!kstrcmp(ptr_name, sptr_list->name))
 		{
 			iLenth = sptr_list->length;
 			break;
@@ -269,7 +269,7 @@ kint32_t fwk_of_property_read_string_index(struct fwk_device_node *sptr_node,
 
 	for (i = 0, iTotalLenth = 0; ((i <= index) && (iTotalLenth < sptr_prop->length)); i++)
 	{
-		iStrLenth = ptr_value ? (strlen(ptr_value) + 1) : 0;
+		iStrLenth = ptr_value ? (kstrlen(ptr_value) + 1) : 0;
 		ptr_value = ptr_value ? (ptr_value + iStrLenth) : (kchar_t *)sptr_prop->value;
 		iTotalLenth += iStrLenth;
 	}
@@ -343,7 +343,7 @@ kbool_t fwk_of_device_is_compatible(struct fwk_device_node *sptr_node, const kch
 	{
 		index++;
 
-		if (!strcmp(ptr_info, ptr_compat))
+		if (!kstrcmp(ptr_info, ptr_compat))
 			return true;
 	}
 
@@ -444,11 +444,11 @@ kint32_t fwk_of_property_match_string(struct fwk_device_node *sptr_node, const k
 
 	for (idx = 0; str < end; str += lenth)
 	{
-		lenth = strlen(str) + 1;
+		lenth = kstrlen(str) + 1;
 		if ((str + lenth) > end)
 			return -ER_MORE;
 
-		if (!strcmp(str, match_name))
+		if (!kstrcmp(str, match_name))
 			return idx;
 
 		idx++;

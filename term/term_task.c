@@ -591,9 +591,9 @@ kint32_t term_init(void)
 
         if (register_io_stream(sptr_stream))
             return -ER_ERROR;
-
-        g_io_stream_flags |= IO_STREAM_ASYNC;
     }
+
+    g_io_stream_flags |= IO_STREAM_ASYNC;
 
     sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
     sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;

@@ -96,40 +96,6 @@ void hw_disable_irq(kint32_t hwirq)
 }
 
 /*!
- * @brief   gic enbale irq
- * @param   none
- * @retval  none
- * @note    enable IRQ: group0
- */
-void local_irq_enable(kint32_t irq_number)
-{
-    kint32_t hwirq;
-
-    hwirq = fwk_gpc_to_gic_irq(irq_number);
-    if (hwirq < 0)
-        return;
-
-    hw_enable_irq(hwirq);
-}
-
-/*!
- * @brief   gic disable irq
- * @param   none
- * @retval  none
- * @note    disable IRQ: group0
- */
-void local_irq_disable(kint32_t irq_number)
-{
-    kint32_t hwirq;
-
-    hwirq = fwk_gpc_to_gic_irq(irq_number);
-    if (hwirq < 0)
-        return;
-
-    hw_disable_irq(hwirq);
-}
-
-/*!
  * @brief   gic acknowledge irq
  * @param   none
  * @retval  none

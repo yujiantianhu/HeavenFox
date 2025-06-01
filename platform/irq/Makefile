@@ -14,5 +14,6 @@ obj-y	+=	fwk_irq_domain.o
 obj-y	+=	fwk_irq_desc.o
 obj-y	+=	fwk_irq_chip.o
 obj-y	+=	fwk_irq_types.o
+obj-y	+=	fwk_softirq.o
 
 # end of file

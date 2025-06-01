@@ -47,7 +47,7 @@ struct fwk_network_if *network_find_node(const kchar_t *name, struct fwk_sockadd
     rd_lock(&sgtc_network_mutex);
     foreach_list_next_entry(sptr_if, &sgtc_fwk_network_nodes, sgtc_link)
     {
-        if (name && (!strcmp(sptr_if->ifname, name)))
+        if (name && (!kstrcmp(sptr_if->ifname, name)))
         {
             rd_unlock(&sgtc_network_mutex);
             return sptr_if;
@@ -117,7 +117,7 @@ kint32_t net_link_up(const kchar_t *name, struct fwk_sockaddr_in *sptr_ip,
     if (sptr_mask)
         memcpy(&sptr_if->sgtc_netmask, sptr_mask, sizeof(*sptr_mask));
 
-    strcpy(sptr_if->ifname, name);
+    kstrcpy(sptr_if->ifname, name);
     sptr_if->sptr_oprts = sptr_ops;
 
     if (sptr_if->sptr_oprts->link_up(sptr_if))
