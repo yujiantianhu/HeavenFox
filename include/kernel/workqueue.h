@@ -90,7 +90,7 @@ static inline void queue_work(struct workqueue_head *sptr_wqh, struct workqueue 
 //  if (!list_head_for_each(&sptr_wqh->sgtc_work, &sptr_wq->sgtc_link))
 //      return;
 
-    if (!mr_list_head_empty(&sptr_wq->sgtc_link))
+    if (!mr_list_empty(&sptr_wq->sgtc_link))
         return;
 
     spin_lock_irqsave(&sptr_wqh->sgtc_lock);
@@ -154,7 +154,7 @@ static inline void work_splice_and_init(struct workqueue_head *sptr_src, struct 
  */
 static inline kbool_t is_workqueue_empty(struct workqueue_head *sptr_wqh)
 {
-    return mr_list_head_empty(&sptr_wqh->sgtc_work);
+    return mr_list_empty(&sptr_wqh->sgtc_work);
 }
 
 #ifdef __cplusplus

@@ -42,7 +42,7 @@ void init_waitqueue_head(struct wait_queue_head *sptr_wqh)
  */
 void add_wait_queue(struct wait_queue_head *sptr_wqh, struct wait_queue *sptr_wq)
 {
-    if (!mr_list_head_empty(&sptr_wq->sgtc_link))
+    if (!mr_list_empty(&sptr_wq->sgtc_link))
         return;
 
     spin_lock_irqsave(&sptr_wqh->sgtc_lock);
@@ -87,7 +87,7 @@ void wake_up_common(struct wait_queue_head *sptr_wqh, kuint32_t state)
 {
     struct wait_queue *sptr_wq, *sptr_temp;
 
-    if (mr_list_head_empty(&sptr_wqh->sgtc_task))
+    if (mr_list_empty(&sptr_wqh->sgtc_task))
         return;
 
     spin_lock_irqsave(&sptr_wqh->sgtc_lock);

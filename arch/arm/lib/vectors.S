@@ -159,6 +159,7 @@ _irq_handler:
 
     srsdb sp!, #ARCH_SVC_MODE                       @ save lr_irq and spsr to sp_svc
     cps #ARCH_SVC_MODE
+    cpsid i
     
     b __schedule_before                             @ jump to "context.S"
 

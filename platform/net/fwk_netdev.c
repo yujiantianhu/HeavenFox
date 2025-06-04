@@ -221,7 +221,7 @@ kint32_t fwk_register_netdevice(struct fwk_net_device *sptr_ndev)
     if (!sptr_ndev)
         return -ER_NODEV;
 
-    if (!mr_list_head_empty(&sptr_ndev->sgtc_link))
+    if (!mr_list_empty(&sptr_ndev->sgtc_link))
         return -ER_CHECKERR;
 
     fwk_net_validate_name(sptr_ndev);
@@ -272,7 +272,7 @@ kint32_t fwk_unregister_netdevice(struct fwk_net_device *sptr_ndev)
     if (!sptr_ndev)
         return -ER_NODEV;
 
-    if (mr_list_head_empty(&sptr_ndev->sgtc_link))
+    if (mr_list_empty(&sptr_ndev->sgtc_link))
         return -ER_CHECKERR;
 
     if (!fwk_ifname_to_ndev(sptr_ndev->name))

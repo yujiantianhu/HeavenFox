@@ -269,7 +269,7 @@ void mod_timer(struct timer_list *sptr_timer, kutime_t expires)
 #if 0
     if (!find_timer(sptr_timer)) {
 #else
-    if (mr_list_head_empty(&sptr_timer->sgtc_link)) {
+    if (mr_list_empty(&sptr_timer->sgtc_link)) {
 #endif
         add_timer(sptr_timer);
     }

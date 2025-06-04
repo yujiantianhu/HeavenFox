@@ -81,7 +81,7 @@ struct term_cmd *term_cmd_allocate(const kchar_t *name, nrt_gfp_t gfp_mask)
  */
 void term_cmd_free(struct term_cmd *sptr_cmd)
 {
-    if (!mr_list_head_empty(&sptr_cmd->sgtc_link))
+    if (!mr_list_empty(&sptr_cmd->sgtc_link))
         term_cmd_del(sptr_cmd);
 
     kfree(sptr_cmd);

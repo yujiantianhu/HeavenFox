@@ -38,7 +38,7 @@ static kint32_t term_cmd_ttc_mail(struct term_cmd *sptr_cmd, kint32_t argc, kcha
     struct thread *sptr_thread;
     struct mailbox *sptr_tar;
     struct mail sgtc_mail;
-    struct mail_msg sgtc_msg[1] = {};
+    struct mail_msg sgtc_msg[2] = {};
     tid_t tid;
 
     switch (argc)
@@ -52,6 +52,7 @@ static kint32_t term_cmd_ttc_mail(struct term_cmd *sptr_cmd, kint32_t argc, kcha
             break;
 
         case 3:
+        case 4:
             tid = ascii_to_dec(argv[1]);
             if (tid < 0)
             {
@@ -76,8 +77,15 @@ static kint32_t term_cmd_ttc_mail(struct term_cmd *sptr_cmd, kint32_t argc, kcha
             sgtc_msg[0].size = kstrlen(argv[2]) + 1;
             sgtc_msg[0].type = NR_MAIL_TYPE_SERIAL;
 
+            if (argc == 4)
+            {
+                sgtc_msg[1].buffer = (kuint8_t *)argv[3];
+                sgtc_msg[1].size = kstrlen(argv[3]) + 1;
+                sgtc_msg[1].type = NR_MAIL_TYPE_SERIAL;
+            }
+
             sgtc_mail.sptr_msg = &sgtc_msg[0];
-            sgtc_mail.num_msgs = 1;
+            sgtc_mail.num_msgs = (argc == 3) ? 1 : 2;
 
             sptr_tar = sptr_thread->sptr_mb;
             mail_send(sptr_tar->name, &sgtc_mail);
@@ -103,7 +111,7 @@ fail:
  */
 static void term_cmd_ttc_help(void)
 {
-    printk("usage: ttc [tid] [op]\r\n");
+    printk("usage: ttc [tid] [op1] [op2]\r\n");
 }
 
 /*!

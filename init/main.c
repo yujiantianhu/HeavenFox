@@ -135,6 +135,8 @@ void start_kernel(void)
     local_irq_enable();
 
 #if CONFIG_SCHDULE
+    scheduler_init();
+
     /*!< create thread */
     if (kthread_init())
         goto fail;
@@ -143,7 +145,6 @@ void start_kernel(void)
     print_info("initial system finished, start scheduler now\r\n");
 
     /*!< start */
-    
     schedule_thread();
 
 #endif

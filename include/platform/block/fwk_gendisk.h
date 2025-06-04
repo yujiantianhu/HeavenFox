@@ -23,6 +23,7 @@
 #include <platform/block/fwk_blkdev.h>
 
 struct fs_stream;
+struct fs_list;
 
 /*!< The defines */
 typedef struct fwk_gendisk
@@ -37,6 +38,8 @@ typedef struct fwk_gendisk
     kint32_t (*mkfs)(struct fwk_gendisk *sptr_disk);
     kint32_t (*mkdir)(struct fwk_gendisk *sptr_disk, const kchar_t *dir_name);
     kint32_t (*rmdir)(struct fwk_gendisk *sptr_disk, const kchar_t *dir_name);
+    kint32_t (*opendir)(struct fwk_gendisk *sptr_gdisk, struct fs_list *sptr_list);
+    kint32_t (*closedir)(struct fwk_gendisk *sptr_gdisk, struct fs_list *sptr_list);
 
     struct fwk_device *sptr_devfs;
     struct fwk_block_device_oprts *sptr_bops;

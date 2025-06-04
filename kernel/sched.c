@@ -41,44 +41,50 @@ static struct scheduler_context sgtc_context;
 static kuint32_t thread_schedule_ref = 0;
 
 /*!< The defines */
+#define SCHED_MANAGER()                         (&sgtc_scheduler_table)
+
 #define SCHED_THREAD_HANDLER(tid)               __THREAD_HANDLER(&sgtc_scheduler_table, tid)
-#define SCHED_RUNNING_THREAD                    __THREAD_RUNNING_LIST(&sgtc_scheduler_table)
-#define SCHED_READY_LIST                        __THREAD_READY_LIST(&sgtc_scheduler_table)
-#define SCHED_SUSPEND_LIST                      __THREAD_SUSPEND_LIST(&sgtc_scheduler_table)
-#define SCHED_SLEEP_LIST                        __THREAD_SLEEP_LIST(&sgtc_scheduler_table)
-#define __SCHED_LOCK                            sgtc_scheduler_table.sgtc_lock
+#define SCHED_RUNNING_THREAD                    (sgtc_scheduler_table.sptr_work)
+#define SCHED_READY_LIST                        (&sgtc_scheduler_table.sgtc_ready)
+#define SCHED_SUSPEND_LIST                      (&sgtc_scheduler_table.sgtc_suspend)
+#define SCHED_SLEEP_LIST                        (&sgtc_scheduler_table.sgtc_sleep)
+#define __SCHED_LOCK                            (sgtc_scheduler_table.sgtc_lock)
+
+#define SCHED_READY_HASH                        __THREAD_READY_HASH(&sgtc_scheduler_table)
+#define SCHED_SUSPEND_HASH                      __THREAD_SUSPEND_HASH(&sgtc_scheduler_table)
+#define SCHED_SLEEP_HASH                        __THREAD_SLEEP_HASH(&sgtc_scheduler_table)
 
 /*!< set thread status */
-#define __SET_THREAD_STATUS(tid, value)	\
+#define __SET_THREAD_STATUS(sptr_th, value)	\
     do {	\
-        if ((value) < NR_THREAD_STATUS_MAX)	\
-            SCHED_THREAD_HANDLER(tid)->to_status = (value);	\
+        sptr_th->to_status = (value);	\
     } while (0)
 
-#define __SYNC_THREAD_STATUS(tid, value)	\
+#define __SYNC_THREAD_STATUS(sptr_th, value)	\
     do {	\
-        if ((value) < NR_THREAD_STATUS_MAX)	\
-        {	\
-            SCHED_THREAD_HANDLER(tid)->status = (value);	\
-            SCHED_THREAD_HANDLER(tid)->to_status = NR_THREAD_NONE;    \
-        }	\
+        sptr_th->status = (value);	\
+        sptr_th->to_status = NR_THREAD_NONE;    \
     } while (0)
 
 /*!< get thread status */
-#define __GET_THREAD_STATUS(tid)	            (SCHED_THREAD_HANDLER(tid)->status)
+#define __GET_THREAD_STATUS(sptr_th)	        (sptr_th->status)
 
 /*!< The functions */
 static kint32_t __find_thread_from_scheduler(tid_t tid, struct list_head *sptr_head);
-static kint32_t __schedule_add_status_list(struct thread *sptr_thread, struct list_head *sptr_head);
-static void __schedule_del_status_list(struct thread *sptr_thread, struct list_head *sptr_head);
-static kint32_t schedule_despoil_work_role(tid_t tid);
-static kint32_t schedule_reinstall_work_role(tid_t tid);
-static kint32_t schedule_add_ready_list(tid_t tid);
-static kint32_t schedule_detach_ready_list(tid_t tid);
-static kint32_t schedule_add_suspend_list(tid_t tid);
-static kint32_t schedule_detach_suspend_list(tid_t tid);
-static kint32_t schedule_add_sleep_list(tid_t tid);
-static kint32_t schedule_detach_sleep_list(tid_t tid);
+
+static kint32_t __schedule_add_status_list(struct thread *sptr_thread, 
+                                struct list_head *sptr_head, struct thread_list *sptr_hash);
+static void __schedule_del_status_list(struct thread *sptr_thread, 
+                                struct list_head *sptr_head, struct thread_list *sptr_hash);
+
+static kint32_t schedule_despoil_work_role(struct thread *sptr_thread);
+static kint32_t schedule_reinstall_work_role(void);
+static kint32_t schedule_add_ready_list(struct thread *sptr_thread);
+static kint32_t schedule_detach_ready_list(struct thread *sptr_thread);
+static kint32_t schedule_add_suspend_list(struct thread *sptr_thread);
+static kint32_t schedule_detach_suspend_list(struct thread *sptr_thread);
+static kint32_t schedule_add_sleep_list(struct thread *sptr_thread);
+static kint32_t schedule_detach_sleep_list(struct thread *sptr_thread);
 
 /* -------------------------------------------------------------------------- */
 /*!< API functions */
@@ -164,7 +170,7 @@ void thread_set_self_name(const kchar_t *name)
  */
 void thread_set_state(struct thread *sptr_thread, kuint32_t state)
 {
-    __SET_THREAD_STATUS(sptr_thread->tid, state);
+    __SET_THREAD_STATUS(sptr_thread, state);
 }
 
 /*!
@@ -212,7 +218,7 @@ tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count)
  */
 static void scheduler_record(void)
 {
-    struct scheduler_table *sptr_tab = &sgtc_scheduler_table;
+    struct scheduler_table *sptr_tab = SCHED_MANAGER();
 
     if ((sptr_tab->sgtc_cnt.sched_cnt++) >= __THREAD_MAX_STATS)
     {
@@ -229,10 +235,8 @@ static void scheduler_record(void)
  */
 kuint64_t scheduler_stats_get(void)
 {
-    struct scheduler_table *sptr_tab = &sgtc_scheduler_table;
+    struct scheduler_table *sptr_tab = SCHED_MANAGER();
     kuint64_t sum;
-
-    sptr_tab = &sgtc_scheduler_table;
 
     spin_lock_irqsave(&__SCHED_LOCK);
     sum = (__THREAD_MAX_STATS * sptr_tab->sgtc_cnt.cnt_out + sptr_tab->sgtc_cnt.sched_cnt);
@@ -249,8 +253,11 @@ kuint64_t scheduler_stats_get(void)
  */
 void schedule_self_suspend(void)
 {
+    struct thread *sptr_cur;
+
     spin_lock_irqsave(&__SCHED_LOCK);
-    __SET_THREAD_STATUS(SCHED_RUNNING_THREAD->tid, NR_THREAD_SUSPEND);
+    sptr_cur = SCHED_RUNNING_THREAD;
+    __SET_THREAD_STATUS(sptr_cur, NR_THREAD_SUSPEND);
     spin_unlock_irqrestore(&__SCHED_LOCK);
 
     schedule_thread();
@@ -264,8 +271,11 @@ void schedule_self_suspend(void)
  */
 void schedule_self_sleep(void)
 {
+    struct thread *sptr_cur;
+
     spin_lock_irqsave(&__SCHED_LOCK);
-    __SET_THREAD_STATUS(SCHED_RUNNING_THREAD->tid, NR_THREAD_SLEEP);
+    sptr_cur = SCHED_RUNNING_THREAD;
+    __SET_THREAD_STATUS(sptr_cur, NR_THREAD_SLEEP);
     spin_unlock_irqrestore(&__SCHED_LOCK);
 
     schedule_thread();
@@ -279,16 +289,20 @@ void schedule_self_sleep(void)
  */
 kint32_t schedule_thread_suspend(tid_t tid)
 {
+    struct thread *sptr_thread;
     kint32_t retval;
 
-    if (tid == SCHED_RUNNING_THREAD->tid)
+    spin_lock_irqsave(&__SCHED_LOCK);
+    if (mr_unlikely(tid == SCHED_RUNNING_THREAD->tid))
     {
+        spin_unlock_irqrestore(&__SCHED_LOCK);
         schedule_self_suspend();
+
         return ER_NORMAL;
     }
 
-    spin_lock_irqsave(&__SCHED_LOCK);
-    __SET_THREAD_STATUS(tid, NR_THREAD_SUSPEND);
+    sptr_thread = SCHED_THREAD_HANDLER(tid);
+    __SET_THREAD_STATUS(sptr_thread, NR_THREAD_SUSPEND);
 
     retval = schedule_thread_switch(tid);
     spin_unlock_irqrestore(&__SCHED_LOCK);
@@ -304,16 +318,20 @@ kint32_t schedule_thread_suspend(tid_t tid)
  */
 kint32_t schedule_thread_sleep(tid_t tid)
 {
+    struct thread *sptr_thread;
     kint32_t retval;
 
-    if (tid == SCHED_RUNNING_THREAD->tid)
+    spin_lock_irqsave(&__SCHED_LOCK);
+    if (mr_unlikely(tid == SCHED_RUNNING_THREAD->tid))
     {
+        spin_unlock_irqrestore(&__SCHED_LOCK);
         schedule_self_sleep();
+
         return ER_NORMAL;
     }
-
-    spin_lock_irqsave(&__SCHED_LOCK);
-    __SET_THREAD_STATUS(tid, NR_THREAD_SLEEP);
+    
+    sptr_thread = SCHED_THREAD_HANDLER(tid);
+    __SET_THREAD_STATUS(sptr_thread, NR_THREAD_SLEEP);
 
     retval = schedule_thread_switch(tid);
     spin_unlock_irqrestore(&__SCHED_LOCK);
@@ -329,12 +347,14 @@ kint32_t schedule_thread_sleep(tid_t tid)
  */
 kint32_t schedule_thread_wakeup(tid_t tid)
 {
+    struct thread *sptr_thread;
     kuint32_t status;
     kint32_t retval;
 
 	spin_lock_irqsave(&__SCHED_LOCK);
+    sptr_thread = SCHED_THREAD_HANDLER(tid);
 
-    status = __GET_THREAD_STATUS(tid);
+    status = __GET_THREAD_STATUS(sptr_thread);
     if ((status != NR_THREAD_SUSPEND) &&
         (status != NR_THREAD_SLEEP))
     {
@@ -342,7 +362,7 @@ kint32_t schedule_thread_wakeup(tid_t tid)
         goto END;
     }
 
-    __SET_THREAD_STATUS(tid, NR_THREAD_READY);
+    __SET_THREAD_STATUS(sptr_thread, NR_THREAD_READY);
     retval = schedule_thread_switch(tid);
 
 END:
@@ -358,7 +378,7 @@ END:
  */
 kbool_t is_ready_thread_empty(void)
 {
-    return !!mr_list_head_empty(SCHED_READY_LIST);
+    return !!mr_list_empty(SCHED_READY_LIST);
 }
 
 /*!
@@ -369,7 +389,7 @@ kbool_t is_ready_thread_empty(void)
  */
 kbool_t is_suspend_thread_empty(void)
 {
-    return !!mr_list_head_empty(SCHED_SUSPEND_LIST);
+    return !!mr_list_empty(SCHED_SUSPEND_LIST);
 }
 
 /*!
@@ -380,7 +400,7 @@ kbool_t is_suspend_thread_empty(void)
  */
 kbool_t is_sleep_thread_empty(void)
 {
-    return !!mr_list_head_empty(SCHED_SLEEP_LIST);
+    return !!mr_list_empty(SCHED_SLEEP_LIST);
 }
 
 /*!
@@ -391,7 +411,7 @@ kbool_t is_sleep_thread_empty(void)
  */
 struct thread *get_first_ready_thread(void)
 {
-    kbool_t existed = mr_list_head_empty(SCHED_READY_LIST);
+    kbool_t existed = mr_list_empty(SCHED_READY_LIST);
     return existed ? mr_nullptr : mr_list_first_entry(SCHED_READY_LIST, struct thread, sgtc_link);
 }
 
@@ -403,7 +423,7 @@ struct thread *get_first_ready_thread(void)
  */
 struct thread *get_first_suspend_thread(void)
 {
-    kbool_t existed = mr_list_head_empty(SCHED_SUSPEND_LIST);
+    kbool_t existed = mr_list_empty(SCHED_SUSPEND_LIST);
     return existed ? mr_nullptr : mr_list_first_entry(SCHED_SUSPEND_LIST, struct thread, sgtc_link);
 }
 
@@ -415,7 +435,7 @@ struct thread *get_first_suspend_thread(void)
  */
 struct thread *get_first_sleep_thread(void)
 {
-    kbool_t existed = mr_list_head_empty(SCHED_SLEEP_LIST);
+    kbool_t existed = mr_list_empty(SCHED_SLEEP_LIST);
     return existed ? mr_nullptr : mr_list_first_entry(SCHED_SLEEP_LIST, struct thread, sgtc_link);
 }
 
@@ -442,8 +462,8 @@ struct thread *next_ready_thread(struct thread *sptr_prev)
     if (!sptr_prev)
         return get_first_ready_thread();
 
-    if (mr_list_head_empty(SCHED_READY_LIST) ||
-        mr_list_head_empty(&sptr_prev->sgtc_link) ||
+    if (mr_list_empty(SCHED_READY_LIST) ||
+        mr_list_empty(&sptr_prev->sgtc_link) ||
         mr_list_head_until(sptr_prev, SCHED_READY_LIST, sgtc_link))
         return mr_nullptr;
 
@@ -461,8 +481,8 @@ struct thread *next_suspend_thread(struct thread *sptr_prev)
     if (!sptr_prev)
         return get_first_suspend_thread();
 
-    if (mr_list_head_empty(SCHED_SUSPEND_LIST) ||
-        mr_list_head_empty(&sptr_prev->sgtc_link) ||
+    if (mr_list_empty(SCHED_SUSPEND_LIST) ||
+        mr_list_empty(&sptr_prev->sgtc_link) ||
         mr_list_head_until(sptr_prev, SCHED_SUSPEND_LIST, sgtc_link))
         return mr_nullptr;
 
@@ -480,12 +500,115 @@ struct thread *next_sleep_thread(struct thread *sptr_prev)
     if (!sptr_prev)
         return get_first_sleep_thread();
 
-    if (mr_list_head_empty(SCHED_SLEEP_LIST) ||
-        mr_list_head_empty(&sptr_prev->sgtc_link) ||
+    if (mr_list_empty(SCHED_SLEEP_LIST) ||
+        mr_list_empty(&sptr_prev->sgtc_link) ||
         mr_list_head_until(sptr_prev, SCHED_SLEEP_LIST, sgtc_link))
         return mr_nullptr;
 
     return mr_list_next_entry(sptr_prev, sgtc_link);
+}
+
+/*!
+ * @brief	add new thread to hash
+ * @param  	sptr_list: current hash
+ * @param   sptr_thread: current thread
+ * @retval 	prev thread (sptr_thread will be add to it's next)
+ * @note   	none
+ */
+static struct list_head *__thread_hash_add(struct thread_list *sptr_list, struct thread *sptr_thread)
+{
+    kint32_t prio = thread_get_priority(sptr_thread->sptr_attr);
+    struct thread_hash *sptr_hash = sptr_list->sgtc_hash + prio;
+    struct thread *sptr_tail = sptr_hash->sptr_tail;
+    struct list_head *sptr_prev = mr_nullptr;
+
+    /*!< Here are other threads with the same priority; add to the tail of them, and update sptr_tail = new-thread */
+    if (sptr_tail)
+    {
+        list_head_add_head(&sptr_tail->sgtc_hash, &sptr_thread->sgtc_hash);
+
+        sptr_prev = &sptr_tail->sgtc_link;
+        sptr_hash->sptr_tail = sptr_thread;
+    }
+    else
+    {
+        kint32_t prev_prio = THREAD_PROTY_NUM;
+        
+        /*!< No thread exists in the hash */
+        list_head_add_head(&sptr_hash->sgtc_list, &sptr_thread->sgtc_hash);
+        sptr_hash->sptr_tail = sptr_thread;
+
+        if (prio < 64)
+        {
+            kuint64_t ffs_l = sptr_list->ffs_l;
+            kuint64_t bit_nr = (1ULL << prio);
+            kuint64_t mask = (bit_nr - 1) & ffs_l;
+
+            sptr_list->ffs_l |= bit_nr;
+
+            /*!< The higher priority thread exists, get the offset in ffs_l */
+            if (mask)
+                prev_prio = mr_flsll(mask) - 1;
+        }
+        else
+        {
+            kuint64_t ffs_h = sptr_list->ffs_h;
+            kuint64_t ffs_l = sptr_list->ffs_l;
+            kuint64_t bit_nr = (1ULL << (prio - 64U));
+            kuint64_t mask = (bit_nr - 1) & ffs_h;
+
+            sptr_list->ffs_h |= bit_nr;
+
+            /*!< The higher priority thread exists, get the offset in ffs_h */
+            if (mask)
+                prev_prio = 64U + mr_flsll(mask) - 1;
+            else if (ffs_l)
+                prev_prio = mr_flsll(ffs_l) - 1;
+        }
+
+        if (prev_prio < THREAD_PROTY_NUM)
+        {
+            struct thread_hash *sptr_prevhash = sptr_list->sgtc_hash + prev_prio;
+            sptr_prev = &sptr_prevhash->sptr_tail->sgtc_link;
+        }
+    }
+
+    return sptr_prev;
+}
+
+/*!
+ * @brief	del thread from hash
+ * @param  	sptr_list: current hash
+ * @param   sptr_thread: current thread
+ * @retval 	none
+ * @note   	none
+ */
+static void __thread_hash_remove(struct thread_list *sptr_list, struct thread *sptr_thread)
+{
+    kint32_t prio = thread_get_priority(sptr_thread->sptr_attr);
+    struct thread_hash *sptr_hash = sptr_list->sgtc_hash + prio;
+    struct thread *sptr_tail = sptr_hash->sptr_tail;
+
+    /*!< Remove the tail */
+    if (sptr_tail == sptr_thread)
+    {
+        if (mr_list_reach_head(&sptr_hash->sgtc_list, &sptr_thread->sgtc_hash))
+        {
+            /*!< It's the last thread */
+            sptr_hash->sptr_tail = mr_nullptr;
+
+            if (prio < 64)
+                sptr_list->ffs_l &= ~(1ULL << prio);
+            else
+                sptr_list->ffs_h &= ~(1ULL << (prio - 64));
+        }
+        else
+        {
+            sptr_hash->sptr_tail = mr_list_prev_entry(sptr_thread, sgtc_hash);
+        }
+    }
+
+    list_head_del(&sptr_thread->sgtc_hash);
 }
 
 /*!
@@ -498,14 +621,16 @@ struct thread *next_sleep_thread(struct thread *sptr_prev)
  */ 
 kint32_t schedule_thread_switch(tid_t tid)
 {
+    struct thread *sptr_thread;
     kuint32_t src, dst;
     kint32_t retval;
     
     /*!< Protected by caller, do not disable again */
 //  mr_preempt_disable();
 
-    src = SCHED_THREAD_HANDLER(tid)->status;
-    dst = SCHED_THREAD_HANDLER(tid)->to_status;
+    sptr_thread = SCHED_THREAD_HANDLER(tid);
+    src = sptr_thread->status;
+    dst = sptr_thread->to_status;
 
     /*!<
      * thread switch:
@@ -517,32 +642,35 @@ kint32_t schedule_thread_switch(tid_t tid)
      *
      * (only running and ready status can be switched to any status)
      */
-    if ((src == dst) || (dst >= NR_THREAD_STATUS_MAX))
+    if (mr_unlikely(src == dst) || 
+        mr_unlikely(dst >= NR_THREAD_STATUS_MAX))
         goto fail;
 
     /*!< for idle thread, only ready and running status can be chosen */
-    if ((tid == THREAD_TID_IDLE) && ((dst != NR_THREAD_RUNNING) && (dst != NR_THREAD_READY)))
+    if ((tid == THREAD_TID_IDLE) && 
+        mr_unlikely((dst != NR_THREAD_RUNNING) && (dst != NR_THREAD_READY)))
         goto fail;
 
     /*!< detached from current list */
     switch (src)
     {
         case NR_THREAD_RUNNING:
-            if (schedule_reinstall_work_role(tid))
+            retval = schedule_reinstall_work_role();
+            if (mr_unlikely(retval))
                 goto fail;
             
             break;
 
         case NR_THREAD_READY:
-            schedule_detach_ready_list(tid);
+            schedule_detach_ready_list(sptr_thread);
             break;
 
         case NR_THREAD_SUSPEND:
-            schedule_detach_suspend_list(tid);
+            schedule_detach_suspend_list(sptr_thread);
             break;
 
         case NR_THREAD_SLEEP:
-            schedule_detach_sleep_list(tid);
+            schedule_detach_sleep_list(sptr_thread);
             break;
 
         default:
@@ -555,19 +683,19 @@ kint32_t schedule_thread_switch(tid_t tid)
     switch (dst)
     {
         case NR_THREAD_RUNNING:
-            retval = schedule_despoil_work_role(tid);
+            retval = schedule_despoil_work_role(sptr_thread);
             break;
 
         case NR_THREAD_READY:
-            retval = schedule_add_ready_list(tid);
+            retval = schedule_add_ready_list(sptr_thread);
             break;
 
         case NR_THREAD_SUSPEND:
-            retval = schedule_add_suspend_list(tid);
+            retval = schedule_add_suspend_list(sptr_thread);
             break;
 
         case NR_THREAD_SLEEP:
-            retval = schedule_add_sleep_list(tid);
+            retval = schedule_add_sleep_list(sptr_thread);
             break;
 
         default:
@@ -575,26 +703,27 @@ kint32_t schedule_thread_switch(tid_t tid)
             break;
     }
 
-    if (retval < 0)
+    if (mr_unlikely(retval < 0))
     {
         print_warn("switch thread failed ! current and target status is : %d, %d\r\n", src, dst);
         goto fail;
     }
 
-    if (!SCHED_RUNNING_THREAD)
+    if (mr_unlikely(!SCHED_RUNNING_THREAD))
     {
         print_err("no thread is running !!! dangerous action !!!\r\n");
         goto fail;
     }
 
     /*!< update thread status */
-    __SYNC_THREAD_STATUS(tid, dst);
+    __SYNC_THREAD_STATUS(sptr_thread, dst);
+
 //  mr_preempt_enable();
 
     return ER_NORMAL;
     
 fail:
-    __SYNC_THREAD_STATUS(tid, src);
+    __SYNC_THREAD_STATUS(sptr_thread, src);
 //  mr_preempt_enable();
 
     return -ER_INVALID;
@@ -606,32 +735,28 @@ fail:
  * @retval 	err code
  * @note   	only ready status can be switched to running!!!
  */
-static kint32_t schedule_despoil_work_role(tid_t tid)
+static kint32_t schedule_despoil_work_role(struct thread *sptr_thread)
 {
-    struct thread *sptr_thread;
     struct thread *sptr_running;
     kint32_t retval;
 
-    sptr_thread = SCHED_THREAD_HANDLER(tid);
-
-    if (!sptr_thread)
+    if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
     /*!< only ready status can be switched to running */
-    if (NR_THREAD_READY != sptr_thread->status)
+    if (mr_unlikely(NR_THREAD_READY != sptr_thread->status))
         return -ER_INVALID;
 
     /*!< get current */
     sptr_running = SCHED_RUNNING_THREAD;
-
-    if (sptr_running)
+    if (mr_likely(sptr_running))
     {
         /*!< current thread add to ready list */
-        retval = schedule_add_ready_list(sptr_running->tid);
-        if (retval < 0)
+        retval = schedule_add_ready_list(sptr_running);
+        if (mr_unlikely(retval < 0))
             return retval;
 
-        __SYNC_THREAD_STATUS(sptr_running->tid, NR_THREAD_READY);
+        __SYNC_THREAD_STATUS(sptr_thread, NR_THREAD_READY);
     }
 
     /*!< update current */
@@ -646,31 +771,31 @@ static kint32_t schedule_despoil_work_role(tid_t tid)
  * @retval 	err code
  * @note   	running ---> xxx
  */
-static kint32_t schedule_reinstall_work_role(tid_t tid)
+static kint32_t schedule_reinstall_work_role(void)
 {
-    struct thread *sptr_thread;
-
-    if (mr_unlikely(tid != SCHED_RUNNING_THREAD->tid))
-        return -ER_INVALID;
+    struct thread *sptr_new;
+    struct list_head *sptr_ready = SCHED_READY_LIST;
 
     /*!< no thread ready; current should be set to idle thread */
-//  if (mr_list_head_empty(SCHED_READY_LIST))
+//  if (mr_list_empty(sptr_ready))
 //      return -ER_FAULT;
 
     /*!< get the first ready thread */
-    sptr_thread = mr_list_first_valid_entry(SCHED_READY_LIST, struct thread, sgtc_link);
-    if (mr_likely(sptr_thread))
+    sptr_new = mr_list_first_valid_entry(sptr_ready, struct thread, sgtc_link);
+    if (mr_likely(sptr_new))
     {
         /*!< detached from ready list */
-        schedule_detach_ready_list(sptr_thread->tid);
+        schedule_detach_ready_list(sptr_new);
 
         /*!< ready thread ---> running */
-        SCHED_RUNNING_THREAD = sptr_thread;
+        SCHED_RUNNING_THREAD = sptr_new;
         mr_barrier();
-        __SYNC_THREAD_STATUS(sptr_thread->tid, NR_THREAD_RUNNING);
+        __SYNC_THREAD_STATUS(sptr_new, NR_THREAD_RUNNING);
+
+        return ER_NORMAL;
     }
 
-    return sptr_thread ? ER_NORMAL : (-ER_FAILD);
+    return -ER_FAILD;
 }
 
 /*!
@@ -679,12 +804,8 @@ static kint32_t schedule_reinstall_work_role(tid_t tid)
  * @retval 	err code
  * @note   	add to ready list
  */
-static kint32_t schedule_add_ready_list(tid_t tid)
+static kint32_t schedule_add_ready_list(struct thread *sptr_thread)
 {
-    struct thread *sptr_thread;
-
-    sptr_thread = SCHED_THREAD_HANDLER(tid);
-
     if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
@@ -692,7 +813,7 @@ static kint32_t schedule_add_ready_list(tid_t tid)
     if (mr_unlikely(NR_THREAD_READY == sptr_thread->status))
         return -ER_INVALID;
 
-    return __schedule_add_status_list(sptr_thread, SCHED_READY_LIST);
+    return __schedule_add_status_list(sptr_thread, SCHED_READY_LIST, SCHED_READY_HASH);
 }
 
 /*!
@@ -703,12 +824,8 @@ static kint32_t schedule_add_ready_list(tid_t tid)
  * 			(after detaching from the ready list, the thread will appear in a free state, 
  * 			so this function prohibits external calls to prevent the thread from leaving management and causing memory leakage)
  */
-static kint32_t schedule_detach_ready_list(tid_t tid)
+static kint32_t schedule_detach_ready_list(struct thread *sptr_thread)
 {
-    struct thread *sptr_thread;
-
-    sptr_thread = SCHED_THREAD_HANDLER(tid);
-
     if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
@@ -717,7 +834,7 @@ static kint32_t schedule_detach_ready_list(tid_t tid)
         return -ER_INVALID;
 
     /*!< delete it */
-    __schedule_del_status_list(sptr_thread, SCHED_READY_LIST);
+    __schedule_del_status_list(sptr_thread, SCHED_READY_LIST, SCHED_READY_HASH);
 
     return ER_NORMAL;
 }
@@ -728,20 +845,16 @@ static kint32_t schedule_detach_ready_list(tid_t tid)
  * @retval 	err code
  * @note   	add to suspend list
  */
-static kint32_t schedule_add_suspend_list(tid_t tid)
+static kint32_t schedule_add_suspend_list(struct thread *sptr_thread)
 {
-    struct thread *sptr_thread;
-
-    sptr_thread = SCHED_THREAD_HANDLER(tid);
-
-    if (!sptr_thread)
+    if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
     /*!< avoid duplicate additions */
-    if (NR_THREAD_SUSPEND == sptr_thread->status)
+    if (mr_unlikely(NR_THREAD_SUSPEND == sptr_thread->status))
         return -ER_INVALID;
 
-    return __schedule_add_status_list(sptr_thread, SCHED_SUSPEND_LIST);
+    return __schedule_add_status_list(sptr_thread, SCHED_SUSPEND_LIST, SCHED_SUSPEND_HASH);
 }
 
 /*!
@@ -752,21 +865,17 @@ static kint32_t schedule_add_suspend_list(tid_t tid)
  * 			(after detaching from the suspend list, the thread will appear in a free state, 
  * 			so this function prohibits external calls to prevent the thread from leaving management and causing memory leakage)
  */
-static kint32_t schedule_detach_suspend_list(tid_t tid)
+static kint32_t schedule_detach_suspend_list(struct thread *sptr_thread)
 {
-    struct thread *sptr_thread;
-
-    sptr_thread = SCHED_THREAD_HANDLER(tid);
-
-    if (!sptr_thread)
+    if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
     /*!< check if is in ready status */
-    if (NR_THREAD_SUSPEND != sptr_thread->status)
+    if (mr_unlikely(NR_THREAD_SUSPEND != sptr_thread->status))
         return -ER_INVALID;
 
     /*!< delete it */
-    __schedule_del_status_list(sptr_thread, SCHED_SUSPEND_LIST);
+    __schedule_del_status_list(sptr_thread, SCHED_SUSPEND_LIST, SCHED_SUSPEND_HASH);
 
     return ER_NORMAL;
 }
@@ -777,20 +886,16 @@ static kint32_t schedule_detach_suspend_list(tid_t tid)
  * @retval 	err code
  * @note   	add to sleep list
  */
-static kint32_t schedule_add_sleep_list(tid_t tid)
+static kint32_t schedule_add_sleep_list(struct thread *sptr_thread)
 {
-    struct thread *sptr_thread;
-
-    sptr_thread = SCHED_THREAD_HANDLER(tid);
-
-    if (!sptr_thread)
+    if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
     /*!< avoid duplicate additions */
-    if (NR_THREAD_SLEEP == sptr_thread->status)
+    if (mr_unlikely(NR_THREAD_SLEEP == sptr_thread->status))
         return -ER_INVALID;
 
-    return __schedule_add_status_list(sptr_thread, SCHED_SLEEP_LIST);
+    return __schedule_add_status_list(sptr_thread, SCHED_SLEEP_LIST, SCHED_SLEEP_HASH);
 }
 
 /*!
@@ -801,21 +906,17 @@ static kint32_t schedule_add_sleep_list(tid_t tid)
  * 			(after detaching from the sleep list, the thread will appear in a free state, 
  * 			so this function prohibits external calls to prevent the thread from leaving management and causing memory leakage)
  */
-static kint32_t schedule_detach_sleep_list(tid_t tid)
+static kint32_t schedule_detach_sleep_list(struct thread *sptr_thread)
 {
-    struct thread *sptr_thread;
-
-    sptr_thread = SCHED_THREAD_HANDLER(tid);
-
-    if (!sptr_thread)
+    if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
     /*!< check if is in ready status */
-    if (NR_THREAD_SLEEP != sptr_thread->status)
+    if (mr_unlikely(NR_THREAD_SLEEP != sptr_thread->status))
         return -ER_INVALID;
 
     /*!< delete it */
-    __schedule_del_status_list(sptr_thread, SCHED_SLEEP_LIST);
+    __schedule_del_status_list(sptr_thread, SCHED_SLEEP_LIST, SCHED_SLEEP_HASH);
 
     return ER_NORMAL;
 }
@@ -833,7 +934,7 @@ static kint32_t __find_thread_from_scheduler(tid_t tid, struct list_head *sptr_h
     struct thread *sptr_anyTask;
     struct thread *sptr_thread = SCHED_THREAD_HANDLER(tid); 
 
-    if (mr_list_head_empty(sptr_head))
+    if (mr_list_empty(sptr_head))
         return -ER_NOTFOUND;
 
     foreach_list_next_entry(sptr_anyTask, sptr_head, sgtc_link)
@@ -852,52 +953,23 @@ static kint32_t __find_thread_from_scheduler(tid_t tid, struct list_head *sptr_h
  * @retval 	err code
  * @note   	every thread will be sorted by priority
  */
-static kint32_t __schedule_add_status_list(struct thread *sptr_thread, struct list_head *sptr_head)
+static kint32_t __schedule_add_status_list(struct thread *sptr_thread, 
+                            struct list_head *sptr_head, struct thread_list *sptr_hash)
 {
-    struct thread *sptr_anyTask;
-    kuint32_t iPriority, iPriority2;
+    struct list_head *sptr_last;
 
-    if ((!sptr_thread) || (!sptr_head))
-        return -ER_FAULT;
-
-    /*!< get priority */
-    iPriority = thread_get_priority(sptr_thread->sptr_attr);
-
-    /*!< target list is empty, add directly */
-    if (mr_list_head_empty(sptr_head))
-        goto END;
-
-    /*!< fault tolerance mechanism: check if this thread has been added to the list, and exit directly if it has been added */
-#if 0
-    if (__find_thread_from_scheduler(sptr_thread->tid, sptr_head) >= 0)
-        return ER_NORMAL;
-#else
-    if (!mr_list_head_empty(&sptr_thread->sgtc_link))
+    if (mr_unlikely(!mr_list_empty(&sptr_thread->sgtc_link)))
         return -ER_EXISTED;
-#endif
 
-#if CONFIG_ROLL_POLL
-    list_head_add_tail(sptr_head, &sptr_thread->sgtc_link);
-    return ER_NORMAL;
+    /*!< Update priority */
+    thread_sync_priority(sptr_thread->sptr_attr);
 
-#else
-    /*!< traversing the ready list, inserting new thread into the tail of thread which is the same priority */
-    foreach_list_prev_entry(sptr_anyTask, sptr_head, sgtc_link)
-    {
-        iPriority2 = thread_get_priority(sptr_anyTask->sptr_attr);
-        if (__THREAD_IS_LOW_PRIO(iPriority, iPriority2))
-        {
-            /*!< priority from high to low */
-            list_head_add_head(&sptr_anyTask->sgtc_link, &sptr_thread->sgtc_link);
-            return ER_NORMAL;
-        }
-    }
+    /*!< Add to hash, and return thread list */
+    sptr_last = __thread_hash_add(sptr_hash, sptr_thread);
+    if (!sptr_last)
+        sptr_last = sptr_head;
 
-#endif
-
-END:
-    /*!< target thread has the highest priority */
-    list_head_add_head(sptr_head, &sptr_thread->sgtc_link);
+    list_head_add_head(sptr_last, &sptr_thread->sgtc_link);
 
     return ER_NORMAL;
 }
@@ -909,11 +981,10 @@ END:
  * @retval 	err code
  * @note   	none
  */
-static void __schedule_del_status_list(struct thread *sptr_thread, struct list_head *sptr_head)
+static void __schedule_del_status_list(struct thread *sptr_thread, 
+                            struct list_head *sptr_head, struct thread_list *sptr_hash)
 {
-    if (mr_unlikely(!sptr_thread) || 
-        mr_unlikely(!sptr_head))
-        return;
+    __thread_hash_remove(sptr_hash, sptr_thread);
 
     /*!< check if target link is in the list before deleting, but needs lot of time */
 //  list_head_del_safe(sptr_head, &sptr_thread->sgtc_link);
@@ -947,6 +1018,7 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
 
     /*!< initial link */
     init_list_head(&sptr_thread->sgtc_link);
+    init_list_head(&sptr_thread->sgtc_hash);
 
     /*!< initial spinlock */
     spin_lock_init(&sptr_thread->sgtc_lock);
@@ -955,7 +1027,7 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     sprintk(sptr_thread->name, "thread-%d", tid);
 
     /*!< add and sorted by priority */
-    retval = schedule_add_ready_list(tid);
+    retval = schedule_add_ready_list(sptr_thread);
     if (retval < 0)
     {
         SCHED_THREAD_HANDLER(tid) = mr_nullptr;
@@ -964,7 +1036,7 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     }
 
     /*!< set to ready status */
-    __SYNC_THREAD_STATUS(tid, NR_THREAD_READY);
+    __SYNC_THREAD_STATUS(sptr_thread, NR_THREAD_READY);
     spin_unlock_irqrestore(&__SCHED_LOCK);
 
     return ER_NORMAL;
@@ -991,7 +1063,7 @@ struct thread *unregister_thread(tid_t tid)
         return ERR_PTR(-ER_BUSY);
 
     spin_lock_irqsave(&__SCHED_LOCK);
-    schedule_detach_sleep_list(tid);
+    schedule_detach_sleep_list(sptr_thread);
     SCHED_THREAD_HANDLER(tid) = mr_nullptr;
     spin_unlock_irqrestore(&__SCHED_LOCK);
 
@@ -1022,10 +1094,13 @@ struct scheduler_context *__schedule_thread(void)
 {
     struct thread *sptr_thread;
     struct thread *sptr_prev;
+    struct thread_list *sptr_hash;
     kint32_t retval;
 
+    sptr_hash = SCHED_READY_HASH;
+
     /*!< no ready thread here, unable to start or switch */
-    if (mr_list_head_empty(SCHED_READY_LIST))
+    if (__THREAD_HASH_EMPTY(sptr_hash))
         goto fail;
 
     /*!< get the current thread */
@@ -1038,13 +1113,13 @@ struct scheduler_context *__schedule_thread(void)
         {
             /*!< scheduled by "start_kernel" for the first time */
             sptr_prev = mr_list_first_entry(SCHED_READY_LIST, struct thread, sgtc_link);           
-            __SET_THREAD_STATUS(sptr_prev->tid, NR_THREAD_RUNNING);
+            __SET_THREAD_STATUS(sptr_prev, NR_THREAD_RUNNING);
         }
     }
     
     /*!< if not set target status, default to ready */
     if (!sptr_prev->to_status)
-        __SET_THREAD_STATUS(sptr_prev->tid, NR_THREAD_READY);
+        __SET_THREAD_STATUS(sptr_prev, NR_THREAD_READY);
 
     /*!< select next valid thread */
     retval = schedule_thread_switch(sptr_prev->tid);
@@ -1082,8 +1157,11 @@ void schedule_thread(void)
     struct scheduler_context *sptr_context;
 
     mr_preempt_disable();
+
+    /*!< Save cpsr to spsr */
     __push_psr();
-    mr_disable_cpu_irq();
+    mr_local_irq_disable();
+    mr_preempt_enable();
     
     sptr_context = __schedule_thread();
     if (!sptr_context)
@@ -1095,7 +1173,41 @@ void schedule_thread(void)
 
 END:
     __pop_psr();
-    mr_preempt_enable();
+}
+
+/*!
+ * @brief	initial hash
+ * @param  	sptr_list: current hash
+ * @retval 	none
+ * @note   	none
+ */
+static void __scheduler_init(struct thread_list *sptr_list)
+{
+    struct thread_hash *sptr_hash;
+
+    sptr_list->ffs_h = sptr_list->ffs_l = 0;
+    spin_lock_init(&sptr_list->sgtc_lock);
+
+    for (kint32_t i = 0; i < THREAD_PROTY_NUM; i++)
+    {
+        sptr_hash = sptr_list->sgtc_hash + i;
+
+        sptr_hash->sptr_tail = mr_nullptr;
+        init_list_head(&sptr_hash->sgtc_list);
+    }
+}
+
+/*!
+ * @brief	initial all hash
+ * @param  	none
+ * @retval 	none
+ * @note   	none
+ */
+void __init scheduler_init(void)
+{
+    __scheduler_init(SCHED_READY_HASH);
+    __scheduler_init(SCHED_SUSPEND_HASH);
+    __scheduler_init(SCHED_SLEEP_HASH);
 }
 
 /*!< end of file */

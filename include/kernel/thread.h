@@ -71,6 +71,7 @@ typedef kint32_t tid_t;
  * kernel thread requires higher priority (1 ~ 19)
  * The lower the value, the higher the priority
  */
+#define THREAD_PROTY_NUM                    (100)
 #define THREAD_PROTY_START					(99)
 #define THREAD_PROTY_DEFAULT				(80)
 #define THREAD_PROTY_MAX					(1)
@@ -90,7 +91,7 @@ typedef kint32_t tid_t;
 #define __THREAD_HIGHER_DEFAULT(val)		(THREAD_PROTY_DEFAULT - (val))	
 
 /*!< preempt period */
-#define THREAD_PREEMPT_PERIOD               (20)                /*!< unit: ms */
+#define THREAD_PREEMPT_PERIOD               (10)                /*!< unit: ms */
 
 /*!< time slice */
 #define THREAD_TIME_DEFUALT                 (40)				/*!< unit: ms */
@@ -219,6 +220,7 @@ extern void tfree(void *__ptr);
  * @retval 	priority
  * @note   	none
  */
+__force_inline 
 static inline kuint32_t thread_get_priority(struct thread_attr *sptr_attr)
 {
     return sptr_attr->sgtc_param.sched_curpriority;
@@ -233,7 +235,19 @@ static inline kuint32_t thread_get_priority(struct thread_attr *sptr_attr)
 static inline void thread_set_priority(struct thread_attr *sptr_attr, kuint32_t priority)
 {
     sptr_attr->sgtc_param.sched_priority = __THREAD_IS_LOW_PRIO(priority, THREAD_PROTY_MAX) ? priority : THREAD_PROTY_MAX;
-    sptr_attr->sgtc_param.sched_curpriority = sptr_attr->sgtc_param.sched_priority;
+}
+
+/*!
+ * @brief	update priority
+ * @param  	sptr_attr
+ * @retval 	none
+ * @note   	none
+ */
+__force_inline 
+static inline void thread_sync_priority(struct thread_attr *sptr_attr)
+{
+    struct scheduler_param *sptr_param = &sptr_attr->sgtc_param;
+    sptr_param->sched_curpriority = sptr_param->sched_priority;
 }
 
 /*!
@@ -278,6 +292,7 @@ static inline void thread_attr_setstacksize(struct thread_attr *sptr_attr, kusiz
  * @retval 	stack size
  * @note   	none
  */
+__force_inline 
 static inline kuint32_t thread_attr_getstacksize(struct thread_attr *sptr_attr)
 {
     return sptr_attr->stacksize;
@@ -305,6 +320,7 @@ static inline struct scheduler_context_regs *thread_get_context(struct thread_at
  * @retval 	&sptr_attr->stack_addr
  * @note   	stack = *(&sptr_attr->stack_addr) (excluding scheduler_context_regs)
  */
+__force_inline 
 static inline kutype_t thread_get_stack(struct thread_attr *sptr_attr)
 {
     return (kutype_t)(&sptr_attr->stack_addr);
@@ -316,6 +332,7 @@ static inline kutype_t thread_get_stack(struct thread_attr *sptr_attr)
  * @retval 	none
  * @note   	none
  */
+__force_inline 
 static inline void thread_attr_setdetachstate(struct thread_attr *sptr_attr, kuint32_t state)
 {
     sptr_attr->detachstate = state;
@@ -327,6 +344,7 @@ static inline void thread_attr_setdetachstate(struct thread_attr *sptr_attr, kui
  * @retval 	detach state
  * @note   	none
  */
+__force_inline 
 static inline kuint32_t thread_attr_getdetachstate(struct thread_attr *sptr_attr)
 {
     return sptr_attr->detachstate;
@@ -338,6 +356,7 @@ static inline kuint32_t thread_attr_getdetachstate(struct thread_attr *sptr_attr
  * @retval 	none
  * @note   	none
  */
+__force_inline 
 static inline void thread_attr_setinheritsched(struct thread_attr *sptr_attr, kuint32_t sched)
 {
     sptr_attr->inheritsched	= sched;
@@ -349,6 +368,7 @@ static inline void thread_attr_setinheritsched(struct thread_attr *sptr_attr, ku
  * @retval 	inherit policy
  * @note   	none
  */
+__force_inline 
 static inline kuint32_t thread_attr_getinheritsched(struct thread_attr *sptr_attr)
 {
     return sptr_attr->inheritsched;
@@ -360,6 +380,7 @@ static inline kuint32_t thread_attr_getinheritsched(struct thread_attr *sptr_att
  * @retval 	none
  * @note   	none
  */
+__force_inline 
 static inline void thread_attr_setschedpolicy(struct thread_attr *sptr_attr, kuint32_t policy)
 {
     sptr_attr->schedpolicy = policy;
@@ -371,6 +392,7 @@ static inline void thread_attr_setschedpolicy(struct thread_attr *sptr_attr, kui
  * @retval 	schedule policy
  * @note   	none
  */
+__force_inline 
 static inline kuint32_t thread_attr_getschedpolicy(struct thread_attr *sptr_attr)
 {
     return sptr_attr->schedpolicy;

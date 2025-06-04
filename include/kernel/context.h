@@ -23,35 +23,35 @@
 /*!< The defines */
 struct scheduler_context_regs
 {
-	kuaddr_t r0;
-	kuaddr_t r1;
-	kuaddr_t r2;
-	kuaddr_t r3;
-	kuaddr_t r4;
-	kuaddr_t r5;
-	kuaddr_t r6;
-	kuaddr_t r7;
-	kuaddr_t r8;
-	kuaddr_t r9;
-	kuaddr_t r10;
-	kuaddr_t r11;
-	kuaddr_t r12;
-	kuaddr_t sp;
-	kuaddr_t lr;
-	kuaddr_t pc;
-	kuaddr_t psr;
+    kuaddr_t r0;
+    kuaddr_t r1;
+    kuaddr_t r2;
+    kuaddr_t r3;
+    kuaddr_t r4;
+    kuaddr_t r5;
+    kuaddr_t r6;
+    kuaddr_t r7;
+    kuaddr_t r8;
+    kuaddr_t r9;
+    kuaddr_t r10;
+    kuaddr_t r11;
+    kuaddr_t r12;
+    kuaddr_t sp;
+    kuaddr_t lr;
+    kuaddr_t pc;
+    kuaddr_t psr;
 
-	kuaddr_t flags;							/*!< save scheduling reason (1: scheduled by preempt; 0: scheduled by self) */
+    kuaddr_t flags;							/*!< save scheduling reason (1: scheduled by preempt; 0: scheduled by self) */
 };
 
 struct scheduler_context
 {
-	kuaddr_t entry;							/*!< if (*flags) is 0, entry will be run */
-	kuaddr_t args;
-	kuaddr_t first;							/*!< 0: first run; 1: other */
+    kuaddr_t entry;							/*!< if (*flags) is 0, entry will be run */
+    kuaddr_t args;
+    kuaddr_t first;							/*!< 0: first run; 1: other */
 
-	kuaddr_t next_sp;
-	kuaddr_t prev_sp;
+    kuaddr_t next_sp;
+    kuaddr_t prev_sp;
 };
 
 /*!< The functions */
@@ -66,7 +66,7 @@ extern void __switch_to(kuaddr_t info);
  */
 static inline void context_switch(struct scheduler_context *sptr_info)
 {
-	__switch_to((kuaddr_t)sptr_info);
+    __switch_to((kuaddr_t)sptr_info);
 }
 
 #ifdef __cplusplus

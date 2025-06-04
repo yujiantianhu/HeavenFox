@@ -176,22 +176,19 @@ kuint32_t do_string_n_copy_safe(void *ptr_dst, const void *ptr_src, kuint32_t si
  * @retval  none
  * @note    compare string
  */
-kbool_t do_string_compare(const void *ptr_dst, const void *ptr_src)
+kint32_t do_string_compare(const void *s1, const void *s2)
 {
-    kuint8_t *ptr_ch;
-    kuint8_t *ptr_buf;
+    kuint8_t *str1 = (kuint8_t *)s1;
+    kuint8_t *str2 = (kuint8_t *)s2;
 
-    ptr_ch  = (kuint8_t *)ptr_src;
-    ptr_buf	= (kuint8_t *)ptr_dst;
+    do {
+        if (*str1 < *str2)
+            return -1;
+        else if (*str1 > *str2)
+            return 1;
+    } while (*(str1++) && *(str2++));
 
-    do
-    {
-        if (*(ptr_buf++) != *(ptr_ch++))
-            return true;
-
-    } while ('\0' != *ptr_ch);
-
-    return false;	
+    return 0;	
 }
 
 /*!
@@ -200,25 +197,22 @@ kbool_t do_string_compare(const void *ptr_dst, const void *ptr_src)
  * @retval  none
  * @note    compare n char
  */
-kbool_t do_string_n_compare(const void *ptr_dst, const void *ptr_src, kuint32_t size)
+kint32_t do_string_n_compare(const void *s1, const void *s2, kuint32_t size)
 {
-    kuint8_t *ptr_ch;
-    kuint8_t *ptr_buf;
-
-    ptr_ch  = (kuint8_t *)ptr_src;
-    ptr_buf	= (kuint8_t *)ptr_dst;
+    kuint8_t *str1 = (kuint8_t *)s1;
+    kuint8_t *str2 = (kuint8_t *)s2;
 
     if (!size)
-        return true;
+        return 0;
 
-    do
-    {
-        if (*(ptr_buf++) != *(ptr_ch++))
-            return true;
+    do {
+        if (*str1 < *str2)
+            return -1;
+        else if (*str1 > *str2)
+            return 1;
+    } while (*(str1++) && *(str2++) && (--size));
 
-    } while (('\0' != *ptr_ch) && (--size));
-
-    return false;	
+    return 0;	
 }
 
 /*!
@@ -1009,7 +1003,7 @@ __weak int strncmp(const char *__s1, const char *__s2, size_t __n)
  * @retval  none
  * @note    return string lenth
  */
-__weak kuint32_t kstrlen(const kchar_t *__s)
+kuint32_t kstrlen(const kchar_t *__s)
 {
     if (!__s)
         return 0;
@@ -1023,7 +1017,7 @@ __weak kuint32_t kstrlen(const kchar_t *__s)
  * @retval  none
  * @note    copy src to dest
  */
-__weak kchar_t *kstrcpy(kchar_t *__dest, const kchar_t *__src)
+kchar_t *kstrcpy(kchar_t *__dest, const kchar_t *__src)
 {
     if (!__dest || !__src)
         return mr_nullptr;
@@ -1037,7 +1031,7 @@ __weak kchar_t *kstrcpy(kchar_t *__dest, const kchar_t *__src)
  * @retval  none
  * @note    copy src to dest
  */
-__weak kchar_t *kstrncpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
+kchar_t *kstrncpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
 {
     if (!__dest || !__src)
         return mr_nullptr;
@@ -1051,7 +1045,7 @@ __weak kchar_t *kstrncpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
  * @retval  none
  * @note    copy src to dest
  */
-__weak kusize_t kstrlcpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
+kusize_t kstrlcpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
 {
     if (!__dest || !__src)
         return 0;
@@ -1065,7 +1059,7 @@ __weak kusize_t kstrlcpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
  * @retval  none
  * @note    copy src to dest (reverse)
  */
-__weak kchar_t *kstrncpyr(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
+kchar_t *kstrncpyr(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
 {
     if (!__dest || !__src)
         return mr_nullptr;
@@ -1079,10 +1073,10 @@ __weak kchar_t *kstrncpyr(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
  * @retval  none
  * @note    compare s1 and s2
  */
-__weak kint32_t kstrcmp(const kchar_t *__s1, const kchar_t *__s2)
+kint32_t kstrcmp(const kchar_t *__s1, const kchar_t *__s2)
 {
     if (!__s1 || !__s2)
-        return 0;
+        return -2;
     
     return do_string_compare(__s1, __s2);
 }
@@ -1093,10 +1087,10 @@ __weak kint32_t kstrcmp(const kchar_t *__s1, const kchar_t *__s2)
  * @retval  none
  * @note    compare s1 and s2
  */
-__weak kint32_t kstrncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
+kint32_t kstrncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
 {
     if (!__s1 || !__s2)
-        return 0;
+        return -2;
     
     return do_string_n_compare(__s1, __s2, __n);
 }
@@ -1107,7 +1101,7 @@ __weak kint32_t kstrncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
  * @retval  none
  * @note    locate where the first "ch" appears
  */
-__weak kchar_t *kstrchr(const kchar_t *__s1, kchar_t ch)
+kchar_t *kstrchr(const kchar_t *__s1, kchar_t ch)
 {
     if (!__s1)
         return mr_nullptr;
@@ -1121,7 +1115,7 @@ __weak kchar_t *kstrchr(const kchar_t *__s1, kchar_t ch)
  * @retval  none
  * @note    locate where the n "ch" appears
  */
-__weak kchar_t *kstrnchr(const kchar_t *__s1, kchar_t ch, kint32_t n)
+kchar_t *kstrnchr(const kchar_t *__s1, kchar_t ch, kint32_t n)
 {
     if (!__s1)
         return mr_nullptr;
@@ -1130,12 +1124,12 @@ __weak kchar_t *kstrnchr(const kchar_t *__s1, kchar_t ch, kint32_t n)
 }
 
 /*!
- * @brief   kstrcat
+ * @brief   kstrcut
  * @param   none
  * @retval  none
  * @note    locate where the index "ch" appears
  */
-__weak kchar_t *kstrcat(const kchar_t *__s1, kuint32_t index)
+kchar_t *kstrcut(const kchar_t *__s1, kuint32_t index)
 {
     if (!__s1)
         return mr_nullptr;

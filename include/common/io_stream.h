@@ -241,18 +241,15 @@ __force_inline static inline kuint32_t api_bit_mask(kuint8_t index)
 }
 
 /*!
- * @brief   setbit_to_words
+ * @brief   set bitmap bit
  * @param   nr, addr
  * @retval  none
  * @note    set bit to array
  */
-static inline void setbit_to_words(kuint32_t nr, kuint32_t *addr)
+__force_inline static inline void bitmap_setl(kuint32_t nr, kuint32_t *addr)
 {
-	kuint32_t pos = (nr >> 5);
-    kuint32_t *p_addr = addr + pos;
-
-    pos = api_bit_mask(nr);
-    mr_setbitl(pos, p_addr);
+    kuint32_t *p_addr = addr + (nr >> 5);
+    (*p_addr) |= (1 << (nr & 0x1f));
 }
 
 /*!
@@ -261,13 +258,10 @@ static inline void setbit_to_words(kuint32_t nr, kuint32_t *addr)
  * @retval  none
  * @note    reset bit to array
  */
-static inline void clrbit_to_words(kuint32_t nr, kuint32_t *addr)
+__force_inline static inline void bitmap_clrl(kuint32_t nr, kuint32_t *addr)
 {
-	kuint32_t pos = (nr >> 5);
-    kuint32_t *p_addr = addr + pos;
-
-    pos = api_bit_mask(nr);
-    mr_clrbitl(pos, p_addr);
+    kuint32_t *p_addr = addr + (nr >> 5);
+    (*p_addr) &= ~(1 << (nr & 0x1f));
 }
 
 /*!
@@ -276,22 +270,10 @@ static inline void clrbit_to_words(kuint32_t nr, kuint32_t *addr)
  * @retval  none
  * @note    get bit from array
  */
-static inline kuint32_t getbit_from_words(kuint32_t nr, kuint32_t lenth, kuint32_t *addr)
+__force_inline static inline kbool_t bitmap_getl(kuint32_t nr, kuint32_t *addr)
 {
-    kuint32_t pos, result = 0U;
-    kuint32_t *p_addr;
-
-    while (lenth--)
-    {
-        pos = (nr + lenth - 1) >> 5;
-        p_addr = addr + pos;
-        pos = api_bit_mask(nr + lenth - 1);
-        
-        result <<= 1;
-        result |= mr_isBitSetl(pos, p_addr);
-    }
-
-    return result;
+    kuint32_t *p_addr = addr + (nr >> 5);
+    return !!((*p_addr) & (1 << (nr & 0x1f)));
 }
 
 /*!
@@ -300,7 +282,7 @@ static inline kuint32_t getbit_from_words(kuint32_t nr, kuint32_t lenth, kuint32
  * @retval  none
  * @note    write SoC register
  */
-static inline void io_writel(kuaddr_t addr, kuint32_t val)
+__force_inline static inline void io_writel(kuaddr_t addr, kuint32_t val)
 {
     *((volatile kuaddr_t *)addr) = val;
 }
@@ -311,7 +293,7 @@ static inline void io_writel(kuaddr_t addr, kuint32_t val)
  * @retval  none
  * @note    read SoC register
  */
-static inline kuint32_t io_readl(kuaddr_t addr, kuint32_t *val)
+__force_inline static inline kuint32_t io_readl(kuaddr_t addr, kuint32_t *val)
 {
     if (val)
         *val = *((kuaddr_t *)addr);
@@ -325,7 +307,7 @@ static inline kuint32_t io_readl(kuaddr_t addr, kuint32_t *val)
  * @retval  none
  * @note    write SoC register
  */
-static inline void io_setbit(kuaddr_t addr, kuint32_t val)
+__force_inline static inline void io_setbit(kuaddr_t addr, kuint32_t val)
 {
     *((volatile kuaddr_t *)addr) |= val;
 }
@@ -336,7 +318,7 @@ static inline void io_setbit(kuaddr_t addr, kuint32_t val)
  * @retval  none
  * @note    write SoC register
  */
-static inline void io_clrbit(kuaddr_t addr, kuint32_t val)
+__force_inline static inline void io_clrbit(kuaddr_t addr, kuint32_t val)
 {
     *((volatile kuaddr_t *)addr) &= ~val;
 }

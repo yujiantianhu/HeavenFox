@@ -26,7 +26,7 @@ kint32_t fwk_blocking_notifier_chain_register(struct fwk_notifier_chain *sptr_ch
     if (!sptr_chain || !sptr_nb)
         return -ER_NULLPTR;
 
-    if (!mr_list_head_empty(&sptr_nb->sgtc_link))
+    if (!mr_list_empty(&sptr_nb->sgtc_link))
         return -ER_EXISTED;
 
     if (!sptr_nb->notifier_call)
@@ -49,7 +49,7 @@ kint32_t fwk_blocking_notifier_chain_register(struct fwk_notifier_chain *sptr_ch
 void fwk_blocking_notifier_chain_unregister(struct fwk_notifier_chain *sptr_chain, struct fwk_notifier_block *sptr_nb)
 {
     if (!sptr_nb ||
-        mr_list_head_empty(&sptr_nb->sgtc_link))
+        mr_list_empty(&sptr_nb->sgtc_link))
         return;
 
     mutex_lock(&sptr_chain->sgtc_lock);
@@ -71,7 +71,7 @@ kint32_t fwk_blocking_notifier_call_chain(struct fwk_notifier_chain *sptr_chain,
     kint32_t count = 0;
 
     if (!sptr_chain ||
-        mr_list_head_empty(&sptr_chain->sgtc_nbs))
+        mr_list_empty(&sptr_chain->sgtc_nbs))
         return -ER_PERMIT;
 
     mutex_lock(&sptr_chain->sgtc_lock);
@@ -104,7 +104,7 @@ kint32_t fwk_blocking_pengding_call_chain(struct fwk_notifier_chain *sptr_chain,
     kint32_t count = 0;
 
     if (!sptr_chain ||
-        mr_list_head_empty(&sptr_chain->sgtc_nbs))
+        mr_list_empty(&sptr_chain->sgtc_nbs))
         return -ER_PERMIT;
 
     mutex_lock(&sptr_chain->sgtc_lock);

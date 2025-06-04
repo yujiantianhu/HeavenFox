@@ -61,7 +61,7 @@ void mailbox_insert(struct mailbox *sptr_mb)
     struct mailbox *sptr_box;
     struct list_head *sptr_last = mr_nullptr;
 
-    if (mr_list_head_empty(&sgtc_kernel_mailboxs))
+    if (mr_list_empty(&sgtc_kernel_mailboxs))
         goto END;
 
     foreach_list_next_entry(sptr_box, &sgtc_kernel_mailboxs, sgtc_link)
@@ -307,7 +307,7 @@ struct mail *mail_recv(struct mailbox *sptr_mb, kutime_t timeout)
     if (mr_unlikely(!sptr_mb))
         return ERR_PTR(-ER_NOMEM);
 
-    while (mr_list_head_empty(&sptr_mb->sgtc_mail))
+    while (mr_list_empty(&sptr_mb->sgtc_mail))
     {
         if (!timeout)
             return ERR_PTR(-ER_EMPTY);
@@ -322,7 +322,7 @@ struct mail *mail_recv(struct mailbox *sptr_mb, kutime_t timeout)
         mr_nop();
     
     /*!< make sure that sptr_recv is still valid */
-    if (mr_list_head_empty(&sptr_recv->sgtc_link))
+    if (mr_list_empty(&sptr_recv->sgtc_link))
     {
         mutex_unlock(&sptr_mb->sgtc_lock);
         return ERR_PTR(-ER_EMPTY);

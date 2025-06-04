@@ -91,7 +91,7 @@ void fwk_of_irq_init(const struct fwk_of_device_id *sptr_matches)
         list_head_add_tail(&sgtc_intc_desc_list, &sptr_desc->sgtc_link);
     }
 
-    while (!mr_list_head_empty(&sgtc_intc_desc_list))
+    while (!mr_list_empty(&sgtc_intc_desc_list))
     {
         foreach_list_next_entry_safe(sptr_desc, sptr_desc_temp, &sgtc_intc_desc_list, sgtc_link)
         {

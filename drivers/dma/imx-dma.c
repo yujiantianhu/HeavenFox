@@ -790,7 +790,7 @@ static kint32_t imx_sdma_desc_load(struct imx_sdma_desc *sptr_desc)
         return -ER_NODEV;
 
     /*!< Does not add to sptr_channel->pending */
-    if (mr_list_head_empty(&sptr_desc->sgtc_link))
+    if (mr_list_empty(&sptr_desc->sgtc_link))
         return -ER_EMPTY;
 
     sptr_channel = mr_imx_sdma_to_chan(sptr_desc->sgtc_txdesc.sptr_chan);
@@ -909,7 +909,7 @@ static irq_return_t imx_sdma_isr(kint32_t irq, void *args)
             /*!< Current desc is completed, move to "completed list" */
             list_head_add_tail(&sptr_channel->sgtc_completed, &sptr_desc->sgtc_link);
 
-            if (mr_list_head_empty(&sptr_channel->sgtc_pending)) 
+            if (mr_list_empty(&sptr_channel->sgtc_pending)) 
             {
                 /*!< No desc needs to load */
                 sptr_channel->sptr_desc = mr_nullptr;
@@ -960,7 +960,7 @@ static irq_return_t imx_sdma_thread_isr(kint32_t irq, void *args)
         list_head_splice_init(&sptr_channel->sgtc_completed, &sgtc_copy);
         spin_unlock_irqrestore(&sptr_channel->sgtc_lock);
 
-        if (mr_list_head_empty(&sgtc_copy))
+        if (mr_list_empty(&sgtc_copy))
             continue;
 
         /*!< detach and destroy desc */

@@ -169,7 +169,7 @@ kint32_t register_io_stream(struct io_stream_dev *sptr_stream)
         return -ER_NODEV;
 
     if (!(*sptr_stream->name) || 
-        !mr_list_head_empty(&sptr_stream->sgtc_link))
+        !mr_list_empty(&sptr_stream->sgtc_link))
         return -ER_INVALID;
 
     spin_lock_irqsave(&sgtc_io_stream_lock);

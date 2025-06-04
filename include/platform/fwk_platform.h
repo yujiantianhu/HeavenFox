@@ -116,8 +116,8 @@ typedef struct fwk_device_type
     parent 	= FWK_GET_BUS_DRIVER(bus);	\
     list	= parent;	\
 }
-#define FWK_NEXT_DEVICE(parent, list)						mr_list_head_parent(parent, list, struct fwk_device, sgtc_link)
-#define FWK_NEXT_DRIVER(parent, list)						mr_list_head_parent(parent, list, struct fwk_driver, sgtc_link)
+#define FWK_NEXT_DEVICE(parent, list)						mr_list_parent(parent, list, struct fwk_device, sgtc_link)
+#define FWK_NEXT_DRIVER(parent, list)						mr_list_parent(parent, list, struct fwk_driver, sgtc_link)
 
 #define __BUS_DEVICE_RD_LOCK(bus)                           rd_lock(&(bus)->sptr_SysPriv->sgtc_device_lock)
 #define __BUS_DEVICE_RD_UNLOCK(bus)                         rd_unlock(&(bus)->sptr_SysPriv->sgtc_device_lock)

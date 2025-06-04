@@ -21,6 +21,183 @@
 /*!< The globals */
 
 /*!< API function */
+#if 0
+int pattern_match(const char *fname, const char *pattern) 
+{
+    while (*pattern) {
+        if (*pattern == '*') {
+            pattern++;
+            while (*fname) {
+                if (pattern_match(fname, pattern)) 
+                    return 1;
+                fname++;
+            }
+        } 
+        else if (*pattern == '?' || *pattern == *fname) {
+            pattern++;
+            fname++;
+        } 
+        else {
+            return 0;
+        }
+    }
+    return *fname == '\0';
+}
+#endif
+
+/*!
+ * @brief   open directory
+ * @param   path: such as "/home/text", not "/home/text/"
+ * @param   pattern: maybe you can input "*.txt" to get all txt, exclude others
+ * @param   mode: O_RDWR/O_RDONLY and so on
+ * @retval  dir pointer
+ * @note    when dir is openning, items will be loaded to sptr_fs->sgtc_dirs and sptr_fs->sgtc_files
+ */
+struct fs_list *dir_open(const kchar_t *path, const kchar_t *pattern, kuint32_t mode)
+{
+    struct fwk_inode *sptr_inode;
+    struct fs_list *sptr_fs;
+    struct fwk_file sgtc_file;
+    struct fwk_gendisk *sptr_gdisk;
+    kint32_t retval;
+
+    sptr_inode = fwk_inode_find_disk(path);
+    if (!isValid(sptr_inode))
+        return ERR_PTR(-ER_NOTFOUND);
+
+    sptr_fs = (struct fs_list *)kzalloc(sizeof(*sptr_fs), GFP_KERNEL);
+    if (!isValid(sptr_fs))
+        return ERR_PTR(-ER_NOMEM);
+
+    sptr_fs->path = (kchar_t *)path;
+    sptr_fs->mode = mode;
+    sptr_fs->sptr_dnode = sptr_inode;
+    init_list_head(&sptr_fs->sgtc_dirs);
+    init_list_head(&sptr_fs->sgtc_files);
+
+    sgtc_file.sptr_foprts = sptr_inode->sptr_foprts;
+    if (sgtc_file.sptr_foprts->open)
+    {
+        sgtc_file.mode = mode;
+        retval = sgtc_file.sptr_foprts->open(sptr_inode, &sgtc_file);
+        if (retval)
+            goto fail1;
+    }
+
+    sptr_gdisk = sptr_inode->sptr_blkdev->sptr_gdisk;
+    if (sptr_gdisk->opendir)
+    {
+        retval = sptr_gdisk->opendir(sptr_gdisk, sptr_fs);
+        if (retval)
+            goto fail2;
+    }
+
+    /*!< Create items */
+    if (sptr_fs->readdir)
+        sptr_fs->readdir(sptr_fs, pattern);
+
+    return sptr_fs;
+
+fail2:
+    if (sgtc_file.sptr_foprts->close)
+        sgtc_file.sptr_foprts->close(sptr_inode, &sgtc_file);
+
+fail1:
+    kfree(sptr_fs);
+    return ERR_PTR(-ER_FAILD);
+}
+
+/*!
+ * @brief   close directory
+ * @param   sptr_fs
+ * @retval  none
+ * @note    close directory (block device)
+ */
+void dir_close(struct fs_list *sptr_fs)
+{
+    struct fwk_inode *sptr_dnode;
+    struct fwk_gendisk *sptr_gdisk;
+    struct fwk_file sgtc_file;
+    kint32_t retval;
+
+    sptr_dnode = sptr_fs->sptr_dnode;
+    sptr_gdisk = sptr_dnode->sptr_blkdev->sptr_gdisk;
+
+    if (sptr_gdisk->closedir)
+    {
+        retval = sptr_gdisk->closedir(sptr_gdisk, sptr_fs);
+        if (retval)
+            return;
+    }
+
+    sgtc_file.sptr_foprts = sptr_dnode->sptr_foprts;
+
+    if (sgtc_file.sptr_foprts->close)
+        sgtc_file.sptr_foprts->close(sptr_dnode, &sgtc_file);
+
+    kfree(sptr_fs);
+}
+
+/*!
+ * @brief   read directory
+ * @param   sptr_fs
+ * @param   pattern
+ * @retval  the number of items
+ * @note    none
+ */
+kint32_t dir_flush(struct fs_list *sptr_fs, const kchar_t *pattern)
+{
+    if (!sptr_fs->readdir)
+        return -ER_ERROR;
+
+    return sptr_fs->readdir(sptr_fs, pattern);
+}
+
+/*!
+ * @brief   read every item
+ * @param   sptr_fs
+ * @param   sptr_prev: previous item
+ * @retval  next item
+ * @note    none
+ */
+struct fs_item *dir_read_item(struct fs_list *sptr_fs, struct fs_item *sptr_prev)
+{
+    struct fs_item *sptr_item = mr_nullptr;
+    struct list_head *sptr_dirs = &sptr_fs->sgtc_dirs;
+    struct list_head *sptr_files = &sptr_fs->sgtc_files;
+
+    if (!sptr_fs->dir_num && !sptr_fs->file_num)
+        return mr_nullptr;
+
+    if (!sptr_prev)
+    {
+        struct list_head *sptr_head = sptr_fs->dir_num ? sptr_dirs : sptr_files;
+        return mr_list_first_entry(sptr_head, struct fs_item, sgtc_link);
+    }
+
+    switch (sptr_prev->type)
+    {
+        case NR_FS_ITEM_DIR:
+            if (mr_list_reach_tail(sptr_dirs, &sptr_prev->sgtc_link))
+                sptr_item = sptr_fs->file_num ? mr_list_first_entry(sptr_files, struct fs_item, sgtc_link) : mr_nullptr;
+            else
+                sptr_item = mr_list_next_entry(sptr_prev, sgtc_link);
+
+            break;
+
+        case NR_FS_ITEM_FILE:
+            if (mr_list_reach_tail(sptr_files, &sptr_prev->sgtc_link))
+                sptr_item = mr_nullptr;
+            else
+                sptr_item = mr_list_next_entry(sptr_prev, sgtc_link);
+            break;
+
+        default: break;
+    }
+    
+    return sptr_item;
+}
+
 /*!
  * @brief   open file
  * @param   name, mode
@@ -177,5 +354,7 @@ kssize_t file_tell(struct fs_stream *sptr_fs)
 
     return sptr_fs->sptr_bops->fpos(sptr_fs);
 }
+
+
 
 /* end of file */

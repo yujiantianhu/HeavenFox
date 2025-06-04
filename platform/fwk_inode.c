@@ -268,7 +268,7 @@ struct fwk_inode *fwk_inode_find_disk(const kchar_t *name)
     while (lenth > 1)
     {
         lenth--;
-        if (*(disk_name + lenth - 1) != '/')
+        if (*(disk_name + lenth) != '/')
         {
             mark = 0;
             continue;
@@ -279,8 +279,8 @@ struct fwk_inode *fwk_inode_find_disk(const kchar_t *name)
             break;
         
         mark = 1;
-        *(disk_name + lenth) = '\0';
-
+        *(disk_name + lenth + 1) = '\0';
+        
         sptr_kobj = fwk_find_kobject_by_path(sptr_kobj, disk_name);
         if (!isValid(sptr_kobj))
             continue;

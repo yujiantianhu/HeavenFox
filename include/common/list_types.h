@@ -85,15 +85,15 @@ typedef struct list_head srt_list_head_t;
 #define mr_next_list_head(head, list)							(list = ((list)->sptr_next != head) ? (list)->sptr_next : mr_nullptr)
 
 /*!< judge if the list has only head */
-#define IS_LIST_HEAD_SELF_HEAD(ptr_list)	\
-    (((ptr_list)->sptr_prev == (ptr_list)) && ((ptr_list)->sptr_next == (ptr_list)))
-#define mr_list_head_empty(head)								IS_LIST_HEAD_SELF_HEAD(head)
+#define mr_list_reach_head(head, ptr_list)                      ((ptr_list)->sptr_prev == (head))
+#define mr_list_reach_tail(head, ptr_list)                      ((ptr_list)->sptr_next == (head))
+#define mr_list_empty(ptr_list)                                 (mr_list_reach_head(ptr_list, ptr_list) && mr_list_reach_tail(ptr_list, ptr_list))
 
 /*!< get parent of every member from list */
-#define mr_list_head_parent(parent, list, type, member)	\
+#define mr_list_parent(parent, list, type, member)	\
 ({	\
     mr_next_list_head(parent, list);	\
-    (isValid(list)) ? mr_container_of(list, type, member) : mr_nullptr;	\
+    (list) ? mr_container_of(list, type, member) : mr_nullptr;	\
 })
 
 /*!< two-way retrieval */
@@ -116,7 +116,7 @@ typedef struct list_head srt_list_head_t;
 #define mr_list_prev_entry(pos, member)						    mr_container_of((pos)->member.sptr_prev, typeof(*(pos)), member)
 
 #define mr_list_head_until(pos, head, member)					((pos)->member.sptr_next == (head))
-#define mr_list_first_valid_entry(ptr, type, member)			(mr_list_head_empty(ptr) ? mr_nullptr : mr_list_first_entry(ptr, type, member))
+#define mr_list_first_valid_entry(ptr, type, member)			(mr_list_empty(ptr) ? mr_nullptr : mr_list_first_entry(ptr, type, member))
 
 /*!<
  * usage: 

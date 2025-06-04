@@ -198,6 +198,164 @@ static kint32_t fatfs_disk_rmdir(struct fwk_gendisk *sptr_gdisk, const kchar_t *
 }
 
 /*!
+ * @brief   reset sptr_list
+ * @param   sptr_list
+ * @retval  none
+ * @note    none
+ */
+static void fatfs_dir_clean(struct fs_list *sptr_list)
+{
+    struct fs_item *sptr_item, *sptr_temp;
+
+    if (!mr_list_empty(&sptr_list->sgtc_files))
+    {
+        foreach_list_next_entry_safe(sptr_item, sptr_temp, &sptr_list->sgtc_files, sgtc_link)
+        {
+            list_head_del(&sptr_item->sgtc_link);
+            kfree(sptr_item);
+        }
+    }
+
+    if (!mr_list_empty(&sptr_list->sgtc_dirs))
+    {
+        foreach_list_next_entry_safe(sptr_item, sptr_temp, &sptr_list->sgtc_dirs, sgtc_link)
+        {
+            list_head_del(&sptr_item->sgtc_link);
+            kfree(sptr_item);
+        }
+    }
+
+    sptr_list->dir_num = sptr_list->file_num = 0;
+}
+
+/*!
+ * @brief   read directory
+ * @param   sptr_list, pattern
+ * @retval  errno
+ * @note    none
+ */
+static kint32_t fatfs_dir_read(struct fs_list *sptr_list, const kchar_t *pattern)
+{
+    struct fs_item *sptr_item;
+    DIR *sptr_dir;
+    FILINFO sgtc_finfo, *sptr_finfo;
+    FRESULT retval;
+
+    sptr_dir = (DIR *)sptr_list->private_data;
+    fatfs_dir_clean(sptr_list);
+
+    for (;;)
+    {
+        retval = f_readdir(sptr_dir, &sgtc_finfo);
+        if (retval != FR_OK)
+            return -ER_FAILD;
+
+        /*!< Read finished */
+        if (!sgtc_finfo.fname[0])
+            break;
+
+        /*!< Jump over child dirs */
+//      if (sgtc_finfo.fattrib & AM_DIR)
+//          continue;
+
+        /*!< Jump over hide files */
+        if (sgtc_finfo.fname[0] == '.') 
+            continue;
+
+//      if (pattern && !pattern_match(sgtc_finfo.fname, pattern)) 
+//          continue;
+
+        /*!< Save current sgtc_finfo */
+        sptr_item = kmalloc(sizeof(*sptr_item) + sizeof(sgtc_finfo), GFP_KERNEL);
+        if (!isValid(sptr_item))
+            return -ER_NOMEM;
+
+        sptr_item->private_data = (void *)sptr_item + sizeof(*sptr_item);
+        memcpy(sptr_item->private_data, &sgtc_finfo, sizeof(sgtc_finfo));
+
+        sptr_finfo = (FILINFO *)sptr_item->private_data;
+        sptr_item->name = sptr_finfo->fname;
+        sptr_item->size = sptr_finfo->fsize;
+
+        if (sgtc_finfo.fattrib & AM_DIR)
+        {
+            sptr_list->dir_num++;
+            sptr_item->type = NR_FS_ITEM_DIR;
+            list_head_add_tail(&sptr_list->sgtc_dirs, &sptr_item->sgtc_link);
+        }
+        else
+        {
+            sptr_list->file_num++;
+            sptr_item->type = NR_FS_ITEM_FILE;
+            list_head_add_tail(&sptr_list->sgtc_files, &sptr_item->sgtc_link);
+        }
+    }
+
+    return (sptr_list->dir_num + sptr_list->file_num);
+}
+
+/*!
+ * @brief   open directory
+ * @param   sptr_blkdev, sptr_list
+ * @retval  errno
+ * @note    none
+ */
+static kint32_t fatfs_dir_open(struct fwk_gendisk *sptr_gdisk, struct fs_list *sptr_list)
+{
+    struct fatfs_disk *sptr_fdisk;
+    DIR *sptr_dir;
+    kchar_t *name;
+    FRESULT retval;
+
+    sptr_fdisk = mr_fatfs_disk_get(sptr_gdisk);
+    if (!sptr_fdisk->is_mounted)
+        return -ER_NREADY;
+
+    name = kstrcut(sptr_list->path, sptr_fdisk->path_lenth);
+    sptr_dir = kzalloc(sizeof(*sptr_dir), GFP_KERNEL);
+    if (!isValid(sptr_dir))
+        return -ER_NOMEM;
+
+    retval = f_opendir(sptr_dir, name);
+    if (retval != FR_OK)
+    {
+        kfree(sptr_dir);
+        return retval;
+    }
+
+    sptr_list->private_data = sptr_dir;
+    sptr_list->readdir = fatfs_dir_read;
+
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   close directory
+ * @param   sptr_blkdev, sptr_list
+ * @retval  errno
+ * @note    none
+ */
+static kint32_t fatfs_dir_close(struct fwk_gendisk *sptr_gdisk, struct fs_list *sptr_list)
+{
+    DIR *sptr_dir;
+
+    sptr_dir = (DIR *)sptr_list->private_data;
+    if (!sptr_dir)
+        return ER_NORMAL;
+
+    if (FR_OK != f_closedir(sptr_dir))
+        return -ER_FAILD;
+
+    fatfs_dir_clean(sptr_list);
+    kfree(sptr_dir);
+    
+    sptr_list->readdir = mr_nullptr;
+    sptr_list->private_data = mr_nullptr;
+
+    return ER_NORMAL;
+}
+
+/*!
  * @brief   open file in disk
  * @param   sptr_blkdev, sptr_file
  * @retval  errno
@@ -214,7 +372,7 @@ static kint32_t fatfs_file_open(struct fwk_block_device *sptr_blkdev, struct fs_
     sptr_gdisk = sptr_blkdev->sptr_gdisk;
     sptr_fdisk = mr_fatfs_disk_get(sptr_gdisk);
 
-    name = kstrcat(sptr_file->full_name, sptr_fdisk->path_lenth);
+    name = kstrcut(sptr_file->full_name, sptr_fdisk->path_lenth);
     if ((*name == '\0') ||
         ((*name == '/' ) && (*(name + 1) == '\0')))
         return -ER_INVALID;
@@ -423,6 +581,8 @@ struct fatfs_disk *fs_alloc_fatfs(kuint16_t number)
     sptr_gdisk->mkfs = fatfs_disk_format;
     sptr_gdisk->mkdir = fatfs_disk_mkdir;
     sptr_gdisk->rmdir = fatfs_disk_rmdir;
+    sptr_gdisk->opendir = fatfs_dir_open;
+    sptr_gdisk->closedir = fatfs_dir_close;
 
     return sptr_fdisk;
 }

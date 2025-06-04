@@ -705,7 +705,7 @@ struct fwk_kset *fwk_kset_create_and_register(const kchar_t *name, struct fwk_ko
  */
 void fwk_kset_unregister(struct fwk_kset *sptr_kset)
 {
-    if (!mr_list_head_empty(&sptr_kset->sgtc_list))
+    if (!mr_list_empty(&sptr_kset->sgtc_list))
         return;
 
     fwk_kobject_del(&sptr_kset->sgtc_kobj);

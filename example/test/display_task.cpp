@@ -43,6 +43,16 @@ class crt_disp_base_t;
 class crt_disp_bmp_t;
 class crt_disp_text_t;
 
+enum disp_text_op
+{
+    NR_DISP_TEXT_NONE = 0,
+    NR_DISP_TEXT_OPEN,
+    NR_DISP_TEXT_UP,
+    NR_DISP_TEXT_DOWN,
+    NR_DISP_TEXT_EXIT,
+    NR_DISP_TEXT_LIST,
+};
+
 /*!< The functions */
 static void display_task_clear(crt_disp_base_t &cgrt_this);
 static void display_task_cursor(crt_disp_base_t &cgrt_this, 
@@ -95,7 +105,6 @@ class crt_disp_text_t : virtual public crt_disp_base_t
 public:
     crt_disp_text_t(crt_disp_task_t &cgrt_dtsk, kuint32_t pages)
         : crt_disp_base_t(cgrt_dtsk)
-        , text(mr_nullptr)
         , num(0)
         , cur_text(0)
         , pages(pages)
@@ -111,18 +120,30 @@ public:
             delete[] this->text_pages;
     }
 
-    void set_src(const kchar_t *path, const kchar_t **text, kuint32_t num)
+    void set_src(const kchar_t *path)
     {
+        struct fs_list *sptr_dir;
+        struct fs_item *sptr_item;
+        kint32_t i = 0;
+
+        sptr_dir = dir_open(path, "*.txt", O_RDONLY);
+        if (!isValid(sptr_dir))
+            return;
+
         this->path = path;
-        this->text = text;
-        this->num  = num;
+        this->num  = mr_dir_items_num(sptr_dir);
+
+        foreach_dir_item(sptr_item, sptr_dir)
+            kstrlcpy(this->text[i++], sptr_item->name, 32);
+
+        dir_close(sptr_dir);
     }
 
-    void show(crt_disp_task_t &cgrt_dtsk);
+    kint32_t show(crt_disp_task_t &cgrt_dtsk);
 
 private:
     const kchar_t *path;
-    const kchar_t **text;
+    kchar_t text[32][32];
     kuint32_t num;
     kuint32_t cur_text;
 
@@ -156,15 +177,10 @@ private:
 
 /*!< The globals */
 static kchar_t g_display_buffer[(1920 * 1080) * 4 + 4] __align(4);
+
 static const kchar_t *g_display_text_path = "/media/FAT32_2/home/fox/text";
-static const kchar_t *g_display_ebook_list[] =
-{
-    "tangzhan.txt",
-    "lianjian.txt",
-    "feidao.txt",
-    "tianlong.txt",
-};
-static const kchar_t *g_display_logo = "/media/FAT32_2/boot/logo/logo768.bmp";// CONFIG_POWER_LOGO;
+static const kchar_t *g_display_logo = CONFIG_POWER_LOGO;
+static const kchar_t *g_display_windows = CONFIG_WALL_PAPER;
 
 /*!< API functions */
 /*!
@@ -362,7 +378,7 @@ static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &c
     struct fwk_disp_info *sptr_disp = sgtc_dctrl.sptr_di;
     struct mail *sptr_mail;
     struct fwk_fb_var_screen_info sgtc_var;
-    kuint8_t op = 0;
+    enum disp_text_op nr_op = NR_DISP_TEXT_NONE;
     kssize_t size, offset = 0;
     kusize_t page_index = 0;
 
@@ -399,26 +415,41 @@ static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &c
             continue;
         }
 
-        op = 1;
         if (sptr_mail->sptr_msg->type == NR_MAIL_TYPE_SERIAL)
         {
+            bsc::string cgtc_str;
             kchar_t *buffer = (kchar_t *)sptr_mail->sptr_msg[0].buffer;
 
-            if (!kstrncmp(buffer, "up", 2))
-                page_index = page_index ? (page_index - 1) : 0;
-            else if (!kstrncmp(buffer, "down", 4)) 
-            {
-                if (page_index < cgrt_text.pages)
-                    page_index++;
-                cgrt_text.text_pages[page_index] = offset;
-            }
-            else
-                op = 0;
+            if (!cgtc_str.strncmp(buffer, "up", 2))
+                nr_op = NR_DISP_TEXT_UP;
+            else if (!cgtc_str.strncmp(buffer, "down", 4)) 
+                nr_op = NR_DISP_TEXT_DOWN;
+            else if (!cgtc_str.strncmp(buffer, "exit", 4))
+                nr_op = NR_DISP_TEXT_EXIT;
         }
 
         mail_recv_finish(sptr_mail);
 
-    } while (!op);
+    } while (NR_DISP_TEXT_NONE == nr_op);
+
+    switch (nr_op)
+    {
+        case NR_DISP_TEXT_UP:
+            page_index = page_index ? (page_index - 1) : 0;
+            break;
+        case NR_DISP_TEXT_DOWN:
+            if (page_index < cgrt_text.pages)
+                page_index++;
+            cgrt_text.text_pages[page_index] = offset;
+            break;
+        case NR_DISP_TEXT_EXIT:
+            page_index = 0;
+            size = -NR_DISP_TEXT_EXIT;
+            break;
+
+        default:
+            break;
+    }
 
     cgrt_text.cur_page = page_index;
     return size;
@@ -430,28 +461,94 @@ static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &c
  * @retval none
  * @note   do display
  */
-void crt_disp_text_t::show(crt_disp_task_t &cgrt_dtsk)
+kint32_t crt_disp_text_t::show(crt_disp_task_t &cgrt_dtsk)
 {
     struct fs_stream *sptr_file;
     kchar_t full_path[128];
+    struct mailbox &sgtc_mb = cgrt_dtsk.cprt_task->get_mailbox();
+    struct mail *sptr_mail;
+    enum disp_text_op nr_op = NR_DISP_TEXT_NONE;
+    kuint8_t text_index = 0;
+    kssize_t retval;
 
     if (!this->text_pages)
-        return;
+        return 0;
+
+    sptr_mail = mail_recv(&sgtc_mb, 0);
+    if (!isValid(sptr_mail))
+        return 0;
+
+    if (sptr_mail->sptr_msg->type == NR_MAIL_TYPE_SERIAL)
+    {
+        kchar_t *buffer = (kchar_t *)sptr_mail->sptr_msg[0].buffer;
+        bsc::string cgtc_str(buffer);
+
+        if (cgtc_str == "list")
+            nr_op = NR_DISP_TEXT_LIST;
+        else if (cgtc_str == "open")
+        {   
+            if (sptr_mail->num_msgs > 1)
+            {
+                kchar_t *item = (kchar_t *)sptr_mail->sptr_msg[1].buffer;
+                text_index = ascii_to_dec(item);
+            }
+
+            nr_op = NR_DISP_TEXT_OPEN;
+        }
+    }
+
+    mail_recv_finish(sptr_mail);
+
+    switch (nr_op)
+    {
+        case NR_DISP_TEXT_LIST:
+            bsc::cout << bsc::endl;
+            bsc::cout << "Text path: " << this->path << bsc::endl;
+            bsc::cout << "Text: " << bsc::endl;
+
+            for (kuint32_t i = 0; i < this->num; i++)
+                bsc::cout << "    " << i << ". " << this->text[i] << bsc::endl;
+            return 0;
+
+        case NR_DISP_TEXT_OPEN:
+            if (text_index >= this->num)
+            {
+                bsc::cout << bsc::endl;
+                bsc::cout << "No text which index is " << text_index << bsc:: endl;
+                return 0;
+            }
+
+            this->cur_text = text_index;
+            break;
+
+        default: return 0;
+    }
 
     sprintk(full_path, "%s/%s", this->path, this->text[this->cur_text]);
     sptr_file = file_open(full_path, O_RDONLY);
     if (!isValid(sptr_file))
-        goto END;
+    {
+        bsc::cout << bsc::endl;
+        bsc::cout << "Can't open text " << full_path << bsc::endl;
+        return 0;
+    }
+
+    bsc::cout << bsc::endl;
+    bsc::cout << "Text " << this->text[this->cur_text] << " is opened" << bsc::endl;
 
     this->cur_page = 0;
     memset_ex(this->text_pages, 0, this->pages);
 
-    while (display_task_text(cgrt_dtsk, *this, sptr_file) > 0);
+    while ((retval = display_task_text(cgrt_dtsk, *this, sptr_file)) > 0);
     file_close(sptr_file);
 
-END:
-    if ((this->cur_text++) >= this->num)
+    if (retval == (-NR_DISP_TEXT_EXIT))
+    {
         this->cur_text = 0;
+        return NR_DISP_TEXT_EXIT;
+    }
+
+    return 0;
 }
 
 /*!
@@ -465,22 +562,32 @@ static void *display_task_entry(void *args)
     crt_task_t *cprt_this = (crt_task_t *)args;
     crt_disp_task_t cgrt_dtsk(cprt_this, "/dev/fb0", O_RDWR);
     crt_disp_bmp_t cgrt_logo(cgrt_dtsk);
+    crt_disp_bmp_t cgrt_windows(cgrt_dtsk);
     crt_disp_text_t cgrt_txt(cgrt_dtsk, 1024);
+    
+    kint32_t retval;
 
     if (cgrt_dtsk.fd < 0)
         goto fail;
 
     cgrt_logo.set_src(g_display_logo);
-    cgrt_txt.set_src(g_display_text_path, g_display_ebook_list, ARRAY_SIZE(g_display_ebook_list));
+    cgrt_windows.set_src(g_display_windows);
+    cgrt_txt.set_src(g_display_text_path);
 
     mr_preempt_disable();
     cgrt_logo.show(cgrt_dtsk);
     mr_preempt_enable();
-    sleep(5);
+    sleep(2);
+
+    cgrt_windows.show(cgrt_dtsk);
+    sleep(1);
 
     for (;;)
     {
-        cgrt_txt.show(cgrt_dtsk);
+        retval = cgrt_txt.show(cgrt_dtsk);
+        if (retval == NR_DISP_TEXT_EXIT)
+            cgrt_windows.show(cgrt_dtsk);
+
         msleep(200);
     }
 

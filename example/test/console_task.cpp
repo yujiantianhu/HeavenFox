@@ -41,16 +41,16 @@ using namespace bsc;
  * @retval none
  * @note   none
  */
-static void command_mail_to_light(crt_task_t *cprt_this, kuint8_t *command_line)
+static void command_mail_to_light(crt_task_t *cprt_this, const kchar_t *command_line)
 {
     struct mailbox &sgtc_mb = cprt_this->get_mailbox();
     struct mail sgtc_mail;
     struct mail_msg sgtc_msg[1] = {};
     kuint8_t status = 0;
 
-    if (!kstrncmp((kchar_t *)command_line, "led1 on", 7))
+    if (!kstrncmp(command_line, "led1 on", 7))
         status = 1;
-    else if (!kstrncmp((kchar_t *)command_line, "led1 off", 8))
+    else if (!kstrncmp(command_line, "led1 off", 8))
         status = 0;
     else
         return;
@@ -73,16 +73,16 @@ static void command_mail_to_light(crt_task_t *cprt_this, kuint8_t *command_line)
  * @retval none
  * @note   none
  */
-static void command_mail_to_display(crt_task_t *cprt_this, kuint8_t *command_line)
+static void command_mail_to_display(crt_task_t *cprt_this, const kchar_t *command_line)
 {
     struct mailbox &sgtc_mb = cprt_this->get_mailbox();
     struct mail sgtc_mail;
     struct mail_msg sgtc_msg[1] = {};
     kuint8_t status = 0;
 
-    if (!kstrncmp((kchar_t *)command_line, "page up", 9))
+    if (!kstrncmp(command_line, "page up", 9))
         status = 1;
-    else if (!kstrncmp((kchar_t *)command_line, "page down", 8))
+    else if (!kstrncmp(command_line, "page down", 8))
         status = 2;
     else
         return;
@@ -106,11 +106,9 @@ static void command_mail_to_display(crt_task_t *cprt_this, kuint8_t *command_lin
  * @note   none
  */
 static void *console_task_entry(void *args)
-{
-    static kuint8_t g_console_recv_buf[1024];
-    
+{   
     crt_task_t *cprt_this = (crt_task_t *)args;
-    string cgrt_str(&g_console_recv_buf[0], sizeof(g_console_recv_buf));
+    string cgrt_str(1024);
 
     for (;;)
     {       
@@ -118,12 +116,12 @@ static void *console_task_entry(void *args)
             /*!< read command line */
             cin >> cgrt_str;
 
-        } while (cgrt_str.real_size <= 0);
+        } while (cgrt_str.size() <= 0);
 
-        cout << "recv command line, data is: " << cgrt_str.get_buf() << endl;
+        cout << "recv command line, data is: " << cgrt_str.c_str() << endl;
 
-        command_mail_to_light(cprt_this, cgrt_str.get_buf());
-        command_mail_to_display(cprt_this, cgrt_str.get_buf());
+        command_mail_to_light(cprt_this, cgrt_str.c_str());
+        command_mail_to_display(cprt_this, cgrt_str.c_str());
     }
 
     return args;

@@ -81,7 +81,7 @@ enum __ERT_URB_PID_TYPE
  * Because low bit will be transferred first, the transmission order is: 10110100 (0xb4)
  */
 #define FWK_URB_PID_NUMBER(x)                                           (((TO_REVERSE(x) << 4) & 0xf0) | ((x) & 0x0f))
-#define FWK_URB_PID_TRANS_NUMBER(x)                                     (reverse_bit(FWK_URB_PID_NUMBER(x)))
+#define FWK_URB_PID_TRANS_NUMBER(x)                                     (rev_u8(FWK_URB_PID_NUMBER(x)))
 
 #define FWK_URB_CHECK_PACKET_TYPE(pid)                                  ((pid) & (0x03))
 #define FWK_URB_IS_SUPER_PACKET(pid)                                    mr_is_bitequal(pid, FWK_URB_SUPER_PACKET_MASK)

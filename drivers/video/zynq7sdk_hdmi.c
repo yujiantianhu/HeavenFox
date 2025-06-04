@@ -381,7 +381,7 @@ static kint32_t xsdk_hdmi_driver_probe_timings(struct fwk_platdev *sptr_pdev)
     if (retval || (!format))
         return -ER_NOTFOUND;
 
-    format = kstrcat(format, 3);
+    format = kstrcut(format, 3);
     if (!format)
         sptr_var->bits_per_pixel = 32;
     else

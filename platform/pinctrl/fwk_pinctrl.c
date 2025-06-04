@@ -162,7 +162,7 @@ static void fwk_pinctrl_free(struct fwk_pinctrl *sptr_pctl)
         return;
 
     /*!< 1, release sptr_setting and sptr_state */
-    if (!mr_list_head_empty(&sptr_pctl->sgtc_states))
+    if (!mr_list_empty(&sptr_pctl->sgtc_states))
     {
         foreach_list_next_entry_safe(sptr_state, sptr_statetemp, &sptr_pctl->sgtc_states, sgtc_link)
         {
@@ -177,7 +177,7 @@ static void fwk_pinctrl_free(struct fwk_pinctrl *sptr_pctl)
         }
     }
 
-    if (mr_list_head_empty(&sptr_pctl->sgtc_dt_maps))
+    if (mr_list_empty(&sptr_pctl->sgtc_dt_maps))
         return;
 
     /*!< 2, release sptr_map and sptr_maps */
@@ -206,7 +206,7 @@ static struct fwk_pinctrl_state *fwk_pinctrl_find_state(struct fwk_pinctrl *sptr
 {
     struct fwk_pinctrl_state *sptr_state;
 
-    if (mr_list_head_empty(&sptr_pctl->sgtc_states))
+    if (mr_list_empty(&sptr_pctl->sgtc_states))
         return mr_nullptr;
 
     foreach_list_next_entry(sptr_state, &sptr_pctl->sgtc_states, sgtc_link)
@@ -415,7 +415,7 @@ static kint32_t fwk_pinctrl_add_setting(struct fwk_pinctrl *sptr_pctl)
     kuint32_t i;
     kint32_t retval = 0;
 
-    if (mr_list_head_empty(&sgtc_fwk_pinctrl_map_list))
+    if (mr_list_empty(&sgtc_fwk_pinctrl_map_list))
         return -ER_EMPTY;
 
     /*!< get each sptr_maps */
@@ -487,7 +487,7 @@ static struct fwk_pinctrl *fwk_find_pinctrl(struct fwk_device *sptr_dev)
 {
     struct fwk_pinctrl *sptr_pctl;
 
-    if (!sptr_dev || mr_list_head_empty(&sgtc_fwk_pinctrl_list))
+    if (!sptr_dev || mr_list_empty(&sgtc_fwk_pinctrl_list))
         return mr_nullptr;
 
     foreach_list_next_entry(sptr_pctl, &sgtc_fwk_pinctrl_list, sgtc_link)
@@ -739,7 +739,7 @@ struct fwk_pinctrl_state *fwk_pinctrl_lookup_state(struct fwk_pinctrl *sptr_pctl
 {
     struct fwk_pinctrl_state *sptr_state;
 
-    if (!sptr_pctl || mr_list_head_empty(&sptr_pctl->sgtc_states))
+    if (!sptr_pctl || mr_list_empty(&sptr_pctl->sgtc_states))
         return mr_nullptr;
 
     if (sptr_pctl->sptr_state && !kstrcmp(sptr_pctl->sptr_state->name, state_name))

@@ -63,7 +63,7 @@ static void memory_block_attach(struct mem_info *sptr_info, struct mem_hash *spt
     init_list_head(&sptr_block->sgtc_link);
 
     /*!< case 1: list is empty */
-    if (mr_list_head_empty(&sptr_hash->sgtc_list))
+    if (mr_list_empty(&sptr_hash->sgtc_list))
     {
         list_head_add_head(&sptr_hash->sgtc_list, &sptr_block->sgtc_link);
         return;

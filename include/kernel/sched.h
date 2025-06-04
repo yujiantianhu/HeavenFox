@@ -49,6 +49,9 @@ struct thread
     /*!< thread list (to ready/suspend/sleep list) */
     struct list_head sgtc_link;
 
+    /*!< hash list */
+    struct list_head sgtc_hash;
+
     /*!< thread time slice (period = sptr_attr->sgtc_param.mr_sched_init_budget) */
     kutime_t expires;
 
@@ -71,6 +74,30 @@ struct thread
 
 #define mr_thread_is_flags(signal, sptr_tsk)						(!!((sptr_tsk)->flags & mr_bit(signal)))
 
+struct thread_hash
+{
+    struct list_head sgtc_list;
+    struct thread *sptr_tail;
+};
+
+struct thread_list
+{
+    kuint64_t ffs_l;
+    kuint64_t ffs_h;
+
+    struct thread_hash sgtc_hash[THREAD_PROTY_NUM];
+    struct spin_lock sgtc_lock;
+
+#define __THREAD_HASH_EMPTY(hash)           (!(hash)->ffs_l && !(hash->ffs_h))           
+};
+
+struct scheduler_core
+{
+    struct thread_list sgtc_ready;
+    struct thread_list sgtc_suspend;
+    struct thread_list sgtc_sleep;
+};
+
 /*!< thread manage table */
 struct scheduler_table
 {
@@ -83,6 +110,8 @@ struct scheduler_table
         kutype_t cnt_out;											/*!< when sched_cnt is over (~0), cnt_out++ */
         kutype_t sched_cnt;											/*!< schedule counter, max is ~0 */
     } sgtc_cnt;
+
+    struct scheduler_core sgtc_core;                                /*!< hash list */
 
     struct list_head sgtc_ready;									/*!< ready list head (manage all ready thread) */
     struct list_head sgtc_suspend;									/*!< suspend list head (manage all suspend thread) */
@@ -101,6 +130,10 @@ struct scheduler_table
 #define __THREAD_READY_LIST(ptr)			(&((ptr)->sgtc_ready))
 #define __THREAD_SUSPEND_LIST(ptr)			(&((ptr)->sgtc_suspend))
 #define __THREAD_SLEEP_LIST(ptr)			(&((ptr)->sgtc_sleep))
+
+#define __THREAD_READY_HASH(ptr)            (&((ptr)->sgtc_core.sgtc_ready))
+#define __THREAD_SUSPEND_HASH(ptr)          (&((ptr)->sgtc_core.sgtc_suspend))
+#define __THREAD_SLEEP_HASH(ptr)            (&((ptr)->sgtc_core.sgtc_sleep))
 };
 
 /*!< The globals */
@@ -138,6 +171,7 @@ extern struct thread *unregister_thread(tid_t tid);
 extern void __thread_init_before(void);
 extern struct scheduler_context *__schedule_thread(void);
 extern void schedule_thread(void);
+extern void scheduler_init(void);
 
 /*!< The defines */
 #define mr_current                             get_current_thread()

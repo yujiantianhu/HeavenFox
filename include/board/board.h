@@ -33,7 +33,7 @@ static inline kuint32_t be32_to_cpu(kuint32_t val)
 #if (defined(CONFIG_LITTILE_ENDIAN) && CONFIG_LITTILE_ENDIAN)
     kuint32_t result;
     
-    mr_reverse_byte32(&result, val);
+    mr_rev_u32(&result, val);
     return result;
 
 #else
@@ -69,7 +69,7 @@ static inline kuint32_t le32_to_cpu(kuint32_t val)
 #if (defined(CONFIG_LITTILE_ENDIAN) && (!CONFIG_LITTILE_ENDIAN))
     kuint32_t result;
     
-    mr_reverse_byte32(&result, val);
+    mr_rev_u32(&result, val);
     return result;
 
 #else
@@ -105,7 +105,7 @@ static inline kuint16_t be16_to_cpu(kuint16_t val)
 #if (defined(CONFIG_LITTILE_ENDIAN) && CONFIG_LITTILE_ENDIAN)
     kuint32_t result;
     
-    mr_reverse_byte16(&result, val);
+    mr_rev_u16(&result, val);
     return result;
 
 #else
@@ -127,7 +127,7 @@ static inline kuint16_t le16_to_cpu(kuint16_t val)
 #if (defined(CONFIG_LITTILE_ENDIAN) && (!CONFIG_LITTILE_ENDIAN))
     kuint32_t result;
     
-    mr_reverse_byte16(&result, val);
+    mr_rev_u16(&result, val);
     return result;
 
 #else

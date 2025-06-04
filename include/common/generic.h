@@ -268,12 +268,12 @@ __force_inline static inline kbool_t isPower2(kutype_t number)
 }
 
 /*!
- * @brief   reverse_byte32
+ * @brief   rev_u32
  * @param   val
  * @retval  result
  * @note    swap high byte and low byte for 4 bytes val
  */
-#define mr_reverse_byte32(ptr, val)	\
+#define mr_rev_u32(ptr, val)	\
     do {    \
         __asm__ __volatile__ (  \
             " rev %0, %1	"   \
@@ -283,21 +283,21 @@ __force_inline static inline kbool_t isPower2(kutype_t number)
         );  \
     } while (0)
 
-static inline kuint32_t reverse_byte32(kuint32_t val)
+static inline kuint32_t rev_u32(kuint32_t val)
 {
     kuint32_t result;
 
-    mr_reverse_byte32(&result, val);
+    mr_rev_u32(&result, val);
     return result;
 }
 
 /*!
- * @brief   reverse_byte16
+ * @brief   rev_u16
  * @param   val
  * @retval  result
  * @note    swap high byte and low byte for 2 bytes val
  */
-#define mr_reverse_byte16(ptr, val)	\
+#define mr_rev_u16(ptr, val)	\
     do {    \
         __asm__ __volatile__ (  \
             " rev16 %0, %1	"   \
@@ -307,21 +307,21 @@ static inline kuint32_t reverse_byte32(kuint32_t val)
         );  \
     } while (0)
 
-static inline kuint16_t reverse_byte16(kuint16_t val)
+static inline kuint16_t rev_u16(kuint16_t val)
 {
     kuint16_t result;
 
-    mr_reverse_byte16(&result, val);
+    mr_rev_u16(&result, val);
     return result;
 }
 
 /*!
- * @brief   reverse_bit
+ * @brief   rev_u8
  * @param   val
  * @retval  result
  * @note    swap high bit and low bit for a byte
  */
-static inline kuint8_t reverse_bit(kuint8_t val)
+static inline kuint8_t rev_u8(kuint8_t val)
 {
     kuint8_t result, i;
 
@@ -334,6 +334,165 @@ static inline kuint8_t reverse_bit(kuint8_t val)
 
     return result;
 }
+
+/*!
+ * @brief   calculate leading zero
+ * @param   val
+ * @retval  result
+ * @note    from high to low
+ */
+static inline kuint32_t clz_u32(kuint32_t val)
+{
+    kuint32_t result;
+
+    __asm__ __volatile__ (
+        " clz %0, %1    \n\t"
+        :"=r"(result)
+        :"r"(val)
+        :"cc"
+    );
+
+    return result;
+}
+
+#ifndef mr_clz
+#define mr_clz(x)                                       clz_u32(x)
+#endif
+
+/*!
+ * @brief   get fisrt bit (value == 1) from low to high
+ * @param   x
+ * @retval  nr (0: x is zero; 1 ~ 32: index of set-bit)
+ * @note    for 32bits. such as 0x80000000, nr = 32
+ */
+static inline kuint32_t ffs_u32(kuint32_t x)
+{
+    kuint32_t nr = 1;
+
+    if (!x)
+        return 0;
+
+    if (!(x & 0xffff)) 
+    {
+        x >>= 16;
+        nr += 16;
+    }
+    if (!(x & 0xff)) 
+    {
+        x >>= 8;
+        nr += 8;
+    }
+    if (!(x & 0xf)) 
+    {
+        x >>= 4;
+        nr += 4;
+    }
+    if (!(x & 3)) 
+    {
+        x >>= 2;
+        nr += 2;
+    }
+    if (!(x & 1)) 
+    {
+        x >>= 1;
+        nr += 1;
+    }
+
+    return nr;
+}
+
+#ifndef mr_ffs
+#define mr_ffs(x)                                       ffs_u32(x)
+#endif
+
+/*!
+ * @brief   get fisrt bit (value == 1) from low to high
+ * @param   x
+ * @retval  nr
+ * @note    for 64bits (0: x is zero; 1 ~ 64: index of set-bit)
+ */
+static inline kuint32_t ffs_u64(kuint64_t x)
+{
+    kuint32_t nr;
+
+    nr = mr_ffs((kuint32_t)x);
+    if (nr)
+        return nr;
+
+    nr = mr_ffs((kuint32_t)(x >> 32));
+    return (nr ? (nr + 32) : 0);
+}
+
+#ifndef mr_ffsll
+#define mr_ffsll(x)                                     ffs_u64(x)
+#endif
+
+/*!
+ * @brief   get fisrt bit (value == 1) from high to low
+ * @param   x
+ * @retval  nr
+ * @note    for 32bits (0: x is zero; 32 ~ 1: index of set-bit)
+ */
+static inline kuint32_t fls_u32(kuint32_t x)
+{
+	kuint32_t nr = 32;
+
+	if (!x)
+		return 0;
+    
+	if (!(x & 0xffff0000)) 
+    {
+		x <<= 16;
+		nr -= 16;
+	}
+	if (!(x & 0xff000000)) 
+    {
+		x <<= 8;
+		nr -= 8;
+	}
+	if (!(x & 0xf0000000)) 
+    {
+		x <<= 4;
+		nr -= 4;
+	}
+	if (!(x & 0xc0000000)) 
+    {
+		x <<= 2;
+		nr -= 2;
+	}
+	if (!(x & 0x80000000)) 
+    {
+		x <<= 1;
+		nr -= 1;
+	}
+
+	return nr;
+}
+
+#ifndef mr_fls
+#define mr_fls(x)                                       fls_u32(x)
+#endif
+
+/*!
+ * @brief   get fisrt bit (value == 1) from high to low
+ * @param   x
+ * @retval  nr
+ * @note    for 64bits (0: x is zero; 32 ~ 1: index of set-bit)
+ */
+static inline kuint32_t fls_u64(kuint64_t x)
+{
+    kuint32_t nr;
+
+    nr = mr_fls((kuint32_t)(x >> 32));
+    if (nr)
+        return (nr + 32);
+
+    return mr_fls((kuint32_t)x);
+}
+
+#ifndef mr_flsll
+#define mr_flsll(x)                                     fls_u64(x)
+#endif
 
 #ifdef __cplusplus
     }
