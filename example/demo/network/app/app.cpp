@@ -110,7 +110,7 @@ void crt_lwip_data_t::excute(void)
     sgtc_remote.sin_addr.s_addr = fwk_inet_addr(REMOTE_IP_ADDRESS);
     memset(sgtc_remote.zero, 0, sizeof(sgtc_remote.zero));
 
-    len = socket_sendto(this->fd, msg, kstrlen(msg) + 1, 0, 
+    len = socket_sendto(this->fd, msg, string::strlen(msg) + 1, 0, 
                     (struct fwk_sockaddr *)&sgtc_remote, sizeof(struct fwk_sockaddr));
     if (len <= 0)
     {
@@ -138,7 +138,7 @@ void crt_lwip_data_t::excute(void)
     {
         kchar_t *buffer = (kchar_t *)sptr_mail->sptr_msg[0].buffer;
 
-        if (!kstrncmp(buffer, "echo", 4))
+        if (!string::strncmp(buffer, "echo", 4))
             this->echo_cnt++;
     }
 

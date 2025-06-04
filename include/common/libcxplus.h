@@ -299,7 +299,7 @@ public:
      * @retval  none
      * @note    return string lenth
      */
-    kuint32_t strlen(const kchar_t *__s)
+    static kuint32_t strlen(const kchar_t *__s)
     {
         return kstrlen(__s);
     }
@@ -310,7 +310,7 @@ public:
      * @retval  none
      * @note    copy src to dest
      */
-    kchar_t *strcpy(kchar_t *__dest, const kchar_t *__src)
+    static kchar_t *strcpy(kchar_t *__dest, const kchar_t *__src)
     {
         return kstrcpy(__dest, __src);
     }
@@ -321,7 +321,7 @@ public:
      * @retval  none
      * @note    copy src to dest
      */
-    kchar_t *strncpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
+    static kchar_t *strncpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
     {
         return kstrncpy(__dest, __src, __n);
     }
@@ -332,7 +332,7 @@ public:
      * @retval  none
      * @note    copy src to dest
      */
-    kusize_t strlcpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
+    static kusize_t strlcpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
     {
         return kstrlcpy(__dest, __src, __n);
     }
@@ -343,7 +343,7 @@ public:
      * @retval  none
      * @note    copy src to dest (reverse)
      */
-    kchar_t *strncpyr(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
+    static kchar_t *strncpyr(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
     {
         return kstrncpyr(__dest, __src, __n);
     }
@@ -354,7 +354,7 @@ public:
      * @retval  none
      * @note    compare s1 and s2
      */
-    kint32_t strcmp(const kchar_t *__s1, const kchar_t *__s2)
+    static kint32_t strcmp(const kchar_t *__s1, const kchar_t *__s2)
     {
         return kstrcmp(__s1, __s2);
     }
@@ -365,7 +365,7 @@ public:
      * @retval  none
      * @note    compare s1 and s2
      */
-    kint32_t strncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
+    static kint32_t strncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
     {
         return kstrncmp(__s1, __s2, __n);
     }
@@ -376,7 +376,7 @@ public:
      * @retval  none
      * @note    locate where the first "ch" appears
      */
-    kchar_t *strchr(const kchar_t *__s1, kint32_t ch)
+    static kchar_t *strchr(const kchar_t *__s1, kint32_t ch)
     {
         return kstrchr(__s1, (kchar_t)ch);
     }
@@ -387,7 +387,7 @@ public:
      * @retval  none
      * @note    locate where the n "ch" appears
      */
-    kchar_t *strnchr(const kchar_t *__s1, kchar_t ch, kint32_t n)
+    static kchar_t *strnchr(const kchar_t *__s1, kchar_t ch, kint32_t n)
     {
         return kstrnchr(__s1, ch, n);
     }
@@ -398,7 +398,7 @@ public:
      * @retval  none
      * @note    locate where the index "ch" appears
      */
-    kchar_t *strcut(const kchar_t *__s1, kuint32_t index)
+    static kchar_t *strcut(const kchar_t *__s1, kuint32_t index)
     {       
         return kstrcut(__s1, index);
     }

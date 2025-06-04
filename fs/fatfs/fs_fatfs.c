@@ -246,12 +246,17 @@ static kint32_t fatfs_dir_read(struct fs_list *sptr_list, const kchar_t *pattern
 
     for (;;)
     {
+        /*!< Initial */
+    	sgtc_finfo.fname[0] = '\0';
+        sgtc_finfo.altname[0] = '\0';
+
         retval = f_readdir(sptr_dir, &sgtc_finfo);
         if (retval != FR_OK)
             return -ER_FAILD;
 
         /*!< Read finished */
-        if (!sgtc_finfo.fname[0])
+        if (!sgtc_finfo.fname[0] &&
+            !sgtc_finfo.altname[0])
             break;
 
         /*!< Jump over child dirs */
@@ -259,8 +264,9 @@ static kint32_t fatfs_dir_read(struct fs_list *sptr_list, const kchar_t *pattern
 //          continue;
 
         /*!< Jump over hide files */
-        if (sgtc_finfo.fname[0] == '.') 
-            continue;
+//      if ((sgtc_finfo.fname[0] == '.') ||
+//          (sgtc_finfo.altname[0] == '.'))
+//          continue;
 
 //      if (pattern && !pattern_match(sgtc_finfo.fname, pattern)) 
 //          continue;
@@ -274,7 +280,7 @@ static kint32_t fatfs_dir_read(struct fs_list *sptr_list, const kchar_t *pattern
         memcpy(sptr_item->private_data, &sgtc_finfo, sizeof(sgtc_finfo));
 
         sptr_finfo = (FILINFO *)sptr_item->private_data;
-        sptr_item->name = sptr_finfo->fname;
+        sptr_item->name = sptr_finfo->fname[0] ? sptr_finfo->fname : sptr_finfo->altname;
         sptr_item->size = sptr_finfo->fsize;
 
         if (sgtc_finfo.fattrib & AM_DIR)

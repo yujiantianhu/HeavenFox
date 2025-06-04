@@ -67,9 +67,9 @@ static void *light_task_entry(void *args)
         {
             kchar_t *buffer = (kchar_t *)sptr_mail->sptr_msg[0].buffer;
 
-            if (!kstrncmp(buffer, "on", 2))
+            if (!string::strncmp(buffer, "on", 2))
                 status = 1;
-            else if (!kstrncmp(buffer, "off", 3))
+            else if (!string::strncmp(buffer, "off", 3))
                 status = 0;
         }
 

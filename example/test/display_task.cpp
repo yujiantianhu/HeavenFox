@@ -134,7 +134,7 @@ public:
         this->num  = mr_dir_items_num(sptr_dir);
 
         foreach_dir_item(sptr_item, sptr_dir)
-            kstrlcpy(this->text[i++], sptr_item->name, 32);
+            string::strlcpy(this->text[i++], sptr_item->name, 64);
 
         dir_close(sptr_dir);
     }
@@ -143,7 +143,7 @@ public:
 
 private:
     const kchar_t *path;
-    kchar_t text[32][32];
+    kchar_t text[32][64];
     kuint32_t num;
     kuint32_t cur_text;
 
@@ -417,14 +417,13 @@ static kssize_t display_task_text(crt_disp_task_t &cgtc_dtsk, crt_disp_text_t &c
 
         if (sptr_mail->sptr_msg->type == NR_MAIL_TYPE_SERIAL)
         {
-            bsc::string cgtc_str;
             kchar_t *buffer = (kchar_t *)sptr_mail->sptr_msg[0].buffer;
 
-            if (!cgtc_str.strncmp(buffer, "up", 2))
+            if (!string::strncmp(buffer, "up", 2))
                 nr_op = NR_DISP_TEXT_UP;
-            else if (!cgtc_str.strncmp(buffer, "down", 4)) 
+            else if (!string::strncmp(buffer, "down", 4)) 
                 nr_op = NR_DISP_TEXT_DOWN;
-            else if (!cgtc_str.strncmp(buffer, "exit", 4))
+            else if (!string::strncmp(buffer, "exit", 4))
                 nr_op = NR_DISP_TEXT_EXIT;
         }
 

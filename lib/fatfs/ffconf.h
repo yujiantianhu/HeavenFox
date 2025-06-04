@@ -77,7 +77,7 @@
 / Locale and Namespace Configurations
 /---------------------------------------------------------------------------*/
 
-#define _CODE_PAGE	932
+#define _CODE_PAGE	936
 /* This option specifies the OEM code page to be used on the target system.
 /  Incorrect setting of the code page can cause a file open failure.
 /
@@ -106,8 +106,8 @@
 */
 
 
-#define	_USE_LFN	0
-#define	_MAX_LFN	255
+#define	_USE_LFN	1
+#define	_MAX_LFN	63
 /* The _USE_LFN switches the support of long file name (LFN).
 /
 /   0: Disable support of LFN. _MAX_LFN has no effect.

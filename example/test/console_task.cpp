@@ -48,9 +48,9 @@ static void command_mail_to_light(crt_task_t *cptr_this, const kchar_t *command_
     struct mail_msg sgtc_msg[1] = {};
     kuint8_t status = 0;
 
-    if (!kstrncmp(command_line, "led1 on", 7))
+    if (!string::strncmp(command_line, "led1 on", 7))
         status = 1;
-    else if (!kstrncmp(command_line, "led1 off", 8))
+    else if (!string::strncmp(command_line, "led1 off", 8))
         status = 0;
     else
         return;
@@ -80,9 +80,9 @@ static void command_mail_to_display(crt_task_t *cptr_this, const kchar_t *comman
     struct mail_msg sgtc_msg[1] = {};
     kuint8_t status = 0;
 
-    if (!kstrncmp(command_line, "page up", 9))
+    if (!string::strncmp(command_line, "page up", 9))
         status = 1;
-    else if (!kstrncmp(command_line, "page down", 8))
+    else if (!string::strncmp(command_line, "page down", 8))
         status = 2;
     else
         return;
