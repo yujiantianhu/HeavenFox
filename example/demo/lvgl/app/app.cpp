@@ -211,15 +211,15 @@ static void lvgl_time_event(lv_timer_t *sptr_timer)
  */
 void lvgl_task_setup(void *args)
 {
-    crt_main_ui_t *cprt_ui;
+    crt_main_ui_t *cptr_ui;
 
-    cprt_ui = new crt_main_ui_t;
-    if (!cprt_ui)
+    cptr_ui = new crt_main_ui_t;
+    if (!cptr_ui)
         return;
 
-    cprt_ui->setup_desktop();
-    cprt_ui->setup_status_bar();
-    cprt_ui->setup_icon();
+    cptr_ui->setup_desktop();
+    cptr_ui->setup_status_bar();
+    cptr_ui->setup_icon();
 }
 
 /*!

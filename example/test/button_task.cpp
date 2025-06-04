@@ -43,10 +43,10 @@ using namespace bsc;
  */
 static void *button_task_entry(void *args)
 {
-    crt_task_t *cprt_this = (crt_task_t *)args;
+    crt_task_t *cptr_this = (crt_task_t *)args;
     kuint8_t status = 0, last_status = 0;
     kint32_t fd;
-    struct mailbox &sgtc_mb = cprt_this->get_mailbox();
+    struct mailbox &sgtc_mb = cptr_this->get_mailbox();
     struct mail *sptr_mail = mr_nullptr;
     struct mail_msg sgtc_msg[1] = {};
     kchar_t msgs[8];
@@ -115,16 +115,16 @@ kint32_t button_task_init(void)
 {
     static kuint8_t g_button_task_stack[BUTTON_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("button_task", 
+    crt_task_t *cptr_task = new crt_task_t("button_task", 
                                             button_task_entry, 
                                             g_button_task_stack, 
                                             sizeof(g_button_task_stack),
                                             __THREAD_HIGHER_DEFAULT(1));
-    if (!cprt_task)
+    if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cprt_task->get_self(), "button-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->get_self(), "button-task-mailbox");
 
     return ER_NORMAL;
 }

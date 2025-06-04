@@ -37,13 +37,13 @@ using namespace bsc;
 /*!< API functions */
 /*!
  * @brief  send mail to light thread
- * @param  cprt_this, command_line
+ * @param  cptr_this, command_line
  * @retval none
  * @note   none
  */
-static void command_mail_to_light(crt_task_t *cprt_this, const kchar_t *command_line)
+static void command_mail_to_light(crt_task_t *cptr_this, const kchar_t *command_line)
 {
-    struct mailbox &sgtc_mb = cprt_this->get_mailbox();
+    struct mailbox &sgtc_mb = cptr_this->get_mailbox();
     struct mail sgtc_mail;
     struct mail_msg sgtc_msg[1] = {};
     kuint8_t status = 0;
@@ -69,13 +69,13 @@ static void command_mail_to_light(crt_task_t *cprt_this, const kchar_t *command_
 
 /*!
  * @brief  send mail to display thread
- * @param  cprt_this, command_line
+ * @param  cptr_this, command_line
  * @retval none
  * @note   none
  */
-static void command_mail_to_display(crt_task_t *cprt_this, const kchar_t *command_line)
+static void command_mail_to_display(crt_task_t *cptr_this, const kchar_t *command_line)
 {
-    struct mailbox &sgtc_mb = cprt_this->get_mailbox();
+    struct mailbox &sgtc_mb = cptr_this->get_mailbox();
     struct mail sgtc_mail;
     struct mail_msg sgtc_msg[1] = {};
     kuint8_t status = 0;
@@ -107,21 +107,21 @@ static void command_mail_to_display(crt_task_t *cprt_this, const kchar_t *comman
  */
 static void *console_task_entry(void *args)
 {   
-    crt_task_t *cprt_this = (crt_task_t *)args;
-    string cgrt_str(1024);
+    crt_task_t *cptr_this = (crt_task_t *)args;
+    string cgtc_str(1024);
 
     for (;;)
     {       
         do {
             /*!< read command line */
-            cin >> cgrt_str;
+            cin >> cgtc_str;
 
-        } while (cgrt_str.size() <= 0);
+        } while (cgtc_str.size() <= 0);
 
-        cout << "recv command line, data is: " << cgrt_str.c_str() << endl;
+        cout << "recv command line, data is: " << cgtc_str.c_str() << endl;
 
-        command_mail_to_light(cprt_this, cgrt_str.c_str());
-        command_mail_to_display(cprt_this, cgrt_str.c_str());
+        command_mail_to_light(cptr_this, cgtc_str.c_str());
+        command_mail_to_display(cptr_this, cgtc_str.c_str());
     }
 
     return args;
@@ -137,15 +137,15 @@ kint32_t console_task_init(void)
 {
     static kuint8_t g_console_task_stack[CONSOLE_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("console task", 
+    crt_task_t *cptr_task = new crt_task_t("console task", 
                                             console_task_entry, 
                                             g_console_task_stack, 
                                             sizeof(g_console_task_stack));
-    if (!cprt_task)
+    if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cprt_task->get_self(), "console-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->get_self(), "console-task-mailbox");
 
     return ER_NORMAL;
 }

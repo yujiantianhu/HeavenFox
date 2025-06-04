@@ -98,8 +98,8 @@ void crt_lwip_data_t::excute(void)
     const kchar_t *msg = "HeavenFox OS will be all the best!";
     fwk_socklen_t addrlen;
     kssize_t len;
-    crt_task_t *cprt_this = (crt_task_t *)this->args;
-    struct mailbox &sgtc_mb = cprt_this->get_mailbox();
+    crt_task_t *cptr_this = (crt_task_t *)this->args;
+    struct mailbox &sgtc_mb = cptr_this->get_mailbox();
     struct mail *sptr_mail;
 
     if (this->fd < 0)

@@ -77,17 +77,17 @@ kint32_t lvgl_task_init(void)
 {
     static kuint8_t g_lvgl_task_stack[LVGL_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("lvgl_task", 
+    crt_task_t *cptr_task = new crt_task_t("lvgl_task", 
                                             lvgl_task_entry, 
                                             g_lvgl_task_stack, 
                                             sizeof(g_lvgl_task_stack),
                                             THREAD_PROTY_DEFAULT,
                                             100);
-    if (!cprt_task)
+    if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cprt_task->get_self(), "lvgl-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->get_self(), "lvgl-task-mailbox");
 
     return ER_NORMAL;
 }

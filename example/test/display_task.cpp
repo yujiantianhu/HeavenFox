@@ -54,22 +54,22 @@ enum disp_text_op
 };
 
 /*!< The functions */
-static void display_task_clear(crt_disp_base_t &cgrt_this);
-static void display_task_cursor(crt_disp_base_t &cgrt_this, 
+static void display_task_clear(crt_disp_base_t &cgtc_this);
+static void display_task_cursor(crt_disp_base_t &cgtc_this, 
                         kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end);
-static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &cgrt_text,
+static kssize_t display_task_text(crt_disp_task_t &cgtc_dtsk, crt_disp_text_t &cgtc_text,
                         struct fs_stream *sptr_file);
 
 /*!< The defines */
 /*!< base class for display */
 class crt_disp_base_t 
 {
-    friend void display_task_clear(crt_disp_base_t &cgrt_this);
-    friend void display_task_cursor(crt_disp_base_t &cgrt_this, 
+    friend void display_task_clear(crt_disp_base_t &cgtc_this);
+    friend void display_task_cursor(crt_disp_base_t &cgtc_this, 
                         kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end);
 
 public:
-    crt_disp_base_t(crt_disp_task_t &cgrt_dtsk);
+    crt_disp_base_t(crt_disp_task_t &cgtc_dtsk);
     ~crt_disp_base_t() {}
 
 protected:
@@ -80,8 +80,8 @@ protected:
 class crt_disp_bmp_t : virtual public crt_disp_base_t
 {
 public:
-    crt_disp_bmp_t(crt_disp_task_t &cgrt_dtsk) 
-        : crt_disp_base_t(cgrt_dtsk)
+    crt_disp_bmp_t(crt_disp_task_t &cgtc_dtsk) 
+        : crt_disp_base_t(cgtc_dtsk)
         , bmp(mr_nullptr) 
     {}
     ~crt_disp_bmp_t() {}
@@ -90,7 +90,7 @@ public:
     {
         this->bmp = bmp;
     }
-    void show(crt_disp_task_t &cgrt_dtsk);
+    void show(crt_disp_task_t &cgtc_dtsk);
 
 private:
     const kchar_t *bmp;
@@ -99,12 +99,12 @@ private:
 /*!< text class */
 class crt_disp_text_t : virtual public crt_disp_base_t
 {
-    friend kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &cgrt_text,
+    friend kssize_t display_task_text(crt_disp_task_t &cgtc_dtsk, crt_disp_text_t &cgtc_text,
                         struct fs_stream *sptr_file);
     
 public:
-    crt_disp_text_t(crt_disp_task_t &cgrt_dtsk, kuint32_t pages)
-        : crt_disp_base_t(cgrt_dtsk)
+    crt_disp_text_t(crt_disp_task_t &cgtc_dtsk, kuint32_t pages)
+        : crt_disp_base_t(cgtc_dtsk)
         , num(0)
         , cur_text(0)
         , pages(pages)
@@ -139,7 +139,7 @@ public:
         dir_close(sptr_dir);
     }
 
-    kint32_t show(crt_disp_task_t &cgrt_dtsk);
+    kint32_t show(crt_disp_task_t &cgtc_dtsk);
 
 private:
     const kchar_t *path;
@@ -160,10 +160,10 @@ class crt_disp_task_t
     friend crt_disp_text_t;
 
 public:
-    crt_disp_task_t(crt_task_t *cprt_task, const kchar_t *file, kuint32_t mode);
+    crt_disp_task_t(crt_task_t *cptr_task, const kchar_t *file, kuint32_t mode);
     ~crt_disp_task_t();
 
-    crt_task_t *cprt_task;
+    crt_task_t *cptr_task;
     kint32_t fd;
 
 private:
@@ -189,8 +189,8 @@ static const kchar_t *g_display_windows = CONFIG_WALL_PAPER;
  * @retval 	none
  * @note   	none
  */
-crt_disp_task_t::crt_disp_task_t(crt_task_t *cprt_task, const kchar_t *file, kuint32_t mode)
-    : cprt_task(cprt_task)
+crt_disp_task_t::crt_disp_task_t(crt_task_t *cptr_task, const kchar_t *file, kuint32_t mode)
+    : cptr_task(cptr_task)
     , fb_buffer1(mr_nullptr)
     , fb_buffer2(mr_nullptr)
 {
@@ -274,9 +274,9 @@ static void display_task_settings_init(struct fwk_font_setting *sptr_set)
  * @retval none
  * @note   do display
  */
-static void display_task_clear(crt_disp_base_t &cgrt_this)
+static void display_task_clear(crt_disp_base_t &cgtc_this)
 {
-    struct fwk_disp_ctrl &sgtc_dctrl = cgrt_this.sgtc_dctrl;
+    struct fwk_disp_ctrl &sgtc_dctrl = cgtc_this.sgtc_dctrl;
     fwk_display_clear(sgtc_dctrl.sptr_di, sgtc_dctrl.sgtc_set.background);
 }
 
@@ -286,10 +286,10 @@ static void display_task_clear(crt_disp_base_t &cgrt_this)
  * @retval none
  * @note   do display
  */
-static void display_task_cursor(crt_disp_base_t &cgrt_this, 
+static void display_task_cursor(crt_disp_base_t &cgtc_this, 
                         kuint32_t x_start, kuint32_t y_start, kuint32_t x_end, kuint32_t y_end)
 {
-    struct fwk_disp_ctrl &sgtc_dctrl = cgrt_this.sgtc_dctrl;
+    struct fwk_disp_ctrl &sgtc_dctrl = cgtc_this.sgtc_dctrl;
     struct fwk_disp_info *sptr_disp = sgtc_dctrl.sptr_di;
     struct fwk_font_setting *sptr_set = &sgtc_dctrl.sgtc_set;
 
@@ -304,13 +304,13 @@ static void display_task_cursor(crt_disp_base_t &cgrt_this,
  * @retval 	none
  * @note   	none
  */
-crt_disp_base_t::crt_disp_base_t(crt_disp_task_t &cgrt_dtsk)
+crt_disp_base_t::crt_disp_base_t(crt_disp_task_t &cgtc_dtsk)
 {
     struct fwk_disp_ctrl &sgtc_dctrl = this->sgtc_dctrl;
     struct fwk_font_setting &sgtc_set = this->sgtc_dctrl.sgtc_set;
 
-    sgtc_dctrl.sptr_di = &cgrt_dtsk.sgtc_disp;
-    if (cgrt_dtsk.fd < 0)
+    sgtc_dctrl.sptr_di = &cgtc_dtsk.sgtc_disp;
+    if (cgtc_dtsk.fd < 0)
         return;
 
     display_task_settings_init(&sgtc_set);
@@ -322,7 +322,7 @@ crt_disp_base_t::crt_disp_base_t(crt_disp_task_t &cgrt_dtsk)
  * @retval none
  * @note   do display
  */
-void crt_disp_bmp_t::show(crt_disp_task_t &cgrt_dtsk)
+void crt_disp_bmp_t::show(crt_disp_task_t &cgtc_dtsk)
 {
     struct fwk_disp_ctrl &sgtc_dctrl = this->sgtc_dctrl;
     struct fwk_disp_info *sptr_disp = sgtc_dctrl.sptr_di;
@@ -352,13 +352,13 @@ void crt_disp_bmp_t::show(crt_disp_task_t &cgrt_dtsk)
     fwk_bitmap_ctrl_init(&sgtc_bctl, sptr_disp, 0, 0);
     fwk_display_whole_bitmap(&sgtc_bctl, (const kuint8_t *)g_display_buffer);
 
-    virt_ioctl(cgrt_dtsk.fd, NR_FB_IOGET_VARINFO, &sgtc_var);
+    virt_ioctl(cgtc_dtsk.fd, NR_FB_IOGET_VARINFO, &sgtc_var);
     if (!sgtc_var.yoffset)
         sgtc_var.yoffset += sgtc_var.yres;
     else
         sgtc_var.yoffset = 0;
     
-    virt_ioctl(cgrt_dtsk.fd, NR_FB_IOSET_VARINFO, &sgtc_var);
+    virt_ioctl(cgtc_dtsk.fd, NR_FB_IOSET_VARINFO, &sgtc_var);
 
 END:
     file_close(sptr_file);
@@ -370,11 +370,11 @@ END:
  * @retval none
  * @note   do display
  */
-static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &cgrt_text,
+static kssize_t display_task_text(crt_disp_task_t &cgtc_dtsk, crt_disp_text_t &cgtc_text,
                         struct fs_stream *sptr_file)
 {
-    struct mailbox &sgtc_mb = cgrt_dtsk.cprt_task->get_mailbox();
-    struct fwk_disp_ctrl &sgtc_dctrl = cgrt_text.sgtc_dctrl;
+    struct mailbox &sgtc_mb = cgtc_dtsk.cptr_task->get_mailbox();
+    struct fwk_disp_ctrl &sgtc_dctrl = cgtc_text.sgtc_dctrl;
     struct fwk_disp_info *sptr_disp = sgtc_dctrl.sptr_di;
     struct mail *sptr_mail;
     struct fwk_fb_var_screen_info sgtc_var;
@@ -383,11 +383,11 @@ static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &c
     kusize_t page_index = 0;
 
     fwk_display_frame_exchange(sptr_disp);
-    display_task_clear(cgrt_text);
-    display_task_cursor(cgrt_text, 0, 0, sptr_disp->width, sptr_disp->height);
+    display_task_clear(cgtc_text);
+    display_task_cursor(cgtc_text, 0, 0, sptr_disp->width, sptr_disp->height);
 
-    page_index = cgrt_text.cur_page;
-    offset = cgrt_text.text_pages[page_index];
+    page_index = cgtc_text.cur_page;
+    offset = cgtc_text.text_pages[page_index];
     while (!IS_DISP_FRAME_FULL(&sgtc_dctrl))
     {
         file_lseek(sptr_file, offset);
@@ -399,13 +399,13 @@ static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &c
         offset += fwk_display_word(&sgtc_dctrl, g_display_buffer);
     }
 
-    virt_ioctl(cgrt_dtsk.fd, NR_FB_IOGET_VARINFO, &sgtc_var);
+    virt_ioctl(cgtc_dtsk.fd, NR_FB_IOGET_VARINFO, &sgtc_var);
     if (!sgtc_var.yoffset)
         sgtc_var.yoffset += sgtc_var.yres;
     else
         sgtc_var.yoffset = 0;
     
-    virt_ioctl(cgrt_dtsk.fd, NR_FB_IOSET_VARINFO, &sgtc_var);
+    virt_ioctl(cgtc_dtsk.fd, NR_FB_IOSET_VARINFO, &sgtc_var);
 
     do {
         sptr_mail = mail_recv(&sgtc_mb, 0);
@@ -438,9 +438,9 @@ static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &c
             page_index = page_index ? (page_index - 1) : 0;
             break;
         case NR_DISP_TEXT_DOWN:
-            if (page_index < cgrt_text.pages)
+            if (page_index < cgtc_text.pages)
                 page_index++;
-            cgrt_text.text_pages[page_index] = offset;
+            cgtc_text.text_pages[page_index] = offset;
             break;
         case NR_DISP_TEXT_EXIT:
             page_index = 0;
@@ -451,7 +451,7 @@ static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &c
             break;
     }
 
-    cgrt_text.cur_page = page_index;
+    cgtc_text.cur_page = page_index;
     return size;
 }
 
@@ -461,11 +461,11 @@ static kssize_t display_task_text(crt_disp_task_t &cgrt_dtsk, crt_disp_text_t &c
  * @retval none
  * @note   do display
  */
-kint32_t crt_disp_text_t::show(crt_disp_task_t &cgrt_dtsk)
+kint32_t crt_disp_text_t::show(crt_disp_task_t &cgtc_dtsk)
 {
     struct fs_stream *sptr_file;
     kchar_t full_path[128];
-    struct mailbox &sgtc_mb = cgrt_dtsk.cprt_task->get_mailbox();
+    struct mailbox &sgtc_mb = cgtc_dtsk.cptr_task->get_mailbox();
     struct mail *sptr_mail;
     enum disp_text_op nr_op = NR_DISP_TEXT_NONE;
     kuint8_t text_index = 0;
@@ -539,7 +539,7 @@ kint32_t crt_disp_text_t::show(crt_disp_task_t &cgrt_dtsk)
     this->cur_page = 0;
     memset_ex(this->text_pages, 0, this->pages);
 
-    while ((retval = display_task_text(cgrt_dtsk, *this, sptr_file)) > 0);
+    while ((retval = display_task_text(cgtc_dtsk, *this, sptr_file)) > 0);
     file_close(sptr_file);
 
     if (retval == (-NR_DISP_TEXT_EXIT))
@@ -559,34 +559,34 @@ kint32_t crt_disp_text_t::show(crt_disp_task_t &cgrt_dtsk)
  */
 static void *display_task_entry(void *args)
 {
-    crt_task_t *cprt_this = (crt_task_t *)args;
-    crt_disp_task_t cgrt_dtsk(cprt_this, "/dev/fb0", O_RDWR);
-    crt_disp_bmp_t cgrt_logo(cgrt_dtsk);
-    crt_disp_bmp_t cgrt_windows(cgrt_dtsk);
-    crt_disp_text_t cgrt_txt(cgrt_dtsk, 1024);
+    crt_task_t *cptr_this = (crt_task_t *)args;
+    crt_disp_task_t cgtc_dtsk(cptr_this, "/dev/fb0", O_RDWR);
+    crt_disp_bmp_t cgtc_logo(cgtc_dtsk);
+    crt_disp_bmp_t cgtc_windows(cgtc_dtsk);
+    crt_disp_text_t cgtc_txt(cgtc_dtsk, 1024);
     
     kint32_t retval;
 
-    if (cgrt_dtsk.fd < 0)
+    if (cgtc_dtsk.fd < 0)
         goto fail;
 
-    cgrt_logo.set_src(g_display_logo);
-    cgrt_windows.set_src(g_display_windows);
-    cgrt_txt.set_src(g_display_text_path);
+    cgtc_logo.set_src(g_display_logo);
+    cgtc_windows.set_src(g_display_windows);
+    cgtc_txt.set_src(g_display_text_path);
 
     mr_preempt_disable();
-    cgrt_logo.show(cgrt_dtsk);
+    cgtc_logo.show(cgtc_dtsk);
     mr_preempt_enable();
-    sleep(2);
+    sleep(1);
 
-    cgrt_windows.show(cgrt_dtsk);
+    cgtc_windows.show(cgtc_dtsk);
     sleep(1);
 
     for (;;)
     {
-        retval = cgrt_txt.show(cgrt_dtsk);
+        retval = cgtc_txt.show(cgtc_dtsk);
         if (retval == NR_DISP_TEXT_EXIT)
-            cgrt_windows.show(cgrt_dtsk);
+            cgtc_windows.show(cgtc_dtsk);
 
         msleep(200);
     }
@@ -607,17 +607,17 @@ kint32_t display_task_init(void)
 {
     static kuint8_t g_display_task_stack[DISPLAY_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("display_task", 
+    crt_task_t *cptr_task = new crt_task_t("display_task", 
                                             display_task_entry, 
                                             g_display_task_stack, 
                                             sizeof(g_display_task_stack),
                                             THREAD_PROTY_DEFAULT,
                                             100);
-    if (!cprt_task)
+    if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cprt_task->get_self(), "display-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->get_self(), "display-task-mailbox");
 
     return ER_NORMAL;
 }

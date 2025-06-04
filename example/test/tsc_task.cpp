@@ -88,15 +88,15 @@ kint32_t tsc_task_init(void)
 {
     static kuint8_t g_tsc_task_stack[TSC_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("tsc task", 
+    crt_task_t *cptr_task = new crt_task_t("tsc task", 
                                             tsc_task_entry, 
                                             g_tsc_task_stack, 
                                             sizeof(g_tsc_task_stack));
-    if (!cprt_task)
+    if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cprt_task->get_self(), "tsc-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->get_self(), "tsc-task-mailbox");
 
     return ER_NORMAL;
 }

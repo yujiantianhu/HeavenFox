@@ -45,16 +45,16 @@ static crt_lwip_data_t sgtc_network_task_data;
  */
 static void *network_task_entry(void *args)
 {
-    crt_lwip_data_t &cgrt_data = sgtc_network_task_data;
+    crt_lwip_data_t &cgtc_data = sgtc_network_task_data;
 
-    cgrt_data.args = args;
-    cgrt_data.echo_cnt = 0;
+    cgtc_data.args = args;
+    cgtc_data.echo_cnt = 0;
 
-    cgrt_data.startup();
+    cgtc_data.startup();
 
     for (;;)
     {
-        cgrt_data.excute();
+        cgtc_data.excute();
         sleep(1);
     }
 
@@ -71,17 +71,17 @@ kint32_t network_task_init(void)
 {
     static kuint8_t g_network_task_stack[NETWORK_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("network_task", 
+    crt_task_t *cptr_task = new crt_task_t("network_task", 
                                             network_task_entry, 
                                             g_network_task_stack, 
                                             sizeof(g_network_task_stack),
                                             THREAD_PROTY_DEFAULT,
                                             100);
-    if (!cprt_task)
+    if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cprt_task->get_self(), "network-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->get_self(), "network-task-mailbox");
 
     return ER_NORMAL;
 }

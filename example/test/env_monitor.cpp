@@ -115,15 +115,15 @@ kint32_t env_monitor_init(void)
 {
     static kuint8_t g_env_monitor_stack[ENV_TASK_STACK_SIZE];
 
-    crt_task_t *cprt_task = new crt_task_t("env_monitor_task", 
+    crt_task_t *cptr_task = new crt_task_t("env_monitor_task", 
                                             env_monitor_entry, 
                                             g_env_monitor_stack, 
                                             sizeof(g_env_monitor_stack));
-    if (!cprt_task)
+    if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cprt_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cprt_task->get_self(), "env_monitor-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->get_self(), "env_monitor-task-mailbox");
 
     return ER_NORMAL;
 }
