@@ -16,7 +16,7 @@
 
 /*!< The functions */
 static struct mem_block *check_employ_simple_memory(void *ptr_head, void *ptr_mem);
-static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size);
+static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size, struct m_area *sptr_real);
 static void free_employ_simple_memory(struct mem_info *sptr_info, void *ptr_mem);
 
 /*!< API function */
@@ -93,11 +93,11 @@ void memory_simple_block_destroy(struct mem_info *sptr_info)
  * @retval  avaliable memory block pointer
  * @note    allocate spare memory space
  */
-static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size)
+static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size, struct m_area *sptr_real)
 {
     struct mem_block *sptr_start;
     struct mem_block *sptr_block;
-    struct mem_block *sptr_new;
+    struct mem_block *sptr_new = mr_nullptr;
     kusize_t header_size, lenth, offset;
     void *ptr_mem = mr_nullptr;
 
@@ -156,6 +156,14 @@ static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size
             {
                 /*!< Update the lenth of memory that is avaliable */
                 sptr_block->remain -= lenth;
+            }
+
+            /*!< Record information */
+            if (mr_likely(sptr_real))
+            {
+                sptr_real->base = sptr_new ? (void *)sptr_new : (void *)sptr_block;
+                sptr_real->offset = header_size;
+                sptr_real->size = lenth;
             }
 
             break;

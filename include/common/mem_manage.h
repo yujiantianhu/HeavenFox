@@ -92,7 +92,7 @@ typedef struct mem_info
     struct mem_block *sptr_mem;
     struct mem_hash sgtc_hash[NR_MEM_NUM];
 
-    void *(*alloc)(struct mem_info *sptr_info, kusize_t size);
+    void *(*alloc)(struct mem_info *sptr_info, kusize_t size, struct m_area *sptr_real);
     void (*free)(struct mem_info *sptr_info, void *ptr_mem);
 
 } srt_mem_info_t;

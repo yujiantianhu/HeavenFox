@@ -120,7 +120,7 @@ void malloc_block_destroy(void)
 __weak void *malloc(size_t __size)
 {
     if (sgtc_infoMalloc.alloc)
-        return sgtc_infoMalloc.alloc(&sgtc_infoMalloc, __size);
+        return sgtc_infoMalloc.alloc(&sgtc_infoMalloc, __size, mr_nullptr);
 
     return mr_nullptr;
 }

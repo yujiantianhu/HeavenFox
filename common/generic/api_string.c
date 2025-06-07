@@ -614,7 +614,7 @@ kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t *ptr_f
                     if (is_hexprex)
                         mode = (ch > 'a') ? 0 : 1;
 
-                    if (ch == 'p')
+                    if ((ch == 'p') || (ch == 'P'))
                         hex_num = (kutype_t)va_arg(ptr_list, void *);
                     else
                         hex_num = (kutype_t)va_arg(ptr_list, kutype_t);

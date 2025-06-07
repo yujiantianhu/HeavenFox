@@ -423,7 +423,7 @@ void *tmalloc(size_t __size, nrt_gfp_t flags)
     sptr_info = &sptr_thread->sptr_attr->sgtc_pool;
     if (sptr_info->alloc)
     {
-        p = sptr_info->alloc(sptr_info, __size);
+        p = sptr_info->alloc(sptr_info, __size, mr_nullptr);
         if (!isValid(p))
             return mr_nullptr;
 

@@ -431,6 +431,7 @@ static const term_cmd_fn_t g_term_cmd_fn[] =
     term_cmd_add_user,
     term_cmd_add_kill,
     term_cmd_add_history,
+    term_cmd_add_mem,
 
     mr_nullptr,
 };
@@ -494,7 +495,7 @@ static kubyte_t term_getc(kubyte_t *ch)
  */
 static kssize_t term_getstr(kubyte_t *msgs, kusize_t size)
 {
-    return virt_read(g_term_fd, msgs, size);;
+    return virt_read(g_term_fd, msgs, size);
 }
 
 /*!< io stream reality */

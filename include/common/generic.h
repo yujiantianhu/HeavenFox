@@ -362,6 +362,75 @@ static inline kuint32_t clz_u32(kuint32_t val)
 /*!
  * @brief   get fisrt bit (value == 1) from low to high
  * @param   x
+ * @retval  nr (0: x is zero; 1 ~ 8: index of set-bit)
+ * @note    for 8bits. such as 0x80, nr = 8
+ */
+static inline kuint32_t ffs_u8(kuint8_t x)
+{
+    kuint32_t nr = 1;
+
+    if (!x)
+        return 0;
+
+    if (!(x & 0xf)) 
+    {
+        x >>= 4;
+        nr += 4;
+    }
+    if (!(x & 3)) 
+    {
+        x >>= 2;
+        nr += 2;
+    }
+    if (!(x & 1)) 
+    {
+        x >>= 1;
+        nr += 1;
+    }
+
+    return nr;
+}
+
+/*!
+ * @brief   get fisrt bit (value == 1) from low to high
+ * @param   x
+ * @retval  nr (0: x is zero; 1 ~ 16: index of set-bit)
+ * @note    for 16bits. such as 0x8000, nr = 16
+ */
+static inline kuint32_t ffs_u16(kuint16_t x)
+{
+    kuint32_t nr = 1;
+
+    if (!x)
+        return 0;
+
+    if (!(x & 0xff)) 
+    {
+        x >>= 8;
+        nr += 8;
+    }
+    if (!(x & 0xf)) 
+    {
+        x >>= 4;
+        nr += 4;
+    }
+    if (!(x & 3)) 
+    {
+        x >>= 2;
+        nr += 2;
+    }
+    if (!(x & 1)) 
+    {
+        x >>= 1;
+        nr += 1;
+    }
+
+    return nr;
+}
+
+/*!
+ * @brief   get fisrt bit (value == 1) from low to high
+ * @param   x
  * @retval  nr (0: x is zero; 1 ~ 32: index of set-bit)
  * @note    for 32bits. such as 0x80000000, nr = 32
  */

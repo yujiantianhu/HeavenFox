@@ -18,52 +18,56 @@
 #include <kernel/spinlock.h>
 
 /*!< The defines */
+struct fwk_mem_info
+{
+    struct mem_info sgtc_info;
+    struct m_area sgtc_maxrec;
+};
+
 struct fwk_mempool
 {
     const kchar_t *name;
     kuint32_t mask;
-    struct mem_info *sptr_info;
+    struct fwk_mem_info *sptr_mn;
 
     struct wait_queue_head sgtc_wqh;
     struct spin_lock sgtc_lock;
 };
 
-#define FWK_MEMPOOL_FIXDATA             0
-#define FWK_MEMPOOL_KERNEL              1
-#define FWK_MEMPOOL_DMA                 2
-#define FWK_MEMPOOL_FB_DRAM             3
-#define FWK_MEMPOOL_SK_BUFF             4
-#define FWK_MEMPOOL_TYPE_MAX            5
-
 /*!< The globals */
-static struct mem_info sgtc_kernel_mem_info[FWK_MEMPOOL_TYPE_MAX] = {};
+static struct fwk_mem_info sgtc_mempool_info[NR_FWK_MEMPOOL_TYPE_MAX] = {};
 
-static struct fwk_mempool sgtc_kernel_mempool[FWK_MEMPOOL_TYPE_MAX] =
+/*!< Memory Pool Area */
+static struct fwk_mempool sgtc_kernel_mempool[NR_FWK_MEMPOOL_TYPE_MAX] =
 {
-    {
-        .name = "fixed data",
-        .mask = NR_KMEM_FIXDATA,
-        .sptr_info = &sgtc_kernel_mem_info[FWK_MEMPOOL_FIXDATA],
-    },
-    {
+    [NR_FWK_MEMPOOL_KERNEL] = {
         .name = "kernel heap",
         .mask = NR_KMEM_NORMAL,
-        .sptr_info = &sgtc_kernel_mem_info[FWK_MEMPOOL_KERNEL],
+        .sptr_mn = &sgtc_mempool_info[NR_FWK_MEMPOOL_KERNEL],
     },
-    {
+
+    [NR_FWK_MEMPOOL_DMA] = {
         .name = "dma",
         .mask = NR_KMEM_DMA_AREA,
-        .sptr_info = &sgtc_kernel_mem_info[FWK_MEMPOOL_DMA],
+        .sptr_mn = &sgtc_mempool_info[NR_FWK_MEMPOOL_DMA],
     },
-    {
-        .name = "framebuffer",
-        .mask = NR_KMEM_FBUFFER,
-        .sptr_info = &sgtc_kernel_mem_info[FWK_MEMPOOL_FB_DRAM],
-    },
-    {
+
+    [NR_FWK_MEMPOOL_SK_BUFF] = {
         .name = "network",
         .mask = NR_KMEM_SK_BUFF,
-        .sptr_info = &sgtc_kernel_mem_info[FWK_MEMPOOL_SK_BUFF],
+        .sptr_mn = &sgtc_mempool_info[NR_FWK_MEMPOOL_SK_BUFF],
+    },
+
+    [NR_FWK_MEMPOOL_FB_DRAM] = {
+        .name = "framebuffer",
+        .mask = NR_KMEM_FBUFFER,
+        .sptr_mn = &sgtc_mempool_info[NR_FWK_MEMPOOL_FB_DRAM],
+    },
+
+    [NR_FWK_MEMPOOL_FIXDATA] = {
+        .name = "fixed data",
+        .mask = NR_KMEM_FIXDATA,
+        .sptr_mn = &sgtc_mempool_info[NR_FWK_MEMPOOL_FIXDATA],
     },
 };
 
@@ -81,8 +85,8 @@ kbool_t fwk_mempool_initial(void)
     kint32_t retval;
 
     /*!< ------------------------------------------------------------ */
-    sptr_pool = &sgtc_kernel_mempool[FWK_MEMPOOL_KERNEL];
-    sptr_info = sptr_pool->sptr_info;
+    sptr_pool = &sgtc_kernel_mempool[NR_FWK_MEMPOOL_KERNEL];
+    sptr_info = &sptr_pool->sptr_mn->sgtc_info;
     retval = memory_block_create(sptr_info, MEMORY_POOL_BASE, MEMORY_POOL_SIZE);
     if (retval)
         return false;
@@ -91,22 +95,22 @@ kbool_t fwk_mempool_initial(void)
     spin_lock_init(&sptr_pool->sgtc_lock);
 
     /*!< ------------------------------------------------------------ */
-    sptr_pool = &sgtc_kernel_mempool[FWK_MEMPOOL_DMA];
-    sptr_info = sptr_pool->sptr_info;
-    memory_simple_block_create(sptr_info, DMA_AREA_BASE, DMA_AREA_SIZE);
+    sptr_pool = &sgtc_kernel_mempool[NR_FWK_MEMPOOL_DMA];
+    sptr_info = &sptr_pool->sptr_mn->sgtc_info;
+    memory_block_create(sptr_info, DMA_AREA_BASE, DMA_AREA_SIZE);
     init_waitqueue_head(&sptr_pool->sgtc_wqh);
     spin_lock_init(&sptr_pool->sgtc_lock);
 
     /*!< ------------------------------------------------------------ */
-    sptr_pool = &sgtc_kernel_mempool[FWK_MEMPOOL_FB_DRAM];
-    sptr_info = sptr_pool->sptr_info;
+    sptr_pool = &sgtc_kernel_mempool[NR_FWK_MEMPOOL_FB_DRAM];
+    sptr_info = &sptr_pool->sptr_mn->sgtc_info;
     memory_simple_block_create(sptr_info, FBUFFER_DRAM_BASE, FBUFFER_DRAM_SIZE);
     init_waitqueue_head(&sptr_pool->sgtc_wqh);
     spin_lock_init(&sptr_pool->sgtc_lock);
 
     /*!< ------------------------------------------------------------ */
-    sptr_pool = &sgtc_kernel_mempool[FWK_MEMPOOL_SK_BUFF];
-    sptr_info = sptr_pool->sptr_info;
+    sptr_pool = &sgtc_kernel_mempool[NR_FWK_MEMPOOL_SK_BUFF];
+    sptr_info = &sptr_pool->sptr_mn->sgtc_info;
     memory_block_create(sptr_info, SK_BUFFER_BASE, SK_BUFFER_SIZE);
     init_waitqueue_head(&sptr_pool->sgtc_wqh);
     spin_lock_init(&sptr_pool->sgtc_lock);
@@ -125,28 +129,20 @@ kbool_t memory_block_self_defines(kint32_t flags, kuaddr_t base, kusize_t size)
     struct fwk_mempool *sptr_pool = mr_nullptr;
     struct mem_info *sptr_info;
     kuint32_t index;
+    kuint8_t area;
 
-    if (flags < 0)
-        sptr_pool = &sgtc_kernel_mempool[FWK_MEMPOOL_KERNEL];
-    else
-    {
-        for (index = 0; index < FWK_MEMPOOL_TYPE_MAX; index++)
-        {
-            if (flags & sgtc_kernel_mempool[index].mask)
-            {
-                if (!sptr_pool)
-                    sptr_pool = &sgtc_kernel_mempool[index];
-                else
-                    return false;
-            }
-        }
-    }
+    area = (flags <= 0) ? GFP_GET_AREA(NR_KMEM_KERNEL) : GFP_GET_AREA(flags);
+    if (mr_unlikely(!isPower2(area)))
+        return mr_nullptr;
 
-    if (!sptr_pool)
-        return false;
+    index = ffs_u8(area) - 1;
+    if (mr_unlikely(index >= NR_FWK_MEMPOOL_TYPE_MAX))
+        return mr_nullptr;
 
-    sptr_info = sptr_pool->sptr_info;
-    if (isValid(sptr_info->sptr_mem))
+    sptr_pool = &sgtc_kernel_mempool[index];
+    sptr_info = &sptr_pool->sptr_mn->sgtc_info;
+
+    if (mr_unlikely(isValid(sptr_info->sptr_mem)))
         return false;
 
     memory_simple_block_create(sptr_info, base, size);
@@ -167,33 +163,73 @@ void memory_block_self_destroy(kint32_t flags)
     struct fwk_mempool *sptr_pool = mr_nullptr;
     struct mem_info *sptr_info;
     kuint32_t index;
+    kuint8_t area;
 
-    if (flags < 0)
-        sptr_pool = &sgtc_kernel_mempool[FWK_MEMPOOL_KERNEL];
-    else
-    {
-        for (index = 0; index < FWK_MEMPOOL_TYPE_MAX; index++)
-        {
-            if (flags & sgtc_kernel_mempool[index].mask)
-            {
-                if (!sptr_pool)
-                    sptr_pool = &sgtc_kernel_mempool[index];
-                else
-                    return;
-            }
-        }
-    }
-
-    if (!sptr_pool)
+    area = (flags <= 0) ? GFP_GET_AREA(NR_KMEM_KERNEL) : GFP_GET_AREA(flags);
+    if (mr_unlikely(!isPower2(area)))
         return;
 
-    sptr_info = sptr_pool->sptr_info;
-    if (!isValid(sptr_info->sptr_mem))
+    index = ffs_u8(area) - 1;
+    if (mr_unlikely(index >= NR_FWK_MEMPOOL_TYPE_MAX))
+        return;
+
+    sptr_pool = &sgtc_kernel_mempool[index];
+    sptr_info = &sptr_pool->sptr_mn->sgtc_info;
+
+    if (mr_unlikely(!isValid(sptr_info->sptr_mem)))
         return;
 
     memory_simple_block_destroy(sptr_info);
     init_waitqueue_head(&sptr_pool->sgtc_wqh);
     spin_lock_init(&sptr_pool->sgtc_lock);
+}
+
+/*!
+ * @brief   kmget_area_record
+ * @param   area_index: refer to "__ERT_FWK_MEMPOOL_INDEX"
+ * @retval  sgtc_maxrec
+ * @note    read memory record about the maximum address allocated
+ */
+struct m_area *kmget_area_record(kuint32_t area_index)
+{
+    return ((area_index < NR_FWK_MEMPOOL_TYPE_MAX) ? 
+                &sgtc_kernel_mempool[area_index].sptr_mn->sgtc_maxrec : mr_nullptr);
+}
+
+/*!
+ * @brief   kmget_area_base_address
+ * @param   area_index: refer to "__ERT_FWK_MEMPOOL_INDEX"
+ * @retval  none
+ * @note    read memory base address
+ */
+kuaddr_t kmget_area_base_address(kuint32_t area_index)
+{
+    return ((area_index < NR_FWK_MEMPOOL_TYPE_MAX) ? 
+                sgtc_kernel_mempool[area_index].sptr_mn->sgtc_info.base : 0);
+}
+
+/*!
+ * @brief   kmget_area_total_size
+ * @param   area_index: refer to "__ERT_FWK_MEMPOOL_INDEX"
+ * @retval  none
+ * @note    read memory total lenth
+ */
+kssize_t kmget_area_total_size(kuint32_t area_index)
+{
+    return ((area_index < NR_FWK_MEMPOOL_TYPE_MAX) ? 
+                sgtc_kernel_mempool[area_index].sptr_mn->sgtc_info.lenth : -1);
+}
+
+/*!
+ * @brief   kmget_area_label
+ * @param   area_index: refer to "__ERT_FWK_MEMPOOL_INDEX"
+ * @retval  none
+ * @note    read name
+ */
+const kchar_t *kmget_area_label(kuint32_t area_index)
+{
+    return ((area_index < NR_FWK_MEMPOOL_TYPE_MAX) ? 
+                sgtc_kernel_mempool[area_index].name : mr_nullptr);
 }
 
 /*!
@@ -206,22 +242,17 @@ __weak kssize_t kmget_size(nrt_gfp_t flags)
 {
     struct fwk_mempool *sptr_pool = mr_nullptr;
     kuint32_t index;
+    kuint8_t area = GFP_GET_AREA(flags);
 
-    for (index = 0; index < FWK_MEMPOOL_TYPE_MAX; index++)
-    {
-        if (flags & sgtc_kernel_mempool[index].mask)
-        {
-            if (!sptr_pool)
-                sptr_pool = &sgtc_kernel_mempool[index];
-            else
-                return -ER_INVALID;
-        }
-    }
+    if (mr_unlikely(!isPower2(area)))
+        return -ER_INVALID;
 
-    if (!sptr_pool)
-        return -ER_NOTFOUND;
+    index = ffs_u8(area) - 1;
+    if (mr_unlikely(index >= NR_FWK_MEMPOOL_TYPE_MAX))
+        return -ER_INVALID;
 
-    return sptr_pool->sptr_info->lenth;
+    sptr_pool = &sgtc_kernel_mempool[index];
+    return sptr_pool->sptr_mn->sgtc_info.lenth;
 }
 
 /*!
@@ -235,32 +266,32 @@ __weak void *kmalloc(size_t __size, nrt_gfp_t flags)
     struct fwk_mempool *sptr_pool = mr_nullptr;
     struct mem_info *sptr_info;
     void *p = mr_nullptr;
+    struct m_area *sptr_record;
     kuint32_t index;
+    kuint8_t area = GFP_GET_AREA(flags);
 
-    for (index = 0; index < FWK_MEMPOOL_TYPE_MAX; index++)
-    {
-        if (flags & sgtc_kernel_mempool[index].mask)
-        {
-            if (!sptr_pool)
-                sptr_pool = &sgtc_kernel_mempool[index];
-            else
-                return p;
-        }
-    }
+    if (mr_unlikely(!isPower2(area)))
+        return mr_nullptr;
 
-    if (!sptr_pool)
-        return p;
+    index = ffs_u8(area) - 1;
+    if (mr_unlikely(index >= NR_FWK_MEMPOOL_TYPE_MAX))
+        return mr_nullptr;
+
+    sptr_pool = &sgtc_kernel_mempool[index];
     
-    if (flags & NR_KMEM_WAIT)
+    if (mr_unlikely(flags & NR_KMEM_WAIT))
         wait_event(&sptr_pool->sgtc_wqh, !spin_is_locked(&sptr_pool->sgtc_lock));
 
     spin_lock_irqsave(&sptr_pool->sgtc_lock);
 
-    sptr_info = sptr_pool->sptr_info;
-    if (sptr_info->alloc)
+    sptr_info = &sptr_pool->sptr_mn->sgtc_info;
+    if (mr_unlikely(sptr_info->alloc))
     {
-        p = sptr_info->alloc(sptr_info, __size);
-        if (!isValid(p))
+        struct m_area sgtc_real;
+        void *address_end;
+
+        p = sptr_info->alloc(sptr_info, __size, &sgtc_real);
+        if (mr_unlikely(!isValid(p)))
         {
             p = mr_nullptr;
             goto END;
@@ -268,6 +299,13 @@ __weak void *kmalloc(size_t __size, nrt_gfp_t flags)
 
         if (flags & NR_KMEM_ZERO)
             kmemzero(p, __size);
+
+        /*!< Record the maximum p */
+        sptr_record = &sptr_pool->sptr_mn->sgtc_maxrec;
+        address_end = sptr_record->base + sptr_record->size;
+
+        if ((sgtc_real.base + sgtc_real.size) > address_end)
+            memcpy(sptr_record, &sgtc_real, sizeof(sgtc_real));
     }
 
 END:
@@ -321,10 +359,10 @@ __weak void kfree(void *__ptr)
     struct mem_info *sptr_info = mr_nullptr;
     kuint32_t index;
 
-    for (index = 0; index < FWK_MEMPOOL_TYPE_MAX; index++)
+    for (index = 0; index < NR_FWK_MEMPOOL_TYPE_MAX; index++)
     {
         sptr_pool = &sgtc_kernel_mempool[index];
-        sptr_info = sptr_pool->sptr_info;
+        sptr_info = &sptr_pool->sptr_mn->sgtc_info;
 
         if ((__ptr >= (void *)sptr_info->base) &&
             (__ptr <  (void *)(sptr_info->base + sptr_info->lenth)))
@@ -332,7 +370,7 @@ __weak void kfree(void *__ptr)
     }
 
     /*!< not found: out of pool */
-    if (index == FWK_MEMPOOL_TYPE_MAX)
+    if (index == NR_FWK_MEMPOOL_TYPE_MAX)
         return;
 
     spin_lock_irqsave(&sptr_pool->sgtc_lock);

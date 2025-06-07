@@ -346,12 +346,15 @@ static kssize_t imx_uart_driver_read(struct fwk_file *sptr_file, kbuffer_t *ptrB
         wait_event(&sptr_data->sgtc_rxwqh, !mr_imx_uart_rx_empty(sptr_uart));
     }
 
-    msgs = kmalloc(size, GFP_KERNEL);
+    msgs = kzalloc(size, GFP_KERNEL);
     if (!isValid(msgs))
         return -ER_NOMEM;
 
     while (!mr_imx_uart_rx_empty(sptr_uart))
-        msgs[count++] = mr_imx_uart_recv_byte(sptr_uart);
+    {
+        if ((count++) < size)
+            msgs[count] = mr_imx_uart_recv_byte(sptr_uart);
+    }
 
     fwk_copy_to_user(ptrBuffer, msgs, count);
     kfree(msgs);

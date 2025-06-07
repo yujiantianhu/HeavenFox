@@ -22,17 +22,30 @@
 #include <common/mem_manage.h>
 
 /*!< The defines */
+/*!< Memory pool */
+enum __ERT_FWK_MEMPOOL_INDEX
+{
+    NR_FWK_MEMPOOL_KERNEL = 0,
+    NR_FWK_MEMPOOL_DMA,
+    NR_FWK_MEMPOOL_SK_BUFF,
+    NR_FWK_MEMPOOL_FB_DRAM,
+    NR_FWK_MEMPOOL_FIXDATA,
+    NR_FWK_MEMPOOL_TYPE_MAX,
+};
+#define FWK_AREA_OFFSET                         (24U)
+#define FWK_AREA_BIT(x)                         (1U << ((x) + FWK_AREA_OFFSET))
+
 typedef enum nrt_gfp
 {
     NR_KMEM_ZERO = mr_bit(0),
     NR_KMEM_WAIT = mr_bit(1),
     NR_KMEM_NOWAIT = 0,
 
-    NR_KMEM_NORMAL = mr_bit(25),                                /*!< memory for kernel heap */
-    NR_KMEM_DMA_AREA = mr_bit(26),                              /*!< memory for dma */
-    NR_KMEM_FBUFFER = mr_bit(27),                               /*!< memory for framebuffer */
-    NR_KMEM_FIXDATA = mr_bit(28),                               /*!< memory for fixed data */
-    NR_KMEM_SK_BUFF = mr_bit(29),                               /*!< memory for sk_buff */
+    NR_KMEM_NORMAL = FWK_AREA_BIT(NR_FWK_MEMPOOL_KERNEL),       /*!< memory for kernel heap */
+    NR_KMEM_DMA_AREA = FWK_AREA_BIT(NR_FWK_MEMPOOL_DMA),        /*!< memory for dma */
+    NR_KMEM_FBUFFER = FWK_AREA_BIT(NR_FWK_MEMPOOL_FB_DRAM),     /*!< memory for framebuffer */
+    NR_KMEM_FIXDATA = FWK_AREA_BIT(NR_FWK_MEMPOOL_FIXDATA),     /*!< memory for fixed data */
+    NR_KMEM_SK_BUFF = FWK_AREA_BIT(NR_FWK_MEMPOOL_SK_BUFF),     /*!< memory for sk_buff */
 
     NR_KMEM_KERNEL = NR_KMEM_WAIT | NR_KMEM_NORMAL,
     NR_KMEM_ATOMIC = NR_KMEM_NOWAIT | NR_KMEM_NORMAL,
@@ -52,11 +65,18 @@ typedef enum nrt_gfp
 #define GFP_FIXED                               NR_KMEM_FIXED
 #define GFP_SOCK                                NR_KMEM_SOCK
 
-#define GFP_GET_AREA(gfp_mask)                  ((gfp_mask) & (0xff000000U))
+#define IS_GFP_VALID(gfp_mask)                  (!!((gfp_mask) & (0xff000000U)))
+#define GFP_GET_AREA(gfp_mask)                  ((kuint8_t)(((gfp_mask) & (0xff000000U)) >> FWK_AREA_OFFSET))
 #define GFP_GET_FLAG(gfp_mask)                  ((gfp_mask) & (0x00ffffffU))
 
 /*!< The functions */
 extern kbool_t fwk_mempool_initial(void);
+
+extern struct m_area *kmget_area_record(kuint32_t area_index);
+extern kuaddr_t kmget_area_base_address(kuint32_t area_index);
+extern kssize_t kmget_area_total_size(kuint32_t area_index);
+extern const kchar_t *kmget_area_label(kuint32_t area_index);
+
 extern kssize_t kmget_size(nrt_gfp_t flags);
 extern void *kmalloc(size_t __size, nrt_gfp_t flags);
 extern void *kcalloc(size_t __size, size_t __n, nrt_gfp_t flags);
