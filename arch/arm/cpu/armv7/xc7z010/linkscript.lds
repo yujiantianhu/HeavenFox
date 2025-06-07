@@ -7,12 +7,13 @@ _PROGRAM_SIZE = ((0x0FF00000) - (0x04000000));
 _RESERVE_MEMORY_SIZE = 0x400000;
 _PROGRAM_END = (_RAM_DDR_BASE + _RAM_DDR_SIZE - _RESERVE_MEMORY_SIZE);
 _HEAP_SIZE = 8 * 1024 * 1024;
-_SVC_STACK_SIZE = (2 * 1024 * 1024);
+_SVC_STACK_SIZE = (8 * 1024 * 1024);
 _SYS_STACK_SIZE = (2 * 1024 * 1024);
-_IRQ_STACK_SIZE = (2 * 1024 * 1024);
+_IRQ_STACK_SIZE = (8 * 1024 * 1024);
 _FIQ_STACK_SIZE = (2 * 1024 * 1024);
 _ABT_STACK_SIZE = (1 * 1024);
 _UND_STACK_SIZE = (1 * 1024);
+_DMA_BUFF_SIZE = (16 * 1024 * 1024);
 _FB_DRAM_SIZE = (16 * 1024 * 1024);
 _NETWORK_BUFF_SIZE = (8 * 1024 * 1024);
 MEMORY
@@ -193,6 +194,13 @@ SECTIONS
         . = ALIGN(16);
         __und_stack_end = .;
         __stack_end = .;
+    } > ram_ddr_0
+    .dma_area (NOLOAD) :
+    {
+        . = ALIGN(16);
+        __dma_area_start = .;
+        . += _DMA_BUFF_SIZE;
+        __dma_area_end = .;
     } > ram_ddr_0
     .fb_dram (NOLOAD) :
     {

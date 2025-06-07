@@ -34,8 +34,8 @@ __switch_to:
     stmdb sp!, { r0 - r12, lr }                     @ save r0 ~ r12 and lr (r0 = g_asm_context_info = &sgtc_context)
 
     mrs r12, spsr
-    add r10, sp, #ARCH_OFFSET_LR
-    stmia r10, { r12, lr }                          @ save lr and spsr (lr will be set to pc, and spsr to cpsr)
+    add r8, sp, #ARCH_OFFSET_LR
+    stmia r8, { r12, lr }                           @ save lr and spsr (lr will be set to pc, and spsr to cpsr)
 
     str r0, g_asm_context_info
 
@@ -52,6 +52,9 @@ __switch_to:
     ldr r3, [r2]                                    @ r2 = &flags, r3 = flags
     bic r3, #SCHED_FROM_IRQ                         @ scheduled by actively
 
+2:
+    mov r10, lr                                     @ r10 = lr
+    mov r11, r10                                    @ r11 = pc
     b _context_save
 
 /* -------------------------------------------------------------------------------
@@ -75,7 +78,9 @@ _context_save:
     orr r3, #SCHED_NOT_FIRST                        @ r3 = flags | 0x02
     str r3, [r2]                                    @ initial flags (marking the previous thread will no longer be scheduled for the first time)  
 
-    str sp, [r1, #ARCH_OFFSET_SP]                   @ save sp
+    add r8, r1, #ARCH_OFFSET_LR
+    str sp, [r8, #-4]                               @ save sp
+    stmia r8, { r10 - r12 }                         @ save lr(r10), pc(r11), spsr(r12). Just saving, not involved in scheduling                   
 
     push { r0 }
     ldr r1, =__thread_init_before                   @ init thread before running
@@ -167,11 +172,11 @@ __schedule_before:
     ldr r1, =__schedule_thread
     blx r1                                          @ schedule threads (r0 = g_asm_context_info = &sgtc_context)
 
-    add r2, sp, #ARCH_OFFSET_PC                     @ pointer to spsr_irq
-    ldr r1, [r2]                                    @ r1 = spsr_irq                    
-    cmp r1, #0
-    orreq r1, #ARCH_SVC_MODE
-    str r1, [r2]                                    @ if spsr is none, set svc-mode
+    add r8, sp, #ARCH_OFFSET_PC                     @ pointer to spsr_irq
+    ldr r12, [r8]                                   @ r12 = spsr_irq                    
+    cmp r12, #0
+    orreq r12, #ARCH_SVC_MODE
+    str r12, [r8]                                   @ if spsr is none, set svc-mode
 
     str r0, g_asm_context_info
 
@@ -183,6 +188,9 @@ __schedule_before:
     ldr r3, [r2]
     orr r3, #SCHED_FROM_IRQ                         @ scheduling source: by IRQ
 
+2:
+    add r8, sp, #ARCH_OFFSET_SP                     @ r8 pointer to lr_svc
+    ldmia r8, { r10, r11 }                          @ r10 = lr(lr_svc), r11 = pc(lr_irq)
     b _context_save
 
 /* -------------------------------------------------------------------------------

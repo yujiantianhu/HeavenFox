@@ -117,6 +117,13 @@ extern kuaddr_t __mem_pool_end;
 #define MEMORY_POOL_END                     ((kuaddr_t)&__mem_pool_end)
 #define MEMORY_POOL_SIZE                    ((kusize_t)((kuaddr_t)(&__mem_pool_end) - (kuaddr_t)(&__mem_pool_start)))
 
+/*!< dma */
+extern kuaddr_t __dma_area_start;
+extern kuaddr_t __dma_area_end;
+
+#define DMA_AREA_BASE                       ((kuaddr_t)&__dma_area_start)
+#define DMA_AREA_SIZE                       ((kusize_t)((kuaddr_t)(&__dma_area_end) - (kuaddr_t)(&__dma_area_start)))
+
 /*!< framebuffer */
 extern kuaddr_t __fb_dram_start;
 extern kuaddr_t __fb_dram_end;
@@ -140,7 +147,7 @@ extern kuaddr_t __sk_buffer_end;
  */
 static inline void boot_text_print(void)
 {
-    print_info("memory pool base address: %#x, size = %d KB\r\n", MEMORY_POOL_BASE, __BYTES_TO_KB(MEMORY_POOL_SIZE));
+    print_info("memory pool base address: %#x, size = %d KB\r\n", MEMORY_POOL_BASE,     __BYTES_TO_KB(MEMORY_POOL_SIZE));
     if (MEMORY_POOL_END <= MEMORY_POOL_BASE)
     {
         /*!< memory pool is only used after kernel starting; bootloader uses another areas */
@@ -148,20 +155,21 @@ static inline void boot_text_print(void)
         mr_assert(false);
     }
     
-    print_info("framebuffer base address: %#x, size = %d KB\r\n", FBUFFER_DRAM_BASE, __BYTES_TO_KB(FBUFFER_DRAM_SIZE));
-    print_info("sock buffer base address: %#x, size = %d KB\r\n", SK_BUFFER_BASE, __BYTES_TO_KB(SK_BUFFER_SIZE));
+    print_info("dma area    base address: %#x, size = %d KB\r\n", DMA_AREA_BASE,        __BYTES_TO_KB(DMA_AREA_SIZE));
+    print_info("framebuffer base address: %#x, size = %d KB\r\n", FBUFFER_DRAM_BASE,    __BYTES_TO_KB(FBUFFER_DRAM_SIZE));
+    print_info("sock buffer base address: %#x, size = %d KB\r\n", SK_BUFFER_BASE,       __BYTES_TO_KB(SK_BUFFER_SIZE));
 
     /*!< stack */
-    print_info("svc stack   top  address: %#x, size = %d KB\r\n", SVC_MODE_STACK_BASE, __BYTES_TO_KB(SVC_MODE_STACK_SIZE));
-//  print_info("usr stack   top  address: %#x, size = %d KB\r\n", SYS_MODE_STACK_BASE, __BYTES_TO_KB(SYS_MODE_STACK_SIZE));
-    print_info("sys stack   top  address: %#x, size = %d KB\r\n", SYS_MODE_STACK_BASE, __BYTES_TO_KB(SYS_MODE_STACK_SIZE));
-    print_info("abt stack   top  address: %#x, size = %d KB\r\n", ABT_MODE_STACK_BASE, __BYTES_TO_KB(ABT_MODE_STACK_SIZE));
-    print_info("irq stack   top  address: %#x, size = %d KB\r\n", IRQ_MODE_STACK_BASE, __BYTES_TO_KB(IRQ_MODE_STACK_SIZE));
-    print_info("fiq stack   top  address: %#x, size = %d KB\r\n", FIQ_MODE_STACK_BASE, __BYTES_TO_KB(FIQ_MODE_STACK_SIZE));
-    print_info("und stack   top  address: %#x, size = %d KB\r\n", UND_MODE_STACK_BASE, __BYTES_TO_KB(UND_MODE_STACK_SIZE));
+    print_info("svc stack   top  address: %#x, size = %d KB\r\n", SVC_MODE_STACK_BASE,  __BYTES_TO_KB(SVC_MODE_STACK_SIZE));
+//  print_info("usr stack   top  address: %#x, size = %d KB\r\n", SYS_MODE_STACK_BASE,  __BYTES_TO_KB(SYS_MODE_STACK_SIZE));
+    print_info("sys stack   top  address: %#x, size = %d KB\r\n", SYS_MODE_STACK_BASE,  __BYTES_TO_KB(SYS_MODE_STACK_SIZE));
+    print_info("abt stack   top  address: %#x, size = %d KB\r\n", ABT_MODE_STACK_BASE,  __BYTES_TO_KB(ABT_MODE_STACK_SIZE));
+    print_info("irq stack   top  address: %#x, size = %d KB\r\n", IRQ_MODE_STACK_BASE,  __BYTES_TO_KB(IRQ_MODE_STACK_SIZE));
+    print_info("fiq stack   top  address: %#x, size = %d KB\r\n", FIQ_MODE_STACK_BASE,  __BYTES_TO_KB(FIQ_MODE_STACK_SIZE));
+    print_info("und stack   top  address: %#x, size = %d KB\r\n", UND_MODE_STACK_BASE,  __BYTES_TO_KB(UND_MODE_STACK_SIZE));
 
     /*!< heap */
-    print_info("__brk heap  base address: %#x, size = %d KB\r\n", MEMORY_HEAP_START, __BYTES_TO_KB(MEMORY_HEAP_SIZE));
+    print_info("__brk heap  base address: %#x, size = %d KB\r\n", MEMORY_HEAP_START,    __BYTES_TO_KB(MEMORY_HEAP_SIZE));
 }
 
 #ifdef __cplusplus

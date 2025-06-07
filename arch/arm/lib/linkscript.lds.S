@@ -98,6 +98,14 @@ _UND_STACK_SIZE = CONFIG_UND_STACK_SIZE;
 _UND_STACK_SIZE = 1024;
 #endif
 
+/*!< DMA BUffer Size */
+#ifdef CONFIG_DMA_AREA_SIZE
+_DMA_BUFF_SIZE = CONFIG_DMA_AREA_SIZE;
+#else
+/*!< 16MB */
+_DMA_BUFF_SIZE = 16 * 1024 * 1024;
+#endif
+
 /*!< framebuffer ram */
 #ifdef CONFIG_FB_DRAM_SIZE
 _FB_DRAM_SIZE = CONFIG_FB_DRAM_SIZE;
@@ -325,6 +333,15 @@ SECTIONS
         . = ALIGN(16);
         __und_stack_end = .;
         __stack_end = .;
+    } > ram_ddr_0
+
+    /*!< DMA */
+    .dma_area (NOLOAD) :
+    {
+        . = ALIGN(16);
+        __dma_area_start = .;
+        . += _DMA_BUFF_SIZE;
+        __dma_area_end = .;
     } > ram_ddr_0
 
     /*!< DRAM */

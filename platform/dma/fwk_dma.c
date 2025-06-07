@@ -252,7 +252,7 @@ void *fwk_dma_alloc_coherent(struct fwk_device *sptr_dev, kusize_t size, kuaddr_
 {
     void *virt;
 
-    virt = kmalloc(size, mask);
+    virt = kmalloc(size, GFP_GET_FLAG(mask) | GFP_DMA);
     if (!isValid(virt))
         return ERR_PTR(-ER_NOMEM);
 

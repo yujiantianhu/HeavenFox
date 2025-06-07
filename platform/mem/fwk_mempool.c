@@ -30,9 +30,10 @@ struct fwk_mempool
 
 #define FWK_MEMPOOL_FIXDATA             0
 #define FWK_MEMPOOL_KERNEL              1
-#define FWK_MEMPOOL_FB_DRAM             2
-#define FWK_MEMPOOL_SK_BUFF             3
-#define FWK_MEMPOOL_TYPE_MAX            4
+#define FWK_MEMPOOL_DMA                 2
+#define FWK_MEMPOOL_FB_DRAM             3
+#define FWK_MEMPOOL_SK_BUFF             4
+#define FWK_MEMPOOL_TYPE_MAX            5
 
 /*!< The globals */
 static struct mem_info sgtc_kernel_mem_info[FWK_MEMPOOL_TYPE_MAX] = {};
@@ -41,13 +42,18 @@ static struct fwk_mempool sgtc_kernel_mempool[FWK_MEMPOOL_TYPE_MAX] =
 {
     {
         .name = "fixed data",
-        .mask = NR_KMEM_FIXED,
+        .mask = NR_KMEM_FIXDATA,
         .sptr_info = &sgtc_kernel_mem_info[FWK_MEMPOOL_FIXDATA],
     },
     {
         .name = "kernel heap",
         .mask = NR_KMEM_NORMAL,
         .sptr_info = &sgtc_kernel_mem_info[FWK_MEMPOOL_KERNEL],
+    },
+    {
+        .name = "dma",
+        .mask = NR_KMEM_DMA_AREA,
+        .sptr_info = &sgtc_kernel_mem_info[FWK_MEMPOOL_DMA],
     },
     {
         .name = "framebuffer",
@@ -81,6 +87,13 @@ kbool_t fwk_mempool_initial(void)
     if (retval)
         return false;
     
+    init_waitqueue_head(&sptr_pool->sgtc_wqh);
+    spin_lock_init(&sptr_pool->sgtc_lock);
+
+    /*!< ------------------------------------------------------------ */
+    sptr_pool = &sgtc_kernel_mempool[FWK_MEMPOOL_DMA];
+    sptr_info = sptr_pool->sptr_info;
+    memory_simple_block_create(sptr_info, DMA_AREA_BASE, DMA_AREA_SIZE);
     init_waitqueue_head(&sptr_pool->sgtc_wqh);
     spin_lock_init(&sptr_pool->sgtc_lock);
 
