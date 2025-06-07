@@ -15,8 +15,6 @@
 #include <kernel/sched.h>
 
 /*!< The globals */
-kuint32_t g_sched_preempt_cnt = 0;
-
 /*!< TCB */
 struct scheduler_table sgtc_scheduler_table =
 {
@@ -39,6 +37,8 @@ struct scheduler_table sgtc_scheduler_table =
 /*!< save to (*.data) section, do not defines in stack */
 static struct scheduler_context sgtc_context;
 static kuint32_t thread_schedule_ref = 0;
+
+kuint32_t g_sched_preempt_cnt = 0;
 
 /*!< The defines */
 #define SCHED_MANAGER()                         (&sgtc_scheduler_table)

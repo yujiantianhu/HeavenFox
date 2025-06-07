@@ -20,22 +20,8 @@
 /* -------------------------------------------------------------------------------
  * Global Variables Defines 
  * -----------------------------------------------------------------------------*/
+ .global g_asm_context_info
 g_asm_context_info: .word 0x00000000
-
-.macro _context_save_params
-    add r2, r1, #ARCH_OFFSET_R3                     @ r1: specified sp
-    stmia r2, { r3 - r12 }                          @ push r3 ~ r12 to sp (basic address)
-
-    mov r9, lr
-    add r2, r1, #ARCH_OFFSET_LR
-    stmia r2, { r9, lr }                            @ save lr
-.endm
-
-.macro _context_restore_params
-    add r2, r1, #ARCH_OFFSET_R3                     @ pointer to r3
-    ldmia r2, { r3 - r12 }                          @ pop r3 ~ r12 from sp
-    ldr lr, [r1, #ARCH_OFFSET_LR]
-.endm
 
 /* -------------------------------------------------------------------------------
  * -------------------------------------------------------------------------------
@@ -44,26 +30,27 @@ g_asm_context_info: .word 0x00000000
  * -----------------------------------------------------------------------------*/
 ENTRY(__switch_to)
 __switch_to:
-    /*!< preemption is prohibited (g_asm_preempt_cnt > 0) */
+    sub sp, #8
+    stmdb sp!, { r0 - r12, lr }                     @ save r0 ~ r12 and lr (r0 = g_asm_context_info = &sgtc_context)
 
-    push { r1, r2 }
+    mrs r12, spsr
+    add r10, sp, #ARCH_OFFSET_LR
+    stmia r10, { r12, lr }                          @ save lr and spsr (lr will be set to pc, and spsr to cpsr)
+
     str r0, g_asm_context_info
 
     ldr r2, [r0, #CONTEXT_FIRST_OFFSET]
     ldr r1, [r2]
-    cmp r1, #0
+    cmp r1, #0                                      @ judge if the scheduler works for the first time
     beq _context_save_first
 
 1:
     ldr r2, [r0, #CONTEXT_PREV_SP]                  @ r1: prev sp (frame register base)
     ldr r1, [r2]
 
-    push { r3 }
     add r2, r1, #ARCH_FRAME_SIZE
-    ldr r3, [r2]
-    bic r3, #SCHED_FROM_IRQ
-    str r3, [r2]                                    @ save scheduling source
-    pop { r3 }
+    ldr r3, [r2]                                    @ r2 = &flags, r3 = flags
+    bic r3, #SCHED_FROM_IRQ                         @ scheduled by actively
 
     b _context_save
 
@@ -71,20 +58,13 @@ __switch_to:
  * scheduled for first time
  * -----------------------------------------------------------------------------*/
 _context_save_first:
-    mov r1, #1
-    str r1, [r2]                                    @ set first to true
+    mov r12, #1
+    str r12, [r2]                                  @ set first to true
 
-    pop { r1, r2 }
-
-    sub sp, sp, #ARCH_FRAME_SIZE                    @ sp: current position
-    stmia sp, { r0 - r12 }                          @ push r0 ~ r12 to sp (basic address)
-    add r8, sp, #ARCH_OFFSET_PC                     @ r8 = offset of pc, it is also lr reg's top address
-    stmdb r8, { sp, lr }                            @ save lr to stack first, and then save sp
-    str lr, [r8]                                    @ manually save lr (pc - 4) to stack (offset pc)
-
-    add r8, sp, #ARCH_OFFSET_PSR                    @ offset psr
-    mrs r5, spsr                                    @ get cpsr (schedule_thread: spsr = cpsr)
-    str r5, [r8]                                    @ manually save spsr to stack (offset psr)
+    push { r0 }
+    ldr r1, =__thread_init_before                  @ init thread before running
+    blx r1
+    pop { r0 }
 
     b _sched_first_ready
 
@@ -92,46 +72,30 @@ _context_save_first:
  * save curent context
  * -----------------------------------------------------------------------------*/
 _context_save:
-    _context_save_params                            @ save r3 ~ r12, sp, lr
-    mov r9, r1                                      @ r9: prev sp (frame register base)
-    pop { r1, r2 }
-    stmia r9, { r0 - r2 }
+    orr r3, #SCHED_NOT_FIRST                        @ r3 = flags | 0x02
+    str r3, [r2]                                    @ initial flags (marking the previous thread will no longer be scheduled for the first time)  
 
-    add r8, r9, #ARCH_OFFSET_PSR                    @ r8 = offset of spsr
-    mrs r5, spsr                                    @ get spsr
-    str r5, [r8]                                    @ manually save spsr to stack (offset psr)
+    str sp, [r1, #ARCH_OFFSET_SP]                   @ save sp
 
-    add r8, r9, #ARCH_FRAME_SIZE                    @ r8 = &flags
-    ldr r7, [r8]                                    @ r7 = flags
-    orr r6, r7, #SCHED_NOT_FIRST                    @ r6 = flags | 0x02
-    str r6, [r8]                                    @ initial flags (marking the previous thread will no longer be scheduled for the first time)  
+    push { r0 }
+    ldr r1, =__thread_init_before                   @ init thread before running
+    blx r1
+    pop { r0 }
 
-    str sp, [r9, #ARCH_OFFSET_SP]                   @ save sp
     b _context_restore
 
 /* -------------------------------------------------------------------------------
  * restore next context
  * -----------------------------------------------------------------------------*/
 _context_restore:
-    ldr r0, g_asm_context_info                      @ get context_info from "__schedule_thread"
-
-    ldr r2, [r0, #CONTEXT_NEXT_SP]                  @ r2: next sp (frame register base)
-    ldr r1, [r2]
+    ldr r2, [r0, #CONTEXT_NEXT_SP]                  @ r0: &sgtc_context
+    ldr r1, [r2]                                    @ r1: next sp (frame register base)
 
     ldr sp, [r1, #ARCH_OFFSET_SP]
     cmp sp, #0
     beq _sched_first_ready                          @ first schedule    
 
-    _context_restore_params
-    push { lr }                                     @ save lr
-
-    ldr r2, [r1, #ARCH_OFFSET_PSR]
-    push { r2 }                                     @ save spsr
-
-    add r2, r1, #ARCH_OFFSET_R2                     @ pointer to r2
-    ldmdb r2, { r0, r1 }
-    ldr r2, [r2]
-
+    ldmia sp!, { r0 - r12, lr }                     @ restore r0 ~ r12 and lr, but spsr and pc reserved
     b _sched_init_before
 
 /* -------------------------------------------------------------------------------
@@ -158,32 +122,26 @@ _sched_first_ready:
  * -----------------------------------------------------------------------------*/
 _sched_init_before:
     push { r0 - r3, r12 }                           @ r1: next sp; r2: first; r7: address of [first]
-    ldr r1, =__thread_init_before                   @ init thread before running
-    blx r1
 
 1:
     ldr r0, g_asm_context_info                      @ get context_info from "__schedule_thread"
     ldr r1, [r0, #CONTEXT_NEXT_SP]                  @ r1: next sp (frame register base)
     ldr r2, [r1]
 
-    add r3, r2, #ARCH_FRAME_SIZE                    @ r8 = &flags
-    ldr r12, [r3]                                   @ r7 = flags
+    add r3, r2, #ARCH_FRAME_SIZE                    @ r3 = &flags
+    ldr r12, [r3]                                   @ r12 = flags
     and r12, #SCHED_FROM_IRQ
     cmp r12, #0
     beq 3f                                          @ judge if is from irq_handler
 
 2:
     pop { r0 - r3, r12 }
-    pop { lr }                                      @ spsr will be abandoned
-    pop { lr }                                      @ lr_svc will be used by current thread
-
     b _switch_to_irq                                @ ===> return irq_handler
 
 3:
-    pop { r0 - r3 }
-    ldr r12, [sp, #4]
+    ldr r12, [sp, #20]
     msr cpsr, r12                                   @ spsr will be used by current thread
-    pop { r12 }
+    pop { r0 - r3, r12 }
     add sp, #4
 
     b _switch_to_next                               @ ===> return thread
@@ -204,35 +162,27 @@ ENDPROC(__switch_to)
  * -----------------------------------------------------------------------------*/
 ENTRY(__schedule_before)
 __schedule_before:
-    push { r0 - r2 }
-    push { lr }                                     @ important: save current thread's lr, which is not equaled to lr_irq !!!
-    push { r3 - r12 }
+    stmdb sp!, { r0 - r12, lr }                     @ save r0 ~ r12 and current thread's lr (which is not equaled to lr_irq !!!)
 
     ldr r1, =__schedule_thread
-    blx r1                                          @ schedule threads
-    str r0, g_asm_context_info
+    blx r1                                          @ schedule threads (r0 = g_asm_context_info = &sgtc_context)
 
-    pop { r3 - r12 }
-    pop { lr }                                      @ get lr_svc
-
-    add r2, sp, #12                                 @ pointer to lr_irq
-    ldr r1, [r2, #4]                                @ r1 = spsr_irq (lr_irq can be kept in sp all the time, does not need to be taken out)                    
+    add r2, sp, #ARCH_OFFSET_PC                     @ pointer to spsr_irq
+    ldr r1, [r2]                                    @ r1 = spsr_irq                    
     cmp r1, #0
     orreq r1, #ARCH_SVC_MODE
-    msr spsr_cxsf, r1
+    str r1, [r2]                                    @ if spsr is none, set svc-mode
+
+    str r0, g_asm_context_info
 
 1:
     ldr r2, [r0, #CONTEXT_PREV_SP]                  @ r1: prev sp (frame register base)
     ldr r1, [r2]
 
-    push { r3 }
     add r2, r1, #ARCH_FRAME_SIZE
     ldr r3, [r2]
-    orr r3, #SCHED_FROM_IRQ
-    str r3, [r2]                                    @ save scheduling source
-    pop { r3 }
+    orr r3, #SCHED_FROM_IRQ                         @ scheduling source: by IRQ
 
-    pop { r0 }
     b _context_save
 
 /* -------------------------------------------------------------------------------
