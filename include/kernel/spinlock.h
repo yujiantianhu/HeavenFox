@@ -46,6 +46,8 @@ extern void spin_unlock_irq(struct spin_lock *sptr_lock);
 extern void spin_lock_irqsave(struct spin_lock *sptr_lock);
 extern kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock);
 extern void spin_unlock_irqrestore(struct spin_lock *sptr_lock);
+extern void spin_lock_bh(struct spin_lock *sptr_lock);
+extern void spin_unlock_bh(struct spin_lock *sptr_lock);
 
 /*!< API functions */
 /*!

@@ -264,15 +264,16 @@ static kssize_t imx_uart_driver_write(struct fwk_file *sptr_file, const kbuffer_
     if (!(sptr_data->flags & NR_IMX_UART_DRV_TXDMA)) 
     {
         srt_imx_uart_t *sptr_uart = sptr_data->sptr_uart;
-        kchar_t msgs[4096];
+        kchar_t msgs[1024];
+        kusize_t real_size = CMP_MIN2(size, sizeof(msgs));
 
-        fwk_copy_from_user(msgs, ptrBuffer, size);
+        fwk_copy_from_user(msgs, ptrBuffer, real_size);
 
         /*!< Wait for last fifo send finished */
         if (!mr_imx_uart_tx_empty(sptr_uart))
             wait_event(&sptr_data->sgtc_txwqh, mr_imx_uart_tx_empty(sptr_uart));
 
-        for (kusize_t i = 0; i < size; i++) 
+        for (kusize_t i = 0; i < real_size; i++) 
         {
             /*!< If TxFIFO is full, waitting for a while */
             while (mr_imx_uart_tx_full(sptr_uart))

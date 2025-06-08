@@ -27,8 +27,10 @@
 /*!< kernel */
 extern kint32_t rest_init(void);
 extern kint32_t kthread_init(void);
+extern kint32_t ksoftirqd_init(void);
 extern kint32_t kworker_init(void);
 extern kint32_t term_init(void);
+extern kint32_t kmemp_init(void);
 
 /*!< application */
 extern kint32_t init_proc_init(void);

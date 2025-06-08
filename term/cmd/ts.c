@@ -35,9 +35,9 @@
 static void term_cmd_ts_title(void)
 {
     printk("----------------------------------------------------------\r\n");
-    printk("tid  stack_size(B) priority slice(ms) status  name\r\n");
+    printk("tid  stack_size(B) priority slice(ms) state   name\r\n");
     printk("----------------------------------------------------------\r\n");
-    printk("status: (1)running, (2)ready, (3)suspend, (4)sleep\r\n");
+    printk("state: (1)running, (2)ready, (3)suspend, (4)sleep\r\n");
     printk("----------------------------------------------------------\r\n");
 }
 
@@ -78,7 +78,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
             sptr_thread = mr_current;
             sptr_attr = sptr_thread->sptr_attr;
             term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
-                        thread_get_sched_msecs(sptr_attr), sptr_thread->status, sptr_thread->name);
+                        thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
             
             /*!< 2. ready */
             sptr_thread = mr_nullptr;
@@ -86,7 +86,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
             {
                 sptr_attr = sptr_thread->sptr_attr;
                 term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
-                        thread_get_sched_msecs(sptr_attr), sptr_thread->status, sptr_thread->name);
+                        thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
             }
 
             /*!< 3. suspend */
@@ -95,7 +95,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
             {
                 sptr_attr = sptr_thread->sptr_attr;
                 term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
-                        thread_get_sched_msecs(sptr_attr), sptr_thread->status, sptr_thread->name);
+                        thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
             }
 
             /*!< 4. sleep */
@@ -104,7 +104,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
             {
                 sptr_attr = sptr_thread->sptr_attr;
                 term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
-                        thread_get_sched_msecs(sptr_attr), sptr_thread->status, sptr_thread->name);
+                        thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
             }
 
 //          spin_unlock_irqrestore(sptr_lock);

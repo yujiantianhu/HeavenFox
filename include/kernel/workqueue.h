@@ -90,6 +90,7 @@ static inline void queue_work(struct workqueue_head *sptr_wqh, struct workqueue 
 //  if (!list_head_for_each(&sptr_wqh->sgtc_work, &sptr_wq->sgtc_link))
 //      return;
 
+    /*!< Important, it indicates that kworker_entry is not finished */
     if (!mr_list_empty(&sptr_wq->sgtc_link))
         return;
 

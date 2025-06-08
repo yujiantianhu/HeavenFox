@@ -147,6 +147,8 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
 
     if (thread_fn)
     {
+        kchar_t name[24];
+
         mr_preempt_disable();
 
         sptr_grp->tid = kernel_thread_create(-1, mr_nullptr, irq_thread, sptr_grp);
@@ -157,6 +159,9 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
         }
 
         schedule_thread_suspend(sptr_grp->tid);
+
+        sprintk(name, "threaded_irq-%d", irq);
+        thread_set_name(sptr_grp->tid, (const kchar_t *)name);
         thread_set_priority(thread_attr_get(sptr_grp->tid), THREAD_PROTY_IRQ);
         mr_preempt_enable();
     }

@@ -11,6 +11,7 @@
  */
 
 /*!< The globals */
+#include <platform/irq/fwk_irq_types.h>
 #include <kernel/kernel.h>
 #include <kernel/spinlock.h>
 #include <kernel/sched.h>
@@ -192,6 +193,30 @@ void spin_unlock_irqrestore(struct spin_lock *sptr_lock)
         mr_enable_cpu_irq();
 
     sptr_lock->flag = 0;
+}
+
+/*!
+ * @brief   spin lock and disable softirq
+ * @param   sptr_lock
+ * @retval  none
+ * @note    none
+ */
+void spin_lock_bh(struct spin_lock *sptr_lock)
+{
+    local_bh_disable();
+    spin_lock(sptr_lock);
+}
+
+/*!
+ * @brief   spin unlock and enable softirq
+ * @param   sptr_lock
+ * @retval  none
+ * @note    none
+ */
+void spin_unlock_bh(struct spin_lock *sptr_lock)
+{
+    spin_unlock(sptr_lock);
+    local_bh_enable();
 }
 
 /*!< end of file */

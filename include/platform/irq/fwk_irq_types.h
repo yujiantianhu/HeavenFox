@@ -145,6 +145,8 @@ extern void fwk_destroy_irq_action(kint32_t irq);
 extern void fwk_do_irq_handler(kint32_t softIrq);
 
 extern kuint32_t fwk_softirq_avaliable(void);
+extern void local_bh_disable(void);
+extern void local_bh_enable(void);
 extern void fwk_handle_softirq(void);
 extern void fwk_open_softirq(kint32_t nr, void (*action)(kint32_t event));
 extern void fwk_raise_softirq(kint32_t nr);

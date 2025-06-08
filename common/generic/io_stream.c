@@ -302,19 +302,24 @@ kssize_t io_stream_logs_extract(void *buffer, kusize_t size)
 
 /*!
  * @brief   kprintf
- * @param   none
+ * @param   __temp_buffer: suggest 4KB
  * @retval  none
  * @note    string output (from sgtc_io_stream_logs.buffer)
  */
-void io_stream_logs_print(void)
+void io_stream_logs_print(void *__temp_buffer, kusize_t __temp_size)
 {
     /*!< 4KB */
-    kubyte_t log_buffer[4096];
+//  kubyte_t log_buffer[4096];
     kssize_t size;
     struct pq_message *sptr_msg;
 
-    sptr_msg = (struct pq_message *)log_buffer;
-    size = io_stream_logs_extract(log_buffer, sizeof(log_buffer));
+    if (!__temp_buffer || !__temp_size)
+        return;
+    if (!mr_is_aligned((kuaddr_t)__temp_buffer, ARCH_PER_SIZE))
+        return;
+
+    sptr_msg = (struct pq_message *)__temp_buffer;
+    size = io_stream_logs_extract(__temp_buffer, __temp_size);
     
     while (size > 0) 
     {

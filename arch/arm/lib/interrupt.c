@@ -46,9 +46,11 @@ void exec_fiq_handler(void)
  */
 void exec_irq_handler(void)
 {
+    static kuint32_t g_exec_irq_count = 0;
     kint32_t hardirq, softIrq;
 
     g_interrupt_flags |= 0x18;
+    g_exec_irq_count++;
 
     /*!< read IAR, enable IRQ */
     hardirq = hw_irq_acknowledge();
@@ -70,7 +72,8 @@ void exec_irq_handler(void)
         g_sched_flag = false;
     }
 
-    g_interrupt_flags &= ~0x18;
+    if (!(--g_exec_irq_count))
+        g_interrupt_flags &= ~0x18;
 }
 
 /*!

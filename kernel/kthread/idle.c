@@ -22,7 +22,7 @@
 
 /*!< The globals */
 static struct thread_attr sgtc_idle_attr;
-static kuint32_t g_idle_stack[IDLE_THREAD_STACK_SIZE];
+static kuint8_t g_idle_stack[IDLE_THREAD_STACK_SIZE];
 
 /*!< API functions */
 /*!

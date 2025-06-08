@@ -99,7 +99,7 @@
  * So the principle of alignment is to make the corresponding bit 0.
  */
 #define mr_align(x, mask)								(((x) + ((mask) - 1)) & (~((mask) - 1)))
-#define mr_is_aligned(x, mask)							((x) & ((typeof(x))(mask) - 1) == 0)
+#define mr_is_aligned(x, mask)							(((x) & ((typeof(x))(mask) - 1)) == 0)
 #define mr_align4(x)									mr_align(x, 4)
 
 #define mr_num_align(x, mask)							((typeof(x))mr_align((x), (typeof(x))(mask)))
@@ -178,7 +178,7 @@
 #ifdef __cplusplus
 #define COUNT_DEC(x)									do { (x) ? (x--) : 0; } while (0)
 #else
-#define COUNT_DEC(x)									do { (x) ? (x--) : (void)0; } while (0)
+#define COUNT_DEC(x)									do { (x) ? (x--, 1) : (void)0; } while (0)
 #endif
 
 /*!< get inverse */

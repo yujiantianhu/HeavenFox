@@ -36,7 +36,7 @@ static void thread_sleep_timeout(kuint32_t args)
     if (spin_is_locked(sptr_lock))
 		return;
 
-    if (sptr_thread->status == NR_THREAD_SUSPEND)
+    if (sptr_thread->state == NR_THREAD_SUSPEND)
         schedule_thread_wakeup(sptr_thread->tid);
 }
 

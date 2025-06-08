@@ -84,8 +84,10 @@ typedef kint32_t tid_t;
 
 #define THREAD_PROTY_SOCKRX                 (19)
 #define THREAD_PROTY_SOCKTX                 (20)
-#define THREAD_PROTY_IRQ                    (THREAD_PROTY_MAX)
-#define THREAD_PROTY_KWORKER				(THREAD_PROTY_MAX + 1)
+#define THREAD_PROTY_KSOFTIRQD              (THREAD_PROTY_MAX)
+#define THREAD_PROTY_IRQ                    (THREAD_PROTY_MAX + 1)
+#define THREAD_PROTY_KWORKER                (THREAD_PROTY_MAX + 1)
+#define THREAD_PROTY_KMEMP				    (THREAD_PROTY_KERNEL + 2)
 
 #define __THREAD_IS_LOW_PRIO(prio, prio2)	((prio2) <= (prio))
 #define __THREAD_HIGHER_DEFAULT(val)		(THREAD_PROTY_DEFAULT - (val))	
@@ -95,6 +97,7 @@ typedef kint32_t tid_t;
 
 /*!< time slice */
 #define THREAD_TIME_DEFUALT                 (40)				/*!< unit: ms */
+#define THREAD_TIME_KMEMP                   (20)				/*!< unit: ms */
 
 /*!< policy */
 enum __ERT_THREAD_DETACH

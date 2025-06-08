@@ -34,7 +34,7 @@ END_NAMESPACE(bsc)
  */
 void *operator new(size_t size)
 {
-    void *ptr = kmalloc(size, GFP_KERNEL);
+    void *ptr = fwk_malloc(size, GFP_KERNEL);
     return isValid(ptr) ? ptr : nullptr;
 }
 
@@ -46,7 +46,7 @@ void *operator new(size_t size)
  */
 void *operator new[](size_t size)
 {
-    void *ptr = kmalloc(size, GFP_KERNEL);
+    void *ptr = fwk_malloc(size, GFP_KERNEL);
     return isValid(ptr) ? ptr : nullptr;
 }
 
@@ -59,7 +59,7 @@ void *operator new[](size_t size)
 void operator delete(void *ptr)
 {
     if (ptr)
-        kfree(ptr);
+        fwk_free(ptr);
 }
 
 /*!
@@ -71,7 +71,7 @@ void operator delete(void *ptr)
 void operator delete[](void *ptr)
 {
     if (ptr)
-        kfree(ptr);
+        fwk_free(ptr);
 }
 
 /*!< ------------------------------------------------------------------- */

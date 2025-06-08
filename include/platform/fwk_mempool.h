@@ -69,6 +69,19 @@ typedef enum nrt_gfp
 #define GFP_GET_AREA(gfp_mask)                  ((kuint8_t)(((gfp_mask) & (0xff000000U)) >> FWK_AREA_OFFSET))
 #define GFP_GET_FLAG(gfp_mask)                  ((gfp_mask) & (0x00ffffffU))
 
+/*!< Memory List */
+struct fwk_memp_list
+{
+    kuint32_t magic;
+    nrt_gfp_t gfp_mask;
+    void (*release)(struct fwk_memp_list *sptr_memp);
+
+    struct fwk_memp_list *sptr_next;
+    void *ptr;
+};
+#define FWK_MEMP_MAGIC                          (0x66dfa3c2)
+#define FWK_MEMP_SIZE                           (mr_align(sizeof(struct fwk_memp_list), ARCH_PER_SIZE))
+
 /*!< The functions */
 extern kbool_t fwk_mempool_initial(void);
 
@@ -83,6 +96,10 @@ extern void *kcalloc(size_t __size, size_t __n, nrt_gfp_t flags);
 extern void *kzalloc(size_t __size, nrt_gfp_t flags);
 extern void kfree(void *__ptr);
 extern void *default_malloc(kusize_t size);
+
+/*!< Allocate and free by async */
+extern void *fwk_malloc(kusize_t size, nrt_gfp_t gfp_mask);
+extern void fwk_free(void *__ptr);
 
 extern kbool_t memory_block_self_defines(kint32_t flags, kuaddr_t base, kusize_t size);
 extern void memory_block_self_destroy(kint32_t flags);

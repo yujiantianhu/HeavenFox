@@ -37,6 +37,7 @@ static kuint32_t g_fwk_softirq_event = 0, g_fwk_softirq_count = 0;
 static struct fwk_tasklet_head sgtc_fwk_tasklet_head;
 
 /*!< The functions */
+extern void wake_up_ksoftirqd(void);
 
 /*!< API function */
 /*!
@@ -48,6 +49,41 @@ static struct fwk_tasklet_head sgtc_fwk_tasklet_head;
 kuint32_t fwk_softirq_avaliable(void)
 {
     return g_fwk_softirq_count;
+}
+
+/*!
+ * @brief   close local softirq
+ * @param   g_fwk_softirq_count++
+ * @retval  none
+ * @note    none
+ */
+void local_bh_disable(void)
+{
+    kutype_t flags;
+
+    mr_local_irq_save(flags);
+    g_fwk_softirq_count++;
+    mr_barrier();
+    mr_local_irq_restore(flags);
+}
+
+/*!
+ * @brief   open local softirq
+ * @param   g_fwk_softirq_count--
+ * @retval  none
+ * @note    none
+ */
+void local_bh_enable(void)
+{
+    kutype_t flags;
+
+    mr_local_irq_save(flags);
+
+    if (g_fwk_softirq_count)
+        g_fwk_softirq_count--;
+
+    mr_barrier();
+    mr_local_irq_restore(flags);
 }
 
 /*!
@@ -67,12 +103,16 @@ void fwk_handle_softirq(void)
         return;
 
     mr_local_irq_save(flags);
+
+    /*!< Local irq is opened, but not allow preempting (disable scheduler) */
     if (IS_IN_INTERRUPT())
-        g_fwk_softirq_count++;
+        mr_preempt_disable();
+
+    /*!< Avoid enter again */
+    g_fwk_softirq_count++;
 
     end = jiffies + msecs_to_jiffies(2);
     pending = g_fwk_softirq_event;
-    mr_preempt_disable();
 
 restart:
     g_fwk_softirq_event = 0;
@@ -100,12 +140,15 @@ restart:
         if (pending && (jiffies < end))
             goto restart;
 
+        mr_preempt_enable();
+
         /*!< wake up "ksoftirqd" */
-        g_fwk_softirq_count--;
+        if (pending)
+            wake_up_ksoftirqd();
     }
 
+    g_fwk_softirq_count--;
     mr_local_irq_restore(flags);
-    mr_preempt_enable();
 }
 
 /*!
@@ -150,7 +193,7 @@ void fwk_raise_softirq(kint32_t nr)
  * @param   nr: irq number (__ERT_SOFTIRQ_EVENT)
  * @param   args: argument
  * @retval  irq retval
- * @note    none
+ * @note    Duplicate entries are not permitted !!!
  */
 static void fwk_tasklet_action(kint32_t nr)
 {
@@ -168,8 +211,12 @@ static void fwk_tasklet_action(kint32_t nr)
         sptr_item = sptr_list;
         sptr_list = sptr_list->sptr_next;
 
-        if (!ATOMIC_READ(&sptr_item->count))
+        /*!< Do tasklet */
+        if (ATOMIC_READ(&sptr_item->count))
+        {
             sptr_item->func(sptr_item->data);
+            atomic_dec(&sptr_item->count);
+        }
     }
 }
 
@@ -203,10 +250,18 @@ void fwk_tasklet_schedule(struct fwk_tasklet *sptr_tsk)
 
     mr_local_irq_save(flags);
 
+    /*!< Has scheduled and does not excute */
+    if (ATOMIC_READ(&sptr_tsk->count))
+    {
+        mr_local_irq_restore(flags);
+        return;
+    }
+
     sptr_list = &sgtc_fwk_tasklet_head;
     sptr_tsk->sptr_next = mr_nullptr;
     *sptr_list->sptr_tail = sptr_tsk;
     sptr_list->sptr_tail = &sptr_tsk->sptr_next;
+    atomic_inc(&sptr_tsk->count);
 
     mr_local_irq_restore(flags);
     fwk_raise_softirq(NR_SOFTIRQ_TASKLET);

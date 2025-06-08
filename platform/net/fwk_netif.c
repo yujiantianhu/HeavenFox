@@ -435,7 +435,13 @@ kint32_t fwk_dev_queue_xmit(struct fwk_sk_buff *sptr_skb)
 kint32_t fwk_netif_rx(struct fwk_sk_buff *sptr_skb)
 {
     if (!fwk_skb_enqueue(fwk_netif_rxq_get(), sptr_skb))
+    {
+    #if (CONFIG_NET_RX_SOFTIRQ)
+        fwk_raise_softirq(NR_SOFTIRQ_NET_RX);
+    #else
         schedule_thread_wakeup(THREAD_TID_SOCKRX);
+    #endif
+    }
 
     return ER_NORMAL;
 }
@@ -449,6 +455,41 @@ struct fwk_netif_tcb
     void (*pfunc_rx)(void *rxq, void *args);
 };
 
+#if (CONFIG_NET_RX_SOFTIRQ)
+static struct fwk_netif_tcb *sptr_fwk_netif_rx_tcb;
+
+/*!
+ * @brief   rx action for softirq
+ * @param   nr (softirq event)
+ * @retval  none
+ * @note    if skb_list is empty, return right away
+ */
+static void fwk_netif_rx_action(kint32_t nr)
+{
+    struct fwk_netif_tcb *sptr_tcb;
+    struct fwk_sk_buff_head *sptr_head;
+    kutype_t flags;
+
+    sptr_head = fwk_netif_rxq_get();
+    sptr_tcb = sptr_fwk_netif_rx_tcb;
+
+    local_irq_save(&flags);
+    if (mr_skbuff_list_empty(sptr_head))
+    {
+        local_irq_restore(&flags);
+        return;
+    }
+
+    fwk_skb_split(&sptr_tcb->sgtc_head, sptr_head);
+    fwk_skb_list_init(sptr_head);
+
+    local_irq_restore(&flags);
+
+    if (sptr_tcb->pfunc_rx)
+        sptr_tcb->pfunc_rx(&sptr_tcb->sgtc_head, sptr_tcb->args);      
+}
+
+#else
 /*!
  * @brief   rx thread
  * @param   args (for callback function)
@@ -466,10 +507,12 @@ static void *fwk_netif_rx_entry(void *args)
 
     for (;;)
     {
-        if (mr_skbuff_list_empty(sptr_head))
-            schedule_self_suspend();
-
         local_irq_save(&flags);
+        if (mr_skbuff_list_empty(sptr_head))
+        {
+            local_irq_restore(&flags);
+            schedule_self_suspend();
+        }        
 
         fwk_skb_split(&sptr_tcb->sgtc_head, sptr_head);
         fwk_skb_list_init(sptr_head);
@@ -482,6 +525,7 @@ static void *fwk_netif_rx_entry(void *args)
 
     return args;
 }
+#endif
 
 /*!
  * @brief   netif initalization
@@ -506,8 +550,13 @@ void fwk_netif_init(void (*pfunc_rx)(void *rxq, void *args), void *args)
     sptr_head = fwk_netif_rxq_get();
     fwk_skb_list_init(sptr_head);
 
+#if (CONFIG_NET_RX_SOFTIRQ)
+    sptr_fwk_netif_rx_tcb = sptr_tcb;
+    fwk_open_softirq(NR_SOFTIRQ_NET_RX, fwk_netif_rx_action);
+#else
     kernel_thread_create(THREAD_TID_SOCKRX, mr_nullptr, fwk_netif_rx_entry, sptr_tcb);
     thread_set_priority(mr_tid_attr(THREAD_TID_SOCKRX), THREAD_PROTY_SOCKRX);
+#endif
 
     /*!< register command */
     term_cmd_add_ifconfig();

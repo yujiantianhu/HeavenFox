@@ -175,7 +175,7 @@ extern kubyte_t io_getc(kubyte_t *ch);
 extern kssize_t io_getstr(kubyte_t *msgs, kusize_t size);
 extern void io_putstr_async(const kubyte_t *msgs, kusize_t size);
 extern kssize_t io_stream_logs_extract(void *buffer, kusize_t size);
-extern void io_stream_logs_print(void);
+extern void io_stream_logs_print(void *__temp_buffer, kusize_t __temp_size);
 
 extern void printk(const kchar_t *ptr_fmt, ...);
 extern void kprintf(const kchar_t *ptr_fmt, ...);

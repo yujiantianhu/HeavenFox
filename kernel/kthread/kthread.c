@@ -19,15 +19,17 @@
 #include <kernel/spinlock.h>
 
 /*!< The defines */
-#define KERL_THREAD_STACK_SIZE                          THREAD_STACK_PAGE(1)   /*!< 1 page (4 kbytes) */
+#define KERL_THREAD_STACK_SIZE                          THREAD_STACK_PAGE(2)   /*!< 2 page (8 kbytes) */
 
 /*!< The globals */
 kbool_t g_sched_flag = false;
 
 static struct thread_attr sgtc_kthread_attr;
-static kuint32_t g_kthread_stack[KERL_THREAD_STACK_SIZE];
+static kuint8_t g_kthread_stack[KERL_THREAD_STACK_SIZE];
 static struct timer_list sgtc_kthread_timer;
 static struct spin_lock sgtc_kthread_spinlock;
+
+static kuint8_t g_kthread_log_buffer[4096];
 
 /*!< API functions */
 /*!
@@ -134,7 +136,9 @@ static void *kthread_entry(void *args)
     print_info("platform initialization finished\r\n");
 
     term_init();                            /*!< create term task */
+    ksoftirqd_init();                       /*!< create ksoftirqd task */
     kworker_init();                         /*!< create kworker task */
+    kmemp_init();                           /*!< create kmemp task */
 
     /*!< build application */
     init_proc_init();                       /*!< create init task */
@@ -144,7 +148,10 @@ static void *kthread_entry(void *args)
         kthread_systime_record();
         kthread_kill_zombie();              /*!< kill zombie thread */
 
-        io_stream_logs_print();
+        /*!< Print logs */
+        io_stream_logs_print(g_kthread_log_buffer, sizeof(g_kthread_log_buffer));
+
+        /*!< Sleep for a while */
         msleep(50);
     }
 

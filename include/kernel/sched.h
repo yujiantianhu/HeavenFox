@@ -38,8 +38,8 @@ struct thread
     kuint32_t tid;
 
     /*!< refer to "__ERT_THREAD_BASIC_STATUS" */
-    kuint32_t status;
-    kuint32_t to_status;
+    kuint32_t state;
+    kuint32_t to_state;
 
     /*!< thread entry */
     void *(*start_routine) (void *);
