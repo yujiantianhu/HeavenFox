@@ -47,6 +47,7 @@ void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
             printk(PRINT_LEVEL_ERR"current thread name: %s\r\n", sptr_thread->name);
         printk(PRINT_LEVEL_ERR"current thread id: %d ==== < === > \r\n\t", sptr_thread->tid);
 
+    #if defined(CONFIG_CONTEXT_EX) && (CONFIG_CONTEXT_EX)
         for (kint32_t idx = 0; idx < 9; idx++)
         {
             if (idx < 10)
@@ -54,6 +55,7 @@ void deal_assert_fail(const kchar_t *__assertion, const kchar_t *__file,
             else
                 printk(PRINT_LEVEL_ERR"r%d:   0x%x\r\n\t",  idx, *((kuaddr_t *)(&sptr_regs->r0) + idx));
         }
+    #endif
 
         printk(PRINT_LEVEL_ERR
                 	"lr:    0x%x\r\n\t"

@@ -48,7 +48,7 @@ typedef kint32_t tid_t;
 #define THREAD_STACK_QUAR(page)			    (THREAD_STACK8(((kuint32_t)(page)) << 10))
 
 #define THREAD_STACK_MIN					THREAD_STACK8(512)
-#define THREAD_STACK_DEFAULT				THREAD_STACK8(2056)
+#define THREAD_STACK_DEFAULT				THREAD_STACK_PAGE(1)
 
 /*!<
  * tid base 

@@ -19,7 +19,7 @@
 #include <kernel/workqueue.h>
 
 /*!< The defines */
-#define KWORKER_THREAD_STACK_SIZE                       THREAD_STACK_HALF(1)    /*!< 1/2 page (2 kbytes) */
+#define KWORKER_THREAD_STACK_SIZE                       THREAD_STACK_PAGE(1)    /*!< 1 page (4 kbytes) */
 
 /*!< The globals */
 static tid_t g_kworker_tid;

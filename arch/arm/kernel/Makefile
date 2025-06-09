@@ -11,7 +11,7 @@
 
 obj-y	+=	head-common.o
 
-ifeq ($(CONSIG_CONTEXT_EX),y)
+ifeq ($(CONFIG_CONTEXT_EX),y)
 obj-y	+=	context2.o
 else
 obj-y	+=	context.o

@@ -31,7 +31,7 @@ void exec_undefined_handler(void)
     g_interrupt_flags |= (EXCEPTION_BIT | 0x04);
 
     printk(PRINT_LEVEL_ERR "%s: program instruction undefine\r\n", __FUNCTION__);
-//  mr_assert(false);
+    mr_assert(false);
 
     g_interrupt_flags &= ~(EXCEPTION_BIT | 0x04);
 }
@@ -47,7 +47,7 @@ void exec_prefetch_abort_handler(void)
     g_interrupt_flags |= (EXCEPTION_BIT | 0x0C);
 
     printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, prefecth_abort_addr);
-//  mr_assert(false);
+    mr_assert(false);
     
     g_interrupt_flags &= ~(EXCEPTION_BIT | 0x0C);
 }
@@ -63,7 +63,7 @@ void exec_data_abort_handler(void)
     g_interrupt_flags |= (EXCEPTION_BIT | 0x10);
 
     printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, data_abort_addr);
-//  mr_assert(false);
+    mr_assert(false);
     
     g_interrupt_flags &= ~(EXCEPTION_BIT | 0x10);
 }
