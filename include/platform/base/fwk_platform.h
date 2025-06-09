@@ -18,8 +18,8 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
-#include <platform/fwk_kobj.h>
+#include <platform/base/fwk_basic.h>
+#include <platform/base/fwk_kobj.h>
 #include <platform/of/fwk_of.h>
 #include <platform/irq/fwk_irq_types.h>
 #include <kernel/rw_lock.h>

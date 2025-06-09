@@ -12,8 +12,8 @@
 
 /*!< The includes */
 #include <common/queue.h>
-#include <platform/fwk_mempool.h>
-#include <platform/fwk_uaccess.h>
+#include <platform/base/fwk_mempool.h>
+#include <platform/base/fwk_uaccess.h>
 #include <platform/net/fwk_lwip.h>
 #include <platform/net/fwk_netif.h>
 #include <kernel/wait.h>

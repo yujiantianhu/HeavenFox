@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_cdev.h>
+#include <platform/base/fwk_cdev.h>
 
 /*!< API function */
 /*!

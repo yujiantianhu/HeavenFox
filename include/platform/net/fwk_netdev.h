@@ -18,9 +18,9 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/net/fwk_if.h>
-#include <platform/fwk_platform.h>
+#include <platform/base/fwk_platform.h>
 
 /*!< The defines */
 typedef kint32_t netdev_tx_t;

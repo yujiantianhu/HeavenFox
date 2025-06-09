@@ -13,7 +13,7 @@
 /*!< The includes */
 #include <common/time.h>
 #include <board/board.h>
-#include <platform/fwk_mempool.h>
+#include <platform/base/fwk_mempool.h>
 #include <platform/mmc/fwk_sdcard.h>
 
 #include "imx6_common.h"

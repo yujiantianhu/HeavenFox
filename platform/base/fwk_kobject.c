@@ -11,8 +11,8 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_kobj.h>
-#include <platform/fwk_inode.h>
+#include <platform/base/fwk_kobj.h>
+#include <platform/base/fwk_inode.h>
 #include <kernel/spinlock.h>
 
 /*!< The globals */

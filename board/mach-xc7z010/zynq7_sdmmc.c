@@ -13,7 +13,7 @@
 /*!< The includes */
 #include "zynq7_common.h"
 #include <common/time.h>
-#include <platform/fwk_mempool.h>
+#include <platform/base/fwk_mempool.h>
 #include <platform/mmc/fwk_sdcard.h>
 
 /*!< The globals */

@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_chrdev.h>
+#include <platform/base/fwk_chrdev.h>
 #include <kernel/mutex.h>
 
 /*!< The globals */

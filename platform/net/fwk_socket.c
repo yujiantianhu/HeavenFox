@@ -11,8 +11,8 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
-#include <platform/fwk_fcntl.h>
+#include <platform/base/fwk_basic.h>
+#include <platform/base/fwk_fcntl.h>
 #include <platform/net/fwk_if.h>
 #include <platform/net/fwk_netif.h>
 #include <platform/net/fwk_socket.h>

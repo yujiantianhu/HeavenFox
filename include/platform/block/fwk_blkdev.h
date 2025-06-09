@@ -18,8 +18,8 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
-#include <platform/fwk_platdev.h>
+#include <platform/base/fwk_basic.h>
+#include <platform/base/fwk_platdev.h>
 
 struct fwk_inode;
 struct fwk_gendisk;

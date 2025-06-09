@@ -13,7 +13,7 @@
 /*!< The includes */
 #include <common/generic.h>
 #include <common/queue.h>
-#include <platform/fwk_mempool.h>
+#include <platform/base/fwk_mempool.h>
 
 /*!< The defines */
 

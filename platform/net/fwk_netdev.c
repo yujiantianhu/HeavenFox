@@ -11,10 +11,10 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/net/fwk_netdev.h>
-#include <platform/fwk_platform.h>
-#include <platform/fwk_platdev.h>
+#include <platform/base/fwk_platform.h>
+#include <platform/base/fwk_platdev.h>
 #include <kernel/mutex.h>
 
 /*!< The defines */

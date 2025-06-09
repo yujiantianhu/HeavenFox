@@ -11,11 +11,11 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_platform.h>
-#include <platform/fwk_platdev.h>
-#include <platform/fwk_platdrv.h>
-#include <platform/fwk_pinctrl.h>
-#include <platform/fwk_inode.h>
+#include <platform/base/fwk_platform.h>
+#include <platform/base/fwk_platdev.h>
+#include <platform/base/fwk_platdrv.h>
+#include <platform/base/fwk_pinctrl.h>
+#include <platform/base/fwk_inode.h>
 
 /*!<
  * One device can only be matched with one driver

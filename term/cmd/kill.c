@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <kernel/signal.h>
 #include <kernel/sched.h>
 #include <term/term.h>

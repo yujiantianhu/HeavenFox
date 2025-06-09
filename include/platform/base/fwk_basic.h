@@ -30,7 +30,7 @@
 #include <board/board.h>
 #include <boot/boot_text.h>
 #include <boot/implicit_call.h>
-#include <platform/fwk_mempool.h>
+#include <platform/base/fwk_mempool.h>
 
 /*!< The defines */
 enum __ERT_DEVICE_TYPE

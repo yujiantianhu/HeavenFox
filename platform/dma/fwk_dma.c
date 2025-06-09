@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/of/fwk_of_prop.h>
 #include <platform/dma/fwk_dma.h>
 #include <kernel/mutex.h>

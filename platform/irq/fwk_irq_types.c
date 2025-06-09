@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/irq/fwk_irq_types.h>
 #include <platform/irq/fwk_irq_chip.h>
 #include <platform/irq/fwk_irq_domain.h>

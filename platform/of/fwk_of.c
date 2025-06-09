@@ -11,10 +11,10 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_prop.h>
-#include <platform/fwk_platdev.h>
+#include <platform/base/fwk_platdev.h>
 
 /*!< -------------------------------------------------------------------------- */
 /*!< The defines */

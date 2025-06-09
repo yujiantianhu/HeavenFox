@@ -11,8 +11,8 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_platform.h>
-#include <platform/fwk_platdrv.h>
+#include <platform/base/fwk_platform.h>
+#include <platform/base/fwk_platdrv.h>
 
 /*!< The functions */
 static kint32_t fwk_driver_attach(struct fwk_driver *sptr_driver, struct fwk_bus_type *sptr_bus_type,

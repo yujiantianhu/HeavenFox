@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_uaccess.h>
+#include <platform/base/fwk_uaccess.h>
 
 /*!< API function */
 /*!

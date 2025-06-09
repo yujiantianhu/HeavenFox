@@ -11,7 +11,7 @@
  *********************/
 #include "lv_port_fs.h"
 
-#include <platform/fwk_fcntl.h>
+#include <platform/base/fwk_fcntl.h>
 #include <fs/fs_intr.h>
 
 /*********************

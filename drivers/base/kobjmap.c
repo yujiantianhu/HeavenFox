@@ -11,10 +11,10 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
-#include <platform/fwk_inode.h>
-#include <platform/fwk_fs.h>
-#include <platform/fwk_kobj.h>
+#include <platform/base/fwk_basic.h>
+#include <platform/base/fwk_inode.h>
+#include <platform/base/fwk_fs.h>
+#include <platform/base/fwk_kobj.h>
 
 /*!< The defines */
 

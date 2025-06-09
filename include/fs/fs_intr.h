@@ -21,7 +21,7 @@
 #include <common/generic.h>
 #include <common/api_string.h>
 #include <common/io_stream.h>
-#include <platform/fwk_kobj.h>
+#include <platform/base/fwk_kobj.h>
 #include <platform/block/fwk_gendisk.h>
 
 /*!< The defines */

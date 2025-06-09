@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_pinctrl.h>
+#include <platform/base/fwk_pinctrl.h>
 
 /*!< The defines */
 

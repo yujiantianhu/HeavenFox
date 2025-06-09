@@ -18,9 +18,9 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
-#include <platform/fwk_inode.h>
-#include <platform/fwk_uaccess.h>
+#include <platform/base/fwk_basic.h>
+#include <platform/base/fwk_inode.h>
+#include <platform/base/fwk_uaccess.h>
 
 /*!< The defines */
 #define RET_INODE_FROM_FILE(file)								((file)->sptr_inode)

@@ -13,7 +13,7 @@
 /*!< The includes */
 #include <common/api_string.h>
 #include <common/io_stream.h>
-#include <platform/fwk_mempool.h>
+#include <platform/base/fwk_mempool.h>
 
 /*!< API function */
 /*!

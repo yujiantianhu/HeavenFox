@@ -10,9 +10,9 @@
  *
  */
 
-#include <platform/fwk_mempool.h>
-#include <platform/fwk_inode.h>
-#include <platform/fwk_fs.h>
+#include <platform/base/fwk_mempool.h>
+#include <platform/base/fwk_inode.h>
+#include <platform/base/fwk_fs.h>
 #include <platform/block/fwk_gendisk.h>
 #include <fs/fs_intr.h>
 

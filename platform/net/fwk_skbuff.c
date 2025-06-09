@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/net/fwk_if.h>
 #include <platform/net/fwk_netdev.h>
 #include <platform/net/fwk_skbuff.h>

@@ -26,7 +26,7 @@
 #include <board/board.h>
 #include <boot/boot_text.h>
 #include <boot/implicit_call.h>
-#include <platform/fwk_mempool.h>
+#include <platform/base/fwk_mempool.h>
 #include <kernel/kernel.h>
 #include <kernel/context.h>
 #include <kernel/sleep.h>

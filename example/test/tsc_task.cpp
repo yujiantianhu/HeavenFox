@@ -15,7 +15,7 @@
 #include <common/error_types.h>
 #include <common/generic.h>
 #include <common/io_stream.h>
-#include <platform/fwk_fcntl.h>
+#include <platform/base/fwk_fcntl.h>
 #include <platform/input/fwk_input.h>
 #include <kernel/kernel.h>
 #include <kernel/sched.h>

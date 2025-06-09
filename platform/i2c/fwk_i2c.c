@@ -11,12 +11,12 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_device.h>
-#include <platform/fwk_platform.h>
-#include <platform/fwk_platdev.h>
-#include <platform/fwk_platdrv.h>
+#include <platform/base/fwk_platform.h>
+#include <platform/base/fwk_platdev.h>
+#include <platform/base/fwk_platdrv.h>
 #include <platform/i2c/fwk_i2c_dev.h>
 #include <platform/i2c/fwk_i2c_core.h>
 #include <platform/i2c/fwk_i2c_algo.h>

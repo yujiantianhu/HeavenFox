@@ -18,7 +18,7 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include "fwk_ch9.h"
 #include "fwk_urb.h"
 

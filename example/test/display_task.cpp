@@ -15,7 +15,7 @@
 #include <common/error_types.h>
 #include <common/generic.h>
 #include <common/io_stream.h>
-#include <platform/fwk_fcntl.h>
+#include <platform/base/fwk_fcntl.h>
 #include <platform/video/fwk_fbmem.h>
 #include <platform/video/fwk_font.h>
 #include <platform/video/fwk_disp.h>

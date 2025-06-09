@@ -15,7 +15,7 @@
 
 /*!< The globals */
 #include <common/generic.h>
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 
 /*!< The defines */
 #define BEGIN_NAMESPACE(name)                       namespace name {

@@ -18,7 +18,7 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 
 /*!< The defines */
 struct fwk_i2c_adapter;

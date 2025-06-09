@@ -11,8 +11,8 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
-#include <platform/fwk_inode.h>
+#include <platform/base/fwk_basic.h>
+#include <platform/base/fwk_inode.h>
 
 /*!< API function */
 /*!

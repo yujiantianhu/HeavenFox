@@ -18,7 +18,7 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 
 /*!< The defines */
 enum __ERT_USB_HOST_INDEX

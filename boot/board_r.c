@@ -12,7 +12,7 @@
 
 /*!< The includes*/
 #include <boot/board_init.h>
-#include <platform/fwk_fcntl.h>
+#include <platform/base/fwk_fcntl.h>
 #include <fs/fs_fatfs.h>
 #include <fs/fs_intr.h>
 

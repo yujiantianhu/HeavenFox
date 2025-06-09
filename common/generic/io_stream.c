@@ -19,7 +19,7 @@
 #include <common/buffer.h>
 #include <kernel/kernel.h>
 #include <kernel/spinlock.h>
-#include <platform/fwk_mempool.h>
+#include <platform/base/fwk_mempool.h>
 
 /*!< The globals */
 static DECLARE_LIST_HEAD(sgtc_io_stream_devices);

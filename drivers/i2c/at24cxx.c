@@ -11,20 +11,20 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_device.h>
-#include <platform/fwk_platdrv.h>
-#include <platform/fwk_uaccess.h>
+#include <platform/base/fwk_platdrv.h>
+#include <platform/base/fwk_uaccess.h>
 #include <platform/gpio/fwk_gpiodesc.h>
 #include <platform/i2c/fwk_i2c_dev.h>
 #include <platform/i2c/fwk_i2c_core.h>
 #include <platform/i2c/fwk_i2c_algo.h>
-#include <platform/fwk_cdev.h>
-#include <platform/fwk_chrdev.h>
-#include <platform/fwk_inode.h>
-#include <platform/fwk_fs.h>
-#include <platform/fwk_fcntl.h>
+#include <platform/base/fwk_cdev.h>
+#include <platform/base/fwk_chrdev.h>
+#include <platform/base/fwk_inode.h>
+#include <platform/base/fwk_fs.h>
+#include <platform/base/fwk_fcntl.h>
 #include <platform/i2c/fwk_eeprom.h>
 #include <kernel/sleep.h>
 #include <kernel/spinlock.h>

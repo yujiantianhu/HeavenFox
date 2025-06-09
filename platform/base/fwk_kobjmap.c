@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_kobj.h>
+#include <platform/base/fwk_kobj.h>
 #include <kernel/mutex.h>
 
 /*!< The globals */

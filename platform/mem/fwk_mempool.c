@@ -12,7 +12,7 @@
 
 /*!< The includes */
 #include <boot/boot_text.h>
-#include <platform/fwk_mempool.h>
+#include <platform/base/fwk_mempool.h>
 #include <kernel/sched.h>
 #include <kernel/wait.h>
 #include <kernel/spinlock.h>

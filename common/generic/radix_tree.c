@@ -14,7 +14,7 @@
 #include <common/generic.h>
 #include <common/radix_tree.h>
 #include <common/io_stream.h>
-#include <platform/fwk_mempool.h>
+#include <platform/base/fwk_mempool.h>
 
 /*!< The defines */
 

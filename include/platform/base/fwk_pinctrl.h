@@ -18,8 +18,8 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
-#include <platform/fwk_platform.h>
+#include <platform/base/fwk_basic.h>
+#include <platform/base/fwk_platform.h>
 #include <platform/of/fwk_of.h>
 #include <kernel/kernel.h>
 #include <kernel/mutex.h>

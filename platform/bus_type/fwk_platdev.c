@@ -11,8 +11,8 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_platform.h>
-#include <platform/fwk_platdev.h>
+#include <platform/base/fwk_platform.h>
+#include <platform/base/fwk_platdev.h>
 #include <kernel/rw_lock.h>
 
 /*!< The defines */

@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/net/fwk_if.h>
 #include <platform/net/fwk_netdev.h>
 #include <platform/net/fwk_skbuff.h>
@@ -25,9 +25,21 @@
 #include <kernel/sched.h>
 
 /*!< The defines */
+struct fwk_netif_tcb
+{
+    struct fwk_sk_buff_head sgtc_head;
+    
+    void *args;
+    void (*pfunc_rx)(void *rxq, void *args);
+};
 
 /*!< The globals */
 static struct fwk_sk_buff_head sgtc_fwk_skb_rx_lists;
+static struct spin_lock sgtc_fwk_netif_rx_lock = SPIN_LOCK_INIT();
+
+#if (CONFIG_NET_RX_SOFTIRQ)
+static struct fwk_netif_tcb *sptr_fwk_netif_rx_tcb;
+#endif
 
 /*!< API functions */
 /*!
@@ -434,29 +446,31 @@ kint32_t fwk_dev_queue_xmit(struct fwk_sk_buff *sptr_skb)
  */
 kint32_t fwk_netif_rx(struct fwk_sk_buff *sptr_skb)
 {
+    struct spin_lock *sptr_lock;
+
+    sptr_lock = &sgtc_fwk_netif_rx_lock;
+    spin_lock_irqsave(sptr_lock);
+
     if (!fwk_skb_enqueue(fwk_netif_rxq_get(), sptr_skb))
     {
+        spin_unlock_irqrestore(sptr_lock);
+
     #if (CONFIG_NET_RX_SOFTIRQ)
         fwk_raise_softirq(NR_SOFTIRQ_NET_RX);
     #else
         schedule_thread_wakeup(THREAD_TID_SOCKRX);
     #endif
+
+        return ER_NORMAL;
     }
 
-    return ER_NORMAL;
+    spin_unlock_irqrestore(sptr_lock);
+    return -ER_FAILD;
 }
 
 /*!< ----------------------------------------------------------------------- */
-struct fwk_netif_tcb
-{
-    struct fwk_sk_buff_head sgtc_head;
-    
-    void *args;
-    void (*pfunc_rx)(void *rxq, void *args);
-};
-
 #if (CONFIG_NET_RX_SOFTIRQ)
-static struct fwk_netif_tcb *sptr_fwk_netif_rx_tcb;
+static struct spin_lock sgtc_cpu_netif_rx_lock = SPIN_LOCK_INIT();
 
 /*!
  * @brief   rx action for softirq
@@ -468,25 +482,30 @@ static void fwk_netif_rx_action(kint32_t nr)
 {
     struct fwk_netif_tcb *sptr_tcb;
     struct fwk_sk_buff_head *sptr_head;
-    kutype_t flags;
+    struct spin_lock *sptr_sklock, *sptr_cpulock;
 
     sptr_head = fwk_netif_rxq_get();
     sptr_tcb = sptr_fwk_netif_rx_tcb;
+    sptr_sklock = &sgtc_fwk_netif_rx_lock;
+    sptr_cpulock = &sgtc_cpu_netif_rx_lock;
 
-    local_irq_save(&flags);
+    spin_lock_irqsave(sptr_sklock);
     if (mr_skbuff_list_empty(sptr_head))
     {
-        local_irq_restore(&flags);
+        spin_unlock_irqrestore(sptr_sklock);
         return;
     }
 
     fwk_skb_split(&sptr_tcb->sgtc_head, sptr_head);
     fwk_skb_list_init(sptr_head);
 
-    local_irq_restore(&flags);
+    spin_unlock_irqrestore(sptr_sklock);
 
-    if (sptr_tcb->pfunc_rx)
-        sptr_tcb->pfunc_rx(&sptr_tcb->sgtc_head, sptr_tcb->args);      
+    spin_lock_bh(sptr_cpulock);
+    if (mr_likely(sptr_tcb->pfunc_rx))
+        sptr_tcb->pfunc_rx(&sptr_tcb->sgtc_head, sptr_tcb->args);
+
+    spin_unlock_bh(sptr_cpulock);
 }
 
 #else
@@ -500,24 +519,25 @@ static void *fwk_netif_rx_entry(void *args)
 {
     struct fwk_netif_tcb *sptr_tcb;
     struct fwk_sk_buff_head *sptr_head;
-    kutype_t flags;
+    struct spin_lock *sptr_lock;
 
     sptr_head = fwk_netif_rxq_get();
     sptr_tcb = (struct fwk_netif_tcb *)args;
+    sptr_lock = &sgtc_fwk_netif_rx_lock;
 
     for (;;)
     {
-        local_irq_save(&flags);
+        spin_lock_irqsave(sptr_lock);
         if (mr_skbuff_list_empty(sptr_head))
         {
-            local_irq_restore(&flags);
+            spin_unlock_irqrestore(sptr_lock);
             schedule_self_suspend();
         }        
 
         fwk_skb_split(&sptr_tcb->sgtc_head, sptr_head);
         fwk_skb_list_init(sptr_head);
 
-        local_irq_restore(&flags);
+        spin_unlock_irqrestore(sptr_lock);
 
         if (sptr_tcb->pfunc_rx)
             sptr_tcb->pfunc_rx(&sptr_tcb->sgtc_head, sptr_tcb->args);       

@@ -21,7 +21,7 @@
 #include <common/generic.h>
 #include <common/libcxplus.h>
 #include <common/list_types.h>
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/net/fwk_if.h>
 #include <platform/net/fwk_netif.h>
 #include <platform/net/fwk_socket.h>

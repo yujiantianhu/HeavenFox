@@ -18,7 +18,7 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 
 /*!< The defines */
 #define FWK_FONT_HZ_3BYTES                  (0)

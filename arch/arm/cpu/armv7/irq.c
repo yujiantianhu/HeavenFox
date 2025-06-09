@@ -16,7 +16,7 @@
 
 #include <common/io_stream.h>
 #include <boot/boot_text.h>
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/irq/fwk_irq_domain.h>
 #include <platform/irq/fwk_irq.h>
 #include <platform/irq/fwk_irq_types.h>

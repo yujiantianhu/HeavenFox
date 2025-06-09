@@ -11,12 +11,12 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_device.h>
-#include <platform/fwk_platdev.h>
-#include <platform/fwk_platdrv.h>
-#include <platform/fwk_uaccess.h>
+#include <platform/base/fwk_platdev.h>
+#include <platform/base/fwk_platdrv.h>
+#include <platform/base/fwk_uaccess.h>
 
 #include <kernel/sched.h>
 #include <kernel/sleep.h>

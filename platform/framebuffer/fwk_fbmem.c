@@ -11,10 +11,10 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_uaccess.h>
-#include <platform/fwk_cdev.h>
-#include <platform/fwk_chrdev.h>
-#include <platform/fwk_inode.h>
+#include <platform/base/fwk_uaccess.h>
+#include <platform/base/fwk_cdev.h>
+#include <platform/base/fwk_chrdev.h>
+#include <platform/base/fwk_inode.h>
 #include <platform/video/fwk_fbmem.h>
 #include <kernel/mutex.h>
 

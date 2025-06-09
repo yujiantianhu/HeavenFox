@@ -12,14 +12,9 @@
 obj-y	+=	mem/
 obj-y	+=	bus_type/
 obj-y	+=	of/
-obj-y	+=	notifier/
 
-obj-y	+=	fwk_uaccess.o
-obj-y	+=	fwk_fcntl.o
-obj-y	+=	fwk_fs.o
-obj-y	+=	fwk_kobjmap.o
-obj-y	+=	fwk_kobject.o
-obj-y	+=	fwk_inode.o
+obj-y	+=	base/
+obj-y	+=	notifier/
 
 obj-y	+=	clk/
 obj-y	+=	irq/

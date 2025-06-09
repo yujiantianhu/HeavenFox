@@ -18,7 +18,7 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 
 /*!< The defines */
 #define USB_DT_ENDIAN_BYTE32(x)								mr_le32_to_cpu(x)

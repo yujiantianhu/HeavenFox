@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/video/fwk_disp.h>
 #include <platform/video/fwk_bitmap.h>
 #include <platform/video/fwk_rgbmap.h>

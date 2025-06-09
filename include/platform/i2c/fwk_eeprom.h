@@ -18,7 +18,7 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 
 /*!< The defines */
 #define FWK_EEPROM_READ							FWK_IOR('r', 1, kuint8_t)

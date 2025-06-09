@@ -18,8 +18,8 @@
 #endif
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
-#include <platform/fwk_platform.h>
+#include <platform/base/fwk_basic.h>
+#include <platform/base/fwk_platform.h>
 #include <kernel/rw_lock.h>
 
 #include "fwk_i2c_algo.h"

@@ -22,8 +22,8 @@ extern "C" {
 #include <lvgl/lvgl.h>
 #endif
 
-#include <platform/fwk_fcntl.h>
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_fcntl.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/video/fwk_fbmem.h>
 #include <platform/video/fwk_font.h>
 #include <platform/video/fwk_disp.h>

@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_fs.h>
+#include <platform/base/fwk_fs.h>
 
 /*!< API function */
 /*!

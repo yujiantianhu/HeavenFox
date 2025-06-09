@@ -15,7 +15,7 @@
 #include <common/trie_tree.h>
 #include <common/io_stream.h>
 #include <common/api_string.h>
-#include <platform/fwk_mempool.h>
+#include <platform/base/fwk_mempool.h>
 
 /*!< The defines */
 #define IS_STRING_END(offset)           (-1 == (offset))

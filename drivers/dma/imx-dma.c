@@ -11,10 +11,10 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_device.h>
-#include <platform/fwk_platdrv.h>
+#include <platform/base/fwk_platdrv.h>
 #include <platform/dma/fwk_dma.h>
 #include <platform/clk/fwk_clk.h>
 #include <kernel/spinlock.h>

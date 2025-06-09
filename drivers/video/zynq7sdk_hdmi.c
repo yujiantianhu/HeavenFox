@@ -11,16 +11,16 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
-#include <platform/fwk_inode.h>
-#include <platform/fwk_fs.h>
+#include <platform/base/fwk_basic.h>
+#include <platform/base/fwk_inode.h>
+#include <platform/base/fwk_fs.h>
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_device.h>
-#include <platform/fwk_platdrv.h>
+#include <platform/base/fwk_platdrv.h>
 #include <platform/clk/fwk_clk.h>
-#include <platform/fwk_pinctrl.h>
+#include <platform/base/fwk_pinctrl.h>
 #include <platform/gpio/fwk_gpiodesc.h>
-#include <platform/fwk_uaccess.h>
+#include <platform/base/fwk_uaccess.h>
 #include <platform/video/fwk_fbmem.h>
 #include <platform/video/fwk_rgbmap.h>
 

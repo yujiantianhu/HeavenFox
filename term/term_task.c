@@ -11,9 +11,9 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
-#include <platform/fwk_fcntl.h>
-#include <platform/fwk_fs.h>
+#include <platform/base/fwk_basic.h>
+#include <platform/base/fwk_fcntl.h>
+#include <platform/base/fwk_fs.h>
 #include <kernel/kernel.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>

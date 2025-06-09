@@ -20,8 +20,8 @@
 /*!< The includes */
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_prop.h>
-#include <platform/fwk_platform.h>
-#include <platform/fwk_platdev.h>
+#include <platform/base/fwk_platform.h>
+#include <platform/base/fwk_platdev.h>
 
 /*!< The functions */
 extern kint32_t fwk_of_register_platdevice(struct fwk_device_node *sptr_node, struct fwk_platdev *sptr_platdev);

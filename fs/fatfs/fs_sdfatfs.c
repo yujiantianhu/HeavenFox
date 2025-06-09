@@ -10,7 +10,7 @@
  *
  */
 
-#include <platform/fwk_mempool.h>
+#include <platform/base/fwk_mempool.h>
 #include <platform/mmc/fwk_sdcard.h>
 #include <fs/fs_fatfs.h>
 

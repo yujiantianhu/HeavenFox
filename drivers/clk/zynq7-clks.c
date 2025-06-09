@@ -11,10 +11,10 @@
  */
 
 /*!< The includes */
-#include <platform/fwk_basic.h>
+#include <platform/base/fwk_basic.h>
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_device.h>
-#include <platform/fwk_platdrv.h>
+#include <platform/base/fwk_platdrv.h>
 #include <platform/clk/fwk_clk.h>
 #include <platform/clk/fwk_clk_provider.h>
 #include <platform/clk/fwk_clk_gate.h>
