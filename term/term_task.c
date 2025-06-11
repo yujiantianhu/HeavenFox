@@ -43,7 +43,7 @@ struct term_kbd_priv
 /*!< The globals */
 static tid_t g_term_task_tid;
 static struct thread_attr sgtc_term_task_attr;
-static kuint8_t g_term_task_stack[TERM_TASK_THREAD_STACK_SIZE];
+static THREAD_STACK_DEFINE(g_term_task_stack, TERM_TASK_THREAD_STACK_SIZE);
 static struct mailbox sgtc_term_task_mailbox;
 
 static kubyte_t g_term_cmdline[TERM_MSG_RECV_LEN];
@@ -432,6 +432,7 @@ static const term_cmd_fn_t g_term_cmd_fn[] =
     term_cmd_add_kill,
     term_cmd_add_history,
     term_cmd_add_mem,
+    term_cmd_add_runtime,
 
     mr_nullptr,
 };

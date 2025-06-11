@@ -113,7 +113,7 @@ END:
  */
 kint32_t button_task_init(void)
 {
-    static kuint8_t g_button_task_stack[BUTTON_TASK_STACK_SIZE];
+    static THREAD_STACK_DEFINE(g_button_task_stack, BUTTON_TASK_STACK_SIZE);
 
     crt_task_t *cptr_task = new crt_task_t("button_task", 
                                             button_task_entry, 

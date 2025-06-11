@@ -264,7 +264,7 @@ void mod_timer(struct timer_list *sptr_timer, kutime_t expires)
     if (!isValid(sptr_timer))
         return;
 
-    sptr_timer->expires = expires;
+    sptr_timer->expires = get_safe_expires(expires);
     
 #if 0
     if (!find_timer(sptr_timer)) {
@@ -291,7 +291,7 @@ void do_timer_event(void)
         if (!sptr_timer->expires)
             continue;
 
-        if (mr_time_after(jiffies, sptr_timer->expires))
+        if (mr_time_after_eq(jiffies, sptr_timer->expires))
         {
             if (sptr_timer->entry)
                 sptr_timer->entry(sptr_timer->data);

@@ -135,7 +135,7 @@ static void *console_task_entry(void *args)
  */
 kint32_t console_task_init(void)
 {
-    static kuint8_t g_console_task_stack[CONSOLE_TASK_STACK_SIZE];
+    static THREAD_STACK_DEFINE(g_console_task_stack, CONSOLE_TASK_STACK_SIZE);
 
     crt_task_t *cptr_task = new crt_task_t("console task", 
                                             console_task_entry, 

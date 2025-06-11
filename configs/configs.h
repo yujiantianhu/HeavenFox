@@ -39,7 +39,7 @@
 #endif
 
 /*!< softirq or threading for network rx/tx */
-#define CONFIG_NET_RX_SOFTIRQ                   (1)
+#define CONFIG_NET_RX_SOFTIRQ                   (0)
 #define CONFIG_NET_TX_SOFTIRQ                   (0)
 
 #define CONFIG_DEFAULT_LOGIN                    "root"

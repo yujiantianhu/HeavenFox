@@ -77,6 +77,7 @@ extern void term_cmd_add_user(void);
 extern void term_cmd_add_kill(void);
 extern void term_cmd_add_history(void);
 extern void term_cmd_add_mem(void);
+extern void term_cmd_add_runtime(void);
 
 #ifdef __cplusplus
     }

@@ -73,6 +73,7 @@ crt_task_t::crt_task_t(const kchar_t *name, void *(*task_entry)(void *),
         , isdync(false)
 {
     kint32_t retval;
+    void *stack_top;
 
     if (!name || !(*name) || !task_entry)
         return;
@@ -93,7 +94,9 @@ crt_task_t::crt_task_t(const kchar_t *name, void *(*task_entry)(void *),
     }
 
     /*!< thread stack */
-    thread_set_stack(&this->sgtc_attr, mr_nullptr, this->stack_base, this->stack_size);
+    stack_top = thread_set_stack(&this->sgtc_attr, mr_nullptr, this->stack_base, this->stack_size);
+    if (!stack_top)
+        goto fail;
 
     /*!< lowest priority */
     thread_set_priority(&this->sgtc_attr, prio);
@@ -102,15 +105,21 @@ crt_task_t::crt_task_t(const kchar_t *name, void *(*task_entry)(void *),
 
     /*!< register thread */
     retval = thread_create(&this->tid, &sgtc_attr, task_entry, (void *)this);
-    if (retval) {
-        if (this->isdync)
-            delete[] this->stack_base;
-
-        return;
-    }
+    if (retval)
+        goto fail;
 
     thread_set_name(this->tid, name);
     bsc::cout << "create new task: " << name << bsc::endl;
+
+    return;
+
+fail:
+    if (this->isdync)
+    {
+        delete[] this->stack_base;
+        this->isdync = false;
+        this->stack_base = mr_nullptr;
+    }
 }
 
 /*!

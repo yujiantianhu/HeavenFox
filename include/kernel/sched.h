@@ -62,6 +62,23 @@ struct thread
     struct mailbox *sptr_mb;
 };
 
+/*!< Set thread state */
+#define __SET_THREAD_STATE(sptr_th, value)	\
+    do {	\
+        sptr_th->to_state = (value);	\
+    } while (0)
+
+#define __SYNC_THREAD_STATE(sptr_th, value)	\
+    do {	\
+        sptr_th->state = (value);	\
+        sptr_th->to_state = NR_THREAD_NONE;    \
+    } while (0)
+
+/*!< Get thread state */
+#define __GET_THREAD_STATE(sptr_th)	                                (sptr_th->state)
+#define __GET_THREAD_TARGET_STATE(sptr_th)	                        (sptr_th->to_state)
+
+/*!< Signal flags */
 #define mr_thread_set_flags(signal, sptr_tsk)	\
     do {	\
         sptr_tsk->flags |= mr_bit(signal);	\
@@ -74,6 +91,8 @@ struct thread
 
 #define mr_thread_is_flags(signal, sptr_tsk)						(!!((sptr_tsk)->flags & mr_bit(signal)))
 
+/*!< -------------------------------------------------------------------------- */
+/*!< Scheduler */
 struct thread_hash
 {
     struct list_head sgtc_list;
@@ -168,6 +187,7 @@ extern struct thread *next_sleep_thread(struct thread *sptr_prev);
 extern kint32_t schedule_thread_switch(tid_t tid);
 extern kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid);
 extern struct thread *unregister_thread(tid_t tid);
+extern void thread_tick_update(void);
 extern void __thread_init_before(void);
 extern struct scheduler_context *__schedule_thread(void);
 extern void schedule_thread(void);

@@ -86,7 +86,7 @@ END:
  */
 kint32_t tsc_task_init(void)
 {
-    static kuint8_t g_tsc_task_stack[TSC_TASK_STACK_SIZE];
+    static THREAD_STACK_DEFINE(g_tsc_task_stack, TSC_TASK_STACK_SIZE);
 
     crt_task_t *cptr_task = new crt_task_t("tsc task", 
                                             tsc_task_entry, 

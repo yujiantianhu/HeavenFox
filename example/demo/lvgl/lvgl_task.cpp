@@ -75,7 +75,7 @@ static void *lvgl_task_entry(void *args)
  */
 kint32_t lvgl_task_init(void)
 {
-    static kuint8_t g_lvgl_task_stack[LVGL_TASK_STACK_SIZE];
+    static THREAD_STACK_DEFINE(g_lvgl_task_stack, LVGL_TASK_STACK_SIZE);
 
     crt_task_t *cptr_task = new crt_task_t("lvgl_task", 
                                             lvgl_task_entry, 

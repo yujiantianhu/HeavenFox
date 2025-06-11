@@ -29,6 +29,20 @@
 
 #define SOFTIRQ_CALL(x)                                     __asm__ __volatile__ ("svc %0" : : "i"(x))
 
+#if 0
+#define mr_get_stack()  \
+({  \
+    kutype_t sp_val = 0;    \
+    __asm__ __volatile__ (  \
+        " mov %0, sp    \n\t"   \
+        : "=r"(sp_val)  \
+        :   \
+        : "cc"    \
+    );   \
+    sp_val; \
+})
+#endif
+
 #define mr_get_irq_pri(irqNumber)                           hw_irq_get_priority(irqNumber)
 #define mr_set_irq_pri(irqNumber, pri)                      hw_irq_set_priority(irqNumber, pri)
 

@@ -283,8 +283,8 @@ void *thread_attr_revise(struct thread_attr *sptr_attr)
 
     if (!sptr_attr->stack_addr)
     {
-        /*!< stack: 128bytes */
-        ptr_stack = kzalloc(THREAD_STACK_DEFAULT, GFP_KERNEL);
+        /*!< stack: 4KB */
+        ptr_stack = kmalloc(THREAD_STACK_DEFAULT, GFP_KERNEL);
         if (!isValid(ptr_stack))
             return mr_nullptr;		
 
@@ -343,7 +343,9 @@ void *thread_set_stack(struct thread_attr *sptr_attr,
 {
     struct scheduler_context_regs *sptr_regs;
 
-    if (!isValid(ptr_stack) || (stacksize < THREAD_STACK_MIN))
+    if (!ptr_stack || 
+        (stacksize < THREAD_STACK_MIN)) /* ||
+        !mr_is_aligned((kuaddr_t)ptr_stack, THREAD_STACK_ALIGN)) */
         return mr_nullptr;
 
     /*!< check: ptr_dync just should be NULL or ptr_stack */
@@ -423,7 +425,7 @@ void *tmalloc(size_t __size, nrt_gfp_t flags)
     sptr_info = &sptr_thread->sptr_attr->sgtc_pool;
     if (sptr_info->alloc)
     {
-        p = sptr_info->alloc(sptr_info, __size, mr_nullptr);
+        p = sptr_info->alloc(sptr_info, __size, -1, mr_nullptr);
         if (!isValid(p))
             return mr_nullptr;
 

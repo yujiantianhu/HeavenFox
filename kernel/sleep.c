@@ -31,11 +31,8 @@
 static void thread_sleep_timeout(kuint32_t args)
 {
     struct thread *sptr_thread = (struct thread *)args;
-    struct spin_lock *sptr_lock = scheduler_lock();
 
-    if (spin_is_locked(sptr_lock))
-		return;
-
+    /*!< Only schedule_thread() is finished, state will be NR_THREAD_SUSPEND */
     if (sptr_thread->state == NR_THREAD_SUSPEND)
         schedule_thread_wakeup(sptr_thread->tid);
 }
@@ -49,23 +46,25 @@ static void thread_sleep_timeout(kuint32_t args)
 void schedule_timeout(kutime_t count)
 {
     struct timer_list sgtc_tm;
-    struct thread *sptr_thread = mr_current;
-    struct spin_lock *sptr_lock = scheduler_lock();
+    struct thread *sptr_cur = mr_current;
 
-    if (!count)
+    /*!< schedule but not suspend (just add to ready list) */
+    if (!count) {
         schedule_thread();
+        return;
+    }
 	
-	spin_lock_irqsave(sptr_lock);
-    setup_timer(&sgtc_tm, thread_sleep_timeout, (kuint32_t)sptr_thread);
-    mod_timer(&sgtc_tm, jiffies + count);
-    spin_unlock_irqrestore(sptr_lock);
-    
+    setup_timer(&sgtc_tm, thread_sleep_timeout, (kuint32_t)sptr_cur);
+
     /*!< suspend current thread, and schedule others */
-    schedule_self_suspend();
-    
-    spin_lock_irqsave(sptr_lock);
+    spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    __SET_THREAD_STATE(sptr_cur, NR_THREAD_SUSPEND);
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
+
+    mod_timer(&sgtc_tm, jiffies + count);
+    schedule_thread();
+
     del_timer(&sgtc_tm);
-    spin_unlock_irqrestore(sptr_lock);
 }
 
 /*!

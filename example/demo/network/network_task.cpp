@@ -69,7 +69,7 @@ static void *network_task_entry(void *args)
  */
 kint32_t network_task_init(void)
 {
-    static kuint8_t g_network_task_stack[NETWORK_TASK_STACK_SIZE];
+    static THREAD_STACK_DEFINE(g_network_task_stack, NETWORK_TASK_STACK_SIZE);
 
     crt_task_t *cptr_task = new crt_task_t("network_task", 
                                             network_task_entry, 

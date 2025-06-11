@@ -17,4 +17,6 @@ else
 obj-y	+=	context.o
 endif
 
+obj-y	+=	kernel.o
+
 # end of file

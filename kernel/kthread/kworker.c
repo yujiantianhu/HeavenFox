@@ -24,7 +24,7 @@
 /*!< The globals */
 static tid_t g_kworker_tid;
 static struct thread_attr sgtc_kworker_attr;
-static kuint8_t g_kworker_stack[KWORKER_THREAD_STACK_SIZE];
+static THREAD_STACK_DEFINE(g_kworker_stack, KWORKER_THREAD_STACK_SIZE);
 
 static DECLARE_WORKQUEUE(sgtc_kworker_wqh);
 

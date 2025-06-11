@@ -22,7 +22,7 @@
 
 /*!< The globals */
 static struct thread_attr sgtc_init_proc_attr;
-static kuint8_t g_init_proc_stack[INIT_THREAD_STACK_SIZE];
+static THREAD_STACK_DEFINE(g_init_proc_stack, INIT_THREAD_STACK_SIZE);
 
 /*!< API functions */
 /*!

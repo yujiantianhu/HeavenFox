@@ -18,11 +18,11 @@
 #include <kernel/instance.h>
 
 /*!< The defines */
-#define IDLE_THREAD_STACK_SIZE                      THREAD_STACK_QUAR(1)    /*!< 1/4 page (1kbytes) */
+#define IDLE_THREAD_STACK_SIZE                      THREAD_STACK_HALF(1)    /*!< 1/2 page (2kbytes) */
 
 /*!< The globals */
 static struct thread_attr sgtc_idle_attr;
-static kuint8_t g_idle_stack[IDLE_THREAD_STACK_SIZE];
+static THREAD_STACK_DEFINE(g_idle_stack, IDLE_THREAD_STACK_SIZE);
 
 /*!< API functions */
 /*!

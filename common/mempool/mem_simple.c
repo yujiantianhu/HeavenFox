@@ -16,7 +16,7 @@
 
 /*!< The functions */
 static struct mem_block *check_employ_simple_memory(void *ptr_head, void *ptr_mem);
-static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size, struct m_area *sptr_real);
+static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size, kint32_t __align_of, struct m_area *sptr_real);
 static void free_employ_simple_memory(struct mem_info *sptr_info, void *ptr_mem);
 
 /*!< API function */
@@ -93,7 +93,7 @@ void memory_simple_block_destroy(struct mem_info *sptr_info)
  * @retval  avaliable memory block pointer
  * @note    allocate spare memory space
  */
-static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size, struct m_area *sptr_real)
+static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size, kint32_t __align_of, struct m_area *sptr_real)
 {
     struct mem_block *sptr_start;
     struct mem_block *sptr_block;

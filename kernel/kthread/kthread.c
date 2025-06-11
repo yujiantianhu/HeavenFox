@@ -25,7 +25,7 @@
 kbool_t g_sched_flag = false;
 
 static struct thread_attr sgtc_kthread_attr;
-static kuint8_t g_kthread_stack[KERL_THREAD_STACK_SIZE];
+static THREAD_STACK_DEFINE(g_kthread_stack, KERL_THREAD_STACK_SIZE);
 static struct timer_list sgtc_kthread_timer;
 static struct spin_lock sgtc_kthread_spinlock;
 
@@ -44,19 +44,18 @@ static void kthread_schedule_timeout(kuint32_t args)
     struct thread *sptr_work, *sptr_ready;
     kuint32_t work_prio, next_prio;
 
-    /*!< if not in thread context or preempt is disable */
-    if (mr_preempt_is_locked())
-        return;
-
     sptr_work = mr_current;
+    spin_lock(&sptr_work->sgtc_lock);
     
     /*!< --------------------------------------------------------- */
     /*!< check time slice (when the time slice is not exhuasted, current cannot be preempted) */
-    if (mr_time_before(jiffies, sptr_work->expires))
+    if (sptr_work->expires--)
         goto END;
 
-    /*!< automatic tracking of time-slice */
-    sptr_work->expires = ((JIFFIES_MAX - jiffies) <= THREAD_PREEMPT_PERIOD) ? 0 : jiffies;
+    /*!< if not in thread context or preempt is disable */
+    sptr_work->expires = 1;
+    if (mr_preempt_is_locked())
+        goto END;
     
     /*!< --------------------------------------------------------- */
     /*!< check priority */
@@ -72,7 +71,8 @@ static void kthread_schedule_timeout(kuint32_t args)
         g_sched_flag = true;
     
 END:
-    mod_timer(sptr_tim, jiffies + msecs_to_jiffies(THREAD_PREEMPT_PERIOD));
+    spin_unlock(&sptr_work->sgtc_lock);
+    mod_timer(sptr_tim, jiffies + 1);
 }
 
 /*!
@@ -88,7 +88,7 @@ static void kthread_systime_record(void)
     if (systime != jiffies)
     {
         msecs_to_timeclock(&sgtc_systime_clock, jiffies_to_msecs(systime));
-        systime = SYS_RUNTICK;
+        systime = SYS_RUNTICK();
     }
 }
 
@@ -124,7 +124,7 @@ static void *kthread_entry(void *args)
 
 #if CONFIG_PREEMPT
     setup_timer(sptr_tim, kthread_schedule_timeout, (kuint32_t)sptr_tim);
-    sptr_tim->expires = jiffies + msecs_to_jiffies(THREAD_PREEMPT_PERIOD);
+    sptr_tim->expires = jiffies + 1;
     add_timer(sptr_tim);
 #endif
 

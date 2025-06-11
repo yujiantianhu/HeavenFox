@@ -43,12 +43,15 @@ typedef kint32_t tid_t;
 #define THREAD_STACK32(word)				(mr_align4(word) >> 2)
 
 /*!< 1 page = 4 kbytes; half page = (1 / 2) page; quarter = (1 / 4) page */
-#define THREAD_STACK_PAGE(page)			    (THREAD_STACK8(((kuint32_t)(page)) << 12))
-#define THREAD_STACK_HALF(page)			    (THREAD_STACK8(((kuint32_t)(page)) << 11))
-#define THREAD_STACK_QUAR(page)			    (THREAD_STACK8(((kuint32_t)(page)) << 10))
+#define THREAD_STACK_PAGE(page)			    ((kutype_t)(page) << 12U)
+#define THREAD_STACK_HALF(page)			    ((kutype_t)(page) << 11U)
+#define THREAD_STACK_QUAR(page)			    ((kutype_t)(page) << 10U)
 
-#define THREAD_STACK_MIN					THREAD_STACK8(512)
+#define THREAD_STACK_MIN					THREAD_STACK_HALF(1)
 #define THREAD_STACK_DEFAULT				THREAD_STACK_PAGE(1)
+#define THREAD_STACK_ALIGN                  THREAD_STACK_PAGE(1)
+
+#define THREAD_STACK_DEFINE(name, size)     kuint8_t name[size]  __align(THREAD_STACK_ALIGN)
 
 /*!<
  * tid base 
@@ -171,12 +174,15 @@ struct thread_attr
     kssize_t guardsize;                         /*!< the size of the alert buffer at the end of the thread stack */
 
     void *ptr_stack_start;                      /*!< thread stack address base (from dynamic allocation) */
-    kutype_t stack_addr;                        /*!< thread stack top, 8 byte anlignment  */
+    kuaddr_t stack_addr;                        /*!< thread stack top, 8 byte anlignment  */
     kusize_t stacksize;                         /*!< thread stack size (unit: byte), the minimum can be set to THREAD_STACK_MIN */
 
     struct mem_info sgtc_pool;                  /*!< thread memory pool */
 };
 typedef struct thread_attr srt_thread_attr_t;
+
+#define THREAD_STACK_CHK1                       (0xd573f2e9)
+#define THREAD_STACK_CHK2                       (~THREAD_STACK_CHK1)
 
 /*!< The defines */
 extern tid_t kernel_thread_create(tid_t tid, 
@@ -286,7 +292,7 @@ static inline kuint32_t thread_get_sched_msecs(struct thread_attr *sptr_attr)
  */
 static inline void thread_attr_setstacksize(struct thread_attr *sptr_attr, kusize_t stacksize)
 {
-    sptr_attr->stacksize = (stacksize >= THREAD_STACK_MIN) ? stacksize : THREAD_STACK_MIN;
+    sptr_attr->stacksize = stacksize;
 }
 
 /*!
@@ -328,6 +334,21 @@ static inline kutype_t thread_get_stack(struct thread_attr *sptr_attr)
 {
     return (kutype_t)(&sptr_attr->stack_addr);
 }
+
+#if 0
+/*!
+ * @brief	get address of current thread's stack_addr
+ * @param  	none
+ * @retval 	base stack address
+ * @note   	current thread's stack base address must be "THREAD_STACK_ALIGN" bytes alignment !!!
+ */
+__force_inline 
+static inline kutype_t thread_get_stack_auto(void)
+{
+    kutype_t stack_base = mr_get_stack();
+    return mr_ralign(stack_base, THREAD_STACK_ALIGN);
+}
+#endif
 
 /*!
  * @brief	set detach state

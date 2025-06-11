@@ -109,6 +109,7 @@
 #define mr_num_align8(x)								mr_num_align((x), 8)
 #define mr_ptr_align8(p)								mr_ptr_align((p), 8)
 
+/*!< mask must be (2 ^ n) (n = 0, 1, 2, ...); if mask is equaled to 4096, and x is 4097, then return 4096 */
 #define mr_ralign(x, mask)								((x) & (~((mask) - 1)))
 
 /*!< Position bit offset on 32-bit array */

@@ -113,7 +113,7 @@ END:
  */
 kint32_t env_monitor_init(void)
 {
-    static kuint8_t g_env_monitor_stack[ENV_TASK_STACK_SIZE];
+    static THREAD_STACK_DEFINE(g_env_monitor_stack, ENV_TASK_STACK_SIZE);
 
     crt_task_t *cptr_task = new crt_task_t("env_monitor_task", 
                                             env_monitor_entry, 

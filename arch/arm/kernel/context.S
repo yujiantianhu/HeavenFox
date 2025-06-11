@@ -37,7 +37,7 @@ __switch_to:
     add r8, sp, #ARCH_OFFSET_LR
     stmia r8, { r12, lr }                           @ save lr and spsr (lr will be set to pc, and spsr to cpsr)
 
-    str r0, g_asm_context_info
+    str r0, g_asm_context_info                      @ save &sgtc_context to global variable
 
     ldr r2, [r0, #CONTEXT_FIRST_OFFSET]
     ldr r1, [r2]
@@ -172,13 +172,16 @@ __schedule_before:
     ldr r1, =__schedule_thread
     blx r1                                          @ schedule threads (r0 = g_asm_context_info = &sgtc_context)
 
+    cmp r0, #0                                      @ __schedule_thread returns NULL ?
+    beq _switch_fail                                @ schedule fail, give up scheduling
+
     add r8, sp, #ARCH_OFFSET_PC                     @ pointer to spsr_irq
     ldr r12, [r8]                                   @ r12 = spsr_irq                    
     cmp r12, #0
     orreq r12, #ARCH_SVC_MODE
     str r12, [r8]                                   @ if spsr is none, set svc-mode
 
-    str r0, g_asm_context_info
+    str r0, g_asm_context_info                      @ save &sgtc_context to global variable
 
 1:
     ldr r2, [r0, #CONTEXT_PREV_SP]                  @ r1: prev sp (frame register base)
@@ -192,6 +195,15 @@ __schedule_before:
     add r8, sp, #ARCH_OFFSET_SP                     @ r8 pointer to lr_svc
     ldmia r8, { r10, r11 }                          @ r10 = lr(lr_svc), r11 = pc(lr_irq)
     b _context_save
+
+/* -------------------------------------------------------------------------------
+ * schedule thread failed (by IRQ)
+ * -----------------------------------------------------------------------------*/
+_switch_fail:
+@   ldr r1, =__thread_init_before                   @ schedule failed, init time slice to run again
+@   blx r1
+
+    stmia sp!, { r0 - r12, lr }                     @ restore context
 
 /* -------------------------------------------------------------------------------
  * schedule new thread (by IRQ)

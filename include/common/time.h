@@ -25,8 +25,8 @@
 #include <common/list_types.h>
 
 /*!< The globals */
-typedef kutype_t 	kutime_t;
-typedef kstype_t 	kstime_t;
+typedef kutype_t kutime_t;
+typedef kstype_t kstime_t;
 
 extern volatile kutime_t jiffies;
 extern volatile kutime_t jiffies_out;
@@ -36,13 +36,12 @@ extern kutime_t g_delay_timer_counter;
 
 /*!< The defines */
 #define TICK_HZ                                             CONFIG_HZ
-//#define SYSTICK_CNT()                                       (ptr_systick_counter ? (*ptr_systick_counter) : 0)
-#define SYSTICK_CNT()                                       (*ptr_systick_counter)
+#define SYSTICK_CNT()                                       (ptr_systick_counter ? (*ptr_systick_counter) : 0)
 
-#define JIFFIES_INITVAL                                     (86400000 - 1)
-#define JIFFIES_MAX                                         ((kutime_t)(~0))
-#define SYS_RUNTICK    \
-            ((jiffies >= JIFFIES_INITVAL) ? (jiffies - JIFFIES_INITVAL) : (JIFFIES_MAX - (jiffies - JIFFIES_INITVAL)))
+#define JIFFIES_MAX                                         (0x7fffffffU)
+#define JIFFIES_BORDER                                      (JIFFIES_MAX - 1)
+#define JIFFIES_INITVAL                                     (0x70000000U - 1U)
+#define SYS_RUNTICK()                                       ((jiffies_out * JIFFIES_MAX) + jiffies - JIFFIES_INITVAL)
 
 #define TIMER_DELAY_COUNTER                                 (g_delay_timer_counter)
 #define TIMER_DELAY_COUNTER_INIT                            (0U)
@@ -143,6 +142,18 @@ extern void do_timer_event(void);
 
 /*!< API functions */
 /*!
+ * @brief   Read systick (unit: ns)
+ * @param   none
+ * @retval  tick (ns)
+ * @note    get the time register's current value
+ */
+static inline kutime_t ktime_systick(void)
+{
+    volatile kutime_t *time_cnt = ptr_systick_counter;
+    return time_cnt ? (*time_cnt) : 0;
+}
+
+/*!
  * @brief   jiffies increment
  * @param   none
  * @retval  none
@@ -152,6 +163,24 @@ static inline void get_time_counter(void)
 {
     jiffies = (jiffies >= JIFFIES_MAX) ? 0 : (jiffies + 1);
     jiffies_out = jiffies ? jiffies_out : (jiffies_out + 1);
+}
+
+/*!
+ * @brief   return safe expires
+ * @param   expires: jiffies + count
+ * @retval  none
+ * @note    none
+ */
+static inline kutime_t get_safe_expires(kutime_t expires)
+{
+    kutime_t safe_expires = 0;
+
+    if (jiffies >= JIFFIES_MAX)
+        safe_expires = (expires > JIFFIES_MAX) ? (expires - JIFFIES_MAX - 1) : expires;
+    else
+        safe_expires = CMP_MIN2(expires, JIFFIES_BORDER);
+
+    return safe_expires;
 }
 
 /*!

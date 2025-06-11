@@ -297,7 +297,7 @@ void *kmalloc(size_t __size, nrt_gfp_t flags)
 
     spin_lock_irqsave(&sptr_pool->sgtc_lock);
 
-    p = sptr_info->alloc(sptr_info, __size, &sgtc_real);
+    p = sptr_info->alloc(sptr_info, __size, -1, &sgtc_real);
     if (mr_unlikely(!isValid(p)))
     {
         spin_unlock_irqrestore(&sptr_pool->sgtc_lock);
