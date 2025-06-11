@@ -532,6 +532,8 @@ static void *fwk_netif_rx_entry(void *args)
         {
             spin_unlock_irqrestore(sptr_lock);
             schedule_self_suspend();
+
+            continue;
         }        
 
         fwk_skb_split(&sptr_tcb->sgtc_head, sptr_head);

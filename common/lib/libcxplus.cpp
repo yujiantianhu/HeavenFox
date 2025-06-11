@@ -83,6 +83,7 @@ void operator delete[](void *ptr)
  */
 void iostream_init(void)
 {
+    g_io_stream_flags |= IO_STREAM_KERNEL;
 }
 
 /*!< end of file */

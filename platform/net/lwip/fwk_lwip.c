@@ -26,6 +26,7 @@
 #include <platform/net/fwk_lwip.h>
 #include <kernel/thread.h>
 #include <kernel/sched.h>
+#include <kernel/spinlock.h>
 
 /*!< The defines */
 struct fwk_lwip_data
@@ -35,6 +36,7 @@ struct fwk_lwip_data
 
     tid_t txd;
     struct fwk_sk_buff_head sgtc_txq;
+    struct spin_lock sgtc_lock;
 };
 
 /*!< The globals */
@@ -95,7 +97,7 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
         sptr_ethhdr = (struct fwk_eth_hdr *)sptr_per->payload;
     
         head_len = SKB_DATA_HEAD_LEN(NET_ETHER_HDR_LEN);
-        sptr_skb = fwk_alloc_skb(sptr_per->len + 2 * head_len, GFP_KERNEL);
+        sptr_skb = fwk_alloc_skb(sptr_per->len + 2 * head_len, GFP_ATOMIC);
         if (!isValid(sptr_skb))
         {
             print_err("%s: allocate skb failed!\r\n", __FUNCTION__);
@@ -135,7 +137,10 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
 
         /*!< copy pbuf to skb */
         memcpy(sptr_skb->data, sptr_per->payload, sptr_skb->len);
+
+        spin_lock_irqsave(&sptr_data->sgtc_lock);
         fwk_skb_add_tail(&sptr_data->sgtc_txq, sptr_skb);
+        spin_unlock_irqrestore(&sptr_data->sgtc_lock);
 
         goto END;
         
@@ -216,16 +221,33 @@ static void *fwk_lwip_tx_entry(void *args)
     struct fwk_network_if *sptr_if;
     struct fwk_lwip_data *sptr_data;
     struct fwk_sk_buff *sptr_skb;
+    struct fwk_sk_buff_head sgtc_txq, *sptr_head;
 
     sptr_netif = (struct netif *)args;
     sptr_if = (struct fwk_network_if *)sptr_netif->state;
     sptr_data = (struct fwk_lwip_data *)sptr_if->private_data;
+    sptr_head = &sptr_data->sgtc_txq;
+
+    fwk_skb_list_init(&sgtc_txq);
 
     for (;;)
     {
-        while ((sptr_skb = fwk_skb_dequeue(&sptr_data->sgtc_txq)))
+        spin_lock_irqsave(&sptr_data->sgtc_lock);
+        if (mr_skbuff_list_empty(sptr_head))
+        {
+            spin_unlock_irqrestore(&sptr_data->sgtc_lock);
+            goto END;
+        }        
+
+        fwk_skb_split(&sgtc_txq, sptr_head);
+        fwk_skb_list_init(sptr_head);
+
+        spin_unlock_irqrestore(&sptr_data->sgtc_lock);
+
+        while ((sptr_skb = fwk_skb_dequeue(&sgtc_txq)))
             fwk_dev_queue_xmit(sptr_skb);
 
+END:
         msleep(1);
     }
 
@@ -257,6 +279,7 @@ static kint32_t fwk_lwip_link_up(struct fwk_network_if *sptr_if)
         goto fail;
 
     fwk_skb_list_init(&sptr_data->sgtc_txq);
+    spin_lock_init(&sptr_data->sgtc_lock);
 
     /*!< save ip address, and call lwip_enet_init */
     netif_add(&sptr_data->sgtc_netif, 

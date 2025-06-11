@@ -17,9 +17,14 @@
 #include <common/mem_manage.h>
 #include <common/list_types.h>
 #include <common/buffer.h>
+#include <common/time.h>
 #include <kernel/kernel.h>
 #include <kernel/spinlock.h>
 #include <platform/base/fwk_mempool.h>
+
+/*!< The defines */
+#define LOG_TIME_FORMAT                                 "[00000.000000] "
+#define LOG_TIME_LENGTH                                 (sizeof(LOG_TIME_FORMAT) - 1)
 
 /*!< The globals */
 static DECLARE_LIST_HEAD(sgtc_io_stream_devices);

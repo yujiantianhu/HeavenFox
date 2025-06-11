@@ -128,6 +128,7 @@ do {   \
 /*!< Input/Output Stream Interface */
 #define IO_STREAM_ASYNC                                 (0x00000001U)
 #define IO_STREAM_TXING                                 (0x00000002U)
+#define IO_STREAM_KERNEL                                (0x00000004U)
 
 struct io_stream_dev
 {
