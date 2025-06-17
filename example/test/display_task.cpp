@@ -373,7 +373,7 @@ END:
 static kssize_t display_task_text(crt_disp_task_t &cgtc_dtsk, crt_disp_text_t &cgtc_text,
                         struct fs_stream *sptr_file)
 {
-    struct mailbox &sgtc_mb = cgtc_dtsk.cptr_task->get_mailbox();
+    struct mailbox &sgtc_mb = cgtc_dtsk.cptr_task->self_mailbox();
     struct fwk_disp_ctrl &sgtc_dctrl = cgtc_text.sgtc_dctrl;
     struct fwk_disp_info *sptr_disp = sgtc_dctrl.sptr_di;
     struct mail *sptr_mail;
@@ -464,7 +464,7 @@ kint32_t crt_disp_text_t::show(crt_disp_task_t &cgtc_dtsk)
 {
     struct fs_stream *sptr_file;
     kchar_t full_path[128];
-    struct mailbox &sgtc_mb = cgtc_dtsk.cptr_task->get_mailbox();
+    struct mailbox &sgtc_mb = cgtc_dtsk.cptr_task->self_mailbox();
     struct mail *sptr_mail;
     enum disp_text_op nr_op = NR_DISP_TEXT_NONE;
     kuint8_t text_index = 0;
@@ -615,8 +615,8 @@ kint32_t display_task_init(void)
     if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cptr_task->get_self(), "display-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->self_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->self_id(), "display-task-mailbox");
 
     return ER_NORMAL;
 }

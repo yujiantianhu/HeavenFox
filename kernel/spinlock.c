@@ -43,10 +43,15 @@ void spin_lock_init(struct spin_lock *sptr_lock)
  */
 void spin_lock(struct spin_lock *sptr_lock)
 {
+    kutype_t flags;
+
     while (spin_is_locked(sptr_lock));
     
+    local_irq_save(&flags);
+
     mr_preempt_disable();
     atomic_inc(&sptr_lock->sgtc_atc);
+    local_irq_restore(&flags);
 }
 
 /*!
@@ -57,11 +62,18 @@ void spin_lock(struct spin_lock *sptr_lock)
  */
 void spin_unlock(struct spin_lock *sptr_lock)
 {
+    kutype_t flags;
+
+    local_irq_save(&flags);
     if (!spin_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         return;
+    }
 
     atomic_dec(&sptr_lock->sgtc_atc);
     mr_preempt_enable();
+    local_irq_restore(&flags);
 }
 
 /*!
@@ -72,11 +84,18 @@ void spin_unlock(struct spin_lock *sptr_lock)
  */
 kint32_t spin_try_lock(struct spin_lock *sptr_lock)
 {
+    kutype_t flags;
+
+    local_irq_save(&flags);
     if (spin_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         return -ER_LOCKED;
+    }
 
     mr_preempt_disable();
     atomic_inc(&sptr_lock->sgtc_atc);
+    local_irq_restore(&flags);
     
     return ER_NORMAL;
 }

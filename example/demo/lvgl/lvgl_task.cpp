@@ -86,8 +86,8 @@ kint32_t lvgl_task_init(void)
     if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cptr_task->get_self(), "lvgl-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->self_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->self_id(), "lvgl-task-mailbox");
 
     return ER_NORMAL;
 }

@@ -68,6 +68,7 @@ const thread_init_t proc_table::g_demo_tables[] =
 crt_task_t::crt_task_t(const kchar_t *name, void *(*task_entry)(void *), 
             kuint8_t *stack, kuint32_t size, kuint32_t prio, kuint32_t tslice)
         : tid(-1)
+        , name(mr_nullptr)
         , stack_base(stack)
         , stack_size(size)
         , isdync(false)
@@ -109,7 +110,8 @@ crt_task_t::crt_task_t(const kchar_t *name, void *(*task_entry)(void *),
         goto fail;
 
     thread_set_name(this->tid, name);
-    bsc::cout << "create new task: " << name << bsc::endl;
+    this->name = thread_get_name(this->tid);
+    bsc::cout << "create new task: " << this->name << bsc::endl;
 
     return;
 

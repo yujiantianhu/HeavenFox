@@ -180,6 +180,7 @@ extern void io_stream_logs_print(void *__temp_buffer, kusize_t __temp_size);
 
 extern void printk(const kchar_t *ptr_fmt, ...);
 extern void kprintf(const kchar_t *ptr_fmt, ...);
+extern void print_sync(const kchar_t *ptr_fmt, ...);
 
 #define print_err(fmt, ...)                             printk(PRINT_LEVEL_ERR fmt, ##__VA_ARGS__)
 #define print_warn(fmt, ...)                            printk(PRINT_LEVEL_WARNING fmt, ##__VA_ARGS__)

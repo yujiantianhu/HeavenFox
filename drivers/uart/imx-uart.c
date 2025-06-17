@@ -333,6 +333,7 @@ static kssize_t imx_uart_driver_read(struct fwk_file *sptr_file, kbuffer_t *ptrB
 {
     struct imx_uart_drv_data *sptr_data;
     srt_imx_uart_t *sptr_uart;
+    kchar_t data[128], *buffer = mr_nullptr;
     kchar_t *msgs;
     kuint32_t count = 0;
     
@@ -347,18 +348,30 @@ static kssize_t imx_uart_driver_read(struct fwk_file *sptr_file, kbuffer_t *ptrB
         wait_event(&sptr_data->sgtc_rxwqh, !mr_imx_uart_rx_empty(sptr_uart));
     }
 
-    msgs = kzalloc(size, GFP_KERNEL);
-    if (!isValid(msgs))
-        return -ER_NOMEM;
+    if (size < 128)
+        msgs = data;
+    else
+    {
+        buffer = kzalloc(size, GFP_KERNEL);
+        if (!isValid(buffer))
+            return -ER_NOMEM;
+
+        msgs = buffer;
+    }
 
     while (!mr_imx_uart_rx_empty(sptr_uart))
     {
-        if ((count++) < size)
-            msgs[count] = mr_imx_uart_recv_byte(sptr_uart);
+        msgs[count++] = mr_imx_uart_recv_byte(sptr_uart);
+        if (count >= size)
+            break;
+
+        delay_ms(5);
     }
 
     fwk_copy_to_user(ptrBuffer, msgs, count);
-    kfree(msgs);
+
+    if (buffer)
+        kfree(buffer);
 
     return count;
 }

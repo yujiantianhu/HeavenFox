@@ -143,6 +143,8 @@ static void *kthread_entry(void *args)
     /*!< build application */
     init_proc_init();                       /*!< create init task */
 
+    print_sync("%s: %d\r\n", __func__, __LINE__);
+
     for (;;)
     {
         kthread_systime_record();

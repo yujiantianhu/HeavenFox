@@ -405,6 +405,38 @@ void printk(const kchar_t *ptr_fmt, ...)
 }
 
 /*!
+ * @brief   print imediately (not use logs)
+ * @param   ptr_fmt
+ * @retval  none
+ * @note    Not sleep, but fmt must less than 1024 bytes!!!
+ */
+void print_sync(const kchar_t *ptr_fmt, ...)
+{
+#if defined(CONFIG_PRINT_LEVEL)
+    va_list ptr_list;
+    kubyte_t level[2] = {};
+    kusize_t size;
+    kubyte_t logs_buf[1024];
+    
+    va_start(ptr_list, ptr_fmt);
+    size = do_fmt_convert(logs_buf, level, ptr_fmt, ptr_list, sizeof(logs_buf));
+    va_end(ptr_list);
+
+    if (!size)
+        return;
+
+    /*!< if level is not set, default PRINT_LEVEL_WARNING */
+    if (*(PRINT_LEVEL_SOH) != *level)
+        memcpy(level, PRINT_LEVEL_WARNING, sizeof(level));
+
+    if (*(level + 1) > *((kubyte_t *)(CONFIG_PRINT_LEVEL)))
+        return;
+
+    io_putstr(logs_buf, size + 1);
+#endif
+}
+
+/*!
  * @brief   find first bit that equaled to value
  * @param   bitmap: array
  * @param	start: base

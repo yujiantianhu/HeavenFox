@@ -42,18 +42,24 @@ public:
             kuint32_t size = 0, kuint32_t prio = THREAD_PROTY_DEFAULT, kuint32_t tslice = THREAD_TIME_DEFUALT);
     ~crt_task_t();
 
-    tid_t get_self(void)
+    tid_t self_id(void)
     {
-        return tid;
+        return this->tid;
     }
 
-    struct mailbox &get_mailbox(void)
+    kchar_t *self_name(void)
     {
-        return sgtc_mb;
+        return this->name;
+    }
+
+    struct mailbox &self_mailbox(void)
+    {
+        return this->sgtc_mb;
     }
 
 private:
     tid_t tid;
+    kchar_t *name;
     struct thread_attr sgtc_attr;
     struct mailbox sgtc_mb;
 

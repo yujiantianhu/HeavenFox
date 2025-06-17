@@ -43,7 +43,7 @@ using namespace bsc;
  */
 static void command_mail_to_light(crt_task_t *cptr_this, const kchar_t *command_line)
 {
-    struct mailbox &sgtc_mb = cptr_this->get_mailbox();
+    struct mailbox &sgtc_mb = cptr_this->self_mailbox();
     struct mail sgtc_mail;
     struct mail_msg sgtc_msg[1] = {};
     kuint8_t status = 0;
@@ -75,7 +75,7 @@ static void command_mail_to_light(crt_task_t *cptr_this, const kchar_t *command_
  */
 static void command_mail_to_display(crt_task_t *cptr_this, const kchar_t *command_line)
 {
-    struct mailbox &sgtc_mb = cptr_this->get_mailbox();
+    struct mailbox &sgtc_mb = cptr_this->self_mailbox();
     struct mail sgtc_mail;
     struct mail_msg sgtc_msg[1] = {};
     kuint8_t status = 0;
@@ -144,8 +144,8 @@ kint32_t console_task_init(void)
     if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cptr_task->get_self(), "console-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->self_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->self_id(), "console-task-mailbox");
 
     return ER_NORMAL;
 }

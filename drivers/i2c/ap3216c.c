@@ -346,12 +346,12 @@ static kssize_t ap3216c_driver_read(struct fwk_file *sptr_file, kbuffer_t *buffe
         sgtc_data.ir = 0;
 
     sgtc_data.als = ap3216c_read_als(sptr_info);
-    if (sgtc_data.ir < 0)
-        sgtc_data.ir = 0;
+    if (sgtc_data.als < 0)
+        sgtc_data.als = 0;
 
     sgtc_data.ps = ap3216c_read_ps(sptr_info);
-    if (sgtc_data.ir < 0)
-        sgtc_data.ir = 0;
+    if (sgtc_data.ps < 0)
+        sgtc_data.ps = 0;
 
     fwk_copy_to_user(buffer, &sgtc_data, sizeof(sgtc_data));
 

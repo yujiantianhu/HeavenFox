@@ -46,7 +46,7 @@ static void *button_task_entry(void *args)
     crt_task_t *cptr_this = (crt_task_t *)args;
     kuint8_t status = 0, last_status = 0;
     kint32_t fd;
-    struct mailbox &sgtc_mb = cptr_this->get_mailbox();
+    struct mailbox &sgtc_mb = cptr_this->self_mailbox();
     struct mail *sptr_mail = mr_nullptr;
     struct mail_msg sgtc_msg[1] = {};
     kchar_t msgs[8];
@@ -123,8 +123,8 @@ kint32_t button_task_init(void)
     if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cptr_task->get_self(), "button-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->self_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->self_id(), "button-task-mailbox");
 
     return ER_NORMAL;
 }

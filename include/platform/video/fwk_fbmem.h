@@ -149,6 +149,25 @@ struct fwk_fb_notifier_param
     kuint32_t bus_width;
 };
 
+#define FB_PICOS_2_KHZ(a)                               (1000000000UL / (a))
+#define FB_KHZ_2_PICOS(a)                               (1000000000UL / (a))
+
+struct fwk_fb_vmode 
+{
+    const kchar_t *name;
+    kuint32_t refresh;
+    kuint32_t xres;
+    kuint32_t yres;
+    kuint32_t pixclock;
+    kuint32_t left_margin;
+    kuint32_t right_margin;
+    kuint32_t upper_margin;
+    kuint32_t lower_margin;
+    kuint32_t hsync_len;
+    kuint32_t vsync_len;
+    kuint32_t sync;
+};
+
 /*!< The globals */
 BLOCKING_NOTIFIER_DECLARE(sgtc_fbmem_notifier_chain);
 

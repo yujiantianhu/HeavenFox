@@ -190,7 +190,7 @@ typedef struct
 /*!< ---------------------------------------------------------------------
                                 ScuTimer                                   
  ---------------------------------------------------------------------- */
-/*!< @name Register Map
+/*! @name Register Map
  * Offsets of registers from the start of the device
  * @{
  */
@@ -200,7 +200,7 @@ typedef struct
 #define XSCUTIMER_CONTROL_OFFSET            0x08U           /*!< Timer Control Register */
 #define XSCUTIMER_ISR_OFFSET                0x0CU           /*!< Timer Interrupt Status Register */
 
-/*!< @name Timer Control register
+/*! @name Timer Control register
  * This register bits control the prescaler, Intr enable,
  * auto-reload and timer enable.
  * @{
@@ -211,20 +211,20 @@ typedef struct
 #define XSCUTIMER_CONTROL_AUTO_RELOAD_MASK  0x00000002U     /*!< Auto-reload */
 #define XSCUTIMER_CONTROL_ENABLE_MASK       0x00000001U     /*!< Timer enable */
 
-/*!< @name Interrupt Status register
+/*! @name Interrupt Status register
  * This register indicates the Timer counter register has reached zero.
  * @{
  */
 
-#define XSCUTIMER_ISR_EVENT_FLAG_MASK       0x00000001U     /**< Event flag */
+#define XSCUTIMER_ISR_EVENT_FLAG_MASK       0x00000001U     /*!< Event flag */
 
 /*!<
  * This typedef contains configuration information for the device.
  */
 typedef struct 
 {
-	kuint16_t DeviceId;	                                    /*!< Unique ID of device */
-	kuint32_t BaseAddr;	                                    /*!< Base address of the device */
+    kuint16_t DeviceId;	                                    /*!< Unique ID of device */
+    kuint32_t BaseAddr;	                                    /*!< Base address of the device */
 
 } XScuTimer_Config;
 
@@ -236,11 +236,236 @@ typedef struct
  */
 typedef struct 
 {
-	XScuTimer_Config Config;                                /*!< Hardware Configuration */
-	kbool_t IsReady;		                                /*!< Device is initialized and ready */
-	kbool_t IsStarted;		                                /*!< Device timer is running */
+    XScuTimer_Config Config;                                /*!< Hardware Configuration */
+    kbool_t IsReady;		                                /*!< Device is initialized and ready */
+    kbool_t IsStarted;		                                /*!< Device timer is running */
 
 } XScuTimer;
+
+/*!< ---------------------------------------------------------------------
+                                TtcPs                                   
+ ---------------------------------------------------------------------- */
+/*! 
+ * @name Register Map
+ * Register offsets from the base address of the device.
+ */
+#define XTTCPS_CLK_CNTRL_OFFSET             0x00000000U     /*!< Clock Control Register */
+#define XTTCPS_CNT_CNTRL_OFFSET             0x0000000CU     /*!< Counter Control Register*/
+#define XTTCPS_COUNT_VALUE_OFFSET           0x00000018U     /*!< Current Counter Value */
+#define XTTCPS_INTERVAL_VAL_OFFSET          0x00000024U     /*!< Interval Count Value */
+#define XTTCPS_MATCH_0_OFFSET               0x00000030U     /*!< Match 1 value */
+#define XTTCPS_MATCH_1_OFFSET               0x0000003CU     /*!< Match 2 value */
+#define XTTCPS_MATCH_2_OFFSET               0x00000048U     /*!< Match 3 value */
+#define XTTCPS_ISR_OFFSET                   0x00000054U     /*!< Interrupt Status Register */
+#define XTTCPS_IER_OFFSET                   0x00000060U     /*!< Interrupt Enable Register */
+
+/*! 
+ * @name Clock Control Register
+ * Clock Control Register definitions
+ */
+#define XTTCPS_CLK_CNTRL_PS_EN_MASK         0x00000001U     /*!< Prescale enable */
+#define XTTCPS_CLK_CNTRL_PS_VAL_MASK        0x0000001EU     /*!< Prescale value */
+#define XTTCPS_CLK_CNTRL_PS_VAL_SHIFT	    1U              /*!< Prescale shift */
+#define XTTCPS_CLK_CNTRL_PS_DISABLE         16U             /*!< Prescale disable */
+#define XTTCPS_CLK_CNTRL_SRC_MASK           0x00000020U     /*!< Clock source */
+#define XTTCPS_CLK_CNTRL_EXT_EDGE_MASK      0x00000040U     /*!< External Clock edge */
+
+/*! 
+ * @name Counter Control Register
+ * Counter Control Register definitions
+ */
+#define XTTCPS_CNT_CNTRL_DIS_MASK           0x00000001U     /*!< Disable the counter */
+#define XTTCPS_CNT_CNTRL_INT_MASK           0x00000002U     /*!< Interval mode */
+#define XTTCPS_CNT_CNTRL_DECR_MASK          0x00000004U     /*!< Decrement mode */
+#define XTTCPS_CNT_CNTRL_MATCH_MASK         0x00000008U     /*!< Match mode */
+#define XTTCPS_CNT_CNTRL_RST_MASK           0x00000010U     /*!< Reset counter */
+#define XTTCPS_CNT_CNTRL_EN_WAVE_MASK       0x00000020U     /*!< Enable waveform */
+#define XTTCPS_CNT_CNTRL_POL_WAVE_MASK      0x00000040U     /*!< Waveform polarity */
+#define XTTCPS_CNT_CNTRL_RESET_VALUE        0x00000021U     /*!< Reset value */
+
+/*! 
+ * @name Current Counter Value Register
+ * Current Counter Value Register definitions
+ */
+#define XTTCPS_COUNT_VALUE_MASK             0x0000FFFFU     /*!< 16-bit counter value */
+// #define XTTCPS_COUNT_VALUE_MASK          0xFFFFFFFFU     /*!< 32-bit counter value */
+
+/*! 
+ * @name Interval Value Register
+ * Interval Value Register is the maximum value the counter will count up or
+ * down to.
+ */
+#define XTTCPS_INTERVAL_VAL_MASK            0x0000FFFFU     /*!< 16-bit Interval value*/
+// #define XTTCPS_INTERVAL_VAL_MASK         0xFFFFFFFFU     /*!< 32-bit Interval value*/
+
+/*! 
+ * @name Match Registers
+ * Definitions for Match registers, each timer counter has three match
+ * registers.
+ */
+#define XTTCPS_MATCH_MASK                   0x0000FFFFU     /*!< 16-bit Match value */
+// #define XTTCPS_MATCH_MASK                0xFFFFFFFFU     /*!< 32-bit Match value */
+#define XTTCPS_NUM_MATCH_REG                3U              /*!< Num of Match reg */
+
+/*! 
+ * @name Interrupt Registers
+ * Following register bit mask is for all interrupt registers.
+ */
+#define XTTCPS_IXR_INTERVAL_MASK            0x00000001U     /*!< Interval Interrupt */
+#define XTTCPS_IXR_MATCH_0_MASK             0x00000002U     /*!< Match 1 Interrupt */
+#define XTTCPS_IXR_MATCH_1_MASK             0x00000004U     /*!< Match 2 Interrupt */
+#define XTTCPS_IXR_MATCH_2_MASK             0x00000008U     /*!< Match 3 Interrupt */
+#define XTTCPS_IXR_CNT_OVR_MASK             0x00000010U     /*!< Counter Overflow */
+#define XTTCPS_IXR_ALL_MASK                 0x0000001FU     /*!< All valid Interrupts */
+
+#define XTtcPs_ReadReg(BaseAddress, RegOffset) \
+        mr_readl((BaseAddress) + (kuint32_t)(RegOffset))
+
+#define XTtcPs_WriteReg(BaseAddress, RegOffset, Data) \
+        mr_writel((kuint32_t)(Data), (BaseAddress) + (kuint32_t)(RegOffset))
+
+/*!
+ *
+ * Calculate a match register offset using the Match Register index.
+ *
+ * @param	MatchIndex is the 0-2 value of the match register
+ *
+ * @return	MATCH_N_OFFSET.
+ *
+ * @note		C-style signature:
+ *		u32 XTtcPs_Match_N_Offset(u8 MatchIndex)
+ */
+#define XTtcPs_Match_N_Offset(MatchIndex) \
+        ((kuint32_t)XTTCPS_MATCH_0_OFFSET + ((kuint32_t)(12U) * (kuint32_t)(MatchIndex)))
+
+#define XTTCPS_MAX_INTERVAL_COUNT           0xFFFFU
+// #define XTTCPS_MAX_INTERVAL_COUNT        0xFFFFFFFFU
+
+/*! 
+ * @name Configuration options
+ *
+ * Options for the device. Each of the options is bit field, so more than one
+ * options can be specified.
+ */
+#define XTTCPS_OPTION_EXTERNAL_CLK          0x00000001U 	/*!< External clock source */
+#define XTTCPS_OPTION_CLK_EDGE_NEG          0x00000002U	    /*!< Clock on trailing edge for external clock*/
+#define XTTCPS_OPTION_INTERVAL_MODE         0x00000004U	    /*!< Interval mode */
+#define XTTCPS_OPTION_DECREMENT             0x00000008U	    /*!< Decrement the counter */
+#define XTTCPS_OPTION_MATCH_MODE            0x00000010U	    /*!< Match mode */
+#define XTTCPS_OPTION_WAVE_DISABLE          0x00000020U 	/*!< No waveform output */
+#define XTTCPS_OPTION_WAVE_POLARITY         0x00000040U	    /*!< Waveform polarity */
+
+typedef kuint32_t XInterval;
+typedef kuint32_t XMatchRegValue;
+
+typedef struct 
+{
+    kuint16_t DeviceId;	                                    /*!< Unique ID for device */
+    kuint32_t BaseAddress;                                  /*!< Base address for device */
+    kuint32_t InputClockHz;                                 /*!< Input clock frequency */
+} XTtcPs_Config;
+
+/*!
+ * The XTtcPs driver instance data. The user is required to allocate a
+ * variable of this type for each PS timer/counter device in the system. A
+ * pointer to a variable of this type is then passed to various driver API
+ * functions.
+ */
+typedef struct 
+{
+    XTtcPs_Config Config;                                   /*!< Configuration structure */
+    kbool_t IsReady;                                        /*!< Device is initialized and ready */
+} XTtcPs;
+
+/*!
+ * Internal helper macros
+ */
+#define InstReadReg(InstancePtr, RegOffset) \
+        mr_readl(((InstancePtr)->Config.BaseAddress) + (kuint32_t)(RegOffset))
+
+#define InstWriteReg(InstancePtr, RegOffset, Data) \
+        mr_writel((kuint32_t)(Data), ((InstancePtr)->Config.BaseAddress) + (kuint32_t)(RegOffset))
+
+#define XTtcPs_Start(InstancePtr)	\
+        InstWriteReg((InstancePtr), XTTCPS_CNT_CNTRL_OFFSET,	\
+        (InstReadReg((InstancePtr), XTTCPS_CNT_CNTRL_OFFSET) & (~XTTCPS_CNT_CNTRL_DIS_MASK)))
+
+/*!
+ *
+ * This function stops the counter/timer. This macro may be called at any time
+ * to stop the counter. The counter holds the last value until it is reset,
+ * restarted or enabled.
+ *
+ * @param	InstancePtr is a pointer to the XTtcPs instance.
+ *
+ * @return	None
+ *
+ * @note		C-style signature:
+ *		void XTtcPs_Stop(XTtcPs *InstancePtr)
+ *
+ */
+#define XTtcPs_Stop(InstancePtr)		\
+        InstWriteReg((InstancePtr), XTTCPS_CNT_CNTRL_OFFSET,	\
+        (InstReadReg((InstancePtr), XTTCPS_CNT_CNTRL_OFFSET) | XTTCPS_CNT_CNTRL_DIS_MASK))
+
+/*!
+ *
+ * This function checks whether the timer counter has already started.
+ *
+ * @param	InstancePtr is a pointer to the XTtcPs instance
+ *
+ * @return	Non-zero if the device has started, '0' otherwise.
+ *
+ * @note		C-style signature:
+ *		int XTtcPs_IsStarted(XTtcPs *InstancePtr)
+ *
+ */
+#define XTtcPs_IsStarted(InstancePtr) \
+        ((InstReadReg((InstancePtr), XTTCPS_CNT_CNTRL_OFFSET) & XTTCPS_CNT_CNTRL_DIS_MASK) == 0U)
+
+/*!
+ *
+ * This function returns the current 16-bit counter value. It may be called at
+ * any time.
+ *
+ * @param	InstancePtr is a pointer to the XTtcPs instance.
+ *
+ * @return	zynq:16 bit counter value.
+ *           zynq ultrascale+mpsoc:32 bit counter value.
+ *
+ * @note		C-style signature:
+ *		zynq: u16 XTtcPs_GetCounterValue(XTtcPs *InstancePtr)
+ *       zynq ultrascale+mpsoc: u32 XTtcPs_GetCounterValue(XTtcPs *InstancePtr)
+ */
+#define XTtcPs_GetCounterValue(InstancePtr) \
+        InstReadReg((InstancePtr), XTTCPS_COUNT_VALUE_OFFSET)
+
+#define XTtcPs_SetInterval(InstancePtr, Value)	\
+        InstWriteReg((InstancePtr), XTTCPS_INTERVAL_VAL_OFFSET, (Value))
+
+/*!
+ * ttc supports 16 bit interval counter for zynq
+ */
+#define XTtcPs_GetInterval(InstancePtr) \
+        InstReadReg((InstancePtr), XTTCPS_INTERVAL_VAL_OFFSET)
+
+#define XTtcPs_ResetCounterValue(InstancePtr) \
+        InstWriteReg((InstancePtr), XTTCPS_CNT_CNTRL_OFFSET,	\
+            (InstReadReg((InstancePtr), XTTCPS_CNT_CNTRL_OFFSET) | (kuint32_t)XTTCPS_CNT_CNTRL_RST_MASK))
+
+#define XTtcPs_EnableInterrupts(InstancePtr, InterruptMask)		\
+        InstWriteReg((InstancePtr), XTTCPS_IER_OFFSET,		\
+            (InstReadReg((InstancePtr), XTTCPS_IER_OFFSET) | (InterruptMask)))
+
+#define XTtcPs_DisableInterrupts(InstancePtr, InterruptMask) \
+        InstWriteReg((InstancePtr), XTTCPS_IER_OFFSET,	\
+            (InstReadReg((InstancePtr), XTTCPS_IER_OFFSET) & ~(InterruptMask)))
+
+#define XTtcPs_GetInterruptStatus(InstancePtr)	 \
+        InstReadReg((InstancePtr), XTTCPS_ISR_OFFSET)
+
+#define XTtcPs_ClearInterruptStatus(InstancePtr, InterruptMask) \
+        InstWriteReg((InstancePtr), XTTCPS_ISR_OFFSET, (InterruptMask))
 
 /*!< ---------------------------------------------------------------------
                                 UartPs                                   
@@ -529,38 +754,38 @@ typedef struct
  * @{
  */
 
-#define XSDPS_HC_LED_MASK		            0x00000001U     /**< LED Control */
-#define XSDPS_HC_WIDTH_MASK		            0x00000002U     /**< Bus width */
+#define XSDPS_HC_LED_MASK		            0x00000001U     /*!< LED Control */
+#define XSDPS_HC_WIDTH_MASK		            0x00000002U     /*!< Bus width */
 #define XSDPS_HC_BUS_WIDTH_4		        0x00000002U
-#define XSDPS_HC_SPEED_MASK		            0x00000004U     /**< High Speed */
-#define XSDPS_HC_DMA_MASK		            0x00000018U     /**< DMA Mode Select */
-#define XSDPS_HC_DMA_SDMA_MASK		        0x00000000U     /**< SDMA Mode */
-#define XSDPS_HC_DMA_ADMA1_MASK		        0x00000008U     /**< ADMA1 Mode */
-#define XSDPS_HC_DMA_ADMA2_32_MASK	        0x00000010U     /**< ADMA2 Mode - 32 bit */
-#define XSDPS_HC_DMA_ADMA2_64_MASK	        0x00000018U     /**< ADMA2 Mode - 64 bit */
-#define XSDPS_HC_EXT_BUS_WIDTH		        0x00000020U     /**< Bus width - 8 bit */
-#define XSDPS_HC_CARD_DET_TL_MASK	        0x00000040U     /**< Card Detect Tst Lvl */
-#define XSDPS_HC_CARD_DET_SD_MASK	        0x00000080U     /**< Card Detect Sig Det */
+#define XSDPS_HC_SPEED_MASK		            0x00000004U     /*!< High Speed */
+#define XSDPS_HC_DMA_MASK		            0x00000018U     /*!< DMA Mode Select */
+#define XSDPS_HC_DMA_SDMA_MASK		        0x00000000U     /*!< SDMA Mode */
+#define XSDPS_HC_DMA_ADMA1_MASK		        0x00000008U     /*!< ADMA1 Mode */
+#define XSDPS_HC_DMA_ADMA2_32_MASK	        0x00000010U     /*!< ADMA2 Mode - 32 bit */
+#define XSDPS_HC_DMA_ADMA2_64_MASK	        0x00000018U     /*!< ADMA2 Mode - 64 bit */
+#define XSDPS_HC_EXT_BUS_WIDTH		        0x00000020U     /*!< Bus width - 8 bit */
+#define XSDPS_HC_CARD_DET_TL_MASK	        0x00000040U     /*!< Card Detect Tst Lvl */
+#define XSDPS_HC_CARD_DET_SD_MASK	        0x00000080U     /*!< Card Detect Sig Det */
 
-#define XSDPS_PC_BUS_PWR_MASK		        0x00000001U     /**< Bus Power Control */
-#define XSDPS_PC_BUS_VSEL_MASK		        0x0000000EU     /**< Bus Voltage Select */
-#define XSDPS_PC_BUS_VSEL_3V3_MASK	        0x0000000EU     /**< Bus Voltage 3.3V */
-#define XSDPS_PC_BUS_VSEL_3V0_MASK	        0x0000000CU     /**< Bus Voltage 3.0V */
-#define XSDPS_PC_BUS_VSEL_1V8_MASK	        0x0000000AU     /**< Bus Voltage 1.8V */
-#define XSDPS_PC_EMMC_HW_RST_MASK	        0x00000010U     /**< HW reset for eMMC */
+#define XSDPS_PC_BUS_PWR_MASK		        0x00000001U     /*!< Bus Power Control */
+#define XSDPS_PC_BUS_VSEL_MASK		        0x0000000EU     /*!< Bus Voltage Select */
+#define XSDPS_PC_BUS_VSEL_3V3_MASK	        0x0000000EU     /*!< Bus Voltage 3.3V */
+#define XSDPS_PC_BUS_VSEL_3V0_MASK	        0x0000000CU     /*!< Bus Voltage 3.0V */
+#define XSDPS_PC_BUS_VSEL_1V8_MASK	        0x0000000AU     /*!< Bus Voltage 1.8V */
+#define XSDPS_PC_EMMC_HW_RST_MASK	        0x00000010U     /*!< HW reset for eMMC */
 
-#define XSDPS_BGC_STP_REQ_MASK		        0x00000001U     /**< Block Gap Stop Req */
-#define XSDPS_BGC_CNT_REQ_MASK		        0x00000002U     /**< Block Gap Cont Req */
-#define XSDPS_BGC_RWC_MASK		            0x00000004U     /**< Block Gap Rd Wait */
-#define XSDPS_BGC_INTR_MASK		            0x00000008U     /**< Block Gap Intr */
-#define XSDPS_BGC_SPI_MODE_MASK		        0x00000010U     /**< Block Gap SPI Mode */
-#define XSDPS_BGC_BOOT_EN_MASK		        0x00000020U     /**< Block Gap Boot Enb */
-#define XSDPS_BGC_ALT_BOOT_EN_MASK	        0x00000040U     /**< Block Gap Alt BootEn */
-#define XSDPS_BGC_BOOT_ACK_MASK		        0x00000080U     /**< Block Gap Boot Ack */
+#define XSDPS_BGC_STP_REQ_MASK		        0x00000001U     /*!< Block Gap Stop Req */
+#define XSDPS_BGC_CNT_REQ_MASK		        0x00000002U     /*!< Block Gap Cont Req */
+#define XSDPS_BGC_RWC_MASK		            0x00000004U     /*!< Block Gap Rd Wait */
+#define XSDPS_BGC_INTR_MASK		            0x00000008U     /*!< Block Gap Intr */
+#define XSDPS_BGC_SPI_MODE_MASK		        0x00000010U     /*!< Block Gap SPI Mode */
+#define XSDPS_BGC_BOOT_EN_MASK		        0x00000020U     /*!< Block Gap Boot Enb */
+#define XSDPS_BGC_ALT_BOOT_EN_MASK	        0x00000040U     /*!< Block Gap Alt BootEn */
+#define XSDPS_BGC_BOOT_ACK_MASK		        0x00000080U     /*!< Block Gap Boot Ack */
 
-#define XSDPS_WC_WUP_ON_INTR_MASK	        0x00000001U     /**< Wakeup Card Intr */
-#define XSDPS_WC_WUP_ON_INSRT_MASK	        0x00000002U     /**< Wakeup Card Insert */
-#define XSDPS_WC_WUP_ON_REM_MASK	        0x00000004U     /**< Wakeup Card Removal */
+#define XSDPS_WC_WUP_ON_INTR_MASK	        0x00000001U     /*!< Wakeup Card Intr */
+#define XSDPS_WC_WUP_ON_INSRT_MASK	        0x00000002U     /*!< Wakeup Card Insert */
+#define XSDPS_WC_WUP_ON_REM_MASK	        0x00000004U     /*!< Wakeup Card Removal */
 
 /*!< @} */
 
@@ -601,37 +826,37 @@ typedef struct
 #define XSDPS_CC_DIV_SHIFT		            8U
 
 /*! @name interrupt register */
-#define XSDPS_INTR_CC_MASK		            0x00000001U     /**< Command Complete */
-#define XSDPS_INTR_TC_MASK		            0x00000002U     /**< Transfer Complete */
-#define XSDPS_INTR_BGE_MASK		            0x00000004U     /**< Block Gap Event */
-#define XSDPS_INTR_DMA_MASK		            0x00000008U     /**< DMA Interrupt */
-#define XSDPS_INTR_BWR_MASK		            0x00000010U     /**< Buffer Write Ready */
-#define XSDPS_INTR_BRR_MASK		            0x00000020U     /**< Buffer Read Ready */
-#define XSDPS_INTR_CARD_INSRT_MASK	        0x00000040U     /**< Card Insert */
-#define XSDPS_INTR_CARD_REM_MASK	        0x00000080U     /**< Card Remove */
-#define XSDPS_INTR_CARD_MASK		        0x00000100U     /**< Card Interrupt */
-#define XSDPS_INTR_INT_A_MASK		        0x00000200U     /**< INT A Interrupt */
-#define XSDPS_INTR_INT_B_MASK		        0x00000400U     /**< INT B Interrupt */
-#define XSDPS_INTR_INT_C_MASK		        0x00000800U     /**< INT C Interrupt */
-#define XSDPS_INTR_RE_TUNING_MASK	        0x00001000U     /**< Re-Tuning Interrupt */
-#define XSDPS_INTR_BOOT_ACK_RECV_MASK	    0x00002000U     /**< Boot Ack Recv Interrupt */
-#define XSDPS_INTR_BOOT_TERM_MASK	        0x00004000U     /**< Boot Terminate Interrupt */
-#define XSDPS_INTR_ERR_MASK		            0x00008000U     /**< Error Interrupt */
+#define XSDPS_INTR_CC_MASK		            0x00000001U     /*!< Command Complete */
+#define XSDPS_INTR_TC_MASK		            0x00000002U     /*!< Transfer Complete */
+#define XSDPS_INTR_BGE_MASK		            0x00000004U     /*!< Block Gap Event */
+#define XSDPS_INTR_DMA_MASK		            0x00000008U     /*!< DMA Interrupt */
+#define XSDPS_INTR_BWR_MASK		            0x00000010U     /*!< Buffer Write Ready */
+#define XSDPS_INTR_BRR_MASK		            0x00000020U     /*!< Buffer Read Ready */
+#define XSDPS_INTR_CARD_INSRT_MASK	        0x00000040U     /*!< Card Insert */
+#define XSDPS_INTR_CARD_REM_MASK	        0x00000080U     /*!< Card Remove */
+#define XSDPS_INTR_CARD_MASK		        0x00000100U     /*!< Card Interrupt */
+#define XSDPS_INTR_INT_A_MASK		        0x00000200U     /*!< INT A Interrupt */
+#define XSDPS_INTR_INT_B_MASK		        0x00000400U     /*!< INT B Interrupt */
+#define XSDPS_INTR_INT_C_MASK		        0x00000800U     /*!< INT C Interrupt */
+#define XSDPS_INTR_RE_TUNING_MASK	        0x00001000U     /*!< Re-Tuning Interrupt */
+#define XSDPS_INTR_BOOT_ACK_RECV_MASK	    0x00002000U     /*!< Boot Ack Recv Interrupt */
+#define XSDPS_INTR_BOOT_TERM_MASK	        0x00004000U     /*!< Boot Terminate Interrupt */
+#define XSDPS_INTR_ERR_MASK		            0x00008000U     /*!< Error Interrupt */
 #define XSDPS_NORM_INTR_ALL_MASK	        0x0000FFFFU
 
-#define XSDPS_INTR_ERR_CT_MASK		        0x00000001U     /**< Command Timeout Error */
-#define XSDPS_INTR_ERR_CCRC_MASK	        0x00000002U     /**< Command CRC Error */
-#define XSDPS_INTR_ERR_CEB_MASK		        0x00000004U     /**< Command End Bit Error */
-#define XSDPS_INTR_ERR_CI_MASK		        0x00000008U     /**< Command Index Error */
-#define XSDPS_INTR_ERR_DT_MASK		        0x00000010U     /**< Data Timeout Error */
-#define XSDPS_INTR_ERR_DCRC_MASK	        0x00000020U     /**< Data CRC Error */
-#define XSDPS_INTR_ERR_DEB_MASK		        0x00000040U     /**< Data End Bit Error */
-#define XSDPS_INTR_ERR_CUR_LMT_MASK	        0x00000080U     /**< Current Limit Error */
-#define XSDPS_INTR_ERR_AUTO_CMD12_MASK	    0x00000100U     /**< Auto CMD12 Error */
-#define XSDPS_INTR_ERR_ADMA_MASK	        0x00000200U     /**< ADMA Error */
-#define XSDPS_INTR_ERR_TR_MASK		        0x00001000U     /**< Tuning Error */
-#define XSDPS_INTR_VEND_SPF_ERR_MASK	    0x0000E000U     /**< Vendor Specific Error */
-#define XSDPS_ERROR_INTR_ALL_MASK	        0x0000F3FFU     /**< Mask for error bits */
+#define XSDPS_INTR_ERR_CT_MASK		        0x00000001U     /*!< Command Timeout Error */
+#define XSDPS_INTR_ERR_CCRC_MASK	        0x00000002U     /*!< Command CRC Error */
+#define XSDPS_INTR_ERR_CEB_MASK		        0x00000004U     /*!< Command End Bit Error */
+#define XSDPS_INTR_ERR_CI_MASK		        0x00000008U     /*!< Command Index Error */
+#define XSDPS_INTR_ERR_DT_MASK		        0x00000010U     /*!< Data Timeout Error */
+#define XSDPS_INTR_ERR_DCRC_MASK	        0x00000020U     /*!< Data CRC Error */
+#define XSDPS_INTR_ERR_DEB_MASK		        0x00000040U     /*!< Data End Bit Error */
+#define XSDPS_INTR_ERR_CUR_LMT_MASK	        0x00000080U     /*!< Current Limit Error */
+#define XSDPS_INTR_ERR_AUTO_CMD12_MASK	    0x00000100U     /*!< Auto CMD12 Error */
+#define XSDPS_INTR_ERR_ADMA_MASK	        0x00000200U     /*!< ADMA Error */
+#define XSDPS_INTR_ERR_TR_MASK		        0x00001000U     /*!< Tuning Error */
+#define XSDPS_INTR_VEND_SPF_ERR_MASK	    0x0000E000U     /*!< Vendor Specific Error */
+#define XSDPS_ERROR_INTR_ALL_MASK	        0x0000F3FFU     /*!< Mask for error bits */
 /*!< @} */
 
 /*!< @name Block Size and Block Count Register
@@ -642,11 +867,11 @@ typedef struct
  * @{
  */
 
-#define XSDPS_BLK_SIZE_MASK		            0x00000FFFU     /**< Transfer Block Size */
-#define XSDPS_SDMA_BUFF_SIZE_MASK	        0x00007000U     /**< Host SDMA Buffer Size */
+#define XSDPS_BLK_SIZE_MASK		            0x00000FFFU     /*!< Transfer Block Size */
+#define XSDPS_SDMA_BUFF_SIZE_MASK	        0x00007000U     /*!< Host SDMA Buffer Size */
 #define XSDPS_BLK_SIZE_1024		            0x400U
 #define XSDPS_BLK_SIZE_2048		            0x800U
-#define XSDPS_BLK_CNT_MASK		            0x0000FFFFU     /**< Block Count for Current Transfer */
+#define XSDPS_BLK_CNT_MASK		            0x0000FFFFU     /*!< Block Count for Current Transfer */
 
 /*!< @} */
 
@@ -658,26 +883,26 @@ typedef struct
  * @{
  */
 
-#define XSDPS_TM_DMA_EN_MASK		        0x00000001U     /**< DMA Enable */
-#define XSDPS_TM_BLK_CNT_EN_MASK	        0x00000002U     /**< Block Count Enable */
-#define XSDPS_TM_AUTO_CMD12_EN_MASK	        0x00000004U     /**< Auto CMD12 Enable */
-#define XSDPS_TM_DAT_DIR_SEL_MASK	        0x00000010U     /**< Data Transfer Direction Select */
-#define XSDPS_TM_MUL_SIN_BLK_SEL_MASK	    0x00000020U     /**< Multi/Single Block Select */
+#define XSDPS_TM_DMA_EN_MASK		        0x00000001U     /*!< DMA Enable */
+#define XSDPS_TM_BLK_CNT_EN_MASK	        0x00000002U     /*!< Block Count Enable */
+#define XSDPS_TM_AUTO_CMD12_EN_MASK	        0x00000004U     /*!< Auto CMD12 Enable */
+#define XSDPS_TM_DAT_DIR_SEL_MASK	        0x00000010U     /*!< Data Transfer Direction Select */
+#define XSDPS_TM_MUL_SIN_BLK_SEL_MASK	    0x00000020U     /*!< Multi/Single Block Select */
 
-#define XSDPS_CMD_RESP_SEL_MASK		        0x00000003U     /**< Response Type Select */
-#define XSDPS_CMD_RESP_NONE_MASK	        0x00000000U     /**< No Response */
-#define XSDPS_CMD_RESP_L136_MASK	        0x00000001U     /**< Response length 138 */
-#define XSDPS_CMD_RESP_L48_MASK		        0x00000002U     /**< Response length 48 */
-#define XSDPS_CMD_RESP_L48_BSY_CHK_MASK	    0x00000003U     /**< Response length 48 & check busy after response */
-#define XSDPS_CMD_CRC_CHK_EN_MASK	        0x00000008U     /**< Command CRC Check Enable */
-#define XSDPS_CMD_INX_CHK_EN_MASK	        0x00000010U     /**< Command Index Check Enable */
-#define XSDPS_DAT_PRESENT_SEL_MASK	        0x00000020U     /**< Data Present Select */
-#define XSDPS_CMD_TYPE_MASK		            0x000000C0U     /**< Command Type */
-#define XSDPS_CMD_TYPE_NORM_MASK	        0x00000000U     /**< CMD Type - Normal */
-#define XSDPS_CMD_TYPE_SUSPEND_MASK	        0x00000040U     /**< CMD Type - Suspend */
-#define XSDPS_CMD_TYPE_RESUME_MASK	        0x00000080U     /**< CMD Type - Resume */
-#define XSDPS_CMD_TYPE_ABORT_MASK	        0x000000C0U     /**< CMD Type - Abort */
-#define XSDPS_CMD_MASK			            0x00003F00U     /**< Command Index Mask - Set to CMD0-63, AMCD0-63 */
+#define XSDPS_CMD_RESP_SEL_MASK		        0x00000003U     /*!< Response Type Select */
+#define XSDPS_CMD_RESP_NONE_MASK	        0x00000000U     /*!< No Response */
+#define XSDPS_CMD_RESP_L136_MASK	        0x00000001U     /*!< Response length 138 */
+#define XSDPS_CMD_RESP_L48_MASK		        0x00000002U     /*!< Response length 48 */
+#define XSDPS_CMD_RESP_L48_BSY_CHK_MASK	    0x00000003U     /*!< Response length 48 & check busy after response */
+#define XSDPS_CMD_CRC_CHK_EN_MASK	        0x00000008U     /*!< Command CRC Check Enable */
+#define XSDPS_CMD_INX_CHK_EN_MASK	        0x00000010U     /*!< Command Index Check Enable */
+#define XSDPS_DAT_PRESENT_SEL_MASK	        0x00000020U     /*!< Data Present Select */
+#define XSDPS_CMD_TYPE_MASK		            0x000000C0U     /*!< Command Type */
+#define XSDPS_CMD_TYPE_NORM_MASK	        0x00000000U     /*!< CMD Type - Normal */
+#define XSDPS_CMD_TYPE_SUSPEND_MASK	        0x00000040U     /*!< CMD Type - Suspend */
+#define XSDPS_CMD_TYPE_RESUME_MASK	        0x00000080U     /*!< CMD Type - Resume */
+#define XSDPS_CMD_TYPE_ABORT_MASK	        0x000000C0U     /*!< CMD Type - Abort */
+#define XSDPS_CMD_MASK			            0x00003F00U     /*!< Command Index Mask - Set to CMD0-63, AMCD0-63 */
 
 /*!< @name Auto CMD Error Status Register
  *
@@ -686,12 +911,12 @@ typedef struct
  * Read Only
  * @{
  */
-#define XSDPS_AUTO_CMD12_NT_EX_MASK	        0x0001U         /**< Auto CMD12 Not executed */
-#define XSDPS_AUTO_CMD_TOUT_MASK	        0x0002U         /**< Auto CMD Timeout Error */
-#define XSDPS_AUTO_CMD_CRC_MASK		        0x0004U         /**< Auto CMD CRC Error */
-#define XSDPS_AUTO_CMD_EB_MASK		        0x0008U         /**< Auto CMD End Bit Error */
-#define XSDPS_AUTO_CMD_IND_MASK		        0x0010U         /**< Auto CMD Index Error */
-#define XSDPS_AUTO_CMD_CNI_ERR_MASK	        0x0080U         /**< Command not issued by Auto CMD12 Error */
+#define XSDPS_AUTO_CMD12_NT_EX_MASK	        0x0001U         /*!< Auto CMD12 Not executed */
+#define XSDPS_AUTO_CMD_TOUT_MASK	        0x0002U         /*!< Auto CMD Timeout Error */
+#define XSDPS_AUTO_CMD_CRC_MASK		        0x0004U         /*!< Auto CMD CRC Error */
+#define XSDPS_AUTO_CMD_EB_MASK		        0x0008U         /*!< Auto CMD End Bit Error */
+#define XSDPS_AUTO_CMD_IND_MASK		        0x0010U         /*!< Auto CMD Index Error */
+#define XSDPS_AUTO_CMD_CNI_ERR_MASK	        0x0080U         /*!< Command not issued by Auto CMD12 Error */
 /*!< @} */
 
 /*!< @name Host Control2 Register
@@ -700,22 +925,22 @@ typedef struct
  * Read Write
  * @{
  */
-#define XSDPS_HC2_UHS_MODE_MASK		        0x0007U         /**< UHS Mode select bits */
-#define XSDPS_HC2_UHS_MODE_SDR12_MASK	    0x0000U         /**< SDR12 UHS Mode */
-#define XSDPS_HC2_UHS_MODE_SDR25_MASK	    0x0001U         /**< SDR25 UHS Mode */
-#define XSDPS_HC2_UHS_MODE_SDR50_MASK	    0x0002U         /**< SDR50 UHS Mode */
-#define XSDPS_HC2_UHS_MODE_SDR104_MASK	    0x0003U         /**< SDR104 UHS Mode */
-#define XSDPS_HC2_UHS_MODE_DDR50_MASK	    0x0004U         /**< DDR50 UHS Mode */
-#define XSDPS_HC2_1V8_EN_MASK		        0x0008U         /**< 1.8V Signal Enable */
-#define XSDPS_HC2_DRV_STR_SEL_MASK	        0x0030U         /**< Driver Strength Selection */
-#define XSDPS_HC2_DRV_STR_B_MASK	        0x0000U         /**< Driver Strength B */
-#define XSDPS_HC2_DRV_STR_A_MASK	        0x0010U         /**< Driver Strength A */
-#define XSDPS_HC2_DRV_STR_C_MASK	        0x0020U         /**< Driver Strength C */
-#define XSDPS_HC2_DRV_STR_D_MASK	        0x0030U         /**< Driver Strength D */
-#define XSDPS_HC2_EXEC_TNG_MASK		        0x0040U         /**< Execute Tuning */
-#define XSDPS_HC2_SAMP_CLK_SEL_MASK	        0x0080U         /**< Sampling Clock Selection */
-#define XSDPS_HC2_ASYNC_INTR_EN_MASK	    0x4000U         /**< Asynchronous Interrupt Enable */
-#define XSDPS_HC2_PRE_VAL_EN_MASK	        0x8000U         /**< Preset Value Enable */
+#define XSDPS_HC2_UHS_MODE_MASK		        0x0007U         /*!< UHS Mode select bits */
+#define XSDPS_HC2_UHS_MODE_SDR12_MASK	    0x0000U         /*!< SDR12 UHS Mode */
+#define XSDPS_HC2_UHS_MODE_SDR25_MASK	    0x0001U         /*!< SDR25 UHS Mode */
+#define XSDPS_HC2_UHS_MODE_SDR50_MASK	    0x0002U         /*!< SDR50 UHS Mode */
+#define XSDPS_HC2_UHS_MODE_SDR104_MASK	    0x0003U         /*!< SDR104 UHS Mode */
+#define XSDPS_HC2_UHS_MODE_DDR50_MASK	    0x0004U         /*!< DDR50 UHS Mode */
+#define XSDPS_HC2_1V8_EN_MASK		        0x0008U         /*!< 1.8V Signal Enable */
+#define XSDPS_HC2_DRV_STR_SEL_MASK	        0x0030U         /*!< Driver Strength Selection */
+#define XSDPS_HC2_DRV_STR_B_MASK	        0x0000U         /*!< Driver Strength B */
+#define XSDPS_HC2_DRV_STR_A_MASK	        0x0010U         /*!< Driver Strength A */
+#define XSDPS_HC2_DRV_STR_C_MASK	        0x0020U         /*!< Driver Strength C */
+#define XSDPS_HC2_DRV_STR_D_MASK	        0x0030U         /*!< Driver Strength D */
+#define XSDPS_HC2_EXEC_TNG_MASK		        0x0040U         /*!< Execute Tuning */
+#define XSDPS_HC2_SAMP_CLK_SEL_MASK	        0x0080U         /*!< Sampling Clock Selection */
+#define XSDPS_HC2_ASYNC_INTR_EN_MASK	    0x4000U         /*!< Asynchronous Interrupt Enable */
+#define XSDPS_HC2_PRE_VAL_EN_MASK	        0x8000U         /*!< Preset Value Enable */
 
 /*!< @} */
 
@@ -727,52 +952,52 @@ typedef struct
  * Read Only
  * @{
  */
-#define XSDPS_CAP_TOUT_CLK_FREQ_MASK	    0x0000003FU     /**< Timeout clock freq select */
-#define XSDPS_CAP_TOUT_CLK_UNIT_MASK	    0x00000080U     /**< Timeout clock unit - MHz/KHz */
-#define XSDPS_CAP_MAX_BLK_LEN_MASK	        0x00030000U     /**< Max block length */
-#define XSDPS_CAP_MAX_BLK_LEN_512B_MASK	    0x00000000U     /**< Max block 512 bytes */
-#define XSDPS_CAP_MAX_BL_LN_1024_MASK	    0x00010000U     /**< Max block 1024 bytes */
-#define XSDPS_CAP_MAX_BL_LN_2048_MASK	    0x00020000U     /**< Max block 2048 bytes */
-#define XSDPS_CAP_MAX_BL_LN_4096_MASK	    0x00030000U     /**< Max block 4096 bytes */
+#define XSDPS_CAP_TOUT_CLK_FREQ_MASK	    0x0000003FU     /*!< Timeout clock freq select */
+#define XSDPS_CAP_TOUT_CLK_UNIT_MASK	    0x00000080U     /*!< Timeout clock unit - MHz/KHz */
+#define XSDPS_CAP_MAX_BLK_LEN_MASK	        0x00030000U     /*!< Max block length */
+#define XSDPS_CAP_MAX_BLK_LEN_512B_MASK	    0x00000000U     /*!< Max block 512 bytes */
+#define XSDPS_CAP_MAX_BL_LN_1024_MASK	    0x00010000U     /*!< Max block 1024 bytes */
+#define XSDPS_CAP_MAX_BL_LN_2048_MASK	    0x00020000U     /*!< Max block 2048 bytes */
+#define XSDPS_CAP_MAX_BL_LN_4096_MASK	    0x00030000U     /*!< Max block 4096 bytes */
 
-#define XSDPS_CAP_EXT_MEDIA_BUS_MASK	    0x00040000U     /**< Extended media bus */
-#define XSDPS_CAP_ADMA2_MASK		        0x00080000U     /**< ADMA2 support */
-#define XSDPS_CAP_HIGH_SPEED_MASK	        0x00200000U     /**< High speed support */
-#define XSDPS_CAP_SDMA_MASK		            0x00400000U     /**< SDMA support */
-#define XSDPS_CAP_SUSP_RESUME_MASK	        0x00800000U     /**< Suspend/Resume support */
-#define XSDPS_CAP_VOLT_3V3_MASK		        0x01000000U     /**< 3.3V support */
-#define XSDPS_CAP_VOLT_3V0_MASK		        0x02000000U     /**< 3.0V support */
-#define XSDPS_CAP_VOLT_1V8_MASK		        0x04000000U     /**< 1.8V support */
+#define XSDPS_CAP_EXT_MEDIA_BUS_MASK	    0x00040000U     /*!< Extended media bus */
+#define XSDPS_CAP_ADMA2_MASK		        0x00080000U     /*!< ADMA2 support */
+#define XSDPS_CAP_HIGH_SPEED_MASK	        0x00200000U     /*!< High speed support */
+#define XSDPS_CAP_SDMA_MASK		            0x00400000U     /*!< SDMA support */
+#define XSDPS_CAP_SUSP_RESUME_MASK	        0x00800000U     /*!< Suspend/Resume support */
+#define XSDPS_CAP_VOLT_3V3_MASK		        0x01000000U     /*!< 3.3V support */
+#define XSDPS_CAP_VOLT_3V0_MASK		        0x02000000U     /*!< 3.0V support */
+#define XSDPS_CAP_VOLT_1V8_MASK		        0x04000000U     /*!< 1.8V support */
 
-#define XSDPS_CAP_SYS_BUS_64_MASK	        0x10000000U     /**< 64 bit system bus  support */
+#define XSDPS_CAP_SYS_BUS_64_MASK	        0x10000000U     /*!< 64 bit system bus  support */
 
 /*!< Spec 2.0 */
-#define XSDPS_CAP_INTR_MODE_MASK	        0x08000000U     /**< Interrupt mode support */
-#define XSDPS_CAP_SPI_MODE_MASK		        0x20000000U     /**< SPI mode */
-#define XSDPS_CAP_SPI_BLOCK_MODE_MASK	    0x40000000U     /**< SPI block mode */
+#define XSDPS_CAP_INTR_MODE_MASK	        0x08000000U     /*!< Interrupt mode support */
+#define XSDPS_CAP_SPI_MODE_MASK		        0x20000000U     /*!< SPI mode */
+#define XSDPS_CAP_SPI_BLOCK_MODE_MASK	    0x40000000U     /*!< SPI block mode */
 
 /*!< Spec 3.0 */
-#define XSDPS_CAPS_ASYNC_INTR_MASK	        0x20000000U     /**< Async Interrupt support */
-#define XSDPS_CAPS_SLOT_TYPE_MASK	        0xC0000000U     /**< Slot Type */
-#define XSDPS_CAPS_REM_CARD			        0x00000000U     /**< Removable Slot */
-#define XSDPS_CAPS_EMB_SLOT			        0x40000000U     /**< Embedded Slot */
-#define XSDPS_CAPS_SHR_BUS			        0x80000000U     /**< Shared Bus Slot */
+#define XSDPS_CAPS_ASYNC_INTR_MASK	        0x20000000U     /*!< Async Interrupt support */
+#define XSDPS_CAPS_SLOT_TYPE_MASK	        0xC0000000U     /*!< Slot Type */
+#define XSDPS_CAPS_REM_CARD			        0x00000000U     /*!< Removable Slot */
+#define XSDPS_CAPS_EMB_SLOT			        0x40000000U     /*!< Embedded Slot */
+#define XSDPS_CAPS_SHR_BUS			        0x80000000U     /*!< Shared Bus Slot */
 
-#define XSDPS_ECAPS_SDR50_MASK		        0x00000001U     /**< SDR50 Mode support */
-#define XSDPS_ECAPS_SDR104_MASK		        0x00000002U     /**< SDR104 Mode support */
-#define XSDPS_ECAPS_DDR50_MASK		        0x00000004U     /**< DDR50 Mode support */
-#define XSDPS_ECAPS_DRV_TYPE_A_MASK	        0x00000010U     /**< DriverType A support */
-#define XSDPS_ECAPS_DRV_TYPE_C_MASK	        0x00000020U     /**< DriverType C support */
-#define XSDPS_ECAPS_DRV_TYPE_D_MASK	        0x00000040U     /**< DriverType D support */
-#define XSDPS_ECAPS_TMR_CNT_MASK	        0x00000F00U     /**< Timer Count for Re-tuning */
-#define XSDPS_ECAPS_USE_TNG_SDR50_MASK	    0x00002000U     /**< SDR50 Mode needs tuning */
-#define XSDPS_ECAPS_RE_TNG_MODES_MASK	    0x0000C000U     /**< Re-tuning modes support */
-#define XSDPS_ECAPS_RE_TNG_MODE1_MASK	    0x00000000U     /**< Re-tuning mode 1 */
-#define XSDPS_ECAPS_RE_TNG_MODE2_MASK	    0x00004000U     /**< Re-tuning mode 2 */
-#define XSDPS_ECAPS_RE_TNG_MODE3_MASK	    0x00008000U     /**< Re-tuning mode 3 */
-#define XSDPS_ECAPS_CLK_MULT_MASK	        0x00FF0000U     /**< Clock Multiplier value for Programmable clock mode */
-#define XSDPS_ECAPS_SPI_MODE_MASK	        0x01000000U     /**< SPI mode */
-#define XSDPS_ECAPS_SPI_BLK_MODE_MASK	    0x02000000U     /**< SPI block mode */
+#define XSDPS_ECAPS_SDR50_MASK		        0x00000001U     /*!< SDR50 Mode support */
+#define XSDPS_ECAPS_SDR104_MASK		        0x00000002U     /*!< SDR104 Mode support */
+#define XSDPS_ECAPS_DDR50_MASK		        0x00000004U     /*!< DDR50 Mode support */
+#define XSDPS_ECAPS_DRV_TYPE_A_MASK	        0x00000010U     /*!< DriverType A support */
+#define XSDPS_ECAPS_DRV_TYPE_C_MASK	        0x00000020U     /*!< DriverType C support */
+#define XSDPS_ECAPS_DRV_TYPE_D_MASK	        0x00000040U     /*!< DriverType D support */
+#define XSDPS_ECAPS_TMR_CNT_MASK	        0x00000F00U     /*!< Timer Count for Re-tuning */
+#define XSDPS_ECAPS_USE_TNG_SDR50_MASK	    0x00002000U     /*!< SDR50 Mode needs tuning */
+#define XSDPS_ECAPS_RE_TNG_MODES_MASK	    0x0000C000U     /*!< Re-tuning modes support */
+#define XSDPS_ECAPS_RE_TNG_MODE1_MASK	    0x00000000U     /*!< Re-tuning mode 1 */
+#define XSDPS_ECAPS_RE_TNG_MODE2_MASK	    0x00004000U     /*!< Re-tuning mode 2 */
+#define XSDPS_ECAPS_RE_TNG_MODE3_MASK	    0x00008000U     /*!< Re-tuning mode 3 */
+#define XSDPS_ECAPS_CLK_MULT_MASK	        0x00FF0000U     /*!< Clock Multiplier value for Programmable clock mode */
+#define XSDPS_ECAPS_SPI_MODE_MASK	        0x01000000U     /*!< SPI mode */
+#define XSDPS_ECAPS_SPI_BLK_MODE_MASK	    0x02000000U     /*!< SPI block mode */
 
 /*!< @name Present State Register
  *
@@ -781,21 +1006,21 @@ typedef struct
  * @{
  */
 
-#define XSDPS_PSR_INHIBIT_CMD_MASK	        0x00000001U     /**< Command inhibit - CMD */
-#define XSDPS_PSR_INHIBIT_DAT_MASK	        0x00000002U     /**< Command Inhibit - DAT */
-#define XSDPS_PSR_DAT_ACTIVE_MASK	        0x00000004U     /**< DAT line active */
-#define XSDPS_PSR_RE_TUNING_REQ_MASK	    0x00000008U     /**< Re-tuning request */
-#define XSDPS_PSR_WR_ACTIVE_MASK	        0x00000100U     /**< Write transfer active */
-#define XSDPS_PSR_RD_ACTIVE_MASK	        0x00000200U     /**< Read transfer active */
-#define XSDPS_PSR_BUFF_WR_EN_MASK	        0x00000400U     /**< Buffer write enable */
-#define XSDPS_PSR_BUFF_RD_EN_MASK	        0x00000800U     /**< Buffer read enable */
-#define XSDPS_PSR_CARD_INSRT_MASK	        0x00010000U     /**< Card inserted */
-#define XSDPS_PSR_CARD_STABLE_MASK	        0x00020000U     /**< Card state stable */
-#define XSDPS_PSR_CARD_DPL_MASK		        0x00040000U     /**< Card detect pin level */
-#define XSDPS_PSR_WPS_PL_MASK		        0x00080000U     /**< Write protect switch pin level */
-#define XSDPS_PSR_DAT30_SG_LVL_MASK	        0x00F00000U     /**< Data 3:0 signal lvl */
-#define XSDPS_PSR_CMD_SG_LVL_MASK	        0x01000000U     /**< Cmd Line signal lvl */
-#define XSDPS_PSR_DAT74_SG_LVL_MASK	        0x1E000000U     /**< Data 7:4 signal lvl */
+#define XSDPS_PSR_INHIBIT_CMD_MASK	        0x00000001U     /*!< Command inhibit - CMD */
+#define XSDPS_PSR_INHIBIT_DAT_MASK	        0x00000002U     /*!< Command Inhibit - DAT */
+#define XSDPS_PSR_DAT_ACTIVE_MASK	        0x00000004U     /*!< DAT line active */
+#define XSDPS_PSR_RE_TUNING_REQ_MASK	    0x00000008U     /*!< Re-tuning request */
+#define XSDPS_PSR_WR_ACTIVE_MASK	        0x00000100U     /*!< Write transfer active */
+#define XSDPS_PSR_RD_ACTIVE_MASK	        0x00000200U     /*!< Read transfer active */
+#define XSDPS_PSR_BUFF_WR_EN_MASK	        0x00000400U     /*!< Buffer write enable */
+#define XSDPS_PSR_BUFF_RD_EN_MASK	        0x00000800U     /*!< Buffer read enable */
+#define XSDPS_PSR_CARD_INSRT_MASK	        0x00010000U     /*!< Card inserted */
+#define XSDPS_PSR_CARD_STABLE_MASK	        0x00020000U     /*!< Card state stable */
+#define XSDPS_PSR_CARD_DPL_MASK		        0x00040000U     /*!< Card detect pin level */
+#define XSDPS_PSR_WPS_PL_MASK		        0x00080000U     /*!< Write protect switch pin level */
+#define XSDPS_PSR_DAT30_SG_LVL_MASK	        0x00F00000U     /*!< Data 3:0 signal lvl */
+#define XSDPS_PSR_CMD_SG_LVL_MASK	        0x01000000U     /*!< Cmd Line signal lvl */
+#define XSDPS_PSR_DAT74_SG_LVL_MASK	        0x1E000000U     /*!< Data 7:4 signal lvl */
 
 /*!< @name Host Controller Version Register
  *
@@ -804,8 +1029,8 @@ typedef struct
  * Read Only
  * @{
  */
-#define XSDPS_HC_VENDOR_VER		            0xFF00U         /**< Vendor Specification version mask */
-#define XSDPS_HC_SPEC_VER_MASK		        0x00FFU         /**< Host Specification version mask */
+#define XSDPS_HC_VENDOR_VER		            0xFF00U         /*!< Vendor Specification version mask */
+#define XSDPS_HC_SPEC_VER_MASK		        0x00FFU         /*!< Host Specification version mask */
 #define XSDPS_HC_SPEC_V3		            0x0002U
 #define XSDPS_HC_SPEC_V2		            0x0001U
 #define XSDPS_HC_SPEC_V1		            0x0000U
@@ -1023,40 +1248,40 @@ typedef void (*XAxiVdma_ErrorCallBack) (void *CallBackRef, kuint32_t ErrorMask);
  */
 typedef struct 
 {
-    kuint16_t DeviceId;                                     /**< DeviceId is the unique ID  of the device */
-    kuint32_t BaseAddress;                                  /**< BaseAddress is the physical base address of the device's registers */
+    kuint16_t DeviceId;                                     /*!< DeviceId is the unique ID  of the device */
+    kuint32_t BaseAddress;                                  /*!< BaseAddress is the physical base address of the device's registers */
 
-    kuint16_t MaxFrameStoreNum;                             /**< The maximum number of Frame Stores */
+    kuint16_t MaxFrameStoreNum;                             /*!< The maximum number of Frame Stores */
 
-    kint32_t HasMm2S;                                       /**< Whether hw build has read channel */
-    kint32_t HasMm2SDRE;                                    /**< Read channel supports unaligned transfer */
-    kint32_t Mm2SWordLen;                                   /**< Read channel word length */
-    kint32_t HasS2Mm;                                       /**< Whether hw build has write channel */
-    kint32_t HasS2MmDRE;                                    /**< Write channel supports unaligned transfer */
-    kint32_t S2MmWordLen;                                   /**< Write channel word length */
-    kint32_t HasSG;                                         /**< Whether hardware has SG engine */
-    kint32_t EnableVIDParamRead;					        /**< Read Enable for video parameters in direct register mode */
-    kint32_t UseFsync;	                                    /**< DMA operations synchronized to Frame Sync */
-    kint32_t FlushonFsync;	                                /**< VDMA Transactions are flushed & channel states reset on Frame Sync */
-    kint32_t Mm2SBufDepth;	                                /**< Depth of Read Channel Line Buffer FIFO */
-    kint32_t S2MmBufDepth;	                                /**< Depth of Write Channel Line Buffer FIFO */
-    kint32_t Mm2SGenLock;	                                /**< Mm2s Gen Lock Mode */
-    kint32_t S2MmGenLock;	                                /**< S2Mm Gen Lock Mode */
-    kint32_t InternalGenLock;                               /**< Internal Gen Lock */
-    kint32_t S2MmSOF;	                                    /**< S2MM Start of Flag Enable */
-    kint32_t Mm2SStreamWidth;                               /**< MM2S TData Width */
-    kint32_t S2MmStreamWidth;                               /**< S2MM TData Width */
-    kint32_t Mm2SThresRegEn;                                /**< MM2S Threshold Register Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_1 configuration parameter */
-    kint32_t Mm2SFrmStoreRegEn;                             /**< MM2S Frame Store Register Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_5 configuration parameter */
-    kint32_t Mm2SDlyCntrEn;	                                /**< MM2S Delay Counter (Control Reg) Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_6 configuration parameter */
-    kint32_t Mm2SFrmCntrEn;                                 /**< MM2S Frame Counter (Control Reg) Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_7 configuration parameter */
-    kint32_t S2MmThresRegEn;                                /**< S2MM Threshold Register Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_9 configuration parameter */
-    kint32_t S2MmFrmStoreRegEn;                             /**< S2MM Frame Store Register Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_13 configuration parameter */
-    kint32_t S2MmDlyCntrEn;	                                /**< S2MM Delay Counter (Control Reg) Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_14  configuration parameter */
-    kint32_t S2MmFrmCntrEn;	                                /**< S2MM Frame Counter (Control Reg) Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_15 configuration parameter */
-    kint32_t EnableAllDbgFeatures;                          /**< Enable all Debug features This corresponds to C_ENABLE_DEBUG_ALL configuration parameter */
-    kint32_t AddrWidth;		                                /**< Address Width */
-    kuint8_t HasVFlip;		                                /**< Whether hardware has Vertical Flip enabled(c_enable_vert_flip) */
+    kint32_t HasMm2S;                                       /*!< Whether hw build has read channel */
+    kint32_t HasMm2SDRE;                                    /*!< Read channel supports unaligned transfer */
+    kint32_t Mm2SWordLen;                                   /*!< Read channel word length */
+    kint32_t HasS2Mm;                                       /*!< Whether hw build has write channel */
+    kint32_t HasS2MmDRE;                                    /*!< Write channel supports unaligned transfer */
+    kint32_t S2MmWordLen;                                   /*!< Write channel word length */
+    kint32_t HasSG;                                         /*!< Whether hardware has SG engine */
+    kint32_t EnableVIDParamRead;					        /*!< Read Enable for video parameters in direct register mode */
+    kint32_t UseFsync;	                                    /*!< DMA operations synchronized to Frame Sync */
+    kint32_t FlushonFsync;	                                /*!< VDMA Transactions are flushed & channel states reset on Frame Sync */
+    kint32_t Mm2SBufDepth;	                                /*!< Depth of Read Channel Line Buffer FIFO */
+    kint32_t S2MmBufDepth;	                                /*!< Depth of Write Channel Line Buffer FIFO */
+    kint32_t Mm2SGenLock;	                                /*!< Mm2s Gen Lock Mode */
+    kint32_t S2MmGenLock;	                                /*!< S2Mm Gen Lock Mode */
+    kint32_t InternalGenLock;                               /*!< Internal Gen Lock */
+    kint32_t S2MmSOF;	                                    /*!< S2MM Start of Flag Enable */
+    kint32_t Mm2SStreamWidth;                               /*!< MM2S TData Width */
+    kint32_t S2MmStreamWidth;                               /*!< S2MM TData Width */
+    kint32_t Mm2SThresRegEn;                                /*!< MM2S Threshold Register Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_1 configuration parameter */
+    kint32_t Mm2SFrmStoreRegEn;                             /*!< MM2S Frame Store Register Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_5 configuration parameter */
+    kint32_t Mm2SDlyCntrEn;	                                /*!< MM2S Delay Counter (Control Reg) Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_6 configuration parameter */
+    kint32_t Mm2SFrmCntrEn;                                 /*!< MM2S Frame Counter (Control Reg) Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_7 configuration parameter */
+    kint32_t S2MmThresRegEn;                                /*!< S2MM Threshold Register Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_9 configuration parameter */
+    kint32_t S2MmFrmStoreRegEn;                             /*!< S2MM Frame Store Register Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_13 configuration parameter */
+    kint32_t S2MmDlyCntrEn;	                                /*!< S2MM Delay Counter (Control Reg) Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_14  configuration parameter */
+    kint32_t S2MmFrmCntrEn;	                                /*!< S2MM Frame Counter (Control Reg) Enable Flag This corresponds to C_ENABLE_DEBUG_INFO_15 configuration parameter */
+    kint32_t EnableAllDbgFeatures;                          /*!< Enable all Debug features This corresponds to C_ENABLE_DEBUG_ALL configuration parameter */
+    kint32_t AddrWidth;		                                /*!< Address Width */
+    kuint8_t HasVFlip;		                                /*!< Whether hardware has Vertical Flip enabled(c_enable_vert_flip) */
 
 } XAxiVdma_Config;
 
@@ -1065,11 +1290,11 @@ typedef struct
  */
 typedef struct 
 {
-    XAxiVdma_CallBack CompletionCallBack; 			        /**< Call back for completion intr */
-    void *CompletionRef;                  			        /**< Call back ref */
+    XAxiVdma_CallBack CompletionCallBack; 			        /*!< Call back for completion intr */
+    void *CompletionRef;                  			        /*!< Call back ref */
 
-    XAxiVdma_ErrorCallBack ErrCallBack;   			        /**< Call back for error intr */
-    void *ErrRef;                         			        /**< Call back ref */
+    XAxiVdma_ErrorCallBack ErrCallBack;   			        /*!< Call back for error intr */
+    void *ErrRef;                         			        /*!< Call back ref */
 
 } XAxiVdma_ChannelCallBack;
 
@@ -1118,19 +1343,19 @@ typedef struct
  */
 typedef struct 
 {
-    kint32_t VertSizeInput;                                 /**< Vertical size input */
-    kint32_t HoriSizeInput;                                 /**< Horizontal size input */
-    kint32_t Stride;                                        /**< Stride */
-    kint32_t FrameDelay;                                    /**< Frame Delay */
+    kint32_t VertSizeInput;                                 /*!< Vertical size input */
+    kint32_t HoriSizeInput;                                 /*!< Horizontal size input */
+    kint32_t Stride;                                        /*!< Stride */
+    kint32_t FrameDelay;                                    /*!< Frame Delay */
 
-    kint32_t EnableCircularBuf;                             /**< Circular Buffer Mode? */
-    kint32_t EnableSync;                                    /**< Gen-Lock Mode? */
-    kint32_t PointNum;                                      /**< Master we synchronize with */
-    kint32_t EnableFrameCounter;                            /**< Frame Counter Enable */
-    kuint32_t FrameStoreStartAddr[XAXIVDMA_MAX_FRAMESTORE]; /**< Start Addresses of Frame Store Buffers. */
-    kint32_t FixedFrameStoreAddr;                           /**< Fixed Frame Store Address index */
-    kint32_t GenLockRepeat;                                 /**< Gen-Lock Repeat? */
-    kuint8_t EnableVFlip;	                                /**< Vertical Flip state */
+    kint32_t EnableCircularBuf;                             /*!< Circular Buffer Mode? */
+    kint32_t EnableSync;                                    /*!< Gen-Lock Mode? */
+    kint32_t PointNum;                                      /*!< Master we synchronize with */
+    kint32_t EnableFrameCounter;                            /*!< Frame Counter Enable */
+    kuint32_t FrameStoreStartAddr[XAXIVDMA_MAX_FRAMESTORE]; /*!< Start Addresses of Frame Store Buffers. */
+    kint32_t FixedFrameStoreAddr;                           /*!< Fixed Frame Store Address index */
+    kint32_t GenLockRepeat;                                 /*!< Gen-Lock Repeat? */
+    kuint8_t EnableVFlip;	                                /*!< Vertical Flip state */
 
 } XAxiVdma_DmaSetup;
 
@@ -1139,19 +1364,19 @@ typedef struct
  * So to remove the dependency on xaxivdma.h
  */
 typedef struct {
-    kint32_t VertSizeInput;                                 /**< Vertical size input */
-    kint32_t HoriSizeInput;                                 /**< Horizontal size input */
-    kint32_t Stride;                                        /**< Stride */
-    kint32_t FrameDelay;                                    /**< Frame Delay */
+    kint32_t VertSizeInput;                                 /*!< Vertical size input */
+    kint32_t HoriSizeInput;                                 /*!< Horizontal size input */
+    kint32_t Stride;                                        /*!< Stride */
+    kint32_t FrameDelay;                                    /*!< Frame Delay */
 
-    kint32_t EnableCircularBuf;                             /**< Circular Buffer Mode? */
-    kint32_t EnableSync;                                    /**< Gen-Lock Mode? */
-    kint32_t PointNum;                                      /**< Master we synchronize with */
-    kint32_t EnableFrameCounter;                            /**< Frame Counter Enable */
-    kuint32_t FrameStoreStartAddr[XAXIVDMA_MAX_FRAMESTORE]; /**< Start Addresses of Frame Store Buffers. */
-    kint32_t FixedFrameStoreAddr;                           /**< Fixed Frame Store Address index */
-    kint32_t GenLockRepeat;                                 /**< Gen-Lock Repeat? */
-    kuint8_t EnableVFlip;	                                /**< Vertical Flip state */
+    kint32_t EnableCircularBuf;                             /*!< Circular Buffer Mode? */
+    kint32_t EnableSync;                                    /*!< Gen-Lock Mode? */
+    kint32_t PointNum;                                      /*!< Master we synchronize with */
+    kint32_t EnableFrameCounter;                            /*!< Frame Counter Enable */
+    kuint32_t FrameStoreStartAddr[XAXIVDMA_MAX_FRAMESTORE]; /*!< Start Addresses of Frame Store Buffers. */
+    kint32_t FixedFrameStoreAddr;                           /*!< Fixed Frame Store Address index */
+    kint32_t GenLockRepeat;                                 /*!< Gen-Lock Repeat? */
+    kuint8_t EnableVFlip;	                                /*!< Vertical Flip state */
 
 }XAxiVdma_ChannelSetup;
 
@@ -1160,26 +1385,26 @@ typedef struct {
  */
 typedef struct 
 {
-    kuint32_t BaseAddr;                   			        /**< Memory address for this device */
-    kint32_t HasSG;                      			        /**< Whether hardware has SG engine */
-    kbool_t IsReady;                    			        /**< Whether driver is initialized */
+    kuint32_t BaseAddr;                   			        /*!< Memory address for this device */
+    kint32_t HasSG;                      			        /*!< Whether hardware has SG engine */
+    kbool_t IsReady;                    			        /*!< Whether driver is initialized */
 
-    kint32_t MaxNumFrames;                			        /**< Number of frames to work on */
-    kint32_t HasMm2S;                    			        /**< Whether hw build has read channel */
-    kint32_t HasMm2SDRE;                 			        /**< Whether read channel has DRE */
-    kint32_t HasS2Mm;                    			        /**< Whether hw build has write channel */
-    kint32_t HasS2MmDRE;                 			        /**< Whether write channel has DRE */
-    kint32_t EnableVIDParamRead;	    			        /**< Read Enable for video parameters in direct register mode */
-    kint32_t UseFsync;       	    				        /**< DMA operations synchronized to Frame Sync */
-    kint32_t InternalGenLock;  	    				        /**< Internal Gen Lock */
+    kint32_t MaxNumFrames;                			        /*!< Number of frames to work on */
+    kint32_t HasMm2S;                    			        /*!< Whether hw build has read channel */
+    kint32_t HasMm2SDRE;                 			        /*!< Whether read channel has DRE */
+    kint32_t HasS2Mm;                    			        /*!< Whether hw build has write channel */
+    kint32_t HasS2MmDRE;                 			        /*!< Whether write channel has DRE */
+    kint32_t EnableVIDParamRead;	    			        /*!< Read Enable for video parameters in direct register mode */
+    kint32_t UseFsync;       	    				        /*!< DMA operations synchronized to Frame Sync */
+    kint32_t InternalGenLock;  	    				        /*!< Internal Gen Lock */
     
-    XAxiVdma_ChannelCallBack ReadCallBack;  		        /**< Call back for read channel */
-    XAxiVdma_ChannelCallBack WriteCallBack; 		        /**< Call back for write channel */
+    XAxiVdma_ChannelCallBack ReadCallBack;  		        /*!< Call back for read channel */
+    XAxiVdma_ChannelCallBack WriteCallBack; 		        /*!< Call back for write channel */
 
-    XAxiVdma_Channel ReadChannel;  					        /**< Channel to read from memory */
-    XAxiVdma_Channel WriteChannel; 					        /**< Channel to write to memory */
+    XAxiVdma_Channel ReadChannel;  					        /*!< Channel to read from memory */
+    XAxiVdma_Channel WriteChannel; 					        /*!< Channel to write to memory */
     
-    kint32_t AddrWidth;		  						        /**< Address Width */
+    kint32_t AddrWidth;		  						        /*!< Address Width */
 
 } XAxiVdma;
 
@@ -1190,8 +1415,8 @@ typedef struct
 
 typedef enum 
 {
-	NR_XIL_DISPLAY_STOPPED = 0,
-	NR_XIL_DISPLAY_RUNNING = 1
+    NR_XIL_DISPLAY_STOPPED = 0,
+    NR_XIL_DISPLAY_RUNNING = 1
 
 } DisplayState;
 
@@ -1200,18 +1425,18 @@ typedef void (*XVtc_ErrorCallBack)(void *CallBackRef, kuint32_t ErrorMask);
 
 typedef struct 
 {
-	kchar_t label[64];                                      /*!< Label describing the resolution */
-	kuint32_t width;		                                /*!< Width(horizon) of the active video frame */
-	kuint32_t height; 	                                    /*!< Height(vertical) of the active video frame */
-	kuint32_t hps; 		                                    /*!< Start time of Horizontal sync pulse, in pixel clocks (active width + H. front porch) */
-	kuint32_t hpe; 		                                    /*!< End time of Horizontal sync pulse, in pixel clocks (active width + H. front porch + H. sync width) */
-	kuint32_t hmax; 		                                /*!< Total number of pixel clocks per line (active width + H. front porch + H. sync width + H. back porch) */
-	kuint32_t hpol; 		                                /*!< hsync pulse polarity */
-	kuint32_t vps;		                                    /*!< Start time of Vertical sync pulse, in lines (active height + V. front porch) */
-	kuint32_t vpe;		                                    /*!< End time of Vertical sync pulse, in lines (active height + V. front porch + V. sync width) */
-	kuint32_t vmax; 		                                /*!< Total number of lines per frame (active height + V. front porch + V. sync width + V. back porch) */
-	kuint32_t vpol; 		                                /*!< vsync pulse polarity */
-	kfloat_t freq; 	                                        /*!< Pixel Clock frequency */
+    kchar_t label[64];                                      /*!< Label describing the resolution */
+    kuint32_t width;		                                /*!< Width(horizon) of the active video frame */
+    kuint32_t height; 	                                    /*!< Height(vertical) of the active video frame */
+    kuint32_t hps; 		                                    /*!< Start time of Horizontal sync pulse, in pixel clocks (active width + H. front porch) */
+    kuint32_t hpe; 		                                    /*!< End time of Horizontal sync pulse, in pixel clocks (active width + H. front porch + H. sync width) */
+    kuint32_t hmax; 		                                /*!< Total number of pixel clocks per line (active width + H. front porch + H. sync width + H. back porch) */
+    kuint32_t hpol; 		                                /*!< hsync pulse polarity */
+    kuint32_t vps;		                                    /*!< Start time of Vertical sync pulse, in lines (active height + V. front porch) */
+    kuint32_t vpe;		                                    /*!< End time of Vertical sync pulse, in lines (active height + V. front porch + V. sync width) */
+    kuint32_t vmax; 		                                /*!< Total number of lines per frame (active height + V. front porch + V. sync width + V. back porch) */
+    kuint32_t vpol; 		                                /*!< vsync pulse polarity */
+    kfloat_t freq; 	                                        /*!< Pixel Clock frequency */
 
 } VideoMode;
 
@@ -1221,8 +1446,8 @@ typedef struct
  */
 typedef struct 
 {
-	kuint16_t DeviceId;		                                /**< DeviceId is the unique ID of the VTC core */
-	kuint32_t BaseAddress;	                                /**< BaseAddress is the physical base address of the core's registers */
+    kuint16_t DeviceId;		                                /*!< DeviceId is the unique ID of the VTC core */
+    kuint32_t BaseAddress;	                                /*!< BaseAddress is the physical base address of the core's registers */
 
 } XVtc_Config;
 
@@ -1232,39 +1457,39 @@ typedef struct
  */
 typedef struct 
 {
-	XVtc_Config Config;	                                    /**< Hardware Configuration */
-	kbool_t IsReady;		                                /**< Core and the driver instance are initialized */
+    XVtc_Config Config;	                                    /*!< Hardware Configuration */
+    kbool_t IsReady;		                                /*!< Core and the driver instance are initialized */
 
-	/*!< Interrupt callbacks*/
-	XVtc_CallBack FrameSyncCallBack;	                    /**< Callback for Frame Sync interrupt */
-	void *FrameSyncRef;		                                /**< To be passed to the Frame Sync interrupt callback */
+    /*!< Interrupt callbacks*/
+    XVtc_CallBack FrameSyncCallBack;	                    /*!< Callback for Frame Sync interrupt */
+    void *FrameSyncRef;		                                /*!< To be passed to the Frame Sync interrupt callback */
 
-	XVtc_CallBack LockCallBack;	                            /**< Callback for Signal Lock interrupt */
-	void *LockRef;			                                /**< To be passed to the Signal Lock interrupt callback */
+    XVtc_CallBack LockCallBack;	                            /*!< Callback for Signal Lock interrupt */
+    void *LockRef;			                                /*!< To be passed to the Signal Lock interrupt callback */
 
-	XVtc_CallBack DetectorCallBack;	                        /**< Callback for Detector interrupt */
-	void *DetectorRef;		                                /**< To be passed to the Detector interrupt callback */
+    XVtc_CallBack DetectorCallBack;	                        /*!< Callback for Detector interrupt */
+    void *DetectorRef;		                                /*!< To be passed to the Detector interrupt callback */
 
-	XVtc_CallBack GeneratorCallBack;	                    /**< Callback for Generator interrupt */
-	void *GeneratorRef;		                                /**< To be passed to the Generator interrupt callback */
+    XVtc_CallBack GeneratorCallBack;	                    /*!< Callback for Generator interrupt */
+    void *GeneratorRef;		                                /*!< To be passed to the Generator interrupt callback */
 
-	XVtc_ErrorCallBack ErrCallBack;	                        /**< Callback for Error interrupt */
-	void *ErrRef;			                                /**< To be passed to the Error interrupt callback */
+    XVtc_ErrorCallBack ErrCallBack;	                        /*!< Callback for Error interrupt */
+    void *ErrRef;			                                /*!< To be passed to the Error interrupt callback */
 
 } XVtc;
 
 typedef struct 
 {
-	kuint32_t dynClkAddr; 				                    /*!< Physical Base address of the dynclk core */
-	XAxiVdma *vdma; 				                        /*!< VDMA driver struct */
-	XAxiVdma_DmaSetup vdmaConfig;                           /*!< VDMA channel configuration */
-	XVtc vtc; 					                            /*!< VTC driver struct */
-	VideoMode vMode; 				                        /*!< Current video mode */
-	kuint8_t *framePtr[DISPLAY_NUM_FRAMES];                 /*!< Array of pointers to the frame buffers */
-	kuint32_t stride; 					                    /*!< The line stride of the frame buffers, in bytes */
-	kfloat_t pxlFreq; 				                        /*!< Frequency of clock currently being generated, maybe not exactly with vMode.freq */
-	kuint32_t curFrame; 					                /*!< Current frame being displayed */
-	DisplayState state; 			                        /*!< Indicates if the Display is currently running */
+    kuint32_t dynClkAddr; 				                    /*!< Physical Base address of the dynclk core */
+    XAxiVdma *vdma; 				                        /*!< VDMA driver struct */
+    XAxiVdma_DmaSetup vdmaConfig;                           /*!< VDMA channel configuration */
+    XVtc vtc; 					                            /*!< VTC driver struct */
+    VideoMode vMode; 				                        /*!< Current video mode */
+    kuint8_t *framePtr[DISPLAY_NUM_FRAMES];                 /*!< Array of pointers to the frame buffers */
+    kuint32_t stride; 					                    /*!< The line stride of the frame buffers, in bytes */
+    kfloat_t pxlFreq; 				                        /*!< Frequency of clock currently being generated, maybe not exactly with vMode.freq */
+    kuint32_t curFrame; 					                /*!< Current frame being displayed */
+    DisplayState state; 			                        /*!< Indicates if the Display is currently running */
 
 } DisplayCtrl;
 
@@ -1311,6 +1536,17 @@ extern void XScuTimer_DisableInterrupt(XScuTimer *sptr_scutimer);
 extern kuint32_t XScuTimer_GetInterruptStatus(XScuTimer *sptr_scutimer);
 extern void XScuTimer_ClearInterruptStatus(XScuTimer *sptr_scutimer);
 
+/*!< Ttc (Timer) */
+extern XTtcPs_Config *XTtcPs_LookupConfig(kuint16_t DeviceId);
+extern kint32_t XTtcPs_CfgInitialize(XTtcPs *sptr_ttc, XTtcPs_Config *sptr_cfg, kuint32_t EffectiveAddr);
+extern void XTtcPs_SetMatchValue(XTtcPs *sptr_ttc, kuint8_t MatchIndex, XMatchRegValue Value);
+extern XMatchRegValue XTtcPs_GetMatchValue(XTtcPs *sptr_ttc, kuint8_t MatchIndex);
+extern void XTtcPs_SetPrescaler(XTtcPs *sptr_ttc, kuint8_t PrescalerValue);
+extern kuint8_t XTtcPs_GetPrescaler(XTtcPs *sptr_ttc);
+extern void XTtcPs_CalcIntervalFromFreq(XTtcPs *sptr_ttc, kuint32_t Freq, XInterval *Interval, kuint8_t *Prescaler);
+extern kint32_t XTtcPs_SetOptions(XTtcPs *sptr_ttc, kuint32_t Options);
+extern kuint32_t XTtcPs_GetOptions(XTtcPs *sptr_ttc);
+
 /*!< Uart */
 extern XUartPs_Config *XUartPs_LookupConfig(kuint16_t DeviceId);
 extern void XUartPs_EnableUart(XUartPs *sptr_uart);
@@ -1346,9 +1582,6 @@ extern kint32_t DisplayInitialize(DisplayCtrl *sptr_disp, XAxiVdma *sptr_vdma, k
 extern kint32_t DisplayChangeFrameBuffer(DisplayCtrl *sptr_disp, kuint32_t FrameAddr, kusize_t FrameSize);
 extern kint32_t DisplayStart(DisplayCtrl *sptr_disp);
 extern kint32_t DisplayStop(DisplayCtrl *sptr_dispctrl);
-
-/*!< EmacPs */
-
 
 #ifdef __cplusplus
     }

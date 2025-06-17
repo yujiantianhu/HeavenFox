@@ -24,6 +24,7 @@
 
 /*!< The functions */
 extern void schedule_timeout(kutime_t count);
+extern void schedule_ktimeout(kutime_t tick);
 
 extern kuint32_t sleep(kuint32_t seconds);
 extern kuint32_t msleep(kuint32_t milseconds);

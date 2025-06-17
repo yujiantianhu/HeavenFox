@@ -64,10 +64,21 @@ typedef struct at24cxx_drv_info
  */
 static kint32_t at24cxx_write_eeprom(struct at24cxx_drv_info *sptr_info, kuint8_t *buffer, kssize_t size)
 {
-    struct fwk_i2c_msg sgtc_msgs = {};
+#if 0
+    kint32_t retval = ER_NORMAL;
 
-    /*!< keep a certain interval between two writes */
-    msleep(100);
+    for (kint32_t index = 1; index < size; index++)
+    {
+        retval = fwk_i2c_write_byte_data(sptr_info->sptr_client, 
+                                (*buffer) + index - 1, *(buffer + index));
+        if (retval < 0)
+            break;
+    }
+
+    return retval;
+
+#else
+    struct fwk_i2c_msg sgtc_msgs = {};
 
     sgtc_msgs.addr = sptr_info->sptr_client->addr;
     sgtc_msgs.flags = 0;
@@ -75,6 +86,8 @@ static kint32_t at24cxx_write_eeprom(struct at24cxx_drv_info *sptr_info, kuint8_
     sgtc_msgs.len = size;
 
     return fwk_i2c_transfer(sptr_info->sptr_client, &sgtc_msgs, 1);
+
+#endif
 }
 
 /*!
@@ -85,6 +98,21 @@ static kint32_t at24cxx_write_eeprom(struct at24cxx_drv_info *sptr_info, kuint8_
  */
 static kint32_t at24cxx_read_eeprom(struct at24cxx_drv_info *sptr_info, kuint8_t *buffer, kssize_t size)
 {
+#if 0
+    kint32_t retval = ER_NORMAL;
+
+    for (kint32_t index = 1; index < size; index++)
+    {
+        retval = fwk_i2c_read_byte_data(sptr_info->sptr_client, (*buffer) + index - 1);
+        if (retval < 0)
+            break;
+
+        *(buffer + index) = (kuint8_t)retval;
+    }
+
+    return retval;
+
+#else
     struct fwk_i2c_msg sgtc_msgs[2] = {};
 
     sgtc_msgs[0].addr = sptr_info->sptr_client->addr;
@@ -98,6 +126,8 @@ static kint32_t at24cxx_read_eeprom(struct at24cxx_drv_info *sptr_info, kuint8_t
     sgtc_msgs[1].len = size - 1;
 
     return fwk_i2c_transfer(sptr_info->sptr_client, &sgtc_msgs[0], ARRAY_SIZE(sgtc_msgs));
+
+#endif
 }
 
 /*!

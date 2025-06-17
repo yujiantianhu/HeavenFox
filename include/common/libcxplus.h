@@ -474,7 +474,7 @@ public:
 
     ostream &operator<<(kuint32_t i)
     {
-        printk("%d", i);
+        printk("%u", i);
         return *this;
     }
 

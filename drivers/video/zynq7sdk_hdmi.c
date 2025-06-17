@@ -91,7 +91,9 @@ static kint32_t xsdk_hdmi_init(void *base, struct xsdk_hdmi_drv *sptr_drv)
         return retval;
 
     sprintk(sgtc_vmode.label, "hdmi %dx%d@60Hz", sptr_var->xres, sptr_var->yres);
-    sgtc_vmode.freq = ((kfloat_t)(sptr_var->pixclock / 1000)) / 1000.0;
+
+    /*!< Convert to MHz */
+    sgtc_vmode.freq = (kfloat_t)(FB_PICOS_2_KHZ(sptr_var->pixclock)) / 1000.0;
     
     sgtc_vmode.width = sptr_var->xres;
     sgtc_vmode.height = sptr_var->yres;
@@ -376,6 +378,9 @@ static kint32_t xsdk_hdmi_driver_probe_timings(struct fwk_platdev *sptr_pdev)
 
     if (retval)
         return -ER_NOTFOUND;
+
+    /*!< Convert to ps */
+    sptr_var->pixclock = FB_KHZ_2_PICOS(sptr_var->pixclock / 1000);
 
     retval = fwk_of_property_read_string(sptr_node, "xlnx,pixel-format", &format);
     if (retval || (!format))

@@ -80,8 +80,8 @@ kint32_t network_task_init(void)
     if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cptr_task->get_self(), "network-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->self_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->self_id(), "network-task-mailbox");
 
     return ER_NORMAL;
 }

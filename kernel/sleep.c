@@ -16,7 +16,15 @@
 #include <kernel/spinlock.h>
 
 /*!< The defines */
+struct ktime_event
+{
+    struct thread *sptr_cur;
+    struct timer_list sgtc_tmf;
+    struct timer_list sgtc_tmr;
 
+    kutime_t remain_tick;
+    kutime_t jiffies_cnt;
+};
 
 /*!< The functions */
 
@@ -161,6 +169,72 @@ kint32_t usleep(kuint32_t useconds)
     }
 
     return (kint32_t)count;
+}
+
+/*!
+ * @brief   timeout callback in jiffies IRQ
+ * @param   args: struct ktime_event *
+ * @retval  none
+ * @note    unused!!!
+ */
+static void thread_ktimeout_f(kuint32_t args)
+{
+    struct ktime_event *sptr_tv;
+    kutime_t cur_tick;
+
+    sptr_tv = (struct ktime_event *)args;
+    cur_tick = ktime_systick();
+
+    if (sptr_tv->remain_tick <= cur_tick)
+        thread_sleep_timeout((kuint32_t)sptr_tv->sptr_cur);
+    else
+    {
+        mod_htimer(&sptr_tv->sgtc_tmr, sptr_tv->remain_tick);
+        sptr_tv->remain_tick = 0;
+        sptr_tv->sgtc_tmr.expires = (JIFFIES_MAX + 1);
+    }    
+}
+
+/*!
+ * @brief   timeout callback with high time tick
+ * @param   tick: interval
+ * @retval  none
+ * @note    unused!!!
+ */
+void schedule_ktimeout(kutime_t tick)
+{    
+    struct ktime_event sgtc_tv;
+    struct thread *sptr_cur = mr_current;
+    kutime_t jiffies_tick = SYSTICK_FREQ / TICK_HZ;
+    kutime_t cur_tick, jiffies_cnt;
+
+    /*!< Scheduling will cast 10tick */
+    if (tick < 10)
+        schedule_thread();
+
+    sgtc_tv.sptr_cur = sptr_cur;
+
+    setup_timer(&sgtc_tv.sgtc_tmf, thread_ktimeout_f, (kuint32_t)&sgtc_tv);
+    setup_htimer(&sgtc_tv.sgtc_tmr, thread_sleep_timeout, (kuint32_t)sptr_cur);
+
+    cur_tick = ktime_systick();
+    jiffies_cnt = (cur_tick + tick) / jiffies_tick;
+    sgtc_tv.remain_tick = (cur_tick + tick) - (jiffies_cnt * jiffies_tick);
+
+    /*!< suspend current thread, and schedule others */
+    spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    __SET_THREAD_STATE(sptr_cur, NR_THREAD_SUSPEND);
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
+
+    if (jiffies_cnt)
+        mod_timer(&sgtc_tv.sgtc_tmf, jiffies + jiffies_cnt);
+    else
+        mod_htimer(&sgtc_tv.sgtc_tmr, cur_tick + tick);
+
+    schedule_thread();
+
+    del_htimer(&sgtc_tv.sgtc_tmf);
+    del_htimer(&sgtc_tv.sgtc_tmr);
 }
 
 /*!< end of file */

@@ -225,6 +225,8 @@ static void imx_fbdev_init(void *base, struct imx_fbdev_drv *sptr_drv)
     mr_writel(sptr_fix->smem_start, &sptr_lcdif->CUR_BUF);
     /*!< NEXT_BUF: Address of the next frame that will be transmitted by eLCDIF */
     mr_writel(sptr_fix->smem_start, &sptr_lcdif->NEXT_BUF);
+
+    sleep(1);
 }
 
 /*!
@@ -626,6 +628,12 @@ static kint32_t imx_fbdev_driver_probe_timings(struct fwk_platdev *sptr_pdev)
 
     if (retval < 0)
         goto fail;
+
+    /*!< Convert to ps */
+    sptr_var->pixclock = FB_KHZ_2_PICOS(sptr_var->pixclock / 1000);
+
+    if (sptr_var->bits_per_pixel == 24)
+        sptr_var->bits_per_pixel = 32;
 
     if (fwk_of_find_property(sptr_disp, "hdmi-endpoint", mr_nullptr))
         sptr_drv->interface_type = NR_IMX_FBDEV_HDMI;

@@ -32,11 +32,27 @@ extern volatile kutime_t jiffies;
 extern volatile kutime_t jiffies_out;
 
 extern volatile kutime_t *ptr_systick_counter;
+extern kutime_t g_systick_freq;
+extern kbool_t g_is_systick_up;
+
 extern kutime_t g_delay_timer_counter;
 
 /*!< The defines */
 #define TICK_HZ                                             CONFIG_HZ
+
+/*!< per tick period = (1 / SYSTICK_FREQ) */
+#define SYSTICK_FREQ                                        (g_systick_freq)
 #define SYSTICK_CNT()                                       (ptr_systick_counter ? (*ptr_systick_counter) : 0)
+#define IS_SYSTICK_UPINC()                                  (g_is_systick_up)
+
+#define SEC_TO_SYSTICK(sec)                                 ( (sec ) * SYSTICK_FREQ)
+#define MSEC_TO_SYSTICK(msec)                               (((msec) * SYSTICK_FREQ + 999UL) / 1000UL)
+#define USEC_TO_SYSTICK(usec)                               (((usec) * SYSTICK_FREQ + 999999UL) / 1000000UL)
+#define NSEC_TO_SYSTICK(nsec)                               (((nsec) * SYSTICK_FREQ + 999999999UL) / 1000000000UL)
+#define SYSTICK_TO_SEC(tick)                                ( (tick) / SYSTICK_FREQ)
+#define SYSTICK_TO_MSEC(tick)                               (((tick) * 1000UL) / SYSTICK_FREQ)
+#define SYSTICK_TO_USEC(tick)                               (((tick) * 1000000UL) / SYSTICK_FREQ)
+#define SYSTICK_TO_NSEC(tick)                               (((tick) * 1000000000UL) / SYSTICK_FREQ)
 
 #define JIFFIES_MAX                                         (0x7fffffffU)
 #define JIFFIES_BORDER                                      (JIFFIES_MAX - 1)
@@ -140,19 +156,16 @@ extern kbool_t find_timer(struct timer_list *sptr_timer);
 extern void mod_timer(struct timer_list *sptr_timer, kutime_t expires);
 extern void do_timer_event(void);
 
-/*!< API functions */
-/*!
- * @brief   Read systick (unit: ns)
- * @param   none
- * @retval  tick (ns)
- * @note    get the time register's current value
- */
-static inline kutime_t ktime_systick(void)
-{
-    volatile kutime_t *time_cnt = ptr_systick_counter;
-    return time_cnt ? (*time_cnt) : 0;
-}
+extern void setup_htimer(struct timer_list *sptr_timer, void (*entry)(kuint32_t), kuint32_t data);
+extern void add_htimer(struct timer_list *sptr_timer);
+extern void del_htimer(struct timer_list *sptr_timer);
+extern void mod_htimer(struct timer_list *sptr_timer, kutime_t expires);
+extern void do_htick_event(void);
 
+extern kutime_t ktime_systick(void);
+extern void systime_init(void);
+
+/*!< API functions */
 /*!
  * @brief   jiffies increment
  * @param   none

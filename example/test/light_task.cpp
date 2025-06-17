@@ -46,9 +46,9 @@ static void *light_task_entry(void *args)
     crt_task_t *cptr_this = (crt_task_t *)args;
     kbool_t status = 0;
     kint32_t fd;
-    struct mailbox &sgtc_mb = cptr_this->get_mailbox();
+    struct mailbox &sgtc_mb = cptr_this->self_mailbox();
     struct mail *sptr_mail;
-    tid_t tid = cptr_this->get_self();
+    tid_t tid = cptr_this->self_id();
     
     cout << __FUNCTION__ << " is running, which tid is: " << tid << endl;
 
@@ -102,8 +102,8 @@ kint32_t light_task_init(void)
     if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cptr_task->get_self(), "light-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->self_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->self_id(), "light-task-mailbox");
 
     return ER_NORMAL;
 }

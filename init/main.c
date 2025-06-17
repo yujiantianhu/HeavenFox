@@ -119,6 +119,7 @@ void start_kernel(void)
     initIRQ();
 
     /*!< systick init */
+    systime_init();
     board_init_systick();
 
     /*!< file system */

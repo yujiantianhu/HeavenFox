@@ -567,10 +567,10 @@ inout
 <B>MIO 18</B>
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-GPIO
+Timer 0
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-gpio[18]
+wave_out
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
 LVCMOS 1.8V
@@ -582,7 +582,7 @@ slow
 enabled
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-inout
+out
 </TD>
 </TR>
 <TR valign="top">
@@ -590,10 +590,10 @@ inout
 <B>MIO 19</B>
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-GPIO
+Timer 0
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-gpio[19]
+clk_in
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
 LVCMOS 1.8V
@@ -605,7 +605,7 @@ slow
 enabled
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-inout
+in
 </TD>
 </TR>
 <TR valign="top">
@@ -1857,6 +1857,39 @@ IO PLL
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
 100.000000
+</TD>
+</TR>
+<TR valign="top">
+<TD width=10% BGCOLOR=#FBF5EF>
+<B>TTC0 CLK0 Freq (MHz)</B>
+</TD>
+<TD width=10% BGCOLOR=#FBF5EF>
+CPU_1X
+</TD>
+<TD width=10% BGCOLOR=#FBF5EF>
+111.111115
+</TD>
+</TR>
+<TR valign="top">
+<TD width=10% BGCOLOR=#FBF5EF>
+<B>TTC0 CLK1 Freq (MHz)</B>
+</TD>
+<TD width=10% BGCOLOR=#FBF5EF>
+CPU_1X
+</TD>
+<TD width=10% BGCOLOR=#FBF5EF>
+111.111115
+</TD>
+</TR>
+<TR valign="top">
+<TD width=10% BGCOLOR=#FBF5EF>
+<B>TTC0 CLK2 Freq (MHz)</B>
+</TD>
+<TD width=10% BGCOLOR=#FBF5EF>
+CPU_1X
+</TD>
+<TD width=10% BGCOLOR=#FBF5EF>
+111.111115
 </TD>
 </TR>
 <TR valign="top">
@@ -34249,10 +34282,10 @@ SLCR_LOCK
 <B>e0</B>
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>6</B>
 </TD>
 <TD width=15% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>c0</B>
 </TD>
 <TD width=35% BGCOLOR=#FBF5EF>
 <B>Level 3 Mux Select 000: GPIO 18 (bank 0), Input/Output 001: CAN 0 Rx, Input 010: I2C 0 Serial Clock, Input/Ouput 011: reserved 100: SDIO 0 IO Bit 0, Input/Output 101: SPI 0 Slave Select 0, Input/Output 110: TTC 0 Wave, Output 111: UART 0 RxD, Input</B>
@@ -34352,7 +34385,7 @@ SLCR_LOCK
 <B></B>
 </TD>
 <TD width=15% BGCOLOR=#C0C0C0>
-<B>1200</B>
+<B>12c0</B>
 </TD>
 <TD width=35% BGCOLOR=#C0C0C0>
 <B>MIO Pin 18 Control</B>
@@ -34436,10 +34469,10 @@ SLCR_LOCK
 <B>1</B>
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>1</B>
 </TD>
 <TD width=15% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>1</B>
 </TD>
 <TD width=35% BGCOLOR=#FBF5EF>
 <B>Operates the same as MIO_PIN_00[TRI_ENABLE]</B>
@@ -34516,10 +34549,10 @@ SLCR_LOCK
 <B>e0</B>
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>6</B>
 </TD>
 <TD width=15% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>c0</B>
 </TD>
 <TD width=35% BGCOLOR=#FBF5EF>
 <B>Level 3 Mux Select 000: GPIO 19 (bank 0), Input/Output 001: CAN 0 Tx, Output 010: I2C 0 Serial Data, Input/Output 011: reserved 100: SDIO 0 IO Bit 1, Input/Output 101: SPI 0 Slave Select 1, Output 110: TTC 0 Clock, Input 111: UART 0 TxD, Output</B>
@@ -34619,7 +34652,7 @@ SLCR_LOCK
 <B></B>
 </TD>
 <TD width=15% BGCOLOR=#C0C0C0>
-<B>1200</B>
+<B>12c1</B>
 </TD>
 <TD width=35% BGCOLOR=#C0C0C0>
 <B>MIO Pin 19 Control</B>
@@ -81556,10 +81589,10 @@ SLCR_LOCK
 <B>e0</B>
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>6</B>
 </TD>
 <TD width=15% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>c0</B>
 </TD>
 <TD width=35% BGCOLOR=#FBF5EF>
 <B>Level 3 Mux Select 000: GPIO 18 (bank 0) 001: CAN 0 Rx 010: I2C 0 Serial Clock 011: reserved 100: SDIO 0 IO Bit 0 101: SPI 0 Slave Select 0 110: TTC 0 Wave Out 111: UART 0 RxD</B>
@@ -81659,7 +81692,7 @@ SLCR_LOCK
 <B></B>
 </TD>
 <TD width=15% BGCOLOR=#C0C0C0>
-<B>1200</B>
+<B>12c0</B>
 </TD>
 <TD width=35% BGCOLOR=#C0C0C0>
 <B>MIO Pin 18 Control</B>
@@ -81743,10 +81776,10 @@ SLCR_LOCK
 <B>1</B>
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>1</B>
 </TD>
 <TD width=15% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>1</B>
 </TD>
 <TD width=35% BGCOLOR=#FBF5EF>
 <B>Operates the same as MIO_PIN_00[TRI_ENABLE]</B>
@@ -81823,10 +81856,10 @@ SLCR_LOCK
 <B>e0</B>
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>6</B>
 </TD>
 <TD width=15% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>c0</B>
 </TD>
 <TD width=35% BGCOLOR=#FBF5EF>
 <B>Level 3 Mux Select 000: GPIO 19 (bank 0) 001: CAN 0 Tx 010: I2C 0 Serial Data 011: reserved 100: SDIO 0 IO Bit 1 101: SPI 0 Slave Select 1 Output 110: TTC 0 Clock Input 111: UART 0 TxD</B>
@@ -81926,7 +81959,7 @@ SLCR_LOCK
 <B></B>
 </TD>
 <TD width=15% BGCOLOR=#C0C0C0>
-<B>1200</B>
+<B>12c1</B>
 </TD>
 <TD width=35% BGCOLOR=#C0C0C0>
 <B>MIO Pin 19 Control</B>
@@ -128224,10 +128257,10 @@ SLCR_LOCK
 <B>e0</B>
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>6</B>
 </TD>
 <TD width=15% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>c0</B>
 </TD>
 <TD width=35% BGCOLOR=#FBF5EF>
 <B>Level 3 Mux Select 0= gpio0, Input, gpio_0_pin_in[18]- (GPIO bank 0) 0= gpio0, Output, gpio_0_pin_out[18]- (GPIO bank 0) 1= can0, Input, can0_phy_rx- (Can RX signal) 2= i2c0, Input, i2c0_scl_input- (SCL signal) 2= i2c0, Output, i2c0_scl_out- (SCL signal) 3= Not Used 4= sd0, Input, sd0_data_in[0]- (4-bit Data bus) 4= sd0, Output, sd0_data_out[0]- (4-bit Data bus) 5= spi0, Input, spi0_n_ss_in- (SPI Master Selects) 5= spi0, Output, spi0_n_ss_out[0]- (SPI Master Selects) 6= ttc0, Output, ttc0_wave_out- (TTC waveform clock) 7= ua0, Input, ua0_rxd- (UART receiver serial input)</B>
@@ -128327,7 +128360,7 @@ SLCR_LOCK
 <B></B>
 </TD>
 <TD width=15% BGCOLOR=#C0C0C0>
-<B>1200</B>
+<B>12c0</B>
 </TD>
 <TD width=35% BGCOLOR=#C0C0C0>
 <B>MIO Control for Pin 18</B>
@@ -128411,10 +128444,10 @@ SLCR_LOCK
 <B>1</B>
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>1</B>
 </TD>
 <TD width=15% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>1</B>
 </TD>
 <TD width=35% BGCOLOR=#FBF5EF>
 <B>Tri-state enable, active high.</B>
@@ -128491,10 +128524,10 @@ SLCR_LOCK
 <B>e0</B>
 </TD>
 <TD width=10% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>6</B>
 </TD>
 <TD width=15% BGCOLOR=#FBF5EF>
-<B>0</B>
+<B>c0</B>
 </TD>
 <TD width=35% BGCOLOR=#FBF5EF>
 <B>Level 3 Mux Select 0= gpio0, Input, gpio_0_pin_in[19]- (GPIO bank 0) 0= gpio0, Output, gpio_0_pin_out[19]- (GPIO bank 0) 1= can0, Output, can0_phy_tx- (Can TX signal) 2= i2c0, Input, i2c0_sda_input- (SDA signal) 2= i2c0, Output, i2c0_sda_out- (SDA signal) 3= Not Used 4= sd0, Input, sd0_data_in[1]- (4-bit Data bus) 4= sd0, Output, sd0_data_out[1]- (4-bit Data bus) 5= spi0, Output, spi0_n_ss_out[1]- (SPI Master Selects) 6= ttc0, Input, ttc0_clk_in- (TTC input clock) 7= ua0, Output, ua0_txd- (UART transmitter serial output)</B>
@@ -128594,7 +128627,7 @@ SLCR_LOCK
 <B></B>
 </TD>
 <TD width=15% BGCOLOR=#C0C0C0>
-<B>1200</B>
+<B>12c1</B>
 </TD>
 <TD width=35% BGCOLOR=#C0C0C0>
 <B>MIO Control for Pin 19</B>

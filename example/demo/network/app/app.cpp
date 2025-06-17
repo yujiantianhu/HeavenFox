@@ -99,7 +99,7 @@ void crt_lwip_data_t::excute(void)
     fwk_socklen_t addrlen;
     kssize_t len;
     crt_task_t *cptr_this = (crt_task_t *)this->args;
-    struct mailbox &sgtc_mb = cptr_this->get_mailbox();
+    struct mailbox &sgtc_mb = cptr_this->self_mailbox();
     struct mail *sptr_mail;
 
     if (this->fd < 0)

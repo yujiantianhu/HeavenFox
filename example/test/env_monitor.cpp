@@ -44,7 +44,10 @@ using namespace bsc;
  */
 static void *env_monitor_entry(void *args)
 {
-    kint32_t fd, eep_fd;
+    crt_task_t *cptr_this = (crt_task_t *)args;
+    kint32_t fd;
+    struct mailbox &sgtc_mb = cptr_this->self_mailbox();
+    struct mail *sptr_mail;
     kuint32_t info[3] = {};
     struct fwk_eeprom sgtc_eep;
     kssize_t retval;
@@ -57,7 +60,7 @@ static void *env_monitor_entry(void *args)
 
     } while (fd < 0);
 
-    sgtc_eep.addr = 0x26;
+    sgtc_eep.addr = 0x2d;
     sgtc_eep.offset = 0;
     sgtc_eep.buf = (kuint8_t *)&info[0];
     sgtc_eep.size = sizeof(info);
@@ -68,34 +71,63 @@ static void *env_monitor_entry(void *args)
         if (retval < 0)
             goto END;
 
-        eep_fd = virt_open("/dev/at24c02", O_RDWR);
-        if (eep_fd < 0)
+        /*!< Choose if show info */
+        sptr_mail = mail_recv(&sgtc_mb, 0);
+        if (!isValid(sptr_mail))
             goto END;
 
-        retval = virt_ioctl(eep_fd, FWK_EEPROM_WRITE, &sgtc_eep);
-        if (retval < 0)
+        if (sptr_mail->sptr_msg->type == NR_MAIL_TYPE_SERIAL)
         {
-            virt_close(eep_fd);
-            goto END;
+            kchar_t *buffer = (kchar_t *)sptr_mail->sptr_msg[0].buffer;
+
+            if (!string::strncmp(buffer, "info", 4))
+            {
+                cout << cptr_this->self_name()
+                    << ": ir: "    << info[0] 
+                    << ", als: "   << info[1] 
+                    << ", ps: "    << info[2] 
+                    << endl;
+            }
+            else if (!string::strncmp(buffer, "sync", 4))
+            {
+                kint32_t eep_fd;
+
+                eep_fd = virt_open("/dev/at24c02", O_RDWR);
+                if (eep_fd < 0)
+                    goto fini;
+
+                cout << "Write enviromental data to EEPROM, waitting ..." << endl;
+
+                retval = virt_ioctl(eep_fd, FWK_EEPROM_WRITE, &sgtc_eep);
+                if (retval < 0)
+                {
+                    virt_close(eep_fd);
+                    cout << "Write enviromental data to EEPROM failed!" << endl;
+                    goto fini;
+                }
+
+                cout << "Enviromental data has been synchronized to EEPROM" << endl;
+                memset(info, 0, sizeof(info));
+
+                cout << "Read EEPROM ===> " << endl;
+                retval = virt_ioctl(eep_fd, FWK_EEPROM_READ, &sgtc_eep);
+                if (retval < 0)
+                {
+                    virt_close(eep_fd);
+                    cout << "Read enviromental data from EEPROM failed!" << endl;
+                    goto fini;
+                }
+
+                virt_close(eep_fd);
+
+                cout << "   ir : " << info[0] << endl;
+                cout << "   als: " << info[1] << endl;
+                cout << "   ps : " << info[2] << endl;
+            }
         }
 
-        memset(info, 0, sizeof(info));
-        retval = virt_ioctl(eep_fd, FWK_EEPROM_READ, &sgtc_eep);
-        if (retval < 0)
-        {
-            virt_close(eep_fd);
-            goto END;
-        }
-
-#if 0
-        cout << __FUNCTION__ 
-             << ": ir: "    << info[0] 
-             << ", als: "   << info[1] 
-             << ", ps: "    << info[2] 
-             << endl;
-#endif
-        
-        virt_close(eep_fd);
+fini:
+        mail_recv_finish(sptr_mail);
         
 END:
         msleep(200);
@@ -122,8 +154,8 @@ kint32_t env_monitor_init(void)
     if (!cptr_task)
         return -ER_FAILD;
 
-    struct mailbox &sgtc_mb = cptr_task->get_mailbox();
-    mailbox_init(&sgtc_mb, cptr_task->get_self(), "env_monitor-task-mailbox");
+    struct mailbox &sgtc_mb = cptr_task->self_mailbox();
+    mailbox_init(&sgtc_mb, cptr_task->self_id(), "env_monitor-task-mailbox");
 
     return ER_NORMAL;
 }

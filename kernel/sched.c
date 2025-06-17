@@ -148,6 +148,34 @@ void thread_set_self_name(const kchar_t *name)
 }
 
 /*!
+ * @brief	get thread'name
+ * @param  	tid: thread id
+ * @retval 	name
+ * @note   	none
+ */
+kchar_t *thread_get_name(tid_t tid)
+{
+    struct thread *sptr_thread;
+
+    sptr_thread = SCHED_THREAD_HANDLER(tid);
+    return sptr_thread->name;
+}
+
+/*!
+ * @brief	get current thread'name
+ * @param  	none
+ * @retval 	name
+ * @note   	none
+ */
+kchar_t *thread_get_self_name(void)
+{
+    struct thread *sptr_work;
+
+    sptr_work = SCHED_RUNNING_THREAD;
+    return sptr_work->name;
+}
+
+/*!
  * @brief	set state to thread
  * @param  	sptr_thread: name handler
  * @retval 	none
@@ -1166,6 +1194,15 @@ fail:
 void schedule_thread(void)
 {
     struct scheduler_context *sptr_context;
+
+    /*!< Not allow called by IRQ */
+    if (mr_unlikely(IS_IN_INTERRUPT()))
+    {
+        __SYNC_THREAD_STATE(mr_current, NR_THREAD_RUNNING);
+        mr_warn(false);
+
+        return;
+    }
 
     mr_preempt_disable();
 

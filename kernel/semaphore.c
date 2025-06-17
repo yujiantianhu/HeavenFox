@@ -42,13 +42,20 @@ void sema_init(struct semaphore *sptr_sem, kuint32_t val)
  */
 void sema_down(struct semaphore *sptr_sem)
 {
+    kutype_t flags;
+
     if (!mr_current)
         return;
 
+    local_irq_save(&flags);
     while (sema_is_locked(sptr_sem))
+    {
+        local_irq_restore(&flags);
         schedule_thread();
+    }
     
     atomic_dec(&sptr_sem->sgtc_atc);
+    local_irq_restore(&flags);
 }
 
 /*!
@@ -59,13 +66,20 @@ void sema_down(struct semaphore *sptr_sem)
  */
 kint32_t sema_down_try_lock(struct semaphore *sptr_sem)
 {
+    kutype_t flags;
+    
     if (!mr_current)
         return -ER_FORBID;
 
+    local_irq_save(&flags);
     if (sema_is_locked(sptr_sem))
+    {
+        local_irq_restore(&flags);
         return -ER_BUSY;
+    }
     
     atomic_dec(&sptr_sem->sgtc_atc);
+    local_irq_restore(&flags);
 
     return ER_NORMAL;
 }
@@ -78,10 +92,17 @@ kint32_t sema_down_try_lock(struct semaphore *sptr_sem)
  */
 void sema_up(struct semaphore *sptr_sem)
 {
+    kutype_t flags;
+
+    local_irq_save(&flags);
     if (!mr_current || !sema_is_locked(sptr_sem))
+    {
+        local_irq_restore(&flags);
         return;
+    }
     
     atomic_inc(&sptr_sem->sgtc_atc);
+    local_irq_restore(&flags);
 }
 
 /*!< end of file */

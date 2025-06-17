@@ -26,11 +26,30 @@ static XGpioPs_Config sgtc_xgpio_ps_config_table[XPAR_XGPIOPS_NUM_INSTANCES] =
     }
 };
 
-static XScuTimer_Config XScuTimer_ConfigTable[XPAR_XSCUTIMER_NUM_INSTANCES] =
+static XScuTimer_Config sgtc_xscutimer_config_table[XPAR_XSCUTIMER_NUM_INSTANCES] =
 {
     {
         XPAR_PS7_SCUTIMER_0_DEVICE_ID,
         XPAR_PS7_SCUTIMER_0_BASEADDR
+    }
+};
+
+static XTtcPs_Config sgtc_xttcps_config_table[XPAR_XTTCPS_NUM_INSTANCES] =
+{
+    {
+        XPAR_PS7_TTC_0_DEVICE_ID,
+        XPAR_PS7_TTC_0_BASEADDR,
+        XPAR_PS7_TTC_0_TTC_CLK_FREQ_HZ
+    },
+    {
+        XPAR_PS7_TTC_1_DEVICE_ID,
+        XPAR_PS7_TTC_1_BASEADDR,
+        XPAR_PS7_TTC_1_TTC_CLK_FREQ_HZ
+    },
+    {
+        XPAR_PS7_TTC_2_DEVICE_ID,
+        XPAR_PS7_TTC_2_BASEADDR,
+        XPAR_PS7_TTC_2_TTC_CLK_FREQ_HZ
     }
 };
 
@@ -60,11 +79,23 @@ static XSdPs_Config sgtc_xsd_ps_config_table[XPAR_XSDPS_NUM_INSTANCES] =
 };
 
 /*!< API functions */
+/*!
+ * @brief   Sync L2 Cache
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 void Xil_L2CacheSync(void)
 {
     XSdPs_WriteReg(XPS_L2CC_BASEADDR, XPS_L2CC_CACHE_SYNC_OFFSET, 0x0U);
 }
 
+/*!
+ * @brief   Flush L1 Cache
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 void Xil_L1DCacheFlushLine(kuaddr_t adr)
 {
     kuint32_t cache_val = 0U;
@@ -78,11 +109,23 @@ void Xil_L1DCacheFlushLine(kuaddr_t adr)
     mr_dsb();
 }
 
+/*!
+ * @brief   L2 Write Debug Ctrl
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 void Xil_L2WriteDebugCtrl(kuint32_t Value)
 {
     XSdPs_WriteReg(XPS_L2CC_BASEADDR, XPS_L2CC_DEBUG_CTRL_OFFSET, Value);
 }
 
+/*!
+ * @brief   Flush L2 Cache
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 void Xil_L2CacheFlushLine(kuaddr_t adr)
 {
     XSdPs_WriteReg(XPS_L2CC_BASEADDR, XPS_L2CC_CACHE_CLEAN_PA_OFFSET, adr);
@@ -92,6 +135,12 @@ void Xil_L2CacheFlushLine(kuaddr_t adr)
     mr_dsb();
 }
 
+/*!
+ * @brief   Flush D-Cache
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 void Xil_DCacheFlushRange(kuaddr_t adr, kuint32_t len)
 {
     kuint32_t LocalAddr = adr;
@@ -133,6 +182,12 @@ void Xil_DCacheFlushRange(kuaddr_t adr, kuint32_t len)
     __set_cpsr(currmask);
 }
 
+/*!
+ * @brief   Xil_DCacheInvalidateRange
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
 void Xil_DCacheInvalidateRange(kuaddr_t adr, kuint32_t len)
 {
     const kuint32_t cacheline = 32U;
@@ -524,7 +579,7 @@ kint32_t XGpioPs_WritePin(XGpioPs *sptr_gpio, kuint32_t Pin, kuint32_t Data)
  */
 XScuTimer_Config *XScuTimer_LookupConfig(kuint16_t DeviceId)
 {
-    XScuTimer_Config *sptr_cfg = &XScuTimer_ConfigTable[0];
+    XScuTimer_Config *sptr_cfg = &sgtc_xscutimer_config_table[0];
     kuint32_t idx;
 
     for (idx = 0U; idx < XPAR_XUARTPS_NUM_INSTANCES; idx++) 
@@ -734,6 +789,373 @@ void XScuTimer_ClearInterruptStatus(XScuTimer *sptr_scutimer)
 {
     mr_writel(XSCUTIMER_ISR_EVENT_FLAG_MASK, 
             sptr_scutimer->Config.BaseAddr + XSCUTIMER_ISR_OFFSET);
+}
+
+/*!
+ * @brief   get ttc_timer config structure
+ * @param   DeviceId
+ * @retval  XTtcPs_Config
+ * @note    none
+ */
+XTtcPs_Config *XTtcPs_LookupConfig(kuint16_t DeviceId)
+{
+    XTtcPs_Config *sptr_cfg = &sgtc_xttcps_config_table[0];
+    kuint32_t idx;
+
+    for (idx = 0U; idx < XPAR_XTTCPS_NUM_INSTANCES; idx++) 
+    {
+        if (sptr_cfg[idx].DeviceId == DeviceId) 
+            return sptr_cfg;
+    }
+
+    return mr_nullptr;
+}
+
+/*!
+ * @brief   Ttc Initialization
+ * @param   BaseAddr: address of timer register
+ * @retval  error code
+ * @note    none
+ */
+kint32_t XTtcPs_CfgInitialize(XTtcPs *sptr_ttc, XTtcPs_Config *sptr_cfg, kuint32_t EffectiveAddr)
+{
+    kuint32_t IsStartResult;
+
+    if (!sptr_ttc || !sptr_cfg)
+        return -ER_NULLPTR;
+
+    /*!< Set some default values */
+    sptr_ttc->Config.DeviceId = sptr_cfg->DeviceId;
+    sptr_ttc->Config.BaseAddress = EffectiveAddr;
+    sptr_ttc->Config.InputClockHz = sptr_cfg->InputClockHz;
+
+    IsStartResult = XTtcPs_IsStarted(sptr_ttc);
+
+    /*!
+     * If the timer counter has already started, return an error
+     * Device should be stopped first.
+     */
+    if(IsStartResult == (kuint32_t)true)
+        return -ER_NREADY;
+
+    /*!< stop the timer before configuring */
+    XTtcPs_Stop(sptr_ttc);
+    /*!< Reset the count control register to it's default value. */
+    XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTTCPS_CNT_CNTRL_OFFSET, XTTCPS_CNT_CNTRL_RESET_VALUE);
+
+    /*!< Reset the rest of the registers to the default values. */
+    XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTTCPS_CLK_CNTRL_OFFSET, 0x00U);
+    XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTTCPS_INTERVAL_VAL_OFFSET, 0x00U);
+    XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTTCPS_MATCH_0_OFFSET, 0x00U);
+    XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTTCPS_MATCH_1_OFFSET, 0x00U);
+    XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTTCPS_MATCH_2_OFFSET, 0x00U);
+    XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTTCPS_IER_OFFSET, 0x00U);
+    XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTTCPS_ISR_OFFSET, XTTCPS_IXR_ALL_MASK);
+
+    sptr_ttc->IsReady = true;
+
+    /*!< Reset the counter value */
+    XTtcPs_ResetCounterValue(sptr_ttc);
+
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   Ttc Set Match Value
+ * @param   sptr_ttc: Ttc handler
+ * @retval  none
+ * @note    none
+ */
+void XTtcPs_SetMatchValue(XTtcPs *sptr_ttc, kuint8_t MatchIndex, XMatchRegValue Value)
+{
+    if (!sptr_ttc || 
+        !sptr_ttc->IsReady ||
+        (MatchIndex >= (kuint8_t)XTTCPS_NUM_MATCH_REG))
+        return;
+
+    /*!< Write the value to the correct match register with MatchIndex */
+    XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTtcPs_Match_N_Offset(MatchIndex), Value);
+}
+
+/*!
+ * @brief   Ttc Get Match Value
+ * @param   sptr_ttc: Ttc handler
+ * @retval  none
+ * @note    none
+ */
+XMatchRegValue XTtcPs_GetMatchValue(XTtcPs *sptr_ttc, kuint8_t MatchIndex)
+{
+    kuint32_t MatchReg;
+
+    if (!sptr_ttc || 
+        !sptr_ttc->IsReady ||
+        (MatchIndex >= (kuint8_t)XTTCPS_NUM_MATCH_REG))
+        return -ER_NREADY;
+
+    MatchReg = XTtcPs_ReadReg(sptr_ttc->Config.BaseAddress, XTtcPs_Match_N_Offset(MatchIndex));
+
+    return (XMatchRegValue) MatchReg;
+}
+
+/*!
+ * @brief   Ttc Set Prescaler
+ * @param   sptr_ttc: Ttc handler
+ * @retval  none
+ * @note    none
+ */
+void XTtcPs_SetPrescaler(XTtcPs *sptr_ttc, kuint8_t PrescalerValue)
+{
+    kuint32_t ClockReg;
+
+    if (!sptr_ttc || 
+        !sptr_ttc->IsReady ||
+        (PrescalerValue > XTTCPS_CLK_CNTRL_PS_DISABLE))
+        return;
+
+    /*!< Read the clock control register */
+    ClockReg = XTtcPs_ReadReg(sptr_ttc->Config.BaseAddress, XTTCPS_CLK_CNTRL_OFFSET);
+
+    /*!< Clear all of the prescaler control bits in the register */
+    ClockReg &= ~(XTTCPS_CLK_CNTRL_PS_VAL_MASK | XTTCPS_CLK_CNTRL_PS_EN_MASK);
+
+    if (PrescalerValue < XTTCPS_CLK_CNTRL_PS_DISABLE) 
+    {
+        /*!< Set the prescaler value and enable prescaler */
+        ClockReg |= (kuint32_t)(((kuint32_t)PrescalerValue << (kuint32_t)XTTCPS_CLK_CNTRL_PS_VAL_SHIFT) &
+                    (kuint32_t)XTTCPS_CLK_CNTRL_PS_VAL_MASK);
+        ClockReg |= (kuint32_t)XTTCPS_CLK_CNTRL_PS_EN_MASK;
+    }
+
+    /*!< Write the register with the new values. */
+    XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTTCPS_CLK_CNTRL_OFFSET, ClockReg);
+}
+
+/*!
+ * @brief   Ttc Get Prescaler
+ * @param   sptr_ttc: Ttc handler
+ * @retval  errno
+ * @note    none
+ */
+kuint8_t XTtcPs_GetPrescaler(XTtcPs *sptr_ttc)
+{
+    kuint8_t Status;
+    kuint32_t ClockReg;
+
+    if (!sptr_ttc || 
+        !sptr_ttc->IsReady)
+        return -ER_NREADY;
+
+    /*!< Read the clock control register */
+    ClockReg = XTtcPs_ReadReg(sptr_ttc->Config.BaseAddress, XTTCPS_CLK_CNTRL_OFFSET);
+
+    if (0 == (ClockReg & XTTCPS_CLK_CNTRL_PS_EN_MASK)) 
+    {
+        /*!< Prescaler is disabled. Return the correct flag value */
+        Status = (kuint8_t)XTTCPS_CLK_CNTRL_PS_DISABLE;
+    }
+    else 
+    {
+        Status = (kuint8_t)((ClockReg & (kuint32_t)XTTCPS_CLK_CNTRL_PS_VAL_MASK) >>
+                    (kuint32_t)XTTCPS_CLK_CNTRL_PS_VAL_SHIFT);
+    }
+
+    return Status;
+}
+
+/*!
+ * @brief   Ttc Calculate Interval
+ * @param   sptr_ttc: Ttc handler
+ * @retval  none
+ * @note    none
+ */
+void XTtcPs_CalcIntervalFromFreq(XTtcPs *sptr_ttc, kuint32_t Freq, XInterval *Interval, kuint8_t *Prescaler)
+{
+    kuint8_t TmpPrescaler;
+    kuaddr_t TempValue;
+    kuint32_t InputClock;
+
+    InputClock = sptr_ttc->Config.InputClockHz;
+    /*!
+     * Find the smallest prescaler that will work for a given frequency. The
+     * smaller the prescaler, the larger the count and the more accurate the PWM setting.
+     */
+    TempValue = InputClock/ Freq;
+
+    if (TempValue < 4U) 
+    {
+        /*!
+         * The frequency is too high, it is too close to the input
+         * clock value. Use maximum values to signal caller.
+         */
+        *Interval = XTTCPS_MAX_INTERVAL_COUNT;
+        *Prescaler = 0xFFU;
+
+        return;
+    }
+
+    /*!< First, do we need a prescaler or not ? */
+    if (((kuaddr_t)XTTCPS_MAX_INTERVAL_COUNT) > TempValue) 
+    {
+        /*!< We do not need a prescaler, so set the values appropriately */
+        *Interval = (XInterval)TempValue;
+        *Prescaler = XTTCPS_CLK_CNTRL_PS_DISABLE;
+
+        return;
+    }
+
+    for (TmpPrescaler = 0U; TmpPrescaler < XTTCPS_CLK_CNTRL_PS_DISABLE; TmpPrescaler++) 
+    {
+        TempValue =	InputClock/ (Freq * (1U << (TmpPrescaler + 1U)));
+
+        /*!< The first value less than 2^16 is the best bet */
+        if (((kuaddr_t)XTTCPS_MAX_INTERVAL_COUNT) > TempValue) 
+        {
+            /*!< Set the values appropriately */
+            *Interval = (XInterval)TempValue;
+            *Prescaler = TmpPrescaler;
+
+            return;
+        }
+    }
+
+    /*!
+     * Can not find interval values that work for the given frequency.
+     * Return maximum values to signal caller.
+     */
+    *Interval = XTTCPS_MAX_INTERVAL_COUNT;
+    *Prescaler = 0XFFU;
+
+    return;
+}
+
+typedef struct 
+{
+    kuint32_t Option;
+    kuint32_t Mask;
+    kuint32_t Register;
+
+} OptionsMap;
+
+static OptionsMap TmrCtrOptionsTable[] = 
+{
+    { XTTCPS_OPTION_EXTERNAL_CLK,   XTTCPS_CLK_CNTRL_SRC_MASK,      XTTCPS_CLK_CNTRL_OFFSET },
+    { XTTCPS_OPTION_CLK_EDGE_NEG,   XTTCPS_CLK_CNTRL_EXT_EDGE_MASK, XTTCPS_CLK_CNTRL_OFFSET },
+    { XTTCPS_OPTION_INTERVAL_MODE,  XTTCPS_CNT_CNTRL_INT_MASK,      XTTCPS_CNT_CNTRL_OFFSET },
+    { XTTCPS_OPTION_DECREMENT,      XTTCPS_CNT_CNTRL_DECR_MASK,     XTTCPS_CNT_CNTRL_OFFSET },
+    { XTTCPS_OPTION_MATCH_MODE,     XTTCPS_CNT_CNTRL_MATCH_MASK,    XTTCPS_CNT_CNTRL_OFFSET },
+    { XTTCPS_OPTION_WAVE_DISABLE,   XTTCPS_CNT_CNTRL_EN_WAVE_MASK,  XTTCPS_CNT_CNTRL_OFFSET },
+    { XTTCPS_OPTION_WAVE_POLARITY,  XTTCPS_CNT_CNTRL_POL_WAVE_MASK, XTTCPS_CNT_CNTRL_OFFSET },
+};
+
+#define XTTCPS_NUM_TMRCTR_OPTIONS               ARRAY_SIZE((TmrCtrOptionsTable))
+
+/*!
+ * @brief   Ttc Set Match Value
+ * @param   sptr_ttc: Ttc handler
+ * @retval  errno
+ * @note    none
+ */
+kint32_t XTtcPs_SetOptions(XTtcPs *sptr_ttc, kuint32_t Options)
+{
+    kuint32_t CountReg;
+    kuint32_t ClockReg;
+    kuint32_t Index;
+    kint32_t Status = ER_NORMAL;
+
+    if (!sptr_ttc || 
+        !sptr_ttc->IsReady)
+        return -ER_NREADY;
+
+    ClockReg = XTtcPs_ReadReg(sptr_ttc->Config.BaseAddress, XTTCPS_CLK_CNTRL_OFFSET);
+    CountReg = XTtcPs_ReadReg(sptr_ttc->Config.BaseAddress, XTTCPS_CNT_CNTRL_OFFSET);
+
+    /*!<
+     * Loop through the options table, turning the option on or off
+     * depending on whether the bit is set in the incoming options flag.
+     */
+    for (Index = 0U; Index < XTTCPS_NUM_TMRCTR_OPTIONS; Index++) 
+    {
+        if (Status == ER_NORMAL) 
+        {
+            if ((Options & TmrCtrOptionsTable[Index].Option) != (kuint32_t)0) 
+            {
+                switch (TmrCtrOptionsTable[Index].Register) 
+                {
+                    case XTTCPS_CLK_CNTRL_OFFSET:
+                        /*!< Add option */
+                        ClockReg |= TmrCtrOptionsTable[Index].Mask;
+                        break;
+
+                    case XTTCPS_CNT_CNTRL_OFFSET:
+                        /*!< Add option */
+                        CountReg |= TmrCtrOptionsTable[Index].Mask;
+                        break;
+
+                    default:
+                        Status = -ER_FAILD;
+                        break;
+                }
+            }
+            else 
+            {
+                switch (TmrCtrOptionsTable[Index].Register) 
+                {
+                    case XTTCPS_CLK_CNTRL_OFFSET:
+                        /*!< Remove option*/
+                        ClockReg &= ~TmrCtrOptionsTable[Index].Mask;
+                        break;
+
+                    case XTTCPS_CNT_CNTRL_OFFSET:
+                        /*!< Remove option*/
+                        CountReg &= ~TmrCtrOptionsTable[Index].Mask;
+                        break;
+
+                    default:
+                        Status = -ER_FAILD;
+                        break;
+                }
+            }
+        }
+    }
+
+    /*!< Now write the registers. Leave it to the upper layers to restart the device */
+    if (Status == ER_NORMAL)
+    {
+        XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTTCPS_CLK_CNTRL_OFFSET, ClockReg);
+        XTtcPs_WriteReg(sptr_ttc->Config.BaseAddress, XTTCPS_CNT_CNTRL_OFFSET, CountReg);
+    }
+
+    return Status;
+}
+
+/*!
+ * @brief   Ttc Get Options
+ * @param   sptr_ttc: Ttc handler
+ * @retval  errno
+ * @note    none
+ */
+kuint32_t XTtcPs_GetOptions(XTtcPs *sptr_ttc)
+{
+    kuint32_t OptionsFlag = 0U;
+    kuint32_t Register;
+    kuint32_t Index;
+
+    if (!sptr_ttc || 
+        !sptr_ttc->IsReady)
+        return -ER_NREADY;
+
+    /*!< Loop through the options table to determine which options are set */
+    for (Index = 0U; Index < XTTCPS_NUM_TMRCTR_OPTIONS; Index++) 
+    {
+        /*!< Get the control register to determine which options are currently set. */
+        Register = XTtcPs_ReadReg(sptr_ttc->Config.BaseAddress,
+                          TmrCtrOptionsTable[Index].Register);
+
+        if ((Register & TmrCtrOptionsTable[Index].Mask) != (kuint32_t)0)
+            OptionsFlag |= TmrCtrOptionsTable[Index].Option;
+    }
+
+    return OptionsFlag;
 }
 
 /*!
@@ -1090,7 +1512,7 @@ kint32_t XUartPs_ReceiveBuffer(XUartPs *sptr_uart)
         sptr_uart->sgtc_rxbuf.NextBytePtr[ReceivedCount] = mr_readl(sptr_uart->sgtc_cfg.BaseAddress + XUARTPS_FIFO_OFFSET);   
         ReceivedCount++;
 
-        delay_ms(1);
+        delay_ms(5);
     }
     sptr_uart->is_rxbs_error = 0;
 

@@ -45,14 +45,22 @@ void rw_lock_init(struct rw_lock *sptr_lock)
  */
 void rw_lock(struct rw_lock *sptr_lock)
 {
+    kutype_t flags;
+
     if (!mr_current)
         return;
 
+    local_irq_save(&flags);
     while (rw_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         schedule_thread();
+    }
     
     atomic_inc(&sptr_lock->sgtc_read);
     atomic_inc(&sptr_lock->sgtc_write);
+
+    local_irq_restore(&flags);
 }
 
 /*!
@@ -63,15 +71,23 @@ void rw_lock(struct rw_lock *sptr_lock)
  */
 kint32_t rw_try_lock(struct rw_lock *sptr_lock)
 {
+    kutype_t flags;
+
     if (!mr_current)
         return -ER_FORBID;
 
+    local_irq_save(&flags);
+
     if (rw_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         return -ER_BUSY;
+    }
     
     atomic_inc(&sptr_lock->sgtc_read);
     atomic_inc(&sptr_lock->sgtc_write);
 
+    local_irq_restore(&flags);
     return ER_NORMAL;
 }
 
@@ -83,11 +99,19 @@ kint32_t rw_try_lock(struct rw_lock *sptr_lock)
  */
 void rw_unlock(struct rw_lock *sptr_lock)
 {
+    kutype_t flags;
+
+    local_irq_save(&flags);
     if (!mr_current || !rw_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         return;
+    }
     
     atomic_dec(&sptr_lock->sgtc_read);
     atomic_dec(&sptr_lock->sgtc_write);
+
+    local_irq_restore(&flags);
 }
 
 /*!
@@ -98,13 +122,20 @@ void rw_unlock(struct rw_lock *sptr_lock)
  */
 void rd_lock(struct rw_lock *sptr_lock)
 {
+    kutype_t flags;
+
     if (!mr_current)
         return;
 
+    local_irq_save(&flags);
     while (wr_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         schedule_thread();
+    }
     
     atomic_inc(&sptr_lock->sgtc_read);
+    local_irq_restore(&flags);
 }
 
 /*!
@@ -115,13 +146,20 @@ void rd_lock(struct rw_lock *sptr_lock)
  */
 kint32_t rd_try_lock(struct rw_lock *sptr_lock)
 {
+    kutype_t flags;
+
     if (!mr_current)
         return -ER_FORBID;
 
+    local_irq_save(&flags);
     if (wr_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         return -ER_BUSY;
+    }
     
     atomic_inc(&sptr_lock->sgtc_read);
+    local_irq_restore(&flags);
 
     return ER_NORMAL;
 }
@@ -134,10 +172,17 @@ kint32_t rd_try_lock(struct rw_lock *sptr_lock)
  */
 void rd_unlock(struct rw_lock *sptr_lock)
 {
+    kutype_t flags;
+
+    local_irq_save(&flags);
     if (!mr_current || !rd_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         return;
+    }
     
     atomic_dec(&sptr_lock->sgtc_read);
+    local_irq_restore(&flags);
 }
 
 /*!
@@ -148,13 +193,20 @@ void rd_unlock(struct rw_lock *sptr_lock)
  */
 void wr_lock(struct rw_lock *sptr_lock)
 {
+    kutype_t flags;
+
     if (!mr_current)
         return;
 
+    local_irq_save(&flags);
     while (rw_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         schedule_thread();
+    }
     
     atomic_inc(&sptr_lock->sgtc_write);
+    local_irq_restore(&flags);
 }
 
 /*!
@@ -165,13 +217,20 @@ void wr_lock(struct rw_lock *sptr_lock)
  */
 kint32_t wr_try_lock(struct rw_lock *sptr_lock)
 {
+    kutype_t flags;
+
     if (!mr_current)
         return -ER_FORBID;
 
+    local_irq_save(&flags);
     if (rw_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         return -ER_BUSY;
+    }
     
     atomic_inc(&sptr_lock->sgtc_write);
+    local_irq_restore(&flags);
 
     return ER_NORMAL;
 }
@@ -184,10 +243,18 @@ kint32_t wr_try_lock(struct rw_lock *sptr_lock)
  */
 void wr_unlock(struct rw_lock *sptr_lock)
 {
+    kutype_t flags;
+
+    local_irq_save(&flags);
+    
     if (!mr_current || !rw_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         return;
+    }
     
     atomic_dec(&sptr_lock->sgtc_write);
+    local_irq_restore(&flags);
 }
 
 /*!< end of file */

@@ -42,13 +42,21 @@ void mutex_init(struct mutex_lock *sptr_lock)
  */
 void mutex_lock(struct mutex_lock *sptr_lock)
 {
+    kutype_t flags;
+
     if (!mr_current)
         return;
 
+    local_irq_save(&flags);
+
     while (mutex_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         schedule_thread();
+    }
     
     atomic_inc(&sptr_lock->sgtc_atc);
+    local_irq_restore(&flags);
 }
 
 /*!
@@ -74,13 +82,21 @@ void mutex_wait(struct mutex_lock *sptr_lock)
  */
 kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
 {
+    kutype_t flags;
+
     if (!mr_current)
         return -ER_FORBID;
+    
+    local_irq_save(&flags);
 
     if (mutex_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         return -ER_BUSY;
+    }
     
     atomic_inc(&sptr_lock->sgtc_atc);
+    local_irq_restore(&flags);
 
     return ER_NORMAL;
 }
@@ -93,10 +109,18 @@ kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
  */
 void mutex_unlock(struct mutex_lock *sptr_lock)
 {
+    kutype_t flags;
+
+    local_irq_save(&flags);
+
     if (!mr_current || !mutex_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
         return;
+    }
     
     atomic_dec(&sptr_lock->sgtc_atc);
+    local_irq_restore(&flags);
 }
 
 /*!< end of file */

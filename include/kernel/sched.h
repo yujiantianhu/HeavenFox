@@ -163,6 +163,8 @@ extern struct list_head *get_ready_thread_table(void);
 extern struct thread *get_thread_handle(tid_t tid);
 extern void thread_set_name(tid_t tid, const kchar_t *name);
 extern void thread_set_self_name(const kchar_t *name);
+extern kchar_t *thread_get_name(tid_t tid);
+extern kchar_t *thread_get_self_name(void);
 extern void thread_set_state(struct thread *sptr_thread, kuint32_t state);
 extern struct spin_lock *scheduler_lock(void);
 extern tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count);
