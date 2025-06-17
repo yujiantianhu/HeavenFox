@@ -40,6 +40,7 @@ public:
         , total_size(0)
     {
         FILE *sptr_fp;
+        size_t ret;
 
         memset(img_fullname, 0, sizeof(img_fullname));
         memset(bin_fullname, 0, sizeof(bin_fullname));
@@ -72,7 +73,7 @@ public:
         memset(bin_buffer, 0, total_size);
         memcpy(bin_buffer, dcd, dcd_len);
 
-        fread(bin_buffer + BIN_OFFSET, 1, bin_size, sptr_fp);
+        ret = fread(bin_buffer + BIN_OFFSET, 1, bin_size, sptr_fp);
         fclose(sptr_fp);
 
         unlink(img_fullname);
@@ -80,11 +81,11 @@ public:
 
         sptr_fp = fopen(img_fullname, "wb");
         if (!sptr_fp) {
-            std::cout << "Create the new" << IMAGE_NAME << " failed!" << std::endl;
+            std::cout << "Create new " << IMAGE_NAME << " failed!" << std::endl;
             goto fail;
         }
 
-        std::cout << "Create the new" << IMAGE_NAME << " success!" << std::endl;
+        std::cout << "Create new " << IMAGE_NAME << " success!" << std::endl;
 
         if (total_size != fwrite(bin_buffer, 1, total_size, sptr_fp)) {
             fclose(sptr_fp);
