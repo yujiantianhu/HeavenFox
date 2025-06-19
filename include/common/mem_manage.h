@@ -44,12 +44,12 @@ typedef struct mem_block
     struct mem_block *sptr_prev;				/*!< the first address of last memory block */
     struct mem_block *sptr_next;				/*!< the first address of next memory block */
 
-    struct list_head sgtc_link;
+    struct list_head sgtc_link;                 /*!< hash list */
 
 } srt_mem_block_t;
 
 #define IS_MEMORYPOOL_VALID(this)               ((this)->magic == MEMORY_POOL_MAGIC)
-#define MEM_BLOCK_HEADER_SIZE                   (mr_num_align4(sizeof(struct mem_block)))  /*!< 32bytes */
+#define MEM_BLOCK_HEADER_SIZE                   (mr_align(sizeof(struct mem_block), ARCH_PER_SIZE))  /*!< 32bytes */
 
 enum __ERT_MEM_TYPE
 {

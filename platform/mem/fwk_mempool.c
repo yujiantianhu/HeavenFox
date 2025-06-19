@@ -293,8 +293,6 @@ void *kmalloc(size_t __size, nrt_gfp_t flags)
         wait_event(&sptr_pool->sgtc_wqh, !spin_is_locked(&sptr_pool->sgtc_lock));
 
     sptr_record = &sptr_pool->sptr_mn->sgtc_maxrec;
-    address_end = sptr_record->base + sptr_record->size;
-
     spin_lock_irqsave(&sptr_pool->sgtc_lock);
 
     p = sptr_info->alloc(sptr_info, __size, -1, &sgtc_real);
@@ -305,6 +303,7 @@ void *kmalloc(size_t __size, nrt_gfp_t flags)
     }
 
     /*!< Record the maximum p */
+    address_end = sptr_record->base + sptr_record->size;
     if ((sgtc_real.base + sgtc_real.size) > address_end)
         memcpy(sptr_record, &sgtc_real, sizeof(sgtc_real));
     

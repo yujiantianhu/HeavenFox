@@ -483,14 +483,43 @@ static inline kuint32_t ffs_u32(kuint32_t x)
  */
 static inline kuint32_t ffs_u64(kuint64_t x)
 {
-    kuint32_t nr;
+    kuint32_t nr = 1;
 
-    nr = mr_ffs((kuint32_t)x);
-    if (nr)
-        return nr;
+    if (!x)
+        return 0;
+    
+    if (!(x & 0xffffffff)) 
+    {
+        x >>= 32;
+        nr += 32;
+    }
+    if (!(x & 0xffff)) 
+    {
+        x >>= 16;
+        nr += 16;
+    }
+    if (!(x & 0xff)) 
+    {
+        x >>= 8;
+        nr += 8;
+    }
+    if (!(x & 0xf)) 
+    {
+        x >>= 4;
+        nr += 4;
+    }
+    if (!(x & 3)) 
+    {
+        x >>= 2;
+        nr += 2;
+    }
+    if (!(x & 1)) 
+    {
+        x >>= 1;
+        nr += 1;
+    }
 
-    nr = mr_ffs((kuint32_t)(x >> 32));
-    return (nr ? (nr + 32) : 0);
+    return nr;
 }
 
 #ifndef mr_ffsll
@@ -501,42 +530,111 @@ static inline kuint32_t ffs_u64(kuint64_t x)
  * @brief   get fisrt bit (value == 1) from high to low
  * @param   x
  * @retval  nr
+ * @note    for 8bits (0: x is zero; 8 ~ 1: index of set-bit)
+ */
+static inline kuint32_t fls_u8(kuint8_t x)
+{
+    kuint32_t nr = 8;
+
+    if (!x)
+        return 0;
+    
+    if (!(x & 0xf0)) 
+    {
+        x <<= 4;
+        nr -= 4;
+    }
+    if (!(x & 0xc0)) 
+    {
+        x <<= 2;
+        nr -= 2;
+    }
+    if (!(x & 0x80)) 
+    {
+        x <<= 1;
+        nr -= 1;
+    }
+
+    return nr;
+}
+
+/*!
+ * @brief   get fisrt bit (value == 1) from high to low
+ * @param   x
+ * @retval  nr
+ * @note    for 16bits (0: x is zero; 16 ~ 1: index of set-bit)
+ */
+static inline kuint32_t fls_u16(kuint16_t x)
+{
+    kuint32_t nr = 16;
+
+    if (!x)
+        return 0;
+    
+    if (!(x & 0xff00)) 
+    {
+        x <<= 8;
+        nr -= 8;
+    }
+    if (!(x & 0xf000)) 
+    {
+        x <<= 4;
+        nr -= 4;
+    }
+    if (!(x & 0xc000)) 
+    {
+        x <<= 2;
+        nr -= 2;
+    }
+    if (!(x & 0x8000)) 
+    {
+        x <<= 1;
+        nr -= 1;
+    }
+
+    return nr;
+}
+
+/*!
+ * @brief   get fisrt bit (value == 1) from high to low
+ * @param   x
+ * @retval  nr
  * @note    for 32bits (0: x is zero; 32 ~ 1: index of set-bit)
  */
 static inline kuint32_t fls_u32(kuint32_t x)
 {
-	kuint32_t nr = 32;
+    kuint32_t nr = 32;
 
-	if (!x)
-		return 0;
+    if (!x)
+        return 0;
     
-	if (!(x & 0xffff0000)) 
+    if (!(x & 0xffff0000)) 
     {
-		x <<= 16;
-		nr -= 16;
-	}
-	if (!(x & 0xff000000)) 
+        x <<= 16;
+        nr -= 16;
+    }
+    if (!(x & 0xff000000)) 
     {
-		x <<= 8;
-		nr -= 8;
-	}
-	if (!(x & 0xf0000000)) 
+        x <<= 8;
+        nr -= 8;
+    }
+    if (!(x & 0xf0000000)) 
     {
-		x <<= 4;
-		nr -= 4;
-	}
-	if (!(x & 0xc0000000)) 
+        x <<= 4;
+        nr -= 4;
+    }
+    if (!(x & 0xc0000000)) 
     {
-		x <<= 2;
-		nr -= 2;
-	}
-	if (!(x & 0x80000000)) 
+        x <<= 2;
+        nr -= 2;
+    }
+    if (!(x & 0x80000000)) 
     {
-		x <<= 1;
-		nr -= 1;
-	}
+        x <<= 1;
+        nr -= 1;
+    }
 
-	return nr;
+    return nr;
 }
 
 #ifndef mr_fls
@@ -551,13 +649,43 @@ static inline kuint32_t fls_u32(kuint32_t x)
  */
 static inline kuint32_t fls_u64(kuint64_t x)
 {
-    kuint32_t nr;
+    kuint32_t nr = 64;
 
-    nr = mr_fls((kuint32_t)(x >> 32));
-    if (nr)
-        return (nr + 32);
+    if (!x)
+        return 0;
+    
+    if (!(x & 0xffffffff00000000ULL)) 
+    {
+        x <<= 32;
+        nr -= 32;
+    }
+    if (!(x & 0xffff000000000000ULL)) 
+    {
+        x <<= 16;
+        nr -= 16;
+    }
+    if (!(x & 0xff00000000000000ULL)) 
+    {
+        x <<= 8;
+        nr -= 8;
+    }
+    if (!(x & 0xf000000000000000ULL)) 
+    {
+        x <<= 4;
+        nr -= 4;
+    }
+    if (!(x & 0xc000000000000000ULL)) 
+    {
+        x <<= 2;
+        nr -= 2;
+    }
+    if (!(x & 0x8000000000000000ULL)) 
+    {
+        x <<= 1;
+        nr -= 1;
+    }
 
-    return mr_fls((kuint32_t)x);
+    return nr;
 }
 
 #ifndef mr_flsll

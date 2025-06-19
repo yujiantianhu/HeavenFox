@@ -30,7 +30,7 @@ static void free_employ_memory(struct mem_info *sptr_info, void *ptr_mem);
  */
 static struct mem_hash *memory_block_get_hash(struct mem_info *sptr_info, kusize_t total_size)
 {
-    kint32_t index = NR_MEM_HighBytes;
+    kint32_t index;
 
     if (total_size >= NR_MEM_HighLimit)
         return &sptr_info->sgtc_hash[NR_MEM_HighBytes];
@@ -38,9 +38,8 @@ static struct mem_hash *memory_block_get_hash(struct mem_info *sptr_info, kusize
     if (total_size < NR_MEM_LowerLimit)
         return &sptr_info->sgtc_hash[NR_MEM_LowerBytes];
 
-    while (!(total_size & (1U << index)))
-        index--;
-
+    /*!< Get the highest bit which is set */
+    index = fls_u16(total_size) - 1;
     return &sptr_info->sgtc_hash[index];
 }
 
@@ -53,6 +52,10 @@ static struct mem_hash *memory_block_get_hash(struct mem_info *sptr_info, kusize
 static void memory_block_attach(struct mem_info *sptr_info, struct mem_hash *sptr_hash, struct mem_block *sptr_block)
 {
     struct mem_block *sptr_per;
+    struct list_head *sptr_prev;
+
+    /*!< 1. no remain: block does not add to hash, sgtc_link equals to self; 2, otherwise, link to hash list */
+    init_list_head(&sptr_block->sgtc_link);
 
     if (!sptr_block->remain)
         return;
@@ -60,28 +63,33 @@ static void memory_block_attach(struct mem_info *sptr_info, struct mem_hash *spt
     if (!sptr_hash)
         sptr_hash = memory_block_get_hash(sptr_info, sptr_block->remain);
     
-    init_list_head(&sptr_block->sgtc_link);
+    sptr_prev = &sptr_hash->sgtc_list;
 
     /*!< case 1: list is empty */
-    if (mr_list_empty(&sptr_hash->sgtc_list))
-    {
-        list_head_add_head(&sptr_hash->sgtc_list, &sptr_block->sgtc_link);
-        return;
-    }
+//  if (mr_list_empty(&sptr_hash->sgtc_list))
+//  {
+//      list_head_add_head(&sptr_hash->sgtc_list, &sptr_block->sgtc_link);
+//      return;
+//  }
 
-    /*!< case 2: head < adress of block < tail */
-    foreach_list_next_entry(sptr_per, &sptr_hash->sgtc_list, sgtc_link)
+    if (!mr_list_empty(&sptr_hash->sgtc_list))
     {
-        /*!< low address in front for easy access next time */
-        if (sptr_block < sptr_per)
+        /*!< case 2: head < adress of block < tail */
+        foreach_list_next_entry(sptr_per, &sptr_hash->sgtc_list, sgtc_link)
         {
-            list_head_add_tail(&sptr_per->sgtc_link, &sptr_block->sgtc_link);
-            return;
+            /*!< low address in front for easy access next time */
+            if (sptr_block < sptr_per)
+            {
+//              list_head_add_tail(&sptr_per->sgtc_link, &sptr_block->sgtc_link);
+                sptr_prev = &sptr_per->sgtc_link;
+                return;
+            }
         }
     }
 
     /*!< case 3: block's address is the largest */
-    list_head_add_tail(&sptr_hash->sgtc_list, &sptr_block->sgtc_link);
+//  list_head_add_tail(&sptr_hash->sgtc_list, &sptr_block->sgtc_link);
+    list_head_add_tail(sptr_prev, &sptr_block->sgtc_link);
 }
 
 /*!
@@ -205,9 +213,8 @@ static struct mem_block *memory_block_get_avaliable(struct mem_info *sptr_info, 
         total_size = NR_MEM_LowerLimit;
     }
 
-    /*!< for example: total_size = 32, index will be 5 */
-    while (!(total_size & (1U << index)))
-        index--;
+    /*!< Get the highest bit which is set. For example: total_size = 32, index will be 5 */
+    index = fls_u16(total_size) - 1;
 
     while (index < NR_MEM_NUM)
     {

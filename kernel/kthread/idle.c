@@ -18,7 +18,7 @@
 #include <kernel/instance.h>
 
 /*!< The defines */
-#define IDLE_THREAD_STACK_SIZE                      THREAD_STACK_HALF(1)    /*!< 1/2 page (2kbytes) */
+#define IDLE_THREAD_STACK_SIZE                      THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
 
 /*!< The globals */
 static struct thread_attr sgtc_idle_attr;
