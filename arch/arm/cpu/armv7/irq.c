@@ -77,7 +77,7 @@ void hw_enable_irq(kint32_t hwirq)
     srt_gic_dist_t *sptr_dist;
 
     sptr_dist = mr_get_gic_distributor(sptr_gic);
-    mr_setbit_towords(hwirq, &sptr_dist->D_ISENABLER);
+    mr_setbit_towords(hwirq, &sptr_dist->D_ISENABLER[0]);
 }
 
 /*!
@@ -92,7 +92,7 @@ void hw_disable_irq(kint32_t hwirq)
     srt_gic_dist_t *sptr_dist;
 
     sptr_dist = mr_get_gic_distributor(sptr_gic);
-    mr_setbit_towords(hwirq, &sptr_dist->D_ICENABLER);
+    mr_setbit_towords(hwirq, &sptr_dist->D_ICENABLER[0]);
 }
 
 /*!
@@ -270,7 +270,7 @@ static void gic_irq_chip_enable(struct fwk_irq_data *sptr_data)
 
     sptr_dest = mr_get_gic_distributor(sptr_gic);
     mr_setbit_towords(sptr_data->hwirq + sptr_data->sptr_domain->hwirq, 
-                    &sptr_dest->D_ISENABLER);
+                    &sptr_dest->D_ISENABLER[0]);
 }
 
 /*!
@@ -289,7 +289,7 @@ static void gic_irq_chip_disable(struct fwk_irq_data *sptr_data)
 
     sptr_dest = mr_get_gic_distributor(sptr_gic);
     mr_setbit_towords(sptr_data->hwirq + sptr_data->sptr_domain->hwirq, 
-                    &sptr_dest->D_ICENABLER);
+                    &sptr_dest->D_ICENABLER[0]);
 }
 
 /*!
@@ -329,7 +329,74 @@ static kbool_t gic_irq_chip_is_enabled(struct fwk_irq_data *sptr_data)
 
     sptr_dest = mr_get_gic_distributor(sptr_gic);
     return !!mr_getbit_fromwords(sptr_data->hwirq + sptr_data->sptr_domain->hwirq, 
-                                &sptr_dest->D_ISENABLER);
+                                &sptr_dest->D_ISENABLER[0]);
+}
+
+/*!
+ * @brief   set irq trigger type
+ * @param   sptr_data
+ * @param   type
+ * @retval  none
+ * @note    Just for SPIs interrupt
+ */
+static kint32_t gic_irq_chip_set_type(struct fwk_irq_data *sptr_data, kuint32_t type)
+{
+#if 0
+    srt_gic_t *sptr_gic = fwk_get_gic_data(0);
+    srt_gic_dist_t *sptr_dest;
+    kint32_t hwirq, is_enabled;
+    kuint32_t reg_value, reg_value2, reg_value3;
+
+    if (!sptr_data || 
+        (sptr_data->hwirq < 0) ||
+        (!(type & IRQ_TYPE_SENSE_MASK)))
+        return -ER_INVALID;
+
+    /*!< Check trigger type */
+    if (!isPower2(type & IRQ_TYPE_SENSE_MASK))
+        return -ER_CHECKERR;
+
+    sptr_dest = mr_get_gic_distributor(sptr_gic);
+    hwirq = sptr_data->hwirq + sptr_data->sptr_domain->hwirq;
+
+    /*!< Exclude SGIs and PPIs */
+    if (hwirq < 32)
+        return -ER_NSUPPORT;
+
+    /*!< For D_ICFGR, distribute must be disable before writting */
+    is_enabled = !!mr_getbit_fromwords(hwirq, &sptr_dest->D_ISENABLER[0]);
+    mr_setbit_towords(hwirq, &sptr_dest->D_ICENABLER[0]);
+
+    /*!< Read D_ICFGR */
+    reg_value = mr_getmask_fromwords(hwirq << 1, 0x3, &sptr_dest->D_ICFGR[0]);
+    reg_value2 = reg_value;
+
+    /*!< 
+     * Just change bit1 
+     *      0x3: rising edge; 
+     *      0x2: falling edge; 
+     *      0x1: high level;
+     *      0x0: low level
+     */
+    if (type & IRQ_TYPE_EDGE_BOTH)
+        reg_value |= 0x2;
+    else
+        reg_value &= ~0x2;
+
+    /*!< Update D_ICFGR */
+    mr_setmask_towords(hwirq << 1, reg_value, &sptr_dest->D_ICFGR[0]);
+    reg_value3 = mr_getmask_fromwords(hwirq << 1, 0x3, &sptr_dest->D_ICFGR[0]);
+
+    /*!< Re-open distribute */
+    if (is_enabled)
+        mr_setbit_towords(hwirq, &sptr_dest->D_ISENABLER[0]);
+
+    /*!< Write failed ? */
+    if ((reg_value != reg_value2) && (reg_value != reg_value3))
+        return -ER_FAILD;
+#endif
+
+    return ER_NORMAL;
 }
 
 /*!
@@ -353,6 +420,7 @@ kint32_t gic_irq_domain_alloc(struct fwk_irq_domain *sptr_domain, kuint32_t virq
     sptr_gc->sgtc_chip.irq_disable = gic_irq_chip_disable;
     sptr_gc->sgtc_chip.irq_ack = gic_irq_chip_ack;
     sptr_gc->sgtc_chip.irq_is_enabled = gic_irq_chip_is_enabled;
+    sptr_gc->sgtc_chip.irq_set_type = gic_irq_chip_set_type;
 
     fwk_irq_setup_generic_chip(virq, nr_irqs, sptr_gc, mr_nullptr);
 

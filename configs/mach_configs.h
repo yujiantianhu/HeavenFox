@@ -21,7 +21,10 @@
 #include <board/board_config.h>
 
 /*!< The defines */
+#ifndef CONFIG_HZ
 #define CONFIG_HZ                               (100UL)             /*!< timer interrupt per 10ms*/
+#endif
+
 #define CONFIG_USE_AMP                          (0)
 
 #endif /* __MACH_CONFIGS_H */

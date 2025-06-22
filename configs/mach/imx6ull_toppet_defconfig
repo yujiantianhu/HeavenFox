@@ -30,6 +30,11 @@ CONFIG_BUILD_TYPE = debug
 CONFIG_OPTIMIZE_CLASS = 0
 # ---------------------------------------------------------------
 
+# System Config
+# Systick period = 10ms
+CONFIG_HZ = 100
+CONFIG_HRTIMER_ENBALE = y
+
 # Console
 CONFIG_CONSOLE_DEVICE = "/dev/uart0"
 # Use DMA to Receive or Send for Console ?

@@ -19,16 +19,16 @@
 
 /*!< The defines */
 /*!< CCM */
-#define IMX_SYSTICK_CLK_CG_REG								CG10
+#define IMX_SYSTICK_CLK_CG_REG								CG6
 #define IMX_SYSTICK_CLK_SELECT								IMX6UL_CCM_CCGR_CLOCK_ENTRY(1)
 
 /*!< port */
-#define IMX_SYSTICK_PORT_ENTRY()                        	IMX6UL_GPT_PROPERTY_ENTRY(1)
+#define IMX_SYSTICK_PORT_ENTRY()                        	IMX6UL_EPIT_PROPERTY_ENTRY(1)
 
 /*!< The globals */
 static const struct fwk_of_device_id sgtc_imx_systick_ids[] =
 {
-    { .compatible = "fsl,imx6ul-gpt" },
+    { .compatible = "fsl,imx6ull-epit" },
     {},
 };
 
@@ -36,25 +36,6 @@ static const struct fwk_of_device_id sgtc_imx_systick_ids[] =
 irq_return_t imx6_systick_isr(kint32_t irq, void *ptrDev);
 
 /*!< API function */
-/*!
- * @brief   load compare value to hardware
- * @param   expires (unit: tick)
- * @retval  none
- * @note    called by systick interrupt
- */
-void reload_htick_cnt(kutime_t expires)
-{
-    srt_hal_imx_gptimer_t *sptr_tick;
-
-    sptr_tick = IMX_SYSTICK_PORT_ENTRY();
-
-    /*!< 
-     * 1 CNT == 1us, but OCR[0] maybe 1ms or 10ms, so the max CNT is 1000 or 10000
-     * unlike OCR[0], even if OCR[1] equals to CNT, CNT will not reset, but ISR will occur
-     */
-    mr_writel(expires, &sptr_tick->OCR[1]);
-}
-
 /*!
  * @brief   imx6ull_systick_init
  * @param   none
@@ -64,7 +45,7 @@ void reload_htick_cnt(kutime_t expires)
 void imx6ull_systick_init(void)
 {
     struct fwk_device_node *sptr_node;
-    srt_hal_imx_gptimer_t *sptr_tick;
+    srt_hal_imx_epit_t *sptr_tick;
     kint32_t irq;
     kint32_t retval;
 
@@ -78,123 +59,61 @@ void imx6ull_systick_init(void)
 
     sptr_tick = IMX_SYSTICK_PORT_ENTRY();
 
-    /*!< enable gpt1 clock */
-      mr_imx_ccm_clk_enable(IMX_SYSTICK_CLK_CG_REG, IMX_SYSTICK_CLK_SELECT);
+    /*!< enable epit1 clock */
+    mr_imx_ccm_clk_enable(IMX_SYSTICK_CLK_CG_REG, IMX_SYSTICK_CLK_SELECT);
 
-    /*!< 
-     * EN: bit0, GPT Enable
-     * Disable GPT by setting EN=0 in GPT_CR register
-     */
-    mr_clrbitl(mr_bit(0U), &sptr_tick->CR);
-
-    /*!< 
-     * SWR: bit15, Software reset of the GPT module. It is a self-clearing bit
-     * Assert the SWR bit in GPT_CR register 
-     */
-    mr_setbitl(mr_bit(15U), &sptr_tick->CR);
-    while (mr_isBitSetl(mr_bit(15U), &sptr_tick->CR));
-
-    /*!< 
-     * FRR: bit9, Free-Run or Restart mode
-     * The FFR bit determines the behavior of the GPT when a compare event in channel 1 occurs.
-     *	• In Restart mode (bit9 is 0), after a compare event, the counter resets to 0x00000000 and resumes counting
-     *	  (after the occurrence of a compare event).
-     *	• In Free-Run mode (bit9 is 1), after a compare event, the counter continues counting until 0xFFFFFFFF and
-     *	  then rolls over to 0
-     */
-    mr_clrbitl(mr_bit(9U), &sptr_tick->CR);
-
-    /*!< 
-     * ROVIE: bit5, Rollover Interrupt Enable
-     * when gpt counter up to 0xffffffff, ROV Interrupt is generated, and clear counter to 0x00000000
-     * Disable GPT interrupt register (GPT_IR)
-     * 
-     * OF1IE ~ OF3IE: bit0 ~ bit3
-     */
-    mr_resetl(&sptr_tick->IR);
-
-    /*!< Enable OCR[0] and OCR[1] IRQ */
-    retval = fwk_request_irq(irq, imx6_systick_isr, 0, "imx6-systick", sptr_tick);
-    if (!retval)
-        mr_setbitl(mr_bit(0U) | mr_bit(1U), &sptr_tick->IR);
+    /*!< Clear all field */
+    mr_resetl(&sptr_tick->CR);
 
     /*!<
-     * CLKSRC: bit[8:6], Clock Source select.
-     * The CLKSRC bits select which clock will go to the prescaler (and subsequently be used to run the GPT
-     * counter).
-     * • The CLKSRC bit field value should only be changed after disabling the GPT by clearing the EN bit in
-     * this register (GPT_CR).
-     * • A software reset does not affect the CLKSRC bit.
-     * 		000 No clock
-     * 		001 Peripheral Clock (ipg_clk)
-     * 		010 High Frequency Reference Clock (ipg_clk_highfreq)
-     * 		011 External Clock
-     * 		100 Low Frequency Reference Clock (ipg_clk_32k)
-     * 		101 Crystal oscillator as Reference Clock (ipg_clk_24M)
-     * 		others Reserved
+     * Control register
+     * bit24: Select clock source
+     *      00: Clock is off
+     *      01: Peripheral clock
+     *      10: High-frequency reference clock
+     *      11: Low-frequency reference clock
+     * bit[15:4]: Counter clock prescaler value
+     *      0x000: Divide by 1
+     *      0x001: Divide by 2...
+     *      0xFFF: Divide by 4096
+     * bit3: Counter reload control
+     *      0: When the counter reaches zero it rolls over to 0xFFFF_FFFF (free-running mode)
+     *      1: When the counter reaches zero it reloads from the modulus register (set-and-forget mode)
+     * bit2: Output compare interrupt enable (1: enable; 0: disable)
+     * bit1: EPIT enable mode
+     *      0: Counter starts counting from the value it had when it was disabled.
+     *      1: Counter starts count from load value (RLD=1) or 0xFFFF_FFFF (If RLD=0)
+     * bit0: This bit enables the EPIT (1: enable; 0: disable)
      * 
-     * ipg_clk = 66MHz
+     *  Set to Peripheral clock (Freq = 66MHz), reloads from sptr_tick->LR
      */
-    mr_clrbitl(mr_bit(6U) | mr_bit(7U) | mr_bit(8U), &sptr_tick->CR);
-    mr_setbitl(mr_bit(6U), &sptr_tick->CR);
+    mr_writel(mr_bit(24U) | mr_bit(3U) | mr_bit(1U), &sptr_tick->CR);
 
     /*!<
-     * PRESCALER: bit[11:0], Prescaler bits
-     * The clock selected by the CLKSRC field is divided by [PRESCALER + 1], and then used to run the
-     * counter
-     * 
-     * Peripheral clock(ipg_clk) = 66MHz, if divider = 66, GPT1 Frequency = 1MHz;
-     * So Timer Period = 1us
+     * prescaler value: bit[15:4] = 0x000, Divide by 1
+     * ===> EPIT1 frequency will be 66MHz / 1 = 66MHz
      */
-    mr_clrbitl(0xfffU, &sptr_tick->PR);
-    mr_setbitl(66 - 1, &sptr_tick->PR);
+    mr_setbitl(mr_bit_mask_nr(0U, 0xfffU, 4U), &sptr_tick->CR);
 
     /*!< Global interface */
-    ptr_systick_counter = (volatile kutime_t *)&sptr_tick->CNT;
-    /*!< Timer Period = 1us: 1 tick = 1us, so 1000000 tick = 1s */
-    g_systick_freq = 1000000;
-    /*!< CNT will be 0 ---> 1000000 */
-    g_is_systick_up = true;
-
-    /*!< 
-     * compare value: 1(s) = 1 / SYSTICK_FREQ = 100 * jiffies (1 * jiffies = TICK_HZ)
-     * for OCR[0], when CNT equals to OCR[0], CNT will be reset
-     */
-    mr_writel(SYSTICK_FREQ / TICK_HZ, &sptr_tick->OCR[0]);
-
-    /*!< 
-     * ROV: bit5, Rollover Flag
-     * The ROV bit indicates that the counter has reached its maximum possible value and rolled over to 0 (from
-     * which the counter continues counting). The ROV bit is only set if the counter has reached 0xFFFFFFFF in
-     * both Restart and Free-Run modes
-     * 
-     * Clear GPT status register (GPT_SR) (i.e., w1c) 
-     */
-    mr_resetl(&sptr_tick->SR);
+    /*!< 66MHz, period = 15.15ns; and it is a decrease counter */
+    SYSTICK_INIT(66000000U, IS_TICKCNT_DEC, &sptr_tick->CNR);
 
     /*!<
-     * ENMOD: bit1, GPT Enable mode
-     * When the GPT is disabled (EN=0), then both the Main Counter and Prescaler Counter freeze their current
-     * count values. The ENMOD bit determines the value of the GPT counter when Counter is enabled again (if
-     * the EN bit is set)
-     * 
-     * • If the ENMOD bit is 1, then the Main Counter and Prescaler Counter values are reset to 0 after GPT
-     * 	 is enabled (EN=1).
-     * • If the ENMOD bit is 0, then the Main Counter and Prescaler Counter restart counting from their
-     *	 frozen values after GPT is enabled (EN=1).
-     *
-     * Set ENMOD=1 in GPT_CR register, to bring GPT counter to 0x00000000
+     * Load register and Compare register
+     * Counter will be "(66000000U / TICK_HZ) ---> 0", and satisfy the CMPR
+     * The EPIT1 frequency is 66MHz, if TICH_HZ is 100, the compare period is 10ms
      */
-    mr_setbitl(mr_bit(1U), &sptr_tick->CR);
+    mr_writel(SYSTICK_FREQ / TICK_HZ, &sptr_tick->LR);
+    mr_writel(0U, &sptr_tick->CMPR);
 
-    /*!< EN: bit0, GPT Enable */
+    /*!< Enable Compare IRQ */
+    retval = fwk_request_irq(irq, imx6_systick_isr, 0, "imx6-systick", sptr_tick);
+    if (!retval)
+        mr_setbitl(mr_bit(2U), &sptr_tick->CR);
+
+    /*!< EN: bit0, EPIT1 Enable */
     mr_setbitl(mr_bit(0U), &sptr_tick->CR);
-
-    /*!< 
-     * 1 CNT == 1us, but OCR[0] maybe 1ms or 10ms, so the max CNT is 1000 or 10000
-     * unlike OCR[0], even if OCR[1] equals to CNT, CNT will not reset, but ISR will occur
-     */
-    reload_htick_cnt(SYSTICK_FREQ + 1);
 }
 
 /*!
@@ -205,24 +124,17 @@ void imx6ull_systick_init(void)
  */
 irq_return_t imx6_systick_isr(kint32_t irq, void *ptrDev)
 {
-    srt_hal_imx_gptimer_t *sptr_tick = (srt_hal_imx_gptimer_t *)ptrDev;
+    srt_hal_imx_epit_t *sptr_tick = (srt_hal_imx_epit_t *)ptrDev;
     kuint32_t status;
 
     status = mr_readl(&sptr_tick->SR);
 
     /*!< Timer ISR */
-    if (mr_isBitSetl(mr_bit(0), &status))
+    if (mr_isBitSetl(mr_bit(0U), &status))
     {
         /*!< reset jiffies when counter over */
         get_time_counter();
         do_timer_event();
-    }
-
-    /*!< Compare ISR */
-    if (mr_isBitSetl(mr_bit(1), &status))
-    {
-        /*!< excute per event */
-        do_htick_event();
     }
 
     /*!< Set 1 to clear compare status */

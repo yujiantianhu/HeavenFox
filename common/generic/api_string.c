@@ -882,6 +882,27 @@ kint32_t sprintk(void *ptr_buf, const kchar_t *ptr_fmt, ...)
 }
 
 /*!
+ * @brief   sprintk
+ * @param   ptr_buf, ptr_fmt
+ * @retval  none
+ * @note    String format conversion
+ */
+kint32_t sprintk_limit(void *ptr_buf, kusize_t limit_len, const kchar_t *ptr_fmt, ...)
+{
+    va_list ptr_list;
+    kusize_t size;
+
+    if (limit_len == 0)
+        return -ER_LACK;
+
+    va_start(ptr_list, ptr_fmt);
+    size = do_fmt_convert(ptr_buf, mr_nullptr, ptr_fmt, ptr_list, limit_len);
+    va_end(ptr_list);
+
+    return size;
+}
+
+/*!
  * @brief   sprintk_safe
  * @param   ptr_buf, ptr_fmt
  * @retval  none

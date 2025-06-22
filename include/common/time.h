@@ -27,23 +27,48 @@
 /*!< The globals */
 typedef kutype_t kutime_t;
 typedef kstype_t kstime_t;
+typedef kuint64_t khrtime_t;
 
 extern volatile kutime_t jiffies;
+extern volatile kuint64_t jiffies_all;
 extern volatile kutime_t jiffies_out;
 
 extern volatile kutime_t *ptr_systick_counter;
 extern kutime_t g_systick_freq;
 extern kbool_t g_is_systick_up;
 
+extern kutime_t g_hrtime_over_cnt;
+
+extern volatile kutime_t *ptr_hrtimer_counter;
+extern volatile kutime_t *ptr_hrtimer_counter2;
+extern kutime_t g_hrtimer_freq;
+extern kbool_t g_is_hrtimer_up;
+
 extern kutime_t g_delay_timer_counter;
 
 /*!< The defines */
 #define TICK_HZ                                             CONFIG_HZ
 
+#define IS_TICKCNT_INC                                      (true)
+#define IS_TICKCNT_DEC                                      (false)
+
+#define FREQ_INIT_VAL                                       (1)
+
+/*!< ----------------------------------------------------------- */
 /*!< per tick period = (1 / SYSTICK_FREQ) */
 #define SYSTICK_FREQ                                        (g_systick_freq)
-#define SYSTICK_CNT()                                       (ptr_systick_counter ? (*ptr_systick_counter) : 0)
 #define IS_SYSTICK_UPINC()                                  (g_is_systick_up)
+#define SYSTICK_CNT()                                       (ptr_systick_counter ? (*ptr_systick_counter) : 0)
+
+/*!< is_up: IS_TICKCNT_INC or IS_TICKCNT_DEC */
+#define SYSTICK_INIT(freq, is_up, counter) \
+    do {    \
+        g_is_systick_up = (is_up); \
+        ptr_systick_counter = (volatile kutime_t *)(counter);  \
+        g_systick_freq = (freq);  \
+    } while (0)
+
+#define SYSTICK_MAX                                         (SYSTICK_FREQ / TICK_HZ)
 
 #define SEC_TO_SYSTICK(sec)                                 ( (sec ) * SYSTICK_FREQ)
 #define MSEC_TO_SYSTICK(msec)                               (((msec) * SYSTICK_FREQ + 999UL) / 1000UL)
@@ -57,8 +82,38 @@ extern kutime_t g_delay_timer_counter;
 #define JIFFIES_MAX                                         (0x7fffffffU)
 #define JIFFIES_BORDER                                      (JIFFIES_MAX - 1)
 #define JIFFIES_INITVAL                                     (0x70000000U - 1U)
-#define SYS_RUNTICK()                                       ((jiffies_out * JIFFIES_MAX) + jiffies - JIFFIES_INITVAL)
+/*!< Total jiffies (0 ~ (kuint64_t)(~0ULL)) */
+#define JIFFIES_COUNT()                                     (jiffies_all)
 
+/*!< ----------------------------------------------------------- */
+/*!< per tick period = (1 / HRTIMER_FREQ) */
+#define HRTIMER_FREQ                                        (g_hrtimer_freq)
+#define IS_HRTIMER_UPINC()                                  (g_is_hrtimer_up)
+#define HRTIMER_CNT()   \
+    (ptr_hrtimer_counter ? ((*ptr_hrtimer_counter) |    \
+        (ptr_hrtimer_counter2 ? ((kuint64_t)(*ptr_hrtimer_counter2) << 32) : 0)) : 0)
+
+#define HRTIMER_MAX                                         (ptr_hrtimer_counter2 ? (kuint64_t)(~0ULL) : (kuint32_t)(~0UL))
+
+/*!< is_up: IS_TICKCNT_INC or IS_TICKCNT_DEC */
+#define HRTIMER_INIT(freq, is_up, counter1, counter2) \
+    do {    \
+        g_is_hrtimer_up = (is_up); \
+        ptr_hrtimer_counter = (volatile kutime_t *)(counter1);  \
+        ptr_hrtimer_counter2 = (volatile kutime_t *)(counter2); \
+        g_hrtimer_freq = (freq);  \
+    } while (0)
+
+#define SEC_TO_HRTICK(sec)                                  ( (khrtime_t)(sec ) * HRTIMER_FREQ)
+#define MSEC_TO_HRTICK(msec)                                (((khrtime_t)(msec) * HRTIMER_FREQ + 999ULL) / 1000ULL)
+#define USEC_TO_HRTICK(usec)                                (((khrtime_t)(usec) * HRTIMER_FREQ + 999999ULL) / 1000000ULL)
+#define NSEC_TO_HRTICK(nsec)                                (((khrtime_t)(nsec) * HRTIMER_FREQ + 999999999ULL) / 1000000000ULL)
+#define HRTICK_TO_SEC(tick)                                 ( (khrtime_t)(tick) / HRTIMER_FREQ)
+#define HRTICK_TO_MSEC(tick)                                (((khrtime_t)(tick) * 1000ULL) / HRTIMER_FREQ)
+#define HRTICK_TO_USEC(tick)                                (((khrtime_t)(tick) * 1000000ULL) / HRTIMER_FREQ)
+#define HRTICK_TO_NSEC(tick)                                (((khrtime_t)(tick) * 1000000000ULL) / HRTIMER_FREQ)
+
+/*!< ----------------------------------------------------------- */
 #define TIMER_DELAY_COUNTER                                 (g_delay_timer_counter)
 #define TIMER_DELAY_COUNTER_INIT                            (0U)
 #define TIMER_DELAY_COUNTER_MAX                             (0x00ffffffU)                   /*!< = 16777215 */
@@ -68,19 +123,27 @@ extern kutime_t g_delay_timer_counter;
 struct time_spec
 {
     /*!< time = tv_sec  */
-	kutime_t tv_sec;			        	                /*!< seconds */
-	kutime_t tv_nsec;		                                /*!< nanoseconds */
+    kutime_t tv_sec;			        	                /*!< seconds */
+    kutime_t tv_nsec;		                                /*!< nanoseconds */
 };
 
 #define mr_is_timespec_empty(t)                            (((t)->tv_sec == 0) && ((t)->tv_nsec == 0))
 
+struct time_val
+{
+    /*!< time = tv_sec  */
+    kutime_t tv_sec;			        	                /*!< seconds */
+    kutime_t tv_usec;		                                /*!< useconds */
+};
+
+/*!< Timer event list */
 struct timer_list 
 {
-	struct list_head sgtc_link;
-	kutime_t expires;
+    struct list_head sgtc_link;
+    kutime_t expires;
 
-	void (*entry)(kuint32_t args);
-	kuint32_t data;
+    void (*entry)(kuint32_t args);
+    kuint32_t data;
 };
 
 #define TIMER_INITIALIZER(_entry, _expires, _data)		\
@@ -91,37 +154,56 @@ struct timer_list
 }
 
 #define DEFINE_TIMER(_name, _entry, _expires, _data)		\
-	struct timer_list _name = TIMER_INITIALIZER(_entry, _expires, _data)
+    struct timer_list _name = TIMER_INITIALIZER(_entry, _expires, _data)
 
 #define mr_setup_timer(timer, fn, data)    \
-	do {    \
-		init_list_head(&(timer)->sgtc_link);  \
-		(timer)->entry = (fn); \
-		(timer)->data = (data);   \
-	} while (0)
+    do {    \
+        init_list_head(&(timer)->sgtc_link);  \
+        (timer)->entry = (fn); \
+        (timer)->data = (data);   \
+    } while (0)
 
 #define mr_time_check_type(a, b)   \
-	const kutime_t _a = 0;	\
-	const kutime_t _b = 0;	\
-	(void)(&_a == &(a));	\
+    const typeof(a) _a = 0;	\
+    const typeof(b) _b = 0;	\
+    (void)(&_a == &(a));	\
     (void)(&_b == &(b));
 
 /*!< a > b ? true : false */
 #define mr_time_after(a, b)    \
 ({  \
     mr_time_check_type(a, b)   \
-	((a) > (b));   \
+    ((a) > (b));   \
 })
 
 /*!< a >= b ? true : false */
 #define mr_time_after_eq(a, b)	\
 ({  \
     mr_time_check_type(a, b)   \
-	((a) >= (b));   \
+    ((a) >= (b));   \
 })
 
 #define mr_time_before(a, b)                               mr_time_after(b, a)            /*!< a < b ? true : false */
 #define mr_time_before_eq(a, b)                            mr_time_after_eq(b, a)         /*!< a <= b ? true : false */
+
+struct hrtimer_list
+{
+    struct list_head sgtc_link;
+    khrtime_t expires;
+
+    void (*entry)(kuint32_t args);
+    kuint32_t data;
+};
+
+#define DEFINE_HRTIMER(_name, _entry, _expires, _data)		\
+    struct hrtimer_list _name = TIMER_INITIALIZER(_entry, _expires, _data)
+
+#define HRTIMER_EXPIRES(cur_tick, interval) \
+({  \
+    const khrtime_t _cur_tick = (cur_tick);   \
+    const khrtime_t _max_tick = HRTIMER_MAX;    \
+    ((interval) > (_max_tick - _cur_tick)) ? _max_tick : (_cur_tick + (interval));    \
+})
 
 struct time_clock 
 {
@@ -156,13 +238,19 @@ extern kbool_t find_timer(struct timer_list *sptr_timer);
 extern void mod_timer(struct timer_list *sptr_timer, kutime_t expires);
 extern void do_timer_event(void);
 
-extern void setup_htimer(struct timer_list *sptr_timer, void (*entry)(kuint32_t), kuint32_t data);
-extern void add_htimer(struct timer_list *sptr_timer);
-extern void del_htimer(struct timer_list *sptr_timer);
-extern void mod_htimer(struct timer_list *sptr_timer, kutime_t expires);
-extern void do_htick_event(void);
+extern void setup_hrtimer(struct hrtimer_list *sptr_timer, void (*entry)(kuint32_t), kuint32_t data);
+extern void add_hrtimer(struct hrtimer_list *sptr_timer);
+extern void del_hrtimer(struct hrtimer_list *sptr_timer);
+extern void mod_hrtimer(struct hrtimer_list *sptr_timer, khrtime_t expires);
+extern void check_hrtimer(void);
+extern void do_hrtime_event(void);
 
 extern kutime_t ktime_systick(void);
+extern khrtime_t ktime_hrtick(void);
+extern khrtime_t khrtime_passed_ticks(void);
+extern void ktime_to_spec(struct time_val *sptr_tval);
+extern void khrtime_reload_cnt(khrtime_t expires);
+
 extern void systime_init(void);
 
 /*!< API functions */
@@ -176,6 +264,31 @@ static inline void get_time_counter(void)
 {
     jiffies = (jiffies >= JIFFIES_MAX) ? 0 : (jiffies + 1);
     jiffies_out = jiffies ? jiffies_out : (jiffies_out + 1);
+
+//  jiffies_all = (jiffies_out * JIFFIES_MAX) + jiffies - JIFFIES_INITVAL;
+    jiffies_all++;
+}
+
+/*!
+ * @brief   mark that hrtimer counter is over (> 0xffffffffU ?)
+ * @param   none
+ * @retval  none
+ * @note    g_hrtime_over_cnt++
+ */
+static inline void mark_hrtime_overone(void)
+{
+    g_hrtime_over_cnt++;
+}
+
+/*!
+ * @brief   get hrtimer over count
+ * @param   none
+ * @retval  g_hrtime_over_cnt
+ * @note    none
+ */
+static inline kutime_t get_hrtime_overcount(void)
+{
+    return g_hrtime_over_cnt;
 }
 
 /*!

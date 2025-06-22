@@ -199,7 +199,7 @@ static struct mem_block *__memory_block_get_avaliable(struct mem_info *sptr_info
 static struct mem_block *memory_block_get_avaliable(struct mem_info *sptr_info, kusize_t total_size)
 {
     struct mem_block *sptr_block;
-    kint32_t index = NR_MEM_HighBytes;
+    kint32_t index;
 
     if (total_size >= NR_MEM_HighLimit)
         return __memory_block_get_avaliable(sptr_info, NR_MEM_HighBytes, total_size);

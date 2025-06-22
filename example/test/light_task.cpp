@@ -30,7 +30,7 @@ using namespace tsk;
 using namespace bsc;
 
 /*!< The defines */
-#define LIGHT_TASK_STACK_SIZE                   THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
+#define LIGHT_TASK_STACK_SIZE                   THREAD_STACK_HALF(1)    /*!< 1/2 page (2kbytes) */
 
 /*!< The globals */
 
@@ -79,7 +79,7 @@ static void *light_task_entry(void *args)
 END2:
         virt_close(fd);
 END1:
-        msleep(200);
+        msleep(203);
     }
 
     return args;

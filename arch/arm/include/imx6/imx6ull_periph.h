@@ -75,6 +75,23 @@ typedef struct hal_imx_gptimer
 #define IMX6UL_GPT_PROPERTY_ENTRY(x)                                (srt_hal_imx_gptimer_t *)IMX6UL_GPT##x##_ADDR_BASE
 
 /*!< ------------------------------------------------------------------------- */
+/*!< EPIT - Register Layout Typedef */
+typedef struct 
+{
+    kuint32_t CR;                                                   /*!< Control register, offset: 0x0 */
+    kuint32_t SR;                                                   /*!< Status register, offset: 0x4 */
+    kuint32_t LR;                                                   /*!< Load register, offset: 0x8 */
+    kuint32_t CMPR;                                                 /*!< Compare register, offset: 0xC */
+    kuint32_t CNR;                                                  /*!< Counter register, offset: 0x10 */
+
+} srt_hal_imx_epit_t;
+
+/*!< Peripheral EPIT base address */
+#define IMX6UL_EPIT1_ADDR_BASE                                      (0x20D0000u)
+#define IMX6UL_EPIT2_ADDR_BASE                                      (0x20D4000u)
+#define IMX6UL_EPIT_PROPERTY_ENTRY(x)                               (srt_hal_imx_epit_t *)IMX6UL_EPIT##x##_ADDR_BASE
+
+/*!< ------------------------------------------------------------------------- */
 /*!< WDOG - Register Layout Typedef */
 typedef struct 
 {

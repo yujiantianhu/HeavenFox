@@ -652,7 +652,7 @@ static kint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sptr_adap, struct fwk_
 	sptr_data = fwk_i2c_adapter_get_drvdata(sptr_adap);
 
     /*!< keep a certain interval between two transfer (specially writting) */
-    if (runtick > SYS_RUNTICK())
+    if (runtick > JIFFIES_COUNT())
         msleep(5);
     
     mutex_lock(&sptr_data->sgtc_lock);
@@ -686,7 +686,7 @@ END:
 
 out:
     mutex_unlock(&sptr_data->sgtc_lock);
-    runtick = SYS_RUNTICK() + msecs_to_jiffies(10);
+    runtick = JIFFIES_COUNT() + msecs_to_jiffies(10);
 
     return retval;
 }

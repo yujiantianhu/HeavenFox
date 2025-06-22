@@ -337,6 +337,46 @@ void io_stream_logs_print(void *__temp_buffer, kusize_t __temp_size)
 }
 
 /*!
+ * @brief   Parse time spec to time_buf
+ * @param   logs_buf
+ * @param   time_size: LOG_TIME_LENGTH (value = 15, exclude '\0')
+ * @retval  none
+ * @note    none
+ */
+static kusize_t io_stream_time_spec(kubyte_t *logs_buf, kusize_t logs_size, 
+                                kubyte_t *time_buf, kusize_t time_size, kusize_t *true_size)
+{
+    struct time_val sgtc_tval;
+    kusize_t size;
+    kint32_t i;
+
+    if (!(g_io_stream_flags & IO_STREAM_KERNEL))
+        return time_size;
+    
+    ktime_to_spec(&sgtc_tval);
+    /*!< time_size + 1, include '\0' */
+    size = sprintk_limit(time_buf, time_size + 1, "[%05u.%06u] ", sgtc_tval.tv_sec, sgtc_tval.tv_usec);
+
+    if (mr_likely(true_size))
+        *true_size = size;
+
+    if (mr_likely(logs_buf && (logs_size > time_size)))
+    {
+        for (i = time_size; i < logs_size; i++) {
+            if ((logs_buf[i] != '\r') && (logs_buf[i] != '\n'))
+                break;
+        }
+
+        memcpy(&logs_buf[time_size - size], &logs_buf[time_size], i - time_size);
+        memcpy(&logs_buf[i - size], time_buf, size);
+
+        return (time_size - size);
+    }
+
+    return size;
+}
+
+/*!
  * @brief   kprintf
  * @param   ptr_fmt
  * @retval  none
@@ -373,7 +413,7 @@ void kprintf(const kchar_t *ptr_fmt, ...)
 }
 
 /*!
- * @brief   printk
+ * @brief   printk with time spec
  * @param   ptr_fmt
  * @retval  none
  * @note    Not sleep, but fmt must less than 1024 bytes!!!
@@ -383,29 +423,35 @@ void printk(const kchar_t *ptr_fmt, ...)
 #if defined(CONFIG_PRINT_LEVEL)
     va_list ptr_list;
     kubyte_t level[2] = {};
-    kusize_t size;
+    kusize_t size, size_ex = 0;
     kubyte_t logs_buf[1024];
+    kubyte_t time_buf[16];
+    kubyte_t offset = sizeof(time_buf) - 1;
     
     va_start(ptr_list, ptr_fmt);
-    size = do_fmt_convert(logs_buf, level, ptr_fmt, ptr_list, sizeof(logs_buf));
+    size = do_fmt_convert(logs_buf + offset, 
+                    level, ptr_fmt, ptr_list, sizeof(logs_buf) - offset);
     va_end(ptr_list);
 
     if (!size)
         return;
 
-    /*!< if level is not set, default PRINT_LEVEL_WARNING */
-    if (*(PRINT_LEVEL_SOH) != *level)
-        memcpy(level, PRINT_LEVEL_WARNING, sizeof(level));
+    /*!< Kernel Logs: Add Time Spec */
+    if (*(PRINT_LEVEL_SOH) == *level)
+    {
+        /*!< Jump over */
+        if (*(level + 1) > *((kubyte_t *)(CONFIG_PRINT_LEVEL)))
+            return;
 
-    if (*(level + 1) > *((kubyte_t *)(CONFIG_PRINT_LEVEL)))
-        return;
+        offset = io_stream_time_spec(logs_buf, sizeof(logs_buf), time_buf, offset, &size_ex);
+    }
 
-    io_putstr_async(logs_buf, size + 1);
+    io_putstr_async(logs_buf + offset, size + size_ex + 1);
 #endif
 }
 
 /*!
- * @brief   print imediately (not use logs)
+ * @brief   print imediately (not use logs) with time spec
  * @param   ptr_fmt
  * @retval  none
  * @note    Not sleep, but fmt must less than 1024 bytes!!!
@@ -415,24 +461,30 @@ void print_sync(const kchar_t *ptr_fmt, ...)
 #if defined(CONFIG_PRINT_LEVEL)
     va_list ptr_list;
     kubyte_t level[2] = {};
-    kusize_t size;
+    kusize_t size, size_ex = 0;
     kubyte_t logs_buf[1024];
+    kubyte_t time_buf[16];
+    kubyte_t offset = sizeof(time_buf) - 1;
     
     va_start(ptr_list, ptr_fmt);
-    size = do_fmt_convert(logs_buf, level, ptr_fmt, ptr_list, sizeof(logs_buf));
+    size = do_fmt_convert(logs_buf + offset, 
+                    level, ptr_fmt, ptr_list, sizeof(logs_buf) - offset);
     va_end(ptr_list);
 
     if (!size)
         return;
 
-    /*!< if level is not set, default PRINT_LEVEL_WARNING */
-    if (*(PRINT_LEVEL_SOH) != *level)
-        memcpy(level, PRINT_LEVEL_WARNING, sizeof(level));
+    /*!< Kernel Logs: Add Time Spec */
+    if (*(PRINT_LEVEL_SOH) == *level)
+    {
+        /*!< Jump over */
+        if (*(level + 1) > *((kubyte_t *)(CONFIG_PRINT_LEVEL)))
+            return;
 
-    if (*(level + 1) > *((kubyte_t *)(CONFIG_PRINT_LEVEL)))
-        return;
+        offset = io_stream_time_spec(logs_buf, sizeof(logs_buf), time_buf, offset, &size_ex);
+    }
 
-    io_putstr(logs_buf, size + 1);
+    io_putstr(logs_buf + offset, size + size_ex + 1);
 #endif
 }
 

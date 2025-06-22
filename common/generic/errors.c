@@ -30,7 +30,7 @@ volatile kuint32_t g_interrupt_flags = 0;
 void deal_assert_fail(const kchar_t *__assertion, kbool_t is_down,
                 const kchar_t *__file, kuint32_t __line, const kchar_t *__function)
 {
-    print_sync(PRINT_LEVEL_ERR"\r\n");
+    print_sync("\r\n");
     print_sync(PRINT_LEVEL_ERR"Program Aborted. Here is Error Information:\r\n");
 
     print_sync(PRINT_LEVEL_ERR"---> assertion: %s\r\n", __assertion);
@@ -45,7 +45,7 @@ void deal_assert_fail(const kchar_t *__assertion, kbool_t is_down,
 
         if (*sptr_thread->name)
             print_sync(PRINT_LEVEL_ERR"current thread name: %s\r\n", sptr_thread->name);
-        print_sync(PRINT_LEVEL_ERR"current thread id: %d ==== < === > \r\n\t", sptr_thread->tid);
+        print_sync(PRINT_LEVEL_ERR"current thread id: %d ==== < === > \r\n", sptr_thread->tid);
 
     #if defined(CONFIG_CONTEXT_EX) && (CONFIG_CONTEXT_EX)
         for (kint32_t idx = 0; idx < 9; idx++)
@@ -57,7 +57,7 @@ void deal_assert_fail(const kchar_t *__assertion, kbool_t is_down,
         }
     #endif
 
-        print_sync(PRINT_LEVEL_ERR
+        print_sync(PRINT_LEVEL_ERR "super register:\r\n\t"
                 	"lr:    0x%x\r\n\t"
                     "sp:    0x%x\r\n\t"
                     "pc:    0x%x\r\n\t"
@@ -66,7 +66,7 @@ void deal_assert_fail(const kchar_t *__assertion, kbool_t is_down,
                     sptr_regs->lr, sptr_regs->sp, sptr_regs->pc, sptr_regs->psr, sptr_regs->flags);
     }
 
-    print_sync(PRINT_LEVEL_ERR"\r\n");
+    print_sync("\r\n");
     print_sync(PRINT_LEVEL_ERR"Please check for errors in time !\r\n");
 
     /*!< quit program */

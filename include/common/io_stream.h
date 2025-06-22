@@ -99,12 +99,14 @@ do {   \
 #define mr_setbit_towords(integer, addr)	\
 do {   \
     *((volatile kuint32_t *)(addr) + mr_word_offset(integer)) |= mr_bit(mr_bit_offset(integer)); \
+    mr_dmb();   \
 } while (0)
 
 /*!< clear bit to 32-bit array */
 #define mr_clrbit_towords(integer, addr)	\
 do {   \
     *((volatile kuint32_t *)(addr) + mr_word_offset(integer)) &= ~mr_bit(mr_bit_offset(integer));    \
+    mr_dmb();   \
 } while (0)
 
 /*!< git bit from 32-bit array */
@@ -113,6 +115,29 @@ do {   \
 
 #define mr_isBitSetWords(integer, addr)                 ( mr_bit(mr_bit_offset(integer)) == mr_getbit_fromwords(bit, addr))
 #define mr_isBitResetWords(integer, addr)               ( 0U == mr_getbit_fromwords(bit, addr))
+
+/*!< set mask to 32-bit array */
+#define mr_setmask_towords(integer, mask, addr)	\
+do {   \
+    const kuint32_t _integer = (integer);   \
+    *((volatile kuint32_t *)(addr) + mr_word_offset(_integer)) |= mr_bit_nr(mask, mr_bit_offset(_integer)); \
+    mr_dmb();   \
+} while (0)
+
+/*!< clear mask to 32-bit array */
+#define mr_clrmask_towords(integer, mask, addr)	\
+do {   \
+    const kuint32_t _integer = (integer);   \
+    *((volatile kuint32_t *)(addr) + mr_word_offset(_integer)) &= ~mr_bit_nr(mask, mr_bit_offset(_integer));    \
+    mr_dmb();   \
+} while (0)
+
+/*!< git mask from 32-bit array (shift to lowest bit) */
+#define mr_getmask_fromwords(integer, mask, addr)	\
+({  \
+    const kuint32_t _integer = (integer);   \
+    ((*((volatile kuint32_t *)(addr) + mr_word_offset(_integer)) >> mr_bit_offset(_integer)) & (mask));   \
+})
 
 /*!< print levels */
 #define PRINT_LEVEL_SOH                                 "\001"
@@ -248,10 +273,10 @@ __force_inline static inline kuint32_t api_bit_mask(kuint8_t index)
  * @retval  none
  * @note    set bit to array
  */
-__force_inline static inline void bitmap_setl(kuint32_t nr, kuint32_t *addr)
+__force_inline static inline void bitmap_setl(kuint32_t nr, kuint32_t mask, kuint32_t *addr)
 {
     kuint32_t *p_addr = addr + (nr >> 5);
-    (*p_addr) |= (1 << (nr & 0x1f));
+    (*p_addr) |= (mask << (nr & 0x1f));
 }
 
 /*!
@@ -260,10 +285,10 @@ __force_inline static inline void bitmap_setl(kuint32_t nr, kuint32_t *addr)
  * @retval  none
  * @note    reset bit to array
  */
-__force_inline static inline void bitmap_clrl(kuint32_t nr, kuint32_t *addr)
+__force_inline static inline void bitmap_clrl(kuint32_t nr, kuint32_t mask, kuint32_t *addr)
 {
     kuint32_t *p_addr = addr + (nr >> 5);
-    (*p_addr) &= ~(1 << (nr & 0x1f));
+    (*p_addr) &= ~(mask << (nr & 0x1f));
 }
 
 /*!

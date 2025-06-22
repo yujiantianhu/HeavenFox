@@ -562,7 +562,7 @@ static void *display_task_entry(void *args)
     crt_disp_task_t cgtc_dtsk(cptr_this, "/dev/fb0", O_RDWR);
     crt_disp_bmp_t cgtc_logo(cgtc_dtsk);
     crt_disp_bmp_t cgtc_windows(cgtc_dtsk);
-    crt_disp_text_t cgtc_txt(cgtc_dtsk, 1024);
+    crt_disp_text_t cgtc_txt(cgtc_dtsk, 4096);
     
     kint32_t retval;
 

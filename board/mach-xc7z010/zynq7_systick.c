@@ -1,7 +1,7 @@
 /*
  * ZYNQ7 Board Terminal Initial
  *
- * File Name:   zynq7_console.c
+ * File Name:   zynq7_systick.c
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2024.06.22
@@ -22,13 +22,10 @@
 
 struct ps7_xtime_data
 {
-    XScuTimer sgtc_timer;
-    XTtcPs sgtc_ttc;
+    XScuTimer sgtc_tick;
 
-    struct fwk_device_node *sptr_timnd;
-    struct fwk_device_node *sptr_ttcnd;
-    kint32_t timer_irq;
-    kint32_t ttc_irq;
+    struct fwk_device_node *sptr_ticknd;
+    kint32_t tick_irq;
 };
 
 /*!< The globals */
@@ -37,134 +34,16 @@ static struct ps7_xtime_data sgtc_ps7_xtime_data;
 #ifdef CONFIG_OF
 static const struct fwk_of_device_id sgtc_zynq7_systick_ids[] =
 {
-	{ .compatible = "arm,cortex-a9-twd-timer" },
+    { .compatible = "arm,cortex-a9-twd-timer" },
 //  { .compatible = "arm,cortex-a9-global-timer" },
-	{},
-};
-
-static const struct fwk_of_device_id sgtc_zynq7_ttc_ids[] =
-{
-	{ .compatible = "cdns,ttc" },
-	{},
+    {},
 };
 #endif
 
 /*!< The functions */
-irq_return_t zynq7_systick_isr(kint32_t irq, void *ptrDev);
+irq_return_t zynq7_systick_isr(kint32_t irq, void *args);
 
 /*!< API function */
-#if 0
-/*!
- * @brief   load compare value to hardware
- * @param   expires (unit: tick)
- * @retval  none
- * @note    called by systick interrupt
- */
-void reload_htick_cnt(kutime_t expires)
-{
-    XTtcPs *sptr_ttc = &sgtc_ps7_xtime_data.sgtc_ttc;
-
-    XTtcPs_Stop(sptr_ttc);
-    
-    /*!< Set expect tick */
-    XTtcPs_SetMatchValue(sptr_ttc, sptr_ttc->Config.DeviceId, expires);
-    
-    XTtcPs_Start(sptr_ttc);
-}
-
-/*!
- * @brief   reset htick counter
- * @param   none
- * @retval  none
- * @note    none
- */
-void reset_htick_cnt(void)
-{
-    XTtcPs *sptr_ttc = &sgtc_ps7_xtime_data.sgtc_ttc;
-
-    XTtcPs_Stop(sptr_ttc);
-    XTtcPs_ResetCounterValue(sptr_ttc);
-    XTtcPs_Start(sptr_ttc);
-}
-
-/*!
- * @brief   initial and start htick
- * @param   none
- * @retval  none
- * @note    none
- */
-static void zynq7_htick_init(void)
-{
-    struct ps7_xtime_data *sptr_data;
-    struct fwk_device_node *sptr_node;
-    XTtcPs *sptr_ttc;
-    XTtcPs_Config *sptr_cfg, sgtc_cfg;
-    kuaddr_t irq;
-    kuint32_t prescaler;
-    kint32_t retval;
-
-    sptr_data = &sgtc_ps7_xtime_data;
-    sptr_ttc = &sptr_data->sgtc_ttc;
-
-#ifdef CONFIG_OF
-    sptr_cfg = &sgtc_cfg;
-
-    sptr_node = fwk_of_find_matching_node_and_match(mr_nullptr, sgtc_zynq7_ttc_ids, mr_nullptr);
-    if (!isValid(sptr_node))
-        return;
-
-    sptr_cfg->DeviceId = XPAR_PS7_TTC_0_DEVICE_ID;
-    sptr_cfg->BaseAddress = (kuaddr_t)fwk_of_iomap(sptr_node, 0);
-    sptr_cfg->InputClockHz = XPAR_PS7_TTC_0_TTC_CLK_FREQ_HZ;
-    irq = fwk_of_irq_get(sptr_node, 0);
-
-    sptr_data->sptr_ttcnd = sptr_node;
-
-#else
-    sptr_cfg = XTtcPs_LookupConfig(XPAR_PS7_TTC_0_DEVICE_ID);
-    if (!isValid(sptr_cfg))
-        return;
-
-    irq = XPAR_XTTCPS_0_INTR - 16;
-
-#endif
-
-    sptr_data->ttc_irq = irq;
-
-    retval = XTtcPs_CfgInitialize(sptr_ttc, sptr_cfg, sptr_cfg->BaseAddress);
-    if (retval)
-        return;
-
-    /*!< Disable IRQ and Timer */
-    XTtcPs_DisableInterrupts(sptr_ttc, XTTCPS_IXR_MATCH_0_MASK);
-    XTtcPs_Stop(sptr_ttc);
-
-    g_is_systick_up = true;
-    ptr_systick_counter = (volatile kutime_t *)(sptr_ttc->Config.BaseAddress + XTTCPS_COUNT_VALUE_OFFSET);
-    /*!< Period: 1us (1MHz) */
-    g_systick_freq = 1000000;
-
-    /*!< Set clocksource (use cpu clock) */
-    XTtcPs_SetOptions(sptr_ttc, XTTCPS_OPTION_WAVE_DISABLE | XTTCPS_OPTION_MATCH_MODE);
-
-    /*!< PrescalerValue = (InputClockHz / 1MHz) - 1 = 110.111115 */
-    prescaler = sptr_cfg->InputClockHz / SYSTICK_FREQ - 1;
-    XTtcPs_SetPrescaler(sptr_ttc, (kuint8_t)((prescaler < 255) ? prescaler : 255));
-
-    /*!< enable interrupt */
-    retval = fwk_request_irq(irq, zynq7_systick_isr, 0, "zynq7-htime_tick", &sgtc_ps7_xtime_data);
-    if (!retval)
-        XTtcPs_EnableInterrupts(sptr_ttc, XTTCPS_IXR_MATCH_0_MASK);
-
-    /*!< Reset */
-    XTtcPs_ClearInterruptStatus(sptr_ttc, XTTCPS_IXR_MATCH_0_MASK);
-
-    /*!< Load expect tick and start TTC */
-    reload_htick_cnt(1000);
-    XTtcPs_ResetCounterValue(sptr_ttc);
-}
-#endif
-
 /*!
  * @brief   initial and start systick
  * @param   none
@@ -181,7 +60,7 @@ void zynq7_systick_init(void)
     kint32_t retval;
 
     sptr_data = &sgtc_ps7_xtime_data;
-    sptr_timer = &sptr_data->sgtc_timer;
+    sptr_timer = &sptr_data->sgtc_tick;
 
 #ifdef CONFIG_OF
     sptr_cfg = &sgtc_cfg;
@@ -194,7 +73,7 @@ void zynq7_systick_init(void)
     sptr_cfg->BaseAddr = (kuaddr_t)fwk_of_iomap(sptr_node, 0);
     irq = fwk_of_irq_get(sptr_node, 0);
 
-    sptr_data->sptr_timnd = sptr_node;
+    sptr_data->sptr_ticknd = sptr_node;
 
 #else
     sptr_cfg = XScuTimer_LookupConfig(XPAR_PS7_SCUTIMER_0_DEVICE_ID);
@@ -205,7 +84,7 @@ void zynq7_systick_init(void)
 
 #endif
 
-    sptr_data->timer_irq = irq;
+    sptr_data->tick_irq = irq;
 
     retval = XScuTimer_CfgInitialize(sptr_timer, sptr_cfg, sptr_cfg->BaseAddr);
     if (retval)
@@ -218,8 +97,13 @@ void zynq7_systick_init(void)
     if (!retval)
         XScuTimer_EnableInterrupt(sptr_timer);
 
-    /*!< 10ms */
-    XScuTimer_LoadTimer(sptr_timer, ZYNQ7_SCUTIMER0_FREQ_HZ / TICK_HZ);
+    /*!< Period: 3ns */
+    SYSTICK_INIT(ZYNQ7_SCUTIMER0_FREQ_HZ,
+                 IS_TICKCNT_DEC,
+                 sptr_timer->Config.BaseAddr + XSCUTIMER_COUNTER_OFFSET);
+
+    /*!< TICK_HZ = 200, period = 5ms */
+    XScuTimer_LoadTimer(sptr_timer, SYSTICK_FREQ / TICK_HZ);
 
 #if 1
     XScuTimer_EnableAutoReload(sptr_timer);
@@ -227,16 +111,10 @@ void zynq7_systick_init(void)
     XScuTimer_DisableAutoReload(sptr_timer);
 #endif
 
-//  zynq7_htick_init();
-
-    g_is_systick_up = true;
-    ptr_systick_counter = (volatile kutime_t *)(sptr_timer->Config.BaseAddr + XSCUTIMER_COUNTER_OFFSET);
-    /*!< Period: 0.3us */
-    g_systick_freq = ZYNQ7_SCUTIMER0_FREQ_HZ;
-
     XScuTimer_Start(sptr_timer);
-
-    print_info("System Tick start to run, frequency is: %d\r\n", TICK_HZ);
+    
+    print_info("System Tick start to run, frequency is: %u(Hz)\r\n", SYSTICK_FREQ);
+    print_info("System counter (jiffies) enable, TICK_HZ is %u(Hz)\r\n", TICK_HZ);
 }
 
 /*!
@@ -248,33 +126,19 @@ void zynq7_systick_init(void)
 irq_return_t zynq7_systick_isr(kint32_t irq, void *args)
 {
     struct ps7_xtime_data *sptr_data = (struct ps7_xtime_data *)args;
-    XScuTimer *sptr_timer = &sptr_data->sgtc_timer;
-//  XTtcPs *sptr_ttc = &sptr_data->sgtc_ttc;
+    XScuTimer *sptr_timer = &sptr_data->sgtc_tick;
     kuint32_t status;
 
     /*!< Timer Interrupt */
     status = XScuTimer_GetInterruptStatus(sptr_timer);
     if (status)
     {
-        /*!< sync tick */
-//      reset_htick_cnt();
-
         /*!< reset jiffies when counter over */
-		get_time_counter();
-		do_timer_event();
+        get_time_counter();
+        do_timer_event();
 
         XScuTimer_ClearInterruptStatus(sptr_timer);
     }
-
-    /*!< Ttc Interrupt */
-//  status = XTtcPs_GetInterruptStatus(sptr_ttc);
-//  if (status)
-//  {
-//      if (status & XTTCPS_IXR_MATCH_0_MASK)
-//          do_htick_event();
-//
-//      XTtcPs_ClearInterruptStatus(sptr_ttc, status);
-//  }
 
     return ER_NORMAL;
 }

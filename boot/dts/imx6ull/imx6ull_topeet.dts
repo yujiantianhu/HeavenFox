@@ -122,6 +122,11 @@
 	fsl,ldo-bypass = <0>;
 };
 
+&epit1 {
+	compatible = "fsl,imx6ull-epit";
+	status = "okay";
+};
+
 &i2c1 {
 	clock_frequency = <100000>;
 	pinctrl-names = "default";

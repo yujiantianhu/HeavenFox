@@ -46,6 +46,36 @@ static void thread_sleep_timeout(kuint32_t args)
 }
 
 /*!
+ * @brief   timeout callback with high time tick
+ * @param   tick: interval
+ * @retval  none
+ * @note    delay and schedule (current thread may convert to suspend status)
+ */
+void khrtime_schedule(khrtime_t tick)
+{    
+    struct hrtimer_list sgtc_tm;
+    struct thread *sptr_cur = mr_current;
+
+    /*!< schedule but not suspend (just add to ready list) */
+    if (tick < USEC_TO_HRTICK(2)) {
+        schedule_thread();
+        return;
+    }
+	
+    setup_hrtimer(&sgtc_tm, thread_sleep_timeout, (kuint32_t)sptr_cur);
+
+    /*!< suspend current thread, and schedule others */
+    spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    __SET_THREAD_STATE(sptr_cur, NR_THREAD_SUSPEND);
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
+
+    mod_hrtimer(&sgtc_tm, ktime_hrtick() + tick);
+    schedule_thread();
+
+    del_hrtimer(&sgtc_tm);
+}
+
+/*!
  * @brief   setup timer for sleeping
  * @param   count
  * @retval  none
@@ -76,15 +106,44 @@ void schedule_timeout(kutime_t count)
 }
 
 /*!
- * @brief   sleep (unit: s)
- * @param   seconds
+ * @brief   sleep (unit: tick) by hrtimer
+ * @param   tick
  * @retval  none
  * @note    delay and schedule (current thread may convert to suspend status)
  */
-kuint32_t sleep(kuint32_t seconds)
+void khrt_sleep_tick(khrtime_t tick)
 {
-    kutime_t count = secs_to_jiffies(seconds);
-    kutime_t expires = jiffies + count;
+    khrtime_t expires = ktime_hrtick() + tick;
+
+    if (mr_likely(mr_current))
+    {
+    #if CONFIG_ROLL_POLL
+        while (expires > ktime_hrtick())
+            schedule_thread();
+
+    #else
+        if (expires > ktime_hrtick())
+            khrtime_schedule(tick);
+        
+    #endif
+    }
+    else
+    {
+        /*!< wait_secs(seconds); */
+        while (expires > ktime_hrtick())
+            mr_nop();
+    }
+}
+
+/*!
+ * @brief   sleep (unit: tick) by jiffies
+ * @param   tick
+ * @retval  none
+ * @note    delay and schedule (current thread may convert to suspend status)
+ */
+kuint32_t sleep_tick(kutime_t tick)
+{
+    kutime_t expires = jiffies + tick;
 
     if (mr_likely(mr_current))
     {
@@ -94,7 +153,7 @@ kuint32_t sleep(kuint32_t seconds)
 
     #else
         if (mr_time_after(expires, jiffies))
-            schedule_timeout(count);
+            schedule_timeout(tick);
         
     #endif
     }
@@ -104,7 +163,26 @@ kuint32_t sleep(kuint32_t seconds)
         while (mr_time_after(expires, jiffies));
     }
 
-    return (kuint32_t)count;
+    return (kuint32_t)tick;
+}
+
+/*!
+ * @brief   sleep (unit: s)
+ * @param   seconds
+ * @retval  none
+ * @note    delay and schedule (current thread may convert to suspend status)
+ */
+kuint32_t sleep(kuint32_t seconds)
+{
+    /*!< TICK_HZ >= 100, jiffies can satisfy */
+//#if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
+//    khrt_sleep_tick(SEC_TO_HRTICK(seconds));
+//    return ER_NORMAL;
+
+//#else
+    return sleep_tick(secs_to_jiffies(seconds));
+
+//#endif
 }
 
 /*!
@@ -115,28 +193,23 @@ kuint32_t sleep(kuint32_t seconds)
  */
 kuint32_t msleep(kuint32_t milseconds)
 {
-    kutime_t count = msecs_to_jiffies(milseconds);
-    kutime_t expires = jiffies + count;
-    
-    if (mr_likely(mr_current))
-    {
-    #if CONFIG_ROLL_POLL
-        while (mr_time_after(expires, jiffies))
-            schedule_thread();
+#if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
+    kuint32_t period_ms = 1000U / TICK_HZ;
+    kuint32_t first_msecs = milseconds / period_ms;
+    kuint32_t remain_msecs = milseconds - (first_msecs * period_ms);
+    khrtime_t ticks = MSEC_TO_HRTICK(milseconds);
 
-    #else
-        if (mr_time_after(expires, jiffies))
-            schedule_timeout(count);
-        
-    #endif
-    }
-    else
-    {
-        /*!< wait_msecs(milseconds); */
-        while (mr_time_after(expires, jiffies));
-    }
+    /*!< Is the multiples of period_ms, or ticks are too large, use jiffies first */
+    if (mr_likely(!remain_msecs) || (ticks > HRTIMER_MAX))
+        return sleep_tick(msecs_to_jiffies(milseconds));
 
-    return (kuint32_t)count;
+    khrt_sleep_tick(ticks);
+    return ER_NORMAL;
+
+#else
+    return sleep_tick(msecs_to_jiffies(milseconds));
+
+#endif
 }
 
 /*!
@@ -147,94 +220,23 @@ kuint32_t msleep(kuint32_t milseconds)
  */
 kint32_t usleep(kuint32_t useconds)
 {
-    kutime_t count = usecs_to_jiffies(useconds);
-    kutime_t expires = jiffies + count;
-    
-    if (mr_likely(mr_current))
-    {
-    #if CONFIG_ROLL_POLL
-        while (mr_time_after(expires, jiffies))
-            schedule_thread();
+#if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
+    kuint32_t period_us = 1000000U / TICK_HZ;
+    kuint32_t first_usecs = useconds / period_us;
+    kuint32_t remain_usecs = useconds - (first_usecs * period_us);
+    khrtime_t ticks = USEC_TO_HRTICK(useconds);
 
-    #else
-        if (mr_time_after(expires, jiffies))
-            schedule_timeout(count);
-        
-    #endif
-    }
-    else
-    {
-        /*!< wait_usecs(useconds); */
-        while (mr_time_after(expires, jiffies));
-    }
+    /*!< Is the multiples of period_us, or ticks are too large, use jiffies first */
+    if (mr_likely(!remain_usecs) || (ticks > HRTIMER_MAX))
+        return sleep_tick(usecs_to_jiffies(useconds));
 
-    return (kint32_t)count;
-}
+    khrt_sleep_tick(ticks);
+    return ER_NORMAL;
 
-/*!
- * @brief   timeout callback in jiffies IRQ
- * @param   args: struct ktime_event *
- * @retval  none
- * @note    unused!!!
- */
-static void thread_ktimeout_f(kuint32_t args)
-{
-    struct ktime_event *sptr_tv;
-    kutime_t cur_tick;
+#else
+    return sleep_tick(usecs_to_jiffies(useconds));
 
-    sptr_tv = (struct ktime_event *)args;
-    cur_tick = ktime_systick();
-
-    if (sptr_tv->remain_tick <= cur_tick)
-        thread_sleep_timeout((kuint32_t)sptr_tv->sptr_cur);
-    else
-    {
-        mod_htimer(&sptr_tv->sgtc_tmr, sptr_tv->remain_tick);
-        sptr_tv->remain_tick = 0;
-        sptr_tv->sgtc_tmr.expires = (JIFFIES_MAX + 1);
-    }    
-}
-
-/*!
- * @brief   timeout callback with high time tick
- * @param   tick: interval
- * @retval  none
- * @note    unused!!!
- */
-void schedule_ktimeout(kutime_t tick)
-{    
-    struct ktime_event sgtc_tv;
-    struct thread *sptr_cur = mr_current;
-    kutime_t jiffies_tick = SYSTICK_FREQ / TICK_HZ;
-    kutime_t cur_tick, jiffies_cnt;
-
-    /*!< Scheduling will cast 10tick */
-    if (tick < 10)
-        schedule_thread();
-
-    sgtc_tv.sptr_cur = sptr_cur;
-
-    setup_timer(&sgtc_tv.sgtc_tmf, thread_ktimeout_f, (kuint32_t)&sgtc_tv);
-    setup_htimer(&sgtc_tv.sgtc_tmr, thread_sleep_timeout, (kuint32_t)sptr_cur);
-
-    cur_tick = ktime_systick();
-    jiffies_cnt = (cur_tick + tick) / jiffies_tick;
-    sgtc_tv.remain_tick = (cur_tick + tick) - (jiffies_cnt * jiffies_tick);
-
-    /*!< suspend current thread, and schedule others */
-    spin_lock_irqsave(&sptr_cur->sgtc_lock);
-    __SET_THREAD_STATE(sptr_cur, NR_THREAD_SUSPEND);
-    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
-
-    if (jiffies_cnt)
-        mod_timer(&sgtc_tv.sgtc_tmf, jiffies + jiffies_cnt);
-    else
-        mod_htimer(&sgtc_tv.sgtc_tmr, cur_tick + tick);
-
-    schedule_thread();
-
-    del_htimer(&sgtc_tv.sgtc_tmf);
-    del_htimer(&sgtc_tv.sgtc_tmr);
+#endif
 }
 
 /*!< end of file */

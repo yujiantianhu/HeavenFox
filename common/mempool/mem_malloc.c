@@ -182,6 +182,9 @@ int memcmp(const void *__s1, const void *__s2, size_t __n)
  */
 void *memcpy(void *__dest, const void *__src, size_t __n)
 {
+    if (!__n)
+        return __dest;
+
     return kmemcpy(__dest, __src, __n);
 }
 

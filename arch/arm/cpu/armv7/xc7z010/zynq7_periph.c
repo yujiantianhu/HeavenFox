@@ -979,7 +979,7 @@ void XTtcPs_CalcIntervalFromFreq(XTtcPs *sptr_ttc, kuint32_t Freq, XInterval *In
      * Find the smallest prescaler that will work for a given frequency. The
      * smaller the prescaler, the larger the count and the more accurate the PWM setting.
      */
-    TempValue = InputClock/ Freq;
+    TempValue = InputClock / Freq;
 
     if (TempValue < 4U) 
     {
@@ -1005,7 +1005,7 @@ void XTtcPs_CalcIntervalFromFreq(XTtcPs *sptr_ttc, kuint32_t Freq, XInterval *In
 
     for (TmpPrescaler = 0U; TmpPrescaler < XTTCPS_CLK_CNTRL_PS_DISABLE; TmpPrescaler++) 
     {
-        TempValue =	InputClock/ (Freq * (1U << (TmpPrescaler + 1U)));
+        TempValue =	InputClock / (Freq * (1U << (TmpPrescaler + 1U)));
 
         /*!< The first value less than 2^16 is the best bet */
         if (((kuaddr_t)XTTCPS_MAX_INTERVAL_COUNT) > TempValue) 

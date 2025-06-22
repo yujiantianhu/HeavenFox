@@ -43,6 +43,7 @@ kint32_t board_init_console(void)
 kint32_t board_init_systick(void)
 {
     zynq7_systick_init();
+    zynq7_hrtime_init();
 
     return RET_BOOT_PASS;
 }

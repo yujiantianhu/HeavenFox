@@ -24,11 +24,14 @@
 
 /*!< The functions */
 extern void schedule_timeout(kutime_t count);
-extern void schedule_ktimeout(kutime_t tick);
+extern void khrtime_schedule(khrtime_t tick);
 
 extern kuint32_t sleep(kuint32_t seconds);
 extern kuint32_t msleep(kuint32_t milseconds);
 extern kint32_t usleep(kuint32_t useconds);
+
+extern kuint32_t sleep_tick(kutime_t tick);
+extern void khrt_sleep_tick(khrtime_t tick);
 
 #ifdef __cplusplus
     }

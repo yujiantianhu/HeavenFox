@@ -13,6 +13,7 @@
 /*!< The includes */
 #include <configs/configs.h>
 #include <common/time.h>
+#include <common/mem_manage.h>
 #include <kernel/spinlock.h>
 
 /*!< The defines */
@@ -29,13 +30,24 @@ struct ktime_tick
 };
 
 /*!< The globals */
+/*!< ---------------------------------------------------------- */
 volatile kutime_t jiffies = JIFFIES_INITVAL;
+volatile kuint64_t jiffies_all = 0;
 volatile kutime_t jiffies_out = 0;
 
 volatile kutime_t *ptr_systick_counter = mr_nullptr;
-kutime_t g_systick_freq = 1;
+kutime_t g_systick_freq = FREQ_INIT_VAL;
 kbool_t g_is_systick_up = true;
 
+kutime_t g_hrtime_over_cnt = 0;
+
+/*!< ---------------------------------------------------------- */
+volatile kutime_t *ptr_hrtimer_counter = mr_nullptr;
+volatile kutime_t *ptr_hrtimer_counter2 = mr_nullptr;
+kutime_t g_hrtimer_freq = FREQ_INIT_VAL;
+kbool_t g_is_hrtimer_up = true;
+
+/*!< ---------------------------------------------------------- */
 kutime_t g_delay_timer_counter = 0;
 struct time_clock sgtc_systime_clock;
 
@@ -48,15 +60,94 @@ static struct ktime_tick sgtc_ktime_inactive;
 
 /*!< API function */
 /*!
- * @brief   Read systick (unit: us)
+ * @brief   Read current systick
  * @param   none
- * @retval  tick (us)
+ * @retval  tick
  * @note    get the time register's current value
  */
 __weak kutime_t ktime_systick(void)
 {
     volatile kutime_t *time_cnt = ptr_systick_counter;
-    return time_cnt ? (IS_SYSTICK_UPINC() ? (*time_cnt) : (SYSTICK_FREQ - (*time_cnt))) : 0;
+    return time_cnt ? (IS_SYSTICK_UPINC() ? (*time_cnt) : (SYSTICK_MAX - (*time_cnt))) : 0;
+}
+
+/*!
+ * @brief   Read high time current tick
+ * @param   none
+ * @retval  tick
+ * @note    get the time register's current value
+ */
+__weak khrtime_t ktime_hrtick(void)
+{
+    volatile kutime_t *time_cnt1 = ptr_hrtimer_counter;
+    volatile kutime_t *time_cnt2 = ptr_hrtimer_counter2;
+
+    if (!time_cnt1)
+        return 0;
+
+    if (time_cnt2)
+    {
+        kutime_t tick_l, tick_h;
+
+        do {
+            tick_h = *time_cnt2;
+            tick_l = *time_cnt1;
+
+        } while (tick_h != (*time_cnt2));
+
+        return ((((khrtime_t)tick_h) << 32ULL) | tick_l);
+    }
+
+    return IS_HRTIMER_UPINC() ? (*time_cnt1) : (HRTIMER_MAX - (*time_cnt1));
+}
+
+/*!
+ * @brief   Read high time total tick
+ * @param   none
+ * @retval  tick
+ * @note    get the time register's current value
+ */
+__weak khrtime_t khrtime_passed_ticks(void)
+{
+    volatile kutime_t *time_cnt1 = ptr_hrtimer_counter;
+    volatile kutime_t *time_cnt2 = ptr_hrtimer_counter2;
+    kutime_t tick_l, tick_h;
+
+    if (!time_cnt1)
+        return 0;
+
+    if (time_cnt2)
+    {
+        do {
+            tick_h = *time_cnt2;
+            tick_l = *time_cnt1;
+
+        } while (tick_h != (*time_cnt2));
+
+        return ((((khrtime_t)tick_h) << 32ULL) | tick_l);
+    }
+
+    tick_l = IS_HRTIMER_UPINC() ? (*time_cnt1) : (HRTIMER_MAX - (*time_cnt1));
+    return (g_hrtime_over_cnt * (khrtime_t)HRTIMER_MAX) + tick_l;
+}
+
+/*!
+ * @brief   Parse to time_val
+ * @param   sptr_tval
+ * @retval  none
+ * @note    Convert total ticks to secs.usecs
+ */
+__weak void ktime_to_spec(struct time_val *sptr_tval)
+{
+    if (mr_unlikely(HRTIMER_FREQ == FREQ_INIT_VAL))
+        memset(sptr_tval, 0, sizeof(*sptr_tval));
+    else
+    {
+        khrtime_t ticks = khrtime_passed_ticks();
+
+        sptr_tval->tv_sec = HRTICK_TO_SEC(ticks);
+        sptr_tval->tv_usec = HRTICK_TO_USEC(ticks - SEC_TO_HRTICK(sptr_tval->tv_sec));
+    }
 }
 
 /*!
@@ -346,12 +437,12 @@ void do_timer_event(void)
  * @retval  none
  * @note    called by systick interrupt
  */
-__weak void reload_htick_cnt(kutime_t expires)
+__weak void khrtime_reload_cnt(khrtime_t expires)
 {
 }
 
 /*!< get timer_list with the smallest expires */
-#define HTICK_FIRST_UPDATE(sptr_cur, sptr_new)  \
+#define HRTIMER_SELECT(sptr_cur, sptr_new)  \
     ((sptr_cur) ? ((sptr_cur)->expires < (sptr_new)->expires ? (sptr_cur) : (sptr_new)) : (sptr_new))
 
 /*!
@@ -362,7 +453,7 @@ __weak void reload_htick_cnt(kutime_t expires)
  * @retval  none
  * @note    none
  */
-void setup_htimer(struct timer_list *sptr_timer, void (*entry)(kuint32_t), kuint32_t data)
+void setup_hrtimer(struct hrtimer_list *sptr_timer, void (*entry)(kuint32_t), kuint32_t data)
 {
     if (!sptr_timer)
         return;
@@ -376,11 +467,11 @@ void setup_htimer(struct timer_list *sptr_timer, void (*entry)(kuint32_t), kuint
  * @retval  none
  * @note    systick interrupt will traverses the hight time list
  */
-void add_htimer(struct timer_list *sptr_timer)
+void add_hrtimer(struct hrtimer_list *sptr_timer)
 {
     struct ktime_tick *sptr_list;
     struct spin_lock *sptr_lock;
-    struct timer_list **sptr_first;
+    struct hrtimer_list **sptr_first;
 
     if ((!sptr_timer) || 
         (!sptr_timer->expires) ||
@@ -389,7 +480,7 @@ void add_htimer(struct timer_list *sptr_timer)
 
     sptr_list = &sgtc_ktime_htick;
     sptr_lock = &sptr_list->sgtc_lock;
-    sptr_first = &sptr_list->sptr_first;
+    sptr_first = (struct hrtimer_list **)&sptr_list->sptr_first;
 
     spin_lock_irqsave(sptr_lock);
 
@@ -397,7 +488,7 @@ void add_htimer(struct timer_list *sptr_timer)
         (sptr_timer->expires < (*sptr_first)->expires))
     {
         *sptr_first = sptr_timer;
-        reload_htick_cnt(sptr_timer->expires);
+        khrtime_reload_cnt(sptr_timer->expires);
     }
 
     list_head_add_tail(&sptr_list->sgtc_list, &sptr_timer->sgtc_link);
@@ -410,12 +501,12 @@ void add_htimer(struct timer_list *sptr_timer)
  * @retval  none
  * @note    none
  */
-void del_htimer(struct timer_list *sptr_timer)
+void del_hrtimer(struct hrtimer_list *sptr_timer)
 {
     struct ktime_tick *sptr_list;
     struct spin_lock *sptr_lock;
-    struct timer_list *sptr_per;
-    struct timer_list *sptr_next = mr_nullptr;
+    struct hrtimer_list *sptr_per;
+    struct hrtimer_list *sptr_next = mr_nullptr;
 
     if (mr_unlikely(!sptr_timer))
         return;
@@ -426,13 +517,13 @@ void del_htimer(struct timer_list *sptr_timer)
     spin_lock_irqsave(sptr_lock);
     list_head_del(&sptr_timer->sgtc_link);
 
-    if (mr_unlikely(sptr_timer == sptr_list->sptr_first))
+    if (mr_unlikely((struct timer_list *)sptr_timer == sptr_list->sptr_first))
     {
         foreach_list_next_entry(sptr_per, &sptr_list->sgtc_list, sgtc_link)
-            sptr_next = HTICK_FIRST_UPDATE(sptr_next, sptr_per);
+            sptr_next = HRTIMER_SELECT(sptr_next, sptr_per);
 
-        sptr_list->sptr_first = sptr_next;
-        reload_htick_cnt(sptr_next ? sptr_next->expires : (SYSTICK_FREQ + 1));
+        sptr_list->sptr_first = (struct timer_list *)sptr_next;
+        khrtime_reload_cnt(sptr_next ? sptr_next->expires : HRTIMER_MAX);
     }
     
     spin_unlock_irqrestore(sptr_lock);
@@ -445,7 +536,7 @@ void del_htimer(struct timer_list *sptr_timer)
  * @retval  none
  * @note    if timer has not been added to list, add it right away
  */
-void mod_htimer(struct timer_list *sptr_timer, kutime_t expires)
+void mod_hrtimer(struct hrtimer_list *sptr_timer, khrtime_t expires)
 {
     if (mr_unlikely(!sptr_timer))
         return;
@@ -453,7 +544,27 @@ void mod_htimer(struct timer_list *sptr_timer, kutime_t expires)
     sptr_timer->expires = expires;
 
     if (mr_list_empty(&sptr_timer->sgtc_link))
-        add_htimer(sptr_timer);
+        add_hrtimer(sptr_timer);
+}
+
+/*!
+ * @brief   timer counter is over, check all expires
+ * @param   none
+ * @retval  none
+ * @note    called by hrtimer interrupt
+ */
+void check_hrtimer(void)
+{
+    struct ktime_tick *sptr_list;
+    struct hrtimer_list *sptr_timer;
+
+    sptr_list = &sgtc_ktime_htick;
+
+    foreach_list_next_entry(sptr_timer, &sptr_list->sgtc_list, sgtc_link)
+    {
+        if (sptr_timer->expires > HRTIMER_MAX)
+            sptr_timer->expires -= HRTIMER_MAX;
+    }
 }
 
 /*!
@@ -461,34 +572,34 @@ void mod_htimer(struct timer_list *sptr_timer, kutime_t expires)
  * @param   none
  * @param	none
  * @retval  none
- * @note    called by systick interrupt
+ * @note    called by hrtimer interrupt
  */
-void do_htick_event(void)
+void do_hrtime_event(void)
 {
     struct ktime_tick *sptr_list, *sptr_cast;
-    struct timer_list *sptr_timer, *sptr_temp;
-    kutime_t cur_tick;
-    struct timer_list *sptr_next = mr_nullptr;
+    struct hrtimer_list *sptr_timer, *sptr_temp;
+    khrtime_t cur_tick;
+    struct hrtimer_list *sptr_next = mr_nullptr;
 
     sptr_list = &sgtc_ktime_htick;
     sptr_cast = &sgtc_ktime_inactive;
 
     foreach_list_next_entry_safe(sptr_timer, sptr_temp, &sptr_list->sgtc_list, sgtc_link)
     {
-        /*!< Get tick real-time */
-        cur_tick = ktime_systick();
+        /*!< Get tick real-time (deal with more events, within 1us) */
+        cur_tick = ktime_hrtick() + USEC_TO_HRTICK(1);
 
         if (mr_time_before(cur_tick, sptr_timer->expires))
-            sptr_next = HTICK_FIRST_UPDATE(sptr_next, sptr_timer);
+            sptr_next = HRTIMER_SELECT(sptr_next, sptr_timer);
         else
         {
             /*!< Do event */
             sptr_timer->entry(sptr_timer->data);
             if (cur_tick < sptr_timer->expires)
-                sptr_next = HTICK_FIRST_UPDATE(sptr_next, sptr_timer);
+                sptr_next = HRTIMER_SELECT(sptr_next, sptr_timer);
             else
             {
-                sptr_timer->expires = SYSTICK_FREQ + 1;
+                sptr_timer->expires = HRTIMER_MAX;
 
                 list_head_del(&sptr_timer->sgtc_link);
                 list_head_add_tail(&sptr_cast->sgtc_list, &sptr_timer->sgtc_link);
@@ -496,10 +607,10 @@ void do_htick_event(void)
         }
     }
     
-    sptr_list->sptr_first = sptr_next;
-    reload_htick_cnt(sptr_next ? sptr_next->expires : (SYSTICK_FREQ + 1));
+    sptr_list->sptr_first = (struct timer_list *)sptr_next;
+    khrtime_reload_cnt(sptr_next ? sptr_next->expires : HRTIMER_MAX);
 }
-#undef  HTICK_FIRST_UPDATE
+#undef  HRTIMER_SELECT
 
 /*!
  * @brief   system timer init

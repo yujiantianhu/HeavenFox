@@ -98,7 +98,7 @@ static void *button_task_entry(void *args)
         last_status = status;
 
 END:
-        msleep(200);
+        msleep(208);
     }
 
     virt_close(fd);

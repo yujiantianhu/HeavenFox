@@ -30,6 +30,7 @@ extern void imx6ull_led_init(void);
 extern void imx6ull_console_init(void);
 extern void imx6ull_sdmmc_init(void);
 extern void imx6ull_systick_init(void);
+extern void imx6ull_hrtimer_init(void);
 
 #ifdef __cplusplus
     }

@@ -88,7 +88,7 @@ static void kthread_systime_record(void)
     if (systime != jiffies)
     {
         msecs_to_timeclock(&sgtc_systime_clock, jiffies_to_msecs(systime));
-        systime = SYS_RUNTICK();
+        systime = JIFFIES_COUNT();
     }
 }
 
@@ -143,13 +143,13 @@ static void *kthread_entry(void *args)
     /*!< build application */
     init_proc_init();                       /*!< create init task */
 
-    print_sync("%s: %d\r\n", __func__, __LINE__);
+    print_info("%s: %d\r\n", __func__, __LINE__);
 
     for (;;)
     {
         kthread_systime_record();
         kthread_kill_zombie();              /*!< kill zombie thread */
-
+        
         /*!< Print logs */
         io_stream_logs_print(g_kthread_log_buffer, sizeof(g_kthread_log_buffer));
 
