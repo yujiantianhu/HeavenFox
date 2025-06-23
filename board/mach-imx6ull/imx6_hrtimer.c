@@ -35,9 +35,6 @@ static const struct fwk_of_device_id sgtc_imx_hrtimer_ids[] =
 /*!< The functions */
 irq_return_t imx6_hrtimer_isr(kint32_t irq, void *ptrDev);
 
-kuint32_t khrtime_over[16] = { 0 };
-kuint32_t khrtime_index = 0;
-
 /*!< API function */
 /*!
  * @brief   load compare value to hardware
@@ -54,10 +51,28 @@ void khrtime_reload_cnt(khrtime_t expires)
     mr_clrbitl(mr_bit(0U), &sptr_tick->IR);
 
     max = HRTIMER_MAX;
+    expires -= (g_hrtime_over_cnt * max);
     val = (expires > max) ? (expires - max) : expires;
-    mr_writel(val, &sptr_tick->OCR[0]);
 
+    mr_writel(val, &sptr_tick->OCR[0]);
     mr_setbitl(mr_bit(0U), &sptr_tick->IR);
+}
+
+/*!
+ * @brief   Check if hrtime counter out
+ * @param   none
+ * @retval  none
+ * @note    true or false
+ */
+kbool_t khrtime_check_overcnt(void)
+{
+    srt_hal_imx_gptimer_t *sptr_tick;
+    kuint32_t status;
+
+    sptr_tick = IMX_HRTIMER_PORT_ENTRY();
+    status = mr_readl(&sptr_tick->SR);
+
+    return mr_isBitSetl(mr_bit(5U), &status);
 }
 
 /*!
@@ -198,6 +213,8 @@ void imx6ull_hrtimer_init(void)
 
     /*!< EN: bit0, GPT Enable */
     mr_setbitl(mr_bit(0U), &sptr_tick->CR);
+
+    print_info("System hrtimer start to run, frequency is: %u(Hz)\r\n", HRTIMER_FREQ);
 }
 
 /*!
@@ -218,16 +235,24 @@ irq_return_t imx6_hrtimer_isr(kint32_t irq, void *ptrDev)
     {
         /*!< Over interrupt */
         mark_hrtime_overone();
-        check_hrtimer();
+
+        /*!< Just clear over bit (clear after marking right away) */
+        mr_writel(mr_bit(5U), &sptr_tick->SR);
+
+//      check_hrtimer();
     }   
     if (mr_isBitSetl(mr_bit(0U), &status))
     {
         /*!< Compare interrupt */
         do_hrtime_event();
+
+        /*!< 
+         * Just clear compare bit 
+         * (if over status bit become 1 during "do_hrtime_event()", keep status for next solution) 
+         */
+        mr_writel(mr_bit(0U), &sptr_tick->SR);
     }
 
-    /*!< Set 1 to clear compare status */
-    mr_writel(status, &sptr_tick->SR);
     return ER_NORMAL;
 }
 

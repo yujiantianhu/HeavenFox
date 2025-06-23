@@ -183,8 +183,8 @@ struct timer_list
     ((a) >= (b));   \
 })
 
-#define mr_time_before(a, b)                               mr_time_after(b, a)            /*!< a < b ? true : false */
-#define mr_time_before_eq(a, b)                            mr_time_after_eq(b, a)         /*!< a <= b ? true : false */
+#define mr_time_before(a, b)                                mr_time_after(b, a)            /*!< a < b ? true : false */
+#define mr_time_before_eq(a, b)                             mr_time_after_eq(b, a)         /*!< a <= b ? true : false */
 
 struct hrtimer_list
 {
@@ -198,12 +198,7 @@ struct hrtimer_list
 #define DEFINE_HRTIMER(_name, _entry, _expires, _data)		\
     struct hrtimer_list _name = TIMER_INITIALIZER(_entry, _expires, _data)
 
-#define HRTIMER_EXPIRES(cur_tick, interval) \
-({  \
-    const khrtime_t _cur_tick = (cur_tick);   \
-    const khrtime_t _max_tick = HRTIMER_MAX;    \
-    ((interval) > (_max_tick - _cur_tick)) ? _max_tick : (_cur_tick + (interval));    \
-})
+#define HRTIMER_EXPIRES(interval)                           (khrtime_ticks() + (interval))
 
 struct time_clock 
 {
@@ -247,7 +242,8 @@ extern void do_hrtime_event(void);
 
 extern kutime_t ktime_systick(void);
 extern khrtime_t ktime_hrtick(void);
-extern khrtime_t khrtime_passed_ticks(void);
+extern khrtime_t khrtime_ticks(void);
+extern kbool_t khrtime_check_overcnt(void);
 extern void ktime_to_spec(struct time_val *sptr_tval);
 extern void khrtime_reload_cnt(khrtime_t expires);
 

@@ -64,7 +64,7 @@ struct khrtime_board_data sgtc_zynq7_khrtime_data;
  * @retval  tick
  * @note    get the time register's current value
  */
-khrtime_t khrtime_passed_ticks(void)
+khrtime_t khrtime_ticks(void)
 {
     struct khrtime_board_data *sptr_data;
     kuaddr_t base;

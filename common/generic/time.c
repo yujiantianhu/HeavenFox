@@ -107,11 +107,13 @@ __weak khrtime_t ktime_hrtick(void)
  * @retval  tick
  * @note    get the time register's current value
  */
-__weak khrtime_t khrtime_passed_ticks(void)
+__weak khrtime_t khrtime_ticks(void)
 {
     volatile kutime_t *time_cnt1 = ptr_hrtimer_counter;
     volatile kutime_t *time_cnt2 = ptr_hrtimer_counter2;
     kutime_t tick_l, tick_h;
+    kutime_t over_count;
+    static kbool_t flags = false;
 
     if (!time_cnt1)
         return 0;
@@ -127,8 +129,27 @@ __weak khrtime_t khrtime_passed_ticks(void)
         return ((((khrtime_t)tick_h) << 32ULL) | tick_l);
     }
 
+    /*!< 
+     * If khrtime_ticks is called by irq_handler, g_hrtime_over_cnt maybe still old;
+     * because g_hrtime_over_cnt only increase in IRQ callback, not real-time,
+     * it means that g_hrtime_over_cnt will be delayed.
+     * khrtime_check_overcnt() will read interrupt status register
+     */
+    over_count = khrtime_check_overcnt() ? (g_hrtime_over_cnt + 1) : g_hrtime_over_cnt;
     tick_l = IS_HRTIMER_UPINC() ? (*time_cnt1) : (HRTIMER_MAX - (*time_cnt1));
-    return (g_hrtime_over_cnt * (khrtime_t)HRTIMER_MAX) + tick_l;
+
+    return (over_count * (khrtime_t)HRTIMER_MAX) + tick_l;
+}
+
+/*!
+ * @brief   Check if hrtime counter out
+ * @param   none
+ * @retval  none
+ * @note    true or false
+ */
+__weak kbool_t khrtime_check_overcnt(void)
+{
+    return false;
 }
 
 /*!
@@ -143,7 +164,7 @@ __weak void ktime_to_spec(struct time_val *sptr_tval)
         memset(sptr_tval, 0, sizeof(*sptr_tval));
     else
     {
-        khrtime_t ticks = khrtime_passed_ticks();
+        khrtime_t ticks = khrtime_ticks();
 
         sptr_tval->tv_sec = HRTICK_TO_SEC(ticks);
         sptr_tval->tv_usec = HRTICK_TO_USEC(ticks - SEC_TO_HRTICK(sptr_tval->tv_sec));
@@ -555,16 +576,6 @@ void mod_hrtimer(struct hrtimer_list *sptr_timer, khrtime_t expires)
  */
 void check_hrtimer(void)
 {
-    struct ktime_tick *sptr_list;
-    struct hrtimer_list *sptr_timer;
-
-    sptr_list = &sgtc_ktime_htick;
-
-    foreach_list_next_entry(sptr_timer, &sptr_list->sgtc_list, sgtc_link)
-    {
-        if (sptr_timer->expires > HRTIMER_MAX)
-            sptr_timer->expires -= HRTIMER_MAX;
-    }
 }
 
 /*!
@@ -580,6 +591,7 @@ void do_hrtime_event(void)
     struct hrtimer_list *sptr_timer, *sptr_temp;
     khrtime_t cur_tick;
     struct hrtimer_list *sptr_next = mr_nullptr;
+    khrtime_t max_ticks = HRTIMER_MAX;
 
     sptr_list = &sgtc_ktime_htick;
     sptr_cast = &sgtc_ktime_inactive;
@@ -587,7 +599,7 @@ void do_hrtime_event(void)
     foreach_list_next_entry_safe(sptr_timer, sptr_temp, &sptr_list->sgtc_list, sgtc_link)
     {
         /*!< Get tick real-time (deal with more events, within 1us) */
-        cur_tick = ktime_hrtick() + USEC_TO_HRTICK(1);
+        cur_tick = khrtime_ticks() + USEC_TO_HRTICK(1);
 
         if (mr_time_before(cur_tick, sptr_timer->expires))
             sptr_next = HRTIMER_SELECT(sptr_next, sptr_timer);
@@ -599,7 +611,7 @@ void do_hrtime_event(void)
                 sptr_next = HRTIMER_SELECT(sptr_next, sptr_timer);
             else
             {
-                sptr_timer->expires = HRTIMER_MAX;
+                sptr_timer->expires = max_ticks;
 
                 list_head_del(&sptr_timer->sgtc_link);
                 list_head_add_tail(&sptr_cast->sgtc_list, &sptr_timer->sgtc_link);
@@ -608,7 +620,7 @@ void do_hrtime_event(void)
     }
     
     sptr_list->sptr_first = (struct timer_list *)sptr_next;
-    khrtime_reload_cnt(sptr_next ? sptr_next->expires : HRTIMER_MAX);
+    khrtime_reload_cnt(sptr_next ? sptr_next->expires : max_ticks);
 }
 #undef  HRTIMER_SELECT
 

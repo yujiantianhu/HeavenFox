@@ -69,7 +69,7 @@ void khrtime_schedule(khrtime_t tick)
     __SET_THREAD_STATE(sptr_cur, NR_THREAD_SUSPEND);
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
 
-    mod_hrtimer(&sgtc_tm, ktime_hrtick() + tick);
+    mod_hrtimer(&sgtc_tm, khrtime_ticks() + tick);
     schedule_thread();
 
     del_hrtimer(&sgtc_tm);
@@ -113,16 +113,16 @@ void schedule_timeout(kutime_t count)
  */
 void khrt_sleep_tick(khrtime_t tick)
 {
-    khrtime_t expires = ktime_hrtick() + tick;
+    khrtime_t expires = khrtime_ticks() + tick;
 
     if (mr_likely(mr_current))
     {
     #if CONFIG_ROLL_POLL
-        while (expires > ktime_hrtick())
+        while (expires > khrtime_ticks())
             schedule_thread();
 
     #else
-        if (expires > ktime_hrtick())
+        if (expires > khrtime_ticks())
             khrtime_schedule(tick);
         
     #endif
@@ -130,7 +130,7 @@ void khrt_sleep_tick(khrtime_t tick)
     else
     {
         /*!< wait_secs(seconds); */
-        while (expires > ktime_hrtick())
+        while (expires > khrtime_ticks())
             mr_nop();
     }
 }

@@ -114,6 +114,9 @@ void imx6ull_systick_init(void)
 
     /*!< EN: bit0, EPIT1 Enable */
     mr_setbitl(mr_bit(0U), &sptr_tick->CR);
+
+    print_info("System Tick start to run, frequency is: %u(Hz)\r\n", SYSTICK_FREQ);
+    print_info("System counter (jiffies) enable, TICK_HZ is %u(Hz)\r\n", TICK_HZ);
 }
 
 /*!
