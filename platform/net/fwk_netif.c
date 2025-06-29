@@ -20,6 +20,7 @@
 #include <platform/net/fwk_icmp.h>
 #include <platform/net/fwk_udp.h>
 #include <platform/net/fwk_tcp.h>
+#include <platform/net/fwk_socket.h>
 
 #include <kernel/thread.h>
 #include <kernel/sched.h>
@@ -118,7 +119,7 @@ fail:
  *          output format:
  *              "192.168.253.231"
  */
-kchar_t *fwk_inet_ntoa(kchar_t *inet_str, kuint32_t addr)
+kchar_t *fwk_inet_ntoa(kchar_t *inet_str, struct fwk_sockaddr_in *sptr_saddr)
 {
     kuint32_t inet_addr;
     kuint32_t val;
@@ -127,7 +128,7 @@ kchar_t *fwk_inet_ntoa(kchar_t *inet_str, kuint32_t addr)
 
 #define INET_IP_BYTES                   4
 
-    inet_addr = mr_ntohl(addr);
+    inet_addr = mr_ntohl(sptr_saddr->sin_addr.s_addr);
 
     for (idx = 0; idx < INET_IP_BYTES; idx++)
     {
@@ -156,6 +157,38 @@ void fwk_inet_random_addr(kuint8_t *buf, kusize_t lenth)
 {
     for (kuint32_t idx = 0; idx < lenth; idx++)
         *(buf++) = (kuint8_t)random_val();
+}
+
+/*!
+ * @brief   prepare to calculate the checksum (ICMP/UDP/TCP)
+ * @param   msg (tcp/udp message)
+ * @retval  check sum
+ * @note    none
+ */
+kuint16_t fwk_transport_csum(kuint8_t *msg, kuint16_t data_len)
+{
+    kuint16_t data, idx;
+    kuint32_t chksum = 0;
+    kbool_t is_odd;
+
+    is_odd = !!(data_len & 0x01);
+    data_len &= ~(kuint16_t)0x01;
+
+    for (idx = 0; idx < data_len; idx += 2) 
+    {
+        /*!< data is saved by big endian */
+        data = (msg[idx] << 8) | msg[idx + 1];
+        /*!< if cpu is little endian, swap high and low bytes */
+        chksum += mr_htons(data);
+    }
+
+    if (is_odd)
+        chksum += msg[data_len];
+
+    chksum = ((chksum & 0xffff0000) >> 16) + (chksum & 0x0000ffff);
+    chksum = ((chksum & 0xffff0000) >> 16) + (chksum & 0x0000ffff);
+
+    return ((kuint16_t)(~chksum));
 }
 
 /*!
@@ -560,6 +593,7 @@ void fwk_netif_init(void (*pfunc_rx)(void *rxq, void *args), void *args)
 {
     struct fwk_netif_tcb *sptr_tcb;
     struct fwk_sk_buff_head *sptr_head;
+    struct fwk_sockaddr_in sgtc_ip, sgtc_gw, sgtc_netmask;
 
     sptr_tcb = kmalloc(sizeof(*sptr_tcb), GFP_KERNEL);
     if (!isValid(sptr_tcb))
@@ -580,8 +614,15 @@ void fwk_netif_init(void (*pfunc_rx)(void *rxq, void *args), void *args)
     thread_set_priority(mr_tid_attr(THREAD_TID_SOCKRX), THREAD_PROTY_SOCKRX);
 #endif
 
+    /*!< IP any */
+    sgtc_ip.sin_addr.s_addr = fwk_inet_addr("0.0.0.0");
+    sgtc_gw.sin_addr.s_addr = fwk_inet_addr("0.0.0.0");
+    sgtc_netmask.sin_addr.s_addr = fwk_inet_addr("255.255.255.0");
+    net_link_up("dummy", &sgtc_ip, &sgtc_gw, &sgtc_netmask);
+
     /*!< register command */
     term_cmd_add_ifconfig();
+    term_cmd_add_ping();
 }
 
 /*!< end of file */

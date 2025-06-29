@@ -147,7 +147,7 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_addr)
     kuint32_t phyregtemp;
     kint32_t RetStatus;
 
-    print_debug("Start PHY autonegotiation \r\n");
+    print_info("Start PHY autonegotiation \r\n");
 
     XEmacPs_PhyRead(sptr_xemacps, phy_addr, 0x1F, (kuint16_t *)&phyregtemp);
     phyregtemp |= 0x4000;
@@ -155,7 +155,7 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_addr)
 
     RetStatus = XEmacPs_PhyRead(sptr_xemacps, phy_addr, 0x1F, (kuint16_t *)&phyregtemp);
     if (RetStatus) {
-        print_debug("Error during sw reset \n\r");
+        print_err("Error during sw reset \n\r");
         return RetStatus;
     }
 
@@ -168,7 +168,7 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_addr)
 
     RetStatus = XEmacPs_PhyRead(sptr_xemacps, phy_addr, 0, (kuint16_t *)&phyregtemp);
     if (RetStatus) {
-        print_debug("Error during reset \n\r");
+        print_err("Error during reset \n\r");
         return RetStatus;
     }
 
@@ -176,7 +176,7 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_addr)
     XEmacPs_PhyWrite(sptr_xemacps, phy_addr, PHY_TI_CR, PHY_TI_CRVAL);
     RetStatus = XEmacPs_PhyRead(sptr_xemacps, phy_addr, PHY_TI_CR, (kuint16_t *)&phyregtemp);
     if (RetStatus) {
-        print_debug("Error writing to 0x10 \n\r");
+        print_err("Error writing to 0x10 \n\r");
         return RetStatus;
     }
 
@@ -188,7 +188,7 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_addr)
 
     RetStatus = XEmacPs_PhyWrite(sptr_xemacps, phy_addr, PHY_ADDAR, 0xA8);
     if (RetStatus) {
-        print_debug("Error in tuning");
+        print_err("Error in tuning");
         return RetStatus;
     }
 
@@ -199,7 +199,7 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_addr)
     
     RetStatus = XEmacPs_PhyRead(sptr_xemacps, phy_addr, PHY_ADDAR, (kuint16_t *)&phyregtemp);
     if (RetStatus) {
-        print_debug("Error in tuning");
+        print_err("Error in tuning");
         return RetStatus;
     }
 
@@ -210,7 +210,7 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_addr)
     
     RetStatus = XEmacPs_PhyWrite(sptr_xemacps, phy_addr, PHY_ADDAR, 0xD3);
     if (RetStatus) {
-        print_debug("Error in tuning");
+        print_err("Error in tuning");
         return RetStatus;
     }
 
@@ -221,7 +221,7 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_addr)
     
     RetStatus = XEmacPs_PhyRead(sptr_xemacps, phy_addr, PHY_ADDAR, (kuint16_t *)&phyregtemp);
     if (RetStatus) {
-        print_debug("Error in tuning");
+        print_err("Error in tuning");
         return RetStatus;
     }
 
@@ -256,21 +256,21 @@ static kint32_t xsdk_get_ti_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_addr)
     XEmacPs_PhyRead(sptr_xemacps, phy_addr, IEEE_CONTROL_REG_OFFSET, &control);
     XEmacPs_PhyRead(sptr_xemacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
 
-    print_debug("Waiting for PHY to complete autonegotiation.\r\n");
+    print_info("Waiting for PHY to complete autonegotiation.\r\n");
 
     while (!(status & IEEE_STAT_AUTONEGOTIATE_COMPLETE)) {
         msleep(10);
         timeout_counter++;
 
         if (timeout_counter == 30) {
-            print_debug("Auto negotiation error \r\n");
+            print_err("Auto negotiation error \r\n");
             return -ER_TIMEOUT;
         }
 
         XEmacPs_PhyRead(sptr_xemacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
     }
 
-    print_debug("autonegotiation complete \r\n");
+    print_info("autonegotiation complete \r\n");
 
     XEmacPs_PhyRead(sptr_xemacps, phy_addr, PHY_STS, &status_speed);
     if ((status_speed & 0xC000) == 0x8000)
@@ -296,7 +296,7 @@ static kint32_t xsdk_get_realtek_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_
     kuint32_t timeout_counter = 0;
     kuint32_t temp_speed;
 
-    print_debug("Start PHY autonegotiation \r\n");
+    print_info("Start PHY autonegotiation \r\n");
 
     XEmacPs_PhyRead(sptr_xemacps, phy_addr, IEEE_AUTONEGO_ADVERTISE_REG, &control);
     control |= IEEE_ASYMMETRIC_PAUSE_MASK;
@@ -326,20 +326,20 @@ static kint32_t xsdk_get_realtek_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_
 
     XEmacPs_PhyRead(sptr_xemacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
 
-    print_debug("Waiting for PHY to complete autonegotiation.\r\n");
+    print_info("Waiting for PHY to complete autonegotiation.\r\n");
 
     while (!(status & IEEE_STAT_AUTONEGOTIATE_COMPLETE)) {
         msleep(10);
         timeout_counter++;
 
         if (timeout_counter == 30) {
-            print_debug("Auto negotiation error \r\n");
+            print_err("Auto negotiation error \r\n");
             return -ER_TIMEOUT;
         }
 
         XEmacPs_PhyRead(sptr_xemacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
     }
-    print_debug("autonegotiation complete \r\n");
+    print_info("autonegotiation complete \r\n");
 
     XEmacPs_PhyRead(sptr_xemacps, phy_addr,IEEE_SPECIFIC_STATUS_REG, &status_speed);
     if (status_speed & 0x400) {
@@ -372,7 +372,7 @@ static kint32_t xsdk_get_marvell_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_
     kuint32_t timeout_counter = 0;
     kuint32_t temp_speed;
 
-    print_debug("Start PHY autonegotiation \r\n");
+    print_info("Start PHY autonegotiation \r\n");
 
     XEmacPs_PhyWrite(sptr_xemacps,phy_addr, IEEE_PAGE_ADDRESS_REGISTER, 2);
     XEmacPs_PhyRead(sptr_xemacps, phy_addr, IEEE_CONTROL_REG_MAC, &control);
@@ -416,7 +416,7 @@ static kint32_t xsdk_get_marvell_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_
 
     XEmacPs_PhyRead(sptr_xemacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
 
-    print_debug("Waiting for PHY to complete autonegotiation.\r\n");
+    print_info("Waiting for PHY to complete autonegotiation.\r\n");
 
     while (!(status & IEEE_STAT_AUTONEGOTIATE_COMPLETE)) {
         msleep(10);
@@ -426,13 +426,13 @@ static kint32_t xsdk_get_marvell_phy_speed(XEmacPs *sptr_xemacps, kuint32_t phy_
 
         if (timeout_counter == 30) 
         {
-            print_debug("Auto negotiation error \r\n");
+            print_err("Auto negotiation error \r\n");
             return -ER_TIMEOUT;
         }
 
         XEmacPs_PhyRead(sptr_xemacps, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
     }
-    print_debug("autonegotiation complete \r\n");
+    print_info("autonegotiation complete \r\n");
 
     XEmacPs_PhyRead(sptr_xemacps, phy_addr,IEEE_SPECIFIC_STATUS_REG, &status_speed);
     if (status_speed & 0x400) {
@@ -492,7 +492,7 @@ static void xsdk_gem_phy_detect(XEmacPs *sptr_emacps, kuint32_t *phymapemac)
             ((phy_reg & PHY_DETECT_MASK) == PHY_DETECT_MASK)) {
             
             /*!< Found a valid PHY address */
-            print_debug("XEmacPs %s: PHY detected at address %d.\r\n", __FUNCTION__, phy_addr);
+            print_info("XEmacPs %s: PHY detected at address %d.\r\n", __FUNCTION__, phy_addr);
 
             phymapemac[phy_addr] = true;
             XEmacPs_PhyRead(sptr_emacps, phy_addr, PHY_IDENTIFIER_1_REG, &phy_reg);
@@ -500,7 +500,7 @@ static void xsdk_gem_phy_detect(XEmacPs *sptr_emacps, kuint32_t *phymapemac)
             if ((phy_reg != PHY_MARVELL_IDENTIFIER) &&
                 (phy_reg != PHY_TI_IDENTIFIER) &&
                 (phy_reg != PHY_REALTEK_IDENTIFIER))
-                print_debug("WARNING: Not a Marvell or TI or Realtek Ethernet PHY. Please verify the initialization sequence\r\n");
+                print_warn("WARNING: Not a Marvell or TI or Realtek Ethernet PHY. Please verify the initialization sequence\r\n");
         }
     }
 }
@@ -543,7 +543,7 @@ static void xsdk_gem_emac_init(struct xsdk_gem_drv_data *sptr_data)
     /*!< set mac address */
     status = XEmacPs_SetMacAddress(sptr_emacps, sptr_ndev->dev_addr, 1);
     if (status)
-        print_debug("In %s: Emac Mac Address set failed...\r\n", __func__);
+        print_warn("In %s: Emac Mac Address set failed...\r\n", __func__);
 
     XEmacPs_SetMdioDivisor(sptr_emacps, MDC_DIV_224);
     xsdk_gem_phy_detect(sptr_emacps, &sptr_phy->phymapemac[0]);
@@ -1146,27 +1146,27 @@ static void xsdk_gem_tx_error_handler(struct xsdk_gem_drv_data *sptr_data, kuint
         return;
 
     if (regVal & XEMACPS_TXSR_HRESPNOK_MASK) {
-        print_debug("Transmit DMA error\r\n");
+        print_err("Transmit DMA error\r\n");
         xsdk_gem_error_handler(sptr_data);
     }
 
     if (regVal & XEMACPS_TXSR_URUN_MASK) {
-        print_debug("Transmit under run\r\n");
+        print_err("Transmit under run\r\n");
         xsdk_gem_send_error(sptr_data);
     }
 
     if (regVal & XEMACPS_TXSR_BUFEXH_MASK) {
-        print_debug("Transmit buffer exhausted\r\n");
+        print_err("Transmit buffer exhausted\r\n");
         xsdk_gem_send_error(sptr_data);
     }
 
     if (regVal & XEMACPS_TXSR_RXOVR_MASK) {
-        print_debug("Transmit retry excessed limits\r\n");
+        print_err("Transmit retry excessed limits\r\n");
         xsdk_gem_send_error(sptr_data);
     }
 
     if (regVal & XEMACPS_TXSR_FRAMERX_MASK) {
-        print_debug("Transmit collision\r\n");
+        print_err("Transmit collision\r\n");
         xsdk_gem_sent_complete(sptr_data);
     }
 }
@@ -1184,18 +1184,18 @@ static void xsdk_gem_rx_error_handler(struct xsdk_gem_drv_data *sptr_data, kuint
         return;
 
     if (regVal & XEMACPS_RXSR_HRESPNOK_MASK) {
-        print_debug("Receive DMA error\r\n");
+        print_err("Receive DMA error\r\n");
         xsdk_gem_error_handler(sptr_data);
     }
 
     if (regVal & XEMACPS_RXSR_RXOVR_MASK) {
-        print_debug("Receive over run\r\n");
+        print_warn("Receive over run\r\n");
         xsdk_gem_recv_handler(sptr_data);
         xsdk_gem_setup_rxbd(sptr_data, GFP_ATOMIC);
     } 
 
     if (regVal & XEMACPS_RXSR_BUFFNA_MASK) {
-        print_debug("Receive buffer not available\r\n");
+        print_warn("Receive buffer not available\r\n");
         xsdk_gem_recv_handler(sptr_data);
         xsdk_gem_setup_rxbd(sptr_data, GFP_ATOMIC);
     }

@@ -120,8 +120,10 @@ kint32_t net_link_up(const kchar_t *name, struct fwk_sockaddr_in *sptr_ip,
     kstrcpy(sptr_if->ifname, name);
     sptr_if->sptr_oprts = sptr_ops;
 
-    if (sptr_if->sptr_oprts->link_up(sptr_if))
-        goto fail;
+    /*!< If ip address is "0.0.0.0", no link needs to up */
+    if (sptr_ip->sin_addr.s_addr)
+        if (sptr_if->sptr_oprts->link_up(sptr_if))
+            goto fail;
 
     wr_lock(&sgtc_network_mutex);
     list_head_add_tail(&sgtc_fwk_network_nodes, &sptr_if->sgtc_link);
@@ -144,7 +146,9 @@ kint32_t network_set_ip(const kchar_t *name, struct fwk_sockaddr_in *sptr_ip)
 {
     struct fwk_network_if *sptr_if;
 
-    if ((!name) || (!sptr_ip))
+    if ((!name) || 
+        (!sptr_ip) || 
+        (!sptr_ip->sin_addr.s_addr))
         return -ER_INVALID;
 
     sptr_if = network_find_node(name, mr_nullptr);
@@ -172,8 +176,9 @@ kint32_t net_link_down(const kchar_t *name)
     if (!sptr_if)
         return -ER_NODEV;
 
-    if (sptr_if->sptr_oprts->link_down(sptr_if))
-        return -ER_FAILD;
+    if (sptr_if->sgtc_ip.sin_addr.s_addr)
+        if (sptr_if->sptr_oprts->link_down(sptr_if))
+            return -ER_FAILD;
 
     fwk_netif_close(name);
 

@@ -32,7 +32,8 @@
 #include <lwip/udp.h>
 #include <lwip/tcp.h>
 #include <lwip/timeouts.h>
-#include <lwip/contrib/apps/udpecho_raw/udpecho_raw.h>
+#include <lwip/raw.h>
+#include <lwip/inet_chksum.h>
 
 /*!< The functions */
 extern kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sptr_upcb, void *buf, 
@@ -46,6 +47,13 @@ extern kssize_t lwip_tcp_raw_send(struct tcp_pcb *sptr_tpcb, const void *buf, ku
 extern struct tcp_pcb *lwip_tcp_raw_bind(const ip_addr_t *sptr_ip, u16_t port);
 extern struct tcp_pcb *lwip_tcp_raw_listen(struct tcp_pcb *sptr_tpcb);
 extern kint32_t lwip_tcp_raw_accept(struct tcp_pcb *sptr_tpcb);
+
+extern kssize_t lwip_icmp_raw_recvfrom(struct raw_pcb *sptr_pcb, void *buf, 
+                            kusize_t size, ip_addr_t *sptr_src);
+extern kssize_t lwip_icmp_raw_send(struct raw_pcb *sptr_pcb, 
+                        const ip_addr_t *sptr_dest, const void *buf, kusize_t size);
+extern void lwip_icmp_raw_exit(struct raw_pcb *sptr_pcb);
+extern struct raw_pcb *lwip_icmp_raw_init(void);
 
 #ifdef __cplusplus
     }

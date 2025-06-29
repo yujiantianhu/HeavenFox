@@ -23,6 +23,7 @@
 #include <common/generic.h>
 #include <common/ascii.h>
 #include <platform/input/fwk_kbd.h>
+#include <platform/notifier/fwk_notifier.h>
 
 /*!< The defines */
 #define TERM_MSG_RECV_LEN                               1024
@@ -46,6 +47,12 @@ struct term_cmd_his
 
     void *cmd;
 };
+
+/*!< Pause key event (Ctrl + C) */
+#define TERM_PAUSE_NOTIFIER_CANCEL                      (0x00000001)
+
+/*!< The globals */
+BLOCKING_NOTIFIER_DECLARE(sgtc_pause_notifier_chain);
 
 /*!< The functions */
 extern struct term_cmd *term_cmd_allocate(const kchar_t *name, nrt_gfp_t gfp_mask);

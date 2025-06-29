@@ -29,7 +29,7 @@ struct loopback_drv_data
     struct fwk_net_device *sptr_ndev;
 };
 
-#define LOOPBACK_MAC_ADDR                           { 0x00, 0x0a, 0x35, 0x00, 0x01, 0x22 }
+#define LOOPBACK_MAC_ADDR                           { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
 
 /*!< The globals */
 static struct loopback_drv_data sgtc_loopback_drv_data;

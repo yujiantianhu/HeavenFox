@@ -16,6 +16,9 @@
 #include <kernel/thread.h>
 #include <kernel/sleep.h>
 #include <kernel/instance.h>
+#include <platform/net/fwk_socket.h>
+#include <platform/net/fwk_if.h>
+#include <platform/net/fwk_netif.h>
 
 /*!< The defines */
 #define INIT_THREAD_STACK_SIZE                          THREAD_STACK_PAGE(1)    /*!< 1 page (4 kbytes) */
@@ -38,6 +41,23 @@ __weak kint32_t main(kint32_t argc, kchar_t **argv)
 }
 
 /*!
+ * @brief	network startup
+ * @param  	none
+ * @retval 	none
+ * @note   	open loopback device
+ */
+static void net_init(void)
+{
+    struct fwk_sockaddr_in sgtc_ip, sgtc_gw, sgtc_netmask;
+
+    /*!< Loopback */
+    sgtc_ip.sin_addr.s_addr = fwk_inet_addr("127.0.0.1");
+    sgtc_gw.sin_addr.s_addr = fwk_inet_addr("127.0.0.1");
+    sgtc_netmask.sin_addr.s_addr = fwk_inet_addr("255.255.255.0");
+    net_link_up("lo", &sgtc_ip, &sgtc_gw, &sgtc_netmask);
+}
+
+/*!
  * @brief	init thread entry
  * @param  	args: NULL normally
  * @retval 	none
@@ -49,7 +69,10 @@ static void *init_proc_entry(void *args)
 
     print_info("%s is enter, which tid is: %d\r\n", __FUNCTION__, mr_current->tid);
 
-    /*!< create application: at the end of "init_proc_entry" */
+    /*!< Network initial */
+    net_init();
+
+    /*!< Create application: at the end of "init_proc_entry" */
     main(0, mr_nullptr);
 
     for (;;)

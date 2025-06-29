@@ -221,9 +221,9 @@ extern void delay_cnt(kuint32_t n);
 extern void delay_s(kuint32_t n_s);
 extern void delay_ms(kuint32_t n_ms);
 extern void delay_us(kuint32_t n_us);
-extern void wait_secs(kuint32_t seconds);
-extern void wait_msecs(kuint32_t milseconds);
-extern void wait_usecs(kuint32_t useconds);
+extern void delay(kuint32_t seconds);
+extern void mdelay(kuint32_t milseconds);
+extern void udelay(kuint32_t useconds);
 extern void msecs_to_timeclock(struct time_clock *sptr_tclk, kutype_t milseconds);
 
 extern void setup_timer(struct timer_list *sptr_timer, void (*entry)(kuint32_t), kuint32_t data);

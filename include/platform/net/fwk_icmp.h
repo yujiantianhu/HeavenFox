@@ -43,6 +43,8 @@ struct fwk_icmp_echo
 {
     kuint16_t id;
     kuint16_t seq_no;
+
+#define NET_ICMP_PING_ID                        (0x53fc)
     
 } __packed;
 

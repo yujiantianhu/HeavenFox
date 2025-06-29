@@ -66,7 +66,7 @@ void fwk_blocking_notifier_chain_unregister(struct fwk_notifier_chain *sptr_chai
  */
 kint32_t fwk_blocking_notifier_call_chain(struct fwk_notifier_chain *sptr_chain, kuint32_t event, void *args)
 {
-    struct fwk_notifier_block *sptr_nb;
+    struct fwk_notifier_block *sptr_nb, *sptr_temp;
     kint32_t re_event;
     kint32_t count = 0;
 
@@ -76,7 +76,7 @@ kint32_t fwk_blocking_notifier_call_chain(struct fwk_notifier_chain *sptr_chain,
 
     mutex_lock(&sptr_chain->sgtc_lock);
 
-    foreach_list_next_entry(sptr_nb, &sptr_chain->sgtc_nbs, sgtc_link)
+    foreach_list_next_entry_safe(sptr_nb, sptr_temp, &sptr_chain->sgtc_nbs, sgtc_link)
     {
         if (sptr_nb->expect_event & event)
         {

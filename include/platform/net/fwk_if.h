@@ -153,9 +153,9 @@ struct fwk_ifreq
     } urt_fwk_ifr_ifru;
 };
 
-#define mr_ifr_name			urt_fwk_ifr_ifrn.ifrn_name					/*!< interface name */
+#define mr_ifr_name			    urt_fwk_ifr_ifrn.ifrn_name					/*!< interface name */
 #define mr_ifr_hwaddr			urt_fwk_ifr_ifru.ifru_hwaddr				/*!< MAC address */
-#define	mr_ifr_addr			urt_fwk_ifr_ifru.ifru_addr					/*!< address */
+#define	mr_ifr_addr			    urt_fwk_ifr_ifru.ifru_addr					/*!< address */
 #define	mr_ifr_dstaddr			urt_fwk_ifr_ifru.ifru_dstaddr				/*!< other end of p-p lnk	*/
 #define	mr_ifr_broadaddr		urt_fwk_ifr_ifru.ifru_broadaddr				/*!< broadcast address */
 #define	mr_ifr_netmask			urt_fwk_ifr_ifru.ifru_netmask				/*!< interface net mask */
@@ -164,10 +164,10 @@ struct fwk_ifreq
 #define	mr_ifr_mtu				urt_fwk_ifr_ifru.ifru_mtu					/*!< mtu */
 #define mr_ifr_map				urt_fwk_ifr_ifru.ifru_map					/*!< device map */
 #define mr_ifr_slave			urt_fwk_ifr_ifru.ifru_slave					/*!< slave device */
-#define	mr_ifr_data			urt_fwk_ifr_ifru.ifru_data					/*!< for use by interface	*/
+#define	mr_ifr_data			    urt_fwk_ifr_ifru.ifru_data					/*!< for use by interface	*/
 #define mr_ifr_ifindex			urt_fwk_ifr_ifru.ifru_ivalue				/*!< interface index */
 #define mr_ifr_bandwidth		urt_fwk_ifr_ifru.ifru_ivalue    			/*!< link bandwidth */
-#define mr_ifr_qlen			urt_fwk_ifr_ifru.ifru_ivalue				/*!< Queue length */
+#define mr_ifr_qlen			    urt_fwk_ifr_ifru.ifru_ivalue				/*!< Queue length */
 #define mr_ifr_newname			urt_fwk_ifr_ifru.ifru_newname				/*!< New name	*/
 // #define mr_ifr_settings		urt_fwk_ifr_ifru.ifru_settings				/*!< Device/proto settings */
 

@@ -12,5 +12,6 @@
 obj-y	+=	fwk_lwip.o
 obj-y	+=	fwk_udp.o
 obj-y	+=	fwk_tcp.o
+obj-y	+=	fwk_icmp.o
 
 # end of file

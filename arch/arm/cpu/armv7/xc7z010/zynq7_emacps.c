@@ -695,7 +695,7 @@ kint32_t XEmacPs_PhySetup(XEmacPs *sptr_emacps, kuint32_t phy_addr, kint32_t lin
     } 
     else 
     {
-        print_debug("Phy setup error \r\n");
+        print_err("Phy setup error \r\n");
         return -ER_INVALID;
     }
 
@@ -727,7 +727,7 @@ kint32_t XEmacPs_PhySetup(XEmacPs *sptr_emacps, kuint32_t phy_addr, kint32_t lin
                 XEMACPS_GMII2RGMII_REG_NUM, convspeeddupsetting);
     }
 
-    print_debug("link speed for phy address %d: %d\r\n", phy_addr, link_speed);
+    print_info("link speed for phy address %d: %d\r\n", phy_addr, link_speed);
     return link_speed;
 }
 
@@ -1035,7 +1035,7 @@ void XEmacPs_SetUpSLCRDivisors(kuint32_t mac_baseaddr, kint32_t speed)
             *(volatile kuint32_t *)(SLCR_LOCK_ADDR) = SLCR_LOCK_KEY_VALUE;
         } 
         else
-            print_debug("Clock Divisors incorrect - Please check\r\n");
+            print_warn("Clock Divisors incorrect - Please check\r\n");
     }
     else if (gigeversion > 2) 
     {
@@ -1170,7 +1170,7 @@ void XEmacPs_SetUpSLCRDivisors(kuint32_t mac_baseaddr, kint32_t speed)
         #endif
         } 
         else
-            print_debug("Clock Divisors incorrect - Please check\r\n");
+            print_warn("Clock Divisors incorrect - Please check\r\n");
     }
 }
 

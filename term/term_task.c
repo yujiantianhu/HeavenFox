@@ -54,6 +54,8 @@ static kint32_t g_term_cmd_queue_cur = -1;
 
 static kint32_t g_term_fd = -1;
 
+BLOCKING_NOTIFIER_HEAD(sgtc_pause_notifier_chain);
+
 /*!< API functions */
 /*!
  * @brief   get cmdline address
@@ -186,6 +188,10 @@ static void term_kbd_pause(struct term_kbd_priv *sptr_priv, kuint32_t *offset)
 
     /*!< echo is the first task */
     term_cmd_print_login();
+
+    /*!< notice another command */
+    fwk_blocking_notifier_call_chain(
+        &sgtc_pause_notifier_chain, TERM_PAUSE_NOTIFIER_CANCEL, mr_nullptr);
 
     *offset = 0;
     *(msg + *offset) = '\0';

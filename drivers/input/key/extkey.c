@@ -48,16 +48,22 @@ struct extkey_drv_data
 #define KEY_DRIVER_MAJOR							(NR_KEY_MAJOR)
 
 /*!< API function */
-static irq_return_t extkey_driver_isr(kint32_t irq, void *ptrDev)
+/*!
+ * @brief   extern key irq handler
+ * @param   irq, args (struct extkey_drv_data *)
+ * @retval  irq retval
+ * @note    none
+ */
+static irq_return_t extkey_driver_isr(kint32_t irq, void *args)
 {
 	struct extkey_drv_data *sptr_data;
 
-	sptr_data = (struct extkey_drv_data *)ptrDev;
+	sptr_data = (struct extkey_drv_data *)args;
 
 	sptr_data->wake = true;
 	wake_up(&sptr_data->sgtc_wqh);
 
-	return 0;
+	return NR_IRQ_HANDLED;
 }
 
 /*!

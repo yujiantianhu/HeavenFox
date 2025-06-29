@@ -59,6 +59,8 @@
  */
 #define LWIP_SOCKET             0
 
+#define LWIP_RAW                 1
+
 /* ---------- Memory options ---------- */
 /**
  * MEM_ALIGNMENT: should be set to the alignment of the CPU

@@ -27,6 +27,8 @@
 #define NET_IP_HDR_LEN                                      (20)
 #define NET_IP_FAKE_HDR_LEN                                 (12)
 
+#define NET_IP_ADDR_ANY                                     (0)
+
 /*!< Trasport Protocol */
 #define NET_IP_PROTO_ICMP                                   (0x01)
 #define NET_IP_PROTO_IGMP                                   (0x02)

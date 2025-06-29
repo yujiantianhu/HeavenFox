@@ -35,6 +35,7 @@ CONFIG_OPTIMIZE_CLASS = 0
 CONFIG_HZ = 200
 CONFIG_HRTIMER_ENBALE = n
 
+# ---------------------------------------------------------------
 # Console
 CONFIG_CONSOLE_DEVICE = "/dev/uart0"
 
@@ -44,6 +45,8 @@ CONFIG_CONSOLE_DEVICE = "/dev/uart0"
 CONFIG_XTAL_FREQ_CLK = (24000000)
 # 32.768KHz
 CONFIG_RTC_FREQ_CLK = (32768)
+# Cpu frequency
+CONFIG_CPU_FREQ = (666666687)
 # ---------------------------------------------------------------
 
 # Memory */

@@ -103,7 +103,7 @@ static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sptr_upcb, struct pbu
     if (!sptr_buf || !sptr_pq)
         return;
     
-    sptr_data = kmalloc(sizeof(*sptr_data), GFP_KERNEL);
+    sptr_data = kmalloc(sizeof(*sptr_data), GFP_ATOMIC);
     if (!isValid(sptr_data))
         return;
 

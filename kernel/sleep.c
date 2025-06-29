@@ -16,14 +16,19 @@
 #include <kernel/spinlock.h>
 
 /*!< The defines */
+#define KTIME_EVENT_JIFFIES                     (0)
+#define KTIME_EVENT_HRTIME                      (1)
+
 struct ktime_event
 {
     struct thread *sptr_cur;
-    struct timer_list sgtc_tmf;
-    struct timer_list sgtc_tmr;
 
-    kutime_t remain_tick;
-    kutime_t jiffies_cnt;
+    union {
+        struct timer_list sgtc_tm;
+        struct hrtimer_list sgtc_hrtm;
+    } u;
+    
+    kuint32_t type;
 };
 
 /*!< The functions */
@@ -38,11 +43,17 @@ struct ktime_event
  */
 static void thread_sleep_timeout(kuint32_t args)
 {
-    struct thread *sptr_thread = (struct thread *)args;
+    struct ktime_event *sptr_event = (struct ktime_event *)args;
+    struct thread *sptr_thread = sptr_event->sptr_cur;
 
     /*!< Only schedule_thread() is finished, state will be NR_THREAD_SUSPEND */
     if (sptr_thread->state == NR_THREAD_SUSPEND)
         schedule_thread_wakeup(sptr_thread->tid);
+
+    if (sptr_event->type == KTIME_EVENT_JIFFIES)
+        mod_timer(&sptr_event->u.sgtc_tm, jiffies + 1);
+    else
+        mod_hrtimer(&sptr_event->u.sgtc_hrtm, khrtime_ticks() + MSEC_TO_HRTICK(1));
 }
 
 /*!
@@ -53,7 +64,8 @@ static void thread_sleep_timeout(kuint32_t args)
  */
 void khrtime_schedule(khrtime_t tick)
 {    
-    struct hrtimer_list sgtc_tm;
+    struct ktime_event sgtc_event;
+    struct hrtimer_list *sptr_tm = &sgtc_event.u.sgtc_hrtm;
     struct thread *sptr_cur = mr_current;
 
     /*!< schedule but not suspend (just add to ready list) */
@@ -62,17 +74,19 @@ void khrtime_schedule(khrtime_t tick)
         return;
     }
 	
-    setup_hrtimer(&sgtc_tm, thread_sleep_timeout, (kuint32_t)sptr_cur);
+    sgtc_event.type = KTIME_EVENT_HRTIME;
+    sgtc_event.sptr_cur = sptr_cur;
+    setup_hrtimer(sptr_tm, thread_sleep_timeout, (kuint32_t)&sgtc_event);
 
     /*!< suspend current thread, and schedule others */
     spin_lock_irqsave(&sptr_cur->sgtc_lock);
     __SET_THREAD_STATE(sptr_cur, NR_THREAD_SUSPEND);
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
 
-    mod_hrtimer(&sgtc_tm, khrtime_ticks() + tick);
+    mod_hrtimer(sptr_tm, khrtime_ticks() + tick);
     schedule_thread();
 
-    del_hrtimer(&sgtc_tm);
+    del_hrtimer(sptr_tm);
 }
 
 /*!
@@ -83,7 +97,8 @@ void khrtime_schedule(khrtime_t tick)
  */
 void schedule_timeout(kutime_t count)
 {
-    struct timer_list sgtc_tm;
+    struct ktime_event sgtc_event;
+    struct timer_list *sptr_tm = &sgtc_event.u.sgtc_tm;
     struct thread *sptr_cur = mr_current;
 
     /*!< schedule but not suspend (just add to ready list) */
@@ -92,17 +107,19 @@ void schedule_timeout(kutime_t count)
         return;
     }
 	
-    setup_timer(&sgtc_tm, thread_sleep_timeout, (kuint32_t)sptr_cur);
+    sgtc_event.type = KTIME_EVENT_JIFFIES;
+    sgtc_event.sptr_cur = sptr_cur;
+    setup_timer(sptr_tm, thread_sleep_timeout, (kuint32_t)&sgtc_event);
 
     /*!< suspend current thread, and schedule others */
     spin_lock_irqsave(&sptr_cur->sgtc_lock);
     __SET_THREAD_STATE(sptr_cur, NR_THREAD_SUSPEND);
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
 
-    mod_timer(&sgtc_tm, jiffies + count);
+    mod_timer(sptr_tm, jiffies + count);
     schedule_thread();
 
-    del_timer(&sgtc_tm);
+    del_timer(sptr_tm);
 }
 
 /*!
@@ -129,7 +146,7 @@ void khrt_sleep_tick(khrtime_t tick)
     }
     else
     {
-        /*!< wait_secs(seconds); */
+        /*!< delay(seconds); */
         while (expires > khrtime_ticks())
             mr_nop();
     }
@@ -159,7 +176,7 @@ kuint32_t sleep_tick(kutime_t tick)
     }
     else
     {
-        /*!< wait_secs(seconds); */
+        /*!< delay(seconds); */
         while (mr_time_after(expires, jiffies));
     }
 

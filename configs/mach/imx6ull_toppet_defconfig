@@ -32,24 +32,27 @@ CONFIG_OPTIMIZE_CLASS = 0
 
 # System Config
 # Systick period = 10ms
-CONFIG_HZ = 100
+CONFIG_HZ = (100)
 CONFIG_HRTIMER_ENBALE = y
 
+# ---------------------------------------------------------------
 # Console
 CONFIG_CONSOLE_DEVICE = "/dev/uart0"
 # Use DMA to Receive or Send for Console ?
 CONFIG_CONSOLE_RXDMA = n
 CONFIG_CONSOLE_TXDMA = n
 
-# Clock */
+# Clock
 # ---------------------------------------------------------------
 # 24MHz
 CONFIG_XTAL_FREQ_CLK = (24000000)
 # 32.768KHz
 CONFIG_RTC_FREQ_CLK = (32768)
+# Cpu frequency
+CONFIG_CPU_FREQ = (528000000)
 # ---------------------------------------------------------------
 
-# Memory */
+# Memory
 # ---------------------------------------------------------------
 CONFIG_RAM_DDR_BASE = (0x80000000)
 CONFIG_RAM_DDR_SIZE = (0x20000000)

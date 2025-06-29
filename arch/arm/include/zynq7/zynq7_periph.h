@@ -26,6 +26,14 @@
 #include "xaxivdma_hw.h"
 
 /*!< The defines */
+/*!< ------------------------------------------------------------------- */
+#undef  XPAR_PS7_CORTEXA9_1_CPU_CLK_FREQ_HZ
+#undef  XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ
+
+#define XPAR_PS7_CORTEXA9_1_CPU_CLK_FREQ_HZ CONFIG_CPU_FREQ
+#define XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ CONFIG_CPU_FREQ
+/*!< ------------------------------------------------------------------- */
+
 #define xil_printf                          print_debug
 #define ULONG64_HI_MASK	                    0xFFFFFFFF00000000U
 #define ULONG64_LO_MASK	                    (~ULONG64_HI_MASK)

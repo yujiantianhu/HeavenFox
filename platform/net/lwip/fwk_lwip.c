@@ -84,6 +84,7 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
     struct fwk_eth_hdr *sptr_ethhdr;
     struct fwk_ip_hdr *sptr_iphdr;
     kuint32_t head_len;
+    kuint16_t h_proto = 0;
     kssize_t transport_len = 0;
 
     if (!sptr_buf->tot_len)
@@ -91,10 +92,13 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
 
     sptr_if = (struct fwk_network_if *)sptr_netif->state;
     sptr_data = (struct fwk_lwip_data *)sptr_if->private_data;
+    if (mr_unlikely(!sptr_data))
+        return ERR_ARG;
 
     for (sptr_per = sptr_buf; sptr_per && sptr_per->len;)
     {
         sptr_ethhdr = (struct fwk_eth_hdr *)sptr_per->payload;
+        h_proto = mr_htons(sptr_ethhdr->h_proto);
     
         head_len = SKB_DATA_HEAD_LEN(NET_ETHER_HDR_LEN);
         sptr_skb = fwk_alloc_skb(sptr_per->len + 2 * head_len, GFP_ATOMIC);
@@ -112,7 +116,7 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
         fwk_skb_set_mac_header(sptr_skb, 0);
         fwk_skb_set_network_header(sptr_skb, NET_ETHER_HDR_LEN);
 
-        switch (mr_htons(sptr_ethhdr->h_proto))
+        switch (h_proto)
         {
             case NET_ETH_PROTO_IP:
                 sptr_iphdr = (struct fwk_ip_hdr *)((void *)sptr_ethhdr + NET_ETHER_HDR_LEN);
@@ -129,7 +133,7 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
 
             default: 
                 print_err("%s: unable to recognize network layer protocol (%d)!\r\n", 
-                        __FUNCTION__, mr_htons(sptr_ethhdr->h_proto));
+                        __FUNCTION__, h_proto);
                 goto fail;
         }
 
@@ -150,8 +154,8 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
         sptr_cur = sptr_per;
         sptr_per = sptr_cur->next;
 
-        /*!< PBUF_RAW will be released by lwip-lib sources code */
-        if (sptr_cur->type == PBUF_POOL)
+        /*!< ARP will be released by lwip-lib sources code */
+        if (h_proto != NET_ETH_PROTO_ARP)
             pbuf_free(sptr_cur);
     }
 
@@ -338,17 +342,17 @@ static kint32_t fwk_lwip_link_down(struct fwk_network_if *sptr_if)
  */
 static kint32_t fwk_lwip_init(struct fwk_network_com *sptr_socket)
 {
-    ip_addr_t *sptr_ip = (ip_addr_t *)&sptr_socket->sgtc_sin.sin_addr;
-    kuint16_t port = sptr_socket->sgtc_sin.sin_port;
     void *pcb;
 
     switch (sptr_socket->type)
     {
         case NR_SOCK_STREAM:
-
             break;
 
-        case NR_SOCK_DGRAM:
+        case NR_SOCK_DGRAM: {
+            ip_addr_t *sptr_ip = (ip_addr_t *)&sptr_socket->sgtc_sin.sin_addr;
+            kuint16_t port = sptr_socket->sgtc_sin.sin_port;
+
             pcb = (void *)lwip_udp_raw_bind(sptr_ip, port);
             if (!isValid(pcb))
                 goto fail;
@@ -356,6 +360,18 @@ static kint32_t fwk_lwip_init(struct fwk_network_com *sptr_socket)
             sptr_socket->private_data = pcb;
         
             break;
+        }
+        case NR_SOCK_RAW: {
+            if (sptr_socket->protocol == NET_IP_PROTO_ICMP) {
+                pcb = (void *)lwip_icmp_raw_init();
+                if (!isValid(pcb))
+                    goto fail;
+
+                sptr_socket->private_data = pcb;
+            }
+
+            break;
+        }
 
         default: goto fail;
     }
@@ -374,7 +390,23 @@ fail:
  */
 static void fwk_lwip_exit(struct fwk_network_com *sptr_socket)
 {
+    void *pcb = sptr_socket->private_data;
 
+    switch (sptr_socket->type)
+    {
+        case NR_SOCK_STREAM:
+            break;
+        case NR_SOCK_DGRAM:
+            break;
+        case NR_SOCK_RAW:
+            if (sptr_socket->protocol == NET_IP_PROTO_ICMP) {
+                lwip_icmp_raw_exit((struct raw_pcb *)pcb);
+                sptr_socket->private_data = mr_nullptr;
+            }
+            break;
+
+        default: break;
+    }
 }
 
 /*!
@@ -404,7 +436,7 @@ static kssize_t fwk_lwip_send(struct fwk_network_com *sptr_socket, const void *b
 }
 
 /*!
- * @brief   send message (for udp)
+ * @brief   send message (for NR_SOCK_DGRAM and NR_SOCK_RAW)
  * @param   sptr_socket, buf, size
  * @retval  size sent
  * @note    none
@@ -412,14 +444,36 @@ static kssize_t fwk_lwip_send(struct fwk_network_com *sptr_socket, const void *b
 static kssize_t fwk_lwip_sendto(struct fwk_network_com *sptr_socket, const void *buf, kssize_t len, 
                         kint32_t flags, const struct fwk_sockaddr *sptr_dest, fwk_socklen_t addrlen)
 {
-    struct udp_pcb *sptr_upcb;
     struct fwk_sockaddr_in sgtc_saddr;
+    kssize_t size = -ER_EMPTY;
 
-    sptr_upcb = (struct udp_pcb *)sptr_socket->private_data;
     memcpy(&sgtc_saddr, sptr_dest, addrlen);
 
-    return lwip_udp_raw_sendto(sptr_upcb, (const ip_addr_t *)&sgtc_saddr.sin_addr, 
-                            sgtc_saddr.sin_port, buf, len);
+    switch (sptr_socket->type)
+    {
+        case NR_SOCK_DGRAM: {
+            struct udp_pcb *sptr_upcb;
+
+            sptr_upcb = (struct udp_pcb *)sptr_socket->private_data;
+            size = lwip_udp_raw_sendto(sptr_upcb, (const ip_addr_t *)&sgtc_saddr.sin_addr, 
+                                    sgtc_saddr.sin_port, buf, len);
+            
+            break;
+        }
+        case NR_SOCK_RAW: {
+            struct raw_pcb *sptr_pcb;
+
+            sptr_pcb = (struct raw_pcb *)sptr_socket->private_data;
+            if (sptr_socket->protocol == NET_IP_PROTO_ICMP)
+                size = lwip_icmp_raw_send(sptr_pcb, (const ip_addr_t *)&sgtc_saddr.sin_addr, buf, len);
+            
+            break;
+        }
+
+        default: break;
+    }
+
+    return size;
 }
 
 /*!
@@ -434,7 +488,7 @@ static kssize_t fwk_lwip_recv(struct fwk_network_com *sptr_socket, void *buf, ks
 }
 
 /*!
- * @brief   recv message (for udp)
+ * @brief   recv message (for NR_SOCK_DGRAM and NR_SOCK_RAW)
  * @param   sptr_socket, buf, size
  * @retval  size received
  * @note    none
@@ -442,13 +496,31 @@ static kssize_t fwk_lwip_recv(struct fwk_network_com *sptr_socket, void *buf, ks
 static kssize_t fwk_lwip_recvfrom(struct fwk_network_com *sptr_socket, void *buf, size_t len, 
                         kint32_t flags, struct fwk_sockaddr *sptr_src, fwk_socklen_t *addrlen)
 {
-    struct udp_pcb *sptr_upcb;
-    struct fwk_sockaddr_in sgtc_saddr;
-    kssize_t size;
+    struct fwk_sockaddr_in sgtc_saddr = {};
+    kssize_t size = -ER_EMPTY;
 
-    sptr_upcb = (struct udp_pcb *)sptr_socket->private_data;
-    size = lwip_udp_raw_recvfrom(sptr_upcb, buf, len, 
-                            (ip_addr_t *)&sgtc_saddr.sin_addr, &sgtc_saddr.sin_port);
+    switch (sptr_socket->type)
+    {
+        case NR_SOCK_DGRAM: {
+            struct udp_pcb *sptr_upcb;
+
+            sptr_upcb = (struct udp_pcb *)sptr_socket->private_data;
+            size = lwip_udp_raw_recvfrom(sptr_upcb, buf, len, 
+                                    (ip_addr_t *)&sgtc_saddr.sin_addr, &sgtc_saddr.sin_port);
+
+            break;
+        }
+        case NR_SOCK_RAW: {
+            struct raw_pcb *sptr_pcb;
+
+            sptr_pcb = (struct raw_pcb *)sptr_socket->private_data;
+            if (sptr_socket->protocol == NET_IP_PROTO_ICMP)
+                size = lwip_icmp_raw_recvfrom(sptr_pcb, buf, len, 
+                                    (ip_addr_t *)&sgtc_saddr.sin_addr);
+            break;
+        }
+        default: break;
+    }
 
     *addrlen = sizeof(sgtc_saddr);
     memcpy(sptr_src, &sgtc_saddr, *addrlen);
@@ -556,9 +628,10 @@ static void fwk_lwip_input(void *rxq, void *args)
 kint32_t __plat_init fwk_lwip_if_init(void)
 {
     lwip_init();
+    
+    network_set_default_ops(&sgtc_fwk_lwip_if_oprts);
     fwk_netif_init(fwk_lwip_input, mr_nullptr);
 
-    network_set_default_ops(&sgtc_fwk_lwip_if_oprts);
     return ER_NORMAL;
 }
 

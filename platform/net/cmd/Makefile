@@ -10,5 +10,6 @@
 #
 
 obj-y	+=	ifconfig.o
+obj-y	+=	ping.o
 
 # end of file

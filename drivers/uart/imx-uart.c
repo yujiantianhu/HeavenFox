@@ -290,11 +290,11 @@ static kssize_t imx_uart_driver_write(struct fwk_file *sptr_file, const kbuffer_
         kuaddr_t tx_phy;
         void *tx_buffer;
 
-        sptr_bdata = kmalloc(sizeof(*sptr_bdata), GFP_KERNEL);
+        sptr_bdata = kmalloc(sizeof(*sptr_bdata), GFP_ATOMIC);
         if (!isValid(sptr_bdata))
             return -ER_NOMEM;
 
-        tx_buffer = fwk_dma_alloc_coherent(mr_nullptr, size, &tx_phy, GFP_KERNEL | GFP_ZERO);
+        tx_buffer = fwk_dma_alloc_coherent(mr_nullptr, size, &tx_phy, GFP_ATOMIC | GFP_ZERO);
         if (!isValid(tx_buffer)) 
         {
             kfree(sptr_bdata);

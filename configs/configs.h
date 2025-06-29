@@ -20,7 +20,7 @@
 /*!< The includes */
 #include "mach_configs.h"
 
-#define CONFIG_PRINT_LEVEL                      "7"
+#define CONFIG_PRINT_LEVEL                      "6"
 
 /*!< all scheduler will be quited, the kernel will degrade to standlone */
 #define CONFIG_SCHDULE                          (1)

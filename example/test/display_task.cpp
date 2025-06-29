@@ -36,7 +36,7 @@ using namespace tsk;
 using namespace bsc;
 
 /*!< The defines */
-#define DISPLAY_TASK_STACK_SIZE                      THREAD_STACK_PAGE(2)    /*!< 2 page (2kbytes) */
+#define DISPLAY_TASK_STACK_SIZE                      THREAD_STACK_PAGE(2)    /*!< 2 page (8kbytes) */
 
 class crt_disp_task_t;
 class crt_disp_base_t;

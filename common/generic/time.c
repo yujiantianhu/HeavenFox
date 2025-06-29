@@ -82,7 +82,7 @@ __weak khrtime_t ktime_hrtick(void)
     volatile kutime_t *time_cnt1 = ptr_hrtimer_counter;
     volatile kutime_t *time_cnt2 = ptr_hrtimer_counter2;
 
-    if (!time_cnt1)
+    if (mr_unlikely(!time_cnt1))
         return 0;
 
     if (time_cnt2)
@@ -113,9 +113,8 @@ __weak khrtime_t khrtime_ticks(void)
     volatile kutime_t *time_cnt2 = ptr_hrtimer_counter2;
     kutime_t tick_l, tick_h;
     kutime_t over_count;
-    static kbool_t flags = false;
 
-    if (!time_cnt1)
+    if (mr_unlikely(!time_cnt1))
         return 0;
 
     if (time_cnt2)
@@ -196,10 +195,12 @@ void simple_delay_timer_runs(void)
     if ((g_simple_delay_timer++) >= TIMER_DELAY_COUNTER_MAX)
     {
         g_simple_delay_timer = TIMER_DELAY_COUNTER_INIT;
-        g_simple_timeout_cnt = (g_simple_timeout_cnt >= 255) ? TIMER_DELAY_COUNTER_INIT : (g_simple_timeout_cnt + 1);
+        g_simple_timeout_cnt = ((g_simple_timeout_cnt >= 255) ? 
+                            TIMER_DELAY_COUNTER_INIT : (g_simple_timeout_cnt + 1));
     }
 
-    g_delay_timer_counter = mr_bit_mask(g_simple_timeout_cnt, ~TIMER_DELAY_COUNTER_MAX, 24U) + g_simple_delay_timer;
+    g_delay_timer_counter = mr_bit_mask(g_simple_timeout_cnt, 
+                            ~TIMER_DELAY_COUNTER_MAX, 24U) + g_simple_delay_timer;
 }
 
 /*!
@@ -256,11 +257,18 @@ __weak void delay_us(kuint32_t n_us)
  * @retval  none
  * @note    none
  */
-void wait_secs(kuint32_t seconds)
+void delay(kuint32_t seconds)
 {
-    kutime_t count = jiffies + secs_to_jiffies(seconds);
-    
-    while (mr_time_before(jiffies, count));
+    if (ptr_hrtimer_counter)
+    {
+        khrtime_t target_tick = khrtime_ticks() + SEC_TO_HRTICK(seconds);
+        while (target_tick > khrtime_ticks());
+    }
+    else
+    {
+        kuint64_t ticks = seconds * (CONFIG_CPU_FREQ / 200U);
+        while (ticks--);
+    }
 }
 
 /*!
@@ -269,11 +277,18 @@ void wait_secs(kuint32_t seconds)
  * @retval  none
  * @note    none
  */
-void wait_msecs(kuint32_t milseconds)
+void mdelay(kuint32_t milseconds)
 {
-    kutime_t count = jiffies + msecs_to_jiffies(milseconds);
-    
-    while (mr_time_before(jiffies, count));
+    if (ptr_hrtimer_counter)
+    {
+        khrtime_t target_tick = khrtime_ticks() + MSEC_TO_HRTICK(milseconds);
+        while (target_tick > khrtime_ticks());
+    }
+    else
+    {
+        kuint64_t ticks = milseconds * (CONFIG_CPU_FREQ / 1000U / 200U);
+        while (ticks--);
+    }
 }
 
 /*!
@@ -282,11 +297,18 @@ void wait_msecs(kuint32_t milseconds)
  * @retval  none
  * @note    none
  */
-void wait_usecs(kuint32_t useconds)
+void udelay(kuint32_t useconds)
 {
-    kutime_t count = jiffies + usecs_to_jiffies(useconds);
-    
-    while (mr_time_before(jiffies, count));
+    if (ptr_hrtimer_counter)
+    {
+        khrtime_t target_tick = khrtime_ticks() + USEC_TO_HRTICK(useconds);
+        while (target_tick > khrtime_ticks());
+    }
+    else
+    {
+        kuint64_t ticks = useconds * (CONFIG_CPU_FREQ / 1000000U / 200U);
+        while (ticks--);
+    }
 }
 
 /*!
@@ -436,18 +458,23 @@ void mod_timer(struct timer_list *sptr_timer, kutime_t expires)
 void do_timer_event(void)
 {
     struct ktime_tick *sptr_list;
-    struct timer_list *sptr_timer;
+    struct timer_list *sptr_timer, *sptr_temp;
+    kutime_t expires_bak;
 
     sptr_list = &sgtc_ktime_jiffies;
-    foreach_list_next_entry(sptr_timer, &sptr_list->sgtc_list, sgtc_link)
+    foreach_list_next_entry_safe(sptr_timer, sptr_temp, &sptr_list->sgtc_list, sgtc_link)
     {
-        if (!sptr_timer->expires)
+        if (!sptr_timer->expires || 
+            !sptr_timer->entry)
             continue;
 
         if (mr_time_after_eq(jiffies, sptr_timer->expires))
         {
-            if (sptr_timer->entry)
-                sptr_timer->entry(sptr_timer->data);
+            expires_bak = sptr_timer->expires;
+            sptr_timer->entry(sptr_timer->data);
+            
+            if (expires_bak == sptr_timer->expires)
+                del_timer(sptr_timer);
         }
     }
 }

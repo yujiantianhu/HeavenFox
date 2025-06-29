@@ -71,7 +71,8 @@ enum __ERT_ERROR_CODE
     ER_SDATA_FAILD,
     ER_RDATA_FAILD,
     ER_STOP_FAILD,
-    ER_NOACK,				
+    ER_NOACK,
+    ER_NOMATCH,		
 };
 
 /*!< The functions */

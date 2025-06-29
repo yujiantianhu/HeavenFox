@@ -48,15 +48,15 @@ static kint32_t term_cmd_ifconfig(struct term_cmd *sptr_cmd, kint32_t argc, kcha
                 /*!< Link Up */
                 if (sptr_if)
                 {
-                    fwk_inet_ntoa(ip_addr, sptr_if->sgtc_ip.sin_addr.s_addr);
-                    fwk_inet_ntoa(netmask, sptr_if->sgtc_netmask.sin_addr.s_addr);
+                    fwk_inet_ntoa(ip_addr, &sptr_if->sgtc_ip);
+                    fwk_inet_ntoa(netmask, &sptr_if->sgtc_netmask);
 
                     printk("%s: <UP RUNNING> mtu %d\r\n", sptr_if->ifname, sptr_ndev->mtu);
                 }
                 else
                 {
-                    fwk_inet_ntoa(ip_addr, 0);
-                    fwk_inet_ntoa(netmask, 0);
+                    memset(ip_addr, 0, sizeof(ip_addr));
+                    memset(netmask, 0, sizeof(netmask));
 
                     printk("%s: <DOWN SLEEPING> mtu %d\r\n", sptr_ndev->name, sptr_ndev->mtu);
                 }

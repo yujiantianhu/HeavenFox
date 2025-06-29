@@ -261,6 +261,44 @@ static irq_return_t sil9022x_isr(kint32_t irq, void *args)
 }
 
 /*!
+ * @brief  write sil9022x
+ * @param  sptr_client
+ * @retval none
+ * @note   delay 1ms before writting to wait for stable
+ */
+kint32_t sil9022x_write_data(struct fwk_i2c_client *sptr_client, kuint8_t reg, kuint8_t data)
+{
+    kint32_t value;
+
+    do {
+        value = fwk_i2c_write_byte_data(sptr_client, reg, data);
+        mdelay(1);
+
+    } while (value < 0);
+
+    return value;
+}
+
+/*!
+ * @brief  read sil9022x
+ * @param  sptr_client
+ * @retval none
+ * @note   delay 1ms before reading to wait for stable
+ */
+kint32_t sil9022x_read_data(struct fwk_i2c_client *sptr_client, kuint8_t reg)
+{
+    kint32_t value;
+
+    do {
+        value = fwk_i2c_read_byte_data(sptr_client, reg);
+        mdelay(1);
+
+    } while (value < 0);
+
+    return value;
+}
+
+/*!
  * @brief  sil9022a interrupt bottom handler
  * @param  sptr_wq
  * @retval none
@@ -272,13 +310,13 @@ static void sil9022x_detect_work(struct workqueue *sptr_wq)
     kubyte_t value;
 
     sptr_drv = mr_container_of(sptr_wq, struct sil9022x_drv_info, sgtc_wq);
-    value = fwk_i2c_read_byte_data(sptr_drv->sptr_client, SIL9022X_INTR_STATUS);
+    value = sil9022x_read_data(sptr_drv->sptr_client, SIL9022X_INTR_STATUS);
 
     /*!< HDMI plug in */
     if (!sptr_drv->is_connected && (value & SIL9022X_INTR_HP_STATE))
     {
         /*!< Power on: set TPI system control (DVI, not HDMI) */
-        fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_SYSTEM, 
+        sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_SYSTEM, 
                         SIL9022X_SYSTEM_OUTDVI | SIL9022X_SYSTEM_TMS_ACTIVE | SIL9022X_SYSTEM_AVMUTE_NORMAL);
 
         print_info("HDMI device plug in\r\n");
@@ -288,7 +326,7 @@ static void sil9022x_detect_work(struct workqueue *sptr_wq)
     else if (sptr_drv->is_connected)
     {
         /*!< Power off */
-        fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_SYSTEM, 
+        sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_SYSTEM, 
                         SIL9022X_SYSTEM_OUTDVI | SIL9022X_SYSTEM_TMS_POWER | SIL9022X_SYSTEM_AVMUTE_NORMAL);
         sptr_drv->is_connected = false;
 
@@ -296,7 +334,7 @@ static void sil9022x_detect_work(struct workqueue *sptr_wq)
     }
 
     /*!< Clear interrupt status */
-    fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_INTR_STATUS, value);
+    sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_INTR_STATUS, value);
 }
 
 /*!
@@ -308,7 +346,7 @@ static void sil9022x_detect_work(struct workqueue *sptr_wq)
 static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_notifier_param *sptr_param)
 {
     struct fwk_fb_var_screen_info *sptr_var;
-    kint32_t loop_cnt = 10, value;
+    kint32_t loop_cnt = 10, value[4];
     kuint16_t pixel_hz_10KHz, line_pixels, lines;
     kuint32_t refresh;
     kuint8_t reg;
@@ -316,12 +354,12 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
 
     /*!< Reset sil9022a, write 0 to reset */
     fwk_gpio_set_value(sptr_drv->sptr_rstgpio, 0);
-    msleep(400);
+    msleep(100);
     fwk_gpio_set_value(sptr_drv->sptr_rstgpio, 1);
-    msleep(500);
+    msleep(200);
 
     /*!< Try to connect TMDS (test slave address for the first time) */
-    retval = fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_TMDS, SIL9022X_TMDS_TPIEN);
+    retval = sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_TMDS, SIL9022X_TMDS_TPIEN);
     if (retval)
     {
         print_err("Reset and init sil9022a failed!\r\n");
@@ -331,18 +369,18 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
     while (--loop_cnt)
     {
         /*!< Read ID */
-        value = fwk_i2c_read_byte_data(sptr_drv->sptr_client, SIL9022X_DEVICE_ID);
-        if (value != 0xB0)
+        value[0] = sil9022x_read_data(sptr_drv->sptr_client, SIL9022X_DEVICE_ID);
+        if (value[0] != 0xB0)
             continue;
 
-        print_info("Detect sil9022a device id: %#x, ", value);
-        value = fwk_i2c_read_byte_data(sptr_drv->sptr_client, SIL9022X_PRODUCT_ID);
-        print_info("product id: %#x, ", value);
-        value = fwk_i2c_read_byte_data(sptr_drv->sptr_client, SIL9022X_REVISION_ID);
-        print_info("revision id: %#x, ", value);
-        value = fwk_i2c_read_byte_data(sptr_drv->sptr_client, SIL9022X_HDCP_REVISION);
-        print_info("hdcp revision: %#x\r\n", value);
+        value[1] = sil9022x_read_data(sptr_drv->sptr_client, SIL9022X_PRODUCT_ID);
+        value[2] = sil9022x_read_data(sptr_drv->sptr_client, SIL9022X_REVISION_ID);
+        value[3] = sil9022x_read_data(sptr_drv->sptr_client, SIL9022X_HDCP_REVISION);
 
+        print_info("Detect sil9022a device:\r\n");
+        print_info("    id: 0x%02x, product id: 0x%02x, revision id: 0x%02x, hdcp revision: 0x%02x\r\n", 
+                value[0], value[1], value[2], value[3]);
+        
         break;
     }
 
@@ -353,9 +391,9 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
     }
 
     /*!< Power up */
-    reg = (kuint8_t)fwk_i2c_read_byte_data(sptr_drv->sptr_client, SIL9022X_POWER_UP);
+    reg = (kuint8_t)sil9022x_read_data(sptr_drv->sptr_client, SIL9022X_POWER_UP);
     reg = (reg & (~SIL9022X_PWR_UP_STAT_MASK)) | SIL9022X_PWR_UP_STAT_D0;
-    retval = fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_POWER_UP, reg);
+    retval = sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_POWER_UP, reg);
     if (retval < 0)
     {
         print_err("Cound not power up sil9022a device!\r\n");
@@ -363,21 +401,21 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
     }
 
     /*!< Power off */
-    fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_SYSTEM, 
+    sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_SYSTEM, 
                     SIL9022X_SYSTEM_OUTDVI | SIL9022X_SYSTEM_TMS_POWER | SIL9022X_SYSTEM_AVMUTE_NORMAL);
 
     /*!< Enable source termination */
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_SET_PAGE, SIL9022X_SET_PAGE_SII9022A);
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_SET_OFFSET, SIL9022X_SET_OFFSET_SII9022A);
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_SET_PAGE, SIL9022X_SET_PAGE_SII9022A);
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_SET_OFFSET, SIL9022X_SET_OFFSET_SII9022A);
     if (retval < 0)
     {
         print_err("Cound not enable source termination for sil9022a device!\r\n");
         return -ER_FAILD;
     }
 
-    reg = (kuint8_t)fwk_i2c_read_byte_data(sptr_drv->sptr_client, SIL9022X_RW_ACCESS);
+    reg = (kuint8_t)sil9022x_read_data(sptr_drv->sptr_client, SIL9022X_RW_ACCESS);
     reg |= SIL9022X_RW_EN_SRC_TERMIN;
-    fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_RW_ACCESS, reg);
+    sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_RW_ACCESS, reg);
 
     /*!< TPI video mode */
     sptr_var = sptr_param->sptr_var;
@@ -389,14 +427,14 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
     /*!< For 720p@60Hz, refresh = 60 * 100 = 6000 */
     refresh = ((FB_PICOS_2_KHZ(sptr_var->pixclock) * 1000) / (line_pixels * lines)) * 100;
 
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_VM_PIXELCLOCK_LSB, (kuint8_t)pixel_hz_10KHz);
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_VM_PIXELCLOCK_MSB, (kuint8_t)(pixel_hz_10KHz >> 8));
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_VM_VFREQ_LSB, (kuint8_t)refresh);
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_VM_VFREQ_MSB, (kuint8_t)(refresh >> 8));
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_VM_HPIXELS_LSB, (kuint8_t)line_pixels);
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_VM_HPIXELS_MSB, (kuint8_t)(line_pixels >> 8));
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_VM_LINES_LSB, (kuint8_t)lines);
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_VM_LINES_MSB, (kuint8_t)(lines >> 8));
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_PIXELCLOCK_LSB, (kuint8_t)pixel_hz_10KHz);
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_PIXELCLOCK_MSB, (kuint8_t)(pixel_hz_10KHz >> 8));
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_VFREQ_LSB, (kuint8_t)refresh);
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_VFREQ_MSB, (kuint8_t)(refresh >> 8));
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_HPIXELS_LSB, (kuint8_t)line_pixels);
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_HPIXELS_MSB, (kuint8_t)(line_pixels >> 8));
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_LINES_LSB, (kuint8_t)lines);
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_LINES_MSB, (kuint8_t)(lines >> 8));
     if (retval < 0)
     {
         print_err("Configure pixel clock and resolution to sil9022a failed!\r\n");
@@ -404,17 +442,16 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
     }
 
     /*!< Configure Input Bus and Pixel Repetition */
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_INBUS, 
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_INBUS, 
                         SIL9022X_INBUS_PR_NREPLY | SIL9022X_INBUS_TCLK_1 | SIL9022X_INBUS_ES_RISING | SIL9022X_INBUS_SEL_FULL);
 
     /*!< Input Format: RGB */
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_IN_FMT, 
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_IN_FMT, 
                         SIL9022X_IN_FMT_SPACE_RGB | SIL9022X_IN_FMT_VRE_AUTO | SIL9022X_IN_FMT_DEPTH_8BIT);
 
     /*!< Output Format: RGB */
-    retval |= fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_OUT_FMT, 
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_OUT_FMT, 
                         SIL9022X_OUT_FMT_SPACE_RGB | SIL9022X_OUT_FMT_VRC_AUTO | SIL9022X_OUT_FMT_DEPTH_8BIT);
-    
     if (retval < 0)
     {
         print_err("Configure sil9022a input-bus and I/O format failed!\r\n");
@@ -424,7 +461,7 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
     /*!< Interrupt Enable */
     if (sptr_drv->irq >= 0)
     {
-        fwk_i2c_write_byte_data(sptr_drv->sptr_client, SIL9022X_INTR_EN, SIL9022X_INTR_HP_CONN);
+        sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_INTR_EN, SIL9022X_INTR_HP_CONN);
         fwk_enable_irq(sptr_drv->irq);
     }
 
