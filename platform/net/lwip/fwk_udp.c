@@ -17,6 +17,8 @@
 #include <platform/net/fwk_lwip.h>
 #include <platform/net/fwk_netif.h>
 #include <kernel/wait.h>
+#include <kernel/sched.h>
+#include <kernel/spinlock.h>
 
 /*!< The globals */
 struct lwip_udp_data
@@ -33,8 +35,13 @@ struct lwip_udp_data
 struct lwip_udp_priv
 {
     struct pq_queue *sptr_pq;
+
     struct wait_queue_head sgtc_wqh;
     kbool_t isComing;
+
+    struct spin_lock sgtc_lock;
+    struct atomic sgtc_ref;
+    kbool_t is_dead;
 };
 
 /*!< API functions */
@@ -80,7 +87,10 @@ static struct lwip_udp_data *lwip_udp_raw_poll(struct udp_pcb *sptr_upcb, kusize
     struct pq_queue *sptr_pq = sptr_priv->sptr_pq;
     struct pq_data *sptr_pqd;
 
+    spin_lock_irqsave(&sptr_priv->sgtc_lock);
     sptr_pqd = pq_dequeue_with_chk(sptr_pq, len);
+    spin_unlock_irqrestore(&sptr_priv->sgtc_lock);
+
     if (isValid(sptr_pqd))
         return mr_container_of(sptr_pqd, struct lwip_udp_data, sgtc_pqd);
 
@@ -97,15 +107,25 @@ static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sptr_upcb, struct pbu
                             const ip_addr_t *sptr_ipaddr, u16_t port)
 {
     struct lwip_udp_priv *sptr_priv = (struct lwip_udp_priv *)arg;
-    struct pq_queue *sptr_pq = sptr_priv->sptr_pq;
+    struct pq_queue *sptr_pq;
     struct lwip_udp_data *sptr_data;
 
-    if (!sptr_buf || !sptr_pq)
+    if (!sptr_buf || !sptr_priv ||
+        sptr_priv->is_dead)
+    {
+        pbuf_free(sptr_buf);
         return;
+    }
+
+    atomic_inc(&sptr_priv->sgtc_ref);
     
     sptr_data = kmalloc(sizeof(*sptr_data), GFP_ATOMIC);
     if (!isValid(sptr_data))
+    {
+        pbuf_free(sptr_buf);
+        atomic_dec(&sptr_priv->sgtc_ref);
         return;
+    }
 
     sptr_data->sptr_upcb = sptr_upcb;
     sptr_data->sptr_ipaddr = (ip_addr_t *)sptr_ipaddr;
@@ -115,10 +135,15 @@ static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sptr_upcb, struct pbu
     sptr_data->sgtc_pqd.release = lwip_udp_raw_free;
     sptr_data->sgtc_pqd.dequeue_chk = lwip_udp_raw_check;
 
+    spin_lock_irqsave(&sptr_priv->sgtc_lock);
+    sptr_pq = sptr_priv->sptr_pq;
     pq_enqueue(sptr_pq, &sptr_data->sgtc_pqd);
 
     sptr_priv->isComing = true;
+    spin_unlock_irqrestore(&sptr_priv->sgtc_lock);
+
     wake_up_interruptible(&sptr_priv->sgtc_wqh);
+    atomic_dec(&sptr_priv->sgtc_ref);
 }
 
 /*!
@@ -130,13 +155,22 @@ static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sptr_upcb, struct pbu
 kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sptr_upcb, void *buf, 
                             kusize_t size, ip_addr_t *sptr_src, u16_t *port)
 {
-    struct lwip_udp_priv *sptr_priv = (struct lwip_udp_priv *)sptr_upcb->recv_arg;
+    struct lwip_udp_priv *sptr_priv;
     struct lwip_udp_data *sptr_data;
     void *payload;
     kssize_t len;
 
+    if (!sptr_upcb || !sptr_upcb->recv_arg)
+        return -ER_INVALID;
+
     if (!size)
         return -ER_LACK;
+
+    sptr_priv = (struct lwip_udp_priv *)sptr_upcb->recv_arg;
+    if (!sptr_priv || sptr_priv->is_dead)
+        return -ER_FORBID;
+
+    atomic_inc(&sptr_priv->sgtc_ref);
 
     /*!< read one frame */
     do {
@@ -147,6 +181,8 @@ kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sptr_upcb, void *buf,
         if (PTR_ERR(sptr_data) == (-ER_LACK))
         {
             print_err("%s: recv buffer is too small\r\n", __FUNCTION__);
+
+            atomic_dec(&sptr_priv->sgtc_ref);
             return -ER_LACK;
         }
         if (!sptr_data)
@@ -165,6 +201,7 @@ kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sptr_upcb, void *buf,
 
     } while (1);
 
+    atomic_dec(&sptr_priv->sgtc_ref);
     return len;
 }
 
@@ -177,13 +214,22 @@ kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sptr_upcb, void *buf,
 kssize_t lwip_udp_raw_sendto(struct udp_pcb *sptr_upcb, const ip_addr_t *sptr_dest, 
                             u16_t dest_port, const void *buf, kusize_t size)
 {
+    struct lwip_udp_priv *sptr_priv;
     struct pbuf *sptr_buf;
     err_t err;
+
+    sptr_priv = (struct lwip_udp_priv *)sptr_upcb->recv_arg;
+    if (!sptr_priv || sptr_priv->is_dead)
+        return -ER_FORBID;
+
+    atomic_inc(&sptr_priv->sgtc_ref);
 
     sptr_buf = pbuf_alloc(PBUF_TRANSPORT, size, PBUF_POOL);
     if (!sptr_buf)
     {
         print_err("%s: allocate lwip pbuf failed!\r\n", __func__);
+
+        atomic_dec(&sptr_priv->sgtc_ref);
         return -ER_NOMEM;
     }
 
@@ -194,9 +240,11 @@ kssize_t lwip_udp_raw_sendto(struct udp_pcb *sptr_upcb, const ip_addr_t *sptr_de
         pbuf_free(sptr_buf);
         print_err("%s: udp send lwip pbuf failed!\r\n", __func__);
 
+        atomic_dec(&sptr_priv->sgtc_ref);
         return -ER_SDATA_FAILD;
     }
 
+    atomic_dec(&sptr_priv->sgtc_ref);
     return size;
 }
 
@@ -237,7 +285,11 @@ struct udp_pcb *lwip_udp_raw_bind(const ip_addr_t *sptr_ip, u16_t port)
     {
         sptr_priv->sptr_pq = sptr_pq;
         sptr_priv->isComing = false;
+        spin_lock_init(&sptr_priv->sgtc_lock);
         init_waitqueue_head(&sptr_priv->sgtc_wqh);
+
+        sptr_priv->is_dead = false;
+        ATOMIC_SET(&sptr_priv->sgtc_ref, 0);
 
         udp_recv(sptr_upcb, __lwip_udp_raw_recv, sptr_priv);
         return sptr_upcb;
@@ -250,6 +302,35 @@ fail:
     pq_queue_destroy(sptr_pq);
 
     return ERR_PTR(-ER_FAILD);
+}
+
+/*!
+ * @brief   udp pcb deinit
+ * @param   sptr_upcb
+ * @retval  none
+ * @note    destroy rx ring queue and private data
+ */
+void lwip_udp_raw_unbind(struct udp_pcb *sptr_upcb)
+{
+    struct lwip_udp_priv *sptr_priv;
+    struct pq_queue *sptr_pq;
+    kutype_t flags;
+
+    sptr_priv = (struct lwip_udp_priv *)sptr_upcb->recv_arg;
+    sptr_pq = sptr_priv->sptr_pq;
+
+    while (ATOMIC_READ(&sptr_priv->sgtc_ref))
+        schedule_thread();
+
+    local_irq_save(&flags);
+    sptr_priv->is_dead = true;
+    local_irq_restore(&flags);
+
+    udp_remove(sptr_upcb);
+    udp_recv(sptr_upcb, mr_nullptr, mr_nullptr);
+
+    pq_queue_destroy(sptr_pq);
+    kfree(sptr_priv);
 }
 
 /* end of file */

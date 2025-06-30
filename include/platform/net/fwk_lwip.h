@@ -41,6 +41,7 @@ extern kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sptr_upcb, void *buf,
 extern kssize_t lwip_udp_raw_sendto(struct udp_pcb *sptr_upcb, const ip_addr_t *sptr_dest, 
                                         u16_t dest_port, const void *buf, kusize_t size);
 extern struct udp_pcb *lwip_udp_raw_bind(const ip_addr_t *sptr_ip, u16_t port);
+extern void lwip_udp_raw_unbind(struct udp_pcb *sptr_upcb);
 
 extern kssize_t lwip_tcp_raw_recv(struct tcp_pcb *sptr_tpcb, void *buf, kusize_t size);
 extern kssize_t lwip_tcp_raw_send(struct tcp_pcb *sptr_tpcb, const void *buf, kusize_t size);

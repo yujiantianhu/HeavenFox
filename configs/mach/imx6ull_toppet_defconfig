@@ -33,7 +33,7 @@ CONFIG_OPTIMIZE_CLASS = 0
 # System Config
 # Systick period = 10ms
 CONFIG_HZ = (100)
-CONFIG_HRTIMER_ENBALE = y
+CONFIG_HRTIMER_ENBALE = n
 
 # ---------------------------------------------------------------
 # Console

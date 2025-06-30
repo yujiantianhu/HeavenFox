@@ -240,7 +240,7 @@ kint32_t network_socket(kint32_t domain, kint32_t type, kint32_t protocol)
 }
 
 /*!
- * @brief   destrot sptr_socket
+ * @brief   destroy sptr_socket
  * @param   sockfd
  * @retval  none
  * @note    none

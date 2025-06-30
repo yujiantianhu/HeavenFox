@@ -396,8 +396,12 @@ static void fwk_lwip_exit(struct fwk_network_com *sptr_socket)
     {
         case NR_SOCK_STREAM:
             break;
+            
         case NR_SOCK_DGRAM:
+            lwip_udp_raw_unbind((struct udp_pcb *)pcb);
+            sptr_socket->private_data = mr_nullptr;
             break;
+
         case NR_SOCK_RAW:
             if (sptr_socket->protocol == NET_IP_PROTO_ICMP) {
                 lwip_icmp_raw_exit((struct raw_pcb *)pcb);

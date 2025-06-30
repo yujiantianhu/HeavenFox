@@ -53,7 +53,8 @@ static kint32_t term_cmd_kill_signal(struct term_cmd *sptr_cmd, kint32_t argc, k
                     if (tid < 0)
                         goto fail;
 
-                    schedule_thread_sleep(tid);
+                    if (!schedule_thread_sleep(tid))
+                        print_info("remove thread '%s' (tid: %d)\r\n", thread_get_name(tid), tid);
                     break;
 
                 case SIGWAKE:
@@ -61,7 +62,8 @@ static kint32_t term_cmd_kill_signal(struct term_cmd *sptr_cmd, kint32_t argc, k
                     if (tid < 0)
                         goto fail;
 
-                    schedule_thread_wakeup(tid);
+                    if (!schedule_thread_wakeup(tid))
+                        print_info("wakeup thread '%s' (tid: %d)\r\n", thread_get_name(tid), tid);
                     break;
             }
 

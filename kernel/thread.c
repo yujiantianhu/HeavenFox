@@ -217,12 +217,15 @@ kint32_t thread_destory(tid_t tid)
 
     sptr_thread = unregister_thread(tid);
     if (IS_ERR(sptr_thread))
+    {
+        print_err("\r\nremove thread '%s' (tid: %d) failed!\r\n", sptr_thread->name, tid);
         return PTR_ERR(sptr_thread);
+    }
 
     if (mr_nullptr == sptr_thread)
         return ER_NORMAL;
 
-    print_debug("\r\nthread \'%s\' (tid: %d) is be destroyed\r\n", sptr_thread->name, sptr_thread->tid);
+    print_debug("\r\nthread \'%s\' (tid: %d) is be destroyed\r\n", sptr_thread->name, tid);
 
     kfree(sptr_thread->sptr_attr);
     kfree(sptr_thread);

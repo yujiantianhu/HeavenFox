@@ -18,6 +18,7 @@
 #include <platform/net/fwk_ip.h>
 #include <platform/net/fwk_socket.h>
 #include <platform/net/fwk_lwip.h>
+#include <kernel/sched.h>
 #include <kernel/spinlock.h>
 
 /*!< The defines */
@@ -47,6 +48,9 @@ struct lwip_icmp_data
     
     kuint16_t seq_num;
     struct lwip_icmp_queue sgtc_seq[PING_MAX_SEQNUM];
+
+    struct atomic sgtc_ref;
+    kbool_t is_dead;
 };
 
 /*!< The globals */
@@ -107,13 +111,17 @@ static kuint8_t __lwip_icmp_raw_recv(void *arg, struct raw_pcb *sptr_pcb,
     if (sptr_buf->tot_len < (NET_IP_HDR_LEN + NET_ICMP_HDR_LEN))
         return 0;
 
+    /*!< Get data and icmp header */
+    sptr_data = (struct lwip_icmp_data *)sptr_pcb->recv_arg;
+    if (!sptr_data || sptr_data->is_dead)
+        return 0;
+
     /*!< Get ip header */
     sptr_iphdr = (struct fwk_ip_hdr *)sptr_buf->payload;
     if (pbuf_header(sptr_buf, -NET_IP_HDR_LEN))
         return 0;
 
-    /*!< Get data and icmp header */
-    sptr_data = (struct lwip_icmp_data *)sptr_pcb->recv_arg;
+    atomic_inc(&sptr_data->sgtc_ref);
     sptr_hdr = (struct fwk_icmp_hdr *)sptr_buf->payload;
 
     switch (sptr_hdr->type)
@@ -158,6 +166,8 @@ static kuint8_t __lwip_icmp_raw_recv(void *arg, struct raw_pcb *sptr_pcb,
                     interval / 1000, interval % 1000);
 
                 pbuf_free(sptr_buf);
+                atomic_dec(&sptr_data->sgtc_ref);
+
                 return 1;
             }
             break;
@@ -167,6 +177,8 @@ static kuint8_t __lwip_icmp_raw_recv(void *arg, struct raw_pcb *sptr_pcb,
 
 out:
     pbuf_header(sptr_buf, NET_IP_HDR_LEN);
+    atomic_dec(&sptr_data->sgtc_ref);
+
     return 0;
 }
 
@@ -189,18 +201,29 @@ kssize_t lwip_icmp_raw_recvfrom(struct raw_pcb *sptr_pcb, void *buf,
         return -ER_INVALID;
 
     sptr_data = (struct lwip_icmp_data *)sptr_pcb->recv_arg;
+    if (!sptr_data || sptr_data->is_dead)
+        return -ER_FORBID;
+
+    atomic_inc(&sptr_data->sgtc_ref);
+
     seq_no = mr_ntohs(sptr_data->seq_num);
     sptr_seq = &sptr_data->sgtc_seq[seq_no % PING_MAX_SEQNUM];
 
     /*!< If buf is valid, it indicates that no timeout event */
     sptr_iphdr = (struct fwk_ip_hdr *)sptr_seq->buf;
     if (!sptr_iphdr)
+    {
+        atomic_dec(&sptr_data->sgtc_ref);
         return -ER_EMPTY;
+    }
 
     /*!< Delete timer_list now after reading buf (timeout callback may free buf) */
     del_timer(&sptr_seq->sgtc_tm);
     if (sptr_seq->timeout_cnt > 1)
+    {
+        atomic_dec(&sptr_data->sgtc_ref);
         return -ER_TIMEOUT;
+    }
 
     iphdr_len = sptr_iphdr->ihl * 4;
     real_len = CMP_MIN2(size, (sptr_seq->len - iphdr_len));
@@ -212,6 +235,7 @@ kssize_t lwip_icmp_raw_recvfrom(struct raw_pcb *sptr_pcb, void *buf,
     kfree(sptr_seq->buf);
     memset(sptr_seq, 0, sizeof(*sptr_seq));
 
+    atomic_dec(&sptr_data->sgtc_ref);
     return real_len;
 }
 
@@ -230,9 +254,18 @@ kssize_t lwip_icmp_raw_send(struct raw_pcb *sptr_pcb,
     kuint16_t seq_no;
     err_t ret;
 
+    sptr_data = (struct lwip_icmp_data *)sptr_pcb->recv_arg;
+    if (!sptr_data || sptr_data->is_dead)
+        return -ER_FORBID;
+
+    atomic_inc(&sptr_data->sgtc_ref);
+
     sptr_buf = pbuf_alloc(PBUF_IP, size, PBUF_RAM);
     if (!sptr_buf)
+    {
+        atomic_dec(&sptr_data->sgtc_ref);
         return -ER_NOMEM;
+    }
 
     /*!< Just one packet */
     if (sptr_buf->next || 
@@ -241,7 +274,6 @@ kssize_t lwip_icmp_raw_send(struct raw_pcb *sptr_pcb,
 
     memcpy(sptr_buf->payload, buf, size);
 
-    sptr_data = (struct lwip_icmp_data *)sptr_pcb->recv_arg;
     sptr_hdr = (struct fwk_icmp_hdr *)sptr_buf->payload;
 
     seq_no = sptr_hdr->u.sgtc_echo.seq_no;
@@ -277,10 +309,13 @@ kssize_t lwip_icmp_raw_send(struct raw_pcb *sptr_pcb,
         printk("PING %s %u bytes of data.\r\n", ip_addr, size);
     }
 
+    atomic_dec(&sptr_data->sgtc_ref);
     return size;
 
 fail:
     pbuf_free(sptr_buf);
+    atomic_dec(&sptr_data->sgtc_ref);
+
     return -ER_FAILD;
 }
 
@@ -297,7 +332,7 @@ struct raw_pcb *lwip_icmp_raw_init(void)
     ip_addr_t ip;
     kint32_t seq = PING_MAX_SEQNUM;
 
-    sptr_data = kmalloc(sizeof(*sptr_data), GFP_KERNEL);
+    sptr_data = kzalloc(sizeof(*sptr_data), GFP_KERNEL);
     if (!isValid(sptr_data))
         return ERR_PTR(-ER_NOMEM);
 
@@ -308,11 +343,7 @@ struct raw_pcb *lwip_icmp_raw_init(void)
         return ERR_PTR(-ER_FAILD);
     }
 
-    sptr_data->type = 0;
     sptr_data->sptr_pcb = sptr_pcb;
-    sptr_data->seq_num = 0;
-
-    memset(&sptr_data->sgtc_seq, 0, sizeof(sptr_data->sgtc_seq));
     while (seq--)
     {
         struct lwip_icmp_queue *sptr_seq;
@@ -339,23 +370,32 @@ void lwip_icmp_raw_exit(struct raw_pcb *sptr_pcb)
     struct lwip_icmp_data *sptr_data;
     struct lwip_icmp_queue *sptr_seq;
     kint32_t seq = PING_MAX_SEQNUM;
+    kutype_t flags;
 
     sptr_data = (struct lwip_icmp_data *)sptr_pcb->recv_arg;
     sptr_seq = &sptr_data->sgtc_seq[0];
 
+    while (ATOMIC_READ(&sptr_data->sgtc_ref))
+        schedule_thread();
+
+    local_irq_save(&flags);
+    sptr_data->is_dead = true;
+    local_irq_restore(&flags);
+
+    raw_recv(sptr_pcb, mr_nullptr, mr_nullptr);
+    raw_remove(sptr_pcb);
+
     while (seq--)
     {
         if (sptr_seq->buf)
-            kfree(sptr_seq);
+            kfree(sptr_seq->buf);
 
+        sptr_seq->buf = mr_nullptr;
         del_timer(&sptr_seq->sgtc_tm);
         sptr_seq++;
     }
 
     kfree(sptr_data);
-
-    raw_recv(sptr_pcb, mr_nullptr, mr_nullptr);
-    raw_remove(sptr_pcb);
 }
 
 /*!< end of file */

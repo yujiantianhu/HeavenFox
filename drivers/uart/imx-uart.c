@@ -264,23 +264,31 @@ static kssize_t imx_uart_driver_write(struct fwk_file *sptr_file, const kbuffer_
     if (!(sptr_data->flags & NR_IMX_UART_DRV_TXDMA)) 
     {
         srt_imx_uart_t *sptr_uart = sptr_data->sptr_uart;
-        kchar_t msgs[1024];
-        kusize_t real_size = CMP_MIN2(size, sizeof(msgs));
+        kchar_t msgs[128];
+        kusize_t real_size, sentbyte = 0;
 
-        fwk_copy_from_user(msgs, ptrBuffer, real_size);
-
-        /*!< Wait for last fifo send finished */
-        if (!mr_imx_uart_tx_empty(sptr_uart))
-            wait_event(&sptr_data->sgtc_txwqh, mr_imx_uart_tx_empty(sptr_uart));
-
-        for (kusize_t i = 0; i < real_size; i++) 
+        while (sentbyte < size)
         {
-            /*!< If TxFIFO is full, waitting for a while */
-            while (mr_imx_uart_tx_full(sptr_uart))
-                mr_delay_nop();
+            real_size = CMP_MIN2(size - sentbyte, sizeof(msgs));
+            fwk_copy_from_user(msgs, ptrBuffer + sentbyte, real_size);
 
-            /*!< Send Data */
-            mr_imx_uart_send_byte(sptr_uart, msgs[i]);
+            /*!< Wait for last fifo send finished */
+            if (mr_unlikely(IS_IN_INTERRUPT()))
+                while (!mr_imx_uart_tx_empty(sptr_uart));
+            else
+                wait_event(&sptr_data->sgtc_txwqh, mr_imx_uart_tx_empty(sptr_uart));
+
+            for (kusize_t i = 0; i < real_size; i++) 
+            {
+                /*!< If TxFIFO is full, waitting for a while */
+                while (mr_imx_uart_tx_full(sptr_uart))
+                    mr_delay_nop();
+
+                /*!< Send Data */
+                mr_imx_uart_send_byte(sptr_uart, msgs[i]);
+            }
+
+            sentbyte += real_size;
         }
     }
     else

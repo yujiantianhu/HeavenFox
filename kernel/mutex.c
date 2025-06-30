@@ -77,7 +77,7 @@ void mutex_wait(struct mutex_lock *sptr_lock)
 /*!
  * @brief   mutex lock
  * @param   sptr_lock
- * @retval  none
+ * @retval  0: success
  * @note    if it has been locked, return directly
  */
 kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
