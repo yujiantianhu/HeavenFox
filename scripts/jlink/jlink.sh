@@ -4,6 +4,7 @@
 # cd scripts/jlink
 # arm-linux-gnueabihf-gdb
 # source jlink.sh
+# sudo luit -encoding gb2312 picocom /dev/ttyUSB0 -b 115200
 
 target remote localhost:2331
 

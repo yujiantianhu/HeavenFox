@@ -189,6 +189,24 @@ void fwk_raise_softirq(kint32_t nr)
 }
 
 /*!
+ * @brief   cancel softirq action
+ * @param   nr: irq number (__ERT_SOFTIRQ_EVENT)
+ * @retval  none
+ * @note    none
+ */
+void fwk_cancel_softirq(kint32_t nr)
+{
+    kutype_t flags;
+
+    mr_local_irq_save(flags);
+
+//  SOFTIRQ_CALL(nr);
+    g_fwk_softirq_event &= ~mr_bit(nr);
+
+    mr_local_irq_restore(flags);
+}
+
+/*!
  * @brief   Tasklet callback
  * @param   nr: irq number (__ERT_SOFTIRQ_EVENT)
  * @param   args: argument

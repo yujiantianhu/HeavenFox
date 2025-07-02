@@ -102,6 +102,8 @@ typedef kint32_t tid_t;
 #define THREAD_TIME_DEFUALT                 (40)				/*!< unit: ms */
 #define THREAD_TIME_KMEMP                   (20)				/*!< unit: ms */
 
+#define THREAD_SWITCH_TIME                  (10)                /*!< thread switch interval, maybe 10us */
+
 /*!< policy */
 enum __ERT_THREAD_DETACH
 {

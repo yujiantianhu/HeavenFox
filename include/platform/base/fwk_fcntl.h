@@ -28,9 +28,10 @@
 
 /*!< The maximum number of extension file descriptors that can be assigned */
 #define FILE_DESC_EXP_NUM									(128)
+#define FILE_DESC_TOT_NUM									(FILE_DESC_NUM_MAX + FILE_DESC_EXP_NUM)
 
 /*!< socket descriptors base */
-#define NETWORK_SOCKETS_BASE                        		(FILE_DESC_NUM_MAX + FILE_DESC_EXP_NUM)
+#define NETWORK_SOCKETS_BASE                        		FILE_DESC_TOT_NUM
 
 #define FILE_DESC_OVER_BASE(fd)								(fd < DEVICE_MAJOR_BASE)
 

@@ -63,7 +63,7 @@ struct thread
 };
 
 /*!< Set thread state */
-#define __SET_THREAD_STATE(sptr_th, value)	\
+#define __SET_THREAD_TARGET_STATE(sptr_th, value)	\
     do {	\
         sptr_th->to_state = (value);	\
     } while (0)

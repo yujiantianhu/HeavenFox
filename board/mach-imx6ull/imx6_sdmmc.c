@@ -763,7 +763,7 @@ static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sptr_usdhc, struct fwk
     struct fwk_sdcard_host *sptr_host;
     kuint32_t iWaterMarkLimit;
     kuint32_t *ptrTxBuffer;
-    kuint32_t iDataWords, iTransWords, iTransCnt;
+    kuint32_t iDataWords, iTransWords;
     kuint32_t iRetry = 4096U;
     kbool_t blRetval;
 
@@ -816,10 +816,24 @@ static kint32_t imx6ull_sdmmc_write_data(srt_imx_usdhc_t *sptr_usdhc, struct fwk
         {
             iDataWords -= iTransWords;
 
-            for (iTransCnt = 0; iTransCnt < iTransWords; iTransCnt++)
+            if (mr_is_aligned((kuaddr_t)ptrTxBuffer, 4U))
             {
                 /*!< 32 bits (4 bytes) will be written to Register */
-                mr_writel(*(ptrTxBuffer++), &sptr_usdhc->DATA_BUFF_ACC_PORT);
+                while (iTransWords--)
+                    mr_writel(*(ptrTxBuffer++), &sptr_usdhc->DATA_BUFF_ACC_PORT);
+            }
+            else
+            {
+                kuint32_t data;
+
+                while (iTransWords--)
+                {
+                    /*!< If ptrRxBuffer is not 4-bytes-alignment, it may cause data_abort; use the super interface to get data */
+                    u32_set2u8(&data, ptrTxBuffer++);
+
+                    /*!< 32 bits (4 bytes) will be written to Register */
+                    mr_writel(data, &sptr_usdhc->DATA_BUFF_ACC_PORT);
+                }
             }
 
             /*!< watermark is full, clear write-ready bit, waiting for the next transmission */
@@ -851,7 +865,7 @@ static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sptr_usdhc, struct fwk_
     struct fwk_sdcard_host *sptr_host;
     kuint32_t iWaterMarkLimit;
     kuint32_t *ptrRxBuffer;
-    kuint32_t iDataWords, iTransWords, iTransCnt;
+    kuint32_t iDataWords, iTransWords;
     kuint32_t iRetry = 4096U;
     kint32_t iRetval = ER_NORMAL;
     kbool_t blRetval;
@@ -867,7 +881,7 @@ static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sptr_usdhc, struct fwk_
         return -ER_NSUPPORT;
 
     /*!< 4 bytes align. blocksize is per block size (unit: byte) */
-    iDataWords = mr_num_align4(sptr_data->blockSize) >> 2;
+    iDataWords = mr_ralign(sptr_data->blockSize, 4U) >> 2;
     iDataWords *= sptr_data->blockCount;
     ptrRxBuffer = (kuint32_t *)sptr_data->rxBuffer;
 
@@ -904,10 +918,23 @@ static kint32_t imx6ull_sdmmc_read_data(srt_imx_usdhc_t *sptr_usdhc, struct fwk_
         {
             iDataWords -= iTransWords;
 
-            for (iTransCnt = 0; iTransCnt < iTransWords; iTransCnt++)
+            if (mr_is_aligned((kuaddr_t)ptrRxBuffer, 4U))
             {
                 /*!< 32 bits (4 bytes) will be read from Register */
-                *(ptrRxBuffer++) = mr_readl(&sptr_usdhc->DATA_BUFF_ACC_PORT);
+                while (iTransWords--)
+                    *(ptrRxBuffer++) = mr_readl(&sptr_usdhc->DATA_BUFF_ACC_PORT);
+            }
+            /*!< If ptrRxBuffer is not 4-bytes-alignment, it may cause data_abort */
+            else
+            {
+                kuint32_t data;
+
+                while (iTransWords--)
+                {
+                    /*!< 32 bits (4 bytes) will be read from Register */
+                    data = mr_readl(&sptr_usdhc->DATA_BUFF_ACC_PORT);
+                    u32_set2u8(ptrRxBuffer++, &data);
+                }
             }
 
             /*!< watermark is full, clear read-ready bit, waiting for the next transmission */

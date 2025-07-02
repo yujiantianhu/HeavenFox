@@ -295,7 +295,8 @@ static struct fwk_file *fwk_fd_to_file(kint32_t fd)
     struct fwk_file  **sptr_fdt;
     kint32_t index;
 
-    if (FILE_DESC_OVER_BASE(fd))
+    if (FILE_DESC_OVER_BASE(fd) ||
+        (fd >= FILE_DESC_TOT_NUM))
         return mr_nullptr;
 
     sptr_table	= &sgtc_fwk_file_table;
@@ -512,7 +513,7 @@ kint32_t virt_open(const kchar_t *dev, kuint32_t mode)
 void virt_close(kint32_t fd)
 {
     if (fd >= NETWORK_SOCKETS_BASE)
-        network_close(fd);
+        return network_close(fd);
 
     return fwk_do_close(fd);
 }

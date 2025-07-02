@@ -93,12 +93,29 @@ static void *irq_thread(void *args)
 
     for (;;)
     {
-        /*!< no additional judgement on whether thread_fn exsits */
-        sptr_grp->thread_fn(sptr_grp->irq, sptr_grp->sgtc_action.ptrArgs);
-        atomic_dec(&sptr_grp->sgtc_rec);
+        /*!
+         * @note Init to 1
+         * even if the upper half irq handler is triggered multiple times, 
+         * the bottom half is excuted only once
+         */
+        ATOMIC_SET(&sptr_grp->sgtc_rec, 1);
 
-        if (!ATOMIC_READ(&sptr_grp->sgtc_rec))
-            schedule_self_suspend();
+        /*!
+         * @note
+         * If upper half irq handler is triggered during the excution of thread_fn, 
+         * then thread_fn needs to excute again to response event 
+         */
+        while (true)
+        {
+            atomic_dec(&sptr_grp->sgtc_rec);
+
+            /*!< no additional judgement on whether thread_fn exsits */
+            sptr_grp->thread_fn(sptr_grp->irq, sptr_grp->sgtc_action.ptrArgs);
+            if (!ATOMIC_READ(&sptr_grp->sgtc_rec))
+                break;
+        }
+
+        schedule_self_suspend();
     }
 
     return sptr_grp->sgtc_action.ptrArgs;

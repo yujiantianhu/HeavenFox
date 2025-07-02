@@ -477,6 +477,31 @@ kint32_t fwk_dev_queue_xmit(struct fwk_sk_buff *sptr_skb)
  * @retval  errno
  * @note    the function will wake up rx_thread
  */
+kint32_t fwk_netif_wake_rx(struct fwk_sk_buff *sptr_skb)
+{
+    struct spin_lock *sptr_lock;
+
+    sptr_lock = &sgtc_fwk_netif_rx_lock;
+    spin_lock_irqsave(sptr_lock);
+
+    if (!fwk_skb_enqueue(fwk_netif_rxq_get(), sptr_skb))
+    {
+        spin_unlock_irqrestore(sptr_lock);
+        schedule_thread_wakeup(THREAD_TID_SOCKRX);
+        
+        return ER_NORMAL;
+    }
+
+    spin_unlock_irqrestore(sptr_lock);
+    return -ER_FAILD;
+}
+
+/*!
+ * @brief   add skb received to global rx list
+ * @param   sptr_skb
+ * @retval  errno
+ * @note    the function will wake up rx_thread or softirq (if configure "CONFIG_NET_RX_SOFTIRQ")
+ */
 kint32_t fwk_netif_rx(struct fwk_sk_buff *sptr_skb)
 {
     struct spin_lock *sptr_lock;
@@ -493,7 +518,7 @@ kint32_t fwk_netif_rx(struct fwk_sk_buff *sptr_skb)
     #else
         schedule_thread_wakeup(THREAD_TID_SOCKRX);
     #endif
-
+    
         return ER_NORMAL;
     }
 
@@ -560,22 +585,25 @@ static void *fwk_netif_rx_entry(void *args)
 
     for (;;)
     {
-        spin_lock_irqsave(sptr_lock);
-        if (mr_skbuff_list_empty(sptr_head))
+        while (true)
         {
+            spin_lock_irqsave(sptr_lock);
+            if (mr_skbuff_list_empty(sptr_head))
+            {
+                spin_unlock_irqrestore(sptr_lock);
+                break;
+            }        
+
+            fwk_skb_split(&sptr_tcb->sgtc_head, sptr_head);
+            fwk_skb_list_init(sptr_head);
+
             spin_unlock_irqrestore(sptr_lock);
-            schedule_self_suspend();
 
-            continue;
-        }        
+            if (sptr_tcb->pfunc_rx)
+                sptr_tcb->pfunc_rx(&sptr_tcb->sgtc_head, sptr_tcb->args);      
+        }
 
-        fwk_skb_split(&sptr_tcb->sgtc_head, sptr_head);
-        fwk_skb_list_init(sptr_head);
-
-        spin_unlock_irqrestore(sptr_lock);
-
-        if (sptr_tcb->pfunc_rx)
-            sptr_tcb->pfunc_rx(&sptr_tcb->sgtc_head, sptr_tcb->args);       
+        schedule_self_suspend();
     }
 
     return args;

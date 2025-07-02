@@ -150,6 +150,7 @@ extern void local_bh_enable(void);
 extern void fwk_handle_softirq(void);
 extern void fwk_open_softirq(kint32_t nr, void (*action)(kint32_t event));
 extern void fwk_raise_softirq(kint32_t nr);
+extern void fwk_cancel_softirq(kint32_t nr);
 extern void fwk_softirq_init(void);
 
 extern void fwk_tasklet_init(struct fwk_tasklet *sptr_tsk, void (*func)(kutype_t args), kutype_t data);

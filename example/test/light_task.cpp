@@ -79,7 +79,7 @@ static void *light_task_entry(void *args)
 END2:
         virt_close(fd);
 END1:
-        msleep(203);
+        msleep(200);
     }
 
     return args;

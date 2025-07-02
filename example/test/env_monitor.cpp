@@ -130,7 +130,7 @@ fini:
         mail_recv_finish(sptr_mail);
         
 END:
-        msleep(213);
+        msleep(200);
     }
 
     virt_close(fd);

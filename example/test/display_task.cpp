@@ -176,7 +176,8 @@ private:
 };
 
 /*!< The globals */
-static kchar_t g_display_buffer[(1920 * 1080) * 4 + 4] __align(4);
+static THREAD_STACK_DEFINE(g_display_task_stack, DISPLAY_TASK_STACK_SIZE);
+static kchar_t g_display_buffer[(1920 * 1080) * 4 + 4] __align(512U);
 
 static const kchar_t *g_display_text_path = "/media/FAT32_2/home/fox/text";
 static const kchar_t *g_display_logo = CONFIG_POWER_LOGO;
@@ -376,22 +377,43 @@ static kssize_t display_task_text(crt_disp_task_t &cgtc_dtsk, crt_disp_text_t &c
     struct mailbox &sgtc_mb = cgtc_dtsk.cptr_task->self_mailbox();
     struct fwk_disp_ctrl &sgtc_dctrl = cgtc_text.sgtc_dctrl;
     struct fwk_disp_info *sptr_disp = sgtc_dctrl.sptr_di;
+    struct fwk_font_setting &sgtr_set = sgtc_dctrl.sgtc_set;
     struct mail *sptr_mail;
     struct fwk_fb_var_screen_info sgtc_var;
     enum disp_text_op nr_op = NR_DISP_TEXT_NONE;
     kssize_t size, offset = 0;
     kusize_t page_index = 0;
+    kusize_t showbytes;
 
     fwk_display_frame_exchange(sptr_disp);
     display_task_clear(cgtc_text);
     display_task_cursor(cgtc_text, 0, 0, sptr_disp->width, sptr_disp->height);
 
+    /*!< 
+     * There are "xres * yres" pixels for full screen, 
+     * For ascii, 1 character = 1bytes; width = height / 2; it needs "width * width / 2" pixels, and the same number bytes;
+     *      The total charaters of full screen are (xres * yres) / (width * width / 2);
+     *      The total bytes of full screen are [(xres * yres) / (width * width / 2)] * 1
+     * For Chinese word, 1 word = 3 bytes in UTF-8, but 2 bytes in GB2312. A word's width = it's height, so
+     * it needs "width * height" pixels to show. Assume 1 word = 4 bytes, then:
+     *      The total words of full screen are (xres * yres) / (width * width);
+     *      The total bytes of full screen are [(xres * yres) / (width * width)] * 4
+     */
+#if FWK_FONT_HZ_3BYTES
+    showbytes = (((sptr_disp->width * sptr_disp->height) / (sgtr_set.size * sgtr_set.size))  * 3U) + 128U;
+#else
+    showbytes = (((sptr_disp->width * sptr_disp->height) / (sgtr_set.size * sgtr_set.size)) << 1U) + 128U;
+#endif
+    showbytes = mr_align4(showbytes);
+
+    /*!< Get previous position */
     page_index = cgtc_text.cur_page;
     offset = cgtc_text.text_pages[page_index];
+
     while (!IS_DISP_FRAME_FULL(&sgtc_dctrl))
     {
         file_lseek(sptr_file, offset);
-        size = file_read(sptr_file, g_display_buffer, sizeof(g_display_buffer) - 4);
+        size = file_read(sptr_file, g_display_buffer, showbytes);
         if (size <= 0)
             return 0;
 
@@ -399,6 +421,7 @@ static kssize_t display_task_text(crt_disp_task_t &cgtc_dtsk, crt_disp_text_t &c
         offset += fwk_display_word(&sgtc_dctrl, g_display_buffer);
     }
 
+    /*!< Switch to second screen */
     virt_ioctl(cgtc_dtsk.fd, NR_FB_IOGET_VARINFO, &sgtc_var);
     if (!sgtc_var.yoffset)
         sgtc_var.yoffset += sgtc_var.yres;
@@ -411,7 +434,7 @@ static kssize_t display_task_text(crt_disp_task_t &cgtc_dtsk, crt_disp_text_t &c
         sptr_mail = mail_recv(&sgtc_mb, 0);
         if (!isValid(sptr_mail))
         {
-            msleep(200);
+            msleep(100);
             continue;
         }
 
@@ -587,7 +610,7 @@ static void *display_task_entry(void *args)
         if (retval == NR_DISP_TEXT_EXIT)
             cgtc_windows.show(cgtc_dtsk);
 
-        msleep(200);
+        msleep(100);
     }
 
 fail:
@@ -604,8 +627,6 @@ fail:
  */
 kint32_t display_task_init(void)
 {
-    static THREAD_STACK_DEFINE(g_display_task_stack, DISPLAY_TASK_STACK_SIZE);
-
     crt_task_t *cptr_task = new crt_task_t("display_task", 
                                             display_task_entry, 
                                             g_display_task_stack, 

@@ -47,13 +47,18 @@ static void thread_sleep_timeout(kuint32_t args)
     struct thread *sptr_thread = sptr_event->sptr_cur;
 
     /*!< Only schedule_thread() is finished, state will be NR_THREAD_SUSPEND */
-    if (sptr_thread->state == NR_THREAD_SUSPEND)
+    if (__GET_THREAD_STATE(sptr_thread) == NR_THREAD_SUSPEND)
         schedule_thread_wakeup(sptr_thread->tid);
 
-    if (sptr_event->type == KTIME_EVENT_JIFFIES)
-        mod_timer(&sptr_event->u.sgtc_tm, jiffies + 1);
-    else
-        mod_hrtimer(&sptr_event->u.sgtc_hrtm, khrtime_ticks() + MSEC_TO_HRTICK(1));
+    /*!< Wake up failed */ 
+    if ((__GET_THREAD_STATE(sptr_thread) != NR_THREAD_READY) ||
+        (__GET_THREAD_STATE(sptr_thread) != NR_THREAD_RUNNING))
+    {
+        if (sptr_event->type == KTIME_EVENT_JIFFIES)
+            mod_timer(&sptr_event->u.sgtc_tm, jiffies + 1);
+        else
+            mod_hrtimer(&sptr_event->u.sgtc_hrtm, khrtime_ticks() + MSEC_TO_HRTICK(1));
+    }
 }
 
 /*!
@@ -69,7 +74,7 @@ void khrtime_schedule(khrtime_t tick)
     struct thread *sptr_cur = mr_current;
 
     /*!< schedule but not suspend (just add to ready list) */
-    if (tick < USEC_TO_HRTICK(2)) {
+    if (tick < USEC_TO_HRTICK(THREAD_SWITCH_TIME)) {
         schedule_thread();
         return;
     }
@@ -80,11 +85,12 @@ void khrtime_schedule(khrtime_t tick)
 
     /*!< suspend current thread, and schedule others */
     spin_lock_irqsave(&sptr_cur->sgtc_lock);
-    __SET_THREAD_STATE(sptr_cur, NR_THREAD_SUSPEND);
+    __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
 
     mod_hrtimer(sptr_tm, khrtime_ticks() + tick);
-    schedule_thread();
+    if (mr_likely(__GET_THREAD_TARGET_STATE(sptr_cur) == NR_THREAD_SUSPEND))
+        schedule_thread();
 
     del_hrtimer(sptr_tm);
 }
@@ -113,7 +119,7 @@ void schedule_timeout(kutime_t count)
 
     /*!< suspend current thread, and schedule others */
     spin_lock_irqsave(&sptr_cur->sgtc_lock);
-    __SET_THREAD_STATE(sptr_cur, NR_THREAD_SUSPEND);
+    __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
 
     mod_timer(sptr_tm, jiffies + count);
@@ -139,7 +145,7 @@ void khrt_sleep_tick(khrtime_t tick)
             schedule_thread();
 
     #else
-        if (expires > khrtime_ticks())
+//      if (expires > khrtime_ticks())
             khrtime_schedule(tick);
         
     #endif

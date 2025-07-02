@@ -243,7 +243,7 @@ extern void do_hrtime_event(void);
 extern kutime_t ktime_systick(void);
 extern khrtime_t ktime_hrtick(void);
 extern khrtime_t khrtime_ticks(void);
-extern kbool_t khrtime_check_overcnt(void);
+extern kuint32_t khrtime_check_overcnt(void);
 extern void ktime_to_spec(struct time_val *sptr_tval);
 extern void khrtime_reload_cnt(khrtime_t expires);
 

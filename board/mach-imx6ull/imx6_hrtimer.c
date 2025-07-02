@@ -64,15 +64,23 @@ void khrtime_reload_cnt(khrtime_t expires)
  * @retval  none
  * @note    true or false
  */
-kbool_t khrtime_check_overcnt(void)
+kuint32_t khrtime_check_overcnt(void)
 {
     srt_hal_imx_gptimer_t *sptr_tick;
-    kuint32_t status;
+    kuint32_t flags;
 
     sptr_tick = IMX_HRTIMER_PORT_ENTRY();
-    status = mr_readl(&sptr_tick->SR);
 
-    return mr_isBitSetl(mr_bit(5U), &status);
+    mr_local_irq_save(flags);
+    
+    if (mr_bit(5U) & mr_readl(&sptr_tick->SR))
+    {
+        g_hrtime_over_cnt++;
+        mr_writel(mr_bit(5U), &sptr_tick->SR);
+    }
+
+    mr_local_irq_restore(flags);
+    return g_hrtime_over_cnt;
 }
 
 /*!

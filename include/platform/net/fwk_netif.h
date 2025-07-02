@@ -45,6 +45,7 @@ extern struct fwk_sk_buff_head *fwk_netif_rxq_get(void);
 extern kint32_t fwk_netif_open(const kchar_t *name);
 extern kint32_t fwk_netif_close(const kchar_t *name);
 extern kint32_t fwk_netif_ioctl(kuint32_t request, kuaddr_t args);
+extern kint32_t fwk_netif_wake_rx(struct fwk_sk_buff *sptr_skb);
 extern kint32_t fwk_netif_rx(struct fwk_sk_buff *sptr_skb);
 extern kint32_t fwk_dev_queue_xmit(struct fwk_sk_buff *sptr_skb);
 

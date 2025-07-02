@@ -128,13 +128,8 @@ __weak khrtime_t khrtime_ticks(void)
         return ((((khrtime_t)tick_h) << 32ULL) | tick_l);
     }
 
-    /*!< 
-     * If khrtime_ticks is called by irq_handler, g_hrtime_over_cnt maybe still old;
-     * because g_hrtime_over_cnt only increase in IRQ callback, not real-time,
-     * it means that g_hrtime_over_cnt will be delayed.
-     * khrtime_check_overcnt() will read interrupt status register
-     */
-    over_count = khrtime_check_overcnt() ? (g_hrtime_over_cnt + 1) : g_hrtime_over_cnt;
+    /*!< Check if counter is over max, and return over count */
+    over_count = khrtime_check_overcnt();
     tick_l = IS_HRTIMER_UPINC() ? (*time_cnt1) : (HRTIMER_MAX - (*time_cnt1));
 
     return (over_count * (khrtime_t)HRTIMER_MAX) + tick_l;
@@ -146,7 +141,7 @@ __weak khrtime_t khrtime_ticks(void)
  * @retval  none
  * @note    true or false
  */
-__weak kbool_t khrtime_check_overcnt(void)
+__weak kuint32_t khrtime_check_overcnt(void)
 {
     return false;
 }
@@ -520,6 +515,7 @@ void add_hrtimer(struct hrtimer_list *sptr_timer)
     struct ktime_tick *sptr_list;
     struct spin_lock *sptr_lock;
     struct hrtimer_list **sptr_first;
+    khrtime_t cur_tick;
 
     if ((!sptr_timer) || 
         (!sptr_timer->expires) ||
@@ -531,6 +527,10 @@ void add_hrtimer(struct hrtimer_list *sptr_timer)
     sptr_first = (struct hrtimer_list **)&sptr_list->sptr_first;
 
     spin_lock_irqsave(sptr_lock);
+
+    cur_tick = khrtime_ticks() + USEC_TO_HRTICK(2);
+    if (mr_unlikely(cur_tick > sptr_timer->expires))
+        sptr_timer->expires = cur_tick;
 
     if (!(*sptr_first) ||
         (sptr_timer->expires < (*sptr_first)->expires))
@@ -623,6 +623,7 @@ void do_hrtime_event(void)
     sptr_list = &sgtc_ktime_htick;
     sptr_cast = &sgtc_ktime_inactive;
 
+loop:
     foreach_list_next_entry_safe(sptr_timer, sptr_temp, &sptr_list->sgtc_list, sgtc_link)
     {
         /*!< Get tick real-time (deal with more events, within 1us) */
@@ -645,9 +646,19 @@ void do_hrtime_event(void)
             }
         }
     }
-    
+
     sptr_list->sptr_first = (struct timer_list *)sptr_next;
-    khrtime_reload_cnt(sptr_next ? sptr_next->expires : max_ticks);
+
+    if (!sptr_next)
+        khrtime_reload_cnt(max_ticks);
+    else
+    {
+        cur_tick = khrtime_ticks() + USEC_TO_HRTICK(1);
+        if (cur_tick <= sptr_next->expires)
+            goto loop;
+
+        khrtime_reload_cnt(sptr_next->expires);
+    }
 }
 #undef  HRTIMER_SELECT
 

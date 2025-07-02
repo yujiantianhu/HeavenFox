@@ -271,9 +271,9 @@ kint32_t sil9022x_write_data(struct fwk_i2c_client *sptr_client, kuint8_t reg, k
     kint32_t value;
 
     do {
-        value = fwk_i2c_write_byte_data(sptr_client, reg, data);
         mdelay(1);
-
+        value = fwk_i2c_write_byte_data(sptr_client, reg, data);
+        
     } while (value < 0);
 
     return value;
@@ -290,8 +290,8 @@ kint32_t sil9022x_read_data(struct fwk_i2c_client *sptr_client, kuint8_t reg)
     kint32_t value;
 
     do {
-        value = fwk_i2c_read_byte_data(sptr_client, reg);
         mdelay(1);
+        value = fwk_i2c_read_byte_data(sptr_client, reg);
 
     } while (value < 0);
 

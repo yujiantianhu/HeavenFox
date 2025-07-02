@@ -84,7 +84,7 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
     struct fwk_eth_hdr *sptr_ethhdr;
     struct fwk_ip_hdr *sptr_iphdr;
     kuint32_t head_len;
-    kuint16_t h_proto = 0;
+    kuint16_t h_proto = 0, pakcet_num = 0;
     kssize_t transport_len = 0;
 
     if (!sptr_buf->tot_len)
@@ -146,6 +146,7 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
         fwk_skb_add_tail(&sptr_data->sgtc_txq, sptr_skb);
         spin_unlock_irqrestore(&sptr_data->sgtc_lock);
 
+        pakcet_num++;
         goto END;
         
     fail:
@@ -158,6 +159,10 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
         if (h_proto != NET_ETH_PROTO_ARP)
             pbuf_free(sptr_cur);
     }
+
+    /*!< Have packets ? Wake tx thread to send */
+    if (pakcet_num)
+        schedule_thread_wakeup(sptr_data->txd);
 
     return ERR_OK;
 }
@@ -236,23 +241,25 @@ static void *fwk_lwip_tx_entry(void *args)
 
     for (;;)
     {
-        spin_lock_irqsave(&sptr_data->sgtc_lock);
-        if (mr_skbuff_list_empty(sptr_head))
+        while (true)
         {
+            spin_lock_irqsave(&sptr_data->sgtc_lock);
+            if (mr_skbuff_list_empty(sptr_head))
+            {
+                spin_unlock_irqrestore(&sptr_data->sgtc_lock);
+                break;
+            }        
+
+            fwk_skb_split(&sgtc_txq, sptr_head);
+            fwk_skb_list_init(sptr_head);
+
             spin_unlock_irqrestore(&sptr_data->sgtc_lock);
-            goto END;
-        }        
 
-        fwk_skb_split(&sgtc_txq, sptr_head);
-        fwk_skb_list_init(sptr_head);
+            while ((sptr_skb = fwk_skb_dequeue(&sgtc_txq)))
+                fwk_dev_queue_xmit(sptr_skb);
+        }
 
-        spin_unlock_irqrestore(&sptr_data->sgtc_lock);
-
-        while ((sptr_skb = fwk_skb_dequeue(&sgtc_txq)))
-            fwk_dev_queue_xmit(sptr_skb);
-
-END:
-        msleep(1);
+        schedule_self_suspend();
     }
 
     return args;
