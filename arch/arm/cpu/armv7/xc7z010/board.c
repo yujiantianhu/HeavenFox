@@ -14,6 +14,12 @@
 #include <common/generic.h>
 #include <boot/board_init.h>
 #include <asm/armv7/gcc_config.h>
+#include <common/time.h>
+
+/*!< Check */
+#if (!defined(CONFIG_CPU_FREQ) || (CONFIG_CPU_FREQ != 666666687))
+    #error "Cpu Frequency is configured (CONFIG_CPU_FREQ) error!"
+#endif
 
 /*!< The defines */
 
@@ -26,6 +32,8 @@
  */
 static void xc7z010_clk_initial(void)
 {
+	/*!< Configure delay cnt */
+	init_delay_freq(111U, 3U, 3U);
 }
 
 /*!

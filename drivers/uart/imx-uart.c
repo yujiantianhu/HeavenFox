@@ -373,7 +373,7 @@ static kssize_t imx_uart_driver_read(struct fwk_file *sptr_file, kbuffer_t *ptrB
         if (count >= size)
             break;
 
-        delay_ms(5);
+        mdelay(2);
     }
 
     fwk_copy_to_user(ptrBuffer, msgs, count);

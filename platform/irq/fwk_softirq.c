@@ -95,14 +95,13 @@ void local_bh_enable(void)
 void fwk_handle_softirq(void)
 {
     struct fwk_softirq_action *sptr_act;
-    kuint32_t pending, nr = 0;
+    kuint32_t pending, nr;
     kutime_t end;
     kutype_t flags;
 
-    if (!g_fwk_softirq_event || g_fwk_softirq_count)
-        return;
-
     mr_local_irq_save(flags);
+    if (!g_fwk_softirq_event || g_fwk_softirq_count)
+        goto ret;
 
     /*!< Local irq is opened, but not allow preempting (disable scheduler) */
     if (IS_IN_INTERRUPT())
@@ -115,9 +114,12 @@ void fwk_handle_softirq(void)
     pending = g_fwk_softirq_event;
 
 restart:
+    mr_barrier();
     g_fwk_softirq_event = 0;
+
     mr_local_irq_enable();
 
+    nr = 0;
     sptr_act = &sgtc_fwk_softirq_actions[0];
 
     /*!< excute per event */
@@ -131,10 +133,10 @@ restart:
         pending >>= 1;
     }
 
+    mr_local_irq_disable();
+
     if (IS_IN_INTERRUPT())
     {
-        mr_local_irq_disable();
-
         /*!< new event occur */
         pending = g_fwk_softirq_event;
         if (pending && (jiffies < end))
@@ -148,6 +150,8 @@ restart:
     }
 
     g_fwk_softirq_count--;
+
+ret:
     mr_local_irq_restore(flags);
 }
 

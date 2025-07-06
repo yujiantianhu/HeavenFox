@@ -30,7 +30,7 @@ using namespace tsk;
 using namespace bsc;
 
 /*!< The defines */
-#define CONSOLE_TASK_STACK_SIZE                       THREAD_STACK_HALF(1)    /*!< 1/2 page (1kbytes) */
+#define CONSOLE_TASK_STACK_SIZE                       THREAD_STACK_PAGE(1)    /*!< 1/2 page (1kbytes) */
 
 /*!< The globals */
 

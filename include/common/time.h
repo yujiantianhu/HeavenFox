@@ -24,27 +24,30 @@
 #include <configs/configs.h>
 #include <common/list_types.h>
 
-/*!< The globals */
+/*!< The defines */
 typedef kutype_t kutime_t;
 typedef kstype_t kstime_t;
 typedef kuint64_t khrtime_t;
 
+struct ktime_manage
+{
+    volatile kutime_t *count;
+    volatile kutime_t *count2;
+
+    kutime_t freq;
+    kutime_t over_cnt;
+    kbool_t is_up;
+};
+
+/*!< The globals */
 extern volatile kutime_t jiffies;
 extern volatile kuint64_t jiffies_all;
 extern volatile kutime_t jiffies_out;
 
-extern volatile kutime_t *ptr_systick_counter;
-extern kutime_t g_systick_freq;
-extern kbool_t g_is_systick_up;
+extern struct ktime_manage sgtc_ksystick_manage;
+extern struct ktime_manage sgtc_khrtime_manage;
 
-extern kutime_t g_hrtime_over_cnt;
-
-extern volatile kutime_t *ptr_hrtimer_counter;
-extern volatile kutime_t *ptr_hrtimer_counter2;
-extern kutime_t g_hrtimer_freq;
-extern kbool_t g_is_hrtimer_up;
-
-extern kutime_t g_delay_timer_counter;
+extern kutime_t g_delay_freq_cnt;
 
 /*!< The defines */
 #define TICK_HZ                                             CONFIG_HZ
@@ -54,18 +57,22 @@ extern kutime_t g_delay_timer_counter;
 
 #define FREQ_INIT_VAL                                       (1)
 
+#define SYSTICK_PTR                                         (&sgtc_ksystick_manage)
+#define HRTIMER_PTR                                         (&sgtc_khrtime_manage)
+
 /*!< ----------------------------------------------------------- */
 /*!< per tick period = (1 / SYSTICK_FREQ) */
-#define SYSTICK_FREQ                                        (g_systick_freq)
-#define IS_SYSTICK_UPINC()                                  (g_is_systick_up)
-#define SYSTICK_CNT()                                       (ptr_systick_counter ? (*ptr_systick_counter) : 0)
+#define SYSTICK_FREQ                                        (SYSTICK_PTR->freq)
+#define IS_SYSTICK_UPINC()                                  (SYSTICK_PTR->is_up)
+#define SYSTICK_CNT()                                       (SYSTICK_PTR->count ? (*(SYSTICK_PTR->count)) : 0)
 
 /*!< is_up: IS_TICKCNT_INC or IS_TICKCNT_DEC */
-#define SYSTICK_INIT(freq, is_up, counter) \
+#define SYSTICK_INIT(_freq, _is_up, _counter) \
     do {    \
-        g_is_systick_up = (is_up); \
-        ptr_systick_counter = (volatile kutime_t *)(counter);  \
-        g_systick_freq = (freq);  \
+        struct ktime_manage *sptr_tmn = SYSTICK_PTR;  \
+        sptr_tmn->is_up = (_is_up); \
+        sptr_tmn->count = (volatile kutime_t *)(_counter);  \
+        sptr_tmn->freq = (_freq);  \
     } while (0)
 
 #define SYSTICK_MAX                                         (SYSTICK_FREQ / TICK_HZ)
@@ -87,21 +94,25 @@ extern kutime_t g_delay_timer_counter;
 
 /*!< ----------------------------------------------------------- */
 /*!< per tick period = (1 / HRTIMER_FREQ) */
-#define HRTIMER_FREQ                                        (g_hrtimer_freq)
-#define IS_HRTIMER_UPINC()                                  (g_is_hrtimer_up)
+#define HRTIMER_FREQ                                        (HRTIMER_PTR->freq)
+#define IS_HRTIMER_UPINC()                                  (HRTIMER_PTR->is_up)
 #define HRTIMER_CNT()   \
-    (ptr_hrtimer_counter ? ((*ptr_hrtimer_counter) |    \
-        (ptr_hrtimer_counter2 ? ((kuint64_t)(*ptr_hrtimer_counter2) << 32) : 0)) : 0)
+({  \
+    struct ktime_manage *sptr_tmn = HRTIMER_PTR;  \
+    (sptr_tmn->count ? ((*sptr_tmn->count) |    \
+        (sptr_tmn->count2 ? ((kuint64_t)(*sptr_tmn->count2) << 32) : 0)) : 0)   \
+})
 
-#define HRTIMER_MAX                                         (ptr_hrtimer_counter2 ? (kuint64_t)(~0ULL) : (kuint32_t)(~0UL))
+#define HRTIMER_MAX                                         (HRTIMER_PTR->count2 ? (khrtime_t)(~0ULL) : (kutime_t)(~0UL))
 
 /*!< is_up: IS_TICKCNT_INC or IS_TICKCNT_DEC */
-#define HRTIMER_INIT(freq, is_up, counter1, counter2) \
+#define HRTIMER_INIT(_freq, _is_up, _counter1, _counter2) \
     do {    \
-        g_is_hrtimer_up = (is_up); \
-        ptr_hrtimer_counter = (volatile kutime_t *)(counter1);  \
-        ptr_hrtimer_counter2 = (volatile kutime_t *)(counter2); \
-        g_hrtimer_freq = (freq);  \
+        struct ktime_manage *sptr_tmn = HRTIMER_PTR;  \
+        sptr_tmn->is_up = (_is_up); \
+        sptr_tmn->count = (volatile kutime_t *)(_counter1);  \
+        sptr_tmn->count2 = (volatile kutime_t *)(_counter2); \
+        sptr_tmn->freq = (_freq);  \
     } while (0)
 
 #define SEC_TO_HRTICK(sec)                                  ( (khrtime_t)(sec ) * HRTIMER_FREQ)
@@ -186,6 +197,13 @@ struct timer_list
 #define mr_time_before(a, b)                                mr_time_after(b, a)            /*!< a < b ? true : false */
 #define mr_time_before_eq(a, b)                             mr_time_after_eq(b, a)         /*!< a <= b ? true : false */
 
+enum __ERT_KTIMER_STATUS
+{
+    NR_KTIMER_COUNTING = 0U,
+    NR_KTIMER_PENDING,
+    NR_KTIMER_INACTIVE,
+};
+
 struct hrtimer_list
 {
     struct list_head sgtc_link;
@@ -193,10 +211,28 @@ struct hrtimer_list
 
     void (*entry)(kuint32_t args);
     kuint32_t data;
+
+    enum __ERT_KTIMER_STATUS status;
 };
 
+#define HRTIMER_INITIALIZER(_entry, _expires, _data)		\
+{   \
+    .expires = _expires,    \
+    .entry = _entry,    \
+    .data = _data,  \
+    .status = NR_KTIMER_COUNTING,   \
+}
+
+#define mr_setup_hrtimer(timer, fn, data)    \
+    do {    \
+        init_list_head(&(timer)->sgtc_link);  \
+        (timer)->entry = (fn); \
+        (timer)->data = (data);   \
+        (timer)->status = NR_KTIMER_COUNTING;   \
+    } while (0)
+
 #define DEFINE_HRTIMER(_name, _entry, _expires, _data)		\
-    struct hrtimer_list _name = TIMER_INITIALIZER(_entry, _expires, _data)
+    struct hrtimer_list _name = HRTIMER_INITIALIZER(_entry, _expires, _data)
 
 #define HRTIMER_EXPIRES(interval)                           (khrtime_ticks() + (interval))
 
@@ -214,13 +250,7 @@ struct time_clock
 extern struct time_clock sgtc_systime_clock;
 
 /*!< The functions */
-extern void simple_delay_timer_initial(void);
-extern void simple_delay_timer_runs(void);
-
-extern void delay_cnt(kuint32_t n);
-extern void delay_s(kuint32_t n_s);
-extern void delay_ms(kuint32_t n_ms);
-extern void delay_us(kuint32_t n_us);
+extern void init_delay_freq(kutime_t _O0_divider, kutime_t _O1_divider, kutime_t _O2_divider);
 extern void delay(kuint32_t seconds);
 extern void mdelay(kuint32_t milseconds);
 extern void udelay(kuint32_t useconds);
@@ -273,7 +303,7 @@ static inline void get_time_counter(void)
  */
 static inline void mark_hrtime_overone(void)
 {
-    g_hrtime_over_cnt++;
+    HRTIMER_PTR->over_cnt++;
 }
 
 /*!
@@ -284,7 +314,7 @@ static inline void mark_hrtime_overone(void)
  */
 static inline kutime_t get_hrtime_overcount(void)
 {
-    return g_hrtime_over_cnt;
+    return HRTIMER_PTR->over_cnt;
 }
 
 /*!

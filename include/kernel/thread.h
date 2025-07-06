@@ -48,7 +48,7 @@ typedef kint32_t tid_t;
 #define THREAD_STACK_QUAR(page)			    ((kutype_t)(page) << 10U)
 
 #define THREAD_STACK_MIN					THREAD_STACK_HALF(1)
-#define THREAD_STACK_DEFAULT				THREAD_STACK_PAGE(1)
+#define THREAD_STACK_DEFAULT				THREAD_STACK_PAGE(2)
 #define THREAD_STACK_ALIGN                  THREAD_STACK_PAGE(1)
 
 #define THREAD_STACK_DEFINE(name, size)     kuint8_t name[size]  __align(THREAD_STACK_ALIGN)

@@ -228,7 +228,7 @@ static kbool_t zynq7_sdmmc_initial_active(struct fwk_sdcard_host *sptr_host, kui
 {
     /*!< for zynq ps7, 74 CLK delay after card is powered up, before the first command */
     /*!< not to do anything here */
-    delay_ms(timeout);
+    mdelay(timeout);
 
     return true;
 }
@@ -537,7 +537,7 @@ static kint32_t zynq7_sdmmc_switch_voltage(struct fwk_sdcard_host *sptr_host, ku
     XSdPs_WriteReg16(BaseAddress, XSDPS_HOST_CTRL2_OFFSET, CtrlReg);
 
     /* Wait minimum 5mSec */
-    delay_us(5000U);
+    udelay(5000U);
 
     /* Check for 1.8V signal enable bit is cleared by Host */
     CtrlReg = XSdPs_ReadReg16(BaseAddress, XSDPS_HOST_CTRL2_OFFSET);
@@ -557,7 +557,7 @@ static kint32_t zynq7_sdmmc_switch_voltage(struct fwk_sdcard_host *sptr_host, ku
     XSdPs_WriteReg16(BaseAddress, XSDPS_CLK_CTRL_OFFSET, ClockReg | XSDPS_CC_SD_CLK_EN_MASK);
 
     /* Wait for 1mSec */
-    delay_us(1000U);
+    udelay(1000U);
 
     /* Wait for CMD and DATA line to go high */
     do {

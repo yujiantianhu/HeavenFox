@@ -957,7 +957,7 @@ static irq_return_t imx_sdma_thread_isr(kint32_t irq, void *args)
 
         /*!< copy sgtc_completed to sgtc_copy, and initialize sgtc_completed */
         spin_lock_irqsave(&sptr_channel->sgtc_lock);
-        list_head_splice_init(&sptr_channel->sgtc_completed, &sgtc_copy);
+        list_head_splice_init(&sgtc_copy, &sptr_channel->sgtc_completed);
         spin_unlock_irqrestore(&sptr_channel->sgtc_lock);
 
         if (mr_list_empty(&sgtc_copy))

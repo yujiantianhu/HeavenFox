@@ -14,6 +14,7 @@
 #include <configs/configs.h>
 #include <common/time.h>
 #include <common/mem_manage.h>
+#include <platform/irq/fwk_irq_types.h>
 #include <kernel/spinlock.h>
 
 /*!< The defines */
@@ -31,32 +32,39 @@ struct ktime_tick
 
 /*!< The globals */
 /*!< ---------------------------------------------------------- */
+kutime_t g_delay_freq_cnt = CONFIG_CPU_FREQ / 100U;
+struct time_clock sgtc_systime_clock;
+
+/*!< ---------------------------------------------------------- */
 volatile kutime_t jiffies = JIFFIES_INITVAL;
 volatile kuint64_t jiffies_all = 0;
 volatile kutime_t jiffies_out = 0;
 
-volatile kutime_t *ptr_systick_counter = mr_nullptr;
-kutime_t g_systick_freq = FREQ_INIT_VAL;
-kbool_t g_is_systick_up = true;
+struct ktime_manage sgtc_ksystick_manage =
+{
+    .freq = FREQ_INIT_VAL,
+    .is_up = true,
+};
 
-kutime_t g_hrtime_over_cnt = 0;
+struct ktime_manage sgtc_khrtime_manage =
+{
+    .freq = FREQ_INIT_VAL,
+    .is_up = true,
+};
 
 /*!< ---------------------------------------------------------- */
-volatile kutime_t *ptr_hrtimer_counter = mr_nullptr;
-volatile kutime_t *ptr_hrtimer_counter2 = mr_nullptr;
-kutime_t g_hrtimer_freq = FREQ_INIT_VAL;
-kbool_t g_is_hrtimer_up = true;
-
-/*!< ---------------------------------------------------------- */
-kutime_t g_delay_timer_counter = 0;
-struct time_clock sgtc_systime_clock;
-
-static kuint32_t g_simple_delay_timer = 0;
-static kuint32_t g_simple_timeout_cnt = 0;
-
 static struct ktime_tick sgtc_ktime_jiffies;
-static struct ktime_tick sgtc_ktime_htick;
-static struct ktime_tick sgtc_ktime_inactive;
+
+struct ktime_tick sgtc_ktime_htick;
+struct ktime_tick sgtc_ktime_pending;
+struct ktime_tick sgtc_ktime_inactive;
+
+static struct ktime_tick *sgtr_ktime_lists[] =
+{
+    [NR_KTIMER_COUNTING] = &sgtc_ktime_htick,
+    [NR_KTIMER_PENDING ] = &sgtc_ktime_pending,
+    [NR_KTIMER_INACTIVE] = &sgtc_ktime_inactive,
+};
 
 /*!< API function */
 /*!
@@ -67,8 +75,30 @@ static struct ktime_tick sgtc_ktime_inactive;
  */
 __weak kutime_t ktime_systick(void)
 {
-    volatile kutime_t *time_cnt = ptr_systick_counter;
+    volatile kutime_t *time_cnt = SYSTICK_PTR->count;
     return time_cnt ? (IS_SYSTICK_UPINC() ? (*time_cnt) : (SYSTICK_MAX - (*time_cnt))) : 0;
+}
+
+/*!
+ * @brief   start hrtimer
+ * @param   none
+ * @retval  none
+ * @note    open compare interrupt
+ */
+__weak void khrtime_event_enable(void)
+{
+
+}
+
+/*!
+ * @brief   stop hrtimer
+ * @param   none
+ * @retval  none
+ * @note    close compare interrupt
+ */
+__weak void khrtime_event_disable(void)
+{
+
 }
 
 /*!
@@ -79,8 +109,9 @@ __weak kutime_t ktime_systick(void)
  */
 __weak khrtime_t ktime_hrtick(void)
 {
-    volatile kutime_t *time_cnt1 = ptr_hrtimer_counter;
-    volatile kutime_t *time_cnt2 = ptr_hrtimer_counter2;
+    struct ktime_manage *sptr_tmn = HRTIMER_PTR;
+    volatile kutime_t *time_cnt1 = sptr_tmn->count;
+    volatile kutime_t *time_cnt2 = sptr_tmn->count2;
 
     if (mr_unlikely(!time_cnt1))
         return 0;
@@ -109,8 +140,9 @@ __weak khrtime_t ktime_hrtick(void)
  */
 __weak khrtime_t khrtime_ticks(void)
 {
-    volatile kutime_t *time_cnt1 = ptr_hrtimer_counter;
-    volatile kutime_t *time_cnt2 = ptr_hrtimer_counter2;
+    struct ktime_manage *sptr_tmn = HRTIMER_PTR;
+    volatile kutime_t *time_cnt1 = sptr_tmn->count;
+    volatile kutime_t *time_cnt2 = sptr_tmn->count2;
     kutime_t tick_l, tick_h;
     kutime_t over_count;
 
@@ -166,84 +198,20 @@ __weak void ktime_to_spec(struct time_val *sptr_tval)
 }
 
 /*!
- * @brief   simple_delay_timer_initial
- * @param   none
+ * @brief   initialize delay freq cnt (unit: Hz)
+ * @param   _O0/1/2_divider: divider of O0/1/2 optimize class
  * @retval  none
- * @note    delay timer counter initial
+ * @note    CONFIG_CPU_FREQ / divider (divider may be only a test value)
  */
-void simple_delay_timer_initial(void)
+void init_delay_freq(kutime_t _O0_divider, kutime_t _O1_divider, kutime_t _O2_divider)
 {
-    g_simple_delay_timer = TIMER_DELAY_COUNTER_INIT;
-    g_simple_timeout_cnt = TIMER_DELAY_COUNTER_INIT;
-
-    g_delay_timer_counter = TIMER_DELAY_COUNTER_INIT;
-}
-
-/*!
- * @brief   simple_delay_timer_runs
- * @param   none
- * @retval  none
- * @note    delay timer counter excute
- */
-void simple_delay_timer_runs(void)
-{
-    if ((g_simple_delay_timer++) >= TIMER_DELAY_COUNTER_MAX)
-    {
-        g_simple_delay_timer = TIMER_DELAY_COUNTER_INIT;
-        g_simple_timeout_cnt = ((g_simple_timeout_cnt >= 255) ? 
-                            TIMER_DELAY_COUNTER_INIT : (g_simple_timeout_cnt + 1));
-    }
-
-    g_delay_timer_counter = mr_bit_mask(g_simple_timeout_cnt, 
-                            ~TIMER_DELAY_COUNTER_MAX, 24U) + g_simple_delay_timer;
-}
-
-/*!
- * @brief   delay_cnt
- * @param   n
- * @retval  none
- * @note    delay n counters
- */
-void delay_cnt(kuint32_t n)
-{
-    while (n--)
-        mr_delay_nop();
-}
-
-/*!
- * @brief   delay_s
- * @param   n_s
- * @retval  none
- * @note    delay n_s seconds
- */
-__weak void delay_s(kuint32_t n_s)
-{
-    while (n_s--)
-        delay_cnt(DELAY_SIMPLE_COUNTER_PER_S);
-}
-
-/*!
- * @brief   delay_ms
- * @param   n_ms
- * @retval  none
- * @note    delay n_ms miliseconds
- */
-__weak void delay_ms(kuint32_t n_ms)
-{
-    while (n_ms--)
-        delay_cnt(DELAY_SIMPLE_COUNTER_PER_MS);
-}
-
-/*!
- * @brief   delay_us
- * @param   n_us
- * @retval  none
- * @note    delay n_us microseconds
- */
-__weak void delay_us(kuint32_t n_us)
-{
-    while (n_us--)
-        delay_cnt(DELAY_SIMPLE_COUNTER_PER_US);
+#if (CONFIG_OPTIMIZE_CLASS == 0)
+    g_delay_freq_cnt = CONFIG_CPU_FREQ / _O0_divider;
+#elif (CONFIG_OPTIMIZE_CLASS == 1)
+    g_delay_freq_cnt = CONFIG_CPU_FREQ / _O1_divider;
+#else
+    g_delay_freq_cnt = CONFIG_CPU_FREQ / _O2_divider;
+#endif
 }
 
 /*!
@@ -254,15 +222,16 @@ __weak void delay_us(kuint32_t n_us)
  */
 void delay(kuint32_t seconds)
 {
-    if (ptr_hrtimer_counter)
+    if (HRTIMER_PTR->count)
     {
         khrtime_t target_tick = khrtime_ticks() + SEC_TO_HRTICK(seconds);
         while (target_tick > khrtime_ticks());
     }
     else
     {
-        kuint64_t ticks = seconds * (CONFIG_CPU_FREQ / 200U);
-        while (ticks--);
+        kuint64_t ticks = seconds * g_delay_freq_cnt;
+        while (ticks--)
+            mr_nop();
     }
 }
 
@@ -274,15 +243,16 @@ void delay(kuint32_t seconds)
  */
 void mdelay(kuint32_t milseconds)
 {
-    if (ptr_hrtimer_counter)
+    if (HRTIMER_PTR->count)
     {
         khrtime_t target_tick = khrtime_ticks() + MSEC_TO_HRTICK(milseconds);
         while (target_tick > khrtime_ticks());
     }
     else
     {
-        kuint64_t ticks = milseconds * (CONFIG_CPU_FREQ / 1000U / 200U);
-        while (ticks--);
+        kuint64_t ticks = milseconds * (g_delay_freq_cnt / 1000U);
+        while (ticks--)
+            mr_nop();
     }
 }
 
@@ -294,15 +264,16 @@ void mdelay(kuint32_t milseconds)
  */
 void udelay(kuint32_t useconds)
 {
-    if (ptr_hrtimer_counter)
+    if (HRTIMER_PTR->count)
     {
         khrtime_t target_tick = khrtime_ticks() + USEC_TO_HRTICK(useconds);
         while (target_tick > khrtime_ticks());
     }
     else
     {
-        kuint64_t ticks = useconds * (CONFIG_CPU_FREQ / 1000000U / 200U);
-        while (ticks--);
+        kuint64_t ticks = useconds * (g_delay_freq_cnt / 1000000U);
+        while (ticks--)
+            mr_nop();
     }
 }
 
@@ -501,7 +472,27 @@ void setup_hrtimer(struct hrtimer_list *sptr_timer, void (*entry)(kuint32_t), ku
     if (!sptr_timer)
         return;
 
-    mr_setup_timer(sptr_timer, entry, data);
+    mr_setup_hrtimer(sptr_timer, entry, data);
+}
+
+/*!
+ * @brief   compare and select the first event will be resolved
+ * @param   sptr_timer
+ * @retval  none
+ * @note    load expires to hardware
+ */
+void __load_hrtimer(struct hrtimer_list *sptr_timer, struct hrtimer_list **sptr_first)
+{
+    /*!< No event exists, using for the first time. Start hrtimer before loading cnt */
+    if (!(*sptr_first))
+        khrtime_event_enable();
+
+    if (!(*sptr_first) ||
+        (sptr_timer->expires < (*sptr_first)->expires))
+    {
+        *sptr_first = sptr_timer;
+        khrtime_reload_cnt(sptr_timer->expires);
+    }
 }
 
 /*!
@@ -514,31 +505,18 @@ void add_hrtimer(struct hrtimer_list *sptr_timer)
 {
     struct ktime_tick *sptr_list;
     struct spin_lock *sptr_lock;
-    struct hrtimer_list **sptr_first;
-    khrtime_t cur_tick;
 
     if ((!sptr_timer) || 
         (!sptr_timer->expires) ||
-        (!sptr_timer->entry))
+        (!sptr_timer->entry) ||
+        (sptr_timer->status != NR_KTIMER_COUNTING))
         return;
 
     sptr_list = &sgtc_ktime_htick;
     sptr_lock = &sptr_list->sgtc_lock;
-    sptr_first = (struct hrtimer_list **)&sptr_list->sptr_first;
 
     spin_lock_irqsave(sptr_lock);
-
-    cur_tick = khrtime_ticks() + USEC_TO_HRTICK(2);
-    if (mr_unlikely(cur_tick > sptr_timer->expires))
-        sptr_timer->expires = cur_tick;
-
-    if (!(*sptr_first) ||
-        (sptr_timer->expires < (*sptr_first)->expires))
-    {
-        *sptr_first = sptr_timer;
-        khrtime_reload_cnt(sptr_timer->expires);
-    }
-
+    __load_hrtimer(sptr_timer, (struct hrtimer_list **)&sptr_list->sptr_first);
     list_head_add_tail(&sptr_list->sgtc_list, &sptr_timer->sgtc_link);
     spin_unlock_irqrestore(sptr_lock);
 }
@@ -560,20 +538,27 @@ void del_hrtimer(struct hrtimer_list *sptr_timer)
         return;
 
     sptr_list = &sgtc_ktime_htick;
-    sptr_lock = &sptr_list->sgtc_lock;
+    sptr_lock = &(sgtr_ktime_lists[sptr_timer->status]->sgtc_lock);
 
     spin_lock_irqsave(sptr_lock);
     list_head_del(&sptr_timer->sgtc_link);
 
-    if (mr_unlikely((struct timer_list *)sptr_timer == sptr_list->sptr_first))
+    if (sptr_timer->status == NR_KTIMER_COUNTING)
     {
-        foreach_list_next_entry(sptr_per, &sptr_list->sgtc_list, sgtc_link)
-            sptr_next = HRTIMER_SELECT(sptr_next, sptr_per);
+        if (mr_unlikely((struct timer_list *)sptr_timer == sptr_list->sptr_first))
+        {
+            foreach_list_next_entry(sptr_per, &sptr_list->sgtc_list, sgtc_link)
+                sptr_next = HRTIMER_SELECT(sptr_next, sptr_per);
 
-        sptr_list->sptr_first = (struct timer_list *)sptr_next;
-        khrtime_reload_cnt(sptr_next ? sptr_next->expires : HRTIMER_MAX);
+            sptr_list->sptr_first = (struct timer_list *)sptr_next;
+
+            if (sptr_next)
+                khrtime_reload_cnt(sptr_next->expires);
+            else
+                khrtime_event_disable();
+        }
     }
-    
+
     spin_unlock_irqrestore(sptr_lock);
 }
 
@@ -606,59 +591,115 @@ void check_hrtimer(void)
 }
 
 /*!
+ * @brief   tick handler (softirq)
+ * @param   none
+ * @param	none
+ * @retval  none
+ * @note    called by softirq (bottom isr)
+ */
+void do_hrtimer_action(kint32_t event)
+{
+    struct hrtimer_list *sptr_timer, *sptr_temp;
+    struct hrtimer_list *sptr_next = mr_nullptr;
+    struct spin_lock *sptr_lock;
+    khrtime_t expires_bak;
+    DECLARE_LIST_HEAD(sgtc_active);
+    DECLARE_LIST_HEAD(sgtc_pending);
+    DECLARE_LIST_HEAD(sgtc_inactive);
+    
+    sptr_lock = &sgtc_ktime_pending.sgtc_lock;
+    spin_lock_irqsave(sptr_lock);
+    list_head_splice_init(&sgtc_pending, &sgtc_ktime_pending.sgtc_list);
+    spin_unlock_irqrestore(sptr_lock);
+
+    foreach_list_next_entry_safe(sptr_timer, sptr_temp, &sgtc_pending, sgtc_link)
+    {
+        expires_bak = sptr_timer->expires;
+        sptr_timer->entry(sptr_timer->data);
+
+        list_head_del(&sptr_timer->sgtc_link);
+        if (sptr_timer->expires <= expires_bak)
+        {
+            /*!< One-shot event, move to inactive list (thread context will call "del_hrtimer" to detach it) */
+            sptr_timer->status = NR_KTIMER_INACTIVE;
+            list_head_add_tail(&sgtc_inactive, &sptr_timer->sgtc_link);
+        }
+        else
+        {
+            /*!< Period event, select event with the smallest expires, and move to active list */
+            sptr_next = HRTIMER_SELECT(sptr_next, sptr_timer);
+            sptr_timer->status = NR_KTIMER_COUNTING;
+            list_head_add_tail(&sgtc_active, &sptr_timer->sgtc_link);
+        }
+    }
+
+    /*!< Add to global active list */
+    if (sptr_next)
+    {
+        struct ktime_tick *sptr_list = &sgtc_ktime_htick;
+
+        spin_lock_irqsave(&sptr_list->sgtc_lock);
+        __load_hrtimer(sptr_next, (struct hrtimer_list **)&sptr_list->sptr_first);
+        list_head_split_tail(&sptr_list->sgtc_list, &sgtc_active);
+        spin_unlock_irqrestore(&sptr_list->sgtc_lock);
+    }
+
+    /*!< Add to global inactive list */
+    if (!mr_list_empty(&sgtc_inactive))
+    {
+        struct ktime_tick *sptr_cast = &sgtc_ktime_inactive;
+
+        spin_lock_irqsave(&sptr_cast->sgtc_lock);
+        list_head_split_tail(&sptr_cast->sgtc_list, &sgtc_inactive);
+        spin_unlock_irqrestore(&sptr_cast->sgtc_lock);
+    }
+}
+
+/*!
  * @brief   tick handler
  * @param   none
  * @param	none
  * @retval  none
- * @note    called by hrtimer interrupt
+ * @note    called by hrtimer interrupt (upper isr)
  */
 void do_hrtime_event(void)
 {
-    struct ktime_tick *sptr_list, *sptr_cast;
+    struct ktime_tick *sptr_list, *sptr_pending;
     struct hrtimer_list *sptr_timer, *sptr_temp;
     khrtime_t cur_tick;
     struct hrtimer_list *sptr_next = mr_nullptr;
-    khrtime_t max_ticks = HRTIMER_MAX;
 
     sptr_list = &sgtc_ktime_htick;
-    sptr_cast = &sgtc_ktime_inactive;
+    sptr_pending = &sgtc_ktime_pending;
 
-loop:
+    /*!< Get tick real-time (deal with more events, within 1us) */
+    cur_tick = khrtime_ticks() + USEC_TO_HRTICK(1);
+
+    /*!< Deal with events */
     foreach_list_next_entry_safe(sptr_timer, sptr_temp, &sptr_list->sgtc_list, sgtc_link)
     {
-        /*!< Get tick real-time (deal with more events, within 1us) */
-        cur_tick = khrtime_ticks() + USEC_TO_HRTICK(1);
-
-        if (mr_time_before(cur_tick, sptr_timer->expires))
-            sptr_next = HRTIMER_SELECT(sptr_next, sptr_timer);
+        /*!< Timeout */
+        if (cur_tick >= sptr_timer->expires)
+        {
+            sptr_timer->status = NR_KTIMER_PENDING;
+            list_head_del(&sptr_timer->sgtc_link);
+            list_head_add_tail(&sptr_pending->sgtc_list, &sptr_timer->sgtc_link);
+        }
         else
         {
-            /*!< Do event */
-            sptr_timer->entry(sptr_timer->data);
-            if (cur_tick < sptr_timer->expires)
-                sptr_next = HRTIMER_SELECT(sptr_next, sptr_timer);
-            else
-            {
-                sptr_timer->expires = max_ticks;
-
-                list_head_del(&sptr_timer->sgtc_link);
-                list_head_add_tail(&sptr_cast->sgtc_list, &sptr_timer->sgtc_link);
-            }
+            sptr_next = HRTIMER_SELECT(sptr_next, sptr_timer);
         }
     }
 
     sptr_list->sptr_first = (struct timer_list *)sptr_next;
-
     if (!sptr_next)
-        khrtime_reload_cnt(max_ticks);
+        khrtime_event_disable();
     else
-    {
-        cur_tick = khrtime_ticks() + USEC_TO_HRTICK(1);
-        if (cur_tick <= sptr_next->expires)
-            goto loop;
-
         khrtime_reload_cnt(sptr_next->expires);
-    }
+
+    /*!< Schedule softirq */
+    fwk_raise_softirq(NR_SOFTIRQ_TIMER);
+//  do_hrtimer_action(NR_SOFTIRQ_TIMER);
 }
 #undef  HRTIMER_SELECT
 
@@ -671,21 +712,23 @@ loop:
 void systime_init(void)
 {
     struct ktime_tick *sptr_tick;
+    kusize_t list_num = ARRAY_SIZE(sgtr_ktime_lists);
 
     sptr_tick = &sgtc_ktime_jiffies;
     sptr_tick->sptr_first = mr_nullptr;
     init_list_head(&sptr_tick->sgtc_list);
     spin_lock_init(&sptr_tick->sgtc_lock);
 
-    sptr_tick = &sgtc_ktime_htick;
-    sptr_tick->sptr_first = mr_nullptr;
-    init_list_head(&sptr_tick->sgtc_list);
-    spin_lock_init(&sptr_tick->sgtc_lock);
+    while (list_num--)
+    {
+        sptr_tick = sgtr_ktime_lists[list_num];
 
-    sptr_tick = &sgtc_ktime_inactive;
-    sptr_tick->sptr_first = mr_nullptr;
-    init_list_head(&sptr_tick->sgtc_list);
-    spin_lock_init(&sptr_tick->sgtc_lock);
+        sptr_tick->sptr_first = mr_nullptr;
+        init_list_head(&sptr_tick->sgtc_list);
+        spin_lock_init(&sptr_tick->sgtc_lock);
+    }
+
+    fwk_open_softirq(NR_SOFTIRQ_TIMER, do_hrtimer_action);
 }
 
 /* end of file */

@@ -1512,7 +1512,7 @@ kint32_t XUartPs_ReceiveBuffer(XUartPs *sptr_uart)
         sptr_uart->sgtc_rxbuf.NextBytePtr[ReceivedCount] = mr_readl(sptr_uart->sgtc_cfg.BaseAddress + XUARTPS_FIFO_OFFSET);   
         ReceivedCount++;
 
-        delay_ms(5);
+        udelay(500U);
     }
     sptr_uart->is_rxbs_error = 0;
 
@@ -1739,7 +1739,7 @@ kint32_t XSdPs_CfgInitialize(XSdPs *sptr_sd, XSdPs_Config *sptr_cfg, kuint32_t a
         XSdPs_WriteReg8(sptr_sd->sgtc_cfg.BaseAddress, XSDPS_POWER_CTRL_OFFSET, 0x0);
 
     /* Delay to poweroff card */
-    delay_us(1000);
+    udelay(1000);
 
     /* "Software reset for all" is initiated */
     XSdPs_WriteReg8(sptr_sd->sgtc_cfg.BaseAddress, XSDPS_SW_RST_OFFSET, XSDPS_SWRST_ALL_MASK);
@@ -1765,7 +1765,7 @@ kint32_t XSdPs_CfgInitialize(XSdPs *sptr_sd, XSdPs_Config *sptr_cfg, kuint32_t a
 
         /* Delay before issuing the command after emmc reset */
         if (XSDPS_CAPS_EMB_SLOT == mr_mask(sptr_sd->Host_Caps, XSDPS_CAPS_SLOT_TYPE_MASK))
-            delay_us(200);
+            udelay(200);
     }
     else
     {
@@ -1885,7 +1885,7 @@ kint32_t XSdPs_Change_BusWidth(XSdPs *sptr_sd, kuint32_t width)
         StatusReg &= ~(XSDPS_HC_EXT_BUS_WIDTH | XSDPS_HC_BUS_WIDTH_4);
 
     XSdPs_WriteReg8(sptr_sd->sgtc_cfg.BaseAddress, XSDPS_HOST_CTRL1_OFFSET, (kuint8_t)StatusReg);
-    delay_us(100U);
+    udelay(100U);
 
     if (sptr_sd->Mode == XSDPS_DDR52_MODE) 
     {
@@ -1903,7 +1903,7 @@ kint32_t XSdPs_SetBlkSize(XSdPs *sptr_sd, kuint32_t BlkCnt, kuint32_t BlkSize)
     XSdPs_WriteReg16(sptr_sd->sgtc_cfg.BaseAddress, XSDPS_BLK_CNT_OFFSET, BlkCnt);
     XSdPs_WriteReg16(sptr_sd->sgtc_cfg.BaseAddress, XSDPS_BLK_SIZE_OFFSET, BlkSize);
 
-    delay_us(100U);
+    udelay(100U);
     return ER_NORMAL;
 }
 

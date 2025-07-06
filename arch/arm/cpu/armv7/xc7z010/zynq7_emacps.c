@@ -704,21 +704,21 @@ kint32_t XEmacPs_PhySetup(XEmacPs *sptr_emacps, kuint32_t phy_addr, kint32_t lin
     link_speed = 1000;
     configure_IEEE_phy_speed(sptr_emacps, phy_addr, link_speed);
     convspeeddupsetting = XEMACPS_GMII2RGMII_SPEED1000_FD;
-    delay_s(1);
+    delay(1);
 
 #elif defined(CONFIG_LINKSPEED100)
     XEmacPs_SetUpSLCRDivisors(sptr_emacps->Config.BaseAddress,100);
     link_speed = 100;
     configure_IEEE_phy_speed(sptr_emacps, phy_addr, link_speed);
     convspeeddupsetting = XEMACPS_GMII2RGMII_SPEED100_FD;
-    delay_s(1);
+    delay(1);
 
 #elif defined(CONFIG_LINKSPEED10)
     XEmacPs_SetUpSLCRDivisors(sptr_emacps->Config.BaseAddress,10);
     link_speed = 10;
     configure_IEEE_phy_speed(sptr_emacps, phy_addr, link_speed);
     convspeeddupsetting = XEMACPS_GMII2RGMII_SPEED10_FD;
-    delay_s(1);
+    delay(1);
 #endif
 
     if (conv_present) 

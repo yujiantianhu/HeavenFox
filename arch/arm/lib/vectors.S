@@ -82,6 +82,10 @@ g_asm_sched_flag:
 _undefined_handler:
     _exception_save_params                          @ save current context
 
+    ldr r0, =undefined_abort_addr                   @ it is defined in "exception.c"
+    sub r1, lr, #4                                  @ get instrcution causing undefined abort
+    str r1, [r0]                                    @ save to global var
+
     bl exec_undefined_handler                       @ exception handlers, please jump to exception.c
     _exception_restore_params                       @ restore previous context
 
@@ -158,8 +162,7 @@ _irq_handler:
     pop { r0 }
 
     srsdb sp!, #ARCH_SVC_MODE                       @ save lr_irq and spsr to sp_svc
-    cps #ARCH_SVC_MODE
-    cpsid i
+    cpsid i, #ARCH_SVC_MODE                         @ atomic: switch svc mode and disable irq
     
     b __schedule_before                             @ jump to "context.S"
 

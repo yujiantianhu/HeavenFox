@@ -30,7 +30,7 @@ using namespace tsk;
 using namespace bsc;
 
 /*!< The defines */
-#define BUTTON_TASK_STACK_SIZE                          THREAD_STACK_HALF(1)    /*!< 1/2 page (1kbytes) */
+#define BUTTON_TASK_STACK_SIZE                          THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
 
 /*!< The globals */
 
@@ -98,7 +98,7 @@ static void *button_task_entry(void *args)
         last_status = status;
 
 END:
-        msleep(200);
+        msleep(105);
     }
 
     virt_close(fd);

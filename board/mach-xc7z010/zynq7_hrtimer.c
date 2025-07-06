@@ -94,14 +94,24 @@ void khrtime_reload_cnt(khrtime_t expires)
 {
     struct khrtime_board_data *sptr_data;
     kuaddr_t base;
-    kuint32_t reg_value;
+    kuint32_t reg_value, flags;
+    khrtime_t cur_tick;
 
     sptr_data = &sgtc_zynq7_khrtime_data;
     base = sptr_data->base;
 
+    mr_local_irq_save(flags);
+
     /*!< Disable interrupt before setting compare value to avoid irq occured */
     reg_value = GT_CTRL_ENABLE;
     mr_writel(reg_value, base + GT_CONTROL_REG);
+
+    cur_tick = khrtime_ticks() + USEC_TO_HRTICK(1);
+    if (expires <= cur_tick)
+        expires = cur_tick;
+
+    /*!< COMP REG will be changed, ignore invalid and out-of-time compare event */
+    mr_writel(GT_INT_STATUS_COMP, sptr_data->base + GT_INT_STATUS_REG);
 
     /*!<
      * Set compare value
@@ -114,6 +124,56 @@ void khrtime_reload_cnt(khrtime_t expires)
     /*!< Do not use mr_readl() to get reg_value and load with it, because it maybe not avaliable (bit[1:3] are unstable ?) */
     reg_value |= (GT_CTRL_COMP_ENABLE | GT_CTRL_IRQ_ENABLE);
     mr_writel(reg_value, base + GT_CONTROL_REG);
+
+    mr_local_irq_restore(flags);
+}
+
+/*!
+ * @brief   start hrtimer
+ * @param   none
+ * @retval  none
+ * @note    open compare
+ */
+void khrtime_event_enable(void)
+{
+    struct khrtime_board_data *sptr_data;
+    kuint32_t reg_value, flags;
+
+    sptr_data = &sgtc_zynq7_khrtime_data;
+
+    mr_local_irq_save(flags);
+
+    mr_writel(~0U, sptr_data->base + GT_COMP_LOW_REG);
+    mr_writel(~0U, sptr_data->base + GT_COMP_HIGH_REG);
+    mr_writel(GT_INT_STATUS_COMP, sptr_data->base + GT_INT_STATUS_REG);
+
+    reg_value = mr_readl(sptr_data->base + GT_CONTROL_REG);
+    reg_value |= (GT_CTRL_COMP_ENABLE | GT_CTRL_IRQ_ENABLE);
+    mr_writel(reg_value, sptr_data->base + GT_CONTROL_REG);
+
+    mr_local_irq_restore(flags);
+}
+
+/*!
+ * @brief   stop hrtimer
+ * @param   none
+ * @retval  none
+ * @note    close compare
+ */
+void khrtime_event_disable(void)
+{
+    struct khrtime_board_data *sptr_data;
+    kuint32_t reg_value, flags;
+
+    sptr_data = &sgtc_zynq7_khrtime_data;
+
+    mr_local_irq_save(flags);
+
+    reg_value = mr_readl(sptr_data->base + GT_CONTROL_REG);
+    reg_value &= ~(GT_CTRL_COMP_ENABLE | GT_CTRL_IRQ_ENABLE);
+    mr_writel(reg_value, sptr_data->base + GT_CONTROL_REG);
+
+    mr_local_irq_restore(flags);
 }
 
 /*!< -------------------------------------------------------------------- */
@@ -248,6 +308,9 @@ irq_return_t zynq7_gt_isr(kint32_t irq, void *args)
     if (!status)
         return NR_IRQ_NONE;
 
+    zynq7_gt_intr_clear_status(BaseAddress);
+    mr_dsb();
+
     if (status & GT_INT_STATUS_COMP)
     {
         /*!
@@ -258,9 +321,6 @@ irq_return_t zynq7_gt_isr(kint32_t irq, void *args)
         khrtime_reload_cnt(HRTIMER_MAX);
         do_hrtime_event();
     }
-
-    zynq7_gt_intr_clear_status(BaseAddress);
-    mr_dsb();
 
     return NR_IRQ_HANDLED;
 }

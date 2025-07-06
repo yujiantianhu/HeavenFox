@@ -343,7 +343,7 @@ static kint32_t imx_i2c_adap_start(struct fwk_i2c_adapter *sptr_adap)
     sptr_i2c->sgtc_icr.ien = true;
     mr_resetw(&sptr_i2c->sgtc_isr);
 
-    delay_ms(1);
+    udelay(500);
     
     /*!< configure iic to work on master mode */
     sptr_i2c->sgtc_icr.msta = true;
@@ -394,7 +394,7 @@ static kint32_t imx_i2c_adap_restart(struct fwk_i2c_adapter *sptr_adap)
 
     /*!< set restart */
     sptr_i2c->sgtc_icr.rsta = true;
-    delay_ms(1);
+    udelay(500);
 
     return ER_NORMAL;
 }
@@ -469,7 +469,7 @@ static kint32_t imx_i2c_adap_write(struct imx_i2c_drv_data *sptr_data, kuint16_t
         if (!imx_i2c_adap_check_ack(sptr_i2c))
             return -ER_NOACK;
 
-        delay_ms(10);
+        udelay(500);
     }
 
     return ER_NORMAL;
@@ -539,7 +539,7 @@ static kint32_t imx_i2c_adap_read(struct imx_i2c_drv_data *sptr_data, kuint16_t 
             mr_imx_i2c_set_ack(sptr_i2c, NR_I2C_ACK);
 
         /*!< Delay to wait slave device stable */
-        delay_ms(20);
+        udelay(500);
         *(buffer++) = mr_imx_i2c_read_data(sptr_i2c);
     }
 

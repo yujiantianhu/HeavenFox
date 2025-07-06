@@ -24,16 +24,16 @@ CONFIG_VFP = y
 CONFIG_INSTRUCTION = arm
 
 # debug or release
-CONFIG_BUILD_TYPE = debug
+CONFIG_BUILD_TYPE = release
 
 # -O0, -O1, -O2
-CONFIG_OPTIMIZE_CLASS = 0
+CONFIG_OPTIMIZE_CLASS = 2
 # ---------------------------------------------------------------
 
 # System Config
 # Systick period = 5ms
 CONFIG_HZ = 200
-CONFIG_HRTIMER_ENBALE = n
+CONFIG_HRTIMER_ENBALE = y
 
 # ---------------------------------------------------------------
 # Console

@@ -19,7 +19,7 @@
 #include <kernel/workqueue.h>
 
 /*!< The defines */
-#define KMEMP_THREAD_STACK_SIZE                         THREAD_STACK_HALF(1)    /*!< 1/2 page (2 kbytes) */
+#define KMEMP_THREAD_STACK_SIZE                         THREAD_STACK_PAGE(1)    /*!< 1/2 page (2 kbytes) */
 
 /*!< The globals */
 static tid_t g_kmemp_tid;

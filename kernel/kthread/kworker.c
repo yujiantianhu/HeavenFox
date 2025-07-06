@@ -72,7 +72,7 @@ static void *kworker_entry(void *args)
         continue;
 
 END:
-        msleep(200);
+        msleep(208);
     }
 
     return args;

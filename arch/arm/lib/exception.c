@@ -18,6 +18,7 @@
 /*!< The globals*/
 kuaddr_t prefecth_abort_addr;
 kuaddr_t data_abort_addr;
+kuaddr_t undefined_abort_addr;
 
 /*!< API function */
 /*!
@@ -30,7 +31,7 @@ void exec_undefined_handler(void)
 {
     g_interrupt_flags |= (EXCEPTION_BIT | 0x04);
 
-    printk(PRINT_LEVEL_ERR "%s: program instruction undefine\r\n", __FUNCTION__);
+    printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, undefined_abort_addr);
     mr_assert(false);
 
     g_interrupt_flags &= ~(EXCEPTION_BIT | 0x04);

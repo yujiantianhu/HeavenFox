@@ -17,6 +17,15 @@
 #include <imx6/imx6ull_clocks.h>
 #include <imx6/imx6ull_pins.h>
 
+/*!< Check */
+#if (!defined(CONFIG_CPU_FREQ) || (CONFIG_CPU_FREQ != 528000000) && (CONFIG_CPU_FREQ != 792000000))
+    #error "Cpu Frequency is configured (CONFIG_CPU_FREQ) error!"
+#endif
+
+#if (!defined(CONFIG_XTAL_FREQ_CLK) || (CONFIG_XTAL_FREQ_CLK != 24000000))
+    #error "XTAL Frequency is configured (CONFIG_XTAL_FREQ_CLK) error!"
+#endif
+
 /*!< The defines */
 #define IMX_CCM_PORT_ENTRY()								IMX6UL_CCM_PROPERTY_ENTRY()
 #define IMX_CCM_PLL_PORT_ENTRY()							IMX6UL_CCM_PLL_PROPERTY_ENTRY()
@@ -56,6 +65,7 @@ static void imx6ull_main_freq_configure(void)
 {
     srt_hal_imx_ccm_t *sptr_clkRegs;
     srt_hal_imx_ccm_pll_t *sptr_ccmPll;
+    kuint32_t podf, div_sel, freq;
 
     sptr_clkRegs = IMX_CCM_PORT_ENTRY();
     sptr_ccmPll  = IMX_CCM_PLL_PORT_ENTRY();
@@ -83,20 +93,37 @@ static void imx6ull_main_freq_configure(void)
      */
     mr_clrbitl(mr_bit(13), &sptr_ccmPll->PLL_ARM);
 
+    /*!< For 762MHz, div_select = 127, but PLL_ARM is only valid for the lower 7bits (0 ~ 127) */
+#if (CONFIG_CPU_FREQ < 762000000)
+    podf = 1U;
+#else
+    podf = 0U;
+#endif
+
     /*!< 
      * CACRR
      * bit[2:0]:	ARM_PODF. divide by (ARM_PODF + 1), ARM_PODF = 000, 001, ..., 111
+     *  set podf
      */
-    mr_clrbitl(mr_bit(0) | mr_bit(1) | mr_bit(2), &sptr_clkRegs->CACRR);
-    mr_setbitl(mr_bit(0), &sptr_clkRegs->CACRR);
+    mr_clrbitl(0x7U, &sptr_clkRegs->CACRR);
+    mr_setbitl(podf, &sptr_clkRegs->CACRR);
 
     /*!<
-     * Fin = osc_clk = 24MHz. Because Main_Freq = PLL1 devided (ARM_PODF + 1), if target Main_Freq = 528MHz,
-     * ARM_PODF = 1, the PLL1 should be configure 1056MHz. That is to say, Fout = 1056MHz.
-     * ===> div_select = (1056 * 2.0) / 24 = 88
+     * Fin = osc_clk = 24MHz. And Main_Freq = PLL1 devided (ARM_PODF + 1)
+     *      div_select = (target_freq * (ARM_PODF + 1) * 2.0) / osc_clk
+     * if target Main_Freq = 792MHz:
+     *      ARM_PODF = 0, the PLL1 should be configure 792MHz. That is to say, Fout = 792MHz.
+     *      ===> div_select = (792MHz * 2.0) / 24 = 66
+     * if target Main_Freq = 528MHz:
+     *      ARM_PODF = 1, the PLL1 should be configure 1056MHz. That is to say, Fout = 1056MHz.
+     *      ===> div_select = (1056MHz * 2.0) / 24 = 88
      */
-    mr_clrbitl(0x7f, &sptr_ccmPll->PLL_ARM);
-    mr_setbitl(88, &sptr_ccmPll->PLL_ARM);
+    freq = (CONFIG_CPU_FREQ / 1000000U) * (podf + 1);
+    div_sel = (freq * 2U) / (CONFIG_XTAL_FREQ_CLK / 1000000U);
+
+    /*!< Set freq */
+    mr_clrbitl(0x7fU, &sptr_ccmPll->PLL_ARM);
+    mr_setbitl(div_sel, &sptr_ccmPll->PLL_ARM);
 
     /*!< delay nop */
     mr_delay_nop();
@@ -366,6 +393,9 @@ static void imx6ull_clk_initial(void)
     mr_writel(IMX6UL_CCM_CCGR_BIT(4)  | IMX6UL_CCM_CCGR_BIT(9) |		/*!< ipmux4 and aips_tz3 */
                IMX6UL_CCM_CCGR_BIT(11) | IMX6UL_CCM_CCGR_BIT(14), 		/*!< anadig and csu */
                g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR6]);
+
+    /*!< Configure delay cnt */
+    init_delay_freq(200U, 10U, 10U);
 }
 
 /*!

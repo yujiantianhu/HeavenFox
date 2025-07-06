@@ -45,14 +45,23 @@ static void thread_sleep_timeout(kuint32_t args)
 {
     struct ktime_event *sptr_event = (struct ktime_event *)args;
     struct thread *sptr_thread = sptr_event->sptr_cur;
+    kuint32_t status;
+
+    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    status = __GET_THREAD_STATE(sptr_thread);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
 
     /*!< Only schedule_thread() is finished, state will be NR_THREAD_SUSPEND */
-    if (__GET_THREAD_STATE(sptr_thread) == NR_THREAD_SUSPEND)
+    if (status == NR_THREAD_SUSPEND)
         schedule_thread_wakeup(sptr_thread->tid);
 
+    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    status = __GET_THREAD_STATE(sptr_thread);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+
     /*!< Wake up failed */ 
-    if ((__GET_THREAD_STATE(sptr_thread) != NR_THREAD_READY) ||
-        (__GET_THREAD_STATE(sptr_thread) != NR_THREAD_RUNNING))
+    if ((status != NR_THREAD_READY) &&
+        (status != NR_THREAD_RUNNING))
     {
         if (sptr_event->type == KTIME_EVENT_JIFFIES)
             mod_timer(&sptr_event->u.sgtc_tm, jiffies + 1);
@@ -218,8 +227,7 @@ kuint32_t msleep(kuint32_t milseconds)
 {
 #if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
     kuint32_t period_ms = 1000U / TICK_HZ;
-    kuint32_t first_msecs = milseconds / period_ms;
-    kuint32_t remain_msecs = milseconds - (first_msecs * period_ms);
+    kuint32_t remain_msecs = milseconds % period_ms;
     khrtime_t ticks = MSEC_TO_HRTICK(milseconds);
 
     /*!< Is the multiples of period_ms, or ticks are too large, use jiffies first */
@@ -245,8 +253,7 @@ kint32_t usleep(kuint32_t useconds)
 {
 #if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
     kuint32_t period_us = 1000000U / TICK_HZ;
-    kuint32_t first_usecs = useconds / period_us;
-    kuint32_t remain_usecs = useconds - (first_usecs * period_us);
+    kuint32_t remain_usecs = useconds % period_us;
     khrtime_t ticks = USEC_TO_HRTICK(useconds);
 
     /*!< Is the multiples of period_us, or ticks are too large, use jiffies first */

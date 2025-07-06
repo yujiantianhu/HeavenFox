@@ -117,7 +117,7 @@ static void imx_fbdev_init(void *base, struct imx_fbdev_drv *sptr_drv)
     mr_writel(mr_bit(31), &sptr_lcdif->CTRL_SET);
     while (mr_isBitResetl(mr_bit(31), &sptr_lcdif->CTRL));
 
-    msleep(100);
+    msleep(50);
 
     /*!< clear bit30 & bit31 */
     mr_writel(mr_bit(31), &sptr_lcdif->CTRL_CLR);

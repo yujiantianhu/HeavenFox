@@ -63,7 +63,9 @@ void exec_irq_handler(void)
     hw_irq_deactivate(hardirq);
 
     /*!< check and excute softirq (irq will be open) */
+    mr_local_irq_exit();
     fwk_handle_softirq();
+    mr_local_irq_enter();
 
     /*!< preemptetion allowd, update schedule flag */
     if (!mr_preempt_is_locked())

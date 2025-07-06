@@ -991,7 +991,7 @@ static kint32_t fwk_sdcard_send_app_command(struct fwk_sdcard *sptr_card,
             iRetval = fwk_sdcard_send_command(sptr_card, cmd_controller, args);
         }
 
-        delay_ms(50);
+        mdelay(50);
 
     } while ((-ER_RETRY == iRetval) && (--iRetry));
 
@@ -1508,7 +1508,7 @@ kbool_t fwk_sdcard_detect(struct fwk_sdcard *sptr_card)
     while (!sptr_if->is_insert(sptr_host));
 
     /*!< Delay some time to make card stable after inserting */
-    delay_ms(500U);
+    mdelay(500U);
     sptr_card->relativeAddr = 0U;
     sptr_card->voltage = NR_SdCard_toVoltage3_3V;
 

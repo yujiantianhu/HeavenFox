@@ -143,7 +143,7 @@ static inline void work_splice_and_init(struct workqueue_head *sptr_src, struct 
         return;
 
     spin_lock_irqsave(&sptr_src->sgtc_lock);
-    list_head_splice_init(&sptr_src->sgtc_work, &sptr_dst->sgtc_work);
+    list_head_splice_init(&sptr_dst->sgtc_work, &sptr_src->sgtc_work);
     spin_unlock_irqrestore(&sptr_src->sgtc_lock);
 }
 

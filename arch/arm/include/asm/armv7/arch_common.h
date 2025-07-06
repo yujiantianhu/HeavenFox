@@ -61,6 +61,32 @@
             mr_enable_cpu_irq();    \
     } while (0)
 
+/*!< Leave IRQ mode, and enter SVC mode safe (but disable irq) */
+#define mr_local_irq_exit()   \
+    do {    \
+        __asm__ __volatile__ (  \
+            " cpsid i, #0x13    \n\t"   \
+            " push { lr }       \n\t"   \
+            " cpsie i           \n\t"   \
+            :   \
+            :   \
+            : "cc"  \
+        );  \
+    } while (0)
+
+/*!< Leave SVC mode safe (disable irq and restore lr_svc), and enter IRQ mode */
+#define mr_local_irq_enter()  \
+    do {    \
+        __asm__ __volatile__ (  \
+            " cpsid i           \n\t"   \
+            " pop { lr }        \n\t"   \
+            " cps #0x12         \n\t"   \
+            :   \
+            :   \
+            : "cc"  \
+        );  \
+    } while (0)
+
 /*!< API function */
 /*!
  * @brief   disable irq

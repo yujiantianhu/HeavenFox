@@ -154,7 +154,7 @@ static void *kthread_entry(void *args)
         io_stream_logs_print(g_kthread_log_buffer, sizeof(g_kthread_log_buffer));
 
         /*!< Sleep for a while */
-        msleep(50);
+        msleep(201);
     }
 
     return args;

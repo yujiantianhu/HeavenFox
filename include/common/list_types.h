@@ -299,24 +299,62 @@ static inline void list_head_del_safe(struct list_head *sptr_head, struct list_h
  * @param   sptr_src: source list
  * @param   sptr_dst: destination list
  * @retval  none
+ * @note    sptr_dst->sptr_next ---> sptr_src->sptr_next
+ */
+static inline void list_head_split_head(struct list_head *sptr_dst, struct list_head *sptr_src)
+{
+    struct list_head *sptr_prev, *sptr_next;
+
+    if (mr_list_empty(sptr_src))
+        return;
+
+    sptr_next = sptr_dst->sptr_next;
+    sptr_prev = sptr_src->sptr_prev;
+
+    sptr_dst->sptr_next = sptr_src->sptr_next;
+    sptr_src->sptr_next->sptr_prev = sptr_dst;
+
+    sptr_next->sptr_prev = sptr_prev;
+    sptr_prev->sptr_next = sptr_next;
+}
+
+/*!
+ * @brief   copy sptr_src to sptr_dst (e.g. split sptr_src and sptr_dst)
+ * @param   sptr_src: source list
+ * @param   sptr_dst: destination list
+ * @retval  none
+ * @note    sptr_dst->sptr_prev->sptr_next ---> sptr_src->sptr_next
+ */
+static inline void list_head_split_tail(struct list_head *sptr_dst, struct list_head *sptr_src)
+{
+    struct list_head *sptr_prev, *sptr_prev2;
+
+    if (mr_list_empty(sptr_src))
+        return;
+
+    sptr_prev  = sptr_dst->sptr_prev;
+    sptr_prev2 = sptr_src->sptr_prev;
+
+    sptr_prev->sptr_next = sptr_src->sptr_next;
+    sptr_src->sptr_next->sptr_prev = sptr_prev;
+
+    sptr_prev2->sptr_next = sptr_dst;
+    sptr_dst->sptr_prev = sptr_prev2;
+}
+
+/*!
+ * @brief   copy sptr_src to sptr_dst (e.g. split sptr_src and sptr_dst) and initialize sptr_src
+ * @param   sptr_src: source list
+ * @param   sptr_dst: destination list
+ * @retval  none
  * @note    none
  */
-static inline void list_head_splice_init(struct list_head *sptr_src, struct list_head *sptr_dst)
+static inline void list_head_splice_init(struct list_head *sptr_dst, struct list_head *sptr_src)
 {
-    struct list_head *sptr_prev;
+    /*!< Add to head */
+    list_head_split_tail(sptr_dst, sptr_src);
 
-    /*!< 
-     * sptr_src->sptr_next ---> sptr_dst
-     * sptr_dst->sptr_prev ---> sptr_src
-     */
-    list_head_add_head(sptr_src, sptr_dst);
-
-    /*!< delete sptr_src: sptr_dst becomes to the head */
-    sptr_prev = sptr_src->sptr_prev;
-    sptr_dst->sptr_prev = sptr_prev;
-    sptr_prev->sptr_next = sptr_dst;
-
-    /*!< delete all tails */
+    /*!< initial source */
     init_list_head(sptr_src);
 }
 

@@ -521,11 +521,11 @@ static kint32_t imx6ull_sdmmc_switch_voltage(struct fwk_sdcard_host *sptr_host, 
     else
         mr_clrbitl(NR_ImxUsdhc_VendSpec_VoltageSelect, &sptr_usdhc->VEND_SPEC);
 
-    delay_ms(100U);
+    mdelay(100U);
 
     /*!< enable force clock on */
     mr_setbitl(NR_ImxUsdhc_VendSpec_ActiveClk, &sptr_usdhc->VEND_SPEC);
-    delay_ms(10U);
+    mdelay(10U);
 
     /*!< disable force clock on */
     mr_clrbitl(NR_ImxUsdhc_VendSpec_ActiveClk, &sptr_usdhc->VEND_SPEC);

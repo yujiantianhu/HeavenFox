@@ -37,6 +37,28 @@ irq_return_t imx6_hrtimer_isr(kint32_t irq, void *ptrDev);
 
 /*!< API function */
 /*!
+ * @brief   Check if hrtime counter out
+ * @param   none
+ * @retval  none
+ * @note    The newest over count
+ */
+kuint32_t khrtime_check_overcnt(void)
+{
+    srt_hal_imx_gptimer_t *sptr_tick;
+    struct ktime_manage *sptr_tmn = HRTIMER_PTR;
+
+    sptr_tick = IMX_HRTIMER_PORT_ENTRY();
+    
+    if (mr_bit(5U) & mr_readl(&sptr_tick->SR))
+    {
+        sptr_tmn->over_cnt++;
+        mr_writel(mr_bit(5U), &sptr_tick->SR);
+    }
+
+    return sptr_tmn->over_cnt;
+}
+
+/*!
  * @brief   load compare value to hardware
  * @param   expires (unit: tick)
  * @retval  none
@@ -44,27 +66,97 @@ irq_return_t imx6_hrtimer_isr(kint32_t irq, void *ptrDev);
  */
 void khrtime_reload_cnt(khrtime_t expires)
 {
+#define KHRTIME_ADJUST_TICK(cur, limit) \
+    (kuint32_t)(((cur) > (limit)) ? ((cur) - (limit)) : (cur))
+
     srt_hal_imx_gptimer_t *sptr_tick;
-    khrtime_t val, max;
+    khrtime_t max, one_us, cur_tick;
+    kuint32_t over_cnt, over_cnt2, exp_tick = 0;
+    kuint32_t flags;
 
     sptr_tick = IMX_HRTIMER_PORT_ENTRY();
-    mr_clrbitl(mr_bit(0U), &sptr_tick->IR);
-
     max = HRTIMER_MAX;
-    expires -= (g_hrtime_over_cnt * max);
-    val = (expires > max) ? (expires - max) : expires;
+    one_us = USEC_TO_HRTICK(1);
 
-    mr_writel(val, &sptr_tick->OCR[0]);
-    mr_setbitl(mr_bit(0U), &sptr_tick->IR);
+    mr_local_irq_save(flags);
+    over_cnt2 = khrtime_check_overcnt();
+
+    do {
+        over_cnt = over_cnt2;
+        cur_tick = (khrtime_t)mr_readl(&sptr_tick->CNT);
+        over_cnt2 = khrtime_check_overcnt();
+
+        /*!< Check if CNT is over max during reading, ensure cur_tick is avaliable */
+    } while (over_cnt != over_cnt2);
+
+    /*!< 
+     * If khrtime_reload_cnt is called, it indiacates that OCR[0] will be changed, 
+     * and expires must be the smallest time!
+     * Ignore invalid and out-of-time compare event
+     */
+    mr_writel(mr_bit(0U), &sptr_tick->SR);
+
+    /*!< Expect time is not reached */
+    if (expires > (cur_tick + (over_cnt * (khrtime_t)max)))
+    {
+        expires -= over_cnt * max;
+
+        /*!< cur_tick must lower than exp_tick, but there values maybe similar */
+        cur_tick += one_us;
+        expires = CMP_MAX2(cur_tick, expires);
+        exp_tick = KHRTIME_ADJUST_TICK(expires, max);
+    }
+    else
+    {
+        /*!< +1us to ensure that compare can be triggered next time */
+        cur_tick += one_us;
+        exp_tick = KHRTIME_ADJUST_TICK(cur_tick, max);
+    }
+
+    mr_writel(exp_tick, &sptr_tick->OCR[0]);
+    mr_local_irq_restore(flags);
+
+#undef  KHRTIME_ADJUST_TICK
 }
 
 /*!
- * @brief   Check if hrtime counter out
+ * @brief   Read high time total tick
+ * @param   none
+ * @retval  tick
+ * @note    get the time register's current value
+ */
+khrtime_t khrtime_ticks(void)
+{
+    volatile kutime_t *time_cnt = HRTIMER_PTR->count;
+    kutime_t tick, over_count, over_count2;
+    kuint32_t max = HRTIMER_MAX;
+    kuint32_t flags;
+
+    if (mr_unlikely(!time_cnt))
+        return 0;
+
+    mr_local_irq_save(flags);
+    over_count2 = khrtime_check_overcnt();
+
+    do {
+        over_count = over_count2;
+        tick = *time_cnt;
+        over_count2 = khrtime_check_overcnt();
+
+        /*!< Check if counter is over max, and return over count */
+    } while (over_count != over_count2);
+
+    mr_local_irq_restore(flags);
+    return ((khrtime_t)tick + (over_count * (khrtime_t)max));
+}
+
+/*!
+ * @brief   start hrtimer
  * @param   none
  * @retval  none
- * @note    true or false
+ * @note    open compare interrupt
  */
-kuint32_t khrtime_check_overcnt(void)
+void khrtime_event_enable(void)
 {
     srt_hal_imx_gptimer_t *sptr_tick;
     kuint32_t flags;
@@ -72,15 +164,28 @@ kuint32_t khrtime_check_overcnt(void)
     sptr_tick = IMX_HRTIMER_PORT_ENTRY();
 
     mr_local_irq_save(flags);
-    
-    if (mr_bit(5U) & mr_readl(&sptr_tick->SR))
-    {
-        g_hrtime_over_cnt++;
-        mr_writel(mr_bit(5U), &sptr_tick->SR);
-    }
-
+    mr_writel((kuint32_t)(~0U), &sptr_tick->OCR[0]);
+    mr_writel(mr_bit(0U), &sptr_tick->SR);
+    mr_setbitl(mr_bit(0U), &sptr_tick->IR);
     mr_local_irq_restore(flags);
-    return g_hrtime_over_cnt;
+}
+
+/*!
+ * @brief   stop hrtimer
+ * @param   none
+ * @retval  none
+ * @note    close compare interrupt
+ */
+void khrtime_event_disable(void)
+{
+    srt_hal_imx_gptimer_t *sptr_tick;
+    kuint32_t flags;
+
+    sptr_tick = IMX_HRTIMER_PORT_ENTRY();
+
+    mr_local_irq_save(flags);
+    mr_clrbitl(mr_bit(0U), &sptr_tick->IR);
+    mr_local_irq_restore(flags);
 }
 
 /*!
@@ -248,17 +353,17 @@ irq_return_t imx6_hrtimer_isr(kint32_t irq, void *ptrDev)
         mr_writel(mr_bit(5U), &sptr_tick->SR);
 
 //      check_hrtimer();
-    }   
+    }
     if (mr_isBitSetl(mr_bit(0U), &status))
     {
-        /*!< Compare interrupt */
-        do_hrtime_event();
-
         /*!< 
          * Just clear compare bit 
-         * (if over status bit become 1 during "do_hrtime_event()", keep status for next solution) 
+         * Clear before excuting "do_hrtime_event"
          */
         mr_writel(mr_bit(0U), &sptr_tick->SR);
+
+        /*!< Compare interrupt */
+        do_hrtime_event();
     }
 
     return ER_NORMAL;
