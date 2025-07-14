@@ -42,9 +42,9 @@ static struct common_random_state sgtc_com_random_state =
  * @retval  none
  * @note    none
  */
-kutype_t udiv_integer(kutype_t divied, kutype_t div)
+kuint64_t udiv_integer(kuint64_t divied, kuint64_t div)
 {
-    kutype_t count = 0;
+    kuint64_t count = 0;
 
     while (divied >= div)
     {
@@ -61,11 +61,11 @@ kutype_t udiv_integer(kutype_t divied, kutype_t div)
  * @retval  none
  * @note    none
  */
-kstype_t sdiv_integer(kstype_t divied, kstype_t div)
+kint64_t sdiv_integer(kint64_t divied, kint64_t div)
 {
-    kstype_t count = 0;
-    kstype_t number1 = mr_abs(divied);
-    kstype_t number2 = mr_abs(div);
+    kint64_t count = 0;
+    kint64_t number1 = mr_abs(divied);
+    kint64_t number2 = mr_abs(div);
 
     while (number1 >= number2)
     {
@@ -82,7 +82,7 @@ kstype_t sdiv_integer(kstype_t divied, kstype_t div)
  * @retval  none
  * @note    none
  */
-kutype_t udiv_remainder(kutype_t divied, kutype_t div)
+kuint64_t udiv_remainder(kuint64_t divied, kuint64_t div)
 {
     while (divied >= div)
         divied -= div;

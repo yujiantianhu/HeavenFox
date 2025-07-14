@@ -127,7 +127,7 @@ static kssize_t extkey_driver_read(struct fwk_file *sptr_file, kbuffer_t *ptrBuf
 	sptr_data = (struct extkey_drv_data *)sptr_file->private_data;
 	
 	if (!(sptr_file->mode & O_NONBLOCK))
-		wait_event(&sptr_data->sgtc_wqh, sptr_data->wake);
+		wait_event_timeout(&sptr_data->sgtc_wqh, sptr_data->wake, 10U);
 	else
 	{
 		if (!sptr_data->wake)

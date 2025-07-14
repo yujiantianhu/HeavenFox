@@ -574,7 +574,7 @@ static void xsdk_gem_emac_init(struct xsdk_gem_drv_data *sptr_data)
     XEmacPs_SetOperatingSpeed(sptr_emacps, sptr_phy->link_speed);
 
     /*!< Setting the operating speed of the MAC needs a delay. */
-    msleep(1);
+    usleep(100);
 }
 
 /*!

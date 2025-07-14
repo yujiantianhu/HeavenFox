@@ -82,7 +82,7 @@ kint32_t lvgl_task_init(void)
                                             g_lvgl_task_stack, 
                                             sizeof(g_lvgl_task_stack),
                                             THREAD_PROTY_DEFAULT,
-                                            100);
+                                            80);
     if (!cptr_task)
         return -ER_FAILD;
 

@@ -45,10 +45,11 @@ static void thread_sleep_timeout(kuint32_t args)
 {
     struct ktime_event *sptr_event = (struct ktime_event *)args;
     struct thread *sptr_thread = sptr_event->sptr_cur;
-    kuint32_t status;
+    kuint32_t status, to_status;
 
     spin_lock_irqsave(&sptr_thread->sgtc_lock);
     status = __GET_THREAD_STATE(sptr_thread);
+    to_status = __GET_THREAD_TARGET_STATE(sptr_thread);
 
     /*!< Only schedule_thread() is finished, state will be NR_THREAD_SUSPEND */
     if (status == NR_THREAD_SUSPEND)
@@ -61,6 +62,14 @@ static void thread_sleep_timeout(kuint32_t args)
 
         spin_lock_irqsave(&sptr_thread->sgtc_lock);
         status = __GET_THREAD_STATE(sptr_thread);
+    }
+    /*!< Timeout is triggered before scheduling, to_status is not equal to NR_THREAD_NONE */
+    else if (to_status == NR_THREAD_SUSPEND)
+    {
+    	__SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_NONE);
+    	spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+
+    	return;
     }
 
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock);

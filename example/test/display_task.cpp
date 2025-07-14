@@ -638,7 +638,7 @@ kint32_t display_task_init(void)
                                             g_display_task_stack, 
                                             sizeof(g_display_task_stack),
                                             THREAD_PROTY_DEFAULT,
-                                            100);
+                                            80);
     if (!cptr_task)
         return -ER_FAILD;
 

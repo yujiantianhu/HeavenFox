@@ -653,7 +653,7 @@ static kint32_t imx_i2c_adap_xfer(struct fwk_i2c_adapter *sptr_adap, struct fwk_
 
     /*!< keep a certain interval between two transfer (specially writting) */
     if (runtick > JIFFIES_COUNT())
-        msleep(5);
+        msleep(jiffies_to_msecs(runtick - JIFFIES_COUNT()));
     
     mutex_lock(&sptr_data->sgtc_lock);
 

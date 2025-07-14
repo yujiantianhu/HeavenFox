@@ -83,7 +83,7 @@ END:
  */
 static void kthread_systime_record(void)
 {
-    static kutime_t systime = 0;
+    static kuint64_t systime = 0;
 
     if (systime != jiffies)
     {
@@ -154,7 +154,7 @@ static void *kthread_entry(void *args)
         io_stream_logs_print(g_kthread_log_buffer, sizeof(g_kthread_log_buffer));
 
         /*!< Sleep for a while */
-        msleep(100);
+        msleep(203);
     }
 
     return args;

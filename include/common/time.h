@@ -254,7 +254,7 @@ extern void init_delay_freq(kutime_t _O0_divider, kutime_t _O1_divider, kutime_t
 extern void delay(kuint32_t seconds);
 extern void mdelay(kuint32_t milseconds);
 extern void udelay(kuint32_t useconds);
-extern void msecs_to_timeclock(struct time_clock *sptr_tclk, kutype_t milseconds);
+extern void msecs_to_timeclock(struct time_clock *sptr_tclk, kuint64_t milseconds);
 
 extern void setup_timer(struct timer_list *sptr_timer, void (*entry)(kuint32_t), kuint32_t data);
 extern void add_timer(struct timer_list *sptr_timer);
@@ -341,7 +341,7 @@ static inline kutime_t get_safe_expires(kutime_t expires)
  * @retval  s
  * @note    none
  */
-static inline kuint32_t jiffies_to_secs(const kutime_t j)
+static inline kuint64_t jiffies_to_secs(const kuint64_t j)
 {
     return (j / TICK_HZ);
 }
@@ -352,7 +352,7 @@ static inline kuint32_t jiffies_to_secs(const kutime_t j)
  * @retval  ms
  * @note    none
  */
-static inline kuint32_t jiffies_to_msecs(const kutime_t j)
+static inline kuint64_t jiffies_to_msecs(const kuint64_t j)
 {
     return ((j * 1000) / TICK_HZ);
 }
@@ -363,7 +363,7 @@ static inline kuint32_t jiffies_to_msecs(const kutime_t j)
  * @retval  us
  * @note    none
  */
-static inline kuint32_t jiffies_to_usecs(const kutime_t j)
+static inline kuint64_t jiffies_to_usecs(const kuint64_t j)
 {
     return ((j * 1000 * 1000) / TICK_HZ);
 }
@@ -374,7 +374,7 @@ static inline kuint32_t jiffies_to_usecs(const kutime_t j)
  * @retval  ns
  * @note    none
  */
-static inline kuint64_t jiffies_to_nsecs(const kutime_t j)
+static inline kuint64_t jiffies_to_nsecs(const kuint64_t j)
 {
     return ((j * 1000 * 1000 * 1000) / TICK_HZ);
 }

@@ -76,7 +76,7 @@ kint32_t network_task_init(void)
                                             g_network_task_stack, 
                                             sizeof(g_network_task_stack),
                                             THREAD_PROTY_DEFAULT,
-                                            100);
+                                            80);
     if (!cptr_task)
         return -ER_FAILD;
 
