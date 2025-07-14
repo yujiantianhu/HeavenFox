@@ -79,7 +79,7 @@ typedef kint32_t tid_t;
 #define THREAD_PROTY_DEFAULT				(80)
 #define THREAD_PROTY_MAX					(1)
 
-#define __THREAD_IS_LOW_PRIO(prio, prio2)	((prio2) <= (prio))
+#define __THREAD_IS_LOW_PRIO(prio, prio2)	((prio2) < (prio))
 #define __THREAD_HIGHER_DEFAULT(val)		(THREAD_PROTY_DEFAULT - (val))	
 
 #define THREAD_PROTY_IDLE				    (98)

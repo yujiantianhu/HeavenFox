@@ -58,12 +58,6 @@ static void kthread_schedule_timeout(kuint32_t args)
     /*!< reduce time slice */
     sptr_work->expires--;
 
-#if !CONFIG_PREEMPT
-    /*!< (when the time slice is not exhuasted, current cannot be preempted */
-    if (sptr_work->expires)
-        goto END;
-#endif
-    
     /*!< not allow preempt */
     if (mr_preempt_is_locked())
         goto END;
@@ -77,9 +71,19 @@ static void kthread_schedule_timeout(kuint32_t args)
     work_prio = thread_get_priority(sptr_work->sptr_attr);
     next_prio = thread_get_priority(sptr_ready->sptr_attr);
    
-    /*!< there is a higher priority thread ready */
-    if (__THREAD_IS_LOW_PRIO(work_prio, next_prio))
+#if CONFIG_PREEMPT
+    /*!< there is a higher priority thread ready, or time slice is zero && the same priority thread ready */
+    if (__THREAD_IS_LOW_PRIO(work_prio, next_prio) ||
+        (!sptr_work->expires && (work_prio == next_prio)))
         g_sched_flag = true;
+
+#else
+    /*!< when the time slice is not exhuasted, current cannot be preempted */
+    if (!sptr_work->expires &&
+        (__THREAD_IS_LOW_PRIO(work_prio, next_prio) ||
+        (work_prio == next_prio)))
+        g_sched_flag = true;
+#endif
     
 END:
     spin_unlock(&sptr_work->sgtc_lock);
