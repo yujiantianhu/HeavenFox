@@ -48,12 +48,23 @@ static void kthread_schedule_timeout(kuint32_t args)
     spin_lock(&sptr_work->sgtc_lock);
     
     /*!< --------------------------------------------------------- */
-    /*!< check time slice (when the time slice is not exhuasted, current cannot be preempted) */
-    if (sptr_work->expires--)
-        goto END;
-
     /*!< if not in thread context or preempt is disable */
-    sptr_work->expires = 1;
+    if (!sptr_work->expires)
+    {
+        sptr_work->expires = 1;
+        mr_barrier();
+    }
+
+    /*!< reduce time slice */
+    sptr_work->expires--;
+
+#if !CONFIG_PREEMPT
+    /*!< (when the time slice is not exhuasted, current cannot be preempted */
+    if (sptr_work->expires)
+        goto END;
+#endif
+    
+    /*!< not allow preempt */
     if (mr_preempt_is_locked())
         goto END;
     
@@ -122,7 +133,7 @@ static void *kthread_entry(void *args)
     thread_set_self_name("kthread");
     spin_lock_init(&sgtc_kthread_spinlock);
 
-#if CONFIG_PREEMPT
+#if CONFIG_SCHED_SLICE
     setup_timer(sptr_tim, kthread_schedule_timeout, (kuint32_t)sptr_tim);
     sptr_tim->expires = jiffies + 1;
     add_timer(sptr_tim);

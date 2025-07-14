@@ -29,10 +29,14 @@
  * 1: the pending will be requested by timer-out ISR (check priority and time-slice, e.g, thread will be preempted suddenly)
  */
 #define CONFIG_PREEMPT                          (1)
-/*!< if CONFIG_PREEMPT is diabled, thread can be chosen ===> 0: polling by priority; 1: polling in order */
+
+/*!< scheduled by time slice (rely on timeout interrupt) */
+#define CONFIG_SCHED_SLICE                      (1)
+
+/*!< if CONFIG_SCHED_SLICE is diabled, thread can be chosen ===> 0: polling by priority; 1: polling in order */
 #define CONFIG_ROLL_POLL                        (1)
 
-#if CONFIG_PREEMPT
+#if CONFIG_SCHED_SLICE
 /*!< disable priority,  */
 #undef  CONFIG_ROLL_POLL
 #define CONFIG_ROLL_POLL                        (0)

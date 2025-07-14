@@ -37,7 +37,7 @@ static void *rest_entry(void *args)
 
     for (;;)
     {   
-#if (!CONFIG_PREEMPT)
+#if (!CONFIG_SCHED_SLICE)
         /*!< check priority */
         struct thread *sptr_ready = get_first_ready_thread();
         if (!sptr_ready || (sptr_ready == mr_current))
