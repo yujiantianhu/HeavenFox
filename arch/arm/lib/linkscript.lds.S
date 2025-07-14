@@ -171,6 +171,16 @@ SECTIONS
 
     __text_sec_end = .;
 
+    .init : 
+    {
+        KEEP (*(.init))
+    } > ram_ddr_0
+
+    .fini : 
+    {
+        KEEP (*(.fini))
+    } > ram_ddr_0
+
     .dync_init : 
     {
         . = ALIGN(16);
@@ -256,6 +266,30 @@ SECTIONS
         *(.ARM.exidx*)
         *(.gnu.linkonce.armexidix.*.*)
         __exidx_end = .;
+    } > ram_ddr_0
+
+    .preinit_array : 
+    {
+        __preinit_array_start = .;
+        KEEP (*(SORT(.preinit_array.*)))
+        KEEP (*(.preinit_array))
+        __preinit_array_end = .;
+    } > ram_ddr_0
+
+    .init_array : 
+    {
+        __init_array_start = .;
+        KEEP (*(SORT(.init_array.*)))
+        KEEP (*(.init_array))
+        __init_array_end = .;
+    } > ram_ddr_0
+
+    .fini_array : 
+    {
+        __fini_array_start = .;
+        KEEP (*(SORT(.fini_array.*)))
+        KEEP (*(.fini_array))
+        __fini_array_end = .;
     } > ram_ddr_0
 
     . = ALIGN(16);

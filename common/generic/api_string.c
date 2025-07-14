@@ -949,75 +949,6 @@ void fmt_free(kchar_t *ptr)
 }
 
 /*!< -------------------------------------------------------------------- */
-#if (0)
-/*!
- * @brief   strlen
- * @param   none
- * @retval  none
- * @note    return string lenth
- */
-__weak size_t strlen(const char *__s)
-{
-    return (size_t)get_string_lenth(__s);
-}
-
-/*!
- * @brief   strcpy
- * @param   none
- * @retval  none
- * @note    copy src to dest
- */
-__weak char *strcpy(char *__dest, const char *__src)
-{
-    return do_string_copy(__dest, __src);
-}
-
-/*!
- * @brief   strncpy
- * @param   none
- * @retval  none
- * @note    copy src to dest
- */
-__weak char *strncpy(char *__dest, const char *__src, size_t __n)
-{
-    return do_string_n_copy(__dest, __src, __n);
-}
-
-/*!
- * @brief   strlcpy
- * @param   none
- * @retval  none
- * @note    copy src to dest
- */
-__weak unsigned int strlcpy(char *__dest, const char *__src, size_t __n)
-{
-    return do_string_n_copy_safe(__dest, __src, __n);
-}
-
-/*!
- * @brief   strcmp
- * @param   none
- * @retval  none
- * @note    compare s1 and s2
- */
-__weak int strcmp(const char *__s1, const char *__s2)
-{
-    return do_string_compare(__s1, __s2);
-}
-
-/*!
- * @brief   strncmp
- * @param   none
- * @retval  none
- * @note    compare s1 and s2
- */
-__weak int strncmp(const char *__s1, const char *__s2, size_t __n)
-{
-    return do_string_n_compare(__s1, __s2, __n);
-}
-
-#endif
-
 /*!
  * @brief   kstrlen
  * @param   none
@@ -1157,5 +1088,107 @@ kchar_t *kstrcut(const kchar_t *__s1, kuint32_t index)
     
     return seek_char_by_pos(__s1, index);
 }
+
+/*!< -------------------------------------------------------------------- */
+#if CONFIG_NOSTDLIB
+/*!
+ * @brief   strlen
+ * @param   none
+ * @retval  none
+ * @note    return string lenth
+ */
+kuint32_t strlen(const kchar_t *__s)
+{
+    return kstrlen(__s);
+}
+
+/*!
+ * @brief   strcpy
+ * @param   none
+ * @retval  none
+ * @note    copy src to dest
+ */
+kchar_t *strcpy(kchar_t *__dest, const kchar_t *__src)
+{
+    return kstrcpy(__dest, __src);
+}
+
+/*!
+ * @brief   strncpy
+ * @param   none
+ * @retval  none
+ * @note    copy src to dest
+ */
+kchar_t *strncpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
+{
+    return kstrncpy(__dest, __src, __n);
+}
+
+/*!
+ * @brief   strlcpy
+ * @param   none
+ * @retval  none
+ * @note    copy src to dest
+ */
+kusize_t strlcpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
+{
+    return kstrlcpy(__dest, __src, __n);
+}
+
+/*!
+ * @brief   strncpyr
+ * @param   none
+ * @retval  none
+ * @note    copy src to dest (reverse)
+ */
+kchar_t *strncpyr(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
+{
+    return kstrncpyr(__dest, __src, __n);
+}
+
+/*!
+ * @brief   strcmp
+ * @param   none
+ * @retval  none
+ * @note    compare s1 and s2
+ */
+kint32_t strcmp(const kchar_t *__s1, const kchar_t *__s2)
+{
+    return kstrcmp(__s1, __s2);
+}
+
+/*!
+ * @brief   strncmp
+ * @param   none
+ * @retval  none
+ * @note    compare s1 and s2
+ */
+kint32_t strncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
+{
+    return kstrncmp(__s1, __s2, __n);
+}
+
+/*!
+ * @brief   strchr
+ * @param   none
+ * @retval  none
+ * @note    locate where the first "ch" appears
+ */
+kchar_t *strchr(const kchar_t *__s1, kint32_t ch)
+{
+    return kstrchr(__s1, (kchar_t)ch);
+}
+
+/*!
+ * @brief   strnchr
+ * @param   none
+ * @retval  none
+ * @note    locate where the n "ch" appears
+ */
+kchar_t *strnchr(const kchar_t *__s1, kchar_t ch, kint32_t n)
+{
+    return kstrnchr(__s1, ch, n);
+}
+#endif
 
 /* end of file */

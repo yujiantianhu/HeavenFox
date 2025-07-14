@@ -574,7 +574,7 @@ static void xsdk_gem_emac_init(struct xsdk_gem_drv_data *sptr_data)
     XEmacPs_SetOperatingSpeed(sptr_emacps, sptr_phy->link_speed);
 
     /*!< Setting the operating speed of the MAC needs a delay. */
-    usleep(100);
+    msleep(1);
 }
 
 /*!
@@ -712,7 +712,7 @@ static kint32_t xsdk_gem_dma_init(struct xsdk_gem_drv_data *sptr_data)
     sptr_txring = &XEmacPs_GetTxRing(&sptr_xemacif->sgtc_emacps);
 
     /*!< allocate 8K for Rx bds, and 8K for Tx bds */
-    bd_space = kmalloc((XNET_RX_DESC_SIZE + XNET_TX_DESC_SIZE) * 2, GFP_KERNEL);
+    bd_space = kmalloc((XNET_RX_DESC_SIZE + XNET_TX_DESC_SIZE) * 2, GFP_ATOMIC);
     if (!isValid(bd_space))
         return -ER_NOMEM;
 
@@ -762,7 +762,7 @@ static kint32_t xsdk_gem_dma_init(struct xsdk_gem_drv_data *sptr_data)
      * Method 1: define an array with 1500 * 512 bytes; but it needs to be copied to sk_buff again
      * Method 2: allocate a sk_buff in advance, and the received packets are stored directly to skb->data by DMA 
      */
-    xsdk_gem_setup_rxbd(sptr_data, GFP_KERNEL);
+    xsdk_gem_setup_rxbd(sptr_data, GFP_ATOMIC);
     XEmacPs_SetQueuePtr(&sptr_xemacif->sgtc_emacps, sptr_xemacif->sgtc_emacps.RxBdRing.BaseBdAddr, 0, XEMACPS_RECV);
 
     gige_version = (XEmacPs_ReadReg(sptr_xemacif->sgtc_emacps.Config.BaseAddress, 0xFC) >> 16) & 0xfff;
@@ -771,7 +771,7 @@ static kint32_t xsdk_gem_dma_init(struct xsdk_gem_drv_data *sptr_data)
         void *bd_terminate;
 
         /*!< allocate 8K for Rx bds, and 8K for Tx bds */
-        bd_terminate = kmalloc((XNET_RX_DESC_SIZE + XNET_TX_DESC_SIZE) * 2, GFP_KERNEL);
+        bd_terminate = kmalloc((XNET_RX_DESC_SIZE + XNET_TX_DESC_SIZE) * 2, GFP_ATOMIC);
         if (!isValid(bd_terminate))
             goto out;
 

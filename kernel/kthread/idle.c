@@ -33,7 +33,7 @@ static THREAD_STACK_DEFINE(g_idle_stack, IDLE_THREAD_STACK_SIZE);
  */
 static void *rest_entry(void *args)
 {
-    thread_set_self_name(__FUNCTION__);
+    thread_set_self_name("idle");
 
     for (;;)
     {   

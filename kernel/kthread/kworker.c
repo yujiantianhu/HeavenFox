@@ -103,7 +103,7 @@ kint32_t kworker_init(void)
     g_kworker_tid = kernel_thread_create(-1, sptr_attr, kworker_entry, mr_nullptr);
     if (g_kworker_tid >= 0)
     {
-        thread_set_name(g_kworker_tid, "kworker_entry");
+        thread_set_name(g_kworker_tid, "kworker");
         return ER_NORMAL;
     }
 

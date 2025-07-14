@@ -42,6 +42,14 @@ extern kuaddr_t __vector_table;
 
 #define VECTOR_TABLE_BASE                           ((kuaddr_t)&__vector_table)
 
+/*!< C++ constructor */
+typedef void (*link_func_t)(void);
+
+extern link_func_t __init_array_start;
+extern link_func_t __init_array_end;
+extern link_func_t __fini_array_start;
+extern link_func_t __fini_array_end;
+
 /*!< dync_init */
 extern dync_init_t __dync_init_start;
 extern dync_init_t __dync_init_end;
@@ -137,6 +145,9 @@ extern kuaddr_t __sk_buffer_end;
 
 #define SK_BUFFER_BASE                      ((kuaddr_t)&__sk_buffer_start)
 #define SK_BUFFER_SIZE                      ((kusize_t)((kuaddr_t)(&__sk_buffer_end) - (kuaddr_t)(&__sk_buffer_start)))
+
+/*!< The functions */
+extern void link_func_call(const link_func_t *pfuncStart, const link_func_t *pfuncEnd);
 
 /*!< API functions */
 /*!

@@ -48,7 +48,7 @@ extern void wake_up_ksoftirqd(void);
  */
 kuint32_t fwk_softirq_avaliable(void)
 {
-    return g_fwk_softirq_count;
+    return ((0 == g_fwk_softirq_count) && g_fwk_softirq_event);
 }
 
 /*!

@@ -13,7 +13,8 @@ CONFIG_CLASS = "cortex-a9"
 CONFIG_VERDOR = "xilinx"
 CONFIG_CPU = "xc7z010"
 
-CONFIG_COMPILER = "arm-linux-gnueabihf-"
+# CONFIG_COMPILER = "arm-linux-gnueabihf-"
+CONFIG_COMPILER = "arm-none-eabi-"
 
 CONFIG_ARCH_ARMV7 = y
 CONFIG_LITTILE_ENDIAN = y
@@ -27,12 +28,12 @@ CONFIG_INSTRUCTION = arm
 CONFIG_BUILD_TYPE = release
 
 # -O0, -O1, -O2
-CONFIG_OPTIMIZE_CLASS = 2
+CONFIG_OPTIMIZE = 2
 # ---------------------------------------------------------------
 
 # System Config
-# Systick period = 5ms
-CONFIG_HZ = 200
+# Systick period = 1ms
+CONFIG_HZ = 1000
 CONFIG_HRTIMER_ENBALE = y
 
 # ---------------------------------------------------------------

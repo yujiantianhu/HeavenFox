@@ -27,6 +27,8 @@
 static struct thread_attr sgtc_init_proc_attr;
 static THREAD_STACK_DEFINE(g_init_proc_stack, INIT_THREAD_STACK_SIZE);
 
+/*!< The functions */
+
 /*!< API functions */
 /*!
  * @brief	application task main
@@ -38,6 +40,17 @@ __weak kint32_t main(kint32_t argc, kchar_t **argv)
 {
     /*!< dummy */
     return 0;
+}
+
+/*!
+ * @brief	C++ init (call global constructor)
+ * @param  	none
+ * @retval 	none
+ * @note   	none
+ */
+static void constructor_init(void)
+{
+    link_func_call(&__init_array_start, &__init_array_end);
 }
 
 /*!
@@ -65,12 +78,14 @@ static void net_init(void)
  */
 static void *init_proc_entry(void *args)
 {
-    thread_set_self_name(__FUNCTION__);
-
+    thread_set_self_name("init_proc");
     print_info("%s is enter, which tid is: %d\r\n", __FUNCTION__, mr_current->tid);
 
     /*!< Network initial */
     net_init();
+
+    /*!< C++ init (call constructor) */
+    constructor_init();
 
     /*!< Create application: at the end of "init_proc_entry" */
     main(0, mr_nullptr);

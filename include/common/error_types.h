@@ -19,7 +19,6 @@
 
 /*!< The includes */
 #include "basic_types.h"
-#include <assert.h>
 
 /*!< The defines */
 /*!< error code */
@@ -81,6 +80,18 @@ extern void deal_assert_fail(const kchar_t *__assertion, kbool_t is_down,
 //                      __THROW __attribute__ ((__noreturn__));
 
 /*!< The defines */
+#ifndef __ASSERT_FUNCTION
+#if defined __cplusplus
+#define __ASSERT_FUNCTION	                        __PRETTY_FUNCTION__
+#else
+#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
+#define __ASSERT_FUNCTION	                        __func__
+#else
+#define __ASSERT_FUNCTION	                        ((const char *)" ")
+#endif
+#endif
+#endif
+
 #define mr_void()									((void)(0))
 #define mr_assert(x)								((x) ? mr_void() : deal_assert_fail(#x, true, __FILE__, __LINE__, __ASSERT_FUNCTION))
 #define mr_warn(x)                                  ((x) ? mr_void() : deal_assert_fail(#x, false, __FILE__, __LINE__, __ASSERT_FUNCTION))
@@ -92,11 +103,7 @@ extern void deal_assert_fail(const kchar_t *__assertion, kbool_t is_down,
     } while (0)
 
 /*!< The globals */
-extern volatile kuint32_t g_interrupt_flags;
 
-#define EXCEPTION_BIT                               (0x80)
-#define IS_IN_INTERRUPT()                           (!!g_interrupt_flags)
-#define IS_IN_EXCEPTION()                           ((g_interrupt_flags & EXCEPTION_BIT) == EXCEPTION_BIT)
 
 /*!< API functions */
 /*!

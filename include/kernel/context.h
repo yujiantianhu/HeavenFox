@@ -21,7 +21,7 @@
 #include <kernel/kernel.h>
 
 /*!< The defines */
-struct scheduler_context_regs
+struct context_regs
 {
     kuaddr_t r0;
     kuaddr_t r1;

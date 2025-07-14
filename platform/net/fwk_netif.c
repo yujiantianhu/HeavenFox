@@ -640,6 +640,7 @@ void fwk_netif_init(void (*pfunc_rx)(void *rxq, void *args), void *args)
 #else
     kernel_thread_create(THREAD_TID_SOCKRX, mr_nullptr, fwk_netif_rx_entry, sptr_tcb);
     thread_set_priority(mr_tid_attr(THREAD_TID_SOCKRX), THREAD_PROTY_SOCKRX);
+    thread_set_name(THREAD_TID_SOCKRX, "netif_rx");
 #endif
 
     /*!< IP any */

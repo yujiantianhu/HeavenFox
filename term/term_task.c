@@ -618,7 +618,7 @@ kint32_t term_init(void)
     g_term_task_tid = kernel_thread_create(-1, sptr_attr, term_entry, mr_nullptr);
     if (g_term_task_tid >= 0)
     {
-        thread_set_name(g_term_task_tid, "term_entry");
+        thread_set_name(g_term_task_tid, "terminal");
         return ER_NORMAL;
     }
 

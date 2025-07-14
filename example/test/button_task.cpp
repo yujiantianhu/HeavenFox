@@ -119,7 +119,7 @@ kint32_t button_task_init(void)
                                             button_task_entry, 
                                             g_button_task_stack, 
                                             sizeof(g_button_task_stack),
-                                            __THREAD_HIGHER_DEFAULT(1));
+                                            __THREAD_HIGHER_DEFAULT(2));
     if (!cptr_task)
         return -ER_FAILD;
 

@@ -21,6 +21,7 @@
 #include <common/basic_types.h>
 #include <common/error_types.h>
 #include <common/generic.h>
+#include "exception.h"
 
 /*!< The functions */
 extern void exec_fiq_handler(void);

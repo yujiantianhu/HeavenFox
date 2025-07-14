@@ -18,7 +18,7 @@
 #define LV_CONF_H
 
 #include <stdint.h>
-#include <configs/configs.h>
+#include <configs/mach_configs.h>
 
 /*====================
    COLOR SETTINGS

@@ -14,6 +14,7 @@
 #include <configs/configs.h>
 #include <common/generic.h>
 #include <common/io_stream.h>
+#include <common/time.h>
 #include <asm/interrupt.h>
 #include <platform/irq/fwk_irq_types.h>
 #include <kernel/kernel.h>
@@ -21,6 +22,8 @@
 /*!< The globals */
 extern kbool_t g_sched_flag;
 extern kuint32_t g_asm_sched_flag;
+
+static kuint32_t g_irq_nested_count = 0;
 
 /*!< API function */
 /*!
@@ -31,11 +34,11 @@ extern kuint32_t g_asm_sched_flag;
  */
 void exec_fiq_handler(void)
 {
-    g_interrupt_flags |= 0x1C;
+    SET_INTERRUPT_FLAG(FIQ_BIT);
 
     /*!< Entry */
 
-    g_interrupt_flags &= ~0x1C;
+    CLR_INTERRUPT_FLAG(FIQ_BIT);
 }
 
 /*!
@@ -46,11 +49,10 @@ void exec_fiq_handler(void)
  */
 void exec_irq_handler(void)
 {
-    static kuint32_t g_exec_irq_count = 0;
     kint32_t hardirq, softIrq;
 
-    g_interrupt_flags |= 0x18;
-    g_exec_irq_count++;
+    SET_INTERRUPT_FLAG(IRQ_BIT);
+    g_irq_nested_count++;
 
     /*!< read IAR, enable IRQ */
     hardirq = hw_irq_acknowledge();
@@ -62,10 +64,14 @@ void exec_irq_handler(void)
     /*!< write IAR, disable IRQ */
     hw_irq_deactivate(hardirq);
 
-    /*!< check and excute softirq (irq will be open) */
-    mr_local_irq_exit();
-    fwk_handle_softirq();
-    mr_local_irq_enter();
+    /*!< nesting depth */
+    if (fwk_softirq_avaliable() && (g_irq_nested_count < 9))
+    {
+        /*!< check and excute softirq (irq will be open) */
+        mr_local_irq_exit();
+        fwk_handle_softirq();
+        mr_local_irq_enter();
+    }
 
     /*!< preemptetion allowd, update schedule flag */
     if (!mr_preempt_is_locked())
@@ -74,8 +80,8 @@ void exec_irq_handler(void)
         g_sched_flag = false;
     }
 
-    if (!(--g_exec_irq_count))
-        g_interrupt_flags &= ~0x18;
+    if (!(--g_irq_nested_count))
+        CLR_INTERRUPT_FLAG(IRQ_BIT);
 }
 
 /*!
@@ -94,7 +100,7 @@ void exec_software_irq_handler(void)
         : "=&r"(event) 
     );
 
-    g_interrupt_flags |= 0x08;
+    SET_INTERRUPT_FLAG(SWI_BIT);
 
     /*!< read IAR, enable IRQ */
 //  hardirq = hw_irq_acknowledge();
@@ -103,7 +109,7 @@ void exec_software_irq_handler(void)
     /*!< write IAR, disable IRQ */
 //  hw_irq_deactivate(hardirq);
 
-    g_interrupt_flags &= ~0x08;
+    CLR_INTERRUPT_FLAG(SWI_BIT);
 }
 
 /* end of file*/

@@ -21,6 +21,7 @@
 #include "asm_config.h"
 #include "gcc_config.h"
 #include "gic_basic.h"
+#include "../exception.h"
 
 /*!< The defines */
 #if (defined(CONFIG_OF))
@@ -67,10 +68,9 @@
         __asm__ __volatile__ (  \
             " cpsid i, #0x13    \n\t"   \
             " push { lr }       \n\t"   \
-            " cpsie i           \n\t"   \
             :   \
             :   \
-            : "cc"  \
+            : "cc", "memory"  \
         );  \
     } while (0)
 
@@ -83,7 +83,7 @@
             " cps #0x12         \n\t"   \
             :   \
             :   \
-            : "cc"  \
+            : "cc", "memory"  \
         );  \
     } while (0)
 
@@ -155,6 +155,48 @@ static inline void set_irq_priority(kint32_t irqNumber, kuint32_t priority)
 {
     mr_set_irq_pri(irqNumber, priority);
 }
+
+/*!
+ * @brief   switch mode
+ * @param   mode: svc/sys/irq/abt/...
+ * @retval  none
+ * @note    none
+ */
+#define mr_arch_mode_switch(mode)   \
+do {    \
+    switch (mode)   \
+    {   \
+        case ARCH_USE_MODE: \
+            __asm__ __volatile__ ("cpsid i, #0x10" : : : "cc"); \
+            break;  \
+        case ARCH_FIQ_MODE: \
+            __asm__ __volatile__ ("cps #0x11" : : : "cc");  \
+            break;  \
+        case ARCH_IRQ_MODE: \
+            __asm__ __volatile__ ("cps #0x12" : : : "cc");  \
+            break;  \
+        case ARCH_SVC_MODE: \
+            __asm__ __volatile__ ("cpsid i, #0x13" : : : "cc"); \
+            break;  \
+        case ARCH_MON_MODE: \
+            __asm__ __volatile__ ("cpsid i, #0x16" : : : "cc"); \
+            break;  \
+        case ARCH_ABT_MODE: \
+            __asm__ __volatile__ ("cps #0x17" : : : "cc");  \
+            break;  \
+        case ARCH_HYP_MODE: \
+            __asm__ __volatile__ ("cpsid i, #0x1a" : : : "cc"); \
+            break;  \
+        case ARCH_UND_MODE: \
+            __asm__ __volatile__ ("cps #0x1b" : : : "cc");  \
+            break;  \
+        case ARCH_SYS_MODE: \
+            __asm__ __volatile__ ("cpsid i, #0x1f" : : : "cc"); \
+            break;  \
+        default:    \
+            break;  \
+    }   \
+} while (0)
 
 #ifdef __cplusplus
     }

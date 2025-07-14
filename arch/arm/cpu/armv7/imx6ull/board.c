@@ -394,8 +394,8 @@ static void imx6ull_clk_initial(void)
                IMX6UL_CCM_CCGR_BIT(11) | IMX6UL_CCM_CCGR_BIT(14), 		/*!< anadig and csu */
                g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR6]);
 
-    /*!< Configure delay cnt */
-    init_delay_freq(200U, 10U, 10U);
+    /*!< Configure delay cnt (270 and 12 are test values) */
+    init_delay_freq(270U, 12U, 12U);
 }
 
 /*!

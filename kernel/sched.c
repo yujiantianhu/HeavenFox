@@ -1203,22 +1203,22 @@ void schedule_thread(void)
 {
     struct scheduler_context *sptr_context;
 
-    /*!< Not allow called by IRQ */
-    if (mr_unlikely(IS_IN_INTERRUPT()))
-    {
-        __SYNC_THREAD_STATE(mr_current, NR_THREAD_RUNNING);
-        mr_warn(false);
-
-        return;
-    }
-
     mr_preempt_disable();
 
     /*!< Save cpsr to spsr */
     __push_psr();
     mr_local_irq_disable();
     mr_preempt_enable();
-    
+
+    /*!< Not allow called by IRQ */
+    if (mr_unlikely(IS_IN_INTERRUPT()))
+    {
+        __SYNC_THREAD_STATE(mr_current, NR_THREAD_RUNNING);
+        mr_warn(false);
+
+        goto END;
+    }
+   
     sptr_context = __schedule_thread();
     if (!sptr_context)
         goto END;

@@ -271,7 +271,7 @@ void io_putstr_async(const kubyte_t *msgs, kusize_t size)
     kssize_t ret = -1;
 
     /*!< In exception ? */
-    is_prohibit = g_interrupt_flags ? IS_IN_EXCEPTION() : false;
+    is_prohibit = IS_IN_EXCEPTION();
 
     if ((g_io_stream_flags & IO_STREAM_ASYNC) && (!is_prohibit))
     {

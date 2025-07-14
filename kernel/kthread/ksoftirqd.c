@@ -83,7 +83,7 @@ kint32_t ksoftirqd_init(void)
     g_ksoftirqd_tid = kernel_thread_create(-1, sptr_attr, ksoftirqd_entry, mr_nullptr);
     if (g_ksoftirqd_tid >= 0)
     {
-        thread_set_name(g_ksoftirqd_tid, "ksoftirqd_entry");
+        thread_set_name(g_ksoftirqd_tid, "ksoftirqd");
         return ER_NORMAL;
     }
 

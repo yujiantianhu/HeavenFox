@@ -27,4 +27,7 @@
 
 #define CONFIG_USE_AMP                          (0)
 
+/*!< save more infomation */
+#define CONFIG_CONTEXT_MORE                     (0)
+
 #endif /* __MACH_CONFIGS_H */

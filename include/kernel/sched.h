@@ -60,6 +60,8 @@ struct thread
 
     struct spin_lock sgtc_lock;
     struct mailbox *sptr_mb;
+
+    void *private_data;
 };
 
 /*!< Set thread state */

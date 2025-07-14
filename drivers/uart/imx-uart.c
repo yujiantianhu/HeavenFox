@@ -373,11 +373,11 @@ static kssize_t imx_uart_driver_read(struct fwk_file *sptr_file, kbuffer_t *ptrB
         if (count >= size)
             break;
 
-        mdelay(2);
+        if (mr_imx_uart_rx_empty(sptr_uart))
+            udelay(100U);
     }
 
     fwk_copy_to_user(ptrBuffer, msgs, count);
-
     if (buffer)
         kfree(buffer);
 

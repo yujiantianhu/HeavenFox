@@ -13,7 +13,8 @@ CONFIG_CLASS = "cortex-a7"
 CONFIG_VERDOR = "nxp"
 CONFIG_CPU = "imx6ull"
 
-CONFIG_COMPILER = "arm-linux-gnueabihf-"
+# CONFIG_COMPILER = "arm-linux-gnueabihf-"
+CONFIG_COMPILER = "arm-none-eabi-"
 
 CONFIG_ARCH_ARMV7 = y
 CONFIG_LITTILE_ENDIAN = y
@@ -24,15 +25,15 @@ CONFIG_VFP = y
 CONFIG_INSTRUCTION = arm
 
 # debug or release
-CONFIG_BUILD_TYPE = debug
+CONFIG_BUILD_TYPE = release
 
 # -O0, -O1, -O2
-CONFIG_OPTIMIZE_CLASS = 0
+CONFIG_OPTIMIZE = 2
 # ---------------------------------------------------------------
 
 # System Config
-# Systick period = 10ms
-CONFIG_HZ = (100)
+# Systick period = 1ms
+CONFIG_HZ = 1000
 CONFIG_HRTIMER_ENBALE = y
 
 # ---------------------------------------------------------------

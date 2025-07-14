@@ -138,7 +138,7 @@ kint32_t kmemp_init(void)
     g_kmemp_tid = kernel_thread_create(-1, sptr_attr, kmemp_entry, mr_nullptr);
     if (g_kmemp_tid >= 0)
     {
-        thread_set_name(g_kmemp_tid, "kmemp_entry");
+        thread_set_name(g_kmemp_tid, "kmemp");
         return ER_NORMAL;
     }
 

@@ -79,11 +79,14 @@ typedef kint32_t tid_t;
 #define THREAD_PROTY_DEFAULT				(80)
 #define THREAD_PROTY_MAX					(1)
 
+#define __THREAD_IS_LOW_PRIO(prio, prio2)	((prio2) <= (prio))
+#define __THREAD_HIGHER_DEFAULT(val)		(THREAD_PROTY_DEFAULT - (val))	
+
 #define THREAD_PROTY_IDLE				    (98)
 #define THREAD_PROTY_KERNEL				    (32)
 #define THREAD_PROTY_INIT					(THREAD_PROTY_KERNEL + 1)
 
-#define THREAD_PROTY_TERM                   (THREAD_PROTY_DEFAULT)
+#define THREAD_PROTY_TERM                   __THREAD_HIGHER_DEFAULT(0)
 
 #define THREAD_PROTY_SOCKRX                 (19)
 #define THREAD_PROTY_SOCKTX                 (20)
@@ -91,9 +94,6 @@ typedef kint32_t tid_t;
 #define THREAD_PROTY_IRQ                    (THREAD_PROTY_MAX + 1)
 #define THREAD_PROTY_KWORKER                (THREAD_PROTY_MAX + 1)
 #define THREAD_PROTY_KMEMP				    (THREAD_PROTY_KERNEL + 2)
-
-#define __THREAD_IS_LOW_PRIO(prio, prio2)	((prio2) <= (prio))
-#define __THREAD_HIGHER_DEFAULT(val)		(THREAD_PROTY_DEFAULT - (val))	
 
 /*!< preempt period */
 #define THREAD_PREEMPT_PERIOD               (10)                /*!< unit: ms */
@@ -315,21 +315,21 @@ static inline kuint32_t thread_attr_getstacksize(struct thread_attr *sptr_attr)
  * @retval 	context structure
  * @note   	none
  */
-static inline struct scheduler_context_regs *thread_get_context(struct thread_attr *sptr_attr)
+static inline struct context_regs *thread_get_context(struct thread_attr *sptr_attr)
 {
     kutype_t base;
 
-    base = sptr_attr->stack_addr + sizeof(struct scheduler_context_regs);
-    base = mr_align(base, 8) - sizeof(struct scheduler_context_regs);
+    base = sptr_attr->stack_addr + sizeof(struct context_regs);
+    base = mr_align(base, 8) - sizeof(struct context_regs);
     
-    return (struct scheduler_context_regs *)base;
+    return (struct context_regs *)base;
 }
 
 /*!
  * @brief	get address of stack_addr
  * @param  	sptr_attr
  * @retval 	&sptr_attr->stack_addr
- * @note   	stack = *(&sptr_attr->stack_addr) (excluding scheduler_context_regs)
+ * @note   	stack = *(&sptr_attr->stack_addr) (excluding context_regs)
  */
 __force_inline 
 static inline kutype_t thread_get_stack(struct thread_attr *sptr_attr)

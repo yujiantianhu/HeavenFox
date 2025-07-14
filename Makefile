@@ -103,11 +103,6 @@ ifeq ($(COMPILER_PATH),)
 endif
 
 COMPILER_LIBC	:=	$(strip $(patsubst %-, $(COMPILER_PATH)/%/libc, $(COMPILER)))
-
-LIBS_PATH		:=  -L $(COMPILER_LIBC)/usr/lib	\
-					-L $(COMPILER_LIBC)/lib
-
-LIBS			:=	--static -lc -lgcc -lstdc++ -lm
 EXTRA_FLAGS		:=  -fexec-charset=GB2312
 
 ifeq ($(CONFIG_INSTRUCTION),thumb)
@@ -123,8 +118,17 @@ EXTRA_FLAGS     +=	-mcpu=$(CLASS)	\
 endif
 
 MACROS			:=
+LINK_FLAGS		:=
+
+ifeq ($(COMPILER), arm-none-eabi-)
+MACROS			+=	-DCONFIG_NOSTDLIB=1
+LINK_FLAGS		+=	-Wl,-build-id=none -specs=$(PROJECT_DIR)/scripts/nano.spec
+else
+MACROS			+=	-DCONFIG_NOSTDLIB=0
+endif
+
 BUILD_TYPE		?=	$(CONFIG_BUILD_TYPE)
-OPTIMIZE_CLASS	?=	$(CONFIG_OPTIMIZE_CLASS)
+OPTIMIZE_CLASS	?=	$(CONFIG_OPTIMIZE)
 
 BUILD_CFLAGS   	:=  -O0 -Wall -nostdlib
 
@@ -138,6 +142,7 @@ BUILD_CFLAGS	+=	-O1
 else ifeq ($(OPTIMIZE_CLASS),2)
 BUILD_CFLAGS	+=	-O2
 endif
+MACROS			+=	-DCONFIG_OPTIMIZE_CLASS=$(OPTIMIZE_CLASS)
 
 BUILD_CFLAGS	+= 	-Wundef	\
 					-Wno-trigraphs \
@@ -147,7 +152,8 @@ BUILD_CFLAGS	+= 	-Wundef	\
                     -fno-tree-scev-cprop	\
 					-fno-exceptions	\
 					-fno-builtin-memcpy	\
-					-munaligned-access
+					-Wno-misleading-indentation	\
+					-mno-unaligned-access
 
 C_FLAGS			:=	$(BUILD_CFLAGS)	\
 					-Wstrict-prototypes
@@ -204,8 +210,8 @@ SOURCE_DIRS		:=	$(ARCH_DIRS) $(COMMON_DIRS) $(BOOT_DIRS) $(BOARD_DIRS) $(PLATFOR
 					$(KERNEL_DIRS) $(ROOTFS_DIRS) $(DRIVER_DIRS) $(TERMINAL_DIRS) $(INIT_DIRS)
 INCLUDE_DIRS	:= 	$(patsubst %, -I%, $(INCLUDE_DIRS))
 
-export ARCH TYPE CLASS CPU VENDOR CC CXX LD AR OBJDUMP OBJCOPY READELF
-export LIBS_PATH LIBS EXTRA_FLAGS C_FLAGS CXX_FLAGS MACROS CONF_MAKEFILE
+export ARCH TYPE CLASS CPU VENDOR COMPILER CC CXX LD AR OBJDUMP OBJCOPY READELF
+export COMPILER_LIBC EXTRA_FLAGS C_FLAGS CXX_FLAGS LINK_FLAGS MACROS CONF_MAKEFILE
 export PROJECT_DIR LINK_SCRIPT DTC BUILD_SCRIPT INCLUDE_DIRS
 export IMAGE_PATH OBJECT_PATH OBJECT_EXEC EXT_LIB_DIRS EXT_LIB_EXEC
 export TARGET_EXEC TARGET_BINY TARGET_IMGE TARGET_NASM TARGET_LASM TARGET_MMAP

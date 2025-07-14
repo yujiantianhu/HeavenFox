@@ -14,11 +14,11 @@
 #include <platform/irq/fwk_irq_domain.h>
 #include <platform/irq/fwk_irq_types.h>
 #include <platform/of/fwk_of.h>
-#include <kernel/rw_lock.h>
+#include <kernel/spinlock.h>
 
 /*!< The globals */
 static DECLARE_LIST_HEAD(sgtc_fwk_irq_domain);
-static struct rw_lock sgtc_irq_domain_lock = RW_LOCK_INIT();
+static struct spin_lock sgtc_irq_domain_lock = SPIN_LOCK_INIT();
 
 /*!< API function */
 /*!
@@ -31,7 +31,7 @@ struct fwk_irq_domain *fwk_of_irq_host(struct fwk_device_node *sptr_node)
 {
 	struct fwk_irq_domain *sptr_domain, *found = mr_nullptr;
 
-	rd_lock(&sgtc_irq_domain_lock);
+	spin_lock_irqsave(&sgtc_irq_domain_lock);
 
 	foreach_list_next_entry(sptr_domain, &sgtc_fwk_irq_domain, sgtc_link)
 	{
@@ -42,7 +42,7 @@ struct fwk_irq_domain *fwk_of_irq_host(struct fwk_device_node *sptr_node)
 		}
 	}
 
-	rd_unlock(&sgtc_irq_domain_lock);
+	spin_unlock_irqrestore(&sgtc_irq_domain_lock);
 	return found;
 }
 
@@ -187,9 +187,9 @@ struct fwk_irq_domain *fwk_irq_domain_add_linear(struct fwk_device_node *sptr_no
 	for (kuint32_t i = 0; i < size; i++)
 		sptr_domain->revmap[i] = -1;
 
-	wr_lock(&sgtc_irq_domain_lock);
+	spin_lock_irqsave(&sgtc_irq_domain_lock);
 	list_head_add_tail(&sgtc_fwk_irq_domain, &sptr_domain->sgtc_link);
-	wr_unlock(&sgtc_irq_domain_lock);
+	spin_unlock_irqrestore(&sgtc_irq_domain_lock);
 
 	return sptr_domain;
 }
@@ -228,9 +228,9 @@ void fwk_irq_domain_del_hierarchy(struct fwk_irq_domain *sptr_domain)
 
 	fwk_irq_domain_free_irqs(sptr_domain);
 
-	wr_lock(&sgtc_irq_domain_lock);
+	spin_lock_irqsave(&sgtc_irq_domain_lock);
 	list_head_del(&sptr_domain->sgtc_link);
-	wr_unlock(&sgtc_irq_domain_lock);
+	spin_unlock_irqrestore(&sgtc_irq_domain_lock);
 }
 
 /*!
@@ -244,19 +244,19 @@ struct fwk_irq_domain *fwk_irq_get_domain_by_name(kchar_t *name, kint32_t hwirq)
 	struct fwk_irq_domain *sptr_domain;
 	kint32_t retval;
 
-	rd_lock(&sgtc_irq_domain_lock);
+	spin_lock_irqsave(&sgtc_irq_domain_lock);
 
 	foreach_list_next_entry(sptr_domain, &sgtc_fwk_irq_domain, sgtc_link)
 	{
 		retval = sptr_domain->name && (!kstrcmp(sptr_domain->name, name));
 		if (retval && (hwirq < sptr_domain->hwirq_max))
 		{
-			rd_unlock(&sgtc_irq_domain_lock);
+			spin_unlock_irqrestore(&sgtc_irq_domain_lock);
 			return sptr_domain;
 		}
 	}
 
-	rd_unlock(&sgtc_irq_domain_lock);
+	spin_unlock_irqrestore(&sgtc_irq_domain_lock);
 	return mr_nullptr;
 }
 

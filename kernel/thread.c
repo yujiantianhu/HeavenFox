@@ -344,7 +344,7 @@ struct thread_attr *thread_attr_get(tid_t tid)
 void *thread_set_stack(struct thread_attr *sptr_attr, 
                                     void *ptr_dync, void *ptr_stack, kusize_t stacksize)
 {
-    struct scheduler_context_regs *sptr_regs;
+    struct context_regs *sptr_regs;
 
     if (!ptr_stack || 
         (stacksize < THREAD_STACK_MIN)) /* ||
@@ -367,12 +367,12 @@ void *thread_set_stack(struct thread_attr *sptr_attr,
     /*!< pointer to stack top with 8 bytes alignment */
     sptr_attr->stack_addr = (kutype_t)((kuint8_t *)ptr_stack + stacksize);
     sptr_attr->stack_addr = mr_ralign(sptr_attr->stack_addr - 16, 8);
-    sptr_attr->stack_addr -= sizeof(struct scheduler_context_regs);
+    sptr_attr->stack_addr -= sizeof(struct context_regs);
     sptr_attr->stack_addr = mr_ralign(sptr_attr->stack_addr, 8);
     sptr_attr->stacksize = stacksize;
 
     sptr_regs = thread_get_context(sptr_attr);
-    memset(sptr_regs, 0, sizeof(struct scheduler_context_regs));
+    memset(sptr_regs, 0, sizeof(struct context_regs));
 
     return (void *)sptr_attr->stack_addr;
 }

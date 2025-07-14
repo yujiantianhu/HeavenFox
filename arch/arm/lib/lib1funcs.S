@@ -35,7 +35,7 @@ Boston, MA 02111-1307, USA.  */
 #include <common/linkage.h>
 
     .text
-    .arm
+@  .arm
 
 /*!< ------------------------------------------------------------------ */
 .macro ARM_DIV_BODY dividend, divisor, result, curbit

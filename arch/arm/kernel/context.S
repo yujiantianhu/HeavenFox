@@ -80,7 +80,10 @@ _context_save:
 
     add r8, r1, #ARCH_OFFSET_LR
     str sp, [r8, #-4]                               @ save sp
+
+#if CONFIG_CONTEXT_MORE
     stmia r8, { r10 - r12 }                         @ save lr(r10), pc(r11), spsr(r12). Just saving, not involved in scheduling                   
+#endif
 
     push { r0 }
     ldr r1, =__thread_init_before                   @ init thread before running

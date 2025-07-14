@@ -14,11 +14,16 @@
 #include <asm/exception.h>
 #include <common/error_types.h>
 #include <common/io_stream.h>
+#include <common/mem_manage.h>
+#include <kernel/context.h>
 
 /*!< The globals*/
 kuaddr_t prefecth_abort_addr;
 kuaddr_t data_abort_addr;
 kuaddr_t undefined_abort_addr;
+
+kuint32_t g_interrupt_flags = 0;
+kutype_t g_abort_cur_sp = 0;
 
 /*!< API function */
 /*!
@@ -29,12 +34,12 @@ kuaddr_t undefined_abort_addr;
  */
 void exec_undefined_handler(void)
 {
-    g_interrupt_flags |= (EXCEPTION_BIT | 0x04);
-
+    SET_EXCEPTION_FLAG(UND_ABORT_BIT);
+    
     printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, undefined_abort_addr);
     mr_assert(false);
 
-    g_interrupt_flags &= ~(EXCEPTION_BIT | 0x04);
+    CLR_EXCEPTION_FLAG(UND_ABORT_BIT);
 }
 
 /*!
@@ -45,12 +50,12 @@ void exec_undefined_handler(void)
  */
 void exec_prefetch_abort_handler(void)
 {
-    g_interrupt_flags |= (EXCEPTION_BIT | 0x0C);
+    SET_EXCEPTION_FLAG(PREFETCH_ABORT_BIT);
 
     printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, prefecth_abort_addr);
     mr_assert(false);
     
-    g_interrupt_flags &= ~(EXCEPTION_BIT | 0x0C);
+    CLR_EXCEPTION_FLAG(PREFETCH_ABORT_BIT);
 }
 
 /*!
@@ -61,12 +66,12 @@ void exec_prefetch_abort_handler(void)
  */
 void exec_data_abort_handler(void)
 {
-    g_interrupt_flags |= (EXCEPTION_BIT | 0x10);
+    SET_EXCEPTION_FLAG(DATA_ABORT_BIT);
 
     printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, data_abort_addr);
     mr_assert(false);
     
-    g_interrupt_flags &= ~(EXCEPTION_BIT | 0x10);
+    CLR_EXCEPTION_FLAG(DATA_ABORT_BIT);
 }
 
 /*!
@@ -77,9 +82,54 @@ void exec_data_abort_handler(void)
  */
 void exec_unused_handler(void)
 {
-    g_interrupt_flags |= (EXCEPTION_BIT | 0x14);
+    SET_EXCEPTION_FLAG(UNUSED_BIT);
     mr_assert(false);
-    g_interrupt_flags &= ~(EXCEPTION_BIT | 0x14);
+    CLR_EXCEPTION_FLAG(UNUSED_BIT);
+}
+
+/*!< --------------------------------------------------------------- */
+/*!
+ * @brief   get abort information
+ * @param   none
+ * @retval  errno
+ * @note    parse to sptr_regs
+ */
+kint32_t abort_info_get(struct context_regs *sptr_regs)
+{
+    struct context_regs *sptr_sp = (struct context_regs *)g_abort_cur_sp;
+
+    if (!sptr_sp)
+        return -ER_EMPTY;
+
+    memcpy(sptr_regs, sptr_sp, sizeof(*sptr_sp));
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   get abort lr and sp
+ * @param   none
+ * @retval  errno
+ * @note    parse to sptr_regs
+ */
+void abort_src_get(struct context_regs *sptr_regs, kutype_t *_lr_src, kutype_t *_sp_src)
+{
+    static kutype_t _lr = 0, _sp = 0, _cpsr = 0;
+
+    _cpsr = __get_cpsr();
+    mr_arch_mode_switch(sptr_regs->psr & 0x1f);
+
+    __asm__ __volatile__ (
+        " mov %0, lr    \n\t"
+        " mov %1, sp    \n\t"
+        : "=r"(_lr), "=r"(_sp)
+        : 
+        : "cc", "memory"
+    );
+
+    mr_arch_mode_switch(_cpsr & 0x1f);
+
+    *_lr_src = _lr;
+    *_sp_src = _sp;
 }
 
 /* end of file*/

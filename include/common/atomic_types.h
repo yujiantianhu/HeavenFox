@@ -170,12 +170,12 @@ static inline void atomic_dec(srt_atomic_t *sptr_atomic)
 }
 
 /*!
- * @brief   atomic_set_bit
+ * @brief   set bit
  * @param   nr， ptr_addr
  * @retval  none
- * @note    set bit
+ * @note    *ptr_addr |= (1 << nr)
  */
-static inline void atomic_set_bit(kint32_t nr, void *ptr_addr)
+static inline void atomic_set_bit(kint32_t nr, kuint32_t *ptr_addr)
 {
 	kutype_t flag;
 	kuint32_t result, bitmask;
@@ -196,12 +196,12 @@ static inline void atomic_set_bit(kint32_t nr, void *ptr_addr)
 }
 
 /*!
- * @brief   atomic_clear_bit
+ * @brief   clear bit
  * @param   nr， ptr_addr
  * @retval  none
- * @note    clear bit
+ * @note    *ptr_addr &= ~(1 << nr)
  */
-static inline void atomic_clear_bit(kint32_t nr, void *ptr_addr)
+static inline void atomic_clear_bit(kint32_t nr, kuint32_t *ptr_addr)
 {
 	kutype_t flag;
 	kuint32_t result, bitmask;
@@ -225,9 +225,9 @@ static inline void atomic_clear_bit(kint32_t nr, void *ptr_addr)
  * @brief   verify bit[nr] if is set
  * @param   nr， ptr_addr
  * @retval  none
- * @note    clear bit
+ * @note    !!(*ptr_addr & (1 << nr))
  */
-static inline kbool_t atomic_is_bitset(kint32_t nr, void *ptr_addr)
+static inline kbool_t atomic_is_bitset(kint32_t nr, kuint32_t *ptr_addr)
 {
 	kuint32_t result, bitmask;
 
@@ -238,6 +238,75 @@ static inline kbool_t atomic_is_bitset(kint32_t nr, void *ptr_addr)
 		"	and %0, %0, %1		\n\t"
 		: "=&r"(result)
 		: "r"(bitmask), "r"(nr), "r"(ptr_addr)
+		: "cc"
+	);
+
+	return !!result;
+}
+
+/*!
+ * @brief   set bit mask
+ * @param   nr， ptr_addr
+ * @retval  none
+ * @note    *ptr_addr |= mask
+ */
+static inline void atomic_set_mask(kint32_t mask, kuint32_t *ptr_addr)
+{
+	kutype_t flag;
+	kuint32_t result;
+
+	__asm__ __volatile__ (
+		" 1:	                \n\t"
+        "   ldrex %0, [%3]		\n\t"
+		"	orr %0, %0, %2		\n\t"
+		"	strex %1, %0, [%3]	\n\t"
+		"	teq %1, #0x0		\n\t"
+		"	bne 1b				\n\t"
+		: "=&r"(result), "=&r"(flag)
+		: "r"(mask), "r"(ptr_addr)
+		: "cc"
+	);
+}
+
+/*!
+ * @brief   clear bit mask
+ * @param   nr， ptr_addr
+ * @retval  none
+ * @note    *ptr_addr &= ~mask
+ */
+static inline void atomic_clear_mask(kint32_t mask, kuint32_t *ptr_addr)
+{
+	kutype_t flag;
+	kuint32_t result;
+
+	__asm__ __volatile__ (
+		" 1:	                \n\t"
+        "   ldrex %0, [%3]		\n\t"
+		"	bic %0, %0, %2		\n\t"
+		"	strex %1, %0, [%3]	\n\t"
+		"	teq %1, #0x0		\n\t"
+		"	bne 1b				\n\t"
+		: "=&r"(result), "=&r"(flag)
+		: "r"(mask), "r"(ptr_addr)
+		: "cc"
+	);
+}
+
+/*!
+ * @brief   verify mask if is set
+ * @param   nr， ptr_addr
+ * @retval  none
+ * @note    !!(*ptr_addr & mask)
+ */
+static inline kbool_t atomic_is_set(kint32_t mask, kuint32_t *ptr_addr)
+{
+	kuint32_t result;
+
+	__asm__ __volatile__ (
+        "   ldr %0, [%2]		\n\t"
+		"	and %0, %0, %1		\n\t"
+		: "=&r"(result)
+		: "r"(mask), "r"(ptr_addr)
 		: "cc"
 	);
 

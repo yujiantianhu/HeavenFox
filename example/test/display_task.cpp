@@ -434,7 +434,7 @@ static kssize_t display_task_text(crt_disp_task_t &cgtc_dtsk, crt_disp_text_t &c
         sptr_mail = mail_recv(&sgtc_mb, 0);
         if (!isValid(sptr_mail))
         {
-            msleep(100);
+            msleep(200);
             continue;
         }
 
@@ -491,7 +491,7 @@ kint32_t crt_disp_text_t::show(crt_disp_task_t &cgtc_dtsk)
     struct mail *sptr_mail;
     enum disp_text_op nr_op = NR_DISP_TEXT_NONE;
     kuint8_t text_index = 0;
-    kssize_t retval;
+    kssize_t retval = 0;
 
     if (!this->text_pages)
         return 0;
@@ -569,6 +569,12 @@ kint32_t crt_disp_text_t::show(crt_disp_task_t &cgtc_dtsk)
         this->cur_text = 0;
         return NR_DISP_TEXT_EXIT;
     }
+    else if (!retval)
+    {
+        bsc::cout << bsc::endl;
+        bsc::cout << "Text " << this->text[this->cur_text] << " read over" << bsc::endl;
+        bsc::cout << "you can use 'ttc " << cgtc_dtsk.cptr_task->self_id() << " list' to view book lists" << bsc::endl;
+    }
 
     return 0;
 }
@@ -610,7 +616,7 @@ static void *display_task_entry(void *args)
         if (retval == NR_DISP_TEXT_EXIT)
             cgtc_windows.show(cgtc_dtsk);
 
-        msleep(100);
+        msleep(200);
     }
 
 fail:

@@ -106,6 +106,8 @@ static void kthread_kill_zombie(void)
         thread_destory(sptr_thread->tid);
 }
 
+extern khrtime_t g_interrupt_time;
+
 /*!
  * @brief	kernel thread entry
  * @param  	args: NULL normally
@@ -119,7 +121,7 @@ static void *kthread_entry(void *args)
 
     mr_preempt_disable();
     
-    thread_set_self_name(__FUNCTION__);
+    thread_set_self_name("kthread");
     spin_lock_init(&sgtc_kthread_spinlock);
 
 #if CONFIG_PREEMPT
@@ -154,7 +156,7 @@ static void *kthread_entry(void *args)
         io_stream_logs_print(g_kthread_log_buffer, sizeof(g_kthread_log_buffer));
 
         /*!< Sleep for a while */
-        msleep(201);
+        msleep(100);
     }
 
     return args;

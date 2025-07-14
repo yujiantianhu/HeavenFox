@@ -15,7 +15,7 @@
 #include "zynq7_common.h"
 
 /*!< The defines */
-#if CONFIG_OPTIMIZE_CLASS != 0
+#if (CONFIG_OPTIMIZE_CLASS != 0)
 /*!< 1GHz = (10 ^ 9)Hz ===> 1ms = (10 ^ 6)Hz */
 #define SYSTEM_CLK_FREQ_CNT_PER_MS                          (1000000)
 #else

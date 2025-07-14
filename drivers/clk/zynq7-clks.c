@@ -180,7 +180,7 @@ static kint32_t zynq7_clks_gate_is_enabled(struct fwk_clk_hw *sptr_hw)
     return !!value;
 }
 
-static const struct fwk_clk_ops sgtc_zynq7_clks_gate_oprts =
+static const struct fwk_clk_ops sgtc_zynq7_clks_gate_oprts __unused =
 {
     .enable = zynq7_clks_gate_enable,
     .disable = zynq7_clks_gate_disable,

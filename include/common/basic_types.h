@@ -102,13 +102,44 @@ typedef kusize_t                size_t;
 #define ARCH_PER_SIZE           sizeof(kutype_t)
 #define __RESERVED(x)           (void)(x)
 
+#ifdef  __used
+#undef  __used
+#endif
 #define __used		            __attribute__((used))
+
+#ifdef  __weak
+#undef  __weak
+#endif
 #define __weak                  __attribute__((weak))
+
+#ifdef  __packed
+#undef  __packed
+#endif
 #define __packed                __attribute__((packed))
+
+#ifdef  __align
+#undef  __align
+#endif
 #define __align(x)              __attribute__((__aligned__(x)))
+
+#ifdef  __section
+#undef  __section
+#endif
 #define __section(x)            __attribute__((section(x)))
+
+#ifdef  __force
+#undef  __force
+#endif
 #define __force                 __attribute__((force))
+
+#ifdef  __unused
+#undef  __unused
+#endif
 #define __unused                __attribute__((unused))
+
+#ifdef  __noreturn
+#undef  __noreturn
+#endif
 #define __noreturn              __attribute__((noreturn))
 
 #if defined(__GNUC__)

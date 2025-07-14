@@ -291,9 +291,8 @@ static void *fwk_font_ascii_lseek(kuint8_t *ptr_lib, kuint32_t size, kuint8_t ch
  */
 static void *fwk_fontlib_lseek(kuint8_t *ptr_lib, kuint32_t font, kuint32_t size, kuint32_t word)
 {
-    kuint32_t pixel_bits, pixel_bytes;
-    kuint32_t area_code, bit_code;
-    kuint32_t offset = 0;
+    register kuint32_t pixel_bits, pixel_bytes;
+    register kuint32_t offset = 0;
 
     /*!< dot matrix data is stored in bytes; pixel_bits: dots of one line; pixel_bytes: bytes of one line (dots / 8) */
     pixel_bits = size;
@@ -302,8 +301,12 @@ static void *fwk_fontlib_lseek(kuint8_t *ptr_lib, kuint32_t font, kuint32_t size
     switch (font)
     {
         case NR_FWK_FONT_SONG:
-            area_code = (word >> 8) & 0xff;
-            bit_code = word & 0xff;
+        {
+            register kuint16_t area_code, bit_code;
+            register kuint16_t flib_index = (kuint16_t)word;
+
+            area_code = (flib_index >> 8) & 0xff;
+            bit_code = flib_index & 0xff;
 
             /*!< 
              * area code
@@ -320,10 +323,10 @@ static void *fwk_fontlib_lseek(kuint8_t *ptr_lib, kuint32_t font, kuint32_t size
             * offset = (area_code * 94 + bit_code) * 32; 
             */
             offset  = (area_code << 7) - (area_code << 5) - (area_code << 1) + bit_code;
-            offset *= size * pixel_bytes;
+            offset *= (size * pixel_bytes);
 
             break;
-
+        }
         case NR_FWK_FONT_XINGKAI:
             break;
 
@@ -345,13 +348,13 @@ static void *fwk_fontlib_lseek(kuint8_t *ptr_lib, kuint32_t font, kuint32_t size
  */
 static kusize_t __fwk_display_dot_matrix_word(struct fwk_disp_ctrl *sptr_dctrl, const kchar_t *fmt)
 {
-    struct fwk_disp_info *sptr_disp;
-    struct fwk_font_setting *sptr_settings;
-    kuint8_t *ptr_ch, *ptr_dmatx;
-    kuint32_t x_pos, y_pos;
-    kuint32_t flib_index;
-    kuint32_t x_cnt, y_cnt, x_data, x_inc, byte_cnt, arr_inc;
-    kuint32_t x_end, y_end;
+    register struct fwk_disp_info *sptr_disp;
+    register struct fwk_font_setting *sptr_settings;
+    register kuint8_t *ptr_ch, *ptr_dmatx;
+    register kuint32_t x_pos, y_pos;
+    register kuint32_t flib_index;
+    register kuint32_t x_cnt, y_cnt, x_data, x_inc, byte_cnt, arr_inc;
+    register kuint32_t x_end, y_end;
 
     if ((!fmt) || (!sptr_dctrl))
         return 0;
@@ -365,6 +368,7 @@ static kusize_t __fwk_display_dot_matrix_word(struct fwk_disp_ctrl *sptr_dctrl, 
     y_end  = sptr_dctrl->y_end;
 
     ptr_ch = (kuint8_t *)fmt;
+    mutex_lock(&sptr_disp->sgtc_lock);
 
     while ('\0' != *(ptr_ch))
     {
@@ -411,7 +415,7 @@ static kusize_t __fwk_display_dot_matrix_word(struct fwk_disp_ctrl *sptr_dctrl, 
                 continue;
 
             x_inc = sptr_settings->size;
-            ptr_dmatx = fwk_fontlib_lseek(sptr_settings->ptr_hz, sptr_settings->font, sptr_settings->size, flib_index);
+            ptr_dmatx = fwk_fontlib_lseek((kuint8_t *)sptr_settings->ptr_hz, sptr_settings->font, sptr_settings->size, flib_index);
         }
         
         /*!< ASCII */
@@ -421,14 +425,13 @@ static kusize_t __fwk_display_dot_matrix_word(struct fwk_disp_ctrl *sptr_dctrl, 
                 continue;
 
             x_inc = sptr_settings->size >> 1;
-            ptr_dmatx = fwk_font_ascii_lseek(sptr_settings->ptr_ascii, sptr_settings->size, (kuint8_t)flib_index);
+            ptr_dmatx = fwk_font_ascii_lseek((kuint8_t *)sptr_settings->ptr_ascii, sptr_settings->size, (kuint8_t)flib_index);
         }
 
         if (!ptr_dmatx)
             continue;
 
         arr_inc = x_inc >> 3;
-        mutex_lock(&sptr_disp->sgtc_lock);
 
         /*!< draw pixel points */
         for (y_cnt = 0; y_cnt < sptr_settings->size; y_cnt++)
@@ -447,13 +450,13 @@ static kusize_t __fwk_display_dot_matrix_word(struct fwk_disp_ctrl *sptr_dctrl, 
             }
         }
 
-        mutex_unlock(&sptr_disp->sgtc_lock);
         x_pos += (x_inc + sptr_settings->word_spacing);
     }
 
     sptr_dctrl->x_next = x_pos;
     sptr_dctrl->y_next = y_pos;
 
+    mutex_unlock(&sptr_disp->sgtc_lock);
     return (kusize_t)(ptr_ch - (kuint8_t *)fmt);
 }
 

@@ -82,11 +82,19 @@ g_asm_sched_flag:
 _undefined_handler:
     _exception_save_params                          @ save current context
 
+    ldr r0, =g_abort_cur_sp                         @ save context base stack
+    str sp, [r0]
+
     ldr r0, =undefined_abort_addr                   @ it is defined in "exception.c"
     sub r1, lr, #4                                  @ get instrcution causing undefined abort
     str r1, [r0]                                    @ save to global var
 
     bl exec_undefined_handler                       @ exception handlers, please jump to exception.c
+
+    ldr r0, =g_abort_cur_sp
+    mov r1, #0
+    str r1, [r0]                                    @ clear
+
     _exception_restore_params                       @ restore previous context
 
     /*!< return pc (when exception handler is called, lr = pc - 4) */
@@ -110,11 +118,19 @@ _software_irq_handler:
 _prefetch_abort_handler:
     _exception_save_params                          @ save current context
 
+    ldr r0, =g_abort_cur_sp                         @ save context base stack
+    str sp, [r0]
+
     ldr r0, =prefecth_abort_addr                    @ it is defined in "exception.c"
     sub r1, lr, #4                                  @ get instrcution causing prefetch abort
     str r1, [r0]                                    @ save to global var
 
     bl exec_prefetch_abort_handler                  @ exception handlers, please jump to exception.c
+
+    ldr r0, =g_abort_cur_sp
+    mov r1, #0
+    str r1, [r0]                                    @ clear
+
     _exception_restore_params                       @ restore previous context
 
     /*!< The instruction causing abort (last instruction) needs to run again. So pc = lr - 4 */
@@ -123,11 +139,19 @@ _prefetch_abort_handler:
 _data_abort_handler:
     _exception_save_params                          @ save current context
 
+    ldr r0, =g_abort_cur_sp                         @ save context base stack
+    str sp, [r0]
+
     ldr r0, =data_abort_addr                        @ it is defined in "exception.c"
     sub r1, lr, #8                                  @ get instrcution causing data abort
     str r1, [r0]                                    @ save to global var
 
     bl exec_data_abort_handler                      @ exception handlers, please jump to exception.c
+
+    ldr r0, =g_abort_cur_sp
+    mov r1, #0
+    str r1, [r0]                                    @ clear
+
     _exception_restore_params                       @ restore previous context
 
     /*!< 
@@ -138,7 +162,16 @@ _data_abort_handler:
     subs pc, lr, #0x08
 
 _unused_handler:
+    _exception_save_params                          @ save current context
+
+    ldr r0, =g_abort_cur_sp                         @ save context base stack
+    str sp, [r0]
+
     bl exec_unused_handler                          @ exception handlers, please jump to exception.c
+
+    ldr r0, =g_abort_cur_sp
+    mov r1, #0
+    str r1, [r0]                                    @ clear
 
 _irq_handler:
     /*!< PC will pointer next instruction before calling IRQ; So it must retrun "lr - 4" */

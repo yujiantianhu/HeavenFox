@@ -49,14 +49,20 @@ static void thread_sleep_timeout(kuint32_t args)
 
     spin_lock_irqsave(&sptr_thread->sgtc_lock);
     status = __GET_THREAD_STATE(sptr_thread);
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
 
     /*!< Only schedule_thread() is finished, state will be NR_THREAD_SUSPEND */
     if (status == NR_THREAD_SUSPEND)
-        schedule_thread_wakeup(sptr_thread->tid);
+    {
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
-    status = __GET_THREAD_STATE(sptr_thread);
+        /*!< NODEV: thread has been released */
+        if ((-ER_NODEV) == schedule_thread_wakeup(sptr_thread->tid))
+            return;
+
+        spin_lock_irqsave(&sptr_thread->sgtc_lock);
+        status = __GET_THREAD_STATE(sptr_thread);
+    }
+
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
 
     /*!< Wake up failed */ 
@@ -94,6 +100,7 @@ void khrtime_schedule(khrtime_t tick)
 
     /*!< suspend current thread, and schedule others */
     spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    sptr_cur->private_data = (void *)&sgtc_event;
     __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
 
@@ -101,6 +108,7 @@ void khrtime_schedule(khrtime_t tick)
     if (mr_likely(__GET_THREAD_TARGET_STATE(sptr_cur) == NR_THREAD_SUSPEND))
         schedule_thread();
 
+    sptr_cur->private_data = mr_nullptr;
     del_hrtimer(sptr_tm);
 }
 
@@ -128,12 +136,14 @@ void schedule_timeout(kutime_t count)
 
     /*!< suspend current thread, and schedule others */
     spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    sptr_cur->private_data = (void *)&sgtc_event;
     __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
 
     mod_timer(sptr_tm, jiffies + count);
     schedule_thread();
 
+    sptr_cur->private_data = mr_nullptr;
     del_timer(sptr_tm);
 }
 
@@ -145,26 +155,16 @@ void schedule_timeout(kutime_t count)
  */
 void khrt_sleep_tick(khrtime_t tick)
 {
+#if CONFIG_ROLL_POLL
     khrtime_t expires = khrtime_ticks() + tick;
 
-    if (mr_likely(mr_current))
-    {
-    #if CONFIG_ROLL_POLL
-        while (expires > khrtime_ticks())
-            schedule_thread();
+    while (expires > khrtime_ticks())
+        schedule_thread();
 
-    #else
-//      if (expires > khrtime_ticks())
-            khrtime_schedule(tick);
-        
-    #endif
-    }
-    else
-    {
-        /*!< delay(seconds); */
-        while (expires > khrtime_ticks())
-            mr_nop();
-    }
+#else
+//  if (expires > khrtime_ticks())
+        khrtime_schedule(tick);
+#endif
 }
 
 /*!
@@ -177,23 +177,15 @@ kuint32_t sleep_tick(kutime_t tick)
 {
     kutime_t expires = jiffies + tick;
 
-    if (mr_likely(mr_current))
-    {
-    #if CONFIG_ROLL_POLL
-        while (mr_time_after(expires, jiffies))
-            schedule_thread();
+#if CONFIG_ROLL_POLL
+    while (mr_time_after(expires, jiffies))
+        schedule_thread();
 
-    #else
-        if (mr_time_after(expires, jiffies))
-            schedule_timeout(tick);
-        
-    #endif
-    }
-    else
-    {
-        /*!< delay(seconds); */
-        while (mr_time_after(expires, jiffies));
-    }
+#else
+    if (mr_time_after(expires, jiffies))
+        schedule_timeout(tick);
+    
+#endif
 
     return (kuint32_t)tick;
 }
@@ -206,15 +198,20 @@ kuint32_t sleep_tick(kutime_t tick)
  */
 kuint32_t sleep(kuint32_t seconds)
 {
+    if (mr_likely(mr_current))
+    {
     /*!< TICK_HZ >= 100, jiffies can satisfy */
-//#if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
-//    khrt_sleep_tick(SEC_TO_HRTICK(seconds));
-//    return ER_NORMAL;
+// #if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
+//      khrt_sleep_tick(SEC_TO_HRTICK(seconds));
+//      return ER_NORMAL;
 
-//#else
-    return sleep_tick(secs_to_jiffies(seconds));
+// #else
+        return sleep_tick(secs_to_jiffies(seconds));
+// #endif
+    }
 
-//#endif
+    delay(seconds);
+    return ER_NORMAL;
 }
 
 /*!
@@ -225,22 +222,27 @@ kuint32_t sleep(kuint32_t seconds)
  */
 kuint32_t msleep(kuint32_t milseconds)
 {
-#if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
-    kuint32_t period_ms = 1000U / TICK_HZ;
-    kuint32_t remain_msecs = milseconds % period_ms;
-    khrtime_t ticks = MSEC_TO_HRTICK(milseconds);
+    if (mr_likely(mr_current))
+    {
+    #if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
+        kuint32_t period_ms = 1000U / TICK_HZ;
+        kuint32_t remain_msecs = milseconds % period_ms;
+        khrtime_t ticks = MSEC_TO_HRTICK(milseconds);
 
-    /*!< Is the multiples of period_ms, or ticks are too large, use jiffies first */
-    if (mr_likely(!remain_msecs) || (ticks > HRTIMER_MAX))
+        /*!< Is the multiples of period_ms, or ticks are too large, use jiffies first */
+        if (mr_likely(!remain_msecs) || (ticks > HRTIMER_MAX))
+            return sleep_tick(msecs_to_jiffies(milseconds));
+
+        khrt_sleep_tick(ticks);
+        return ER_NORMAL;
+
+    #else
         return sleep_tick(msecs_to_jiffies(milseconds));
+    #endif
+    }
 
-    khrt_sleep_tick(ticks);
+    mdelay(milseconds);
     return ER_NORMAL;
-
-#else
-    return sleep_tick(msecs_to_jiffies(milseconds));
-
-#endif
 }
 
 /*!
@@ -251,22 +253,28 @@ kuint32_t msleep(kuint32_t milseconds)
  */
 kint32_t usleep(kuint32_t useconds)
 {
-#if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
-    kuint32_t period_us = 1000000U / TICK_HZ;
-    kuint32_t remain_usecs = useconds % period_us;
-    khrtime_t ticks = USEC_TO_HRTICK(useconds);
+    if (mr_likely(mr_current))
+    {
+    #if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
+        kuint32_t period_us = 1000000U / TICK_HZ;
+        kuint32_t remain_usecs = useconds % period_us;
+        khrtime_t ticks = USEC_TO_HRTICK(useconds);
 
-    /*!< Is the multiples of period_us, or ticks are too large, use jiffies first */
-    if (mr_likely(!remain_usecs) || (ticks > HRTIMER_MAX))
+        /*!< Is the multiples of period_us, or ticks are too large, use jiffies first */
+        if (mr_likely(!remain_usecs) || (ticks > HRTIMER_MAX))
+            return sleep_tick(usecs_to_jiffies(useconds));
+
+        khrt_sleep_tick(ticks);
+        return ER_NORMAL;
+
+    #else
         return sleep_tick(usecs_to_jiffies(useconds));
-
-    khrt_sleep_tick(ticks);
+    #endif
+    }
+    
+    /*!< Scheduling not starts, use general delay */
+    udelay(useconds);
     return ER_NORMAL;
-
-#else
-    return sleep_tick(usecs_to_jiffies(useconds));
-
-#endif
 }
 
 /*!< end of file */

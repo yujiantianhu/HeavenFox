@@ -1512,7 +1512,8 @@ kint32_t XUartPs_ReceiveBuffer(XUartPs *sptr_uart)
         sptr_uart->sgtc_rxbuf.NextBytePtr[ReceivedCount] = mr_readl(sptr_uart->sgtc_cfg.BaseAddress + XUARTPS_FIFO_OFFSET);   
         ReceivedCount++;
 
-        udelay(500U);
+        if (XUartPs_IsRecvEmpty(sptr_uart->sgtc_cfg.BaseAddress))
+            udelay(100U);
     }
     sptr_uart->is_rxbs_error = 0;
 

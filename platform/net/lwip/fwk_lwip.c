@@ -308,6 +308,7 @@ static kint32_t fwk_lwip_link_up(struct fwk_network_if *sptr_if)
 
     sptr_data->txd = kernel_thread_create(-1, mr_nullptr, fwk_lwip_tx_entry, &sptr_data->sgtc_netif);
     thread_set_priority(mr_tid_attr(sptr_data->txd), THREAD_PROTY_SOCKTX);
+    thread_set_name(sptr_data->txd, sptr_if->ifname);
 
     return ER_NORMAL;
 

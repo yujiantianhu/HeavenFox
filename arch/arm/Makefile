@@ -43,10 +43,24 @@ depd-objs	:=	$(wildcard $(depd-objs))
 include $(depd-objs)
 endif
 
+LIBS_PATH	:=	-L $(COMPILER_LIBC)/lib
+LIBS		:=	--static -Wl,--start-group
+
+ifeq ($(COMPILER),arm-none-eabi-)
+ifeq ($(CONFIG_INSTRUCTION),thumb)
+LIBS_PATH	+=  -L $(COMPILER_LIBC)/usr/lib/thumb/v7-a/fpv3/hard
+else
+LIBS_PATH	+=  -L $(COMPILER_LIBC)/usr/lib/v7-a/fpv3/hard
+endif
+else
+LIBS_PATH	+=  -L $(COMPILER_LIBC)/usr/lib
+endif
+
 ifneq ($(lib-y),)
 LIBS		+=	$(patsubst lib%.a,-l%, $(notdir $(lib-y)))
 LIBS_PATH	+=	-L $(EXT_LIB_EXEC)
 endif
+LIBS		+=	-lstdc++ -lm -Wl,--end-group -lc -lgcc
 
 define arch_build
 	if [ ! -d $(arch_output) ]; then mkdir -p $(arch_output); fi
@@ -68,7 +82,7 @@ $(TARGET_BINY) : $(TARGET_EXEC) force
 	$(OBJDUMP) -D -m $(ARCH) -S -l $(TARGET_EXEC) > $(TARGET_LASM)
 
 $(TARGET_EXEC) : $(head-objs) $(lds-y) force
-	$(CXX) -T$(lds-y) $(CXX_FLAGS) $(EXTRA_FLAGS) -Wl,-Map=$(TARGET_MMAP) -o $@ $(head-objs) $(OBJECT_EXEC) $(LIBS_PATH) $(LIBS)
+	$(CXX) -T$(lds-y) $(CXX_FLAGS) $(EXTRA_FLAGS) $(LINK_FLAGS) -Wl,-Map=$(TARGET_MMAP) -o $@ $(head-objs) $(OBJECT_EXEC) $(LIBS_PATH) $(LIBS)
 
 $(arch_output)/%.o : %.S force
 	$(call arch_build, $(CC), $@, $<)

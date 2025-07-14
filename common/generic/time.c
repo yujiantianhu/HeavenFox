@@ -55,9 +55,9 @@ struct ktime_manage sgtc_khrtime_manage =
 /*!< ---------------------------------------------------------- */
 static struct ktime_tick sgtc_ktime_jiffies;
 
-struct ktime_tick sgtc_ktime_htick;
-struct ktime_tick sgtc_ktime_pending;
-struct ktime_tick sgtc_ktime_inactive;
+static struct ktime_tick sgtc_ktime_htick;
+static struct ktime_tick sgtc_ktime_pending;
+static struct ktime_tick sgtc_ktime_inactive;
 
 static struct ktime_tick *sgtr_ktime_lists[] =
 {
@@ -225,10 +225,12 @@ void delay(kuint32_t seconds)
     if (HRTIMER_PTR->count)
     {
         khrtime_t target_tick = khrtime_ticks() + SEC_TO_HRTICK(seconds);
-        while (target_tick > khrtime_ticks());
+        while (target_tick > khrtime_ticks())
+            mr_nop();
     }
     else
     {
+        /*!< Simply delay. Time will be greater than milseconds if IRQ is triggered during "ticks--" */
         kuint64_t ticks = seconds * g_delay_freq_cnt;
         while (ticks--)
             mr_nop();
@@ -246,10 +248,12 @@ void mdelay(kuint32_t milseconds)
     if (HRTIMER_PTR->count)
     {
         khrtime_t target_tick = khrtime_ticks() + MSEC_TO_HRTICK(milseconds);
-        while (target_tick > khrtime_ticks());
+        while (target_tick > khrtime_ticks())
+            mr_nop();
     }
     else
     {
+        /*!< Simply delay. Time will be greater than milseconds if IRQ is triggered during "ticks--" */
         kuint64_t ticks = milseconds * (g_delay_freq_cnt / 1000U);
         while (ticks--)
             mr_nop();
@@ -267,10 +271,12 @@ void udelay(kuint32_t useconds)
     if (HRTIMER_PTR->count)
     {
         khrtime_t target_tick = khrtime_ticks() + USEC_TO_HRTICK(useconds);
-        while (target_tick > khrtime_ticks());
+        while (target_tick > khrtime_ticks())
+            mr_nop();
     }
     else
     {
+        /*!< Simply delay. Time will be greater than milseconds if IRQ is triggered during "ticks--" */
         kuint64_t ticks = useconds * (g_delay_freq_cnt / 1000000U);
         while (ticks--)
             mr_nop();
@@ -697,9 +703,12 @@ void do_hrtime_event(void)
     else
         khrtime_reload_cnt(sptr_next->expires);
 
+#if CONFIG_HRTIMER_SOFTIRQ
     /*!< Schedule softirq */
     fwk_raise_softirq(NR_SOFTIRQ_TIMER);
-//  do_hrtimer_action(NR_SOFTIRQ_TIMER);
+#else
+    do_hrtimer_action(NR_SOFTIRQ_TIMER);
+#endif
 }
 #undef  HRTIMER_SELECT
 

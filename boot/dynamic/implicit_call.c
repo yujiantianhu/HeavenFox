@@ -55,6 +55,20 @@ const dync_exit_t *dync_exit_sections[] =
 
 /* API functions */
 /*!
+ * @brief   initcall
+ * @param   none
+ * @retval  none
+ * @note    call every function from .init_xxx 
+ */
+void link_func_call(const link_func_t *pfuncStart, const link_func_t *pfuncEnd)
+{
+    const link_func_t *pfunc;
+
+    for (pfunc = pfuncStart; *pfunc && (pfunc < pfuncEnd); pfunc++)
+        (*pfunc)();
+}
+
+/*!
  * @brief   dync_initcall_run_list
  * @param   none
  * @retval  none
@@ -67,7 +81,9 @@ kint32_t dync_initcall_run_list(const kuint32_t section)
     if (section >= NR_DYNC_SEC_END)
         return -ER_NOMEM;
 
-	for (pFunc_init = dync_init_sections[section]; (*pFunc_init) && (pFunc_init < dync_init_sections[section + 1]); pFunc_init++)
+	for (pFunc_init = dync_init_sections[section]; 
+		(*pFunc_init) && (pFunc_init < dync_init_sections[section + 1]); 
+		pFunc_init++)
 	{
 		if (0 > ((*pFunc_init)()))
 			return -ER_ERROR;
@@ -89,7 +105,9 @@ void dync_exitcall_run_list(const kuint32_t section)
     if (section >= NR_DYNC_SEC_END)
         return;
 
-	for (pFunc_exit = dync_exit_sections[section]; (*pFunc_exit) && (pFunc_exit < dync_exit_sections[section + 1]); pFunc_exit++)
+	for (pFunc_exit = dync_exit_sections[section]; 
+		(*pFunc_exit) && (pFunc_exit < dync_exit_sections[section + 1]); 
+		pFunc_exit++)
 	{
 		(*pFunc_exit)();
 	}

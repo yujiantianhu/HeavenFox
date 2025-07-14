@@ -71,17 +71,14 @@ extern kchar_t *kstrnchr(const kchar_t *__s1, kchar_t ch, kint32_t n);
 extern kchar_t *kstrcut(const kchar_t *__s1, kuint32_t index);
 
 /*!< API functions */
-#if 0
+#if CONFIG_NOSTDLIB
 /*!
  * @brief   strlen
  * @param   none
  * @retval  none
  * @note    return string lenth
  */
-static inline kuint32_t strlen(const kchar_t *__s)
-{
-    return kstrlen(__s);
-}
+extern kuint32_t strlen(const kchar_t *__s);
 
 /*!
  * @brief   strcpy
@@ -89,10 +86,7 @@ static inline kuint32_t strlen(const kchar_t *__s)
  * @retval  none
  * @note    copy src to dest
  */
-static inline kchar_t *strcpy(kchar_t *__dest, const kchar_t *__src)
-{
-    return kstrcpy(__dest, __src);
-}
+extern kchar_t *strcpy(kchar_t *__dest, const kchar_t *__src);
 
 /*!
  * @brief   strncpy
@@ -100,10 +94,7 @@ static inline kchar_t *strcpy(kchar_t *__dest, const kchar_t *__src)
  * @retval  none
  * @note    copy src to dest
  */
-static inline kchar_t *strncpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
-{
-    return kstrncpy(__dest, __src, __n);
-}
+extern kchar_t *strncpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n);
 
 /*!
  * @brief   strlcpy
@@ -111,10 +102,7 @@ static inline kchar_t *strncpy(kchar_t *__dest, const kchar_t *__src, kusize_t _
  * @retval  none
  * @note    copy src to dest
  */
-static inline kusize_t strlcpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
-{
-    return kstrlcpy(__dest, __src, __n);
-}
+extern kusize_t strlcpy(kchar_t *__dest, const kchar_t *__src, kusize_t __n);
 
 /*!
  * @brief   strncpyr
@@ -122,10 +110,7 @@ static inline kusize_t strlcpy(kchar_t *__dest, const kchar_t *__src, kusize_t _
  * @retval  none
  * @note    copy src to dest (reverse)
  */
-static inline kchar_t *strncpyr(kchar_t *__dest, const kchar_t *__src, kusize_t __n)
-{
-    return kstrncpyr(__dest, __src, __n);
-}
+extern kchar_t *strncpyr(kchar_t *__dest, const kchar_t *__src, kusize_t __n);
 
 /*!
  * @brief   strcmp
@@ -133,10 +118,7 @@ static inline kchar_t *strncpyr(kchar_t *__dest, const kchar_t *__src, kusize_t 
  * @retval  none
  * @note    compare s1 and s2
  */
-static inline kint32_t strcmp(const kchar_t *__s1, const kchar_t *__s2)
-{
-    return kstrcmp(__s1, __s2);
-}
+extern kint32_t strcmp(const kchar_t *__s1, const kchar_t *__s2);
 
 /*!
  * @brief   strncmp
@@ -144,10 +126,7 @@ static inline kint32_t strcmp(const kchar_t *__s1, const kchar_t *__s2)
  * @retval  none
  * @note    compare s1 and s2
  */
-static inline kint32_t strncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n)
-{
-    return kstrncmp(__s1, __s2, __n);
-}
+extern kint32_t strncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_t __n);
 
 /*!
  * @brief   strchr
@@ -155,10 +134,7 @@ static inline kint32_t strncmp(const kchar_t *__s1, const kchar_t *__s2, kusize_
  * @retval  none
  * @note    locate where the first "ch" appears
  */
-static inline kchar_t *strchr(const kchar_t *__s1, kint32_t ch)
-{
-    return kstrchr(__s1, (kchar_t)ch);
-}
+extern kchar_t *strchr(const kchar_t *__s1, kint32_t ch);
 
 /*!
  * @brief   strnchr
@@ -166,10 +142,8 @@ static inline kchar_t *strchr(const kchar_t *__s1, kint32_t ch)
  * @retval  none
  * @note    locate where the n "ch" appears
  */
-static inline kchar_t *strnchr(const kchar_t *__s1, kchar_t ch, kint32_t n)
-{
-    return kstrnchr(__s1, ch, n);
-}
+extern kchar_t *strnchr(const kchar_t *__s1, kchar_t ch, kint32_t n);
+
 #endif
 
 #ifdef __cplusplus
