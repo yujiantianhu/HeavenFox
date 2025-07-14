@@ -106,8 +106,6 @@ static void kthread_kill_zombie(void)
         thread_destory(sptr_thread->tid);
 }
 
-extern khrtime_t g_interrupt_time;
-
 /*!
  * @brief	kernel thread entry
  * @param  	args: NULL normally
