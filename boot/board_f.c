@@ -72,6 +72,33 @@ kint32_t board_init_malloc_space(void)
     return (retval) ? RET_BOOT_PASS : RET_BOOT_ERR;
 }
 
+/*!
+ * @brief   board_init_console
+ * @param   none
+ * @retval  none
+ * @note    initial console
+ */
+kint32_t board_init_console(void)
+{
+	board_init_serial();
+
+    /*!< Output Board Information */
+    print_info("\r\n");
+
+    for (kint32_t i = 0; i < 80; i++)
+    {
+        print_info(">");
+        mdelay(5U);
+    }
+
+    print_info("\r\n");
+    print_info("Console Initial Finished ...\r\n");
+    print_info("Welcome to Use HeavenFox OS!\r\n");
+    print_info("\r\n");
+
+    return RET_BOOT_PASS;
+}
+
 /*!< board init queue early */
 board_init_t board_init_sequence_f[] =
 {

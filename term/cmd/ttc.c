@@ -53,8 +53,7 @@ static kint32_t term_cmd_ttc_mail(struct term_cmd *sptr_cmd, kint32_t argc, kcha
 
         case 3:
         case 4:
-            tid = ascii_to_dec(argv[1]);
-            if (tid < 0)
+            if (ascii_to_dec(argv[1], &tid))
             {
                 printk("tid is not correct!\r\n");
                 return -ER_FAULT;

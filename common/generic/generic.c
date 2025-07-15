@@ -172,18 +172,25 @@ kutype_t dec_to_binary(kchar_t *buf, kutype_t number, kint32_t mode)
 /*!
  * @brief   convert string to number
  * @param   str
- * @retval  number
+ * @param   result
+ * @retval  errno
  * @note    such as: "160"/"0xA0"/"0xa0"/"0b10100000" ===> 160
  */
-kint32_t ascii_to_dec(const kchar_t *str)
+kint32_t ascii_to_dec(const kchar_t *str, kint32_t *result)
 {
     kchar_t *p;
-    kint32_t val = 0;
-    kchar_t type = -1;
+    kint32_t val = 0, count = 0, bak;
+    kchar_t type = -1, dir = 0;
 
     p = (kchar_t *)str;
     if (p)
     {
+        if (*p == '-')
+        {
+            p++;
+            dir = 1;
+        }
+
         if ((*(p) == '0') && 
             ((*(p + 1) == 'X') || (*(p + 1) == 'x')))
             type = 16;
@@ -210,13 +217,23 @@ kint32_t ascii_to_dec(const kchar_t *str)
                     goto fail;
 
                 val = (val << 1) + (*p) - '0';
+
+                /*!< Over */
+                if ((count++) >= 32)
+                    goto fail;
                 break;
 
             case 10:
                 if ((*p < '0') || (*p > '9'))
                     goto fail;
 
+                bak = val;
                 val = (val << 1) + (val << 3) + (*p) - '0';
+
+                /*!< Over */
+                if (((count++) >= 10) || (bak > val))
+                    goto fail;
+                
                 break;
 
             case 16:
@@ -228,17 +245,25 @@ kint32_t ascii_to_dec(const kchar_t *str)
                     val = (val << 4) + (*p) - 'A' + 10;
                 else
                     goto fail;
+
+                /*!< Over */
+                if ((count++) >= 8)
+                    goto fail;
+
                 break;
 
             default: goto fail;
         }
     }
 
-    return val;
+    *result = dir ? (-val) : val;
+    return ER_NORMAL;
 
 fail:
+    *result = -1;
     print_err("%s: input argument error!\r\n", __FUNCTION__);
-    return -1;
+    
+    return -ER_INVALID;
 }
 
 /*!

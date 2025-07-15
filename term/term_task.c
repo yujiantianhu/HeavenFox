@@ -218,6 +218,7 @@ static void term_kbd_enter(struct term_kbd_priv *sptr_priv, kuint32_t *offset)
 
         /*!< call function */
         term_cmdline_distribute((const kchar_t *)msg);
+        term_cmd_print_login();
 
         /*!< save current command to history queue */
         if (sptr_term_cmd_queue)
@@ -237,8 +238,12 @@ static void term_kbd_enter(struct term_kbd_priv *sptr_priv, kuint32_t *offset)
             }
         }
     }
+    else
+    {
+        /*!< Show login directely */
+        term_cmd_print_login();
+    }
 
-    term_cmd_print_login();
     *offset = 0;
 }
 
@@ -439,6 +444,7 @@ static const term_cmd_fn_t g_term_cmd_fn[] =
     term_cmd_add_history,
     term_cmd_add_mem,
     term_cmd_add_runtime,
+    term_cmd_add_value,
 
     mr_nullptr,
 };

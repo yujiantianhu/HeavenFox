@@ -206,7 +206,7 @@ extern kuint64_t udiv_remainder(kuint64_t divied, kuint64_t div);
 
 extern kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kint32_t mode);
 extern kutype_t dec_to_binary(kchar_t *buf, kutype_t number, kint32_t mode);
-extern kint32_t ascii_to_dec(const kchar_t *str);
+extern kint32_t ascii_to_dec(const kchar_t *str, kint32_t *result);
 extern kutype_t random_val(void);
 extern kuint16_t parse_valid_u32_bits(kuint32_t number);
 

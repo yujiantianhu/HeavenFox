@@ -31,6 +31,8 @@
 #include <platform/video/fwk_fbmem.h>
 #include <kernel/sleep.h>
 #include <kernel/workqueue.h>
+#include <kernel/wait.h>
+#include <term/term.h>
 
 /*!< The defines */
 /*!< Register */
@@ -99,6 +101,7 @@
 #define SIL9022X_PWR_UP_STAT_MASK                   (0x03)
 #define SIL9022X_PWR_UP_STAT_BITS(x)                (((x) << SIL9022X_PWR_UP_STAT_OFFSET) & SIL9022X_PWR_UP_STAT_MASK)
 #define SIL9022X_PWR_UP_STAT_D0                     SIL9022X_PWR_UP_STAT_BITS(0x00)
+#define SIL9022X_PWR_UP_STAT_D3                     SIL9022X_PWR_UP_STAT_BITS(0x03)
 
 /*!< SIL9022X_INBUS */
 /*!< a) Pixel Repetition Factor (bit[3:0]) */
@@ -241,7 +244,12 @@ typedef struct sil9022x_drv_info
     struct workqueue sgtc_wq;
     kbool_t is_connected;
 
+    struct term_variable sgtc_term;
+
 } sil9022x_drv_info_t;
+
+/*!< The globals */
+static kint32_t g_sil902x_enable = 0;
 
 /*!< API function */
 /*!
@@ -271,7 +279,7 @@ kint32_t sil9022x_write_data(struct fwk_i2c_client *sptr_client, kuint8_t reg, k
     kint32_t value;
 
     do {
-        mdelay(1);
+        msleep(2);
         value = fwk_i2c_write_byte_data(sptr_client, reg, data);
         
     } while (value < 0);
@@ -315,7 +323,7 @@ static void sil9022x_detect_work(struct workqueue *sptr_wq)
     /*!< HDMI plug in */
     if (!sptr_drv->is_connected && (value & SIL9022X_INTR_HP_STATE))
     {
-        /*!< Power on: set TPI system control (DVI, not HDMI) */
+        /*!< Set TPI system control (DVI, not HDMI) */
         sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_SYSTEM, 
                         SIL9022X_SYSTEM_OUTDVI | SIL9022X_SYSTEM_TMS_ACTIVE | SIL9022X_SYSTEM_AVMUTE_NORMAL);
 
@@ -325,11 +333,11 @@ static void sil9022x_detect_work(struct workqueue *sptr_wq)
     /*!< HDMI plug out */
     else if (sptr_drv->is_connected)
     {
-        /*!< Power off */
+        /*!< Disable TMDS */
         sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_SYSTEM, 
                         SIL9022X_SYSTEM_OUTDVI | SIL9022X_SYSTEM_TMS_POWER | SIL9022X_SYSTEM_AVMUTE_NORMAL);
-        sptr_drv->is_connected = false;
 
+        sptr_drv->is_connected = false;
         print_info("HDMI device plug out\r\n");
     }
 
@@ -356,7 +364,7 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
     fwk_gpio_set_value(sptr_drv->sptr_rstgpio, 0);
     msleep(100);
     fwk_gpio_set_value(sptr_drv->sptr_rstgpio, 1);
-    msleep(200);
+    msleep(500);
 
     /*!< Try to connect TMDS (test slave address for the first time) */
     retval = sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_TMDS, SIL9022X_TMDS_TPIEN);
@@ -390,7 +398,7 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
         return -ER_NODEV;
     }
 
-    /*!< Power up */
+    /*!< Power up (sleep） */
     reg = (kuint8_t)sil9022x_read_data(sptr_drv->sptr_client, SIL9022X_POWER_UP);
     reg = (reg & (~SIL9022X_PWR_UP_STAT_MASK)) | SIL9022X_PWR_UP_STAT_D0;
     retval = sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_POWER_UP, reg);
@@ -461,6 +469,7 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
     /*!< Interrupt Enable */
     if (sptr_drv->irq >= 0)
     {
+//      sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_INTR_STATUS, 0xffU);
         sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_INTR_EN, SIL9022X_INTR_HP_CONN);
         fwk_enable_irq(sptr_drv->irq);
     }
@@ -480,6 +489,9 @@ kint32_t sil9022x_hdmi_action(struct fwk_notifier_block *sptr_nb, kuint32_t even
 {
     struct sil9022x_drv_info *sptr_drv;
     struct fwk_fb_notifier_param *sptr_param;
+
+    while (g_sil902x_enable == 0)
+        sleep(1);
 
     sptr_drv = (struct sil9022x_drv_info *)sptr_nb->data;
     sptr_param = (struct fwk_fb_notifier_param *)args;
@@ -569,6 +581,12 @@ static kint32_t sil9022x_driver_probe(struct fwk_i2c_client *sptr_client, const 
     sptr_drv->sgtc_nb.expect_event = FB_NOTIFIER_HDMI_OPEN | FB_NOTIFIER_HDMI_CLOSE;
     init_list_head(&sptr_drv->sgtc_nb.sgtc_link);
     fwk_blocking_notifier_chain_register(&sgtc_fbmem_notifier_chain, &sptr_drv->sgtc_nb);
+
+    /*!< Add terminal manage */
+    sprintk(sptr_drv->sgtc_term.name, "g_sil902x_enable");
+    sptr_drv->sgtc_term.var = &g_sil902x_enable;
+    init_list_head(&sptr_drv->sgtc_term.sgtc_link);
+    term_variable_add(&sptr_drv->sgtc_term);
 
 	return ER_NORMAL;
 

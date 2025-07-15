@@ -16,20 +16,14 @@
 
 /*!< API function */
 /*!
- * @brief   board_init_console
+ * @brief   board_init_serial
  * @param   none
  * @retval  none
- * @note    initial console
+ * @note    initial serial
  */
-kint32_t board_init_console(void)
+kint32_t board_init_serial(void)
 {
 	zynq7_console_init();
-
-    /*!< Output Board Information */
-    print_info("\r\n");
-    print_info("Console Initial Finished ...\r\n");
-    print_info("Welcome to Use HeavenFox OS!\r\n");
-    print_info("\r\n");
 
     return RET_BOOT_PASS;
 }

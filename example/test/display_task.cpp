@@ -490,7 +490,7 @@ kint32_t crt_disp_text_t::show(crt_disp_task_t &cgtc_dtsk)
     struct mailbox &sgtc_mb = cgtc_dtsk.cptr_task->self_mailbox();
     struct mail *sptr_mail;
     enum disp_text_op nr_op = NR_DISP_TEXT_NONE;
-    kuint8_t text_index = 0;
+    kuint32_t text_index = 0;
     kssize_t retval = 0;
 
     if (!this->text_pages)
@@ -512,7 +512,7 @@ kint32_t crt_disp_text_t::show(crt_disp_task_t &cgtc_dtsk)
             if (sptr_mail->num_msgs > 1)
             {
                 kchar_t *item = (kchar_t *)sptr_mail->sptr_msg[1].buffer;
-                text_index = ascii_to_dec(item);
+                ascii_to_dec(item, (kint32_t *)&text_index);
             }
 
             nr_op = NR_DISP_TEXT_OPEN;
@@ -638,7 +638,7 @@ kint32_t display_task_init(void)
                                             g_display_task_stack, 
                                             sizeof(g_display_task_stack),
                                             THREAD_PROTY_DEFAULT,
-                                            80);
+                                            40);
     if (!cptr_task)
         return -ER_FAILD;
 

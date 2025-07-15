@@ -42,15 +42,13 @@ static kint32_t term_cmd_kill_signal(struct term_cmd *sptr_cmd, kint32_t argc, k
             if (*(argv[1]) != '-')
                 goto fail;
 
-            signal = ascii_to_dec(argv[1] + 1);
-            if (signal < 0)
+            if (ascii_to_dec(argv[1] + 1, &signal))
                 goto fail;
 
             switch (signal)
             {
                 case SIGKILL:
-                    tid = ascii_to_dec(argv[2]);
-                    if (tid < 0)
+                    if (ascii_to_dec(argv[2], &tid))
                         goto fail;
 
                     if (!schedule_thread_sleep(tid))
@@ -58,8 +56,7 @@ static kint32_t term_cmd_kill_signal(struct term_cmd *sptr_cmd, kint32_t argc, k
                     break;
 
                 case SIGWAKE:
-                    tid = ascii_to_dec(argv[2]);
-                    if (tid < 0)
+                    if (ascii_to_dec(argv[2], &tid))
                         goto fail;
 
                     if (!schedule_thread_wakeup(tid))

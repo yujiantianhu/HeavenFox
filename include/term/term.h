@@ -30,6 +30,7 @@
 
 typedef void (*term_cmd_fn_t)(void);
 
+/*!< Command structure */
 struct term_cmd
 {
     kchar_t name[32];
@@ -40,12 +41,22 @@ struct term_cmd
     struct list_head sgtc_link;
 };
 
+/*!< History command */
 struct term_cmd_his
 {
     kuint32_t length;
     struct pq_data sgtc_pqd;
 
     void *cmd;
+};
+
+/*!< Global variable r/w by terminal */
+struct term_variable
+{
+    kchar_t name[32];
+
+    kint32_t *var;
+    struct list_head sgtc_link;
 };
 
 /*!< Pause key event (Ctrl + C) */
@@ -61,6 +72,12 @@ extern void term_cmd_free(struct term_cmd *sptr_cmd);
 extern struct term_cmd *term_cmd_find_by_name(kchar_t *name);
 extern kint32_t term_cmd_add(struct term_cmd *sptr_cmd);
 extern void term_cmd_del(struct term_cmd *sptr_cmd);
+
+extern struct term_variable *term_variable_find_by_name(kchar_t *name);
+extern kint32_t term_variable_add(struct term_variable *sptr_var);
+extern void term_variable_del(struct term_variable *sptr_var);
+extern kint32_t term_variable_read(kchar_t *name);
+extern kint32_t term_variable_write(kchar_t *name, kint32_t value);
 
 extern kchar_t *term_cmdline_get(void);
 extern struct pq_queue *term_cmd_queue_get(void);
@@ -85,6 +102,7 @@ extern void term_cmd_add_kill(void);
 extern void term_cmd_add_history(void);
 extern void term_cmd_add_mem(void);
 extern void term_cmd_add_runtime(void);
+extern void term_cmd_add_value(void);
 
 #ifdef __cplusplus
     }

@@ -17,5 +17,6 @@ obj-y	+= kill.o
 obj-y	+= history.o
 obj-y	+= mem.o
 obj-y	+= runtime.o
+obj-y	+= value.o
 
 # end of file

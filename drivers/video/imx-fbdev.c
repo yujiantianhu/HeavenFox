@@ -750,7 +750,6 @@ static kint32_t imx_fbdev_driver_probe(struct fwk_platdev *sptr_pdev)
         goto fail7;
 
     imx_fbdev_init(base, sptr_drv);
-
     return ER_NORMAL;
 
 fail7:

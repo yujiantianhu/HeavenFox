@@ -66,7 +66,7 @@ extern kuaddr_t board_init_f_alloc_reserve(kuaddr_t base);
 extern void board_init_f_init_reserve(kuaddr_t base);
 
 /*!< initialized by being called by "board_init_f/r" */
-extern kint32_t board_init_console(void);
+extern kint32_t board_init_serial(void);
 extern kint32_t board_init_light(void);
 extern kint32_t board_init_sdmmc(void);
 extern kint32_t board_init_systick(void);

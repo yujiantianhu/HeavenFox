@@ -22,7 +22,10 @@ static kchar_t g_term_cmdline_argv[TERM_MSG_RECV_LEN];
 
 /*!< top command: help */
 static DECLARE_LIST_HEAD(sgtc_term_cmd_lists);
- 
+
+/*!< globals terminal variable management */
+static DECLARE_LIST_HEAD(sgtc_term_var_manage);
+
 /*!< The functions */
 /*!
  * @brief   find command by name
@@ -228,3 +231,95 @@ void term_cmd_add_help(void)
 
     term_cmd_add(sptr_cmd);
 }
+
+/*!< ------------------------------------------------------------------------------ */
+/*!
+ * @brief   find command by name
+ * @param   name
+ * @retval  term_variable
+ * @note    none
+ */
+struct term_variable *term_variable_find_by_name(kchar_t *name)
+{
+    struct term_variable *sptr_var;
+
+    if (!name || !(*name))
+        goto fail;
+
+    foreach_list_next_entry(sptr_var, &sgtc_term_var_manage, sgtc_link)
+    {
+        if (!kstrcmp(sptr_var->name, name))
+            return sptr_var;
+    }
+
+fail:
+    return mr_nullptr;
+}
+
+/*!
+ * @brief   add variable member
+ * @param   sptr_var
+ * @retval  errno
+ * @note    none
+ */
+kint32_t term_variable_add(struct term_variable *sptr_var)
+{
+    if ((!sptr_var->var) ||
+        (*sptr_var->name == '\0') ||
+        (kstrchr(sptr_var->name, ' ')))
+        return -ER_INVALID;
+
+    if (term_variable_find_by_name(sptr_var->name))
+        return -ER_EXISTED;
+
+    list_head_add_tail(&sgtc_term_var_manage, &sptr_var->sgtc_link);
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   del variable member
+ * @param   sptr_var
+ * @retval  none
+ * @note    none
+ */
+void term_variable_del(struct term_variable *sptr_var)
+{
+    list_head_del(&sptr_var->sgtc_link);
+}
+
+/*!
+ * @brief   read variable
+ * @param   name
+ * @retval  value
+ * @note    none
+ */
+kint32_t term_variable_read(kchar_t *name)
+{
+    struct term_variable *sptr_var;
+
+    sptr_var = term_variable_find_by_name(name);
+    if (!sptr_var || !sptr_var->var)
+        return 0;
+
+    return *sptr_var->var;
+}
+
+/*!
+ * @brief   write variable
+ * @param   name and value
+ * @retval  errno
+ * @note    none
+ */
+kint32_t term_variable_write(kchar_t *name, kint32_t value)
+{
+    struct term_variable *sptr_var;
+
+    sptr_var = term_variable_find_by_name(name);
+    if (!sptr_var || !sptr_var->var)
+        return -ER_FAILD;
+
+    *sptr_var->var = value;
+    return ER_NORMAL;
+}
+
+/* end of file */

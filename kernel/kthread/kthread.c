@@ -157,8 +157,7 @@ static void *kthread_entry(void *args)
 
     /*!< build application */
     init_proc_init();                       /*!< create init task */
-
-    print_info("%s: %d\r\n", __func__, __LINE__);
+    print_info("kernel thread initial finished\r\n");
 
     for (;;)
     {
@@ -169,7 +168,7 @@ static void *kthread_entry(void *args)
         io_stream_logs_print(g_kthread_log_buffer, sizeof(g_kthread_log_buffer));
 
         /*!< Sleep for a while */
-        msleep(203);
+        msleep(103);
     }
 
     return args;
