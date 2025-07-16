@@ -330,7 +330,7 @@ static void term_kbd_dir_down(struct term_kbd_priv *sptr_priv, kuint32_t *offset
     if (!sptr_term_cmd_queue)
         return;
 
-    sptr_pqd = pq_lookfront(sptr_term_cmd_queue, &g_term_cmd_queue_cur);
+    sptr_pqd = pq_lookfront_next(sptr_term_cmd_queue, &g_term_cmd_queue_cur);
     if (!sptr_pqd)
         return;
 

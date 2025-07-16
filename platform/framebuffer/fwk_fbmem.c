@@ -133,6 +133,8 @@ kint32_t fwk_register_framebuffer(struct fwk_fb_info *sptr_fb_info)
     sptr_exsited[i] = sptr_fb_info;
 
     mutex_unlock(&sgtc_fwk_fbmem_mutex);
+
+    print_info("register a new framebuffer driver (fb%d)\r\n", i);
     return ER_NORMAL;
 }
 
@@ -183,6 +185,35 @@ struct fwk_fb_info *fwk_file_fb_info(struct fwk_file *sptr_file)
     fbidx		= RET_INODE_MINOR(sptr_inode);
 
     return sgtc_fwk_registered_fb[fbidx];
+}
+
+/*!
+ * @brief   read framebuffer info to video-mode
+ * @param   sptr_vmode
+ * @param   sptr_info
+ * @retval  none
+ * @note    none
+ */
+void fwk_fb_to_vmode(struct fwk_fb_vmode *sptr_vmode, struct fwk_fb_info *sptr_info)
+{
+    struct fwk_fb_var_screen_info *sptr_var = &sptr_info->sgtc_var;
+
+    sptr_vmode->pixclock = sptr_var->pixclock;
+    sptr_vmode->xres = sptr_var->xres;
+    sptr_vmode->yres = sptr_var->yres;
+
+    sptr_vmode->left_margin = sptr_var->left_margin;
+    sptr_vmode->hsync_len = sptr_var->hsync_len;
+    sptr_vmode->right_margin = sptr_var->right_margin;
+    sptr_vmode->upper_margin = sptr_var->upper_margin;
+    sptr_vmode->vsync_len = sptr_var->vsync_len;
+    sptr_vmode->lower_margin = sptr_var->lower_margin;
+
+    sptr_vmode->line_pixels = sptr_var->hsync_len + sptr_var->left_margin + sptr_var->right_margin + sptr_var->xres;
+    sptr_vmode->lines = sptr_var->vsync_len + sptr_var->upper_margin + sptr_var->lower_margin + sptr_var->yres;
+
+    /*!< For 720p@60Hz, refresh = 60 */
+    sptr_vmode->refresh = ((FB_PICOS_2_KHZ(sptr_var->pixclock) * 1000) / (sptr_vmode->line_pixels * sptr_vmode->lines));
 }
 
 /*!< ------------------------------------------------------------------------- */

@@ -45,21 +45,17 @@ static void kthread_schedule_timeout(kuint32_t args)
     kuint32_t work_prio, next_prio;
 
     sptr_work = mr_current;
+
+    /*!< mr_preempt_cnt() += 1 */
     spin_lock(&sptr_work->sgtc_lock);
     
     /*!< --------------------------------------------------------- */
+    /*!< reduce time-slice */
+    if (sptr_work->expires)
+        sptr_work->expires--;
+
     /*!< if not in thread context or preempt is disable */
-    if (!sptr_work->expires)
-    {
-        sptr_work->expires = 1;
-        mr_barrier();
-    }
-
-    /*!< reduce time slice */
-    sptr_work->expires--;
-
-    /*!< not allow preempt */
-    if (mr_preempt_is_locked())
+    if (mr_preempt_cnt() > 1)
         goto END;
     
     /*!< --------------------------------------------------------- */

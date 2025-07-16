@@ -38,7 +38,7 @@ struct scheduler_table sgtc_scheduler_table =
 static struct scheduler_context sgtc_context;
 static kuint32_t thread_schedule_ref = 0;
 
-kuint32_t g_sched_preempt_cnt = 0;
+struct atomic sgtc_sched_preempt_cnt = ATOMIC_INIT();
 
 /*!< The defines */
 #define SCHED_MANAGER()                         (&sgtc_scheduler_table)

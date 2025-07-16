@@ -602,13 +602,18 @@ static void *display_task_entry(void *args)
     cgtc_windows.set_src(g_display_windows);
     cgtc_txt.set_src(g_display_text_path);
 
-    mr_preempt_disable();
+    print_info("Prepare screen logo ......\r\n");
+
+//  mr_preempt_disable();
     cgtc_logo.show(cgtc_dtsk);
-    mr_preempt_enable();
+//  mr_preempt_enable();
     sleep(1);
 
+    print_info("Prepare screen home windows ......\r\n");
     cgtc_windows.show(cgtc_dtsk);
     sleep(1);
+
+    print_info("Display over, now you can operate screen freely\r\n");
 
     for (;;)
     {

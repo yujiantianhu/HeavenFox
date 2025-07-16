@@ -1,0 +1,27 @@
+#
+# Makefile
+#
+# File Name:   Makefile
+# Author:      Yang Yujun
+# E-mail:      <yujiantianhu@163.com>
+# Created on:  2024.04.12
+#
+# Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
+#
+
+ifeq ($(CONFIG_INSTRUCTION),thumb)
+ifeq ($(CONFIG_VFP),y)
+LIBS_PATH	+=  -L $(COMPILER_LIBC)/usr/lib/thumb/v7-a/fpv3/hard
+else
+LIBS_PATH	+=  -L $(COMPILER_LIBC)/usr/lib/thumb/v7-a/fpv3/softfp
+endif
+
+else
+ifeq ($(CONFIG_VFP),y)
+LIBS_PATH	+=  -L $(COMPILER_LIBC)/usr/lib/v7-a/fpv3/hard
+else
+LIBS_PATH	+=  -L $(COMPILER_LIBC)/usr/lib/v7-a/fpv3/softfp
+endif
+endif
+
+# end of file

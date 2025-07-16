@@ -47,11 +47,7 @@ LIBS_PATH	:=	-L $(COMPILER_LIBC)/lib
 LIBS		:=	--static -Wl,--start-group
 
 ifeq ($(COMPILER),arm-none-eabi-)
-ifeq ($(CONFIG_INSTRUCTION),thumb)
-LIBS_PATH	+=  -L $(COMPILER_LIBC)/usr/lib/thumb/v7-a/fpv3/hard
-else
-LIBS_PATH	+=  -L $(COMPILER_LIBC)/usr/lib/v7-a/fpv3/hard
-endif
+include cpu/$(TYPE)/Makefile.include
 else
 LIBS_PATH	+=  -L $(COMPILER_LIBC)/usr/lib
 endif

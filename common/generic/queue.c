@@ -160,6 +160,7 @@ void *pq_lookback(struct pq_queue *sptr_pq, kint32_t *base)
     if (!sptr_pq->len)
         return mr_nullptr;
 
+    /*!< First enter */
     if (*base < 0)
         cur_index = (sptr_pq->head + sptr_pq->tot_len - 1) % sptr_pq->tot_len;
     else
@@ -201,13 +202,9 @@ void *pq_lookfront(struct pq_queue *sptr_pq, kint32_t *base)
         return mr_nullptr;
 
     if (*base < 0)
+        cur_index = sptr_pq->tail % sptr_pq->tot_len;
+    else
     {
-//      cur_index = sptr_pq->tail % sptr_pq->tot_len;
-        return mr_nullptr;
-    }
-
-//  else
-//  {
         cur_index = ((*base) + 1) % sptr_pq->tot_len;
 
         if (sptr_pq->head < sptr_pq->tail)
@@ -222,13 +219,27 @@ void *pq_lookfront(struct pq_queue *sptr_pq, kint32_t *base)
                 (cur_index >= sptr_pq->head))
                 goto fail;
         }
-//  }
+    }
 
     *base = cur_index;
     return sptr_pq->sptr_data[cur_index];
 
 fail:
     return mr_nullptr;
+}
+
+/*!
+ * @brief   just read member in queue
+ * @param   sptr_pq
+ * @retval  member
+ * @note    none
+ */
+void *pq_lookfront_next(struct pq_queue *sptr_pq, kint32_t *base)
+{
+    if (!sptr_pq->len || (*base < 0))
+        return mr_nullptr;
+
+    return pq_lookfront(sptr_pq, base);
 }
 
 /*!

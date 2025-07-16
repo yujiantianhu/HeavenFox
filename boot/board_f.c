@@ -88,7 +88,7 @@ kint32_t board_init_console(void)
     for (kint32_t i = 0; i < 80; i++)
     {
         print_info(">");
-        mdelay(5U);
+        mdelay(1U);
     }
 
     print_info("\r\n");

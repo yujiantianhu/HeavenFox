@@ -245,6 +245,7 @@ typedef struct sil9022x_drv_info
     kbool_t is_connected;
 
     struct term_variable sgtc_term;
+    struct fwk_fb_vmode sgtc_mode;
 
 } sil9022x_drv_info_t;
 
@@ -353,10 +354,10 @@ static void sil9022x_detect_work(struct workqueue *sptr_wq)
  */
 static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_notifier_param *sptr_param)
 {
-    struct fwk_fb_var_screen_info *sptr_var;
-    kint32_t loop_cnt = 10, value[4];
+    struct fwk_fb_vmode *sptr_vmode = &sptr_drv->sgtc_mode;
     kuint16_t pixel_hz_10KHz, line_pixels, lines;
     kuint32_t refresh;
+    kint32_t loop_cnt = 10, value[4];
     kuint8_t reg;
     kint32_t retval;
 
@@ -398,7 +399,7 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
         return -ER_NODEV;
     }
 
-    /*!< Power up (sleep） */
+    /*!< Power up */
     reg = (kuint8_t)sil9022x_read_data(sptr_drv->sptr_client, SIL9022X_POWER_UP);
     reg = (reg & (~SIL9022X_PWR_UP_STAT_MASK)) | SIL9022X_PWR_UP_STAT_D0;
     retval = sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_POWER_UP, reg);
@@ -425,15 +426,15 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
     reg |= SIL9022X_RW_EN_SRC_TERMIN;
     sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_RW_ACCESS, reg);
 
-    /*!< TPI video mode */
-    sptr_var = sptr_param->sptr_var;
+    /*!< Get video mode */
+    fwk_fb_to_vmode(sptr_vmode, sptr_param->sptr_info);
 
     /*!< sptr_var->pixclock: picoseconds */
-    pixel_hz_10KHz = FB_PICOS_2_KHZ(sptr_var->pixclock) / 10;
-    line_pixels = sptr_var->hsync_len + sptr_var->left_margin + sptr_var->right_margin + sptr_var->xres;
-    lines = sptr_var->vsync_len + sptr_var->upper_margin + sptr_var->lower_margin + sptr_var->yres;
+    pixel_hz_10KHz = FB_PICOS_2_KHZ(sptr_vmode->pixclock) / 10;
+    line_pixels = sptr_vmode->line_pixels;
+    lines = sptr_vmode->lines;
     /*!< For 720p@60Hz, refresh = 60 * 100 = 6000 */
-    refresh = ((FB_PICOS_2_KHZ(sptr_var->pixclock) * 1000) / (line_pixels * lines)) * 100;
+    refresh = sptr_vmode->refresh * 100;
 
     retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_PIXELCLOCK_LSB, (kuint8_t)pixel_hz_10KHz);
     retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_PIXELCLOCK_MSB, (kuint8_t)(pixel_hz_10KHz >> 8));
@@ -482,7 +483,7 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
 /*!
  * @brief   notifier callback
  * @param   sptr_nb
- * @retval  errno
+ * @retval  0: non-finish; event: succuss
  * @note    none
  */
 kint32_t sil9022x_hdmi_action(struct fwk_notifier_block *sptr_nb, kuint32_t event, void *args)
@@ -508,7 +509,7 @@ kint32_t sil9022x_hdmi_action(struct fwk_notifier_block *sptr_nb, kuint32_t even
         default: break;
     }
 
-    return ER_NORMAL;
+    return 0;
 }
 
 /*!

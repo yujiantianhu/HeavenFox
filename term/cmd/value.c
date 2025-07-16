@@ -78,6 +78,14 @@ static kint32_t term_cmd_value(struct term_cmd *sptr_cmd, kint32_t argc, kchar_t
         case 2:
             if (!kstrcmp(argv[1], "--help"))
                 sptr_cmd->help();
+            else if (!kstrcmp(argv[1], "--list"))
+            {
+                kint32_t count = 0;
+
+                sptr_var = mr_nullptr;
+                while ((sptr_var = term_variable_next(sptr_var)))
+                    printk("%d. %s\r\n", ++count, sptr_var->name);
+            }
             else
                 goto fail;
 

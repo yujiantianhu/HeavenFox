@@ -234,7 +234,7 @@ void term_cmd_add_help(void)
 
 /*!< ------------------------------------------------------------------------------ */
 /*!
- * @brief   find command by name
+ * @brief   find variable by name
  * @param   name
  * @retval  term_variable
  * @note    none
@@ -253,6 +253,26 @@ struct term_variable *term_variable_find_by_name(kchar_t *name)
     }
 
 fail:
+    return mr_nullptr;
+}
+
+/*!
+ * @brief   get next variable
+ * @param   sptr_var
+ * @retval  term_variable
+ * @note    none
+ */
+struct term_variable *term_variable_next(struct term_variable *sptr_var)
+{
+    struct term_variable *sptr_next;
+
+    if (!sptr_var)
+        return mr_list_first_valid_entry(&sgtc_term_var_manage, struct term_variable, sgtc_link);
+
+    sptr_next = mr_list_next_entry(sptr_var, sgtc_link);
+    if (&sptr_next->sgtc_link != &sgtc_term_var_manage)
+        return sptr_next;
+
     return mr_nullptr;
 }
 

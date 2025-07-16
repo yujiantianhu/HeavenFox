@@ -74,6 +74,7 @@ extern kint32_t term_cmd_add(struct term_cmd *sptr_cmd);
 extern void term_cmd_del(struct term_cmd *sptr_cmd);
 
 extern struct term_variable *term_variable_find_by_name(kchar_t *name);
+extern struct term_variable *term_variable_next(struct term_variable *sptr_var);
 extern kint32_t term_variable_add(struct term_variable *sptr_var);
 extern void term_variable_del(struct term_variable *sptr_var);
 extern kint32_t term_variable_read(kchar_t *name);

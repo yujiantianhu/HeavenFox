@@ -43,7 +43,7 @@ static kint32_t term_cmd_show_history(struct term_cmd *sptr_cmd, kint32_t argc, 
         case 1:
             count = 0;
 
-            while ((sptr_pqd = pq_lookback(sptr_pq, &queue_cur)))
+            while ((sptr_pqd = pq_lookfront(sptr_pq, &queue_cur)))
             {
                 sptr_his = mr_container_of(sptr_pqd, struct term_cmd_his, sgtc_pqd);
 

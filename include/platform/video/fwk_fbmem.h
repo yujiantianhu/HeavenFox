@@ -144,8 +144,7 @@ struct fwk_fb_oprts
 
 struct fwk_fb_notifier_param
 {
-    struct fwk_fb_fix_screen_info *sptr_fix;			/*!< fix parameters */
-    struct fwk_fb_var_screen_info *sptr_var;			/*!< variadics */
+    struct fwk_fb_info *sptr_info;
     kuint32_t bus_width;
 };
 
@@ -165,7 +164,8 @@ struct fwk_fb_vmode
     kuint32_t lower_margin;
     kuint32_t hsync_len;
     kuint32_t vsync_len;
-    kuint32_t sync;
+    kuint32_t line_pixels;
+    kuint32_t lines;
 };
 
 /*!< The globals */
@@ -183,6 +183,8 @@ extern kint32_t fwk_register_framebuffer(struct fwk_fb_info *sptr_fb_info);
 extern void fwk_unregister_framebuffer(struct fwk_fb_info *sptr_fb_info);
 extern struct fwk_fb_info *fwk_get_fb_info(kuint32_t idx);
 extern struct fwk_fb_info *fwk_file_fb_info(struct fwk_file *sptr_file);
+
+extern void fwk_fb_to_vmode(struct fwk_fb_vmode *sptr_vmode, struct fwk_fb_info *sptr_info);
 
 /*!< API functions */
 /*!

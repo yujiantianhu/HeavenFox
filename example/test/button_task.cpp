@@ -64,7 +64,9 @@ static void *button_task_entry(void *args)
         retval = virt_read(fd, &status, 1);
         if ((retval < 0) || (status == last_status))
             goto END;
-        
+
+        print_info("Button status toggle, status = %d\r\n", status);
+                
         if (sptr_mail)
             mail_destroy(&sgtc_mb, sptr_mail);
 

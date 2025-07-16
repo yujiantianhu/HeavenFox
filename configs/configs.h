@@ -55,7 +55,7 @@
 #define CONFIG_WALL_PAPER                       "/media/FAT32_2/boot/windows/windows.bmp"
 
 /*!< armv7 */
-#if defined(CONFIG_ARCH_ARMV7)
+#if (defined(CONFIG_ARCH_ARMV7) && (CONFIG_ARCH_ARMV7))
     #include <asm/armv7/arch_common.h>
 #endif
 

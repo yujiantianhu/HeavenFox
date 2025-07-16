@@ -17,6 +17,8 @@ CONFIG_CPU = "xc7z010"
 CONFIG_COMPILER = "arm-none-eabi-"
 
 CONFIG_ARCH_ARMV7 = y
+CONFIG_ARCH_ARMV8 = n
+
 CONFIG_LITTILE_ENDIAN = y
 
 # float with hardware
@@ -25,7 +27,7 @@ CONFIG_VFP = y
 CONFIG_INSTRUCTION = arm
 
 # debug or release
-CONFIG_BUILD_TYPE = release
+CONFIG_BUILD_TYPE = debug
 
 # -O0, -O1, -O2
 CONFIG_OPTIMIZE = 2

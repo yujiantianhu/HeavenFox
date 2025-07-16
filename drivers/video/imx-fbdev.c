@@ -297,8 +297,7 @@ static kint32_t imx_fbdev_wake_interface(struct imx_fbdev_drv *sptr_drv)
             if (!isValid(sptr_param))
                 return -ER_NOMEM;
 
-            sptr_param->sptr_fix = &sptr_drv->sptr_fb->sgtc_fix;
-            sptr_param->sptr_var = &sptr_drv->sptr_fb->sgtc_var;
+            sptr_param->sptr_info = sptr_drv->sptr_fb;
             sptr_param->bus_width = sptr_drv->sgtc_phase.bus_width;
 
             dev_cnt = fwk_blocking_notifier_call_chain(
@@ -374,25 +373,25 @@ static kint32_t imx_fbdev_open(struct fwk_fb_info *sptr_info, kint32_t user)
 {
     struct imx_fbdev_drv *sptr_drv;
     srt_imx_lcdif_t *sptr_lcdif;
-    kint32_t retval;
+    kint32_t count = 0, retval;
 
     sptr_drv = fwk_fb_get_drvdata(sptr_info);
     sptr_lcdif = (srt_imx_lcdif_t *)sptr_drv->base;
-
-    /*!< Enable interface */
-    retval = imx_fbdev_wake_interface(sptr_drv);
-    if (retval < 0)
-        return retval;
-    else if (retval == 0)
-        wait_event_interruptible_timeout(&sptr_drv->sgtc_wqh, 
-                            imx_fbdev_wait_interface(sptr_drv), msecs_to_jiffies(100));
 
     /*!< Enable LCD */
     mr_writel(mr_bit(17) | mr_bit(0), &sptr_lcdif->CTRL_SET);
     print_info("fbdev is opened\r\n");
 
     memset_ex(sptr_info->screen_base, RGB_WHITE, sptr_info->screen_size);
-    print_info("clear full screen with black color\r\n");
+//  print_info("clear full screen with black color\r\n");
+
+    /*!< Enable interface */
+    retval = imx_fbdev_wake_interface(sptr_drv);
+    if (retval == 0)
+        wait_event_interruptible_timeout(&sptr_drv->sgtc_wqh, 
+                            imx_fbdev_wait_interface(sptr_drv) || ((count++) > 20U), msecs_to_jiffies(100));
+    else if (retval < 0)
+        print_err("No interface to driver framebuffer, but fbdev still be running\r\n");
 
     return ER_NORMAL;
 }

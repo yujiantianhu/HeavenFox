@@ -68,16 +68,17 @@ enum __ERT_THREAD_SIGNALS
 };
 
 /*!< The globals */
-extern kuint32_t g_sched_preempt_cnt;
+extern struct atomic sgtc_sched_preempt_cnt;
 
-#define mr_preempt_cnt_dec()						COUNT_DEC(g_sched_preempt_cnt)
-#define mr_preempt_cnt_inc()						COUNT_INC(g_sched_preempt_cnt)
-#define mr_preempt_is_locked()						(!!g_sched_preempt_cnt)
+#define mr_preempt_cnt_dec()						atomic_dec(&sgtc_sched_preempt_cnt)
+#define mr_preempt_cnt_inc()						atomic_inc(&sgtc_sched_preempt_cnt)
+#define mr_preempt_cnt()							ATOMIC_READ(&sgtc_sched_preempt_cnt)
+#define mr_preempt_is_locked()						(!!mr_preempt_cnt())
 
 #ifdef CONFIG_PREEMPT_NESTING
 #define mr_preempt_enable()							mr_barrier()
 #define mr_preempt_disable()						mr_barrier()
-#define mr_preempt_is_locked()						(!!g_sched_preempt_cnt)
+#define mr_preempt_is_locked()						ATOMIC_READ(&sgtc_sched_preempt_cnt)
 
 #else
 #define mr_preempt_enable()	\

@@ -75,6 +75,8 @@ static inline void atomic_sub(kint32_t i, srt_atomic_t *sptr_atomic)
 	__asm__ __volatile__ (
 		" 1:	                \n\t"
         "   ldrex %0, [%3]		\n\t"
+		"	cmp %0, #0			\n\t"
+		"	moveq %2, #0		\n\t"
 		"	sub %0, %0, %2		\n\t"
 		"	strex %1, %0, [%3]	\n\t"
 		"	teq %1, #0x0		\n\t"

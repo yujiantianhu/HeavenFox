@@ -15,7 +15,7 @@
 
 #include "autoconf.h"
 
-#if defined(CONFIG_ARCH_ARMV7)
+#if (defined(CONFIG_ARCH_ARMV7) && (CONFIG_ARCH_ARMV7))
 #include <asm/armv7/asm_config.h>
 #endif
 #include <board/board_config.h>
