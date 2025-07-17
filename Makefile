@@ -134,7 +134,7 @@ BUILD_CFLAGS   	:=  -O0 -Wall -nostdlib
 
 ifeq ($(BUILD_TYPE),debug)
 BUILD_CFLAGS	+=	-g3
-MACROS			+=	-DCONFIG_DEBUG_JTAG
+MACROS			+=	-DCONFIG_DEBUG
 endif
 
 ifeq ($(OPTIMIZE_CLASS),1)

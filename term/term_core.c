@@ -277,6 +277,43 @@ struct term_variable *term_variable_next(struct term_variable *sptr_var)
 }
 
 /*!
+ * @brief   allocate variable structure
+ * @param   name
+ * @param   var
+ * @retval  sptr_var
+ * @note    none
+ */
+struct term_variable *term_variable_allocate(const kchar_t *name, kint32_t *var)
+{
+    struct term_variable *sptr_var;
+
+    if (!name || !(*name) || !var)
+        return ERR_PTR(-ER_INVALID);
+
+    sptr_var = kmalloc(sizeof(*sptr_var), GFP_KERNEL);
+    if (!isValid(sptr_var))
+        return ERR_PTR(-ER_NOMEM);
+
+    sprintk(sptr_var->name, "%s", name);
+    sptr_var->var = var;
+
+    init_list_head(&sptr_var->sgtc_link);
+    return sptr_var;
+}
+
+/*!
+ * @brief   destory variable structure
+ * @param   sptr_var
+ * @retval  none
+ * @note    none
+ */
+void term_variable_destory(struct term_variable *sptr_var)
+{
+    if (sptr_var)
+        kfree(sptr_var);
+}
+
+/*!
  * @brief   add variable member
  * @param   sptr_var
  * @retval  errno
@@ -305,6 +342,35 @@ kint32_t term_variable_add(struct term_variable *sptr_var)
 void term_variable_del(struct term_variable *sptr_var)
 {
     list_head_del(&sptr_var->sgtc_link);
+}
+
+/*!
+ * @brief   add more variable member
+ * @param   sptr_var
+ * @retval  errno
+ * @note    none
+ */
+kint32_t term_variable_add_more(struct term_variable **sptr_var, kusize_t num)
+{
+    for (kint32_t i = 0; i < num; i++)
+    {
+        if (term_variable_add(sptr_var[i]))
+            return -(i + 1);
+    }
+
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   del more variable member
+ * @param   sptr_var
+ * @retval  none
+ * @note    none
+ */
+void term_variable_del_more(struct term_variable **sptr_var, kusize_t num)
+{
+    for (kint32_t i = 0; i < num; i++)
+        term_variable_del(sptr_var[i]);
 }
 
 /*!

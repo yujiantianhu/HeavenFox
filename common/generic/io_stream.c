@@ -354,6 +354,9 @@ static kusize_t io_stream_time_spec(kubyte_t *logs_buf, kusize_t logs_size,
         return time_size;
     
     ktime_to_spec(&sgtc_tval);
+    if (sgtc_tval.tv_sec > 99999)
+        sgtc_tval.tv_sec = 99999;
+
     /*!< time_size + 1, include '\0' */
     size = sprintk_limit(time_buf, time_size + 1, "[%05u.%06u] ", sgtc_tval.tv_sec, sgtc_tval.tv_usec);
 

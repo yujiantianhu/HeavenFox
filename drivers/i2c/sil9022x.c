@@ -308,6 +308,60 @@ kint32_t sil9022x_read_data(struct fwk_i2c_client *sptr_client, kuint8_t reg)
 }
 
 /*!
+ * @brief  sil9022a initialize format
+ * @param  sptr_drv
+ * @retval errno
+ * @note   Format (I/O and display mode)
+ */
+static kint32_t __sil9022x_init_format(struct sil9022x_drv_info *sptr_drv)
+{
+    struct fwk_fb_vmode *sptr_vmode = &sptr_drv->sgtc_mode;
+    kuint16_t pixel_hz_10KHz, line_pixels, lines;
+    kuint32_t refresh;
+    kint32_t retval = 0;
+
+    /*!< sptr_var->pixclock: picoseconds */
+    pixel_hz_10KHz = FB_PICOS_2_KHZ(sptr_vmode->pixclock) / 10;
+    line_pixels = sptr_vmode->line_pixels;
+    lines = sptr_vmode->lines;
+    /*!< For 720p@60Hz, refresh = 60 * 100 = 6000 */
+    refresh = sptr_vmode->refresh * 100;
+
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_PIXELCLOCK_LSB, (kuint8_t)pixel_hz_10KHz);
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_PIXELCLOCK_MSB, (kuint8_t)(pixel_hz_10KHz >> 8));
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_VFREQ_LSB, (kuint8_t)refresh);
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_VFREQ_MSB, (kuint8_t)(refresh >> 8));
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_HPIXELS_LSB, (kuint8_t)line_pixels);
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_HPIXELS_MSB, (kuint8_t)(line_pixels >> 8));
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_LINES_LSB, (kuint8_t)lines);
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_LINES_MSB, (kuint8_t)(lines >> 8));
+    if (retval < 0)
+    {
+        print_err("Configure pixel clock and resolution to sil9022a failed!\r\n");
+        return -ER_FAILD;
+    }
+
+    /*!< Configure Input Bus and Pixel Repetition */
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_INBUS, 
+                        SIL9022X_INBUS_PR_NREPLY | SIL9022X_INBUS_TCLK_1 | SIL9022X_INBUS_ES_RISING | SIL9022X_INBUS_SEL_FULL);
+
+    /*!< Input Format: RGB */
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_IN_FMT, 
+                        SIL9022X_IN_FMT_SPACE_RGB | SIL9022X_IN_FMT_VRE_AUTO | SIL9022X_IN_FMT_DEPTH_8BIT);
+
+    /*!< Output Format: RGB */
+    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_OUT_FMT, 
+                        SIL9022X_OUT_FMT_SPACE_RGB | SIL9022X_OUT_FMT_VRC_AUTO | SIL9022X_OUT_FMT_DEPTH_8BIT);
+    if (retval < 0)
+    {
+        print_err("Configure sil9022a input-bus and I/O format failed!\r\n");
+        return -ER_FAILD;
+    }
+
+    return ER_NORMAL;
+}
+
+/*!
  * @brief  sil9022a interrupt bottom handler
  * @param  sptr_wq
  * @retval none
@@ -324,6 +378,15 @@ static void sil9022x_detect_work(struct workqueue *sptr_wq)
     /*!< HDMI plug in */
     if (!sptr_drv->is_connected && (value & SIL9022X_INTR_HP_STATE))
     {
+//      kint32_t retval;
+//
+//      retval = __sil9022x_init_format(sptr_drv);
+//      if (retval)
+//      {
+//          print_err("Initialize sil9022x Input/Output format error\r\n");
+//          return;
+//      }
+
         /*!< Set TPI system control (DVI, not HDMI) */
         sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_SYSTEM, 
                         SIL9022X_SYSTEM_OUTDVI | SIL9022X_SYSTEM_TMS_ACTIVE | SIL9022X_SYSTEM_AVMUTE_NORMAL);
@@ -354,9 +417,6 @@ static void sil9022x_detect_work(struct workqueue *sptr_wq)
  */
 static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_notifier_param *sptr_param)
 {
-    struct fwk_fb_vmode *sptr_vmode = &sptr_drv->sgtc_mode;
-    kuint16_t pixel_hz_10KHz, line_pixels, lines;
-    kuint32_t refresh;
     kint32_t loop_cnt = 10, value[4];
     kuint8_t reg;
     kint32_t retval;
@@ -427,44 +487,14 @@ static kint32_t sil9022x_init(struct sil9022x_drv_info *sptr_drv, struct fwk_fb_
     sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_RW_ACCESS, reg);
 
     /*!< Get video mode */
-    fwk_fb_to_vmode(sptr_vmode, sptr_param->sptr_info);
+    fwk_fb_to_vmode(&sptr_drv->sgtc_mode, sptr_param->sptr_info);
 
-    /*!< sptr_var->pixclock: picoseconds */
-    pixel_hz_10KHz = FB_PICOS_2_KHZ(sptr_vmode->pixclock) / 10;
-    line_pixels = sptr_vmode->line_pixels;
-    lines = sptr_vmode->lines;
-    /*!< For 720p@60Hz, refresh = 60 * 100 = 6000 */
-    refresh = sptr_vmode->refresh * 100;
-
-    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_PIXELCLOCK_LSB, (kuint8_t)pixel_hz_10KHz);
-    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_PIXELCLOCK_MSB, (kuint8_t)(pixel_hz_10KHz >> 8));
-    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_VFREQ_LSB, (kuint8_t)refresh);
-    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_VFREQ_MSB, (kuint8_t)(refresh >> 8));
-    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_HPIXELS_LSB, (kuint8_t)line_pixels);
-    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_HPIXELS_MSB, (kuint8_t)(line_pixels >> 8));
-    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_LINES_LSB, (kuint8_t)lines);
-    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_VM_LINES_MSB, (kuint8_t)(lines >> 8));
-    if (retval < 0)
+    /*!< Initialize mode */
+    retval = __sil9022x_init_format(sptr_drv);
+    if (retval)
     {
-        print_err("Configure pixel clock and resolution to sil9022a failed!\r\n");
-        return -ER_FAILD;
-    }
-
-    /*!< Configure Input Bus and Pixel Repetition */
-    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_INBUS, 
-                        SIL9022X_INBUS_PR_NREPLY | SIL9022X_INBUS_TCLK_1 | SIL9022X_INBUS_ES_RISING | SIL9022X_INBUS_SEL_FULL);
-
-    /*!< Input Format: RGB */
-    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_IN_FMT, 
-                        SIL9022X_IN_FMT_SPACE_RGB | SIL9022X_IN_FMT_VRE_AUTO | SIL9022X_IN_FMT_DEPTH_8BIT);
-
-    /*!< Output Format: RGB */
-    retval |= sil9022x_write_data(sptr_drv->sptr_client, SIL9022X_OUT_FMT, 
-                        SIL9022X_OUT_FMT_SPACE_RGB | SIL9022X_OUT_FMT_VRC_AUTO | SIL9022X_OUT_FMT_DEPTH_8BIT);
-    if (retval < 0)
-    {
-        print_err("Configure sil9022a input-bus and I/O format failed!\r\n");
-        return -ER_FAILD;
+        print_err("Initialize sil9022x Input/Output format error\r\n");
+        return retval;
     }
 
     /*!< Interrupt Enable */

@@ -8,7 +8,7 @@
 #define CONFIG_LITTILE_ENDIAN 1
 #define CONFIG_VFP 1
 #define CONFIG_INSTRUCTION arm
-#define CONFIG_BUILD_TYPE release
+#define CONFIG_BUILD_TYPE debug
 #define CONFIG_OPTIMIZE 2
 #define CONFIG_HZ 1000
 #define CONFIG_CONSOLE_DEVICE "/dev/uart0"

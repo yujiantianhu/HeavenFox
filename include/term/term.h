@@ -75,8 +75,12 @@ extern void term_cmd_del(struct term_cmd *sptr_cmd);
 
 extern struct term_variable *term_variable_find_by_name(kchar_t *name);
 extern struct term_variable *term_variable_next(struct term_variable *sptr_var);
+extern struct term_variable *term_variable_allocate(const kchar_t *name, kint32_t *var);
+extern void term_variable_destory(struct term_variable *sptr_var);
 extern kint32_t term_variable_add(struct term_variable *sptr_var);
 extern void term_variable_del(struct term_variable *sptr_var);
+extern kint32_t term_variable_add_more(struct term_variable **sptr_var, kusize_t num);
+extern void term_variable_del_more(struct term_variable **sptr_var, kusize_t num);
 extern kint32_t term_variable_read(kchar_t *name);
 extern kint32_t term_variable_write(kchar_t *name, kint32_t value);
 

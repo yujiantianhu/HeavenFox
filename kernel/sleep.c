@@ -111,9 +111,12 @@ void khrtime_schedule(khrtime_t tick)
     spin_lock_irqsave(&sptr_cur->sgtc_lock);
     sptr_cur->private_data = (void *)&sgtc_event;
     __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
+    mr_preempt_disable();
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
 
     mod_hrtimer(sptr_tm, khrtime_ticks() + tick);
+    mr_preempt_enable();
+    
     if (mr_likely(__GET_THREAD_TARGET_STATE(sptr_cur) == NR_THREAD_SUSPEND))
         schedule_thread();
 
@@ -147,10 +150,14 @@ void schedule_timeout(kutime_t count)
     spin_lock_irqsave(&sptr_cur->sgtc_lock);
     sptr_cur->private_data = (void *)&sgtc_event;
     __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
+    mr_preempt_disable();
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
 
     mod_timer(sptr_tm, jiffies + count);
-    schedule_thread();
+    mr_preempt_enable();
+
+    if (mr_likely(__GET_THREAD_TARGET_STATE(sptr_cur) == NR_THREAD_SUSPEND))
+        schedule_thread();
 
     sptr_cur->private_data = mr_nullptr;
     del_timer(sptr_tm);

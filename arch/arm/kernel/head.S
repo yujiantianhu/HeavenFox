@@ -72,7 +72,7 @@ _kernel_reset:
     msr spsr_fsxc, r0
 
     /*!< Jtag can not run with another mode */
-@#if !defined(CONFIG_DEBUG_JTAG)
+@#if !defined(CONFIG_DEBUG)
 
     cps #ARCH_FIQ_MODE                              @ set the cpu to FIQ mode
     ldr sp, _FIQ_MODE_STACK_BASE                    @ set FIQ mode stack

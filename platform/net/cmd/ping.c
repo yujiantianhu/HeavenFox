@@ -35,7 +35,7 @@ struct ping_cmd_data
 };
 
 /*!< The globals */
-static kuint32_t g_ping_cmd_count = 0;
+static kint32_t g_ping_cmd_count = -1;
 
 /*!< The functions */
 static void ping_destroy(struct ping_cmd_data *sptr_data);
@@ -116,7 +116,7 @@ static void *ping_cmd_entry(void *args)
                                 &sgtc_pause_notifier_chain, &sptr_data->sgtc_nb);
 
             ping_destroy(sptr_data);
-            g_ping_cmd_count--;
+            g_ping_cmd_count = -1;
 
             schedule_self_sleep();
         }
@@ -135,6 +135,7 @@ static void *ping_cmd_entry(void *args)
                 continue;
             }
 
+            g_ping_cmd_count++;
             sleep(1);
 
             /*!< Read but do nothing (socket_recvfrom will print information, and free rx buffer) */
@@ -241,7 +242,7 @@ static kint32_t term_cmd_ping(struct term_cmd *sptr_cmd, kint32_t argc, kchar_t 
                 kuint32_t ip_addr;
 
                 /*!< Forbid second calling */
-                if (g_ping_cmd_count > 0)
+                if (g_ping_cmd_count != -1)
                 {
                     printk("ping command is running, please cancel the previous ping task first\r\n");
                     return ER_NORMAL;
@@ -257,7 +258,7 @@ static kint32_t term_cmd_ping(struct term_cmd *sptr_cmd, kint32_t argc, kchar_t 
                 if (!isValid(sptr_data))
                     return -ER_FAILD;
 
-                g_ping_cmd_count++;
+                g_ping_cmd_count = 0;
 
                 /*!< Register notifier ("Ctrl + C") */
                 sptr_data->sgtc_nb.data = sptr_data;
@@ -301,6 +302,7 @@ static void term_cmd_ping_help(void)
 void term_cmd_add_ping(void)
 {
     struct term_cmd *sptr_cmd;
+    struct term_variable *sptr_pctrl;
 
     sptr_cmd = term_cmd_allocate("ping", GFP_KERNEL);
     if (!isValid(sptr_cmd))
@@ -310,4 +312,9 @@ void term_cmd_add_ping(void)
     sptr_cmd->help = term_cmd_ping_help;
 
     term_cmd_add(sptr_cmd);
+
+    /*!< Add terminal manage */
+    sptr_pctrl = term_variable_allocate("g_ping_cmd_count", &g_ping_cmd_count);
+    if (isValid(sptr_pctrl))
+        term_variable_add(sptr_pctrl);
 }
