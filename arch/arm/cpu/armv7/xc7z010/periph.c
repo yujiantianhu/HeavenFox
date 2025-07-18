@@ -1,7 +1,7 @@
 /*
  * ZYNQ7 Peripheral APIs
  *
- * File Name:   zynq7_periph.c
+ * File Name:   periph.c
  * Author:      Yang Yujun (Copy from "Xilinx SDK")
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2024.06.20
@@ -12,7 +12,7 @@
 
 /*!< The includes */
 #include <configs/configs.h>
-#include <asm/armv7/gcc_config.h>
+#include <arch/armv7/gcc_config.h>
 #include <zynq7/zynq7_periph.h>
 #include <common/time.h>
 #include <common/api_string.h>

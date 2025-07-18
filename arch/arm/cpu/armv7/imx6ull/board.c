@@ -13,7 +13,7 @@
 /*!< The includes */
 #include <common/generic.h>
 #include <boot/board_init.h>
-#include <asm/armv7/gcc_config.h>
+#include <arch/armv7/gcc_config.h>
 #include <imx6/imx6ull_clocks.h>
 #include <imx6/imx6ull_pins.h>
 
@@ -393,9 +393,6 @@ static void imx6ull_clk_initial(void)
     mr_writel(IMX6UL_CCM_CCGR_BIT(4)  | IMX6UL_CCM_CCGR_BIT(9) |		/*!< ipmux4 and aips_tz3 */
                IMX6UL_CCM_CCGR_BIT(11) | IMX6UL_CCM_CCGR_BIT(14), 		/*!< anadig and csu */
                g_iCCM_CGRx[NR_IMX6UL_CCM_CCGR6]);
-
-    /*!< Configure delay cnt (270 and 12 are test values) */
-    init_delay_freq(270U, 12U, 12U);
 }
 
 /*!
@@ -410,6 +407,21 @@ static void imx6ull_sram_initial(void)
 }
 
 /*!
+ * @brief  	delay_config
+ * @param  	none
+ * @retval 	none
+ * @note   	void function
+ */
+void arch_delay_config(kbool_t in_kernel)
+{
+    /*!< Configure delay cnt (270 and 12 are test values) */
+    if (in_kernel)
+        init_delay_freq(270U, 12U, 12U);
+    else
+        init_delay_freq(270U, 270U, 270U);
+}
+
+/*!
  * @brief  	s_init
  * @param  	none
  * @retval 	none
@@ -417,6 +429,9 @@ static void imx6ull_sram_initial(void)
  */
 void s_init(void)
 {
+    /*!< delay freq configure */
+    arch_delay_config(false);
+    
     /*!< clock init */
     imx6ull_clk_initial();
 

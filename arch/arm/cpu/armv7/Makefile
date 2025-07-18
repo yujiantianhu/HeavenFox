@@ -13,5 +13,6 @@ obj-y	+=	$(CPU)/
 
 obj-y	+=	lowlevel_init.o
 obj-y	+=	irq.o
+obj-y	+=	setup.o
 
 # end of file

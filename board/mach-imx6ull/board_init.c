@@ -29,20 +29,6 @@ kint32_t board_init_serial(void)
 }
 
 /*!
- * @brief   board_init_systick
- * @param   none
- * @retval  none
- * @note    initial systick
- */
-kint32_t board_init_systick(void)
-{
-    imx6ull_systick_init();
-    imx6ull_hrtimer_init();
-
-    return RET_BOOT_PASS;
-}
-
-/*!
  * @brief   board_init_sdmmc
  * @param   none
  * @retval  none

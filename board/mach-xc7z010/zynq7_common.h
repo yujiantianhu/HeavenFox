@@ -26,8 +26,6 @@
 /*!< The functions */
 extern void zynq7_led_init(void);
 extern void zynq7_console_init(void);
-extern void zynq7_systick_init(void);
-extern void zynq7_hrtime_init(void);
 extern void zynq7_sdmmc_init(void);
 extern void zynq7_hdmi_init(void);
 

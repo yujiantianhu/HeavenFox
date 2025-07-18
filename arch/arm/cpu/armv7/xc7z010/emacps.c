@@ -1,7 +1,7 @@
 /*
  * ZYNQ eMAC Of PS Interface
  *
- * File Name:   zynq7_emacps.c
+ * File Name:   emacps.c
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2024.11.24
@@ -14,7 +14,7 @@
 #include <common/queue.h>
 
 #include <boot/board_init.h>
-#include <asm/armv7/gcc_config.h>
+#include <arch/armv7/gcc_config.h>
 
 #include <zynq7/zynq7_periph.h>
 #include <zynq7/xemac/xemacpsif.h>

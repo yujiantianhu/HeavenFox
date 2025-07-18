@@ -81,7 +81,7 @@ void operator delete[](void *ptr)
  * @retval none
  * @note   none
  */
-void iostream_init(void)
+void __fwk_init iostream_init(void)
 {
     g_io_stream_flags |= IO_STREAM_KERNEL;
 }

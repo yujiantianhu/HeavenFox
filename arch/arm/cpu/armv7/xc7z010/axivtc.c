@@ -12,7 +12,7 @@
 
 /*!< The includes */
 #include <configs/configs.h>
-#include <asm/armv7/gcc_config.h>
+#include <arch/armv7/gcc_config.h>
 #include <zynq7/zynq7_periph.h>
 #include <common/time.h>
 #include <common/api_string.h>

@@ -13,7 +13,8 @@
 /*!< The includes */
 #include <common/generic.h>
 #include <boot/board_init.h>
-#include <asm/armv7/gcc_config.h>
+#include <arch/armv7/gcc_config.h>
+#include <arch/setup.h>
 #include <common/time.h>
 
 /*!< Check */
@@ -32,8 +33,7 @@
  */
 static void xc7z010_clk_initial(void)
 {
-	/*!< Configure delay cnt */
-	init_delay_freq(111U, 3U, 3U);
+
 }
 
 /*!
@@ -48,6 +48,21 @@ static void xc7z010_sram_initial(void)
 }
 
 /*!
+ * @brief  	delay_config
+ * @param  	none
+ * @retval 	none
+ * @note   	void function
+ */
+void arch_delay_config(kbool_t in_kernel)
+{
+    /*!< Configure delay cnt */
+    if (in_kernel)
+        init_delay_freq(111U, 3U, 3U);
+    else
+        init_delay_freq(111U, 3U, 3U);
+}
+
+/*!
  * @brief  	s_init
  * @param  	none
  * @retval 	none
@@ -55,11 +70,14 @@ static void xc7z010_sram_initial(void)
  */
 void s_init(void)
 {
-	/*!< clock init */
-	xc7z010_clk_initial();
+    /*!< delay freq configure */
+    arch_delay_config(false);
 
-	/*!< sram init */
-	xc7z010_sram_initial();
+    /*!< clock init */
+    xc7z010_clk_initial();
+
+    /*!< sram init */
+    xc7z010_sram_initial();
 }
 
 /* end of file */

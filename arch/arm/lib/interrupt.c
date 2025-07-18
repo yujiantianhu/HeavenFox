@@ -15,7 +15,7 @@
 #include <common/generic.h>
 #include <common/io_stream.h>
 #include <common/time.h>
-#include <asm/interrupt.h>
+#include <arch/interrupt.h>
 #include <platform/irq/fwk_irq_types.h>
 #include <kernel/kernel.h>
 

@@ -18,6 +18,7 @@
 #include <common/atomic_types.h>
 #include <common/io_stream.h>
 #include <common/time.h>
+#include <arch/setup.h>
 #include <boot/implicit_call.h>
 #include <boot/board_init.h>
 #include <platform/of/fwk_of.h>
@@ -105,8 +106,11 @@ void start_kernel(void)
     /*!< initial memory pool */
     fwk_mempool_initial();
 
+    /*!< initial I/O interface */
     iostream_init();
-    print_info("\r\nStart kernel ...... \r\n");
+
+    /*!< initial arch */
+    setup_arch();
 
     /*!< populate params from bootloader */
     setup_machine(sptr_tag_params);
@@ -120,7 +124,6 @@ void start_kernel(void)
 
     /*!< systick init */
     systime_init();
-    board_init_systick();
 
     /*!< file system */
     if (filesystem_initcall())

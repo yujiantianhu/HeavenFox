@@ -11,8 +11,6 @@
 
 obj-y	+=	imx_common.o
 obj-y	+=	imx6_led.o
-obj-y	+=	imx6_systick.o
-obj-y	+=	imx6_hrtimer.o
 obj-y	+=	imx6_console.o
 obj-y	+=	imx6_sdmmc.o
 obj-y	+=	board_init.o

@@ -1,7 +1,7 @@
 /*
- * IMX6ULL Board GPIO Initial
+ * IMX6ULL Global Timer Initial
  *
- * File Name:   imx6_led.c
+ * File Name:   hrtimer.c
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2023.09.10
@@ -13,9 +13,15 @@
 /*!< The includes */
 #include <configs/configs.h>
 #include <common/time.h>
+#include <common/generic.h>
+#include <common/io_stream.h>
+#include <arch/setup.h>
+#include <imx6/imx6ull_clocks.h>
+#include <imx6/imx6ull_pins.h>
+#include <imx6/imx6ull_periph.h>
+#include <imx6/imx6ull_irqvector.h>
 #include <platform/of/fwk_of.h>
 #include <platform/irq/fwk_irq_types.h>
-#include "imx6_common.h"
 
 /*!< The defines */
 /*!< CCM */
@@ -326,8 +332,6 @@ void imx6ull_hrtimer_init(void)
 
     /*!< EN: bit0, GPT Enable */
     mr_setbitl(mr_bit(0U), &sptr_tick->CR);
-
-    print_info("System hrtimer start to run, frequency is: %u(Hz)\r\n", HRTIMER_FREQ);
 }
 
 /*!
@@ -367,6 +371,18 @@ irq_return_t imx6_hrtimer_isr(kint32_t irq, void *ptrDev)
     }
 
     return ER_NORMAL;
+}
+
+/*!< -------------------------------------------------------------------------- */
+/*!
+ * @brief   initial high real-time timer
+ * @param   none
+ * @retval  none
+ * @note    initial Timer
+ */
+void __init arch_hrtimer_init(void)
+{
+    imx6ull_hrtimer_init();
 }
 
 /* end of file*/

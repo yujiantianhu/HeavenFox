@@ -1,7 +1,7 @@
 /*
- * ZYNQ7 Board Global Timer Initial
+ * ZYNQ7 Global Timer Initial
  *
- * File Name:   zynq7_hrtimer.c
+ * File Name:   hrtimer.c
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2025.06.21
@@ -12,10 +12,11 @@
 
 /*!< The includes */
 #include <common/time.h>
+#include <arch/setup.h>
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_device.h>
 #include <platform/irq/fwk_irq_types.h>
-#include "zynq7_common.h"
+#include <zynq7/zynq7_periph.h>
 
 /*!< The defines */
 #define ZYNQ7_GLBTIMER0_FREQ_HZ                 (XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ / 2)
@@ -367,8 +368,18 @@ void zynq7_hrtime_init(void)
     zynq7_gt_irq_enable(base);
     zynq7_gt_intr_clear_status(base);
     zynq7_gt_start(base);
+}
 
-    print_info("System hrtimer start to run, frequency is: %u(Hz)\r\n", HRTIMER_FREQ);
+/*!< -------------------------------------------------------------------------- */
+/*!
+ * @brief   initial high real-time timer
+ * @param   none
+ * @retval  none
+ * @note    initial Timer
+ */
+void __init arch_hrtimer_init(void)
+{
+    zynq7_hrtime_init();
 }
 
 /* end of file*/

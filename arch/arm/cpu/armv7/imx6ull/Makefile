@@ -9,6 +9,9 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
+obj-y	+=	systick.o
+obj-y	+=	hrtimer.o
+
 obj-y	+=	board.o
 
 # end of file

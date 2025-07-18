@@ -1,7 +1,7 @@
 /*
- * ZYNQ7 Board Terminal Initial
+ * ZYNQ7 System Tick Initial
  *
- * File Name:   zynq7_systick.c
+ * File Name:   systick.c
  * Author:      Yang Yujun
  * E-mail:      <yujiantianhu@163.com>
  * Created on:  2024.06.22
@@ -12,10 +12,11 @@
 
 /*!< The includes */
 #include <common/time.h>
+#include <arch/setup.h>
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_device.h>
 #include <platform/irq/fwk_irq_types.h>
-#include "zynq7_common.h"
+#include <zynq7/zynq7_periph.h>
 
 /*!< The defines */
 #define ZYNQ7_SCUTIMER0_FREQ_HZ                 (XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ / 2)
@@ -112,9 +113,6 @@ void zynq7_systick_init(void)
 #endif
 
     XScuTimer_Start(sptr_timer);
-    
-    print_info("System Tick start to run, frequency is: %u(Hz)\r\n", SYSTICK_FREQ);
-    print_info("System counter (jiffies) enable, TICK_HZ is %u(Hz)\r\n", TICK_HZ);
 }
 
 /*!
@@ -141,6 +139,18 @@ irq_return_t zynq7_systick_isr(kint32_t irq, void *args)
     }
 
     return ER_NORMAL;
+}
+
+/*!< -------------------------------------------------------------------------- */
+/*!
+ * @brief   initial and start systick
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __init arch_systick_init(void)
+{
+    zynq7_systick_init();
 }
 
 /* end of file*/

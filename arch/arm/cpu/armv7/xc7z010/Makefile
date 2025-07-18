@@ -9,9 +9,11 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-obj-y	+=	zynq7_periph.o
-obj-y	+=	zynq7_axivtc.o
-obj-y	+=	zynq7_emacps.o
+obj-y	+=	periph.o
+obj-y	+=	axivtc.o
+obj-y	+=	emacps.o
+obj-y	+=	systick.o
+obj-y	+=	hrtimer.o
 
 obj-y	+=	board.o
 

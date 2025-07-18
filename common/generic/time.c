@@ -14,6 +14,7 @@
 #include <configs/configs.h>
 #include <common/time.h>
 #include <common/mem_manage.h>
+#include <arch/setup.h>
 #include <platform/irq/fwk_irq_types.h>
 #include <kernel/spinlock.h>
 
@@ -65,6 +66,9 @@ static struct ktime_tick *sgtr_ktime_lists[] =
     [NR_KTIMER_PENDING ] = &sgtc_ktime_pending,
     [NR_KTIMER_INACTIVE] = &sgtc_ktime_inactive,
 };
+
+/*!< The functions */
+extern kint32_t board_init_systick(void);
 
 /*!< API function */
 /*!
@@ -718,7 +722,7 @@ void do_hrtime_event(void)
  * @retval  none
  * @note    called by "start_kernel"
  */
-void systime_init(void)
+void __fwk_init systime_init(void)
 {
     struct ktime_tick *sptr_tick;
     kusize_t list_num = ARRAY_SIZE(sgtr_ktime_lists);
@@ -738,6 +742,10 @@ void systime_init(void)
     }
 
     fwk_open_softirq(NR_SOFTIRQ_TIMER, do_hrtimer_action);
+
+    /*!< Initialize systick */
+    setup_systick();
+    setup_hrtick();
 }
 
 /* end of file */

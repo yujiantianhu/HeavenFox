@@ -11,7 +11,7 @@
  */
 
 /*!< The includes */
-#include <asm/exception.h>
+#include <arch/exception.h>
 #include <common/error_types.h>
 #include <common/io_stream.h>
 #include <common/mem_manage.h>

@@ -12,7 +12,7 @@
 
 /*!< The includes */
 #include <configs/configs.h>
-#include <asm/armv7/gic_basic.h>
+#include <arch/armv7/gic_basic.h>
 
 #include <common/io_stream.h>
 #include <boot/boot_text.h>

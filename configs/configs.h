@@ -60,7 +60,7 @@
 
 /*!< armv7 */
 #if (defined(CONFIG_ARCH_ARMV7) && (CONFIG_ARCH_ARMV7))
-    #include <asm/armv7/arch_common.h>
+    #include <arch/armv7/arch_common.h>
 #endif
 
 #ifdef __cplusplus

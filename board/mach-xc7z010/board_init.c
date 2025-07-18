@@ -29,20 +29,6 @@ kint32_t board_init_serial(void)
 }
 
 /*!
- * @brief   board_init_systick
- * @param   none
- * @retval  none
- * @note    initial systick
- */
-kint32_t board_init_systick(void)
-{
-    zynq7_systick_init();
-    zynq7_hrtime_init();
-
-    return RET_BOOT_PASS;
-}
-
-/*!
  * @brief   board_init_sdmmc
  * @param   none
  * @retval  none

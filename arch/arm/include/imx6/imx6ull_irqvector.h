@@ -18,7 +18,7 @@
 #endif
 
 /*!< The includes */
-#include <asm/armv7/gic_basic.h>
+#include <arch/armv7/gic_basic.h>
 #include <common/basic_types.h>
 #include <common/error_types.h>
 #include <common/generic.h>
