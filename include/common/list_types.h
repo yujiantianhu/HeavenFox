@@ -148,14 +148,14 @@ typedef struct list_head srt_list_head_t;
 /* get list and next list, and then delete current list from list_head */
 #define foreach_list_next_entry_safe(pos, temp, head, member)	\
     for (pos = mr_list_first_entry(head, typeof(*pos), member),	\
-        temp = mr_list_next_entry(pos, member);	\
+         temp = mr_list_next_entry(pos, member);	\
          &(pos->member) != (head);	\
          pos = temp, temp = mr_list_next_entry(temp, member))
 
 /* get list and prev list, and then delete current list from list_head */
 #define foreach_list_prev_entry_safe(pos, temp, head, member)	\
     for (pos = mr_list_last_entry(head, typeof(*pos), member),	\
-        temp = mr_list_prev_entry(pos, member);	\
+         temp = mr_list_prev_entry(pos, member);	\
          &(pos->member) != (head);	\
          pos = temp, temp = mr_list_prev_entry(temp, member))
 
