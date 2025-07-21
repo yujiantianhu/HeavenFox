@@ -47,6 +47,20 @@ static kint32_t term_cmd_show_info(struct term_cmd *sptr_cmd, kint32_t argc, kch
         case 2:
             if (!kstrcmp(argv[1], "--help"))
                 sptr_cmd->help();
+            else if (!kstrcmp(argv[1], "-v"))
+                printk("HeavenFox %s\r\n", get_version());
+            else if (!kstrcmp(argv[1], "-m"))
+            {
+                printk("HeavenFox %s %s %s %s %s %s %s %s\r\n", 
+                    get_arch(), get_arch_type(), get_arch_class(), get_cpu_verdor(), get_cpu_name(), 
+                    get_cpu_mode(), get_board_manufacturer(), get_board_name());
+            }
+            else if (!kstrcmp(argv[1], "-a"))
+            {
+                printk("HeavenFox %s %s %s %s %s %s %s %s %s\r\n", get_version(),
+                    get_arch(), get_arch_type(), get_arch_class(), get_cpu_verdor(), get_cpu_name(), 
+                    get_cpu_mode(), get_board_manufacturer(), get_board_name());
+            }
             else
                 goto fail;
 
@@ -71,7 +85,7 @@ fail:
  */
 static void term_cmd_info_help(void)
 {
-    printk("usage: info\r\n");
+    printk("usage: info or info -[v/m/a]\r\n");
 }
 
 /*!

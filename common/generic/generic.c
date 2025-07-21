@@ -42,7 +42,7 @@ static struct common_random_state sgtc_com_random_state =
  * @retval  none
  * @note    none
  */
-kuint64_t udiv_integer(kuint64_t divied, kuint64_t div)
+kuint64_t udiv_int64(kuint64_t divied, kuint64_t div)
 {
     kuint64_t count = 0;
 
@@ -61,7 +61,7 @@ kuint64_t udiv_integer(kuint64_t divied, kuint64_t div)
  * @retval  none
  * @note    none
  */
-kint64_t sdiv_integer(kint64_t divied, kint64_t div)
+kint64_t sdiv_int64(kint64_t divied, kint64_t div)
 {
     kint64_t count = 0;
     kint64_t number1 = mr_abs(divied);
@@ -82,12 +82,35 @@ kint64_t sdiv_integer(kint64_t divied, kint64_t div)
  * @retval  none
  * @note    none
  */
-kuint64_t udiv_remainder(kuint64_t divied, kuint64_t div)
+kuint64_t urem_int64(kuint64_t divied, kuint64_t div)
 {
     while (divied >= div)
         divied -= div;
 
     return divied;
+}
+
+/*!
+ * @brief   unsigned divied: "divied / div"， and get the remainder: "divied % div"
+ * @param   rem_val: remainder
+ * @param   divied, div
+ * @retval  none
+ * @note    none
+ */
+kuint64_t udiv_rem_int64(kuint64_t *rem_val, kuint64_t divied, kuint64_t div)
+{
+    kuint64_t count = 0;
+
+    while (divied >= div)
+    {
+        divied -= div;
+        count++;
+    }
+
+    if (rem_val)
+        *rem_val = divied;
+
+    return count;
 }
 
 /*!

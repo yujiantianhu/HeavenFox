@@ -38,7 +38,7 @@ static kuint16_t radix_tree_numlen(kuint32_t number)
         return mr_align(count, MAX_BRANCH);
     
     /*!< result = count % default_valids */
-    result = udiv_remainder(count, MAX_BRANCH);
+    result = count % MAX_BRANCH;
     return result ? (count + MAX_BRANCH - result) : count;
 }
 

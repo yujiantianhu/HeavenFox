@@ -508,8 +508,8 @@ static kint32_t bitmap_find_first_bit(kuint8_t *bitmap, kuint32_t start, kusize_
     /*!< search by per 8 bits */
     for (index = start; index < total_bits; index++)
     {
-        area_mask = mr_udiv(index, bit_per_map);
-        bit_mask = mr_urem(index, bit_per_map);
+        area_mask = index / bit_per_map;
+        bit_mask = index % bit_per_map;
 
         if ((!!(*(bitmap + area_mask) & (1 << bit_mask))) == value)
             break;
@@ -561,8 +561,8 @@ static void bitmap_set_nr_bit(kuint8_t *bitmap, kuint32_t start, kusize_t total_
 
     for (index = start; index < end; index++)
     {
-        area_mask = mr_udiv(index, bit_per_map);
-        bit_mask = mr_urem(index, bit_per_map);
+        area_mask = index / bit_per_map;
+        bit_mask = index % bit_per_map;
 
         if (value)
             *(bitmap + area_mask) |= (1 << bit_mask);

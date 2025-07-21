@@ -200,9 +200,10 @@
 }
 
 /*!< The functions */
-extern kuint64_t udiv_integer(kuint64_t divied, kuint64_t div);
-extern kint64_t sdiv_integer(kint64_t divied, kint64_t div);
-extern kuint64_t udiv_remainder(kuint64_t divied, kuint64_t div);
+extern kuint64_t udiv_int64(kuint64_t divied, kuint64_t div);
+extern kint64_t sdiv_int64(kint64_t divied, kint64_t div);
+extern kuint64_t urem_int64(kuint64_t divied, kuint64_t div);
+extern kuint64_t udiv_rem_int64(kuint64_t *rem_val, kuint64_t divied, kuint64_t div);
 
 extern kutype_t dec_to_hex(kchar_t *buf, kutype_t number, kint32_t mode);
 extern kutype_t dec_to_binary(kchar_t *buf, kutype_t number, kint32_t mode);
@@ -215,7 +216,7 @@ extern kuint16_t parse_valid_u32_bits(kuint32_t number);
     typeof(divied) _divied = (divied);	\
     typeof(div) _div = (div);	\
     (void)(&_divied == &_div);	\
-    (typeof(divied))udiv_integer(_divied, _div);	\
+    (typeof(divied))udiv_int64(_divied, _div);	\
 })
 
 #define mr_sdiv(divied, div)	\
@@ -223,7 +224,7 @@ extern kuint16_t parse_valid_u32_bits(kuint32_t number);
     typeof(divied) _divied = (divied);	\
     typeof(div) _div = (div);	\
     (void)(&_divied == &_div);	\
-    (typeof(divied))sdiv_integer(_divied, _div);	\
+    (typeof(divied))sdiv_int64(_divied, _div);	\
 })
 
 #define mr_urem(divied, div)	\
@@ -231,7 +232,7 @@ extern kuint16_t parse_valid_u32_bits(kuint32_t number);
     typeof(divied) _divied = (divied);	\
     typeof(div) _div = (div);	\
     (void)(&_divied == &_div);	\
-    (typeof(divied))udiv_remainder(_divied, _div);	\
+    (typeof(divied))urem_int64(_divied, _div);	\
 })
 
 /*!< API function */

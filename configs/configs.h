@@ -19,6 +19,7 @@
 
 /*!< The includes */
 #include "mach_configs.h"
+#include "version.h"
 
 #ifdef CONFIG_DEBUG
 #define CONFIG_PRINT_LEVEL                      "7"

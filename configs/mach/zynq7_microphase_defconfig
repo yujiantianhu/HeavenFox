@@ -21,10 +21,16 @@ CONFIG_ARCH_ARMV8 = n
 
 CONFIG_LITTILE_ENDIAN = y
 
+CONFIG_MANUFACTURER = "microphase"
+CONFIG_BOARD = "z7-lite"
+
 # float with hardware
 CONFIG_VFP = y
 # instruction: thumb or arm
 CONFIG_INSTRUCTION = arm
+
+# 0: amp; 1: smp
+CONFIG_CORE = 0
 
 # debug or release
 CONFIG_BUILD_TYPE = release

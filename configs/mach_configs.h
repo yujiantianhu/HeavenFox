@@ -25,7 +25,9 @@
 #define CONFIG_HZ                               (100UL)             /*!< timer interrupt per 10ms*/
 #endif
 
-#define CONFIG_USE_AMP                          (0)
+#ifndef CONFIG_CORE
+#define CONFIG_CORE                             (0)                 /*!< default AMP */
+#endif
 
 /*!< save more infomation */
 #define CONFIG_CONTEXT_MORE                     (0)
