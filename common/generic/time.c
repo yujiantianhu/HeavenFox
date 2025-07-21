@@ -297,25 +297,25 @@ void msecs_to_timeclock(struct time_clock *sptr_tclk, kuint64_t milseconds)
 {
     kuint64_t temp;
 
-    sptr_tclk->milsecond = (kuint16_t)udiv_remainder(milseconds, 1000);
-    temp = udiv_integer(milseconds, 1000);
+    sptr_tclk->milsecond = (kuint16_t)(milseconds % 1000);
+    temp = milseconds / 1000;
  
-    sptr_tclk->second = (kuint8_t)udiv_remainder(temp, 60);
-    temp = udiv_integer(temp, 60);
+    sptr_tclk->second = (kuint8_t)(temp % 60);
+    temp = temp / 60;
 
-    sptr_tclk->minute = (kuint8_t)udiv_remainder(temp, 60);
-    temp = udiv_integer(temp, 60);
+    sptr_tclk->minute = (kuint8_t)(temp % 60);
+    temp = temp / 60;
 
-    sptr_tclk->hour = (kuint8_t)udiv_remainder(temp, 60);
-    temp = udiv_integer(temp, 60);
+    sptr_tclk->hour = (kuint8_t)(temp % 24);
+    temp = temp / 24;
 
-    sptr_tclk->day = (kuint8_t)udiv_remainder(temp, 24);
-    temp = udiv_integer(temp, 24);
+    sptr_tclk->day = (kuint8_t)(temp % 30);
+    temp = temp / 30;
 
-    sptr_tclk->month = (kuint8_t)udiv_remainder(temp, 30);
-    temp = udiv_integer(temp, 30);
+    sptr_tclk->month = (kuint8_t)(temp % 12);
+    temp = temp / 12;
 
-    sptr_tclk->year = (kuint8_t)udiv_remainder(temp, 12);
+    sptr_tclk->year = (kuint32_t)temp;
 }
 
 /*!
