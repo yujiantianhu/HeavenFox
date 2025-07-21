@@ -19,10 +19,16 @@ CONFIG_COMPILER = "arm-none-eabi-"
 CONFIG_ARCH_ARMV7 = y
 CONFIG_LITTILE_ENDIAN = y
 
+CONFIG_MANUFACTURER = "TOPEET"
+CONFIG_BOARD = "TERMINATOR_v1.1"
+
 # float with hardware
 CONFIG_VFP = y
 # instruction: thumb or arm
 CONFIG_INSTRUCTION = arm
+
+# 0: amp; 1: smp
+CONFIG_CORE = 0
 
 # debug or release
 CONFIG_BUILD_TYPE = release

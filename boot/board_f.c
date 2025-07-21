@@ -11,6 +11,7 @@
  */
 
 /*!< The includes */
+#include <boot/core.h>
 #include <boot/board_init.h>
 
 /*!< API function */
@@ -94,6 +95,7 @@ kint32_t board_init_console(void)
     print_info("\r\n");
     print_info("Console Initial Finished ...\r\n");
     print_info("Welcome to Use HeavenFox OS!\r\n");
+    print_info("Version: %s\r\n", get_version());
     print_info("\r\n");
 
     return RET_BOOT_PASS;

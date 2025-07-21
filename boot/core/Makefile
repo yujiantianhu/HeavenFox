@@ -9,6 +9,7 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
+obj-y	+=	version.o
 obj-y	+=	implicit_call.o
 
 # end of file

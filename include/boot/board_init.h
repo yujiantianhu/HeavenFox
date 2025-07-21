@@ -46,6 +46,7 @@ typedef struct global_data srt_gd_t;
 
 typedef kint32_t (*board_init_t) (void);
 
+/*!< The globals */
 extern kuaddr_t _SVC_MODE_STACK_BASE;
 extern kuaddr_t _SYS_MODE_STACK_BASE;
 extern kuaddr_t _IRQ_MODE_STACK_BASE;

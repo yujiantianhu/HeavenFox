@@ -6,8 +6,11 @@
 #define CONFIG_COMPILER "arm-none-eabi-"
 #define CONFIG_ARCH_ARMV7 1
 #define CONFIG_LITTILE_ENDIAN 1
+#define CONFIG_MANUFACTURER "microphase"
+#define CONFIG_BOARD "z7-lite"
 #define CONFIG_VFP 1
 #define CONFIG_INSTRUCTION arm
+#define CONFIG_CORE 0
 #define CONFIG_BUILD_TYPE release
 #define CONFIG_OPTIMIZE 2
 #define CONFIG_HZ 1000

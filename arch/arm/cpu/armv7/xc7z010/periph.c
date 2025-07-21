@@ -16,6 +16,7 @@
 #include <zynq7/zynq7_periph.h>
 #include <common/time.h>
 #include <common/api_string.h>
+#include <boot/core.h>
 
 /*!< The globals */
 static XGpioPs_Config sgtc_xgpio_ps_config_table[XPAR_XGPIOPS_NUM_INSTANCES] =
@@ -147,9 +148,11 @@ void Xil_DCacheFlushRange(kuaddr_t adr, kuint32_t len)
     const kuint32_t cacheline = 32U;
     kuint32_t end;
     kuint32_t currmask;
-    volatile kuint32_t *L2CCOffset;
 
+#if (!defined(CONFIG_USE_AMP) || !CONFIG_USE_AMP)
+    volatile kuint32_t *L2CCOffset;
     L2CCOffset = (volatile kuint32_t *)(XPS_L2CC_BASEADDR + XPS_L2CC_CACHE_INV_CLN_PA_OFFSET);
+#endif
 
     currmask = __get_cpsr();
     __set_cpsr(currmask | CPSR_BIT_I | CPSR_BIT_F);
@@ -195,10 +198,12 @@ void Xil_DCacheInvalidateRange(kuaddr_t adr, kuint32_t len)
     kuint32_t tempadr = adr;
     kuint32_t tempend;
     kuint32_t currmask;
-    volatile kuint32_t *L2CCOffset;
     kuint32_t cache_val = 0U;
 
+#if (!defined(CONFIG_USE_AMP) || !CONFIG_USE_AMP)
+    volatile kuint32_t *L2CCOffset;
     L2CCOffset = (volatile kuint32_t *)(XPS_L2CC_BASEADDR + XPS_L2CC_CACHE_INVLD_PA_OFFSET);
+#endif
 
     currmask = __get_cpsr();
     __set_cpsr(currmask | CPSR_BIT_F);

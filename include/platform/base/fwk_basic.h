@@ -28,6 +28,7 @@
 #include <common/time.h>
 #include <common/queue.h>
 #include <board/board.h>
+#include <boot/core.h>
 #include <boot/boot_text.h>
 #include <boot/implicit_call.h>
 #include <platform/base/fwk_mempool.h>

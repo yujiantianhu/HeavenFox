@@ -9,7 +9,7 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-obj-y	+=	dynamic/
+obj-y	+=	core/
 
 obj-y	+=	board_f.o
 obj-y	+=	board_r.o
