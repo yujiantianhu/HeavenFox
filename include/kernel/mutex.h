@@ -24,7 +24,7 @@
 /*!< The defines */
 typedef struct mutex_lock
 {
-	struct atomic sgtc_atc;
+    struct atomic sgtc_atc;
 
 } srt_mutex_lock_t;
 
@@ -46,7 +46,7 @@ extern void mutex_unlock(struct mutex_lock *sptr_lock);
  */
 static inline kbool_t mutex_is_locked(struct mutex_lock *sptr_lock)
 {
-	return !!ATOMIC_READ(&sptr_lock->sgtc_atc);
+    return !!ATOMIC_READ(&sptr_lock->sgtc_atc);
 }
 
 #ifdef __cplusplus

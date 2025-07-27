@@ -142,38 +142,19 @@ enum __ERT_THREAD_POLICY
 
 struct scheduler_param
 {
-    kint32_t sched_priority;
-    kint32_t sched_curpriority;
+    kint32_t priority;
+    kint32_t cur_priority;                      /*!< current priority */
 
-    union
-    {
-        kint32_t reserved[8];
-
-        struct
-        {
-            kint32_t __ss_low_priority;
-            kint32_t __ss_max_repl;
-            struct time_spec __ss_repl_period;
-            struct time_spec __ss_init_budget;
-
-        } sgtc_ss;
-
-    } ugtr_ss;
-
-#define mr_sched_low_priority   			    ugtr_ss.sgtc_ss.__ss_low_priority
-#define mr_sched_max_repl					    ugtr_ss.sgtc_ss.__ss_max_repl
-#define mr_sched_repl_period				    ugtr_ss.sgtc_ss.__ss_repl_period
-#define mr_sched_init_budget				    ugtr_ss.sgtc_ss.__ss_init_budget
+    struct time_spec init_budget;               /*!< time slice */
 };
 
 struct thread_attr
 {
     kint32_t detachstate;                       /*!< refer to "__ERT_THREAD_DETACH" */
     kint32_t schedpolicy;                       /*!< refer to "__ERT_THREAD_SCHED" */
-    struct scheduler_param sgtc_param;          /*!< schedule parameters */
     kint32_t inheritsched;                      /*!< refer to "__ERT_THREAD_POLICY" */
-    kint32_t scope;                             /*!< the scope of threads */
-    kssize_t guardsize;                         /*!< the size of the alert buffer at the end of the thread stack */
+
+    struct scheduler_param sgtc_param;          /*!< schedule parameters */
 
     void *ptr_stack_start;                      /*!< thread stack address base (from dynamic allocation) */
     kuaddr_t stack_addr;                        /*!< thread stack top, 8 byte anlignment  */
@@ -182,9 +163,6 @@ struct thread_attr
     struct mem_info sgtc_pool;                  /*!< thread memory pool */
 };
 typedef struct thread_attr srt_thread_attr_t;
-
-#define THREAD_STACK_CHK1                       (0xd573f2e9)
-#define THREAD_STACK_CHK2                       (~THREAD_STACK_CHK1)
 
 /*!< The defines */
 extern tid_t kernel_thread_create(tid_t tid, 
@@ -234,7 +212,7 @@ extern void tfree(void *__ptr);
 __force_inline 
 static inline kuint32_t thread_get_priority(struct thread_attr *sptr_attr)
 {
-    return sptr_attr->sgtc_param.sched_curpriority;
+    return sptr_attr->sgtc_param.cur_priority;
 }
 
 /*!
@@ -245,7 +223,7 @@ static inline kuint32_t thread_get_priority(struct thread_attr *sptr_attr)
  */
 static inline void thread_set_priority(struct thread_attr *sptr_attr, kuint32_t priority)
 {
-    sptr_attr->sgtc_param.sched_priority = __THREAD_IS_LOW_PRIO(priority, THREAD_PROTY_MAX) ? priority : THREAD_PROTY_MAX;
+    sptr_attr->sgtc_param.priority = __THREAD_IS_LOW_PRIO(priority, THREAD_PROTY_MAX) ? priority : THREAD_PROTY_MAX;
 }
 
 /*!
@@ -258,7 +236,7 @@ __force_inline
 static inline void thread_sync_priority(struct thread_attr *sptr_attr)
 {
     struct scheduler_param *sptr_param = &sptr_attr->sgtc_param;
-    sptr_param->sched_curpriority = sptr_param->sched_priority;
+    sptr_param->cur_priority = sptr_param->priority;
 }
 
 /*!
@@ -272,7 +250,7 @@ static inline void thread_set_time_slice(struct thread_attr *sptr_attr, kutime_t
     struct time_spec sgtc_tm;
     
     msecs_to_time_spec(&sgtc_tm, mseconds);
-    memcpy(&sptr_attr->sgtc_param.mr_sched_init_budget, &sgtc_tm, sizeof(sgtc_tm));
+    memcpy(&sptr_attr->sgtc_param.init_budget, &sgtc_tm, sizeof(sgtc_tm));
 }
 
 /*!
@@ -283,7 +261,7 @@ static inline void thread_set_time_slice(struct thread_attr *sptr_attr, kutime_t
  */
 static inline kuint32_t thread_get_sched_msecs(struct thread_attr *sptr_attr)
 {
-    return time_spec_to_msecs(&sptr_attr->sgtc_param.mr_sched_init_budget);
+    return time_spec_to_msecs(&sptr_attr->sgtc_param.init_budget);
 }
 
 /*!

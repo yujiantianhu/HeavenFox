@@ -35,36 +35,36 @@ enum __ERT_THREAD_BASIC_STATUS
 {
     NR_THREAD_NONE = 0,
     
-	/*!< running status: thread is running  */
-	NR_THREAD_RUNNING,
+    /*!< running status: thread is running  */
+    NR_THREAD_RUNNING,
 
-	/*!< ready status: thread is waitting for running */
-	NR_THREAD_READY,
+    /*!< ready status: thread is waitting for running */
+    NR_THREAD_READY,
 
-	/*!<
-	 * suspend status: when thread is in delay or message-blocking stage, it is suspended;
-	 * and returns to the ready state when the delay ends and the message is normal 
-	 */
-	NR_THREAD_SUSPEND,
+    /*!<
+     * suspend status: when thread is in delay or message-blocking stage, it is suspended;
+     * and returns to the ready state when the delay ends and the message is normal 
+     */
+    NR_THREAD_SUSPEND,
 
-	/*!<
-	 * sleep status: thread is sleeping, e.g. thread is completely dormant, 
-	 * and even if the ready condition is met, it will not be inserted into the ready list Can be awakened */
-	NR_THREAD_SLEEP,
+    /*!<
+     * sleep status: thread is sleeping, e.g. thread is completely dormant, 
+     * and even if the ready condition is met, it will not be inserted into the ready list Can be awakened */
+    NR_THREAD_SLEEP,
 
-	/*!< numbers */
-	NR_THREAD_STATUS_MAX
+    /*!< numbers */
+    NR_THREAD_STATUS_MAX
 };
 
 enum __ERT_THREAD_SIGNALS
 {
-	NR_THREAD_SIG_NORMAL = NR_THREAD_STATUS_MAX,
-	NR_THREAD_SIG_WAKEUP,
-	NR_THREAD_SIG_KILL,
-	NR_THREAD_SIG_INTR,
+    NR_THREAD_SIG_NORMAL = NR_THREAD_STATUS_MAX,
+    NR_THREAD_SIG_WAKEUP,
+    NR_THREAD_SIG_KILL,
+    NR_THREAD_SIG_INTR,
 
-	/*!< NR_THREAD_SIG_MAX <= 32 */
-	NR_THREAD_SIG_MAX,
+    /*!< NR_THREAD_SIG_MAX <= 32 */
+    NR_THREAD_SIG_MAX,
 };
 
 /*!< The globals */
@@ -82,16 +82,16 @@ extern struct atomic sgtc_sched_preempt_cnt;
 
 #else
 #define mr_preempt_enable()	\
-	do {	\
-		mr_barrier();	\
-		mr_preempt_cnt_dec();	\
-	} while (0)
+    do {	\
+        mr_barrier();	\
+        mr_preempt_cnt_dec();	\
+    } while (0)
 
 #define mr_preempt_disable()	\
-	do {	\
-		mr_preempt_cnt_inc();	\
-		mr_barrier();	\
-	} while (0)
+    do {	\
+        mr_preempt_cnt_inc();	\
+        mr_barrier();	\
+    } while (0)
 
 #endif
 

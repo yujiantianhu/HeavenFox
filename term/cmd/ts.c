@@ -76,7 +76,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
             /*!< 1. running */
             sptr_thread = mr_current;
             sptr_attr = sptr_thread->sptr_attr;
-            term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
+            term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
                         thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
             
             /*!< 2. ready */
@@ -84,7 +84,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
             while ((sptr_thread = next_ready_thread(sptr_thread)))
             {
                 sptr_attr = sptr_thread->sptr_attr;
-                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
+                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
                         thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
             }
 
@@ -93,7 +93,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
             while ((sptr_thread = next_suspend_thread(sptr_thread)))
             {
                 sptr_attr = sptr_thread->sptr_attr;
-                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
+                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
                         thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
             }
 
@@ -102,7 +102,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
             while ((sptr_thread = next_sleep_thread(sptr_thread)))
             {
                 sptr_attr = sptr_thread->sptr_attr;
-                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.sched_curpriority,
+                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
                         thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
             }
 

@@ -113,8 +113,9 @@ kssize_t pq_buffer_write(struct pq_buffer *sptr_pq, const void *data, kusize_t l
         if (len > sptr_pq->tot_len)
             return -ER_MORE;
 
+        /*!< tail offset */
+        sptr_pq->tail = (sptr_pq->tail + len - (sptr_pq->tot_len - sptr_pq->len)) % sptr_pq->tot_len;
         sptr_pq->len = sptr_pq->tot_len;
-        sptr_pq->tail = (sptr_pq->tail + sptr_pq->len + len - sptr_pq->tot_len) % sptr_pq->tot_len;
     }
 
     __pq_buffer_write(sptr_pq, data, len);

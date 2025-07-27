@@ -698,6 +698,11 @@ kint32_t schedule_thread_switch(tid_t tid)
         mr_unlikely((dst != NR_THREAD_RUNNING) && (dst != NR_THREAD_READY)))
         goto fail;
 
+    /*!< do not suspend self in interrupt */
+    if (mr_unlikely(dst == NR_THREAD_RUNNING) && 
+        mr_unlikely(IS_IN_INTERRUPT()))
+        goto fail;
+
     /*!< detached from current list */
     switch (src)
     {
@@ -1099,21 +1104,29 @@ struct thread *unregister_thread(tid_t tid)
 {
     struct thread *sptr_thread;
 
+    spin_lock_irqsave(&__SCHED_LOCK);
+
     if ((tid < 0) || (tid == mr_current->tid))
-        return ERR_PTR(-ER_LOCKED);
+    {
+        sptr_thread = ERR_PTR(-ER_LOCKED);
+        goto END;
+    }
 
     sptr_thread = SCHED_THREAD_HANDLER(tid);
     if (!sptr_thread)
         return mr_nullptr;
 
     if (sptr_thread->state != NR_THREAD_SLEEP)
-        return ERR_PTR(-ER_BUSY);
+    {
+        sptr_thread = ERR_PTR(-ER_BUSY);
+        goto END;
+    }
 
-    spin_lock_irqsave(&__SCHED_LOCK);
     schedule_detach_sleep_list(sptr_thread);
     SCHED_THREAD_HANDLER(tid) = mr_nullptr;
-    spin_unlock_irqrestore(&__SCHED_LOCK);
 
+END:
+    spin_unlock_irqrestore(&__SCHED_LOCK);
     return sptr_thread;
 }
 

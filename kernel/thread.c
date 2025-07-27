@@ -13,6 +13,8 @@
 /*!< The includes */
 #include <kernel/thread.h>
 #include <kernel/sched.h>
+#include <kernel/sleep.h>
+#include <kernel/mailbox.h>
 
 /*!< API functions */
 /*!
@@ -225,6 +227,11 @@ kint32_t thread_destory(tid_t tid)
     if (mr_nullptr == sptr_thread)
         return ER_NORMAL;
 
+    if (sptr_thread->time_event)
+        thread_sleep_quit(sptr_thread->time_event);
+    if (sptr_thread->sptr_mb)
+        mailbox_destroy(sptr_thread->sptr_mb);
+    
     print_debug("\r\nthread \'%s\' (tid: %d) is be destroyed\r\n", sptr_thread->name, tid);
 
     kfree(sptr_thread->sptr_attr);
@@ -278,10 +285,10 @@ void *thread_attr_revise(struct thread_attr *sptr_attr)
     if (!sptr_attr)
         return mr_nullptr;
 
-    if (!sptr_attr->sgtc_param.sched_priority)
+    if (!sptr_attr->sgtc_param.priority)
         thread_set_priority(sptr_attr, THREAD_PROTY_DEFAULT);
     
-    if (mr_is_timespec_empty(&sptr_attr->sgtc_param.mr_sched_init_budget))
+    if (mr_is_timespec_empty(&sptr_attr->sgtc_param.init_budget))
         thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
 
     if (!sptr_attr->stack_addr)

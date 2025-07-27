@@ -24,16 +24,16 @@
 /*!< The defines */
 typedef struct spin_lock
 {
-	struct atomic sgtc_atc;
-	kuint32_t flag;
+    struct atomic sgtc_atc;
+    kuint32_t flag;
 
 } srt_spin_lock_t;
 
 #define DECLARE_SPIN_LOCK(lock)	\
-	struct spin_lock lock = { .sgtc_atc = ATOMIC_INIT(), .flag = 0 }
+    struct spin_lock lock = { .sgtc_atc = ATOMIC_INIT(), .flag = 0 }
 
 #define SPIN_LOCK_INIT()	\
-	{ .sgtc_atc = ATOMIC_INIT(), .flag = 0 }
+    { .sgtc_atc = ATOMIC_INIT(), .flag = 0 }
 
 /*!< The functions */
 extern void spin_lock_init(struct spin_lock *sptr_lock);
@@ -58,7 +58,7 @@ extern void spin_unlock_bh(struct spin_lock *sptr_lock);
  */
 static inline kbool_t spin_is_locked(struct spin_lock *sptr_lock)
 {
-	return !!ATOMIC_READ(&sptr_lock->sgtc_atc);
+    return !!ATOMIC_READ(&sptr_lock->sgtc_atc);
 }
 
 #ifdef __cplusplus

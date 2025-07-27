@@ -52,7 +52,7 @@ struct thread
     /*!< hash list */
     struct list_head sgtc_hash;
 
-    /*!< thread time slice (period = sptr_attr->sgtc_param.mr_sched_init_budget) */
+    /*!< thread time slice (period = sptr_attr->sgtc_param.init_budget) */
     kutime_t expires;
 
     /*!< refer to "__ERT_THREAD_SIGNALS" */
@@ -61,7 +61,7 @@ struct thread
     struct spin_lock sgtc_lock;
     struct mailbox *sptr_mb;
 
-    void *private_data;
+    void *time_event;
 };
 
 /*!< Set thread state */
