@@ -24,10 +24,10 @@
 /*!< The defines */
 typedef struct fwk_clk_gate 
 {
-	struct fwk_clk_hw sgtc_hw;
-	void *reg;
-	kuint8_t bit_idx;
-	kuint8_t flags;
+    struct fwk_clk_hw sgtc_hw;
+    void *reg;
+    kuint8_t bit_idx;
+    kuint8_t flags;
 
 } srt_fwk_clk_gate_t;
 
