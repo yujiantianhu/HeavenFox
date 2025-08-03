@@ -90,10 +90,6 @@ struct fwk_net_device
     kuint16_t hard_header_len;										/*!< hardware interface header lenth */
     kuint16_t min_header_len;										/*!< minimum hardware header length */
 
-    kuint32_t uc_promisc;											/*!< unicast mode of the network device interface */
-    kuint32_t promiscuity;											/*!< promiscuous mode of the network device interface */
-    kuint32_t allmulti;												/*!< full multicast mode for the network device interface */
-
     kutype_t last_rx;
     kuint8_t dev_addr[NET_MAC_ETH_ALEN];							/*!< MAC address of the network device interface */
 
@@ -105,7 +101,6 @@ struct fwk_net_device
     kuint64_t tx_queue_len;											/*!< max frame per queue allowned */
 
     struct fwk_device sgtc_dev;
-//	struct fwk_phy_device *sptr_phydev;
     void *private_data;
 };
 
