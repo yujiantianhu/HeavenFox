@@ -8,10 +8,29 @@
 #### Catalog
 - [Note](#note)
 - [Information](#information)
+- [disclaimer](#disclaimer)
 - [Feature](#feature)
 - [Methods](#methods)
 - [Folder Instruction](#folder-instruction)
 - [Updating Logs](#updating-logs)
+  - [2025.07.20](#20250720)
+  - [2024.12.21](#20241221)
+  - [2024.11.17](#20241117)
+  - [2024.11.09](#20241109)
+  - [2024.07.02](#20240702)
+  - [2024.06.12](#20240612)
+  - [2024.06.05](#20240605)
+  - [2024.06.03](#20240603)
+  - [2024.06.02](#20240602)
+  - [2024.05.27](#20240527)
+  - [2024.05.26](#20240526)
+  - [2024.05.13](#20240513)
+  - [2024.04.18](#20240418)
+  - [2024.04.16:](#20240416)
+  - [2024.04.15](#20240415)
+  - [2024.04.13](#20240413)
+  - [2024.04.07](#20240407)
+  - [2023.12.21](#20231221)
 
 ## Note
     HeavenFox OS aims to simplify the Linux kernel by refering to the kernel mechanism,
@@ -23,6 +42,9 @@
     created on: 2023.12.21
     e-mail:     <yujiantianhu@163.com>
     git:        git@github.com:yujiantianhu/HeavenFox.git
+
+## disclaimer
+    Night-Rain.Yang, talented-rain and yujiantinahu are all the author's own (Yang Yujun)
 
 ## Feature
     01) support multithreading (time slice, priority preemption, and delayed sleep);

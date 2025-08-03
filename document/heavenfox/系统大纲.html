@@ -816,7 +816,8 @@ hue-6-2: #e6c07b
         
         </head>
         <body class="vscode-body vscode-light">
-            <h1 align="center">HeavenFox 设计方法</h1>
+            <h1 align="center">HeavenFox系统大纲</h1>
+<p align="center">作者: 杨雨俊 (Night-Rain.Yang)</p>
 <hr>
 <h3 id="1-目录">1. 目录</h3>
 <ul>
@@ -846,33 +847,117 @@ hue-6-2: #e6c07b
 </li>
 </ul>
 </li>
-<li><a href="#6-%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8">6. 内核启动</a></li>
-<li><a href="#7-%E5%B9%B3%E5%8F%B0">7. 平台</a></li>
-<li><a href="#8-%E9%A9%B1%E5%8A%A8">8. 驱动</a></li>
-<li><a href="#9-%E7%BA%BF%E7%A8%8B%E8%B0%83%E5%BA%A6">9. 线程调度</a></li>
+<li><a href="#6-%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8">6. 内核启动</a>
+<ul>
+<li><a href="#61-%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC">6.1. 链接脚本</a></li>
+<li><a href="#62-%E5%BC%82%E5%B8%B8%E5%90%91%E9%87%8F%E8%A1%A8">6.2. 异常向量表</a></li>
+<li><a href="#63-%E6%97%A9%E6%9C%9F%E5%88%9D%E5%A7%8B%E5%8C%96">6.3. 早期初始化</a></li>
+<li><a href="#64-%E5%90%8E%E6%9C%9F%E5%88%9D%E5%A7%8B%E5%8C%96">6.4. 后期初始化</a></li>
+<li><a href="#65-%E5%86%85%E6%A0%B8%E8%B7%B3%E8%BD%AC">6.5. 内核跳转</a></li>
+<li><a href="#66-start_kernel">6.6. start_kernel</a></li>
+</ul>
+</li>
+<li><a href="#7-%E5%B9%B3%E5%8F%B0%E6%9E%B6%E6%9E%84">7. 平台架构</a>
+<ul>
+<li><a href="#71-%E9%9A%90%E5%BC%8F%E5%88%9D%E5%A7%8B%E5%8C%96">7.1. 隐式初始化</a></li>
+<li><a href="#72-%E8%AE%BE%E5%A4%87%E6%A0%91">7.2. 设备树</a>
+<ul>
+<li><a href="#721-%E8%AF%AD%E6%B3%95">7.2.1. 语法</a></li>
+<li><a href="#722-dtc%E7%BC%96%E8%AF%91%E5%99%A8">7.2.2. dtc编译器</a></li>
+<li><a href="#723-dtb">7.2.3. dtb</a></li>
+<li><a href="#724-%E8%AE%BE%E5%A4%87%E8%8A%82%E7%82%B9">7.2.4. 设备节点</a></li>
+<li><a href="#725-of%E5%87%BD%E6%95%B0">7.2.5. of函数</a></li>
+</ul>
+</li>
+<li><a href="#73-%E6%97%B6%E9%92%9F">7.3. 时钟</a></li>
+<li><a href="#74-%E4%B8%AD%E6%96%AD">7.4. 中断</a></li>
+<li><a href="#75-%E5%AE%9A%E6%97%B6%E5%99%A8">7.5. 定时器</a></li>
+<li><a href="#76-%E9%80%9A%E7%9F%A5%E9%93%BE">7.6. 通知链</a></li>
+<li><a href="#77-%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E4%B8%8E%E6%80%BB%E7%BA%BF">7.7. 平台设备与总线</a></li>
+<li><a href="#78-%E6%80%BB%E7%BA%BF-%E8%AE%BE%E5%A4%87-%E9%A9%B1%E5%8A%A8%E5%8C%B9%E9%85%8D">7.8. 总线-设备-驱动匹配</a></li>
+<li><a href="#79-gpio%E4%B8%8Epinctrl">7.9. gpio与pinctrl</a></li>
+<li><a href="#710-%E5%B8%A7%E7%BC%93%E5%86%B2">7.10. 帧缓冲</a></li>
+<li><a href="#711-i2c%E6%80%BB%E7%BA%BF">7.11. i2c总线</a></li>
+<li><a href="#712-%E7%BD%91%E7%BB%9C">7.12. 网络</a>
+<ul>
+<li><a href="#7121-%E7%BD%91%E7%BB%9C%E8%AE%BE%E5%A4%87">7.12.1. 网络设备</a></li>
+<li><a href="#7122-%E6%95%B0%E6%8D%AE%E5%8C%85">7.12.2. 数据包</a></li>
+<li><a href="#7123-socket">7.12.3. socket</a></li>
+</ul>
+</li>
+<li><a href="#713-%E7%BB%88%E7%AB%AF">7.13. 终端</a></li>
+</ul>
+</li>
+<li><a href="#8-%E8%99%9A%E6%8B%9F%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84">8. 虚拟文件路径</a>
+<ul>
+<li><a href="#81-%E8%8A%82%E7%82%B9%E5%AF%B9%E8%B1%A1%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">8.1. 节点对象与文件系统</a></li>
+<li><a href="#82-%E8%99%9A%E6%8B%9F%E8%AE%BE%E5%A4%87%E6%96%87%E4%BB%B6">8.2. 虚拟设备文件</a></li>
+<li><a href="#83-%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87">8.3. 字符设备</a></li>
+<li><a href="#84-%E7%A3%81%E7%9B%98%E8%AE%BE%E5%A4%87">8.4. 磁盘设备</a></li>
+</ul>
+</li>
+<li><a href="#9-%E7%BA%BF%E7%A8%8B%E7%AE%A1%E7%90%86">9. 线程管理</a>
+<ul>
+<li><a href="#91-%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E4%B8%8E%E8%BF%81%E7%A7%BB%E4%B8%80%E7%8A%B6%E6%80%81%E5%AE%9A%E4%B9%89">9.1. 线程状态与迁移（一）：状态定义</a></li>
+<li><a href="#92-%E7%BA%BF%E7%A8%8B%E6%8E%A7%E5%88%B6%E5%9D%97">9.2. 线程控制块</a></li>
+<li><a href="#93-%E8%B0%83%E5%BA%A6%E6%8E%A7%E5%88%B6%E5%9D%97sgtc_scheduler_table">9.3. 调度控制块“sgtc_scheduler_table”</a></li>
+<li><a href="#94-%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E4%B8%8E%E8%BF%81%E7%A7%BB%E4%BA%8C%E4%BC%98%E5%85%88%E7%BA%A7%E6%8E%92%E5%BA%8F">9.4. 线程状态与迁移（二）：优先级排序</a></li>
+<li><a href="#95-%E7%BA%BF%E7%A8%8B%E5%88%9B%E5%BB%BA%E4%B8%8E%E6%B3%A8%E9%94%80">9.5. 线程创建与注销</a></li>
+<li><a href="#96-%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E4%B8%8E%E8%BF%81%E7%A7%BB%E4%B8%89schedule_thread_switch">9.6. 线程状态与迁移（三）：schedule_thread_switch</a></li>
+<li><a href="#97-%E7%BA%BF%E7%A8%8B%E8%B0%83%E5%BA%A6">9.7. 线程调度</a>
+<ul>
+<li><a href="#971-__schedule_thread">9.7.1. __schedule_thread</a></li>
+<li><a href="#972-context_switch">9.7.2. context_switch</a></li>
+<li><a href="#973-%E4%BC%91%E7%9C%A0%E4%B8%8E%E5%94%A4%E9%86%92">9.7.3. 休眠与唤醒</a></li>
+<li><a href="#974-%E6%8A%A2%E5%8D%A0">9.7.4. 抢占</a></li>
+</ul>
+</li>
+<li><a href="#98-%E5%90%8C%E6%AD%A5%E4%B8%8E%E4%BA%92%E6%96%A5">9.8. 同步与互斥</a>
+<ul>
+<li><a href="#981-%E5%85%B3%E4%B8%AD%E6%96%AD">9.8.1. 关中断</a></li>
+<li><a href="#982-%E8%87%AA%E6%97%8B%E9%94%81">9.8.2. 自旋锁</a></li>
+<li><a href="#983-%E4%BA%92%E6%96%A5%E9%94%81">9.8.3. 互斥锁</a></li>
+<li><a href="#984-%E8%AF%BB%E5%86%99%E9%94%81">9.8.4. 读写锁</a></li>
+<li><a href="#985-%E4%BF%A1%E5%8F%B7%E9%87%8F">9.8.5. 信号量</a></li>
+</ul>
+</li>
+<li><a href="#99-%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1%E9%82%AE%E7%AE%B1">9.9. 线程间通信：邮箱</a></li>
+<li><a href="#910-%E7%AD%89%E5%BE%85%E9%98%9F%E5%88%97">9.10. 等待队列</a></li>
+<li><a href="#911-%E5%86%85%E6%A0%B8%E7%BA%BF%E7%A8%8B">9.11. 内核线程</a>
+<ul>
+<li><a href="#9111-idle">9.11.1. idle</a></li>
+<li><a href="#9112-kthread">9.11.2. kthread</a></li>
+<li><a href="#9113-init_proc">9.11.3. init_proc</a></li>
+<li><a href="#9114-kworker">9.11.4. kworker</a></li>
+<li><a href="#9115-kmemp">9.11.5. kmemp</a></li>
+<li><a href="#9116-irq_thread">9.11.6. irq_thread</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <hr>
 <h3 id="2-终端命令">2. 终端命令</h3>
-<pre><code>1.1, help
+<pre><code>2.1, help
     显示当前支持的所有命令
-1.2, info
+2.2, info
     显示作者信息
     info -v: 显示系统程序版本;
     info -m: 显示系统运行的机器型号;
     info -a: 显示系统信息 (版本, 机器型号等)
-1.3, ts
+2.3, ts
     显示当前的所有线程(含运行中、就绪、睡眠等状态), 显示线程栈、线程号及时间片等信息
-1.4, history
+2.4, history
     显示历史命令(从旧到新依次显示)
-1.5, user
+2.5, user
     修改用户名. 终端以&quot;login@host: &quot;作为开头
     user login xxx: 将login改为xxx
     user host xxx: 将host改为xxx
-1.6, kill
+2.6, kill
     给线程发信号
     kill -9 [tid]: 给线程号为tid(1, 2, 3, ...)的线程发&quot;SIGKILL&quot;(数字9), 使该线程进入睡眠(线程睡眠后将进入&quot;死亡&quot;状态, 将被kernel线程回收);
     kill -32 [tid]: 给线程号为tid(1, 2, 3, ...)的线程发&quot;SIGWAKE&quot;(数字9), 唤醒该线程(线程被回收后无法被唤醒)
-1.7, ttc
+2.7, ttc
     给线程发信息. 适用于应用程序(如&quot;example/&quot;文件夹下)
     ttc [tid] [op]: 给线程号为tid(1, 2, 3, ...)的线程发op(操作信息), 需该线程支持该信息的解析(终端线程不负责解析该信息)
     示例 (具体线程号需通过&quot;ts&quot;命令确定):
@@ -888,16 +973,16 @@ hue-6-2: #e6c07b
     env_monitor_task &lt;线程号为131&gt;:
             ttc 131 info: 显示当前环境信息
             ttc 131 sync: 保存环境信息到EEPROM, 并回显 (读取EEPROM并打印)
-1.8, ifconfig
+2.8, ifconfig
     查看当前已注册的网络设备, 及收发的数据包数量
-1.9, ping
+2.9, ping
     发送ICMP协议报文到对端ip地址, 并等待响应. 如: ping 127.0.0.1
-1.10, value
+2.10, value
     读写系统程序中已注册的全局变量. 如: value -w 1 g_xxx, 可修改全局变量g_xxx的值为1. 可通过&quot;value --list&quot;查看可以读写的变量列表;
-1.11, mem
+2.11, mem
     查看系统内存信息
     mem info: 查看当前内存分布(起始地址和大小), 及已分配内存中最接近边界的起始地址;
-1.12, runtime
+2.12, runtime
     查看从系统启动迄今所经过的时间(格式: 年-月-日 时:分:秒:毫秒), 即系统运行时间
 </code></pre>
 <hr>
@@ -2126,10 +2211,8 @@ sptr_block-&gt;sptr_next = sptr_new;
 <p>而使用哪个内存池，由参数“nrt_gfp_t flags”决定，见枚举结构“enum nrt_gfp”。</p>
 <hr>
 <h3 id="6-内核启动">6. 内核启动</h3>
-<ul>
-<li>链接脚本
-内核的链接脚本通用，由公共的链接脚本文件linkscript.lds.S定义。以下为其局部：</li>
-</ul>
+<h4 id="61-链接脚本">6.1. 链接脚本</h4>
+<p>内核的链接脚本通用，由公共的链接脚本文件linkscript.lds.S定义。以下为其局部：</p>
 <pre><code class="language-c"><span class="hljs-comment">/* 头文件, 提供宏定义 */</span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;configs/mach_configs.h&gt;</span></span>
 
@@ -2468,10 +2551,8 @@ MEMORY
 <pre><code class="language-Makefile"><span class="hljs-variable">$(TARGET_EXEC)</span> : $(head-objs) $(lds-y) force
 	<span class="hljs-variable">$(CXX)</span> -T$(lds-y) <span class="hljs-variable">$(CXX_FLAGS)</span> <span class="hljs-variable">$(EXTRA_FLAGS)</span> <span class="hljs-variable">$(LINK_FLAGS)</span> -Wl,-Map=<span class="hljs-variable">$(TARGET_MMAP)</span> -o <span class="hljs-variable">$@</span> $(head-objs) <span class="hljs-variable">$(OBJECT_EXEC)</span> <span class="hljs-variable">$(LIBS_PATH)</span> <span class="hljs-variable">$(LIBS)</span>
 </code></pre>
-<ul>
-<li>异常向量表
-根据链接脚本，Heavenfox的程序入口是异常向量表，它定义在“arch/$(ARCH)/lib/vectors.S”：</li>
-</ul>
+<h4 id="62-异常向量表">6.2. 异常向量表</h4>
+<p>根据链接脚本，Heavenfox的程序入口是异常向量表，它定义在“arch/$(ARCH)/lib/vectors.S”：</p>
 <pre><code class="language-nasm">    .global _start
 
     .global _undefined_handler
@@ -2554,11 +2635,9 @@ _main:
     ldr lr, =board_init_r                       @ 后期初始化
     mov pc, lr                                  @ pc = board_init_r, 此后不再回来
 </code></pre>
-<ul>
-<li>早期初始化
-board_init_f_alloc_reserve、board_init_f_init_reserve和board_init_f为早期初始化代码，由C语言编写。
-前两个已在代码注释中说明了其功能，以CONFIG_BOARD_SP_ADDR为起始，向下移动CONFIG_BOOT_MALLOC_LEN，作为早期内存池；再向下移动sizeof(srt_gd_t)，留出全局变量“srt_gd_t global_data”的空间；并将此时global_data起始地址作为新的栈顶：</li>
-</ul>
+<h4 id="63-早期初始化">6.3. 早期初始化</h4>
+<p>board_init_f_alloc_reserve、board_init_f_init_reserve和board_init_f为早期初始化代码，由C语言编写。
+前两个已在代码注释中说明了其功能，以CONFIG_BOARD_SP_ADDR为起始，向下移动CONFIG_BOOT_MALLOC_LEN，作为早期内存池；再向下移动sizeof(srt_gd_t)，留出全局变量“srt_gd_t global_data”的空间；并将此时global_data起始地址作为新的栈顶：</p>
 <blockquote>
 <pre>
             --------------------    ---> CONFIG_BOARD_SP_ADDR
@@ -2606,10 +2685,8 @@ board_init_f_alloc_reserve、board_init_f_init_reserve和board_init_f为早期�
 }
 </code></pre>
 <p>board_init_console和board_init_sdmmc需由各CPU自行提供，不同CPU初始化方式不相同。</p>
-<ul>
-<li>后期初始化
-board_init_r用于后期初始化，负责保存内核所需的数据（如设备树、字库等），并跳转到内核。</li>
-</ul>
+<h4 id="64-后期初始化">6.4. 后期初始化</h4>
+<p>board_init_r用于后期初始化，负责保存内核所需的数据（如设备树、字库等），并跳转到内核。</p>
 <pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">boot_images</span>
 {</span>
     <span class="hljs-type">kuaddr_t</span> os_entry;                          <span class="hljs-comment">/* 内核入口: kernel_entry */</span>
@@ -2749,10 +2826,8 @@ board_init_r用于后期初始化，负责保存内核所需的数据（如设�
 <p>函数boot_params_prep首先定义一个“struct tag_params”对象，并设置它的地址为CONFIG_B2K_PARAM_BASE（来自autoconf.h），即，tag_params为一个全局对象。
 首先初始化sgtc_hdr的各个成员为0，然后从sd卡读取字库，标记此刻的sgtc_hdr.type为TAG_PARAM_VIDEO，并将字库所在的内存地址保存到sgtc_vdp，而sgtc_hdr.size则设置为sizeof(struct video_params)，此时字库数据即保存到tag_params；
 将tag_params偏移sizeof(struct video_params)，再保存下一个启动参数（如设备树），依次类推。</p>
-<ul>
-<li>内核跳转
-jump_to_kernel函数负责boot到内核的跳转，而内核入口地址已知，即sptr_image-&gt;os_entry（kernel_entry）；跳转时还要将tag_params进行传递，届时内核可将其解析。</li>
-</ul>
+<h4 id="65-内核跳转">6.5. 内核跳转</h4>
+<p>jump_to_kernel函数负责boot到内核的跳转，而内核入口地址已知，即sptr_image-&gt;os_entry（kernel_entry）；跳转时还要将tag_params进行传递，届时内核可将其解析。</p>
 <pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">jump_to_kernel</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> boot_images *sptr_image)</span>
 {
     <span class="hljs-type">kuint32_t</span> r2;
@@ -2773,10 +2848,8 @@ jump_to_kernel函数负责boot到内核的跳转，而内核入口地址已知�
 4）跳转到head-common.S</p>
 </blockquote>
 <p>head-common.S将直接跳转到“start_kernel”函数，内核开始运行。</p>
-<ul>
-<li>start_kernel
-首先将tag_params的地址从寄存器r2中读出（jump_to_kernel函数将tag_params保存到了r2寄存器）：</li>
-</ul>
+<h4 id="66-start_kernel">6.6. start_kernel</h4>
+<p>首先将tag_params的地址从寄存器r2中读出（jump_to_kernel函数将tag_params保存到了r2寄存器）：</p>
 <pre><code class="language-c"><span class="hljs-type">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">tag_params</span> *<span class="hljs-title">sptr_tag_params</span>;</span>
 
 <span class="hljs-meta">#<span class="hljs-keyword">define</span> mr_tag_params_get()    \
@@ -2799,13 +2872,12 @@ jump_to_kernel函数负责boot到内核的跳转，而内核入口地址已知�
 }
 </code></pre>
 <p>然后构建内存池（包括“kernel heap”、“dma”、“framebuffer”和“network”，在《内存池》章节有简述）、解析设备树、构建时钟子系统、中断子系统、文件系统，并初始化系统定时器和platform平台。最终调用“schedule_thread”，调度器开始运转。</p>
-<h3 id="7-平台">7. 平台</h3>
-<ul>
-<li>隐式初始化
-由于不同CPU寄存器存在差异，硬件的初始化流程也有不同，如果直接调用某个CPU的初始化函数到“start_kerenl”，当CPU种类较多时，便无法适应。
+<h3 id="7-平台架构">7. 平台架构</h3>
+<p>HeavenFox是一个类Linux的简化OS，这个“类”就主要体现在“平台架构”和“虚拟文件路径”两个章节，可以看到很多接口名称（结构体成员、函数名）都与Linux相似，但部分接口的具体实现则由笔者重构，代码趋向于简单化，开发者可以像写Linux一样调用这些名称相似的接口。</p>
+<h4 id="71-隐式初始化">7.1. 隐式初始化</h4>
+<p>由于不同CPU寄存器存在差异，硬件的初始化流程也有不同，如果直接调用某个CPU的初始化函数到“start_kerenl”，当CPU种类较多时，便无法适应。
 内核使用链接脚本定义“.dync_init”和“.dync_exit”代码段，并指定某个初始化函数存放到该代码段，那么，只需要读取并执行该代码段的各个函数入口，便能实现初始化功能。
-某个CPU的初始化函数是否能执行，则完全取自于：该初始化函数所在的.c文件，是否能被编译到内核中；而编译又取决于Makefile，Makefile又会读取auto.conf，并根据obj-y、obj-n来决定是否编译某个文件。即，最终取决于各个CPU的配置文件，如imx6ull_toppet_defconfig。选择哪个配置文件，则需要“make CONFIGS=imx6ull_toppet_defconfig config”配合。</li>
-</ul>
+某个CPU的初始化函数是否能执行，则完全取自于：该初始化函数所在的.c文件，是否能被编译到内核中；而编译又取决于Makefile，Makefile又会读取auto.conf，并根据obj-y、obj-n来决定是否编译某个文件。即，最终取决于各个CPU的配置文件，如imx6ull_toppet_defconfig。选择哪个配置文件，则需要“make CONFIGS=imx6ull_toppet_defconfig config”配合。</p>
 <p>规定如下代码段：</p>
 <pre><code class="language-c"><span class="hljs-comment">/*!&lt; dynamic init/exit sections*/</span>
 <span class="hljs-meta">#<span class="hljs-keyword">define</span> __DYNC_INIT_SEC(n)							__section(<span class="hljs-string">&quot;.dync_init.&quot;</span>#n)</span>
@@ -2874,11 +2946,9 @@ jump_to_kernel函数负责boot到内核的跳转，而内核入口地址已知�
 <span class="hljs-meta">#<span class="hljs-keyword">define</span> IMPORT_DEVICE_EXIT(x)				        IMPORT_DYNC_EXIT_ENTRY(bsp,  x, __DYNC_DEV_EXIT_SEC)</span>
 <span class="hljs-meta">#<span class="hljs-keyword">define</span> IMPORT_DRIVER_EXIT(x)				        IMPORT_DYNC_EXIT_ENTRY(drv,  x, __DYNC_DRV_EXIT_SEC)</span>
 </code></pre>
-<ul>
-<li>设备树
-HeavenFox支持设备树。设备树文件存放于“boot/dts/$(CPU)”，而编译器位于“scripts/dtc”。dtc编译器将.dts文件编译为.dtb，并拷贝到“boot/image”路径下，重命名为“firmware.dtb”；它被fdt_boot_initial函数从sd中读出，存储到内存地址CONFIG_DEVICE_TREE_BASE，再经tag_params传递给内核。
-start_kernel将调用setup_machine函数解析tag_params：</li>
-</ul>
+<h4 id="72-设备树">7.2. 设备树</h4>
+<p>HeavenFox支持设备树。设备树文件存放于“boot/dts/$(CPU)”，而编译器位于“scripts/dtc”。设备树文件以.dts或.dtsi为后缀名，由dtc编译器将二者编译为.dtb（二进制文件），并拷贝到“boot/image”路径下，重命名为“firmware.dtb”；它被fdt_boot_initial函数从sd中读出，存储到内存地址CONFIG_DEVICE_TREE_BASE，再经tag_params传递给内核。</p>
+<p>start_kernel将调用setup_machine函数解析tag_params：</p>
 <pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">setup_machine_fdt</span><span class="hljs-params">(<span class="hljs-type">void</span> *ptr)</span>
 {
     <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fdt_params</span> *<span class="hljs-title">sptr_param</span>;</span>
@@ -2920,93 +2990,1478 @@ start_kernel将调用setup_machine函数解析tag_params：</li>
     setup_machine(sptr_tag_params);
 }
 </code></pre>
-<p>dtb文件以大端模式存储，而ARM多为小端模式，读取数据时需伴随大小端转换。
-设备树每一个节点都会被转换为结构体“struct fwk_device_node”，而每个节点的属性都会被转换为结构体“struct fwk_of_property”。
-节点转化和属性转化分别使用：</p>
+<h5 id="721-语法">7.2.1. 语法</h5>
+<p>首先认识一下设备树。这是一个.dts文件的例程：</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 设备树注释方式与C语言一样; 语句后需以&quot;;&quot;结尾 */</span>
+<span class="hljs-comment">/* 可包含.h头文件 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;dt-bindings/input.h&gt;</span></span>
+<span class="hljs-comment">/* .dts和.dtsi的语法完全一样, 它们之间的关系,就如同C语言的.c和.h */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;am4372.dtsi&quot;</span></span>
+
+<span class="hljs-comment">/*!
+ * &#x27;/&#x27;: 根节点, 和通用的树结构一样, 一个设备树只有一个根节点
+ *          根节点的特点: 无父节点和兄弟节点
+ *
+ * 节点下可以挂接多个节点, 每个节点可能拥有自己的属性
+ * 根节点属性: compatible, interrupt-parent, #address-cells, #size-cells
+ * 子节点: chosen, memory@0, aliases, cpus, gic, ocp@44000000, ...
+ *
+ * 节点
+ *      @: 后面一般接当前设备的寄存器地址. 该地址在代码中无用, 但可用于区分同名的节点
+ *          (设备节点可能同名, 但设备地址一定不同)
+ *      &amp;: 引用其他节点. 被引用的节点会自动生成一个独一无二phandle属性值
+ *          (未被引用过的节点也有phandle属性, 但属性值为-1)
+ *      full_name: 全路径, 从根节点开始算起. 如: &quot;/ocp@44000000/serial@48022000&quot;
+ *      name: 节点名称, 不含路径和@, 如: &quot;serial&quot;. name一般与name属性相同, 见下文
+ *          (由于不包含&quot;@设备地址&quot;, 值可重复. 如&quot;gpio@1&quot;, &quot;gpio@2&quot;, name都是&quot;gpio&quot;)
+ *
+ * 属性值
+ *      &quot;&quot;: 表示属性值为字符串. 一个属性值可以是多个字符串, 中间用&#x27;,&#x27;隔开
+ *      &lt;&gt;: 表示属性值是32位整型. 如: reg = &lt;0x400 0x4&gt;
+ *      []: 表示属性值是16位整型. 如: mac-address = [ 00 00 00 00 00 00 ]
+ *      /bits/: 指定位数(8/16/32/64). 如: opp-hz = /bits/ 64 &lt;800000000&gt;;
+ *      
+ * name: 名称, 目前基本已不再显式地出现在dts中, 但并不是说没有这个属性 ===&gt;
+ *      内核代码手动添加, 它由节点的full_name切片得到 (最后一个&#x27;/&#x27;和&#x27;\0&#x27;之间)
+ * compatible: 兼容属性, 表示节点的基本信息, 格式一般为: 厂商名,产品系列名,产品名
+ * device_type: 设备类型
+ * #address-cells: 表示子节点的reg属性该以几个连续的数值表示一个地址
+ * #size-cells: 表示子节点的reg属性该以几个连续的数值表示一个长度
+ * reg: 寄存器属性, 属性值一般为地址 + 长度. 如: 
+ *      #address-cells = &lt;2&gt;;
+ *      #size-cells = &lt;1&gt;;
+ *      node {
+ *          compatible = &quot;template&quot;;
+ *          reg = &lt;0x200 0x400 0x4 0x600 0x800 0xC&gt;;
+ *      };
+ *      
+ *      因父节点属性#address-cells为2, 故reg属性需两个数表示地址, 即[0x200 0x400];
+ *      因父节点属性#size-cells为1, 故reg属性需一个数表示地址, 即0x4;
+ *      故 ===&gt;
+ *          地址1范围: 0x200 ~ 0x200 + 0x4; 地址2范围: 0x400 ~ 0x400 + 0x4
+ *          地址3范围: 0x600 ~ 0x600 + 0xC; 地址4范围: 0x800 ~ 0x800 + 0xC
+ * interrupt-controller: 空属性, bool类型; 有此属性时, 表示该设备节点是一个中断控制器
+ * #interrupt-cells: 表示子节点的interrupts属性需要几个数值来描述中断信息. 如:
+ *      #interrupt-cells = &lt;2&gt;;
+ *      node {
+ *          interrupts = &lt;16 0&gt;;
+ *      };
+ *
+ *      父节点属性#interrupt-cells为2, 故interrupts需两个数表示中断信息, 即[16 0];
+ *      一般第1个值(16)表示中断号, 第2个值表示中断触发类型(0) 
+ *      (上/下边沿触发, 或高/低电平触发)
+ * interrupt-parent: 本节点所属的中断控制器, 即父中断控制器; 
+ *      (常引用中断控制器节点, 故一般是一个phandle值)
+ * status: 表示当前节点的开关状态. 属性值为&quot;okay&quot;时, 节点使能; 为&quot;disabled&quot;则禁用
+ *      (使能或禁用不会影响生成的dtb, 最终是要由内核代码自己判断status属性值来决定)
+ *      (热插拔设备可以设置为&quot;disabled&quot;, 后期可转为&quot;okay&quot;; 但&quot;fail&quot;则表示永久禁用)
+ */</span>
+
+/ {
+    <span class="hljs-comment">/*!
+     * 根节点属性1
+     * 属性名: compatible
+     * 属性值类型: 字符串
+     * 属性值: value = &quot;ti,am4372&quot;, &quot;ti,am43&quot;
+     * 第一个属性值: str1 = value = &quot;ti,am4372&quot;
+     * 第二个属性值: str2 = value + strlen(value) = &quot;ti,am43&quot;
+     * 属性值长度: size = strlen(str1) + strlen(str2)
+     */</span>
+    compatible = <span class="hljs-string">&quot;ti,am4372&quot;</span>, <span class="hljs-string">&quot;ti,am43&quot;</span>;
+
+    <span class="hljs-comment">/*!
+     * 根节点属性2
+     * 属性名: interrupt-parent
+     * 属性值类型: 32位整型
+     * 属性值: phandle (wakeupgen是某一个节点的名字, 被引用后生成非负数的id号)
+     * 属性值长度: sizeof(unsigned int)
+     * (各节点的phandle数值不重复, 可遍历整个设备树比较phandle, 获得wakeupgen)
+     */</span>
+    interrupt-parent = &lt;&amp;wakeupgen&gt;;
+
+    <span class="hljs-comment">/* 见前文 (根节点注释内容) */</span>
+    <span class="hljs-meta">#address-cells = <span class="hljs-string">&lt;1&gt;</span>;</span>
+    <span class="hljs-meta">#size-cells = <span class="hljs-string">&lt;1&gt;</span>;</span>
+
+    <span class="hljs-comment">/* 不是一个真实的设备, 在HeavenFox中无意义 */</span>
+    chosen { };
+
+    <span class="hljs-comment">/*!
+     * 根节点的子节点: memory
+     * full_name (路径): &quot;/memory@0&quot;
+     * name (名称): &quot;memory&quot; (name是full_name最后一个&#x27;/&#x27;起始的内容, 并剔除&#x27;@&#x27;)
+     */</span>
+    memory@<span class="hljs-number">0</span> {
+        device_type = <span class="hljs-string">&quot;memory&quot;</span>;
+
+        <span class="hljs-comment">/* 父节点为根节点, #address-cells = &lt;1&gt;, #size-cells = &lt;1&gt; */</span>
+        reg = &lt;<span class="hljs-number">0</span> <span class="hljs-number">0</span>&gt;;
+    };
+
+    <span class="hljs-comment">/*!
+     * 根节点的子节点: aliases
+     * 该节点在代码中需特殊处理, 用于给其他节点起别名
+     * dtc编译后, 各个属性会被展开, 比如serial0:
+     *      serial0 = &quot;/ocp@44000000/serial@48022000&quot;
+     */</span>
+    aliases {
+        i2c0 = &amp;i2c0;
+        i2c1 = &amp;i2c1;
+        i2c2 = &amp;i2c2;
+        serial0 = &amp;uart0;
+        serial1 = &amp;uart1;
+        serial2 = &amp;uart2;
+        serial3 = &amp;uart3;
+    };
+
+    cpus {
+        <span class="hljs-meta">#address-cells = <span class="hljs-string">&lt;1&gt;</span>;</span>
+        <span class="hljs-meta">#size-cells = <span class="hljs-string">&lt;0&gt;</span>;</span>
+
+        <span class="hljs-comment">/* cpus的子节点, 根节点的孙节点 */</span>
+        cpu: cpu@<span class="hljs-number">0</span> {
+            compatible = <span class="hljs-string">&quot;arm,cortex-a9&quot;</span>;
+            enable-method = <span class="hljs-string">&quot;ti,am4372&quot;</span>;
+            device_type = <span class="hljs-string">&quot;cpu&quot;</span>;
+
+            <span class="hljs-comment">/* 父节点cpus的#size-cells = &lt;0&gt;, 故只有address */</span>
+            reg = &lt;<span class="hljs-number">0</span>&gt;;
+
+            <span class="hljs-comment">/* dpll_mpu_ck是时钟控制器-设备树节点 */</span>
+            clocks = &lt;&amp;dpll_mpu_ck&gt;;
+            clock-names = <span class="hljs-string">&quot;cpu&quot;</span>;
+
+            operating-points-v2 = &lt;&amp;cpu0_opp_table&gt;;
+
+            clock-latency = &lt;<span class="hljs-number">300000</span>&gt;; <span class="hljs-comment">/* From omap-cpufreq driver */</span>
+            cpu-idle-states = &lt;&amp;mpu_gate&gt;;
+        };
+    };
+
+    <span class="hljs-comment">/* 中断控制器-设备树节点 */</span>
+    gic: interrupt-controller@<span class="hljs-number">48241000</span> {
+        compatible = <span class="hljs-string">&quot;arm,cortex-a9-gic&quot;</span>;
+
+        <span class="hljs-comment">/* 空属性, 内核代码需判断是否有该属性, 有, 则注册为中断控制器 (irq_domain) */</span>
+        interrupt-controller;
+
+        <span class="hljs-comment">/* 引用gic的节点, interrupts属性需要3个数值描述 */</span>
+        <span class="hljs-meta">#interrupt-cells = <span class="hljs-string">&lt;3&gt;</span>;</span>
+        reg = &lt;<span class="hljs-number">0x48241000</span> <span class="hljs-number">0x1000</span>&gt;,
+              &lt;<span class="hljs-number">0x48240100</span> <span class="hljs-number">0x0100</span>&gt;;
+        interrupt-parent = &lt;&amp;gic&gt;;
+    };
+
+    ocp@<span class="hljs-number">44000000</span> {
+        compatible = <span class="hljs-string">&quot;ti,am4372-l3-noc&quot;</span>, <span class="hljs-string">&quot;simple-bus&quot;</span>;
+        <span class="hljs-meta">#address-cells = <span class="hljs-string">&lt;1&gt;</span>;</span>
+        <span class="hljs-meta">#size-cells = <span class="hljs-string">&lt;1&gt;</span>;</span>
+        ranges;
+        ti,hwmods = <span class="hljs-string">&quot;l3_main&quot;</span>;
+        ti,no-idle;
+        reg = &lt;<span class="hljs-number">0x44000000</span> <span class="hljs-number">0x400000</span>
+               <span class="hljs-number">0x44800000</span> <span class="hljs-number">0x400000</span>&gt;;
+
+        <span class="hljs-comment">/* 中断信息: 中断组(PPI, SGI, SPI), 中断号, 中断触发类型 */</span>
+        interrupts = &lt;GIC_SPI <span class="hljs-number">9</span> IRQ_TYPE_LEVEL_HIGH&gt;,
+                 &lt;GIC_SPI <span class="hljs-number">10</span> IRQ_TYPE_LEVEL_HIGH&gt;;
+
+        uart1: serial@<span class="hljs-number">48022000</span> {
+            compatible = <span class="hljs-string">&quot;ti,am4372-uart&quot;</span>,<span class="hljs-string">&quot;ti,omap2-uart&quot;</span>;
+            reg = &lt;<span class="hljs-number">0x48022000</span> <span class="hljs-number">0x2000</span>&gt;;
+            interrupts = &lt;GIC_SPI <span class="hljs-number">73</span> IRQ_TYPE_LEVEL_HIGH&gt;;
+            ti,hwmods = <span class="hljs-string">&quot;uart2&quot;</span>;
+
+            <span class="hljs-comment">/* 暂时关闭. 内核需判断status的值, 以决定是否转化为platform_device */</span>
+            status = <span class="hljs-string">&quot;disabled&quot;</span>;
+        };
+    
+    };
+};
+</code></pre>
+<p>基于am4372.dtsi，可根据具体单板编写.dts文件，只需包含一下am4372.dtsi即可。比如可以写一个template.dts：</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 声明设备树版本 */</span>
+/dts-v1/;
+
+<span class="hljs-comment">/* 包含dtsi文件, 就好像C语言包含.h文件一样 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;am4372.dtsi&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;dt-bindings/pinctrl/am43xx.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;dt-bindings/pwm/pwm.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;dt-bindings/gpio/gpio.h&gt;</span></span>
+
+<span class="hljs-comment">/* 根节点内容补充; 不需要使用&#x27;&amp;&#x27;进行引用 */</span>
+/ {
+    model = <span class="hljs-string">&quot;TI AM437x GP EVM&quot;</span>;
+    compatible = <span class="hljs-string">&quot;ti,am437x-gp-evm&quot;</span>,<span class="hljs-string">&quot;ti,am4372&quot;</span>,<span class="hljs-string">&quot;ti,am43&quot;</span>;
+
+    aliases {
+        display0 = &amp;lcd0;
+    };
+
+    chosen {
+        <span class="hljs-built_in">stdout</span>-path = &amp;uart0;
+    };
+};
+
+<span class="hljs-comment">/* 节点内容补充, 因为不是根节点, 需要使用&#x27;&amp;&#x27;来引用, 表示继续填充节点usb1 */</span>
+&amp;usb1 {
+    dr_mode = <span class="hljs-string">&quot;otg&quot;</span>;
+
+    <span class="hljs-comment">/* status可能在dtsi是disabled, 这里改成okay, 直接开放 */</span>
+    status = <span class="hljs-string">&quot;okay&quot;</span>;
+
+    <span class="hljs-comment">/* pinctrl, 引脚配置 */</span>
+    pinctrl-names = <span class="hljs-string">&quot;default&quot;</span>;
+    pinctrl<span class="hljs-number">-0</span> = &lt;&amp;usb1_pins&gt;;
+};
+</code></pre>
+<h5 id="722-dtc编译器">7.2.2. dtc编译器</h5>
+<p>HeavenFox使用“scripts/dtc”路径下的dtc编译器来编译设备树，并将其编译规则写入到“boot/dts”路径下的Makefile文件，输入命令“make dtbs”即可一次性编译。
+全文如下：</p>
+<pre><code class="language-Makefile"><span class="hljs-comment"># 设备树所在路径: 当前位置(boot/dts)</span>
+DT_DIRS			:=	<span class="hljs-variable">$(<span class="hljs-built_in">shell</span> pwd)</span>
+
+dtb-y 			:=
+inc-y			:=
+
+<span class="hljs-keyword">include</span> <span class="hljs-variable">$(CONF_MAKEFILE)</span>
+<span class="hljs-keyword">include</span> <span class="hljs-variable">$(CPU)</span>/Makefile
+
+<span class="hljs-comment"># 由$(CPU)/Makefile提供, dtb-y可能叫imx6ull_topeet.dtb</span>
+TARGET			:=	$(dtb-y)
+
+<span class="hljs-comment"># imx6ull_topeet.dts所在路径</span>
+DT_NAME			:=	<span class="hljs-variable">$(DT_DIRS)</span>/<span class="hljs-variable">$(CPU)</span>
+DT_FILE			:=	<span class="hljs-variable">$(DT_NAME)</span>/<span class="hljs-variable">$(TARGET)</span>.dts
+
+<span class="hljs-comment"># 取头文件路径, 头文件中只能定义宏, 不能有变量类型出现</span>
+INCLUDES		:=	<span class="hljs-variable">$(DT_DIRS)</span>/	\
+					<span class="hljs-variable">$(DT_DIRS)</span>/<span class="hljs-variable">$(CPU)</span>/	\
+					<span class="hljs-variable">$(DT_DIRS)</span>/dt-bindings/
+<span class="hljs-keyword">ifneq</span> ($(inc-y),)
+INCLUDES		+=	$(inc-y)
+<span class="hljs-keyword">endif</span>
+
+<span class="hljs-comment"># 一个用于dtc编译器(-i), 另一个用于cpp编译器(-I)</span>
+DTC_INCLUDES	:= 	<span class="hljs-variable">$(<span class="hljs-built_in">patsubst</span> %, -i%, <span class="hljs-variable">$(INCLUDES)</span>)</span>
+CXX_INCLUDES	:=	<span class="hljs-variable">$(<span class="hljs-built_in">patsubst</span> %, -I%, <span class="hljs-variable">$(INCLUDES)</span>)</span>
+
+<span class="hljs-comment"># 用法: dtc -I &lt;源文件(输入)&gt; -o &lt;目标文件(输出)&gt; -i &lt;头文件路径&gt; -o $@ $^</span>
+DTC				:=	<span class="hljs-variable">$(PROJECT_DIR)</span>/scripts/dtc/dtc
+DTB				:=	<span class="hljs-variable">$(DT_NAME)</span>/<span class="hljs-variable">$(TARGET)</span>.dtb
+DTS				:=	<span class="hljs-variable">$(DT_NAME)</span>/.<span class="hljs-variable">$(TARGET)</span>.dts
+DEP				:=	<span class="hljs-variable">$(DTS)</span>.d
+TEMP			:=	<span class="hljs-variable">$(DTS)</span>.temp
+
+BUILD_FLAGS		:=	-nostdinc -undef -D__DTS__ -x assembler-with-cpp
+
+<span class="hljs-section">all:</span>
+    <span class="hljs-comment"># 1. 将xxx.dts生成xxx.temp</span>
+    <span class="hljs-comment"># 2. xxx.temp生成.xxx.dts;</span>
+    <span class="hljs-comment"># 3. .xxx.dts生成xxx.dtb</span>
+    <span class="hljs-comment"># 4. xxx.dtb重命名为firmware.dtb</span>
+	cpp -Wp,-MD,<span class="hljs-variable">$(DEP)</span> <span class="hljs-variable">$(BUILD_FLAGS)</span> <span class="hljs-variable">$(CXX_INCLUDES)</span> -o <span class="hljs-variable">$(TEMP)</span> <span class="hljs-variable">$(DT_FILE)</span>
+	<span class="hljs-variable">$(DTC)</span> -I dts -O dts <span class="hljs-variable">$(DTC_INCLUDES)</span> -o <span class="hljs-variable">$(DTS)</span> <span class="hljs-variable">$(TEMP)</span>
+	<span class="hljs-variable">$(DTC)</span> -I dts -O dtb -o <span class="hljs-variable">$(DTB)</span> <span class="hljs-variable">$(DTS)</span>
+	cp <span class="hljs-variable">$(DTB)</span> <span class="hljs-variable">$(IMAGE_PATH)</span>/firmware.dtb
+
+<span class="hljs-section">clean:</span>
+	rm -rf <span class="hljs-variable">$(TEMP)</span> 
+	rm -rf <span class="hljs-variable">$(DEP)</span> 
+	rm -rf <span class="hljs-variable">$(DTS)</span>
+
+<span class="hljs-section">distclean:</span>
+	rm -rf <span class="hljs-variable">$(IMAGE_PATH)</span>/firmware.dtb
+	rm -rf <span class="hljs-variable">$(DTB)</span> 
+	rm -rf <span class="hljs-variable">$(TEMP)</span> 
+	rm -rf <span class="hljs-variable">$(DEP)</span> 
+	rm -rf <span class="hljs-variable">$(DTS)</span>
+
+<span class="hljs-section">check:</span>
+    <span class="hljs-comment"># 检查.dts格式是否正确</span>
+	<span class="hljs-variable">$(DTC)</span> -q -I dts -O dtb <span class="hljs-variable">$(DTC_INCLUDES)</span> <span class="hljs-variable">$(DT_FILE)</span>
+
+<span class="hljs-section">version:</span>
+    <span class="hljs-comment"># 查看编译器版本</span>
+	<span class="hljs-variable">$(DTC)</span> -v
+</code></pre>
+<p>设备树文件也是可以包含.h文件的，前提是.h文件只能存放宏定义，其他语法并不能被设备树识别和支持。.h文件定义的宏可以直接用于设备树dts文件中，编译时会将宏自动展开（预处理）为具体的值。
+Makefile先后使用了cpp和dtc两个编译器，xxx.dts首先由cpp编译为.xxx.dts.temp，同时由“-Mp,-MD”选项生成.xxx.dts.d；
+最后由dtc编译.temp为.xxx.dts，然后再将其输出为xxx.dtb。这里的“.xxx.dts”是“xxx.dts”展开所有的宏、phandle，以及合并imx6ull.dtsi之后的设备树全貌，比如aliases节点就会被展开。
+imx6ull.dtsi：</p>
+<pre><code class="language-c">/ {
+    aliases {
+        can0 = &amp;flexcan1;
+        can1 = &amp;flexcan2;
+        ethernet0 = &amp;fec1;
+        ethernet1 = &amp;fec2;
+    };
+};
+</code></pre>
+<p>.xxx.dts：</p>
+<pre><code class="language-c">/ {
+    aliases {
+        can0 = <span class="hljs-string">&quot;/soc/aips-bus@02000000/can@02090000&quot;</span>;
+        can1 = <span class="hljs-string">&quot;/soc/aips-bus@02000000/can@02094000&quot;</span>;
+        ethernet0 = <span class="hljs-string">&quot;/soc/aips-bus@02100000/ethernet@02188000&quot;</span>;
+        ethernet1 = <span class="hljs-string">&quot;/soc/aips-bus@02000000/ethernet@020b4000&quot;</span>;
+    };
+};
+</code></pre>
+<p>可以看到，原先的引用节点（phandle）的写法，被展开为具体节点的全路径。
+还有就是合并imx6ull.dtsi，这使得设备树所有节点（dtsi和dts）全部集中到一起，最终dtb文件的内容顺序也将按照这个最终的dts文件排布。比如imx6ull.dtsi是以aliases节点开头：</p>
+<pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;dt-bindings/imx6ul/imx6ul-clock.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;dt-bindings/gpio.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;dt-bindings/arm-gic.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;dt-bindings/imx6ull/imx6ull-pinfunc.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;dt-bindings/imx6ull/imx6ull-pinfunc-snvs.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;../skeleton.dtsi&quot;</span></span>
+
+/ {
+    aliases {
+        can0 = &amp;flexcan1;
+        can1 = &amp;flexcan2;
+        ethernet0 = &amp;fec1;
+        ethernet1 = &amp;fec2;
+    };
+};
+</code></pre>
+<p>xxx.dts则是以model属性开头：</p>
+<pre><code class="language-c">/dts-v1/;
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;dt-bindings/input.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;imx6ull.dtsi&quot;</span></span>
+
+/ {
+    model = <span class="hljs-string">&quot;Freescale i.MX6 ULL Template Board&quot;</span>;
+    compatible = <span class="hljs-string">&quot;fsl,imx6ull,template&quot;</span>, <span class="hljs-string">&quot;fsl,imx6ull&quot;</span>;
+
+    chosen {
+        <span class="hljs-built_in">stdout</span>-path = &amp;uart1;
+    };
+
+    memory {
+        reg = &lt;<span class="hljs-number">0x80000000</span> <span class="hljs-number">0x20000000</span>&gt;;
+    };
+};
+</code></pre>
+<p>最终.xxx.dts呈现的结果就是二者的合并与结构重排：</p>
+<pre><code class="language-c">/dts-v1/;
+
+/ {
+    <span class="hljs-meta">#address-cells = <span class="hljs-string">&lt;0x1&gt;</span>;</span>
+    <span class="hljs-meta">#size-cells = <span class="hljs-string">&lt;0x1&gt;</span>;</span>
+    model = <span class="hljs-string">&quot;Freescale i.MX6 ULL Template Board&quot;</span>;
+    compatible = <span class="hljs-string">&quot;fsl,imx6ull,template&quot;</span>, <span class="hljs-string">&quot;fsl,imx6ull&quot;</span>;
+
+    chosen {
+        <span class="hljs-built_in">stdout</span>-path = <span class="hljs-string">&quot;/soc/aips-bus@02000000/spba-bus@02000000/serial@02020000&quot;</span>;
+    };
+
+    aliases {
+        can0 = <span class="hljs-string">&quot;/soc/aips-bus@02000000/can@02090000&quot;</span>;
+        can1 = <span class="hljs-string">&quot;/soc/aips-bus@02000000/can@02094000&quot;</span>;
+        ethernet0 = <span class="hljs-string">&quot;/soc/aips-bus@02100000/ethernet@02188000&quot;</span>;
+        ethernet1 = <span class="hljs-string">&quot;/soc/aips-bus@02000000/ethernet@020b4000&quot;</span>;
+    };
+};
+</code></pre>
+<p>这里自动补充了#address-cells和#size-cells两个属性；另外，如果节点被其他节点引用，且引用方式为&lt;&amp;节点名&gt;的形式（&lt;&gt;内表示整数），被引用的节点也会凭空多出一个phandle属性。需注意的是，像“stdout-path = &amp;uart1”这种写法并不会生成phandle，因为它写的并不是“stdout-path = &lt;&amp;uart1&gt;”，非整型数；其实最后是解析为一个字符串，代表节点全路径：</p>
+<pre><code class="language-c"><span class="hljs-built_in">stdout</span>-path = <span class="hljs-string">&quot;/soc/aips-bus@02000000/spba-bus@02000000/serial@02020000&quot;</span>
+</code></pre>
+<h5 id="723-dtb">7.2.3. dtb</h5>
+<p>以HeavenFox使用的imx6ull_topeet.dts为例，使用“hexdump -C imx6ull_topeet.dtb”可查看：</p>
+<pre><code>00000000  d0 0d fe ed 00 00 86 5a  00 00 00 38 00 00 7d a0  |.......Z...8..}.|
+00000010  00 00 00 28 00 00 00 11  00 00 00 10 00 00 00 00  |...(............|
+00000020  00 00 08 ba 00 00 7d 68  00 00 00 00 00 00 00 00  |......}h........|
+00000030  00 00 00 00 00 00 00 00  00 00 00 01 00 00 00 00  |................|
+00000040  00 00 00 03 00 00 00 04  00 00 00 00 00 00 00 01  |................|
+00000050  00 00 00 03 00 00 00 04  00 00 00 0f 00 00 00 01  |................|
+00000060  00 00 00 03 00 00 00 20  00 00 00 1b 46 72 65 65  |....... ....Free|
+00000070  73 63 61 6c 65 20 69 2e  4d 58 36 20 55 4c 4c 20  |scale i.MX6 ULL |
+00000080  31 34 78 31 34 20 42 6f  61 72 64 00 00 00 00 03  |14x14 Board.....|
+00000090  00 00 00 1f 00 00 00 21  66 73 6c 2c 69 6d 78 36  |.......!fsl,imx6|
+000000a0  75 6c 6c 2d 74 6f 70 65  65 74 00 66 73 6c 2c 69  |ull-topeet.fsl,i|
+000000b0  6d 78 36 75 6c 6c 00 00  00 00 00 01 63 68 6f 73  |mx6ull......chos|
+000000c0  65 6e 00 00 00 00 00 03  00 00 00 39 00 00 00 2c  |en.........9...,|
+000000d0  2f 73 6f 63 2f 61 69 70  73 2d 62 75 73 40 30 32  |/soc/aips-bus@02|
+000000e0  30 30 30 30 30 30 2f 73  70 62 61 2d 62 75 73 40  |000000/spba-bus@|
+000000f0  30 32 30 30 30 30 30 30  2f 73 65 72 69 61 6c 40  |02000000/serial@|
+00000100  30 32 30 32 30 30 30 30  00 00 00 00 00 00 00 02  |02020000........|
+00000110  00 00 00 01 61 6c 69 61  73 65 73 00 00 00 00 03  |....aliases.....|
+00000120  00 00 00 24 00 00 00 38  2f 73 6f 63 2f 61 69 70  |...$...8/soc/aip|
+00000130  73 2d 62 75 73 40 30 32  30 30 30 30 30 30 2f 63  |s-bus@02000000/c|
+00000140  61 6e 40 30 32 30 39 30  30 30 30 00 00 00 00 03  |an@02090000.....|
+</code></pre>
+<p>部分字节具有特殊含义，称为dtb文件的格式特征码：</p>
+<table>
+<thead>
+<tr>
+<th>数据 (4字节)</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>D0 0D FE ED</code></strong></td>
+<td>魔数，用于dtb校验；固定数值，放在dtb文件开头；看到这个数就表示这是一个设备树文件</td>
+</tr>
+<tr>
+<td><strong><code>00 00 00 01</code></strong></td>
+<td>1）表示所有节点的开始，与0x00000009对应；<br> 2）表示一个节点的开始，后面接的就是节点的内容；与0x00000002对应</td>
+</tr>
+<tr>
+<td><strong><code>00 00 00 02</code></strong></td>
+<td>表示一个节点的结束，前面接的就是节点的内容; 与0x00000001对应</td>
+</tr>
+<tr>
+<td><strong><code>00 00 00 03</code></strong></td>
+<td>表示一个节点的属性，后面接的是该属性的值 （属性值和属性名称是分开存放的，这里仅包含值，没有名称）</td>
+</tr>
+<tr>
+<td><strong><code>00 00 00 04</code></strong></td>
+<td>表示一个节点的属性，这是一个空属性，没有属性值</td>
+</tr>
+<tr>
+<td><strong><code>00 00 00 09</code></strong></td>
+<td>表示所有节点的结束；与0x00000001对应</td>
+</tr>
+</tbody>
+</table>
+<p>下面来逐帧解析dtb的内容。</p>
+<ul>
+<li>header
+前40个字节表示dtb文件的头部，每4个字节一组（即刚好一个unsigned int），分布如下：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>对应数据</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>magic</td>
+<td>D0 0D FE ED</td>
+<td>魔数, 固定为0xd00dfeed</td>
+</tr>
+<tr>
+<td>totalsize</td>
+<td>00 00 86 5A</td>
+<td>整个设备树的大小 = 34394B = 34.394KB</td>
+</tr>
+<tr>
+<td>off_dt_struct</td>
+<td>00 00 00 38</td>
+<td>block的偏移位置 = 56字节</td>
+</tr>
+<tr>
+<td>off_dt_strings</td>
+<td>00 00 7D A0</td>
+<td>string block的偏移位置 = 32160字节</td>
+</tr>
+<tr>
+<td>off_mem_rsvmap</td>
+<td>00 00 00 28</td>
+<td>保留内存区</td>
+</tr>
+<tr>
+<td>version</td>
+<td>00 00 00 11</td>
+<td>设备树版本 = 17</td>
+</tr>
+<tr>
+<td>last_comp_version</td>
+<td>00 00 00 10</td>
+<td>向后兼容的版本 = 16</td>
+</tr>
+<tr>
+<td>boot_cpuid_phys</td>
+<td>00 00 00 00</td>
+<td>用于多核系统下主CPU启动的物理ID</td>
+</tr>
+<tr>
+<td>size_dt_strings</td>
+<td>00 00 08 BA</td>
+<td>string block的大小 = 2234字节</td>
+</tr>
+<tr>
+<td>size_dt_struct</td>
+<td>00 00 76 68</td>
+<td>block的大小 = 30312字节</td>
+</tr>
+</tbody>
+</table>
+<p>魔数和设备树大小这些都很好理解，重点在于block（dt_struct）和string block（dt_strings）。前者用于存放节点的名字，以及属性值；后者则存放属性的名称——即属性值和属性名称存在于两个不同的区域。block处于设备树起始偏移56个字节的位置，也就是第56个字节开始，往下总共30312个字节，都是block的区域；而剩下的部分，从第（30312 + 56）个字节开始，一直到设备树末尾，全都是string block的范围，共2234个字节。</p>
+<ul>
+<li>dt_struct
+从第56个字节开始，第1个数据就是00000001，从前文我们知道，这表示所有节点的起始；直接划到第（30312 + 56 - 4）字节的位置，可以看到00000009，前后呼应，即一整个dt_struct的区域：</li>
+</ul>
+<pre><code>00007d90  00 00 00 00 00 00 00 02  00 00 00 02 00 00 00 09  |................|
+00007da0  23 61 64 64 72 65 73 73  2d 63 65 6c 6c 73 00 23  |#address-cells.#|
+00007db0  73 69 7a 65 2d 63 65 6c  6c 73 00 6d 6f 64 65 6c  |size-cells.model|
+00007dc0  00 63 6f 6d 70 61 74 69  62 6c 65 00 73 74 64 6f  |.compatible.stdo|
+00007dd0  75 74 2d 70 61 74 68 00  63 61 6e 30 00 63 61 6e  |ut-path.can0.can|
+</code></pre>
+<p>以00000009作为分界，前面的是dt_struct，后面是dt_strings。
+回到第56个字节处：</p>
+<table>
+<thead>
+<tr>
+<th>数据</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>00 00 00 01</td>
+<td>节点起始, 第一个节点是根节点</td>
+</tr>
+<tr>
+<td>00 00 00 00</td>
+<td>节点名字. 根节点没有名字, 不体现在dtb中 (内核代码可以自己指定名字, 即: '/')</td>
+</tr>
+<tr>
+<td>00 00 00 03</td>
+<td>属性起始</td>
+</tr>
+<tr>
+<td>00 00 00 04</td>
+<td>属性值的长度: 4字节</td>
+</tr>
+<tr>
+<td>00 00 00 00</td>
+<td>属性名称在strings block的偏移位置: 0</td>
+</tr>
+<tr>
+<td>00 00 00 01</td>
+<td>属性值: #address-cells = &lt;1&gt;</td>
+</tr>
+<tr>
+<td>00 00 00 03</td>
+<td>属性起始</td>
+</tr>
+<tr>
+<td>00 00 00 04</td>
+<td>属性值的长度: 4字节</td>
+</tr>
+<tr>
+<td>00 00 00 0F</td>
+<td>属性名称在strings block的偏移位置: 15</td>
+</tr>
+<tr>
+<td>00 00 00 01</td>
+<td>属性值: #size-cells = &lt;1&gt;</td>
+</tr>
+<tr>
+<td>00 00 00 03</td>
+<td>属性起始</td>
+</tr>
+<tr>
+<td>00 00 00 20</td>
+<td>属性值的长度: 32字节 (含'\0')</td>
+</tr>
+<tr>
+<td>00 00 00 1B</td>
+<td>属性名称在strings block的偏移位置: 27</td>
+</tr>
+<tr>
+<td>46 72 65 65</td>
+<td>属性值: model = &quot;Freescale i.MX6 ULL Template Board&quot; <br> 46 = 'F', 72 = 'r', ..., 64 = 'd',  倒数第二个00表示'\0', 由于还没有凑齐4个字节, 再补一个00 (即最后一个00)</td>
+</tr>
+<tr>
+<td>...</td>
+<td></td>
+</tr>
+<tr>
+<td>61 72 64 00</td>
+<td>model属性的最后3个字符 (即&quot;Board&quot;的最后3个字符'a', 'r', 'd')</td>
+</tr>
+<tr>
+<td>00 00 00 03</td>
+<td>属性起始</td>
+</tr>
+<tr>
+<td>...</td>
+<td>compatible = &quot;fsl,imx6ull-topeet&quot;, &quot;fsl,imx6ull&quot;</td>
+</tr>
+<tr>
+<td>00 00 00 00</td>
+<td>第1个00表示结束符，最后3个00是为了保证4字节对齐, 凑数的</td>
+</tr>
+<tr>
+<td>00 00 00 01</td>
+<td>新节点起始. 这里是chosen节点</td>
+</tr>
+<tr>
+<td>63 68 6F 73</td>
+<td>节点名: chos</td>
+</tr>
+<tr>
+<td>65 6E 00 00</td>
+<td>节点名: en</td>
+</tr>
+<tr>
+<td>00 00 00 03</td>
+<td>属性起始</td>
+</tr>
+<tr>
+<td>00 00 00 39</td>
+<td>属性值的长度: 73字节 (含'\0')</td>
+</tr>
+<tr>
+<td>00 00 00 2C</td>
+<td>属性名称在strings block的偏移位置: 44</td>
+</tr>
+<tr>
+<td>2F 73 6F 63</td>
+<td>属性值: stdout-path = &quot;/soc/aips-bus@02000000/spba-bus@02000000/serial@02020000&quot;</td>
+</tr>
+<tr>
+<td>...</td>
+<td></td>
+</tr>
+<tr>
+<td>00 00 00 02</td>
+<td>本节点结束. 这里是chosen节点</td>
+</tr>
+<tr>
+<td>00 00 00 01</td>
+<td>新节点起始. 这里是aliases节点</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>00 00 00 02</td>
+<td>根节点的最后一个子节点结束 (chosen/aliases的兄弟节点)</td>
+</tr>
+<tr>
+<td>00 00 00 02</td>
+<td>根节点结束</td>
+</tr>
+<tr>
+<td>00 00 00 09</td>
+<td>所有节点结束. dt_struct结束</td>
+</tr>
+</tbody>
+</table>
+<p>总结一下，一个节点包括的内容为：</p>
+<table>
+<thead>
+<tr>
+<th>0x00000001</th>
+<th>节点名称</th>
+<th>属性信息</th>
+<th>子节点</th>
+<th>0x00000002</th>
+</tr>
+</thead>
+</table>
+<p>一个属性包括的内容为：</p>
+<table>
+<thead>
+<tr>
+<th>0x00000003</th>
+<th>属性值长度</th>
+<th>属性名称在dt_strings的偏移</th>
+<th>属性值</th>
+</tr>
+</thead>
+</table>
+<p>属性信息并不需要结束的表示符，因为属性值只有两种，等于0x0（“\0”），或者大于等于0x20（空格），当出现0x1/0x2/0x3时，基本就可以认为是新节点/节点结束/是新属性。另外，如果是空属性（没有属性值），则不含属性值字段。比如ranges属性：</p>
+<pre><code class="language-c">soc {
+    <span class="hljs-meta">#address-cells = <span class="hljs-string">&lt;0x1&gt;</span>;</span>
+    <span class="hljs-meta">#size-cells = <span class="hljs-string">&lt;0x1&gt;</span>;</span>
+    compatible = <span class="hljs-string">&quot;simple-bus&quot;</span>;
+    interrupt-parent = &lt;<span class="hljs-number">0x5</span>&gt;;
+    ranges;
+};
+</code></pre>
+<p>它在dtb中只有0x00000003、属性长度（0x00000000）和偏移（0x000001F8），显然属性长度等于0，且没有属性值。</p>
+<ul>
+<li>dt_strings
+属性信息的偏移数就是属性名称在strings block中的位置，我们知道，strings block位于整个dtb偏移32160个字节处，也就是十六进制0x7DA0。
+对于根节点的几个属性，从之前分析dt_struct那里可以提取它的偏移信息：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>所属节点</th>
+<th>属性</th>
+<th>名称在strings block的偏移</th>
+<th>偏移	(在dtb的地址)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>根节点</td>
+<td>#address-cells</td>
+<td>0</td>
+<td>0x00007DA0</td>
+</tr>
+<tr>
+<td>根节点</td>
+<td>#size-cells</td>
+<td>15</td>
+<td>0x00007DAF</td>
+</tr>
+<tr>
+<td>根节点</td>
+<td>model</td>
+<td>27</td>
+<td>0x000077BB</td>
+</tr>
+<tr>
+<td>根节点</td>
+<td>compatible</td>
+<td>33</td>
+<td>0x000077C1</td>
+</tr>
+<tr>
+<td>chosen节点</td>
+<td>stdout-path</td>
+<td>44</td>
+<td>0x000077CC</td>
+</tr>
+</tbody>
+</table>
+<p>这一区域的内容为：</p>
+<pre><code>00007d90  00 00 00 00 00 00 00 02  00 00 00 02 00 00 00 09  |................|
+00007da0  23 61 64 64 72 65 73 73  2d 63 65 6c 6c 73 00 23  |#address-cells.#|
+00007db0  73 69 7a 65 2d 63 65 6c  6c 73 00 6d 6f 64 65 6c  |size-cells.model|
+00007dc0  00 63 6f 6d 70 61 74 69  62 6c 65 00 73 74 64 6f  |.compatible.stdo|
+00007dd0  75 74 2d 70 61 74 68 00  63 61 6e 30 00 63 61 6e  |ut-path.can0.can|
+</code></pre>
+<p>结合右侧区域内的十六进制数据解析，确确实实就是这些属性对应的名称。
+于是，根据header，我们得到了dt_struct和dt_strings的起始位置，从dt_struct中逐帧读取到各节点信息（名称和子节点）、各属性信息（属性长度和属性值，但属性名称不包含在此，而是给出一个在dt_strings的偏移地址）；各属性根据自己的偏移地址，再到dt_strings中读取自己的属性名称。
+看起来似乎已比较清晰，但查找效率并不太高；最好是一次性把这些节点、属性全部查找并提取出来，保存到我们内存中，以后就不必再去检索dtb。</p>
+<h5 id="724-设备节点">7.2.4. 设备节点</h5>
+<p>内核将一个节点封装为fwk_device_node结构体，又将一个属性封装成fwk_of_property结构体。对于属性：</p>
+<pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_of_property</span>
+{</span>
+    <span class="hljs-comment">/*!&lt; 属性名,  如: &quot;name&quot;, &quot;compatible&quot;, &quot;#size-cells&quot; */</span>
+    <span class="hljs-type">kchar_t</span> *name;
+    <span class="hljs-comment">/*!&lt; 属性长度 */</span>
+    <span class="hljs-type">kint32_t</span> length;
+    <span class="hljs-comment">/*!&lt; 属性值, 如: compatible = &quot;myBoard&quot;, 则属性值就是&quot;myBoard&quot;, 属性长度 = kstrlen(&quot;myBoard&quot;) */</span>
+    <span class="hljs-type">void</span> *value;
+    <span class="hljs-comment">/*!&lt; 下一个属性 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_of_property</span> *<span class="hljs-title">sptr_next</span>;</span>
+
+} <span class="hljs-type">srt_fwk_of_property_t</span>;
+</code></pre>
+<p>刚好涵盖了dtb文件中属性的几个组成部分，只需遍历一整个dtb，将属性提取成一个个“struct fwk_of_property”结构体，然后通过sptr_next连接到所属的节点。
+节点与之相似：</p>
+<pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_device_node</span>
+{</span>
+    <span class="hljs-type">kchar_t</span> *name;                      <span class="hljs-comment">/* 节点名. 如果一个节点叫&quot;gpio@020a0000&quot;, 则name = &quot;gpio&quot;; 不同节点, name可能相同(但&quot;@地址&quot;不同) */</span>
+    <span class="hljs-type">kchar_t</span> *type;                      <span class="hljs-comment">/* 节点类型. 需要节点拥有&quot;device_type&quot;属性, 否则为&quot;&lt;null&gt;&quot; */</span>
+    <span class="hljs-type">kint32_t</span> phandle;                   <span class="hljs-comment">/* 节点被其他节点引用时, 本节点将自动生成一个phandle属性(32位整型), 不体现在dts/dtsi中; 若没有被引用, phandle为-1 */</span>
+    <span class="hljs-type">kchar_t</span> *full_name;                 <span class="hljs-comment">/* 节点全名, 也即节点的路径名称, 从根节点直到当前节点. 如full_name可能为: &quot;/soc/aips-bus@02100000/ethernet@02188000&quot;. 每个节点的全名绝对不相同 */</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_of_property</span> *<span class="hljs-title">properties</span>;</span>	<span class="hljs-comment">/* 本节点的属性列表 (由struct fwk_of_property::sptr_next连接) */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_of_property</span> *<span class="hljs-title">deadprops</span>;</span>	<span class="hljs-comment">/* 被移除的属性列表 */</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_device_node</span> *<span class="hljs-title">parent</span>;</span>    	<span class="hljs-comment">/* 父节点, 即本节点的上一个路径. 根节点没有父节点, 为NULL */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_device_node</span> *<span class="hljs-title">child</span>;</span>     	<span class="hljs-comment">/* 第一个子节点, 即本节点的下一个路径 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_device_node</span> *<span class="hljs-title">sibling</span>;</span>   	<span class="hljs-comment">/* 兄弟节点, 父节点的所有子节点均连接到此, 对于本节点, 只能获取下一个兄弟节点, 无法获取上一个 (因为只有allnext成员) */</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_device_node</span> *<span class="hljs-title">sptr_next</span>;</span>	<span class="hljs-comment">/* 仅用在设备树-fwk_device_node构建阶段, 正常情况下必为NULL; 不可被外部使用  */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_device_node</span> *<span class="hljs-title">allnext</span>;</span>	<span class="hljs-comment">/* 每个节点通过allnext连接 */</span>
+
+} <span class="hljs-type">srt_fwk_device_node_t</span>;
+</code></pre>
+<p>setup_machine函数依次调用setup_machine_fdt、fwk_unflatten_device_tree、__fwk_unflatten_device_tree、fwk_unflatten_dt_nodes解析dtb并提取每一个节点，所有的节点被链接到全局设备链表sptr_fwk_of_allNodes。解析的关键在于以下两个函数：</p>
 <pre><code class="language-c"><span class="hljs-comment">/*!
- * @brief   各节点处理方法相同
+ * @brief   提取节点, 被fwk_unflatten_dt_nodes调用
  * @param   ptr_blob: 	dtb起始地址
  * @param	ptr_offset: 偏移: dtb中的第几个字节
  * @param	mem: 		从内存池分配, 用于保存解析后的设备树节点
  * @param	parent: 	父节点
  * @param	allNext:	下一个节点
  */</span>
-<span class="hljs-type">static</span> <span class="hljs-type">void</span> *<span class="hljs-title function_">fwk_fdt_populate_node</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_fdt_header *ptr_blob,
-                                        <span class="hljs-type">void</span> **ptr_offset, <span class="hljs-type">void</span> **mem, <span class="hljs-type">void</span> **ptr_parent, <span class="hljs-type">void</span> ***allNext)</span>;
+<span class="hljs-type">void</span> *<span class="hljs-title function_">fwk_fdt_populate_node</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_fdt_header *ptr_blob,
+                            <span class="hljs-type">void</span> **ptr_offset, <span class="hljs-type">void</span> **mem, <span class="hljs-type">void</span> **ptr_parent, <span class="hljs-type">void</span> ***allNext)</span>;
 
-<span class="hljs-comment">/*!
- * @brief   Deal with one property
- * @param   none
- * @retval  none
- * @note    none
- */</span>
-<span class="hljs-type">static</span> <span class="hljs-type">void</span> *<span class="hljs-title function_">fwk_fdt_populate_properties</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_fdt_header *ptr_blob,
-                                        <span class="hljs-type">void</span> **ptr_offset, <span class="hljs-type">void</span> **mem, <span class="hljs-type">void</span> *node, <span class="hljs-type">void</span> ***allNext, <span class="hljs-type">kbool_t</span> *has_name)</span>;
+<span class="hljs-comment">/* 提取当前节点下的属性(被fwk_fdt_populate_node调用) */</span>
+<span class="hljs-type">void</span> *<span class="hljs-title function_">fwk_fdt_populate_properties</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_fdt_header *ptr_blob,
+                                  <span class="hljs-type">void</span> **ptr_offset, <span class="hljs-type">void</span> **mem, <span class="hljs-type">void</span> *node, <span class="hljs-type">void</span> ***allNext, <span class="hljs-type">kbool_t</span> *has_name)</span>;
 </code></pre>
-<ul>
-<li>
-<p>时钟</p>
-</li>
-<li>
-<p>中断</p>
-</li>
-<li>
-<p>定时器</p>
-</li>
-<li>
-<p>节点对象与文件系统</p>
-</li>
-<li>
-<p>虚拟设备文件</p>
-</li>
-<li>
-<p>通知链</p>
-</li>
-<li>
-<p>终端</p>
-</li>
-</ul>
+<p>需要注意的是，dtb文件以大端模式保存，在arm 32位处理器（小端模式）中，提取32位或16位数据时应伴随大小端转化。</p>
+<pre><code class="language-c"><span class="hljs-comment">/*!&lt; 魔数, dtb文件的第一个数据 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> FDT_MAGIC_VERIFY                        (0xd00dfeed)</span>
+<span class="hljs-comment">/*!&lt; 一个节点起始 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> FDT_NODE_START                          (0x00000001)</span>
+<span class="hljs-comment">/*!&lt; 一个节点结束 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> FDT_NODE_END                            (0x00000002)</span>
+<span class="hljs-comment">/*!&lt; 属性起始 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> FDT_NODE_PROP                           (0x00000003)</span>
+<span class="hljs-comment">/*!&lt; 空节点 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> FDT_NODE_NOP                            (0x00000004)</span>
+<span class="hljs-comment">/*!&lt; 所有节点的起始 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> FDT_ALL_NODE_START                      (FDT_NODE_START)</span>
+<span class="hljs-comment">/*!&lt; 所有节点的结束 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> FDT_ALL_NODE_END                        (0x00000009)</span>
+</code></pre>
+<p>fwk_unflatten_dt_nodes函数解析过程如下（解析方法参考自Linux内核，虽由笔者重构, 但非原创，故这里不做源码展开；有兴趣可查看“platform/of/fwk_of.c”）：</p>
+<pre><code class="language-Mermaid">graph TD
+    A[开始解析设备树] --&gt; B[验证设备树有效性]
+    B --&gt;|有效| C[计算内存需求]
+    C --&gt; D[分配内存空间]
+    D --&gt; E[解析设备树节点]
+    
+    E --&gt; F{当前标签类型}
+    F --&gt;|FDT_NODE_START| G[创建新节点]
+    F --&gt;|FDT_NODE_END| H[返回父节点]
+    F --&gt;|FDT_NODE_NOP| I[跳过]
+    F --&gt;|FDT_ALL_NODE_END| J[结束解析]
+    
+    G --&gt; K[处理节点名称]
+    K --&gt; L[构建全路径名]
+    L --&gt; M[设置父子关系]
+    M --&gt; N[解析节点属性]
+    
+    N --&gt; O{属性标签}
+    O --&gt;|FDT_NODE_PROP| P[解析属性]
+    O --&gt;|其他| Q[结束属性解析]
+    
+    P --&gt; R[获取属性名]
+    R --&gt; S[获取属性值]
+    S --&gt; T[特殊属性处理]
+    T --&gt;|name| U[设置节点名]
+    T --&gt;|device_type| V[设置节点类型]
+    T --&gt;|phandle| W[设置phandle]
+    
+    Q --&gt; X{缺少name属性?}
+    X --&gt;|是| Y[手动创建name属性]
+    X --&gt;|否| Z[设置默认名称]
+    
+    J --&gt; AA[检查内存边界]
+    AA --&gt; AB[完成解析]
+    
+    classDef black fill:#000000,stroke:#FFFFFF,color:#FFFFFF;
+</code></pre>
+<h5 id="725-of函数">7.2.5. of函数</h5>
+<p>为便于获取节点和节点的前后关系，提供了一系列函数接口，可供使用：</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 获取根节点 */</span>
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_node_root</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;
+<span class="hljs-comment">/* 通过full_name (path)来查找节点 (遍历全局链表sptr_fwk_of_allNodes) */</span>
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_find_node_by_path</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_path)</span>;
+<span class="hljs-comment">/* 通过name来查找节点, 如果有name相同的节点, 仅返回第一个 */</span>
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_find_node_by_name</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_from, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name)</span>;
+<span class="hljs-comment">/* 通过device_type来查找节点 */</span>
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_find_node_by_type</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_from, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_type)</span>;
+<span class="hljs-comment">/* 通过phandle来查找节点 */</span>
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_find_node_by_phandle</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_from, <span class="hljs-type">kuint32_t</span> phandle)</span>;
+<span class="hljs-comment">/* 通过compatible属性值来查找节点 (若ptr_type不为NULL, 则device_type也要同时匹配) */</span>
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_find_compatible_node</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_from,
+                                            <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_type, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_compat)</span>;
+<span class="hljs-comment">/* 比较sptr_matches数组中的每一项, 找到compatible属性匹配的项, 保存至sptr_match; 返回值为NULL时匹配失败 */</span>
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_node_try_matches</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node,
+                                            <span class="hljs-type">const</span> <span class="hljs-keyword">struct</span> fwk_of_device_id *sptr_matches, <span class="hljs-keyword">struct</span> fwk_of_device_id **sptr_match)</span>;
+<span class="hljs-comment">/* 从sptr_from开始遍历, 找到一个与sptr_matches某一项compatible属性匹配的节点, 保存该项到sptr_match, 并返回该节点 */</span>
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_find_matching_node_and_match</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_from,
+                                            <span class="hljs-type">const</span> <span class="hljs-keyword">struct</span> fwk_of_device_id *sptr_matches, <span class="hljs-keyword">struct</span> fwk_of_device_id **sptr_match)</span>;
+<span class="hljs-comment">/* 从sptr_parent-&gt;sptr_child开始遍历, 在sptr_child-&gt;sptr_sibling中找到一个与sptr_matches某一项compatible属性匹配的节点, 保存该项到sptr_match, 并返回该节点 */</span> */
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_find_matching_child_and_match</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_parent,
+                                            <span class="hljs-type">const</span> <span class="hljs-keyword">struct</span> fwk_of_device_id *sptr_matches, <span class="hljs-keyword">struct</span> fwk_of_device_id **sptr_match)</span>;
+<span class="hljs-comment">/* fwk_of_node_try_matches改编版, 将匹配成功的sptr_match作为返回值 */</span>
+<span class="hljs-keyword">struct</span> fwk_of_device_id *<span class="hljs-title function_">fwk_of_match_node</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-keyword">struct</span> fwk_of_device_id *sptr_matches, <span class="hljs-keyword">struct</span> fwk_device_node *sptr_node)</span>;
+
+<span class="hljs-comment">/* 执行fwk_of_node_try_matches(sptr_dev-&gt;sptr_node, sptr_matches, NULL), 并返回匹配成功的sptr_match */</span>
+<span class="hljs-keyword">struct</span> fwk_of_device_id *<span class="hljs-title function_">fwk_of_get_device_id</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-keyword">struct</span> fwk_of_device_id *sptr_matches, <span class="hljs-keyword">struct</span> fwk_device *sptr_dev)</span>;
+<span class="hljs-comment">/* 返回sptr_node-&gt;parent */</span>
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_get_parent</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node)</span>;
+<span class="hljs-comment">/* 返回sptr_node-&gt;sptr_child, 或ptr_prev-&gt;sibling */</span>
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_get_next_child</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-keyword">struct</span> fwk_device_node *ptr_prev)</span>;
+<span class="hljs-comment">/* 计算子节点的数量 */</span>
+<span class="hljs-type">kuint32_t</span> <span class="hljs-title function_">fwk_of_get_child_count</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node)</span>;
+<span class="hljs-comment">/* 检测&quot;status&quot;属性值, 若status属性不存在或值为&quot;ok&quot;/&quot;okay&quot;, 则节点有效; 若为&quot;disabled&quot;或其他值, 则无效 */</span>
+<span class="hljs-type">kbool_t</span> <span class="hljs-title function_">fwk_of_device_is_avaliable</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node)</span>;
+
+<span class="hljs-comment">/* 由本节点的&quot;interrupt-parent&quot;或&quot;interrupt-extended&quot;属性找到phandle节点, 若该节点具有&quot;#interrupt-cells&quot;属性, 即为父中断控制器 */</span>
+<span class="hljs-keyword">struct</span> fwk_device_node *<span class="hljs-title function_">fwk_of_irq_parent</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node)</span>;
+<span class="hljs-comment">/* 获取父中断控制器的&quot;#interrupt-cells&quot;属性值 */</span>
+<span class="hljs-type">kuint32_t</span> <span class="hljs-title function_">fwk_of_n_irq_cells</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node)</span>;
+<span class="hljs-comment">/* 当前节点有几个中断属性. 获取&quot;interrupts&quot;属性值个数 */</span>
+<span class="hljs-type">kuint32_t</span> <span class="hljs-title function_">fwk_of_irq_count</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node)</span>;
+<span class="hljs-comment">/* 当前节点在&quot;alias&quot;节点中的序号. 如gpio0 = &amp;gpio1, 则id = 0 */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_get_alias_id</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node)</span>;
+<span class="hljs-comment">/* 取本节点compatible属性第1个&quot;,&quot;后的值. 如: compatible = &quot;xxx, yyy&quot;, 则modalias = &quot;yyy&quot; */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_modalias_node</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">kchar_t</span> *modalias, <span class="hljs-type">kuint32_t</span> len)</span>;
+
+<span class="hljs-comment">/* 遍历所有节点 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> foreach_fwk_of_dt_node(np, head)	\
+    for (np = (isValid(head) ? head : fwk_of_node_root()); isValid(np); np = (np)-&gt;allnext)</span>
+
+<span class="hljs-comment">/* 遍历parent下的所有子节点 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> foreach_fwk_of_child(parent, np)	\
+    for (np = fwk_of_get_next_child(parent, mr_nullptr); np; np = fwk_of_get_next_child(parent, np))</span>
+
+<span class="hljs-comment">/* 遍历所有父节点, 直到根节点 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> foreach_fwk_of_parent(np, child)	\
+    for (np = child; np; np = fwk_of_get_parent(np))</span>
+</code></pre>
+<p>获取本节点的属性内容，也有相关函数接口：</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 获取本节点属性名为ptr_name的属性 */</span>
+<span class="hljs-keyword">struct</span> fwk_of_property *<span class="hljs-title function_">fwk_of_find_property</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node,
+                                        <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, <span class="hljs-type">kusize_t</span> *ptr_lenth)</span>;
+<span class="hljs-comment">/* 根据属性名找到属性后, 返回属性值 */</span>
+<span class="hljs-type">void</span> *<span class="hljs-title function_">fwk_of_get_property</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, <span class="hljs-type">kusize_t</span> *ptr_lenth)</span>;
+
+<span class="hljs-comment">/* 获取属性值(属性值类型为8位). index表示从第几个属性值开始获取, ptr_name为属性名, 而获取的属性值保存到ptr_value. 下述16位、32位同理 */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_u8_array_index</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, 
+                                        <span class="hljs-type">kuint8_t</span> *ptr_value, <span class="hljs-type">kuint32_t</span> index, <span class="hljs-type">kusize_t</span> size)</span>;
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_u16_array_index</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, 
+                                        <span class="hljs-type">kuint16_t</span> *ptr_value, <span class="hljs-type">kuint32_t</span> index, <span class="hljs-type">kusize_t</span> size)</span>;
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_u32_array_index</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, 
+                                        <span class="hljs-type">kuint32_t</span> *ptr_value, <span class="hljs-type">kuint32_t</span> index, <span class="hljs-type">kusize_t</span> size)</span>;
+<span class="hljs-comment">/* 仅获取第index个属性值 */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_u32_index</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node,
+                                        <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, <span class="hljs-type">kuint32_t</span> index, <span class="hljs-type">kuint32_t</span> *ptr_value)</span>;
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_u8_array</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node,
+                                        <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, <span class="hljs-type">kuint8_t</span> *ptr_value, <span class="hljs-type">kusize_t</span> size)</span>;
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_u16_array</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node,
+                                        <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, <span class="hljs-type">kuint16_t</span> *ptr_value, <span class="hljs-type">kusize_t</span> size)</span>;
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_u32_array</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node,
+                                        <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, <span class="hljs-type">kuint32_t</span> *ptr_value, <span class="hljs-type">kusize_t</span> size)</span>;
+<span class="hljs-comment">/* 仅获取第0个属性值 */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_u8</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, <span class="hljs-type">kuint8_t</span> *ptr_value)</span>;
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_u16</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, <span class="hljs-type">kuint16_t</span> *ptr_value)</span>;
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_u32</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, <span class="hljs-type">kuint32_t</span> *ptr_value)</span>;
+
+<span class="hljs-comment">/* 属性值为字符串, 获取第0个字符串属性. 如: xxx = &quot;123&quot;, &quot;456&quot;, 则返回&quot;123&quot; */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_string</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, <span class="hljs-type">kchar_t</span> **ptr_string)</span>;
+<span class="hljs-comment">/* 属性值为字符串, 获取第index个字符串属性. 如: xxx = &quot;123&quot;, &quot;456&quot;, 若index为1, 则返回&quot;456&quot; */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_read_string_index</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node,
+                                        <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_name, <span class="hljs-type">kuint32_t</span> index, <span class="hljs-type">kchar_t</span> **ptr_string)</span>;
+
+<span class="hljs-comment">/* 从父节点获取属性&quot;#size-cells&quot;的值 */</span>
+<span class="hljs-type">kuint32_t</span> <span class="hljs-title function_">fwk_of_n_size_cells</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node)</span>;
+<span class="hljs-comment">/* 从父节点获取属性&quot;#address-cells&quot;的值 */</span>
+<span class="hljs-type">kuint32_t</span> <span class="hljs-title function_">fwk_of_n_addr_cells</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node)</span>;
+<span class="hljs-comment">/* 比较sptr_node的compatible属性值(字符串)是否与ptr_compat相同 */</span>
+<span class="hljs-type">kbool_t</span> <span class="hljs-title function_">fwk_of_device_is_compatible</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *ptr_compat)</span>;
+<span class="hljs-comment">/* list_name: 属性名; 比较sptr_node的list_name属性的值(字符串)是否与match_name相同 */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_property_match_string</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *list_name, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *match_name)</span>;
+
+<span class="hljs-comment">/* 或者可以根据phandle读出1组属性 (1组属性有args_count个属性值) */</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_of_phandle_args</span> 
+{</span>
+    <span class="hljs-comment">/* sptr_node为phandle所对应的节点 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_device_node</span> *<span class="hljs-title">sptr_node</span>;</span>
+    <span class="hljs-type">kuint32_t</span> args_count;
+    <span class="hljs-type">kuint32_t</span> args[<span class="hljs-number">16</span>];
+};
+<span class="hljs-comment">/*!
+ * 如节点属性为: xxx = &lt;&amp;aaa 1 6&gt;, 且节点aaa的phandle为88, 则:
+ *  struct fwk_of_phandle_args::sptr_node = fwk_of_find_node_by_phandle(NULL, 88);
+ *  struct fwk_of_phandle_args::args_count = 2;
+ *  struct fwk_of_phandle_args::args[] = { 1, 6, 0, 0, ... }
+ * 
+ * @param   list_name: 属性名, 如&quot;xxx&quot;;
+ * @param   cells_name: 可能为属性名&quot;#size-cells&quot;, 一般节点aaa会具有此属性;
+ * @param   cell_count: 如果节点aaa没有属性cells_name, 则cell_count被当成1组属性的属性个数; 正常情况下无用; 对于xxx = &lt;&amp;aaa 1 6&gt;, cell_count应为2 (表示1和6)
+ * @param   index: 要获取第几组属性, 节点属性可能是:
+ *              xxx = &lt;&amp;aaa 1 6&gt; &lt;&amp;bbb 2 3&gt; &lt;&amp;ccc 9 9&gt;
+ *              若index为1, 表示第1组 &lt;&amp;bbb 2 3&gt;
+ * @param   sptr_args: 解析后存入此结构
+ */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_of_parse_phandle_with_args</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_device_node *sptr_node, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *list_name,
+                                        <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *cells_name, <span class="hljs-type">kuint32_t</span> cell_count, <span class="hljs-type">kint32_t</span> index, <span class="hljs-keyword">struct</span> fwk_of_phandle_args *sptr_args)</span>;
+</code></pre>
+<h4 id="73-时钟">7.3. 时钟</h4>
+<p>时钟在两个地方初始化，一是board.c，是CPU刚刚启动的时候，用于确定系统主频、外设时钟主频，保证时钟树的正常运行，并使能部分必需的外设时钟；二是驱动程序“drivers/clk”，在start_kernel函数中调用，补充board.c中没有初始化的时钟，如LCD像素时钟，并搭建时钟平台架构。
+HeavenFox目前仅支持一种时钟平台架构，即时钟使能/失能。设备树节点会提供一个名为“clocks”的属性，比如imx6ull的gpt定时器节点：</p>
+<pre><code class="language-c">gpt1: gpt@<span class="hljs-number">02098000</span> {
+    compatible = <span class="hljs-string">&quot;fsl,imx6ul-gpt&quot;</span>, <span class="hljs-string">&quot;fsl,imx31-gpt&quot;</span>;
+    reg = &lt;<span class="hljs-number">0x02098000</span> <span class="hljs-number">0x4000</span>&gt;;
+    interrupts = &lt;GIC_SPI <span class="hljs-number">55</span> IRQ_TYPE_LEVEL_HIGH&gt;;
+    clocks = &lt;&amp;clks IMX6UL_CLK_GPT1_BUS&gt;,
+            &lt;&amp;clks IMX6UL_CLK_GPT_3M&gt;;
+    clock-names = <span class="hljs-string">&quot;ipg&quot;</span>, <span class="hljs-string">&quot;osc_per&quot;</span>;
+};
+</code></pre>
+<p>IMX6UL_CLK_GPT1_BUS即表示gpt外设所需开启的时钟序号，在内核源码中，用宏来表示。</p>
+<pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> IMX6UL_CLK_GPT1_BUS		                    152</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> IMX6UL_CLK_GPT_3M		                    214</span>
+
+<span class="hljs-comment">/* 数量 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> IMX6UL_CLK_END			                    236</span>
+</code></pre>
+<p>数字序号往往可以表示数组下标，内核也确实定义了一个时钟数组，长度为IMX6UL_CLK_END。
+时钟数组的类型为：</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_one_cell</span>
+{</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk</span> *<span class="hljs-title">sptr_clks</span>;</span>                      <span class="hljs-comment">/* 每一个clocks属性都抽象成一个fwk_clk结构体 */</span>
+    <span class="hljs-type">kuint32_t</span> clks_size;                            <span class="hljs-comment">/* 一般等于IMX6UL_CLK_END */</span>
+
+};
+
+<span class="hljs-comment">/* 数组 */</span>
+<span class="hljs-type">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk</span> <span class="hljs-title">sgtc_imx_clks_data</span>[<span class="hljs-title">IMX6UL_CLK_END</span>];</span>
+<span class="hljs-type">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_one_cell</span> <span class="hljs-title">sgtc_imx_clk_one_cell_data</span> =</span> { &amp;sgtc_imx_clks_data[<span class="hljs-number">0</span>], IMX6UL_CLK_END };
+</code></pre>
+<p>由设备树的时钟序号（如IMX6UL_CLK_GPT1_BUS），即可找到sgtc_imx_clks_data[IMX6UL_CLK_GPT1_BUS]；即，内核最终将通过结构体“struct fwk_clk”来控制时钟设备。
+HeavenFox目前支持的时钟设备是时钟开关，它被设计为一个“struct fwk_clk_gate”结构：</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_gate</span> 
+{</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_hw</span> <span class="hljs-title">sgtc_hw</span>;</span>                      <span class="hljs-comment">/* 内含结构体&quot;struct fwk_clk&quot;成员 */</span>
+    <span class="hljs-type">void</span> *reg;                                      <span class="hljs-comment">/* 时钟设备的地址 */</span>
+    <span class="hljs-type">kuint8_t</span> bit_idx;                               <span class="hljs-comment">/* 开关所在的偏移位. 打开时钟: *reg |= (1 &lt;&lt; bit_idx); 关闭时钟: *reg &amp;= ~(1 &lt;&lt; bit_idx) */</span>
+};
+</code></pre>
+<p>看到有寄存器地址reg和偏移，可知fwk_clk_gate正是时钟设备最终操作的结构；不过内核追求一视同仁，希望不管是什么类型的时钟设备（分频器或开关？），都能使用统一的函数接口，即使已知是时钟开关，也不会直接操作“struct fwk_clk_gate”。sgtc_hw成员是核心结构，它内部含有两个重要成员：sptr_clk和sptr_core：</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_hw</span>
+{</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_core</span> *<span class="hljs-title">sptr_core</span>;</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk</span> *<span class="hljs-title">sptr_clk</span>;</span>
+};
+</code></pre>
+<p>sptr_core是时钟设备的通用结构，</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_core</span>
+{</span>
+    <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *name;
+    <span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_ops</span> *<span class="hljs-title">sptr_ops</span>;</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_hw</span> *<span class="hljs-title">sptr_hw</span>;</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_core</span>	*<span class="hljs-title">sptr_parent</span>;</span>
+
+    <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> **parent_names;
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_core</span>	**<span class="hljs-title">sptr_parents</span>;</span>
+
+    <span class="hljs-type">kuint32_t</span> rate;
+
+    <span class="hljs-type">kuint32_t</span> flags;
+    <span class="hljs-type">kuint32_t</span> enable_count;
+    <span class="hljs-type">kuint32_t</span> prepare_count;
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">sgtc_clks</span>;</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mutex_lock</span> <span class="hljs-title">sgtc_mutex</span>;</span>
+};
+
+
+</code></pre>
+<p>fwk_clk结构体的核心在于fwk_clk_core结构体：</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_core</span>
+{</span>
+    <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *name;
+    <span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_ops</span> *<span class="hljs-title">sptr_ops</span>;</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_hw</span> *<span class="hljs-title">sptr_hw</span>;</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_core</span>	*<span class="hljs-title">sptr_parent</span>;</span>
+
+    <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> **parent_names;
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_core</span> **<span class="hljs-title">sptr_parents</span>;</span>
+
+    <span class="hljs-type">kuint32_t</span> rate;
+
+    <span class="hljs-type">kuint32_t</span> flags;
+    <span class="hljs-type">kuint32_t</span> enable_count;
+    <span class="hljs-type">kuint32_t</span> prepare_count;
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">sgtc_clks</span>;</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mutex_lock</span> <span class="hljs-title">sgtc_mutex</span>;</span>
+
+};
+
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk</span>
+{</span>
+    <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *dev_id;
+    <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *con_id;
+    <span class="hljs-type">kuint32_t</span> max_rate;
+    <span class="hljs-type">kuint32_t</span> min_rate;
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_clk_core</span> *<span class="hljs-title">sptr_core</span>;</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">sgtc_link</span>;</span>
+
+    <span class="hljs-type">kuint8_t</span> flags;
+};
+</code></pre>
+<h4 id="74-中断">7.4. 中断</h4>
+<h4 id="75-定时器">7.5. 定时器</h4>
+<h4 id="76-通知链">7.6. 通知链</h4>
+<h4 id="77-平台设备与总线">7.7. 平台设备与总线</h4>
+<h4 id="78-总线-设备-驱动匹配">7.8. 总线-设备-驱动匹配</h4>
+<h4 id="79-gpio与pinctrl">7.9. gpio与pinctrl</h4>
+<h4 id="710-帧缓冲">7.10. 帧缓冲</h4>
+<h4 id="711-i2c总线">7.11. i2c总线</h4>
+<h4 id="712-网络">7.12. 网络</h4>
+<p>HeavenFox内置第三方库Lwip，网络协议层由Lwip全权处理。内核需要提供Lwip对下的底层代码，及对上的应用接口封装。
+Lwip网络数据包均通过pbuf结构体传递，发送时将创建一个pbuf，并拷贝数据到其中；接收时同样创建一个pbuf，将接收的数据保存，然后由Lwip协议层传递给应用程序。HeavenFox为能与之解耦，参考Linux增加一个fwk_sk_buff结构体，专门负责底层报文收发。于是：</p>
+<pre><code class="language-Mermaid">graph TD
+
+    A[应用程序发送数据包buffer] ---&gt; B[socket调用lwip协议层，封装为pbuf]
+    B ---&gt; C[lwip经协议层添加报文头部]
+    C ---&gt; D[lwip_lowlevel_output：读取pbuf并创建fwk_sk_buff，拷贝pbuf数据段（含头部）到fwk_sk_buff]
+    D ---&gt; E[将fwk_sk_buff添加到发送队列] 
+    E ---&gt; F[网络发送线程被唤醒，取出发送队列的每一个fwk_sk_buff]
+    F ---&gt; G[进入驱动层，取出fwk_sk_buff的数据段（含头部），发送到网络设备寄存器]
+
+    H[网络设备寄存器接收数据] ---&gt; I[创建fwk_sk_buff并拷贝数据到其数据段]
+    I ---&gt; J[添加到接收队列]
+    J ---&gt; K[网络接收线程被唤醒，取出接收队列的每一个fwk_sk_buff]
+    K ---&gt; L[创建pbuf，拷贝fwk_sk_buff到其数据段] 
+    L ---&gt; M[进入lwip协议层，添加报文头部]
+    M ---&gt; N[进入应用层，触发接收回调函数，socket可读取数据（拷贝pbuf数据段到应用层接收缓冲区）]
+</code></pre>
+<p>看起来中间涉及三次拷贝，但网络寄存器的数据可以启用DMA辅助接收，可事先申请一大块内存用于fwk_sk_buff，并使DMA缓冲区地址指向fwk_sk_buff，则省去了CPU搬运寄存器数据到fwk_sk_buff的时间，只剩下fwk_sk_buff到pbuf，以及pbuf到应用层缓冲区的拷贝工作。</p>
+<h5 id="7121-网络设备">7.12.1. 网络设备</h5>
+<p>每个网络设备都可以被抽象成一个“struct fwk_net_device”结构体，用于描述设备的物理地址、收发的数据包总数等，并提供网络设备的收、发及初始化函数接口，系统将通过fwk_net_device进行全局管理。</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_net_device</span>
+{</span>
+    <span class="hljs-type">kchar_t</span> name[<span class="hljs-number">32</span>];                                       <span class="hljs-comment">/*!&lt; 网络设备名称, 可通过终端&quot;ifconfig&quot;命令查看 */</span>
+
+    <span class="hljs-type">kint32_t</span> ifindex;                                       <span class="hljs-comment">/*!&lt; 可用于同名设备的序号区分, 如: eth0, eth1 */</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">sgtc_link</span>;</span>                             <span class="hljs-comment">/*!&lt; 所有的网络设备使用链表连接到全局 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_netdev_stats</span> <span class="hljs-title">sgtc_stats</span>;</span>                     <span class="hljs-comment">/*!&lt; 数据收发统计 */</span>
+    <span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_netdev_ops</span> *<span class="hljs-title">sptr_netdev_oprts</span>;</span>         <span class="hljs-comment">/*!&lt; 网络设备函数接口集合 */</span>
+
+    <span class="hljs-type">kuint32_t</span> mtu;                                          <span class="hljs-comment">/*!&lt; 单次数据包的最大字节数限制(如1500) */</span>
+    <span class="hljs-type">kuint16_t</span> hard_header_len;                              <span class="hljs-comment">/*!&lt; 物理层报文头部大小(如EtherNetII, 大小为14字节) */</span>
+
+    <span class="hljs-type">kutype_t</span> last_rx;                                       <span class="hljs-comment">/*!&lt; 最后一次接收的时间 */</span>
+    <span class="hljs-type">kuint8_t</span> dev_addr[<span class="hljs-number">6</span>];                                   <span class="hljs-comment">/*!&lt; MAC地址 */</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_device</span> <span class="hljs-title">sgtc_dev</span>;</span>
+    <span class="hljs-type">void</span> *private_data;                                     <span class="hljs-comment">/*!&lt; 用于保存驱动私有数据 */</span>
+};
+
+<span class="hljs-comment">/* 创建一个网络设备. sizeof_priv表示额外的数据, 一般保存到private_data成员 */</span>
+<span class="hljs-keyword">struct</span> fwk_net_device *<span class="hljs-title function_">fwk_alloc_netdev_mq</span><span class="hljs-params">(<span class="hljs-type">kint32_t</span> sizeof_priv, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *name,
+                                        <span class="hljs-type">void</span> (*setup) (<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev), <span class="hljs-type">kuint32_t</span> queue_count)</span>;
+<span class="hljs-comment">/* 释放内存 */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">fwk_free_netdev</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev)</span>;
+<span class="hljs-comment">/* 根据name从全局网络设备链表中查找对应的网络设备 */</span>
+<span class="hljs-keyword">struct</span> fwk_net_device *<span class="hljs-title function_">fwk_ifname_to_ndev</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *name)</span>;
+<span class="hljs-comment">/* 注册到全局网络设备链表 */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_register_netdevice</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev)</span>;
+<span class="hljs-comment">/* 注销 */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_unregister_netdevice</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev)</span>;
+<span class="hljs-comment">/* 下一个网络设备 */</span>
+<span class="hljs-keyword">struct</span> fwk_net_device *<span class="hljs-title function_">next_netdevice</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev)</span>;
+
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> fwk_alloc_netdev(sizeof_priv, name, setup)  \
+                fwk_alloc_netdev_mq(sizeof_priv, name, setup, 1)</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> fwk_netdev_priv(sptr_ndev)                ((sptr_ndev)-&gt;private_data)</span>
+</code></pre>
+<p>sptr_netdev_oprts是网络设备的操作函数集，由驱动程序提供，平台在获取到fwk_net_device后会直接访问函数集，可根据需要定义对应的入口。常用函数如：</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_netdev_ops</span>
+{</span>
+    <span class="hljs-type">kint32_t</span> (*ndo_init) (<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev);
+    <span class="hljs-type">void</span> (*ndo_uninit) (<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev);
+    <span class="hljs-type">kint32_t</span> (*ndo_open) (<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev);
+    <span class="hljs-type">kint32_t</span> (*ndo_stop) (<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev);
+    <span class="hljs-type">netdev_tx_t</span> (*ndo_start_xmit) (<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb, <span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev);
+    <span class="hljs-type">kint32_t</span> (*ndo_set_mac_address) (<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev, <span class="hljs-type">void</span> *ptr_addr);
+    <span class="hljs-type">kint32_t</span> (*ndo_do_ioctl) (<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev, <span class="hljs-keyword">struct</span> fwk_ifreq *sptr_ifr, <span class="hljs-type">kint32_t</span> cmd);
+    <span class="hljs-type">void</span> (*ndo_tx_timeout) (<span class="hljs-keyword">struct</span> fwk_net_device *sptr_ndev);
+};
+</code></pre>
+<p>ndo_start_xmit就是发送线程取出队列后要调用的发送函数，而接收队列通常在中断中提交，是驱动程序主动发起，不需要平台去调用。收发函数分别是：</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 读取发送队列, 调用ndo_start_xmit */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_dev_queue_xmit</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+<span class="hljs-comment">/* 提交数据到接收队列 */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_netif_rx</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+</code></pre>
+<h5 id="7122-数据包">7.12.2. 数据包</h5>
+<p>结构体“struct fwk_sk_buff”拥有完整的数据段（包括头部、数据部分、尾部），和Linux的“struct sk_buff”基本相同。</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 数据队列, 连接当前网络设备的所有数据包 */</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sk_buff_head</span>
+{</span>
+    <span class="hljs-comment">/*!&lt; 前两个成员与&quot;struct fwk_sk_buff&quot;相同, 也必须相同, 以便二者可以互相强制类型转换 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sk_buff</span> *<span class="hljs-title">sptr_next</span>;</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sk_buff</span> *<span class="hljs-title">sptr_prev</span>;</span>
+
+    <span class="hljs-comment">/* 数据包的个数 */</span>
+    <span class="hljs-type">kint32_t</span> qlen;
+};
+
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sk_buff</span>
+{</span>
+    <span class="hljs-comment">/*!&lt; 用于连接前后数据包. 必须与&quot;struct fwk_sk_buff_head&quot;前两个成员相同 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sk_buff</span> *<span class="hljs-title">sptr_next</span>;</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sk_buff</span> *<span class="hljs-title">sptr_prev</span>;</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_net_device</span> *<span class="hljs-title">sptr_ndev</span>;</span>                                   <span class="hljs-comment">/*!&lt; 数据包绑定的网络设备 */</span>
+
+    <span class="hljs-type">kuint32_t</span> len;                                                      <span class="hljs-comment">/*!&lt; 数据长度. 包括头部 (tail - data) */</span>
+    <span class="hljs-type">kuint32_t</span> data_len;                           						<span class="hljs-comment">/*!&lt; 数据长度, 不含头部 (len - 数据链路层 - 传输层数据) */</span>
+
+    <span class="hljs-type">kuint16_t</span> protocol;                        					        <span class="hljs-comment">/*!&lt; 传输层协议, 如IP, ARP */</span>
+    <span class="hljs-type">kuint16_t</span> transport_header;                   				        <span class="hljs-comment">/*!&lt; 传输层所在的偏移(相对于head) */</span>
+    <span class="hljs-type">kuint16_t</span> network_header;                     				        <span class="hljs-comment">/*!&lt; 网络层所在的偏移(相对于head) */</span>
+    <span class="hljs-type">kuint16_t</span> mac_header;                         				        <span class="hljs-comment">/*!&lt; 物理层所在的偏移(相对于head) */</span>
+
+    <span class="hljs-comment">/*!&lt; head ---&gt; data ---&gt; tail ---&gt; end */</span>
+    <span class="hljs-type">sk_buff_data_t</span> tail;                               				    <span class="hljs-comment">/*!&lt; 数据段结尾, 与data对应 */</span>
+    <span class="hljs-type">sk_buff_data_t</span> end;                                				    <span class="hljs-comment">/*!&lt; 数据结尾, 与head对应 */</span>
+    <span class="hljs-type">kuint8_t</span> *head;                              					    <span class="hljs-comment">/*!&lt; 数据段起始 */</span>
+    <span class="hljs-type">kuint8_t</span> *data;                              					    <span class="hljs-comment">/*!&lt; 实际数据的起始地址 */</span>
+};
+</code></pre>
+<p>“struct fwk_sk_buff_head”是数据包连接的链表头，它的前两个成员与“struct fwk_sk_buff”相同，方便类型转换，如：</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sk_buff_head</span> <span class="hljs-title">sgtc_head</span>;</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sk_buff</span> <span class="hljs-title">sgtr_skb</span>, *<span class="hljs-title">sptr_skb</span>;</span>
+
+sgtc_head.sptr_next = &amp;sgtr_skb;
+sgtc_head.sptr_prev = &amp;sgtr_skb;
+
+<span class="hljs-comment">/* 将链表头视为普通skb */</span>
+sptr_skb = (<span class="hljs-keyword">struct</span> fwk_sk_buff *)sgtc_head;
+printk(<span class="hljs-string">&quot;%u\n&quot;</span>, sptr_skb-&gt;sptr_next-&gt;data_len);
+</code></pre>
+<p>在“struct fwk_sk_buff”结构体中有4个特殊的成员：tail、end、head和data，它们的关系和Linux中sk_buff一样。head表示数据段的起始，它一般是4字节对齐，而EtherNetII的数据头长度一般为14字节，假设head的地址为0，EtherNetII取head的地址，也为0，那紧随其后的网络层数据起始地址就是14（非4字节对齐），而网络层数据长度为20字节，故之后的传输层数据的起始地址也同样不是4字节对齐了。如果传输层和网络层涉及到unsigned int类型变量的读写，可能引发未对齐异常（触发abort）。实际上，EtherNetII数据头由3部分组成：</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_eth_hdr</span>
+{</span>
+    <span class="hljs-type">kuint8_t</span> h_dest[<span class="hljs-number">6</span>];                      <span class="hljs-comment">/*!&lt; 目标物理地址 */</span>
+    <span class="hljs-type">kuint8_t</span> h_source[<span class="hljs-number">6</span>];                    <span class="hljs-comment">/*!&lt; 源物理地址 */</span>
+
+    <span class="hljs-type">kuint16_t</span> h_proto;                       <span class="hljs-comment">/*!&lt; 网络层协议类型, 如IP, ARP */</span>
+
+} __packed;
+</code></pre>
+<p>根本不存在kuint32_t或kint32_t这种类型，即，EtherNetII完全不需要4字节对齐的起始地址。
+一般我们将head往右偏两个字节，得到struct fwk_sk_buff::data成员。这样网络层的起始地址就是16，而传输层的起始地址就是36，满足4字节要求。如果为了保证数据段的“对称”，我们给尾部也留出两个字节，分别得到tail和end，其中end = tail + 2。
+HeavenFox提供了对应的操作接口：</p>
+<pre><code class="language-c"><span class="hljs-comment">/* head和end不变, data和tail同时偏移len个字节 (比如len = 2) */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">fwk_skb_reserve</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb, <span class="hljs-type">kuint32_t</span> len)</span>;
+<span class="hljs-comment">/* head和data不变, tail向右偏移len个字节, 留出数据段的空间 */</span>
+<span class="hljs-type">void</span> *<span class="hljs-title function_">fwk_skb_put</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb, <span class="hljs-type">kuint32_t</span> len)</span>;
+<span class="hljs-comment">/* data左移len个字节, 数据段向左扩张 */</span>
+<span class="hljs-type">void</span> *<span class="hljs-title function_">fwk_skb_push</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb, <span class="hljs-type">kuint32_t</span> len)</span>;
+<span class="hljs-comment">/* data右移len个字节, 数据段缩小 */</span>
+<span class="hljs-type">void</span> *<span class="hljs-title function_">fwk_skb_pull</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb, <span class="hljs-type">kuint32_t</span> len)</span>;
+</code></pre>
+<p>“struct fwk_sk_buff”的transport_header、network_header和mac_header分别表示传输层、网络层、物理层数据相对于head的偏移，以便快速定位到指定数据位置。比如初始化时，mac_header被赋值为“data - head”，则物理层数据的起始地址 = head + mac_header = data。
+可以使用函数接口进行操作：</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 初始化: sptr_skb-&gt;mac_header = data - head */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">fwk_skb_reset_mac_header</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+<span class="hljs-comment">/* sptr_skb-&gt;mac_header = data - head + offset */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">fwk_skb_set_mac_header</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb, <span class="hljs-type">const</span> <span class="hljs-type">kint32_t</span> offset)</span>;
+<span class="hljs-comment">/* return head + sptr_skb-&gt;mac_header */</span>
+<span class="hljs-type">kuint8_t</span> *<span class="hljs-title function_">fwk_skb_mac_header</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+<span class="hljs-comment">/* return head + sptr_skb-&gt;mac_header - data */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_skb_mac_offset</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+
+<span class="hljs-comment">/* 同mac_header */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">fwk_skb_reset_network_header</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+<span class="hljs-type">void</span> <span class="hljs-title function_">fwk_skb_set_network_header</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb, <span class="hljs-type">const</span> <span class="hljs-type">kint32_t</span> offset)</span>;
+<span class="hljs-type">kuint8_t</span> *<span class="hljs-title function_">fwk_skb_network_header</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_skb_network_offset</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+
+<span class="hljs-comment">/* 同mac_header */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">fwk_skb_reset_transport_header</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+<span class="hljs-type">void</span> <span class="hljs-title function_">fwk_skb_set_transport_header</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb, <span class="hljs-type">const</span> <span class="hljs-type">kint32_t</span> offset)</span>;
+<span class="hljs-type">kuint8_t</span> *<span class="hljs-title function_">fwk_skb_transport_header</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_skb_transport_offset</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+</code></pre>
+<p>以上是“struct fwk_sk_buff”重要成员的含义及赋值方法，最终整个结构将通过sptr_prev和sptr_next串接到全局队列“struct fwk_sk_buff_head”，即入队和出队；一个数据包至少需要经历1次入队和出队：发送时需要将lwip的pbuf转化为skb，然后入队，当队列被读取时出队，交给发送寄存器或DMA；接收时需要将新收到的skb入队，当队列被接收线程读取时出队，转化为lwip的pbuf。</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 创建一个skb, 数据部分(head ~ end)长度为data_size */</span>
+<span class="hljs-keyword">struct</span> fwk_sk_buff *<span class="hljs-title function_">fwk_alloc_skb</span><span class="hljs-params">(<span class="hljs-type">kuint32_t</span> data_size, <span class="hljs-type">nrt_gfp_t</span> flags)</span>;
+<span class="hljs-comment">/* 释放一个skb */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">fwk_free_skb</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+<span class="hljs-comment">/* 添加skb到全局队列 */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_skb_enqueue</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff_head *sptr_head, <span class="hljs-keyword">struct</span> fwk_sk_buff *sptr_skb)</span>;
+<span class="hljs-comment">/* 从全局队列读出skb */</span>
+<span class="hljs-keyword">struct</span> fwk_sk_buff *<span class="hljs-title function_">fwk_skb_dequeue</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_sk_buff_head *sptr_head)</span>;
+</code></pre>
+<h5 id="7123-socket">7.12.3. socket</h5>
+<p>任何一个网络设备链路开启后（link up），都将被分配一个结构体“struct fwk_network_if”，存储设备的ip、子网掩码、网关信息，以及操作函数集。
+而HeavenFox又为每个网络设备的访问者分配一个“套接字”，每个“套接字”对应一个“struct fwk_network_object”结构，并使用基数树保存它们。当要获取套接字xxx对应的fwk_network_object结构时，可从基数树快速找到。</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_network_com</span>
+{</span>
+    <span class="hljs-type">kint32_t</span> domain;                                <span class="hljs-comment">/* 域, 可选NET_AF_INET */</span>
+    <span class="hljs-type">kint32_t</span> type;                                  <span class="hljs-comment">/* 类型, 可选NR_SOCK_STREAM/NR_SOCK_DGRAM/NR_SOCK_RAW */</span>
+    <span class="hljs-type">kint32_t</span> protocol;                              <span class="hljs-comment">/* 协议, 可选NET_IP_PROTO_UDP/NET_IP_PROTO_ICMP */</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sockaddr_in</span> <span class="hljs-title">sgtc_sin</span>;</span>                <span class="hljs-comment">/* 绑定的ip地址 */</span>
+    <span class="hljs-type">void</span> *private_data;                             <span class="hljs-comment">/* 中间件的私有数据, 如lwip返回的结构指针(udp_pcb, raw_pcb) */</span>
+};
+
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_network_object</span>
+{</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_network_com</span> <span class="hljs-title">sgtc_socket</span>;</span>             <span class="hljs-comment">/* 访问者的核心结构 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_network_if</span> *<span class="hljs-title">sptr_if</span>;</span>                 <span class="hljs-comment">/* 绑定ip地址后, 将根据ip得到网络设备对应的sptr_if, 赋值于此 */</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">radix_link</span> <span class="hljs-title">sgtc_radix</span>;</span>                   <span class="hljs-comment">/* 基数树链接点, 套接字即基数树对应的&quot;数字&quot;节点 */</span>
+};
+</code></pre>
+<p>“struct fwk_network_object”只是一个简单结构，它的真正核心是sgtc_socket和sptr_if。前者是其固有成员，用来存储申请套接字时传入的参数信息；后者是指针，根据“struct fwk_network_com::sgtc_sin”中的ip地址找到对应的网络节点后，保存该节点的“struct fwk_network_if”到此，由此建立联系；如果找不到节点，说明网络设备可能不存在，或者链路处于关闭状态，即尚未注册到lwip。</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sockaddr_in</span> 
+{</span>
+    <span class="hljs-type">fwk_sa_family_t</span>	sin_family;                         <span class="hljs-comment">/* 如NET_AF_INET */</span>
+    <span class="hljs-type">kuint16_t</span>		sin_port;                           <span class="hljs-comment">/* 端口号 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_in_addr</span> <span class="hljs-title">sin_addr</span>;</span>                        <span class="hljs-comment">/* ip地址 */</span>
+
+    <span class="hljs-comment">/*!&lt; zero[8], 无意义 */</span>
+    <span class="hljs-type">kuint8_t</span> zero[<span class="hljs-number">16</span> - <span class="hljs-keyword">sizeof</span>(<span class="hljs-type">fwk_sa_family_t</span>) - <span class="hljs-keyword">sizeof</span>(<span class="hljs-type">kuint16_t</span>) - <span class="hljs-keyword">sizeof</span>(<span class="hljs-keyword">struct</span> fwk_in_addr)];
+};
+
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_network_if</span>
+{</span>
+	<span class="hljs-type">kchar_t</span> ifname[<span class="hljs-number">32</span>];                                 <span class="hljs-comment">/* 与网络设备节点名称相同 */</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sockaddr_in</span> <span class="hljs-title">sgtc_ip</span>;</span>                     <span class="hljs-comment">/* ip地址 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sockaddr_in</span> <span class="hljs-title">sgtc_gw</span>;</span>                     <span class="hljs-comment">/* 网关 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_sockaddr_in</span> <span class="hljs-title">sgtc_netmask</span>;</span>                <span class="hljs-comment">/* 子网掩码 */</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_network_if_ops</span> *<span class="hljs-title">sptr_oprts</span>;</span>              <span class="hljs-comment">/* 由协议层定义的函数集, 一般是lwip提供 */</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">sgtc_link</span>;</span>                         <span class="hljs-comment">/* 已激活的网络设备, 链接到全局链表 */</span>
+    <span class="hljs-type">void</span> *private_data;                                 <span class="hljs-comment">/* 用于协议层的私有数据, 如自定义的lwip_data */</span>
+};
+
+<span class="hljs-comment">/* 启用链路: 根据name找到网络设备节点, 并创建和初始化&quot;struct fwk_network_if&quot;, 注册到lwip协议层(netif_add) */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">net_link_up</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *name, <span class="hljs-keyword">struct</span> fwk_sockaddr_in *sptr_ip, 
+                    <span class="hljs-keyword">struct</span> fwk_sockaddr_in *sptr_gw, <span class="hljs-keyword">struct</span> fwk_sockaddr_in *sptr_mask)</span>;
+<span class="hljs-comment">/* 关闭链路, 销毁&quot;struct fwk_network_if&quot; */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">net_link_down</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *name)</span>;
+</code></pre>
+<p>套接字（“struct fwk_network_object”）由以下API创建和使用：</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 创建&quot;struct fwk_network_object&quot;并返回基数树对应的数字作为套接字. 目前仅支持UDP和ICMP */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">net_socket</span><span class="hljs-params">(<span class="hljs-type">kint32_t</span> domain, <span class="hljs-type">kint32_t</span> type, <span class="hljs-type">kint32_t</span> protocol)</span>;
+
+<span class="hljs-comment">/* 绑定ip. 根据ip找到匹配的&quot;struct fwk_network_if&quot;, 并执行sptr_oprts-&gt;init() */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">socket_bind</span><span class="hljs-params">(<span class="hljs-type">kint32_t</span> sockfd, <span class="hljs-type">const</span> <span class="hljs-keyword">struct</span> fwk_sockaddr *sptr_addr, <span class="hljs-type">fwk_socklen_t</span> addrlen)</span>;
+<span class="hljs-comment">/* 调用sptr_oprts-&gt;sendto, 发送数据包 */</span>
+<span class="hljs-type">kssize_t</span> <span class="hljs-title function_">socket_sendto</span><span class="hljs-params">(<span class="hljs-type">kint32_t</span> sockfd, <span class="hljs-type">const</span> <span class="hljs-type">void</span> *buf, <span class="hljs-type">kssize_t</span> len, 
+                            <span class="hljs-type">kint32_t</span> flags, <span class="hljs-type">const</span> <span class="hljs-keyword">struct</span> fwk_sockaddr *sptr_dest, <span class="hljs-type">fwk_socklen_t</span> addrlen)</span>;
+<span class="hljs-comment">/* 调用sptr_oprts-&gt;recvfrom, 接收数据包 */</span>
+<span class="hljs-type">kssize_t</span> <span class="hljs-title function_">socket_recvfrom</span><span class="hljs-params">(<span class="hljs-type">kint32_t</span> sockfd, <span class="hljs-type">void</span> *buf, <span class="hljs-type">size_t</span> len, 
+                            <span class="hljs-type">kint32_t</span> flags, <span class="hljs-keyword">struct</span> fwk_sockaddr *sptr_src, <span class="hljs-type">fwk_socklen_t</span> *addrlen)</span>;
+
+<span class="hljs-comment">/* 关闭套接字: 销毁&quot;struct fwk_network_object&quot;并取消其在基数树的存在 */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">virt_close</span><span class="hljs-params">(<span class="hljs-type">kint32_t</span> fd)</span>;
+</code></pre>
+<p>大致流程为：</p>
+<pre><code class="language-Mermaid">graph TD
+    A[驱动程序创建并注册“struct fwk_net_device”网络设备节点] ---&gt; B[应用程序启动链路：net_link_up]
+    B ---&gt; C[创建网络接口“struct fwk_network_if”，进入平台中间层]
+    C ---&gt; D[根据name找到网络设备节点，与fwk_network_if绑定]
+    D ---&gt; E[调用lwip协议层netif_add函数，注册接口和ip，进入lwip协议层]
+    E ---&gt; F[执行回调lwip_enet_init]
+    F ---&gt; G[执行函数钩子“struct fwk_net_device::sptr_netdev_oprts-&gt;ndo_open”，进入驱动层]
+    G ---&gt; H[初始化网络设备、网卡硬件（寄存器）]
+    H ---&gt; I[返回平台中间层，创建并初始化发送线程、发送队列]
+
+    O[应用层调用net_socket，申请套接字] ---&gt; P[创建“struct fwk_network_object”结构，保存到全局基数树]
+    P ---&gt; Q[返回基数树节点值作为“套接字”]
+    Q ---&gt; R[应用层调用socket_bind，根据ip地址找到匹配的fwk_network_if]
+    R ---&gt; S[执行“struct fwk_network_if::sptr_oprts-&gt;init”函数，创建和初始化lwip数据资源（如udp_pcb）]
+    S ---&gt; T[应用层调用socket_sendto，实际执行“struct fwk_network_if::sptr_oprts-&gt;sendto”函数]
+    T ---&gt; U[创建pbuf，并拷贝应用程序缓冲区数据到pbuf，进入lwip协议层，发出数据]
+    U ---&gt; V[触发lwip发送回调函数，进入lwip_lowlevel_output]
+    V ---&gt; W[读出每一个pbuf，创建fwk_sk_buff结构，拷贝数据，并添加到发送队列，唤醒发送线程]
+    W ---&gt; X[发送线程被唤醒，读出每一个fwk_sk_buff，调用fwk_dev_queue_xmit]
+    X ---&gt; Y[执行函数钩子“struct fwk_net_device::sptr_netdev_oprts-&gt;ndo_start_xmit”，进入驱动层]
+    Y ---&gt; Z[保存fwk_sk_buff指针到DMA缓冲区，使能硬件发送]
+</code></pre>
+<h4 id="713-终端">7.13. 终端</h4>
+<p>内核支持串口终端（波特率115200），源码位于“term”文件夹下。
+远程主机使用终端时，键盘每输入一个字符，都会被立即发送到设备从机，HeavenFox则根据传来的字符判断主机的行为。支持以下特殊字符的解析：</p>
+<pre><code class="language-shell">    空格键: 自动忽略重复的空格、首尾的空格;
+    退格键: 输入退格键时, 删除前一个字符;
+    方向上键: 显示上一个输入的命令;
+    方向下键: 显示下一个输入的命令;
+    Ctrl+C: 取消/中止输入;
+    回车键: 确认键, 内核将解析之前输入的字符串, 处理对应的功能;
+</code></pre>
+<p>终端是HeavenFox的一个内核线程，名称为“terminal”，但优先级并不高，主要靠轮询（查询串口是否有数据接收）分辨是否有输入。
+终端支持动态插入和删除命令，使用如下接口实现：</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 每一个命令都使用该结构体表示 */</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">term_cmd</span>
+{</span>
+    <span class="hljs-comment">/* 命令名称 */</span>
+    <span class="hljs-type">kchar_t</span> name[<span class="hljs-number">32</span>];
+
+    <span class="hljs-comment">/* 命令的执行函数, argc表示命令参数, argv为命令内容. 如&quot;ttc 188 66&quot;, argc = 3, argv[] = { &quot;ttc&quot;, &quot;188&quot;, &quot;66&quot; } */</span>
+    <span class="hljs-type">kint32_t</span> (*do_excute)(<span class="hljs-keyword">struct</span> term_cmd *, <span class="hljs-type">kint32_t</span> argc, <span class="hljs-type">kchar_t</span> **argv);
+    <span class="hljs-comment">/* 命令的帮助函数 */</span>
+    <span class="hljs-type">void</span> (*help)(<span class="hljs-type">void</span>);
+
+    <span class="hljs-comment">/* 所有命令连接到全局链表 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">sgtc_link</span>;</span>
+};
+
+<span class="hljs-comment">/* 创建一个命令 (名字为name) */</span>
+<span class="hljs-keyword">struct</span> term_cmd *<span class="hljs-title function_">term_cmd_allocate</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *name, <span class="hljs-type">nrt_gfp_t</span> gfp_mask)</span>;
+<span class="hljs-comment">/* 销毁一个命令 */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">term_cmd_free</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> term_cmd *sptr_cmd)</span>;
+<span class="hljs-comment">/* 注册新命令 */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">term_cmd_add</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> term_cmd *sptr_cmd)</span>;
+<span class="hljs-comment">/* 注销命令 */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">term_cmd_del</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> term_cmd *sptr_cmd)</span>;
+</code></pre>
+<p>回车键按下后，内核将遍历全局命令链表sgtc_term_cmd_lists（即命令分发），找到与之对应的命令对象“struct term_cmd”，执行其do_excute函数。</p>
 <hr>
-<h3 id="8-驱动">8. 驱动</h3>
-<ul>
-<li>
-<p>平台设备与总线</p>
-</li>
-<li>
-<p>总线-设备-驱动匹配</p>
-</li>
-<li>
-<p>字符设备驱动</p>
-</li>
-<li>
-<p>gpio设备驱动</p>
-</li>
-<li>
-<p>帧缓冲设备驱动</p>
-</li>
-<li>
-<p>i2c设备驱动</p>
-</li>
-<li>
-<p>网络设备驱动</p>
-</li>
-<li>
-<p>磁盘设备驱动</p>
-</li>
-</ul>
+<h3 id="8-虚拟文件路径">8. 虚拟文件路径</h3>
+<h4 id="81-节点对象与文件系统">8.1. 节点对象与文件系统</h4>
+<h4 id="82-虚拟设备文件">8.2. 虚拟设备文件</h4>
+<h4 id="83-字符设备">8.3. 字符设备</h4>
+<h4 id="84-磁盘设备">8.4. 磁盘设备</h4>
+<p>目前HeavenFox支持的磁盘设备即SD卡，它会初始化两次，一是在boot阶段，用于读取卡内的文件（如设备树）；二是在内核初始化阶段，注册fatfs文件系统，并挂载sd卡。
+sd卡默认挂载到虚拟文件路径“/media/FATFS_32”，如需要访问“home/fox/123.txt”，需引用完整路径“/media/FATFS_32/home/fox/123.txt”。
+内核简单地将磁盘抽象为“struct fwk_gendisk”结构体，包含对磁盘的读写、挂载/卸载等通用操作；磁盘也可以申请设备号，并直接保存设备号到fwk_gendisk结构体中。</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_gendisk</span>
+{</span>
+    <span class="hljs-comment">/* 主设备号 */</span>
+    <span class="hljs-type">kint32_t</span> major;
+    <span class="hljs-comment">/* 次设备号起始 */</span>
+    <span class="hljs-type">kint32_t</span> first_minor;
+    <span class="hljs-comment">/* 次设备号个数 */</span>
+    <span class="hljs-type">kint32_t</span> minors;
+    <span class="hljs-comment">/* 磁盘名称 */</span>
+    <span class="hljs-type">kchar_t</span> disk_name[<span class="hljs-number">32</span>];
+
+    <span class="hljs-comment">/* 函数入口, 需由文件系统提供具体内容 */</span>
+    <span class="hljs-comment">/* 挂载, 伴随系统初始化和磁盘初始化 */</span>
+    <span class="hljs-type">kint32_t</span> (*mount)(<span class="hljs-keyword">struct</span> fwk_gendisk *sptr_disk);
+    <span class="hljs-comment">/* 卸载, 磁盘恢复非激活状态 */</span>
+    <span class="hljs-type">kint32_t</span> (*unmount)(<span class="hljs-keyword">struct</span> fwk_gendisk *sptr_disk);
+    <span class="hljs-comment">/* 格式化 */</span>
+    <span class="hljs-type">kint32_t</span> (*mkfs)(<span class="hljs-keyword">struct</span> fwk_gendisk *sptr_disk);
+    <span class="hljs-comment">/* 创建文件夹 */</span>
+    <span class="hljs-type">kint32_t</span> (*mkdir)(<span class="hljs-keyword">struct</span> fwk_gendisk *sptr_disk, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *dir_name);
+    <span class="hljs-comment">/* 删除文件夹 */</span>
+    <span class="hljs-type">kint32_t</span> (*rmdir)(<span class="hljs-keyword">struct</span> fwk_gendisk *sptr_disk, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *dir_name);
+    <span class="hljs-comment">/* 打开文件夹 */</span>
+    <span class="hljs-type">kint32_t</span> (*opendir)(<span class="hljs-keyword">struct</span> fwk_gendisk *sptr_gdisk, <span class="hljs-keyword">struct</span> fs_list *sptr_list);
+    <span class="hljs-comment">/* 关闭文件夹 */</span>
+    <span class="hljs-type">kint32_t</span> (*closedir)(<span class="hljs-keyword">struct</span> fwk_gendisk *sptr_gdisk, <span class="hljs-keyword">struct</span> fs_list *sptr_list);
+
+    <span class="hljs-comment">/* 磁盘设备, 伴随设备号申请操作 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_device</span> *<span class="hljs-title">sptr_devfs</span>;</span>
+    <span class="hljs-comment">/* 更多的操作函数 (如文件读写) */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_block_device_oprts</span> *<span class="hljs-title">sptr_bops</span>;</span>
+
+    <span class="hljs-comment">/* 简单表示磁盘设备类型, 对标字符设备 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_block_device</span> *<span class="hljs-title">sptr_blkdev</span>;</span>
+};
+
+<span class="hljs-comment">/* 初始化sptr_gdisk, 并令sptr_gdisk-&gt;sptr_bops = sptr_oprts */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_gendisk_init</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_gendisk *sptr_gdisk, 
+                            <span class="hljs-type">const</span> <span class="hljs-keyword">struct</span> fwk_block_device_oprts *sptr_oprts)</span>;
+<span class="hljs-comment">/* 申请一个新的fwk_gendisk, 并调用fwk_gendisk_init进行初始化, 且令sptr_gdisk-&gt;minors = minors */</span>
+<span class="hljs-keyword">struct</span> fwk_gendisk *<span class="hljs-title function_">fwk_alloc_gendisk</span><span class="hljs-params">(<span class="hljs-type">kint32_t</span> minors, 
+                            <span class="hljs-type">const</span> <span class="hljs-keyword">struct</span> fwk_block_device_oprts *sptr_oprts)</span>;
+<span class="hljs-comment">/* 自动分配一个sptr_blkdev, 并注册sptr_gdisk; 本函数将同时执行sptr_gdisk-&gt;mount, 挂载磁盘 */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_add_gendisk</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_gendisk *sptr_gdisk)</span>;
+<span class="hljs-comment">/* 执行sptr_gdisk-&gt;unmount, 卸载磁盘, 并释放sptr_blkdev */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_del_gendisk</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> fwk_gendisk *sptr_gdisk)</span>;
+</code></pre>
 <hr>
-<h3 id="9-线程调度">9. 线程调度</h3>
-<ul>
-<li>
-<p>线程状态与迁移（一）：状态定义
-在HeavenFox中，线程就是一个任务，当任务在执行时，称它处于运行态（running）；当它准备执行时，称它处于就绪态（ready）；一个无法被执行的任务，称它处于睡眠态（sleep），这种状态的任务，如果不能及时唤醒，将会被系统回收（被杀死）；一个暂时不能执行的任务，但是有机会变成就绪态，称它处于挂起态（suspend），处于该状态的任务，系统不会回收。
+<h3 id="9-线程管理">9. 线程管理</h3>
+<h4 id="91-线程状态与迁移一状态定义">9.1. 线程状态与迁移（一）：状态定义</h4>
+<p>在HeavenFox中，线程就是一个任务，当任务在执行时，称它处于运行态（running）；当它准备执行时，称它处于就绪态（ready）；一个无法被执行的任务，称它处于睡眠态（sleep），这种状态的任务，如果不能及时唤醒，将会被系统回收（被杀死）；一个暂时不能执行的任务，但是有机会变成就绪态，称它处于挂起态（suspend），处于该状态的任务，系统不会回收。
 在单核CPU中，任何时刻只有一个任务处于运行态，当它结束时，会自动从处于就绪态的各个任务中取一个来运行。内核始终至少保留一个任务处于就绪态，如空闲线程。一个运行中的任务结束时，可能变为就绪、挂起、睡眠中的任一个状态；当变为就绪态时，可以在其他任务执行结束后重新恢复运行；当变为挂起态时，需要由中断或其他任务“唤醒”，并置为就绪态。挂起态不能直接恢复为运行态，必须经由就绪态，以便调度器裁决。</p>
-</li>
-<li>
-<p>线程控制块
-每个任务（线程）都使用结构体“struct thread”来描述：</p>
-</li>
-</ul>
+<h4 id="92-线程控制块">9.2. 线程控制块</h4>
+<p>每个任务（线程）都使用结构体“struct thread”来描述：</p>
 <pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">thread</span>
 {</span>
     <span class="hljs-comment">/*!&lt; 线程名字: 每个线程都有独一无二的名字 */</span>
@@ -3072,10 +4527,8 @@ start_kernel将调用setup_machine函数解析tag_params：</li>
     <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mem_info</span> <span class="hljs-title">sgtc_pool</span>;</span>                  <span class="hljs-comment">/*!&lt; 线程池 (即专为线程服务的内存池, 一般不使用) */</span>
 };
 </code></pre>
-<ul>
-<li>调度控制块“sgtc_scheduler_table”
-所有线程都需要注册到调度控制块sgtc_scheduler_table，以便管理和调度。它是一个“struct scheduler_table”结构体：</li>
-</ul>
+<h4 id="93-调度控制块sgtc_scheduler_table">9.3. 调度控制块“sgtc_scheduler_table”</h4>
+<p>所有线程都需要注册到调度控制块sgtc_scheduler_table，以便管理和调度。它是一个“struct scheduler_table”结构体：</p>
 <pre><code class="language-c"><span class="hljs-comment">/*!&lt; 哈希散列表 */</span>
 <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">thread_hash</span>
 {</span>
@@ -3152,13 +4605,11 @@ start_kernel将调用setup_machine函数解析tag_params：</li>
     .sgtc_lock		= SPIN_LOCK_INIT(),
 };
 </code></pre>
-<ul>
-<li>线程状态与迁移（二）：优先级排序
-链表不同于数组，想要快速实现排序，一般要借助复杂的结构，比如红黑树；但内核对优先级做了限制（0 ~ 99），所以我们可以将每个同优先级的线程都归到一个链表中，组成100个链表，再用长度为100的指针数组存放每个链表的首地址，即为哈希散列表。
+<h4 id="94-线程状态与迁移二优先级排序">9.4. 线程状态与迁移（二）：优先级排序</h4>
+<p>链表不同于数组，想要快速实现排序，一般要借助复杂的结构，比如红黑树；但内核对优先级做了限制（0 ~ 99），所以我们可以将每个同优先级的线程都归到一个链表中，组成100个链表，再用长度为100的指针数组存放每个链表的首地址，即为哈希散列表。
 内核规定数值越低，优先级越高，故优先级为0的线程，优先级最高，而99最低。
 当已知一个线程的优先级为88时，可直接找到数组的第88个位置，插入到该处的链表末尾，即完成一次插入；不过，这里使用的是“struct thread”结构体的sgtc_hash成员（插入到“struct scheduler_table”结构体的sgtc_core），并不是sgtc_link，我们还需找到当前数组的上一个非空位置。
-假设即将插入的线程优先级为88，要插入的哈希数组为xxx_hash[100]， 则：</li>
-</ul>
+假设即将插入的线程优先级为88，要插入的哈希数组为xxx_hash[100]， 则：</p>
 <blockquote>
 <p>1）若xxx_hash[88]非空（即sptr_tail非NULL），直接使sgtc_hash插入到链表尾部，sgtc_link可直接链接sptr_tail-&gt;sgtc_link，并更新sptr_tail为新的thread；</p>
 <p>2）若xxx_hash[88]为空（即sptr_tail为NULL），直接使sgtc_hash插入到链表尾部，此时新线程为xxx_hash[88]的唯一链表项，使sptr_tail直接等于新线程；之后需要向后查找，xxx_hash[0] ~ xxx_hash[87]，获取离xxx_hash[88]最近的一个散列表。需要借助“struct thread_list”结构体的ffs_l和ffs_h成员，它们的每一个bit表示一个优先级，前者可表示0 ~ 63，后者表示64 ~ 99；当新线程插入xxx_hash[88]后，需同步置ffs_h的第24位（88 - 64）为1，然后检查ffs_h的第0 ~ 23位是否存在置位，若有（假设为第a位），获取该位（优先级为“a + 64”，是比新线程优先级高且最近的位置）对应的xxx_hash[a + 64]，将新线程的sgtc_link成员链接到xxx_hash[a + 64].sptr_tail-&gt;sgtc_link即可；若在ffs_h没有找到，则退到ffs_l查找，若也没有，则表示新线程的优先级为最高。</p>
@@ -3305,10 +4756,8 @@ start_kernel将调用setup_machine函数解析tag_params：</li>
     list_head_del(&amp;sptr_thread-&gt;sgtc_link);
 }
 </code></pre>
-<ul>
-<li>线程创建与注销
-HeavenFox的线程都需要从内存池申请，不允许全局定义。新线程首先要确定tid， 需要在数组sgtc_scheduler_table.sptr_tid_array[1024]中找到一个未被使用的位置（即数组为NULL），取其下标作为tid。可通过函数get_unused_tid_from_scheduler实现：</li>
-</ul>
+<h4 id="95-线程创建与注销">9.5. 线程创建与注销</h4>
+<p>HeavenFox的线程都需要从内存池申请，不允许全局定义。新线程首先要确定tid， 需要在数组sgtc_scheduler_table.sptr_tid_array[1024]中找到一个未被使用的位置（即数组为NULL），取其下标作为tid。可通过函数get_unused_tid_from_scheduler实现：</p>
 <pre><code class="language-c"><span class="hljs-type">tid_t</span> <span class="hljs-title function_">get_unused_tid_from_scheduler</span><span class="hljs-params">(<span class="hljs-type">kuint32_t</span> i_start, <span class="hljs-type">kuint32_t</span> count)</span>
 {
     <span class="hljs-type">kuint32_t</span> i;
@@ -3575,11 +5024,9 @@ END:
     <span class="hljs-keyword">return</span> ER_NORMAL;
 }
 </code></pre>
-<ul>
-<li>线程状态与迁移（三）：schedule_thread_switch
-切换线程状态要用到函数schedule_thread_switch，但在此之前需要先设置线程的目标状态（“struct thread”结构体的to_state成员），schedule_thread_switch会根据state成员获知当前线程状态，并从对应链表中删除；再根据to_state成员获知线程希望迁移的状态，然后将当前线程插入到对应的链表。
-线程状态切换，其实就是链表的转换。</li>
-</ul>
+<h4 id="96-线程状态与迁移三schedule_thread_switch">9.6. 线程状态与迁移（三）：schedule_thread_switch</h4>
+<p>切换线程状态要用到函数schedule_thread_switch，但在此之前需要先设置线程的目标状态（“struct thread”结构体的to_state成员），schedule_thread_switch会根据state成员获知当前线程状态，并从对应链表中删除；再根据to_state成员获知线程希望迁移的状态，然后将当前线程插入到对应的链表。
+线程状态切换，其实就是链表的转换。</p>
 <p>线程切换规则：
 1）不论何时，都必须有一个线程处于运行态；
 2）处于运行态的线程，可以切换为就绪/挂起/睡眠；
@@ -3686,15 +5133,14 @@ fail:
     <span class="hljs-keyword">return</span> -ER_INVALID;
 }
 </code></pre>
-<ul>
-<li>线程调度（一）：__schedule_thread
-线程调度需要：
+<h4 id="97-线程调度">9.7. 线程调度</h4>
+<h5 id="971-__schedule_thread">9.7.1. __schedule_thread</h5>
+<p>线程调度需要：
 1）找出下一个可以运行的线程a，即就绪列表中优先级最高者；
 2）将当前线程改为就绪态，即将接替运行的线程a改为运行态，中间涉及列表转换，即调用schedule_thread_switch；
 2）保存当前线程的上下文；
 3）恢复线程a的上下文；
-4）切换到线程a运行（更新pc寄存器）。</li>
-</ul>
+4）切换到线程a运行（更新pc寄存器）。</p>
 <p>内核使用结构体“struct scheduler_context”来记录发生调度时的当前线程和下一个线程：</p>
 <pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">scheduler_context</span>
 {</span>
@@ -3811,10 +5257,8 @@ fail:
     <span class="hljs-keyword">return</span> mr_nullptr;
 }
 </code></pre>
-<ul>
-<li>线程调度（二）：context_switch
-__schedule_thread填充好sgtc_context的各个成员后，返回地址给context_switch，而：</li>
-</ul>
+<h5 id="972-context_switch">9.7.2. context_switch</h5>
+<p>__schedule_thread填充好sgtc_context的各个成员后，返回地址给context_switch，而：</p>
 <pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">context_switch</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> scheduler_context *sptr_info)</span>
 {
     __switch_to((<span class="hljs-type">kuaddr_t</span>)sptr_info);
@@ -4006,11 +5450,9 @@ _switch_to_next:
 
 ENDPROC(__switch_to)
 </code></pre>
-<ul>
-<li>线程调度（三）：休眠与唤醒
-切换线程其实只需两步：一是设置线程的目标态（即设置to_state）；二是调用schedule_thread函数，它会根据目标态完全切换。
-比如让线程挂起：</li>
-</ul>
+<h5 id="973-休眠与唤醒">9.7.3. 休眠与唤醒</h5>
+<p>切换线程其实只需两步：一是设置线程的目标态（即设置to_state）；二是调用schedule_thread函数，它会根据目标态完全切换。
+比如让线程挂起：</p>
 <pre><code class="language-c"><span class="hljs-comment">/*!&lt; 挂起自身 */</span>
 <span class="hljs-type">void</span> <span class="hljs-title function_">schedule_self_suspend</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
 {
@@ -4197,13 +5639,11 @@ ENDPROC(__switch_to)
 }
 </code></pre>
 <p>sleep的本质就是秒转为jiffies，然后调用schedule_timeout；msleep、usleep则是将毫秒、微秒转为jiffies。</p>
-<ul>
-<li>线程调度（四）：抢占
-内核支持抢占，即，不使用schedule_thread，也不使用sleep，而是强制将当前线程挂起（剥夺线程持有的CPU），并切换到下一个线程。
+<h5 id="974-抢占">9.7.4. 抢占</h5>
+<p>内核支持抢占，即，不使用schedule_thread，也不使用sleep，而是强制将当前线程挂起（剥夺线程持有的CPU），并切换到下一个线程。
 该操作往往由中断发起，并根据两条标准决定是否抢占：
 1）就绪列表是否存在比当前运行线程优先级更高的线程，若有，立即切换到该线程；
-2）如果没有更高的优先级，则检查当前线程的时间片，如已耗尽，则检查就绪列表是否有优先级相同的线程，若有，立即切换到该线程。</li>
-</ul>
+2）如果没有更高的优先级，则检查当前线程的时间片，如已耗尽，则检查就绪列表是否有优先级相同的线程，若有，立即切换到该线程。</p>
 <p>内核中定义了一个抢占计数器，当它为0时，允许抢占；非0时，表示禁止抢占。
 有一组接口可以使用它：</p>
 <pre><code class="language-c"><span class="hljs-comment">/*!&lt; 定义为原子变量 */</span>
@@ -4360,13 +5800,12 @@ _switch_to_irq:
 
 ENDPROC(__schedule_before)
 </code></pre>
-<ul>
-<li>同步与互斥（一）：关中断
-多线程运行时，会存在多个线程同时读写一个全局变量的情况，比如线程a将全局变量xxx置为1，而线程b将它值为2，最后线程a再读取的时候就是2而不是1；如果这是一个全局的指针变量，线程a将指针赋值为某个全局变量的地址，而线程b将指针置为NULL，那么线程a再对指针操作的时候，就会触发异常；如果这是一个全局的链表，线程a正在加入新链表项，还没加完就被线程b抢占，而它也要加入新链表项，则链表可能因为错乱的指针导致链表项前后关系错误。
+<h4 id="98-同步与互斥">9.8. 同步与互斥</h4>
+<h5 id="981-关中断">9.8.1. 关中断</h5>
+<p>多线程运行时，会存在多个线程同时读写一个全局变量的情况，比如线程a将全局变量xxx置为1，而线程b将它值为2，最后线程a再读取的时候就是2而不是1；如果这是一个全局的指针变量，线程a将指针赋值为某个全局变量的地址，而线程b将指针置为NULL，那么线程a再对指针操作的时候，就会触发异常；如果这是一个全局的链表，线程a正在加入新链表项，还没加完就被线程b抢占，而它也要加入新链表项，则链表可能因为错乱的指针导致链表项前后关系错误。
 这里的全局变量或全局函数，被称为临界资源。临界资源必须使用互斥，以防止多个线程“同时”操作。
 一种暴力的方式是关中断，中断关闭时kthread_schedule_timeout无法被执行，自然就不能发生抢占。
-关中断有几种方式：</li>
-</ul>
+关中断有几种方式：</p>
 <pre><code class="language-c"><span class="hljs-comment">/*!&lt; 暴力开启中断; 如果关闭中断前就是关中断的状态, 这里将导致中断错误打开 */</span>
 <span class="hljs-meta">#<span class="hljs-keyword">define</span> mr_local_irq_enable()                               mr_enable_cpu_irq()</span>
 <span class="hljs-comment">/*!&lt; 暴力关闭中断 */</span>
@@ -4396,11 +5835,9 @@ ENDPROC(__schedule_before)
 <span class="hljs-type">void</span> <span class="hljs-title function_">local_irq_restore</span><span class="hljs-params">(<span class="hljs-type">kutype_t</span> *flags)</span>;
 </code></pre>
 <p>在多核CPU且SMP模式中，关中断仅对某个核生效，无法禁止其他核读写全局变量，故关中断只能用于单核CPU。</p>
-<ul>
-<li>同步与互斥（二）：自旋锁
-为解决多核SMP的问题，引入自旋锁。使用全局计数器（各个核可见），当计数器为0时，允许访问临界资源；当计数器大于0时，表示已有其他线程正在访问，当前线程将原地等待计数器变为0（自旋）。等待期间，线程将空耗CPU，直到更高优先级或时间片耗尽，才有可能让出CPU，待其他线程访问临界资源结束，计数器减为0。
-当前核也需要处理线程和中断的关系，因为中断是无条件打断线程，二者对临界资源同样存在竞争关系；此时线程就可以采用关中断的方式。</li>
-</ul>
+<h5 id="982-自旋锁">9.8.2. 自旋锁</h5>
+<p>为解决多核SMP的问题，引入自旋锁。使用全局计数器（各个核可见），当计数器为0时，允许访问临界资源；当计数器大于0时，表示已有其他线程正在访问，当前线程将原地等待计数器变为0（自旋）。等待期间，线程将空耗CPU，直到更高优先级或时间片耗尽，才有可能让出CPU，待其他线程访问临界资源结束，计数器减为0。
+当前核也需要处理线程和中断的关系，因为中断是无条件打断线程，二者对临界资源同样存在竞争关系；此时线程就可以采用关中断的方式。</p>
 <p>自旋锁的定义为：</p>
 <pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">spin_lock</span>
 {</span>
@@ -4444,11 +5881,9 @@ ENDPROC(__schedule_before)
 <span class="hljs-type">void</span> <span class="hljs-title function_">spin_unlock_bh</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> spin_lock *sptr_lock)</span>;
 </code></pre>
 <p>注：不论使用哪一种API进行加锁，加锁时都会同时使抢占计数器自增，即抢占被关闭；解锁时抢占计数器自减。</p>
-<ul>
-<li>同步与互斥（三）：互斥锁
-自旋锁要么关中断，要么就是原地等待，很容易就拖慢内核的运行速度。互斥锁不需要等待，当加锁失败时，直接调用schedule_thread切换到其他线程，直到锁可用时，才为当前线程加锁。
-加锁和解锁期间，临界资源不需要强制在关中断状态下运行，抢占也能处于开启状态。只有一点，如果在中断中加互斥锁，schedule_thread会检测到当前处于中断回调函数，将原路返回，不会发生切换（在中断回调函数中切换线程是危险操作，中断不应该随意跳出）；但中断的优先级最高，如果中断获取不到锁，又无法让持有锁的线程释放，则内核将陷入死锁，只能一直空耗在加锁失败和schedule_thread失败之间。故，中断禁止使用互斥锁。</li>
-</ul>
+<h5 id="983-互斥锁">9.8.3. 互斥锁</h5>
+<p>自旋锁要么关中断，要么就是原地等待，很容易就拖慢内核的运行速度。互斥锁不需要等待，当加锁失败时，直接调用schedule_thread切换到其他线程，直到锁可用时，才为当前线程加锁。
+加锁和解锁期间，临界资源不需要强制在关中断状态下运行，抢占也能处于开启状态。只有一点，如果在中断中加互斥锁，schedule_thread会检测到当前处于中断回调函数，将原路返回，不会发生切换（在中断回调函数中切换线程是危险操作，中断不应该随意跳出）；但中断的优先级最高，如果中断获取不到锁，又无法让持有锁的线程释放，则内核将陷入死锁，只能一直空耗在加锁失败和schedule_thread失败之间。故，中断禁止使用互斥锁。</p>
 <p>互斥锁是比较简单的锁，它的定义和相关API如下：</p>
 <pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mutex_lock</span>
 {</span>
@@ -4469,12 +5904,10 @@ ENDPROC(__schedule_before)
 <span class="hljs-comment">/* 解锁 */</span>
 <span class="hljs-type">void</span> <span class="hljs-title function_">mutex_unlock</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> mutex_lock *sptr_lock)</span>;
 </code></pre>
-<ul>
-<li>同步与互斥（四）：读写锁
-读写锁也是互斥锁。有时候写操作应该互斥，但读操作却可以同时，就可以借助读写锁。它的规则为：
+<h5 id="984-读写锁">9.8.4. 读写锁</h5>
+<p>读写锁也是互斥锁。有时候写操作应该互斥，但读操作却可以同时，就可以借助读写锁。它的规则为：
 1）一个线程在读临界资源时，另一个线程也可以读，但不可以写。
-2）一个线程在写临界资源时，另一个线程不可以读，也不可以写。</li>
-</ul>
+2）一个线程在写临界资源时，另一个线程不可以读，也不可以写。</p>
 <p>其定义和API如下：</p>
 <pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">rw_lock</span>
 {</span>
@@ -4503,11 +5936,9 @@ ENDPROC(__schedule_before)
 <span class="hljs-comment">/* 解写锁 */</span>
 <span class="hljs-type">void</span> <span class="hljs-title function_">wr_unlock</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> rw_lock *sptr_lock)</span>;
 </code></pre>
-<ul>
-<li>同步与互斥（五）：信号量
-信号量是一个扩展版的互斥锁，它允许多次加锁，当加锁次数达到指定的上限时，再加锁则失败，切换其他线程运行。
-结构也比较简单，如下：</li>
-</ul>
+<h5 id="985-信号量">9.8.5. 信号量</h5>
+<p>信号量是一个扩展版的互斥锁，它允许多次加锁，当加锁次数达到指定的上限时，再加锁则失败，切换其他线程运行。
+结构也比较简单，如下：</p>
 <pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">semaphore</span>
 {</span>
 	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">atomic</span> <span class="hljs-title">sgtc_atc</span>;</span>                 <span class="hljs-comment">/* 不同于互斥锁, 信号量是减计数; 即计数器初值非0, 加锁时自减; 当计数器为0时, 则锁分配完毕 */</span>
@@ -4530,14 +5961,12 @@ ENDPROC(__schedule_before)
 <span class="hljs-comment">/* 释放信号量. 计数器自增 */</span>
 <span class="hljs-type">void</span> <span class="hljs-title function_">sema_up</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> semaphore *sptr_sem)</span>;
 </code></pre>
-<ul>
-<li>线程间通信：邮箱
-Heavenfox的线程可以通过全局变量直接传递消息，也可以通过邮箱的方式。所谓邮箱，由发送方申请一个缓冲区存放“邮件”，邮件包含：发送方的邮箱名称、接收方的邮箱名称、邮件内容（消息数据）。一封邮件可以包含多条消息。接收方需要检查自己的邮箱，非空时读出邮件，并释放掉已读的邮件（发送方申请了内存作为缓冲区，需要由接收方释放）。
+<h4 id="99-线程间通信邮箱">9.9. 线程间通信：邮箱</h4>
+<p>Heavenfox的线程可以通过全局变量直接传递消息，也可以通过邮箱的方式。所谓邮箱，由发送方申请一个缓冲区存放“邮件”，邮件包含：发送方的邮箱名称、接收方的邮箱名称、邮件内容（消息数据）。一封邮件可以包含多条消息。接收方需要检查自己的邮箱，非空时读出邮件，并释放掉已读的邮件（发送方申请了内存作为缓冲区，需要由接收方释放）。
 对于邮箱而言，邮件本质上就是链表，发送方需要根据接收方的邮箱地址找到目的邮箱，并将邮件插入到目的邮箱的邮件链表中；而接收方所谓的读取邮件，就是读取自身邮箱的链表。
 每一个线程最多只能有一个邮箱，且邮箱名称唯一、不能重复。也可以没有邮箱，视具体应用自由定义。
 之前在“线程控制块”章节中简述了“struct thread”结构体，它有一个指针成员就是邮箱；实际上，邮箱是由各线程自行定义，并赋值给thread结构体。
-邮箱结构为：</li>
-</ul>
+邮箱结构为：</p>
 <pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mailbox</span>
 {</span>
     <span class="hljs-type">kchar_t</span> name[<span class="hljs-number">32</span>];                               <span class="hljs-comment">/* 邮箱名称, 不允许有同名的邮箱 */</span>
@@ -4613,12 +6042,10 @@ Heavenfox的线程可以通过全局变量直接传递消息，也可以通过�
 <span class="hljs-comment">/* 读邮件完成, 可调用此函数释放掉已读的邮件 */</span>
 <span class="hljs-type">void</span> <span class="hljs-title function_">mail_recv_finish</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> mail *sptr_mail)</span>;
 </code></pre>
-<ul>
-<li>等待队列
-当资源不可用（如数据不可读、数据未准备）时，可能需要先等资源可用才能继续执行，就可以先切换其他线程运行。等待队列其实就是封装了这一过程：判断资源是否可用，如不可用，切换线程。
+<h4 id="910-等待队列">9.10. 等待队列</h4>
+<p>当资源不可用（如数据不可读、数据未准备）时，可能需要先等资源可用才能继续执行，就可以先切换其他线程运行。等待队列其实就是封装了这一过程：判断资源是否可用，如不可用，切换线程。
 当资源一直不可用时，可能会一直切换线程，即当前线程持续“睡眠”；有两种方式可以中止等待：1）资源可用，即等待条件满足；2）被信号打断，可用给线程发信，如唤醒信号。
-等待队列被封装为一个宏：</li>
-</ul>
+等待队列被封装为一个宏：</p>
 <pre><code class="language-c"><span class="hljs-comment">/* 方式1: condition为false时, 持续调用schedule_thread() */</span>
 <span class="hljs-meta">#<span class="hljs-keyword">define</span> wait_event(sptr_wqh, condition) \
     do {    \
@@ -4746,26 +6173,169 @@ Heavenfox的线程可以通过全局变量直接传递消息，也可以通过�
         wake_up_common(sptr_wqh, NR_THREAD_SIG_INTR);    \
     } while (0)</span>
 </code></pre>
+<h4 id="911-内核线程">9.11. 内核线程</h4>
+<h5 id="9111-idle">9.11.1. idle</h5>
+<p>idle（空闲）线程是内核的兜底线程，只要调度开启、CPU在运转，空闲线程就会一直在运行态和就绪态之间切换，不会挂起，也无法睡眠，更不可能被杀死。
+这意味着：即使用户线程和除空闲线程以外的所有内核线程都处于挂起或睡眠态，内核也能通过执行空闲线程而不会被终止。
+空闲线程的id为0，但优先级最低，除非其他线程都歇菜，否则不可能轮得到空闲线程运行。而它的功能也很简单，就是努力让自己切换成就绪态：</p>
+<pre><code class="language-c"><span class="hljs-type">static</span> <span class="hljs-type">void</span> *<span class="hljs-title function_">rest_entry</span><span class="hljs-params">(<span class="hljs-type">void</span> *args)</span>
+{
+    <span class="hljs-comment">/* 设置线程名称 */</span>
+    thread_set_self_name(<span class="hljs-string">&quot;idle&quot;</span>);
+
+    <span class="hljs-keyword">for</span> (;;)
+    {   
+        <span class="hljs-comment">/* 切换线程: 如果没有任何线程处于就绪态, 则立即返回并继续运行 */</span>
+        schedule_thread();
+    }
+
+    <span class="hljs-keyword">return</span> args;
+}
+</code></pre>
+<h5 id="9112-kthread">9.11.2. kthread</h5>
+<p>空闲线程的id虽然为0，但它却不是内核创建的第一个线程。内核中最重要的线程是kthread，也是第一个被创建的任务，它负责：</p>
+<blockquote>
+<p>1）创建线程定时监视任务，每过一个系统节拍检查一次当前线程的时间片，及是否满足抢占条件；
+2）处理平台、设备和驱动程序的隐式初始化，注册平台设备和驱动组件；
+3）创建其他内核线程，如终端、工作队列等；
+4）记录系统运行时间；
+5）管理打印缓冲区，统一打印输出；
+6）对处于睡眠态的线程，将作为僵死线程进行清理</p>
+</blockquote>
+<p>这里的线程定时监视任务，即“抢占”一章中提及的kthread_schedule_timeout函数；而几乎所有的驱动程序，都要由kthread调用驱动程序初始化入口，从而完成总线-设备-驱动的probe机制。
+此外，kthread负责销毁无用线程，而在HeavenFox中，线程如果处于睡眠态，将被当成无用线程，将面临被清理的结局。</p>
+<h5 id="9113-init_proc">9.11.3. init_proc</h5>
+<p>线程init_proc由kthread创建，但kthread仅管理已知的内核线程，而用户线程交由init_proc负责。
+init_proc的工作目前较为简单：
+1）执行所有C++的全局构造函数；
+2）创建网络回环设备节点；
+3）创建用户线程（自定义，可创建如显示、环境传感器、触摸屏、按键等任务）</p>
+<h5 id="9114-kworker">9.11.4. kworker</h5>
+<p>内核中有一个特殊的线程，名为工作者线程，其他线程可以通过注册工作队列，再由工作者线程提取，异步执行。
+工作者线程拥有极高的优先级，当其他线程希望某个任务可以尽快被执行，或者中断回调函数觉得某段代码过于复杂，希望由线程上下文来处理，就可以通过工作队列，安排给工作者线程。</p>
 <ul>
-<li>
-<p>内核线程（一）：idle</p>
-</li>
-<li>
-<p>内核线程（二）：kthread</p>
-</li>
-<li>
-<p>内核线程（三）：init_proc</p>
-</li>
-<li>
-<p>内核线程（四）：kworker</p>
-</li>
-<li>
-<p>内核线程（五）：kmemp</p>
-</li>
-<li>
-<p>内核线程（六）：中断线程</p>
-</li>
+<li>工作队列
+工作队列本身是一个链表（类似定时器链表），其他线程可以定义工作项，再插入到工作队列链表头，之后再遍历链表处理其中的回调函数即可。</li>
 </ul>
+<pre><code class="language-c"><span class="hljs-comment">/* 工作队列头 */</span>
+<span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">workqueue_head</span>
+{</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">sgtc_work</span>;</span>                     <span class="hljs-comment">/* 每个工作项组成链表, 插入到sgtc_work尾部 */</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">spin_lock</span> <span class="hljs-title">sgtc_lock</span>;</span>                     <span class="hljs-comment">/* 内置自旋锁 */</span>
+
+} <span class="hljs-type">srt_workqueue_head_t</span>;
+
+<span class="hljs-comment">/* 初始化工作队列 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> INIT_WORKQUEUE_HEAD(sptr_wqh)   \
+    do {    \
+        init_list_head(&amp;(sptr_wqh)-&gt;sgtc_link); \
+        spin_lock_init(&amp;(sptr_wqh)-&gt;sgtc_lock); \
+    } while (0)</span>
+
+<span class="hljs-comment">/* 定义工作队列 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> DECLARE_WORKQUEUE(name) \
+    struct workqueue_head name = {  \
+        .sgtc_work = LIST_HEAD_INIT(&amp;(name).sgtc_work),  \
+        .sgtc_lock = SPIN_LOCK_INIT(),  \
+    }</span>
+
+<span class="hljs-comment">/* 遍历工作队列 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> foreach_workqueue_safe(sptr_wq, sptr_temp, sptr_wqh)    \
+    foreach_list_next_entry_safe(sptr_wq, sptr_temp, &amp;(sptr_wqh)-&gt;sgtc_work, sgtc_link)</span>
+</code></pre>
+<p>工作项也是一个结构体：</p>
+<pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-title function_">void</span> <span class="hljs-params">(*<span class="hljs-type">func_work_t</span>)</span> <span class="hljs-params">(<span class="hljs-keyword">struct</span> workqueue *)</span>;
+
+<span class="hljs-comment">/* 工作项 */</span>
+<span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">workqueue</span>
+{</span>
+    <span class="hljs-type">func_work_t</span> func;                               <span class="hljs-comment">/* 回调函数, 参数为工作项自己 */</span>
+    <span class="hljs-type">kutype_t</span> data;                                  <span class="hljs-comment">/* func函数内部使用, 可传入私有变量指针 */</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">sgtc_link</span>;</span>                     <span class="hljs-comment">/* 链表项, 注册时将插入到链表头struct workqueue_head::sgtc_work */</span>
+
+} <span class="hljs-type">srt_workqueue_t</span>;
+
+<span class="hljs-comment">/* 初始化一个工作项 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> INIT_WORK(sptr_wq, _func)  \
+    do {    \
+        (sptr_wq)-&gt;func = _func; \
+        (sptr_wq)-&gt;data = 0; \
+        init_list_head(&amp;(sptr_wq)-&gt;sgtc_link);  \
+    } while (0)</span>
+
+<span class="hljs-comment">/* 定义一个工作项 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> DECLARE_WORK(name, _func)  \
+    struct workqueue name = {   \
+        .func = _func,   \
+        .data = 0,   \
+        .sgtc_link = LIST_HEAD_INIT(&amp;(name).sgtc_link), \
+    }</span>
+</code></pre>
+<p>工作项可以使用如下API与工作队列建立关系：</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 添加工作项到工作队列 */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">queue_work</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> workqueue_head *sptr_wqh, <span class="hljs-keyword">struct</span> workqueue *sptr_wq)</span>;
+<span class="hljs-comment">/* 将工作项从工作队列分离 (使用自旋锁保护) */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">detach_work</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> workqueue_head *sptr_wqh, <span class="hljs-keyword">struct</span> workqueue *sptr_wq)</span>;
+<span class="hljs-comment">/* 将工作项从工作队列分离 (无锁, 确认外部安全时分离) */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">detach_work_safe</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> workqueue_head *sptr_wqh, <span class="hljs-keyword">struct</span> workqueue *sptr_wq)</span>;
+<span class="hljs-comment">/* 将工作队列的所有工作项拷贝到另一个工作队列, 并初始化自身 */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">work_splice_and_init</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> workqueue_head *sptr_src, <span class="hljs-keyword">struct</span> workqueue_head *sptr_dst)</span>;
+<span class="hljs-comment">/* 判断工作队列是否为空 */</span>
+<span class="hljs-type">kbool_t</span> <span class="hljs-title function_">is_workqueue_empty</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> workqueue_head *sptr_wqh)</span>;
+</code></pre>
+<ul>
+<li>工作者线程
+线程定义了一个专属工作队列sgtc_kworker_wqh，可以通过queue_work函数添加工作项到队列中：</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">schedule_work</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> workqueue *sptr_wq)</span>
+{
+    queue_work(&amp;sgtc_kworker_wqh, sptr_wq);
+}
+</code></pre>
+<p>线程将从队列中读出每个工作项，并一一执行其回调函数。</p>
+<h5 id="9115-kmemp">9.11.5. kmemp</h5>
+<p>kmemp线程主要负责内存管理工作。内核允许申请的内存可以异步释放，即：线程a从内存池申请内存，用完后调用释放函数，但并不是立即释放，而是进行标记；待kmemp线程恢复允许，再统一释放的这些被标记的内存块。这样线程a无需再耗费时间去归还内存块。
+要使用kmemp线程，要求内存申请和释放使用特定函数接口：</p>
+<pre><code class="language-c"><span class="hljs-comment">/* 申请内存, 本质是调用kmalloc */</span>
+<span class="hljs-type">void</span> *<span class="hljs-title function_">fwk_malloc</span><span class="hljs-params">(<span class="hljs-type">kusize_t</span> __size, <span class="hljs-type">nrt_gfp_t</span> gfp_mask)</span>;
+<span class="hljs-comment">/* 申请内存, 并初始化为0 */</span>
+<span class="hljs-type">void</span> *<span class="hljs-title function_">fwk_zalloc</span><span class="hljs-params">(<span class="hljs-type">kusize_t</span> __size, <span class="hljs-type">nrt_gfp_t</span> gfp_mask)</span>;
+<span class="hljs-comment">/* 申请(__size * __n)大小的内存块 */</span>
+<span class="hljs-type">void</span> *<span class="hljs-title function_">fwk_calloc</span><span class="hljs-params">(<span class="hljs-type">kusize_t</span> __size, <span class="hljs-type">size_t</span> __n, <span class="hljs-type">nrt_gfp_t</span> gfp_mask)</span>;
+<span class="hljs-comment">/* 释放内存(不会立即释放) */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">fwk_free</span><span class="hljs-params">(<span class="hljs-type">void</span> *__ptr)</span>;
+</code></pre>
+<p>调用fwk_free后，内存块会被插入到释放链表中，即标记为即将释放的内存；这需要在内存块首部添加一个管理信息头：</p>
+<pre><code class="language-c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_memp_list</span>
+{</span>
+    <span class="hljs-type">kuint32_t</span> magic;                                <span class="hljs-comment">/* 魔数, 固定为0x66dfa3c2, 用于识别 */</span>
+    <span class="hljs-type">nrt_gfp_t</span> gfp_mask;                             <span class="hljs-comment">/* 分配方式, 如GFP_KERNEL */</span>
+
+    <span class="hljs-comment">/* 真正的释放函数, 归还内存块 */</span>
+    <span class="hljs-type">void</span> (*release)(<span class="hljs-keyword">struct</span> fwk_memp_list *sptr_memp);
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fwk_memp_list</span> *<span class="hljs-title">sptr_next</span>;</span>                <span class="hljs-comment">/* 下一个要被释放的内存块 */</span>
+    <span class="hljs-type">void</span> *ptr;                                      <span class="hljs-comment">/* fwk_malloc的返回值: struct fwk_memp_list::ptr, 即去掉信息头后的真正内存地址 */</span>
+};
+</code></pre>
+<p>要释放的内存块通过sptr_next进行连接，最终链到kmemp定义的全局链表sgtc_kmemp_list_head中，kmemp线程只需不断读取sgtc_kmemp_list_head的sptr_next，便可获得需要释放的内存块，再调用struct fwk_memp_list::release将其真正地释放。
+Heavenfox支持C++创建用户线程，而内存分配接口new和free则分别被重载为fwk_malloc和fwk_free。</p>
+<h5 id="9116-irq_thread">9.11.6. irq_thread</h5>
+<p>除工作者线程外，中断中复杂的代码也可以交由中断线程irq_thread来处理。不同于工作者线程，中断线程只为中断回调函数服务，是名副其实的中断下半部。
+申请中断可以使用特定的接口fwk_request_threaded_irq：</p>
+<pre><code class="language-c"><span class="hljs-comment">/*!
+ * @param   irq: 中断号
+ * @param   handler: 中断回调函数, 由irq_handler异常向量表入口处理;
+ * @param   thread_fn: 中断线程回调函数, 由中断线程irq_thread调用;
+ * @param   args: 将赋值给中断事件结构体“struct fwk_irq_action”的ptrArgs成员, 而ptrArgs将作为handler和thread_fn的函数参数
+ */</span>
+<span class="hljs-type">kint32_t</span> <span class="hljs-title function_">fwk_request_threaded_irq</span><span class="hljs-params">(<span class="hljs-type">kint32_t</span> irq, <span class="hljs-type">irq_handler_t</span> handler, <span class="hljs-type">irq_handler_t</span> thread_fn, 
+                                <span class="hljs-type">kuint32_t</span> flags, <span class="hljs-type">const</span> <span class="hljs-type">kchar_t</span> *name, <span class="hljs-type">void</span> *args)</span>;
+</code></pre>
+<p>中断回调函数handler返回值如果为NR_IRQ_WAKE_THREAD，将在中断回调函数的退出路径唤醒中断线程irq_thread；这里的irq_thread并非只有一个，当fwk_request_threaded_irq被调用时，也会同时创建一个irq_thread，线程名为“threadirq-中断号”，若内核中有多个驱动使用该接口申请中断，则将存在多个irq_thread中断线程，只是线程号和线程名不同。
+irq_thread根据传入的args参数（struct fwk_irq_action::ptrArgs）处理对应的中断事件（调用thread_fn回调函数），完成后若没有新的唤醒信息，则将自身挂起，等待下一次唤醒。
+中断线程的优先级极高（与工作者线程相同），故具有优先执行的特权。</p>
 
             <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
             

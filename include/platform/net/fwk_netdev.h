@@ -57,11 +57,11 @@ struct fwk_netdev_queue
 {
     struct fwk_sk_buff *sptr_skb;
 
-    struct fwk_net_device *sptr_ndev;								/*!< destination/source network device */
+    struct fwk_net_device *sptr_ndev;                                /*!< destination/source network device */
     kuint64_t tx_maxrate;
-    kuint64_t trans_timeout;										/*!< statistics on the number of times the queue times out */
-    kuint64_t trans_start;											/*!< The time of the last sent */
-    kuint64_t state;												/*!< state */
+    kuint64_t trans_timeout;                                        /*!< statistics on the number of times the queue times out */
+    kuint64_t trans_start;                                            /*!< The time of the last sent */
+    kuint64_t state;                                                /*!< state */
 };
 
 enum __ERT_FWK_NETDEVICE_PRIV
@@ -71,34 +71,34 @@ enum __ERT_FWK_NETDEVICE_PRIV
 
 struct fwk_net_device
 {
-    kchar_t name[NET_IFNAME_SIZE];									/*!< network device name */
-    kchar_t *ifalias;											    /*!< network device aliases */
+    kchar_t name[NET_IFNAME_SIZE];                                  /*!< network device name */
+    kchar_t *ifalias;                                               /*!< network device aliases */
 
-    kuint64_t state;												/*!< network device interface state */
-    kint32_t ifindex;												/*!< network Device Interface Index Value: Network device identifier */
+    kuint64_t state;                                                /*!< network device interface state */
+    kint32_t ifindex;                                               /*!< network Device Interface Index Value: Network device identifier */
 
-    struct list_head sgtc_link;										/*!< network device list */
-    struct fwk_netdev_stats sgtc_stats;							    /*!< statistics on network device interfaces */
-    const struct fwk_netdev_ops *sptr_netdev_oprts;					/*!< network device operation API */
-    const struct fwk_ethtool_ops *sptr_ethtool_oprts;				/*!< ether tool operation API */
+    struct list_head sgtc_link;                                     /*!< network device list */
+    struct fwk_netdev_stats sgtc_stats;                             /*!< statistics on network device interfaces */
+    const struct fwk_netdev_ops *sptr_netdev_oprts;                 /*!< network device operation API */
+    const struct fwk_ethtool_ops *sptr_ethtool_oprts;               /*!< ether tool operation API */
 
-    kuint32_t flags;												/*!< Network device Interface identifier */
-    kuint16_t priv_flags;											/*!< Network device Interface identifier; However, it is not visible to user space */
+    kuint32_t flags;                                                /*!< Network device Interface identifier */
+    kuint16_t priv_flags;                                           /*!< Network device Interface identifier; However, it is not visible to user space */
 
-    kuint32_t mtu;													/*!< maximum transmission unit of the network device interface */
-    kuint16_t type;													/*!< interface hardware type */
-    kuint16_t hard_header_len;										/*!< hardware interface header lenth */
-    kuint16_t min_header_len;										/*!< minimum hardware header length */
+    kuint32_t mtu;                                                  /*!< maximum transmission unit of the network device interface */
+    kuint16_t type;                                                 /*!< interface hardware type */
+    kuint16_t hard_header_len;                                      /*!< hardware interface header lenth */
+    kuint16_t min_header_len;                                       /*!< minimum hardware header length */
 
     kutype_t last_rx;
-    kuint8_t dev_addr[NET_MAC_ETH_ALEN];							/*!< MAC address of the network device interface */
+    kuint8_t dev_addr[NET_MAC_ETH_ALEN];                            /*!< MAC address of the network device interface */
 
-    kuint8_t broadcast[NET_MAX_ADDR_LEN];							/*!< hardware broadcast address */
-    struct fwk_netdev_queue *sptr_tx;								/*!< packet send queue for network device interfaces */
+    kuint8_t broadcast[NET_MAX_ADDR_LEN];                           /*!< hardware broadcast address */
+    struct fwk_netdev_queue *sptr_tx;                               /*!< packet send queue for network device interfaces */
 
-    kuint32_t num_tx_queues;										/*!< number of TX queues allocated at alloc_netdev_mq() time */
-    kuint32_t real_num_tx_queues;									/*!< number of TX queues currently active in device */
-    kuint64_t tx_queue_len;											/*!< max frame per queue allowned */
+    kuint32_t num_tx_queues;                                        /*!< number of TX queues allocated at alloc_netdev_mq() time */
+    kuint32_t real_num_tx_queues;                                   /*!< number of TX queues currently active in device */
+    kuint64_t tx_queue_len;                                         /*!< max frame per queue allowned */
 
     struct fwk_device sgtc_dev;
     void *private_data;
@@ -136,9 +136,9 @@ extern kint32_t fwk_register_netdevice(struct fwk_net_device *sptr_ndev);
 extern kint32_t fwk_unregister_netdevice(struct fwk_net_device *sptr_ndev);
 extern struct fwk_net_device *next_netdevice(struct fwk_net_device *sptr_ndev);
 
-#define fwk_alloc_netdev(sizeof_priv, name, setup)	\
+#define fwk_alloc_netdev(sizeof_priv, name, setup)  \
                 fwk_alloc_netdev_mq(sizeof_priv, name, setup, 1)
-#define fwk_netdev_priv(sptr_ndev)				((sptr_ndev)->private_data)
+#define fwk_netdev_priv(sptr_ndev)                ((sptr_ndev)->private_data)
 
 #ifdef __cplusplus
     }
