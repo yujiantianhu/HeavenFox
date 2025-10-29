@@ -22,7 +22,7 @@
 #define KWORKER_THREAD_STACK_SIZE                       THREAD_STACK_PAGE(1)    /*!< 1 page (4 kbytes) */
 
 /*!< The globals */
-static tid_t g_kworker_tid;
+static tid_t g_kworker_tid = -1;
 static struct thread_attr sgtc_kworker_attr;
 static THREAD_STACK_DEFINE(g_kworker_stack, KWORKER_THREAD_STACK_SIZE);
 
@@ -38,6 +38,9 @@ static DECLARE_WORKQUEUE(sgtc_kworker_wqh);
 void schedule_work(struct workqueue *sptr_wq)
 {
     queue_work(&sgtc_kworker_wqh, sptr_wq);
+
+    if (g_kworker_tid != (-1))
+        schedule_thread_wakeup(g_kworker_tid);
 }
 
 /*!

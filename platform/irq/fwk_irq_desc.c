@@ -89,7 +89,8 @@ static kint32_t fwk_irq_bitmap_find_areas(kuint32_t *bitmap, kint32_t irq_base, 
  * @retval  virtual irq number or errno
  * @note    none
  */
-static kint32_t irq_domain_alloc_irq_data(struct fwk_irq_domain *sptr_domain, kuint32_t virq, kuint32_t hwirq, kuint32_t nr_irqs)
+static kint32_t fwk_irq_domain_init_irq_data(struct fwk_irq_domain *sptr_domain, 
+								kuint32_t virq, kuint32_t hwirq, kuint32_t nr_irqs)
 {
 	struct fwk_irq_data *sptr_data;
 
@@ -279,7 +280,7 @@ kint32_t fwk_irq_domain_alloc_irqs(struct fwk_irq_domain *sptr_domain, kint32_t 
 	if (virq < 0)
 		return virq;
 	
-	return irq_domain_alloc_irq_data(sptr_domain, virq, hwirq, nr_irqs);
+	return fwk_irq_domain_init_irq_data(sptr_domain, virq, hwirq, nr_irqs);
 }
 
 /*!

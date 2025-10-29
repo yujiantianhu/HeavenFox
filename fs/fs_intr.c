@@ -65,11 +65,14 @@ struct fs_list *dir_open(const kchar_t *path, const kchar_t *pattern, kuint32_t 
     if (!isValid(sptr_inode))
         return ERR_PTR(-ER_NOTFOUND);
 
-    sptr_fs = (struct fs_list *)kzalloc(sizeof(*sptr_fs), GFP_KERNEL);
+    sptr_fs = (struct fs_list *)kzalloc(sizeof(*sptr_fs) + kstrlen(path) + 1, GFP_KERNEL);
     if (!isValid(sptr_fs))
         return ERR_PTR(-ER_NOMEM);
 
-    sptr_fs->path = (kchar_t *)path;
+    /*!< Save path */
+    sptr_fs->path = (kchar_t *)sptr_fs + sizeof(*sptr_fs);
+    kstrcpy(sptr_fs->path, path);
+
     sptr_fs->mode = mode;
     sptr_fs->sptr_dnode = sptr_inode;
     init_list_head(&sptr_fs->sgtc_dirs);

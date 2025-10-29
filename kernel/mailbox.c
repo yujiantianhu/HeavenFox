@@ -26,6 +26,7 @@
 
 /*!< The globals */
 static DECLARE_LIST_HEAD(sgtc_kernel_mailboxs);
+static struct mutex_lock sgtc_mailbox_mutex = MUTEX_LOCK_INIT();
 
 /*!< API functions */
 /*!
@@ -41,12 +42,18 @@ struct mailbox *mailbox_find(const kchar_t *name)
     if (!name || !(*name))
         return mr_nullptr;
 
+    mutex_lock(&sgtc_mailbox_mutex);
+
     foreach_list_next_entry(sptr_mb, &sgtc_kernel_mailboxs, sgtc_link)
     {
         if (!kstrcmp(sptr_mb->name, name))
+        {
+            mutex_unlock(&sgtc_mailbox_mutex);
             return sptr_mb;
+        }
     }
 
+    mutex_unlock(&sgtc_mailbox_mutex);
     return mr_nullptr;
 }
 
@@ -60,6 +67,8 @@ void mailbox_insert(struct mailbox *sptr_mb)
 {
     struct mailbox *sptr_box;
     struct list_head *sptr_last = mr_nullptr;
+
+    mutex_lock(&sgtc_mailbox_mutex);
 
     if (mr_list_empty(&sgtc_kernel_mailboxs))
         goto END;
@@ -77,10 +86,12 @@ void mailbox_insert(struct mailbox *sptr_mb)
     else
         list_head_add_tail(sptr_last, &sptr_mb->sgtc_link);
 
+    mutex_unlock(&sgtc_mailbox_mutex);
     return;
 
 END:
     list_head_add_tail(&sgtc_kernel_mailboxs, &sptr_mb->sgtc_link);
+    mutex_unlock(&sgtc_mailbox_mutex);
 }
 
 /*!
@@ -134,8 +145,9 @@ void mailbox_deinit(struct mailbox *sptr_mb)
     sptr_thread = get_thread_handle(sptr_mb->tid);
     sptr_thread->sptr_mb = mr_nullptr;
 
+    mutex_lock(&sgtc_mailbox_mutex);
     list_head_del(&sptr_mb->sgtc_link);
-    mutex_init(&sptr_mb->sgtc_lock);
+    mutex_unlock(&sgtc_mailbox_mutex);
 }
 
 /*!
@@ -169,11 +181,22 @@ struct mailbox *mailbox_create(tid_t tid, const kchar_t *name)
  */
 void mailbox_destroy(struct mailbox *sptr_mb)
 {
+    struct mail *sptr_mail, *sptr_temp;
+    DECLARE_LIST_HEAD(sgtc_list);
+
     if (mr_unlikely(!sptr_mb))
         return;
 
     mailbox_deinit(sptr_mb);
+
+    mutex_lock(&sptr_mb->sgtc_lock);
+    list_head_splice_init(&sgtc_list, &sptr_mb->sgtc_mail);
+    mutex_unlock(&sptr_mb->sgtc_lock);
+
     kfree(sptr_mb);
+
+    foreach_list_next_entry_safe(sptr_mail, sptr_temp, &sgtc_list, sgtc_link)
+        mail_recv_finish(sptr_mail);   
 }
 
 /*!< ------------------------------------------------------------- */

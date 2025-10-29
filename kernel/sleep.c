@@ -16,25 +16,28 @@
 #include <kernel/spinlock.h>
 
 /*!< The defines */
-#define KTIME_EVENT_JIFFIES                     (0)
-#define KTIME_EVENT_HRTIME                      (1)
-
-struct ktime_event
-{
-    struct thread *sptr_cur;
-
-    union {
-        struct timer_list sgtc_tm;
-        struct hrtimer_list sgtc_hrtm;
-    } u;
-    
-    kuint32_t type;
-};
 
 /*!< The functions */
 
 
 /*!< API functions */
+/*!
+ * @brief   stop sleep and destroy timer event
+ * @param   sptr_event
+ * @retval  none
+ * @note    perhaps called by thread_destroy
+ */
+void thread_sleep_quit(struct ktime_event *sptr_event)
+{
+    sptr_event->sptr_cur->time_event = mr_nullptr;
+    sptr_event->sptr_cur = mr_nullptr;
+
+    if (sptr_event->type == KTIME_EVENT_JIFFIES)
+        del_timer(&sptr_event->u.sgtc_tm);
+    else
+        del_hrtimer(&sptr_event->u.sgtc_hrtm);
+}
+
 /*!
  * @brief   suspend status over, wake it up
  * @param   args
@@ -46,6 +49,9 @@ static void thread_sleep_timeout(kuint32_t args)
     struct ktime_event *sptr_event = (struct ktime_event *)args;
     struct thread *sptr_thread = sptr_event->sptr_cur;
     kuint32_t status, to_status;
+
+    if (mr_unlikely(!sptr_thread))
+        return;
 
     spin_lock_irqsave(&sptr_thread->sgtc_lock);
     status = __GET_THREAD_STATE(sptr_thread);
@@ -109,7 +115,7 @@ void khrtime_schedule(khrtime_t tick)
 
     /*!< suspend current thread, and schedule others */
     spin_lock_irqsave(&sptr_cur->sgtc_lock);
-    sptr_cur->private_data = (void *)&sgtc_event;
+    sptr_cur->time_event = (void *)&sgtc_event;
     __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
     mr_preempt_disable();
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
@@ -120,7 +126,7 @@ void khrtime_schedule(khrtime_t tick)
     if (mr_likely(__GET_THREAD_TARGET_STATE(sptr_cur) == NR_THREAD_SUSPEND))
         schedule_thread();
 
-    sptr_cur->private_data = mr_nullptr;
+    sptr_cur->time_event = mr_nullptr;
     del_hrtimer(sptr_tm);
 }
 
@@ -148,7 +154,7 @@ void schedule_timeout(kutime_t count)
 
     /*!< suspend current thread, and schedule others */
     spin_lock_irqsave(&sptr_cur->sgtc_lock);
-    sptr_cur->private_data = (void *)&sgtc_event;
+    sptr_cur->time_event = (void *)&sgtc_event;
     __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
     mr_preempt_disable();
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
@@ -159,7 +165,7 @@ void schedule_timeout(kutime_t count)
     if (mr_likely(__GET_THREAD_TARGET_STATE(sptr_cur) == NR_THREAD_SUSPEND))
         schedule_thread();
 
-    sptr_cur->private_data = mr_nullptr;
+    sptr_cur->time_event = mr_nullptr;
     del_timer(sptr_tm);
 }
 

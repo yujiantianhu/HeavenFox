@@ -30,7 +30,11 @@ struct fwk_tasklet_head
 static struct fwk_softirq_action sgtc_fwk_softirq_actions[NR_SOFTIRQ_NUM];
 static const kchar_t *sgtc_fwk_softirq_name[NR_SOFTIRQ_NUM] __unused =
 {
-    "TIMER", "NET_TX", "NET_RX", "TASKLET", "SCHEDULE", "RCU"
+    [NR_SOFTIRQ_TIMER   ] = "TIMER",
+    [NR_SOFTIRQ_NET_TX  ] = "NET_TX",
+    [NR_SOFTIRQ_NET_RX  ] = "NET_RX",
+    [NR_SOFTIRQ_TASKLET ] = "TASKLET",
+    [NR_SOFTIRQ_SCHEDULE] = "SCHEDULE"
 };
 
 static kuint32_t g_fwk_softirq_event = 0, g_fwk_softirq_count = 0;

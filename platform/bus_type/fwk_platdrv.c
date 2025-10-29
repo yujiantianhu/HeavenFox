@@ -220,7 +220,7 @@ kint32_t fwk_driver_register(struct fwk_driver *sptr_driver)
 		goto fail;
 
 	/*!< The bus does not exist and cannot be registered */
-	if (!sptr_bus_type->sptr_SysPriv)
+	if (!sptr_bus_type->sptr_buspriv)
 		goto fail;
 
 	/*!< Is the driver registered? No more duplicate registrations */
@@ -256,7 +256,7 @@ kint32_t fwk_driver_unregister(struct fwk_driver *sptr_driver)
 		goto fail;
 
 	/*!< The bus does not exist and cannot be logged out */
-	if (!sptr_bus_type->sptr_SysPriv)
+	if (!sptr_bus_type->sptr_buspriv)
 		goto fail;
 
 	/*!< The driver is not registered? Go straight back */

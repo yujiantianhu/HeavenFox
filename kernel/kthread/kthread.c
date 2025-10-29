@@ -95,11 +95,12 @@ END:
 static void kthread_systime_record(void)
 {
     static kuint64_t systime = 0;
+    kuint64_t cur_time = JIFFIES_COUNT();
 
-    if (systime != jiffies)
+    if (systime != cur_time)
     {
+        systime = cur_time;
         msecs_to_timeclock(&sgtc_systime_clock, jiffies_to_msecs(systime));
-        systime = JIFFIES_COUNT();
     }
 }
 

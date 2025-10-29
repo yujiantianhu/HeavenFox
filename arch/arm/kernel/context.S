@@ -53,8 +53,10 @@ __switch_to:
     bic r3, #SCHED_FROM_IRQ                         @ scheduled by actively
 
 2:
+#if CONFIG_CONTEXT_MORE
     mov r10, lr                                     @ r10 = lr
     mov r11, r10                                    @ r11 = pc
+#endif
     b _context_save
 
 /* -------------------------------------------------------------------------------
@@ -75,7 +77,7 @@ _context_save_first:
  * save curent context
  * -----------------------------------------------------------------------------*/
 _context_save:
-    orr r3, #SCHED_NOT_FIRST                        @ r3 = flags | 0x02
+@   orr r3, #SCHED_NOT_FIRST                        @ r3 = flags | 0x02
     str r3, [r2]                                    @ initial flags (marking the previous thread will no longer be scheduled for the first time)  
 
     add r8, r1, #ARCH_OFFSET_LR
@@ -195,8 +197,10 @@ __schedule_before:
     orr r3, #SCHED_FROM_IRQ                         @ scheduling source: by IRQ
 
 2:
+#if CONFIG_CONTEXT_MORE
     add r8, sp, #ARCH_OFFSET_SP                     @ r8 pointer to lr_svc
     ldmia r8, { r10, r11 }                          @ r10 = lr(lr_svc), r11 = pc(lr_irq)
+#endif
     b _context_save
 
 /* -------------------------------------------------------------------------------

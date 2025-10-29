@@ -16,7 +16,7 @@
 /*!< The defines */
 #define CONFIG_MAJOR                            "3"
 #define CONFIG_MINOR                            "2"
-#define CONFIG_PATCH                            "0"
+#define CONFIG_PATCH                            "1"
 
 #ifdef CONFIG_BUILD_TIME
 #define CONFIG_VERSION                          CONFIG_MAJOR "." CONFIG_MINOR "."  CONFIG_PATCH"." CONFIG_BUILD_TIME

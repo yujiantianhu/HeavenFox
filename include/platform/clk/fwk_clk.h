@@ -27,85 +27,85 @@ struct mutex_lock;
 
 enum __ERT_FWK_CLK_FLAG
 {
-	NR_FWK_CLK_IS_DYNAMIC = mr_bit(0),
+    NR_FWK_CLK_IS_DYNAMIC = mr_bit(0),
 };
 
 typedef struct fwk_clk
 {
-	const kchar_t *dev_id;
-	const kchar_t *con_id;
-	kuint32_t max_rate;
-	kuint32_t min_rate;
+    const kchar_t *dev_id;
+    const kchar_t *con_id;
+    kuint32_t max_rate;
+    kuint32_t min_rate;
 
-	struct fwk_clk_core *sptr_core;
-	struct list_head sgtc_link;
+    struct fwk_clk_core *sptr_core;
+    struct list_head sgtc_link;
 
-	kuint8_t flags;
+    kuint8_t flags;
 
 } srt_fwk_clk_t;
 
 typedef struct fwk_clk_core
 {
-	const kchar_t *name;
-	const struct fwk_clk_ops *sptr_ops;
-	struct fwk_clk_hw *sptr_hw;
+    const kchar_t *name;
+    const struct fwk_clk_ops *sptr_ops;
+    struct fwk_clk_hw *sptr_hw;
 
-	struct fwk_clk_core	*sptr_parent;
+    struct fwk_clk_core	*sptr_parent;
 
-	const kchar_t **parent_names;
-	struct fwk_clk_core	**sptr_parents;
+    const kchar_t **parent_names;
+    struct fwk_clk_core	**sptr_parents;
 
-	kuint32_t rate;
+    kuint32_t rate;
 
-	kuint32_t flags;
-	kuint32_t enable_count;
-	kuint32_t prepare_count;
+    kuint32_t flags;
+    kuint32_t enable_count;
+    kuint32_t prepare_count;
 
-	struct list_head sgtc_clks;
-	struct mutex_lock sgtc_mutex;
+    struct list_head sgtc_clks;
+    struct mutex_lock sgtc_mutex;
 
 } srt_fwk_clk_core_t;
 
 typedef struct fwk_clk_init_data 
 {
-	const kchar_t *name;
-	const struct fwk_clk_ops *sptr_ops;
+    const kchar_t *name;
+    const struct fwk_clk_ops *sptr_ops;
 
-	const kchar_t **parent_names;
-	kuint8_t num_parents;
+    const kchar_t **parent_names;
+    kuint8_t num_parents;
 
-	kuint32_t flags;
+    kuint32_t flags;
 
 } srt_fwk_clk_init_data_t;
 
 typedef struct fwk_clk_hw
 {
-	struct fwk_clk_core *sptr_core;
-	struct fwk_clk *sptr_clk;
-	const struct fwk_clk_init_data *sptr_init;
+    struct fwk_clk_core *sptr_core;
+    struct fwk_clk *sptr_clk;
+    const struct fwk_clk_init_data *sptr_init;
 
 } srt_fwk_clk_hw_t;
 
 typedef struct fwk_clk_ops
 {
-	kint32_t	(*prepare) (struct fwk_clk_hw *sptr_hw);
-	void		(*unprepare) (struct fwk_clk_hw *sptr_hw);
-	kint32_t	(*is_prepared) (struct fwk_clk_hw *sptr_hw);
-	void		(*unprepare_unused) (struct fwk_clk_hw *sptr_hw);
-	kint32_t	(*enable) (struct fwk_clk_hw *sptr_hw);
-	void		(*disable) (struct fwk_clk_hw *sptr_hw);
-	kint32_t	(*is_enabled) (struct fwk_clk_hw *sptr_hw);
-	void		(*disable_unused) (struct fwk_clk_hw *sptr_hw);
+    kint32_t	(*prepare) (struct fwk_clk_hw *sptr_hw);
+    void		(*unprepare) (struct fwk_clk_hw *sptr_hw);
+    kint32_t	(*is_prepared) (struct fwk_clk_hw *sptr_hw);
+    void		(*unprepare_unused) (struct fwk_clk_hw *sptr_hw);
+    kint32_t	(*enable) (struct fwk_clk_hw *sptr_hw);
+    void		(*disable) (struct fwk_clk_hw *sptr_hw);
+    kint32_t	(*is_enabled) (struct fwk_clk_hw *sptr_hw);
+    void		(*disable_unused) (struct fwk_clk_hw *sptr_hw);
 
-	kint32_t	(*round_rate) (struct fwk_clk_hw *sptr_hw, kuint32_t rate, kuint32_t *parent_rate);
+    kint32_t	(*round_rate) (struct fwk_clk_hw *sptr_hw, kuint32_t rate, kuint32_t *parent_rate);
 
-	kint32_t	(*set_parent) (struct fwk_clk_hw *sptr_hw, kuint8_t index);
-	kuint8_t	(*get_parent) (struct fwk_clk_hw *sptr_hw);
-	kint32_t	(*set_rate) (struct fwk_clk_hw *sptr_hw, kuint32_t rate, kuint32_t parent_rate);
+    kint32_t	(*set_parent) (struct fwk_clk_hw *sptr_hw, kuint8_t index);
+    kuint8_t	(*get_parent) (struct fwk_clk_hw *sptr_hw);
+    kint32_t	(*set_rate) (struct fwk_clk_hw *sptr_hw, kuint32_t rate, kuint32_t parent_rate);
 
-	kint32_t	(*get_phase) (struct fwk_clk_hw *sptr_hw);
-	kint32_t	(*set_phase) (struct fwk_clk_hw *sptr_hw, kint32_t degrees);
-	void		(*init) (struct fwk_clk_hw *sptr_hw);
+    kint32_t	(*get_phase) (struct fwk_clk_hw *sptr_hw);
+    kint32_t	(*set_phase) (struct fwk_clk_hw *sptr_hw, kint32_t degrees);
+    void		(*init) (struct fwk_clk_hw *sptr_hw);
 
 } srt_fwk_clk_ops_t;
 
@@ -114,7 +114,7 @@ extern struct fwk_clk *fwk_clk_register(struct fwk_device *sptr_dev, struct fwk_
 extern void fwk_clk_unregister(struct fwk_clk *sptr_clk);
 
 extern struct fwk_clk *fwk_clk_config(struct fwk_clk *sptr_clk, 
-									struct fwk_clk_hw *sptr_hw, const kchar_t *dev_id, const kchar_t *con_id);
+                                    struct fwk_clk_hw *sptr_hw, const kchar_t *dev_id, const kchar_t *con_id);
 extern struct fwk_clk *fwk_create_clk(struct fwk_clk_hw *sptr_hw, const kchar_t *dev_id, const kchar_t *con_id);
 extern kint32_t fwk_init_clk(struct fwk_device *sptr_dev, struct fwk_clk *sptr_clk);
 

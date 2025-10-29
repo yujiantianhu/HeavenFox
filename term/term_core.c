@@ -98,8 +98,7 @@ void term_cmd_free(struct term_cmd *sptr_cmd)
  */
 kint32_t term_cmd_add(struct term_cmd *sptr_cmd)
 {
-    if ((!sptr_cmd->name) ||
-        (*sptr_cmd->name == '\0') ||
+    if ((*sptr_cmd->name == '\0') ||
         (kstrchr(sptr_cmd->name, ' ')))
         return -ER_INVALID;
 

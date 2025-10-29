@@ -64,6 +64,16 @@ __weak void _init(void)
 }
 
 /*!
+ * @brief	fini (call global destructor)
+ * @param  	none
+ * @retval 	none
+ * @note   	none
+ */
+__weak void _fini(void)
+{
+}
+
+/*!
  * @brief	abort
  * @param  	none
  * @retval 	none

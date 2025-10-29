@@ -25,23 +25,23 @@ typedef struct fwk_irq_data srt_fwk_irq_data_t;
 
 typedef struct fwk_irq_chip 
 {
-	void (*irq_enable) (struct fwk_irq_data *sptr_data);
-	void (*irq_disable) (struct fwk_irq_data *sptr_data);
-	void (*irq_mask) (struct fwk_irq_data *sptr_data);
-	void (*irq_unmask) (struct fwk_irq_data *sptr_data);
-	kbool_t (*irq_ack) (struct fwk_irq_data *sptr_data);
-	kbool_t (*irq_is_enabled) (struct fwk_irq_data *sptr_data);
-	kint32_t (*irq_set_type) (struct fwk_irq_data *sptr_data, kuint32_t type);
+    void (*irq_enable) (struct fwk_irq_data *sptr_data);
+    void (*irq_disable) (struct fwk_irq_data *sptr_data);
+    void (*irq_mask) (struct fwk_irq_data *sptr_data);
+    void (*irq_unmask) (struct fwk_irq_data *sptr_data);
+    kbool_t (*irq_ack) (struct fwk_irq_data *sptr_data);
+    kbool_t (*irq_is_enabled) (struct fwk_irq_data *sptr_data);
+    kint32_t (*irq_set_type) (struct fwk_irq_data *sptr_data, kuint32_t type);
 
 } srt_fwk_irq_chip_t;
 
 typedef struct fwk_irq_generic
 {
-	kuaddr_t manage_reg;
-	kuaddr_t status_reg;
+    kuaddr_t manage_reg;
+    kuaddr_t status_reg;
 
-	struct fwk_irq_chip sgtc_chip;
-	void *private_data;
+    struct fwk_irq_chip sgtc_chip;
+    void *private_data;
 
 } srt_fwk_irq_generic_t;
 
@@ -61,7 +61,7 @@ extern void fwk_irq_shutdown_generic_chip(kint32_t irq_base, kuint32_t irq_max);
 extern struct fwk_irq_generic *fwk_irq_get_generic_data(struct fwk_irq_data *sptr_data);
 
 #ifdef __cplusplus
-	}
+    }
 #endif
 
 #endif /* __FWK_IRQ_CHIP_H */

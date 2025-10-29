@@ -24,8 +24,8 @@
 /*!< The defines */
 typedef struct fwk_clk_one_cell
 {
-	struct fwk_clk *sptr_clks;
-	kuint32_t clks_size;
+    struct fwk_clk *sptr_clks;
+    kuint32_t clks_size;
 
 } srt_fwk_clk_one_cell_t;
 

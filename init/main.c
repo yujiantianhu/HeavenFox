@@ -31,8 +31,6 @@
 #include <fs/fs_intr.h>
 #include <fs/fs_fatfs.h>
 
-#include <platform/net/fwk_netif.h>
-
 /*!< The globals */
 static struct tag_params *sptr_tag_params;
 

@@ -298,7 +298,7 @@ kint32_t fwk_device_add(struct fwk_device *sptr_dev)
     if (sptr_bus_type)
     {
         /*!< device list is not exsisted */
-        if (!sptr_bus_type->sptr_SysPriv)
+        if (!sptr_bus_type->sptr_buspriv)
             goto fail;
 
         /*!< fisrt register */
@@ -340,7 +340,7 @@ kint32_t fwk_device_del(struct fwk_device *sptr_dev)
     if (sptr_bus_type)
     {
         /*!< device list is not exsisted */
-        if (!sptr_bus_type->sptr_SysPriv)
+        if (!sptr_bus_type->sptr_buspriv)
             goto fail;
 
         /*!< delete device on the bus */

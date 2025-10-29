@@ -151,7 +151,6 @@ BUILD_CFLAGS	+= 	-Wundef	\
 					-Wno-trigraphs \
                     -fno-strict-aliasing	\
 					-fno-common \
-                    -Werror-implicit-function-declaration \
                     -fno-tree-scev-cprop	\
 					-fno-exceptions	\
 					-fno-builtin-memcpy	\
@@ -159,7 +158,9 @@ BUILD_CFLAGS	+= 	-Wundef	\
 					-mno-unaligned-access
 
 C_FLAGS			:=	$(BUILD_CFLAGS)	\
-					-Wstrict-prototypes
+					-Wstrict-prototypes	\
+					-Werror-implicit-function-declaration
+
 CXX_FLAGS		:=	$(BUILD_CFLAGS) -std=c++11
 
 # *********************************************************************

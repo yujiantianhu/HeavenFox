@@ -39,9 +39,9 @@
 
 typedef struct fwk_irq_data
 {
-    unsigned int irq;
-    unsigned long hwirq;
-    unsigned int node;
+    kuint32_t irq;
+    kutype_t hwirq;
+
     struct fwk_irq_chip *sptr_chip;
     struct fwk_irq_domain *sptr_domain;
 
@@ -82,7 +82,7 @@ typedef struct fwk_irq_desc
     kchar_t irq_name[FWK_IRQ_DESC_NAME_LENTH];
     struct list_head sgtc_action;;
 
-    struct list_head sgtc_link;
+//  struct list_head sgtc_link;
     struct radix_link sgtc_radix;
 
     struct spin_lock sgtc_lock;
@@ -99,7 +99,6 @@ enum __ERT_SOFTIRQ_EVENT
     NR_SOFTIRQ_NET_RX,
     NR_SOFTIRQ_TASKLET,
     NR_SOFTIRQ_SCHEDULE,
-    NR_SOFTIRQ_RCU,
 
     NR_SOFTIRQ_NUM,
 };

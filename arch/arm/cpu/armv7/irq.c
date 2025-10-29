@@ -232,26 +232,26 @@ srt_gic_t *fwk_get_gic_data(kuint32_t gic_nr)
  * @note    none
  */
 static kint32_t gic_irq_domain_xlate(struct fwk_irq_domain *sptr_domain, struct fwk_device_node *sptr_intc,
-				const kuint32_t *intspec, kuint32_t intsize, kuint32_t *out_hwirq, kuint32_t *out_type)
+                const kuint32_t *intspec, kuint32_t intsize, kuint32_t *out_hwirq, kuint32_t *out_type)
 {
-	if (sptr_domain->sptr_node != sptr_intc)
-		return -ER_INVALID;
-	if (intsize < 3)
-		return -ER_INVALID;
+    if (sptr_domain->sptr_node != sptr_intc)
+        return -ER_INVALID;
+    if (intsize < 3)
+        return -ER_INVALID;
 
-	*out_hwirq = intspec[1];
+    *out_hwirq = intspec[1];
 
-	/* skip over PPI, which is 0 ~ 15 */
+    /* skip over SGI, which is 0 ~ 15 */
 //	*out_hwirq += 16;
 
-	/* GIC_SGI: 1; GIC_SPI: 0 ===> skip over SGI */
-	if (!intspec[0])
-		*out_hwirq += 16;
+    /* GIC_PPI: 1; GIC_SPI: 0 ===> skip over PPI */
+    if (!intspec[0])
+        *out_hwirq += 16;
 
     /* interrupt trigger type */
-	*out_type = intspec[2] & IRQ_TYPE_SENSE_MASK;
+    *out_type = intspec[2] & IRQ_TYPE_SENSE_MASK;
 
-	return ER_NORMAL;
+    return ER_NORMAL;
 }
 
 /*!
@@ -412,8 +412,8 @@ kint32_t gic_irq_domain_alloc(struct fwk_irq_domain *sptr_domain, kuint32_t virq
     if (!sptr_domain)
         return -ER_NODEV;
 
-	sptr_gc = kzalloc(sizeof(*sptr_gc), GFP_KERNEL);
-	if (!isValid(sptr_gc))
+    sptr_gc = kzalloc(sizeof(*sptr_gc), GFP_KERNEL);
+    if (!isValid(sptr_gc))
         return -ER_NOMEM;
 
     sptr_gc->sgtc_chip.irq_enable = gic_irq_chip_enable;
@@ -450,9 +450,9 @@ void gic_irq_domain_free(struct fwk_irq_domain *sptr_domain, kuint32_t virq, kui
 
 static const struct fwk_irq_domain_ops sgtc_gic_domain_hierarchy_ops = 
 {
-	.xlate = gic_irq_domain_xlate,
-	.alloc = gic_irq_domain_alloc,
-	.free = gic_irq_domain_free,
+    .xlate = gic_irq_domain_xlate,
+    .alloc = gic_irq_domain_alloc,
+    .free = gic_irq_domain_free,
 };
 
 /*!
@@ -498,12 +498,12 @@ static void fwk_gic_initial(srt_gic_t *sptr_gic)
     for (i = 0; i < irqRegs; i++)
         mr_writel(0xffffffffU, &sptr_dest->D_ICENABLER[i]);
 
-	/*!< The trigger mode in the int_config register, only write to the SPI interrupts, so start at 32 */
+    /*!< The trigger mode in the int_config register, only write to the SPI interrupts, so start at 32 */
     for (i = 32U; i < __GIC_MAX_SPI_IRQS; i += 16U)
     {
-		/*!<
-		 * Each INT_ID uses two bits, or 16 INT_ID per register
-		 * Set them all to be level sensitive, active HIGH.
+        /*!<
+         * Each INT_ID uses two bits, or 16 INT_ID per register
+         * Set them all to be level sensitive, active HIGH.
          * 
          * 00: Reserved
          * 01: Edge triggered
@@ -513,27 +513,27 @@ static void fwk_gic_initial(srt_gic_t *sptr_gic)
          * D_ICFGR[0]: irq0 ~ irq15
          * ...
          * D_ICFGR[2]: irq32 ~ irq47
-		 */
+         */
         mr_writel(0U, &sptr_dest->D_ICFGR[i >> 4]);
     }
 
     for (i = 0; i < 512; i++)
     {
-		/*!<
-		 * The priority using int the priority_level register
-		 * The priority_level and spi_target registers use one byte per
-		 * INT_ID.
-		 * Write a default value that can be changed elsewhere.
-		 */
+        /*!<
+         * The priority using int the priority_level register
+         * The priority_level and spi_target registers use one byte per
+         * INT_ID.
+         * Write a default value that can be changed elsewhere.
+         */
         mr_writeb(0xa0, &sptr_dest->D_IPRIORITYR[i]);
     }
 
     for (i = 32U; i < 512; i++)
     {
-		/*!<
-		 * The CPU interface in the spi_target register
-		 * Only write to the SPI interrupts, so start at 32
-		 */
+        /*!<
+         * The CPU interface in the spi_target register
+         * Only write to the SPI interrupts, so start at 32
+         */
         mr_writeb(0x01, &sptr_dest->D_ITARGETSR[i]);
     }
 
@@ -560,8 +560,8 @@ static void fwk_gic_initial(srt_gic_t *sptr_gic)
  * @note    none
  */
 static void fwk_gic_init_bases(kuint32_t gic_nr, kuint32_t irq_start,
-			                void *dest_base, void *cpu_base,
-			                kuint32_t percpu_offset, struct fwk_device_node *sptr_node)
+                            void *dest_base, void *cpu_base,
+                            kuint32_t percpu_offset, struct fwk_device_node *sptr_node)
 {
     srt_gic_t *sptr_gic;
     struct fwk_irq_domain *sptr_domain;
@@ -664,28 +664,28 @@ kint32_t fwk_gpc_to_gic_irq(kint32_t virq)
  * @note    none
  */
 static kint32_t gpc_irq_domain_xlate(struct fwk_irq_domain *sptr_domain, struct fwk_device_node *sptr_intc,
-				const kuint32_t *intspec, kuint32_t intsize, kuint32_t *out_hwirq, kuint32_t *out_type)
+                const kuint32_t *intspec, kuint32_t intsize, kuint32_t *out_hwirq, kuint32_t *out_type)
 {
-	if (sptr_domain->sptr_node != sptr_intc)
-		return -ER_INVALID;
-	if (intsize != 3)
-		return -ER_INVALID;
+    if (sptr_domain->sptr_node != sptr_intc)
+        return -ER_INVALID;
+    if (intsize != 3)
+        return -ER_INVALID;
 
-    /*!< not allow GIC_SGI */
+    /*!< not allow GIC_PPI */
     if (intspec[0] != 0)
         return -ER_INVALID;
 
-	*out_hwirq = intspec[1];
+    *out_hwirq = intspec[1];
     *out_type = intspec[2];
 
-	return ER_NORMAL;
+    return ER_NORMAL;
 }
 
 static const struct fwk_irq_domain_ops sgtc_gpc_domain_hierarchy_ops = 
 {
-	.xlate = gpc_irq_domain_xlate,
-	.alloc = gic_irq_domain_alloc,
-	.free = gic_irq_domain_free,
+    .xlate = gpc_irq_domain_xlate,
+    .alloc = gic_irq_domain_alloc,
+    .free = gic_irq_domain_free,
 };
 
 /*!

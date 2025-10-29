@@ -34,8 +34,6 @@ struct fwk_sk_buff
 
     struct fwk_net_device *sptr_ndev;                                   /*!< net_device */
 
-    kuint16_t queue_mapping;
-
     /*!< 
      * represents the sum of the length of the data area (tail - data) and the length of the data area of the shard structure. 
      * In fact, the length of the data area in this len is a valid length 
