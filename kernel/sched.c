@@ -1155,6 +1155,7 @@ struct scheduler_context *__schedule_thread(void)
     struct thread *sptr_thread;
     struct thread *sptr_prev;
     struct thread_list *sptr_hash;
+    struct scheduler_context *sptr_context;
     kint32_t retval;
 
     sptr_hash = SCHED_READY_HASH;
@@ -1187,20 +1188,21 @@ struct scheduler_context *__schedule_thread(void)
     if (mr_unlikely(retval < 0) || 
         mr_unlikely(!sptr_thread))
         goto fail;
-    
-    sgtc_context.first = (kuaddr_t)&thread_schedule_ref;
-    sgtc_context.entry = (kuaddr_t)&sptr_thread->start_routine;
-    sgtc_context.args = (kuaddr_t)&sptr_thread->ptr_args;
-    sgtc_context.prev_sp = 0;
-    sgtc_context.next_sp = thread_get_stack(sptr_thread->sptr_attr);
+
+    sptr_context = &sgtc_context;
+    sptr_context->first = (kuaddr_t)&thread_schedule_ref;
+    sptr_context->entry = (kuaddr_t)&sptr_thread->start_routine;
+    sptr_context->args = (kuaddr_t)&sptr_thread->ptr_args;
+    sptr_context->prev_sp = 0;
+    sptr_context->next_sp = thread_get_stack(sptr_thread->sptr_attr);
 
     if (mr_likely(thread_schedule_ref))
-        sgtc_context.prev_sp = thread_get_stack(sptr_prev->sptr_attr);
+        sptr_context->prev_sp = thread_get_stack(sptr_prev->sptr_attr);
 
     scheduler_record();
 
     /*!< address of sgtc_context ===> r0 */
-    return &sgtc_context;
+    return sptr_context;
 
 fail:
     return mr_nullptr;

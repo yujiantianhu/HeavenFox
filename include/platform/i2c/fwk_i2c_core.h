@@ -29,19 +29,18 @@ struct fwk_i2c_client;
 
 typedef struct fwk_i2c_adapter
 {
-	kuint32_t id;
-	const struct fwk_i2c_algo *sptr_algo; 				/*!< the algorithm to access the bus */
-	void *algo_data;
+    kuint32_t id;
+    const struct fwk_i2c_algo *sptr_algo; 				/*!< the algorithm to access the bus */
+    void *algo_data;
 
-	kint32_t timeout;		         	 				/*!< in jiffies */
-	kint32_t retries;
-	struct fwk_device sgtc_dev;		         			/*!< the adapter device */
+    kint32_t timeout;		         	 				/*!< in jiffies */
+    struct fwk_device sgtc_dev;		         			/*!< the adapter device */
 
-	kint32_t nr;
-	kchar_t name[48];
+    kint32_t nr;
+    kchar_t name[48];
 
-	struct list_head sgtc_clients;
-	struct rw_lock sgtc_lock;
+    struct list_head sgtc_clients;
+    struct rw_lock sgtc_lock;
 
 } srt_fwk_i2c_adapter_t;
 
@@ -60,7 +59,7 @@ extern kint32_t fwk_i2c_read_byte_data(struct fwk_i2c_client *sptr_client, kuint
  */
 static inline void fwk_i2c_adapter_set_drvdata(struct fwk_i2c_adapter *sptr_adap, void *data)
 {
-	sptr_adap->sgtc_dev.privData = data;
+    sptr_adap->sgtc_dev.privData = data;
 }
 
 /*!
@@ -71,7 +70,7 @@ static inline void fwk_i2c_adapter_set_drvdata(struct fwk_i2c_adapter *sptr_adap
  */
 static inline void *fwk_i2c_adapter_get_drvdata(struct fwk_i2c_adapter *sptr_adap)
 {
-	return sptr_adap->sgtc_dev.privData;
+    return sptr_adap->sgtc_dev.privData;
 }
 
 #ifdef __cplusplus

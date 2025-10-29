@@ -28,7 +28,7 @@
 struct fwk_pinctrl_dev_info;
 struct fwk_dev_pm_ops;
 
-typedef struct fwk_SysPrivate
+typedef struct fwk_bus_private
 {
     struct fwk_bus_type *sptr_bus;
 
@@ -40,7 +40,7 @@ typedef struct fwk_SysPrivate
     struct list_head sgtc_list_drivers;
     struct rw_lock sgtc_driver_lock;
     
-} srt_fwk_SysPrivate_t;
+} srt_fwk_bus_private_t;
 
 typedef struct fwk_device
 {
@@ -78,8 +78,6 @@ typedef struct fwk_driver
     kint32_t (*probe)	(struct fwk_device *sptr_dev);
     kint32_t (*remove)	(struct fwk_device *sptr_dev);
 
-    struct fwk_device_oprts *sptr_oprts;
-
 } srt_fwk_driver_t;
 
 typedef struct fwk_bus_type
@@ -90,7 +88,7 @@ typedef struct fwk_bus_type
     kint32_t (*probe)	(struct fwk_device *sptr_dev);
     kint32_t (*remove)	(struct fwk_device *sptr_dev);
 
-    struct fwk_SysPrivate *sptr_SysPriv;
+    struct fwk_bus_private *sptr_buspriv;
 
 } srt_fwk_bus_type_t;
 
@@ -103,8 +101,8 @@ typedef struct fwk_device_type
 
 } srt_fwk_device_type_t;
 
-#define FWK_GET_BUS_DEVICE(bus)								(&(bus)->sptr_SysPriv->sgtc_list_devices)
-#define FWK_GET_BUS_DRIVER(bus)								(&(bus)->sptr_SysPriv->sgtc_list_drivers)
+#define FWK_GET_BUS_DEVICE(bus)								(&(bus)->sptr_buspriv->sgtc_list_devices)
+#define FWK_GET_BUS_DRIVER(bus)								(&(bus)->sptr_buspriv->sgtc_list_drivers)
 
 #define FWK_INIT_BUS_DEVICE_LIST(parent, list, bus)	\
 {	\
@@ -119,15 +117,15 @@ typedef struct fwk_device_type
 #define FWK_NEXT_DEVICE(parent, list)						mr_list_parent(parent, list, struct fwk_device, sgtc_link)
 #define FWK_NEXT_DRIVER(parent, list)						mr_list_parent(parent, list, struct fwk_driver, sgtc_link)
 
-#define __BUS_DEVICE_RD_LOCK(bus)                           rd_lock(&(bus)->sptr_SysPriv->sgtc_device_lock)
-#define __BUS_DEVICE_RD_UNLOCK(bus)                         rd_unlock(&(bus)->sptr_SysPriv->sgtc_device_lock)
-#define __BUS_DEVICE_WR_LOCK(bus)                           wr_lock(&(bus)->sptr_SysPriv->sgtc_device_lock)
-#define __BUS_DEVICE_WR_UNLOCK(bus)                         wr_unlock(&(bus)->sptr_SysPriv->sgtc_device_lock)
+#define __BUS_DEVICE_RD_LOCK(bus)                           rd_lock(&(bus)->sptr_buspriv->sgtc_device_lock)
+#define __BUS_DEVICE_RD_UNLOCK(bus)                         rd_unlock(&(bus)->sptr_buspriv->sgtc_device_lock)
+#define __BUS_DEVICE_WR_LOCK(bus)                           wr_lock(&(bus)->sptr_buspriv->sgtc_device_lock)
+#define __BUS_DEVICE_WR_UNLOCK(bus)                         wr_unlock(&(bus)->sptr_buspriv->sgtc_device_lock)
 
-#define __BUS_DRIVER_RD_LOCK(bus)                           rd_lock(&(bus)->sptr_SysPriv->sgtc_driver_lock)
-#define __BUS_DRIVER_RD_UNLOCK(bus)                         rd_unlock(&(bus)->sptr_SysPriv->sgtc_driver_lock)
-#define __BUS_DRIVER_WR_LOCK(bus)                           wr_lock(&(bus)->sptr_SysPriv->sgtc_driver_lock)
-#define __BUS_DRIVER_WR_UNLOCK(bus)                         wr_unlock(&(bus)->sptr_SysPriv->sgtc_driver_lock)
+#define __BUS_DRIVER_RD_LOCK(bus)                           rd_lock(&(bus)->sptr_buspriv->sgtc_driver_lock)
+#define __BUS_DRIVER_RD_UNLOCK(bus)                         rd_unlock(&(bus)->sptr_buspriv->sgtc_driver_lock)
+#define __BUS_DRIVER_WR_LOCK(bus)                           wr_lock(&(bus)->sptr_buspriv->sgtc_driver_lock)
+#define __BUS_DRIVER_WR_UNLOCK(bus)                         wr_unlock(&(bus)->sptr_buspriv->sgtc_driver_lock)
 
 /*!< The globals */
 extern struct fwk_bus_type sgtc_fwk_platform_bus_type;

@@ -48,10 +48,6 @@ struct fwk_fb_fix_screen_info
     kuaddr_t smem_start;								/*!< The starting physical address of the framebuffer memory */
     kuint32_t smem_len;									/*!< The length of the framebuffer memory */
     kuint32_t type;										/*!< The type of frame buffer storage, i.e. the way in which image data is stored in the frame buffer */
-    kuint32_t type_aux;									/*!< Subtype of the framebuffer store */
-    kuint32_t visual;									/*!< Screen color mode, such as black and white mode, true color mode, etc */
-
-    kuint32_t line_lenth;								/*!< The number of bytes in a row */
 };
 
 /*!< LCD variable parameters */

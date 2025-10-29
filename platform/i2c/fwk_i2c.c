@@ -142,14 +142,14 @@ static kint32_t fwk_i2c_device_remove(struct fwk_device *sptr_dev)
     return ER_NORMAL;
 }
 
-static struct fwk_SysPrivate sgtc_fwk_i2c_device_SysPriv =
+static struct fwk_bus_private sgtc_fwk_i2c_device_buspriv =
 {
     .sptr_bus = &sgtc_fwk_i2c_bus_type,
 
-    .sgtc_list_devices	= LIST_HEAD_INIT(&sgtc_fwk_i2c_device_SysPriv.sgtc_list_devices),
+    .sgtc_list_devices	= LIST_HEAD_INIT(&sgtc_fwk_i2c_device_buspriv.sgtc_list_devices),
     .sgtc_device_lock   = RW_LOCK_INIT(),
 
-    .sgtc_list_drivers	= LIST_HEAD_INIT(&sgtc_fwk_i2c_device_SysPriv.sgtc_list_drivers),
+    .sgtc_list_drivers	= LIST_HEAD_INIT(&sgtc_fwk_i2c_device_buspriv.sgtc_list_drivers),
     .sgtc_driver_lock   = RW_LOCK_INIT(),
 };
 
@@ -161,7 +161,7 @@ struct fwk_bus_type sgtc_fwk_i2c_bus_type =
     .probe	= fwk_i2c_device_probe,
     .remove	= fwk_i2c_device_remove,
 
-    .sptr_SysPriv = &sgtc_fwk_i2c_device_SysPriv,
+    .sptr_buspriv = &sgtc_fwk_i2c_device_buspriv,
 };
 
 struct fwk_device_type sgtc_fwk_i2c_adapter_type =

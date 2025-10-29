@@ -166,26 +166,26 @@ typedef struct thread_attr srt_thread_attr_t;
 
 /*!< The defines */
 extern tid_t kernel_thread_create(tid_t tid, 
-                                        struct thread_attr *sptr_attr, 
-                                        void *(*pfunc_start_routine) (void *), 
-                                        void *ptr_args);
+                                struct thread_attr *sptr_attr, 
+                                void *(*pfunc_start_routine) (void *), 
+                                void *ptr_args);
 
 extern kint32_t thread_create(tid_t *ptr_id, 
-                                        struct thread_attr *sptr_attr, 
-                                        void *(*pfunc_start_routine) (void *), 
-                                        void *ptr_args);
+                                struct thread_attr *sptr_attr, 
+                                void *(*pfunc_start_routine) (void *), 
+                                void *ptr_args);
 
 extern kint32_t kernel_thread_idle_create(struct thread_attr *sptr_attr, 
-                                        void *(*pfunc_start_routine) (void *), 
-                                        void *ptr_args);
+                                void *(*pfunc_start_routine) (void *), 
+                                void *ptr_args);
 
 extern kint32_t kernel_thread_base_create(struct thread_attr *sptr_attr, 
-                                        void *(*pfunc_start_routine) (void *), 
-                                        void *ptr_args);
+                                void *(*pfunc_start_routine) (void *), 
+                                void *ptr_args);
                                                 
 extern kint32_t kernel_thread_init_create(struct thread_attr *sptr_attr, 
-                                        void *(*pfunc_start_routine) (void *), 
-                                        void *ptr_args);
+                                void *(*pfunc_start_routine) (void *), 
+                                void *ptr_args);
 
 extern kint32_t thread_destory(tid_t tid);
 extern void *thread_attr_init(struct thread_attr *sptr_attr);

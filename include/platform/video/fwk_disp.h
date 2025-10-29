@@ -58,18 +58,21 @@ typedef struct fwk_disp_ctrl
 
 #define IS_DISP_FRAME_FULL(sptr_dctrl)  \
         (((sptr_dctrl)->x_next == (sptr_dctrl)->x_start) && \
-            ((sptr_dctrl)->y_next >= (sptr_dctrl)->y_end))
+         ((sptr_dctrl)->y_next >= (sptr_dctrl)->y_end))
 
+/*!< buffer must be 2 bytes alignment */
 #define mr_fwk_disp_write_fb16(buffer, offset, data) \
     do {    \
         *(((kuint16_t *)(buffer)) + (offset)) = data;   \
     } while (0)
 
+/*!< buffer must be 4 bytes alignment */
 #define mr_fwk_disp_write_fb32(buffer, offset, data) \
     do {    \
         *(((kuint32_t *)(buffer)) + (offset)) = data;   \
     } while (0)
 
+/*!< buffer must be 4 bytes alignment */
 #define mr_fwk_disp_write_fb24(buffer, offset, data)               mr_fwk_disp_write_fb32(buffer, offset, data)
 
 #define mr_fwk_disp_write_pixel(buffer, offset, bpp, data)   \

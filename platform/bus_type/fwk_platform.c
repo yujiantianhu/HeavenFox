@@ -60,7 +60,7 @@ static kint32_t fwk_platform_match(struct fwk_device *sptr_dev, struct fwk_drive
     {
         sptr_idTable = sptr_platdrv->sptr_idTable + idTable_cnt;
 
-        if (!kstrcmp((char *)sptr_platdev->name, (char *)sptr_idTable->name))
+        if (!kstrcmp((const kchar_t *)sptr_platdev->name, (const kchar_t *)sptr_idTable->name))
             return ER_NORMAL;
     }
 
@@ -68,7 +68,7 @@ static kint32_t fwk_platform_match(struct fwk_device *sptr_dev, struct fwk_drive
     /*!< 
      * Each device is not allowed to have the same name;
      * So you can exit immediately after finding it, and there will be no more devices with the same name in the future */
-    if (!kstrcmp((char *)sptr_platdev->name, (char *)sptr_driver->name))
+    if (!kstrcmp((const kchar_t *)sptr_platdev->name, (const kchar_t *)sptr_driver->name))
         return ER_NORMAL;
 
     return -ER_NOTFOUND;
@@ -127,7 +127,7 @@ static kint32_t fwk_platform_remove(struct fwk_device *sptr_dev)
     return ER_NORMAL;
 }
 
-static struct fwk_SysPrivate sgtc_fwk_platform_SysPriv =
+static struct fwk_bus_private sgtc_fwk_platform_SysPriv =
 {
     .sptr_bus = &sgtc_fwk_platform_bus_type,
 
@@ -146,7 +146,7 @@ struct fwk_bus_type sgtc_fwk_platform_bus_type =
     .probe	= fwk_platform_probe,
     .remove	= fwk_platform_remove,
 
-    .sptr_SysPriv = &sgtc_fwk_platform_SysPriv,
+    .sptr_buspriv = &sgtc_fwk_platform_SysPriv,
 };
 
 /*!

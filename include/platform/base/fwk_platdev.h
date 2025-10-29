@@ -24,45 +24,45 @@
 /*!< The defines */
 enum __ERT_DEVICE_RESOURCE_TYPE
 {
-	NR_DEVICE_RESOURCE_IO  = 0x00000100U,
-	NR_DEVICE_RESOURCE_MEM = 0x00000200U,
-	NR_DEVICE_RESOURCE_REG = 0x00000300U,
-	NR_DEVICE_RESOURCE_IRQ = 0x00000400U,
-	NR_DEVICE_RESOURCE_DMA = 0x00000800U,
-	NR_DEVICE_RESOURCE_BUS = 0x00001000U,
+    NR_DEVICE_RESOURCE_IO  = 0x00000100U,
+    NR_DEVICE_RESOURCE_MEM = 0x00000200U,
+    NR_DEVICE_RESOURCE_REG = 0x00000300U,
+    NR_DEVICE_RESOURCE_IRQ = 0x00000400U,
+    NR_DEVICE_RESOURCE_DMA = 0x00000800U,
+    NR_DEVICE_RESOURCE_BUS = 0x00001000U,
 };
 
 /*!< Hardware Information Table 1: Obtain hardware by address */
 struct fwk_resources
 {
-	kchar_t *name;
-	kuaddr_t start;
-	kuaddr_t end;
-	kuint32_t type;
+    kchar_t *name;
+    kuaddr_t start;
+    kuaddr_t end;
+    kuint32_t type;
 };
 
 /*!< Hardware Information Table 2: Obtain hardware by enum */
 struct fwk_enums
 {
-	kint32_t pinEnum;
-	kint32_t irqNum;
+    kint32_t pinEnum;
+    kint32_t irqNum;
 
-	void *data;
+    void *data;
 };
 
 struct fwk_platdev
 {
-	kchar_t *name;
-	kint32_t id;
+    kchar_t *name;
+    kint32_t id;
 
-	struct fwk_resources *sptr_resources;
-	kusize_t num_resources;
+    struct fwk_resources *sptr_resources;
+    kusize_t num_resources;
 
-	struct fwk_enums *sptr_enums;
-	kusize_t num_enums;
+    struct fwk_enums *sptr_enums;
+    kusize_t num_enums;
 
-	kchar_t *driver_override;
-	struct fwk_device sgtc_dev;
+    kchar_t *driver_override;
+    struct fwk_device sgtc_dev;
 };
 
 #define RESOURCE_SIZE(sptr_res)						(sptr_res ? (sptr_res->end - sptr_res->start + 1) : 0)
@@ -84,7 +84,7 @@ extern kint32_t fwk_unregister_platdevice(struct fwk_platdev *sptr_platdev);
  */
 static inline kusize_t fwk_resource_size(struct fwk_resources *sptr_res)
 {
-	return sptr_res ? (sptr_res->end - sptr_res->start + 1) : 0;
+    return sptr_res ? (sptr_res->end - sptr_res->start + 1) : 0;
 }
 
 /*!
@@ -95,7 +95,7 @@ static inline kusize_t fwk_resource_size(struct fwk_resources *sptr_res)
  */
 static inline kuaddr_t fwk_address_map(struct fwk_resources *sptr_res)
 {
-	return sptr_res ? (kuaddr_t)fwk_io_remap((void *)sptr_res->start, sptr_res->end - sptr_res->start + 1) : 0;
+    return sptr_res ? (kuaddr_t)fwk_io_remap((void *)sptr_res->start, sptr_res->end - sptr_res->start + 1) : 0;
 }
 
 #ifdef __cplusplus

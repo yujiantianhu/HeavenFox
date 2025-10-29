@@ -303,7 +303,7 @@ static void *imx_iomuxc_get_group_by_name(srt_imx_iomuxc_data_t *sptr_data, cons
  * @note    none
  */
 static kint32_t imx_iomuxc_dt_node_to_map(struct fwk_pinctrl_dev *sptr_pctldev, struct fwk_device_node *sptr_node, 
-												            struct fwk_pinctrl_map **sptr_map, kuint32_t *num_maps)
+										struct fwk_pinctrl_map **sptr_map, kuint32_t *num_maps)
 {
     srt_imx_iomuxc_data_t *sptr_data;
     srt_imx_iomuxc_pin_grp_t *sptr_pingrp;
