@@ -211,6 +211,10 @@ extern kint32_t ascii_to_dec(const kchar_t *str, kint32_t *result);
 extern kutype_t random_val(void);
 extern kuint16_t parse_valid_u32_bits(kuint32_t number);
 
+extern kchar_t *path_symbol_add(const kchar_t *path, kusize_t *len, kbool_t *flag);
+extern void path_symbol_release(kchar_t *full_path, kbool_t flag);
+
+/*!< The defines */
 #define mr_udiv(divied, div)	\
 ({	\
     typeof(divied) _divied = (divied);	\

@@ -9,9 +9,9 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-obj-y	+=	fs_intr.o
+obj-y	+=	ls.o
+obj-y	+=	pwd.o
 
-obj-y	+=	cmd/
-obj-y	+=	fatfs/
+obj-y	+=	fs_cmd.o
 
 # end of file

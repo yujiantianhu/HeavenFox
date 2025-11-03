@@ -47,7 +47,7 @@ int pattern_match(const char *fname, const char *pattern)
 
 /*!
  * @brief   open directory
- * @param   path: such as "/home/text", not "/home/text/"
+ * @param   path: such as "/home/text", or "/home/text/"
  * @param   pattern: maybe you can input "*.txt" to get all txt, exclude others
  * @param   mode: O_RDWR/O_RDONLY and so on
  * @retval  dir pointer
@@ -59,19 +59,33 @@ struct fs_list *dir_open(const kchar_t *path, const kchar_t *pattern, kuint32_t 
     struct fs_list *sptr_fs;
     struct fwk_file sgtc_file;
     struct fwk_gendisk *sptr_gdisk;
-    kint32_t retval;
+    kchar_t *full_path;
+    kusize_t length;
+    kbool_t flag;
+    kint32_t retval = ER_NORMAL;
 
-    sptr_inode = fwk_inode_find_disk(path);
-    if (!isValid(sptr_inode))
-        return ERR_PTR(-ER_NOTFOUND);
-
-    sptr_fs = (struct fs_list *)kzalloc(sizeof(*sptr_fs) + kstrlen(path) + 1, GFP_KERNEL);
-    if (!isValid(sptr_fs))
+    /*!< Add path symbol '/' to the end of name */
+    full_path = path_symbol_add(path, &length, &flag);
+    if (!isValid(full_path))
         return ERR_PTR(-ER_NOMEM);
+
+    sptr_inode = fwk_inode_find_disk(full_path);
+    if (!isValid(sptr_inode))
+    {
+        retval = -ER_NOTFOUND;
+        goto fail1;
+    }
+
+    sptr_fs = (struct fs_list *)kzalloc(sizeof(*sptr_fs) + length + 1, GFP_KERNEL);
+    if (!isValid(sptr_fs))
+    {
+        retval = -ER_NOMEM;
+        goto fail1;
+    }
 
     /*!< Save path */
     sptr_fs->path = (kchar_t *)sptr_fs + sizeof(*sptr_fs);
-    kstrcpy(sptr_fs->path, path);
+    kstrcpy(sptr_fs->path, full_path);
 
     sptr_fs->mode = mode;
     sptr_fs->sptr_dnode = sptr_inode;
@@ -84,7 +98,7 @@ struct fs_list *dir_open(const kchar_t *path, const kchar_t *pattern, kuint32_t 
         sgtc_file.mode = mode;
         retval = sgtc_file.sptr_foprts->open(sptr_inode, &sgtc_file);
         if (retval)
-            goto fail1;
+            goto fail2;
     }
 
     sptr_gdisk = sptr_inode->sptr_blkdev->sptr_gdisk;
@@ -92,22 +106,26 @@ struct fs_list *dir_open(const kchar_t *path, const kchar_t *pattern, kuint32_t 
     {
         retval = sptr_gdisk->opendir(sptr_gdisk, sptr_fs);
         if (retval)
-            goto fail2;
+            goto fail3;
     }
 
     /*!< Create items */
     if (sptr_fs->readdir)
         sptr_fs->readdir(sptr_fs, pattern);
 
+    path_symbol_release(full_path, flag);
     return sptr_fs;
 
-fail2:
+fail3:
     if (sgtc_file.sptr_foprts->close)
         sgtc_file.sptr_foprts->close(sptr_inode, &sgtc_file);
 
-fail1:
+fail2:
     kfree(sptr_fs);
-    return ERR_PTR(-ER_FAILD);
+fail1:
+    path_symbol_release(full_path, flag);
+
+    return ERR_PTR(retval);
 }
 
 /*!

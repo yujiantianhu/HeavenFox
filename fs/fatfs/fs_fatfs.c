@@ -87,7 +87,8 @@ static kint32_t fatfs_disk_mount(struct fwk_gendisk *sptr_gdisk)
         sptr_fdisk->sptr_kobj = sptr_kobj;
         fwk_kobject_get(sptr_kobj);
 
-        sptr_fdisk->path_lenth = lenth;
+        /*!< Reserve '/' */
+        sptr_fdisk->path_lenth = lenth - 1;
     }
 
     sptr_fdisk->is_mounted = true;
@@ -310,7 +311,8 @@ static kint32_t fatfs_dir_open(struct fwk_gendisk *sptr_gdisk, struct fs_list *s
 {
     struct fatfs_disk *sptr_fdisk;
     DIR *sptr_dir;
-    kchar_t *name;
+    kchar_t *name, *fatpath;
+    kusize_t len;
     FRESULT retval;
 
     sptr_fdisk = mr_fatfs_disk_get(sptr_gdisk);
@@ -318,15 +320,22 @@ static kint32_t fatfs_dir_open(struct fwk_gendisk *sptr_gdisk, struct fs_list *s
         return -ER_NREADY;
 
     name = kstrcut(sptr_list->path, sptr_fdisk->path_lenth);
-    sptr_dir = kzalloc(sizeof(*sptr_dir), GFP_KERNEL);
+    len  = kstrlen(name);
+
+    sptr_dir = kzalloc(sizeof(*sptr_dir) + len + 1, GFP_KERNEL);
     if (!isValid(sptr_dir))
         return -ER_NOMEM;
 
-    retval = f_opendir(sptr_dir, name);
+    fatpath = (kchar_t *)sptr_dir + sizeof(*sptr_dir);
+    kstrcpy(fatpath, name);
+    if ((len > 1) && (*(fatpath + len - 1) == '/'))
+        *(fatpath + len - 1) = '\0';
+
+    retval = f_opendir(sptr_dir, fatpath);
     if (retval != FR_OK)
     {
         kfree(sptr_dir);
-        return retval;
+        return -ER_FAILD;
     }
 
     sptr_list->private_data = sptr_dir;

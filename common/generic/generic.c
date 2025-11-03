@@ -12,9 +12,11 @@
 
 /*!< The includes */
 #include <common/generic.h>
+#include <common/api_string.h>
 #include <common/io_stream.h>
 #include <common/time.h>
 #include <kernel/spinlock.h>
+#include <platform/base/fwk_mempool.h>
 
 /*!< The defines */
 #define RANDOM_BLOCK_SIZE                       (64)
@@ -333,6 +335,55 @@ kuint16_t parse_valid_u32_bits(kuint32_t number)
     }
 
     return (32 - count);
+}
+
+/*!
+ * @brief   add '/' to the end of path, for example, path is "/dev", then fix to "/dev/"
+ * @param   path, it can be "xxx/" or "xxx", for "xxx/", nothing will be done; for "xxx", add '/' to the end of it
+ * @param   len: length of full_path
+ * @param   flag: mark if full_path is from memory pool (true or false)
+ * @retval  full path, will contain '/' at the end of full path
+ * @note    none
+ */
+kchar_t *path_symbol_add(const kchar_t *path, kusize_t *len, kbool_t *flag)
+{
+    kchar_t *full_path = (kchar_t *)path;
+    kusize_t length = kstrlen(path);
+
+    if (length && (*(path + length - 1) != '/'))
+    {
+        full_path = kmalloc(length + 2, GFP_KERNEL);
+        if (!isValid(full_path))
+            return mr_nullptr;
+
+        kstrncpy(full_path, path, length);
+        *(full_path + length) = '/';
+        *(full_path + length + 1) = '\0';
+
+        *flag = true;
+    }
+    else
+    {
+        *flag = false;
+    }
+
+    if (len)
+        *len = length + 1;
+
+    return full_path;
+}
+
+/*!
+ * @brief   free full_path if it is from memory pool
+ * @param   full_path
+ * @param   flag: guarantee to be from memory pool (true or false)
+ * @retval  none
+ * @note    none
+ */
+void path_symbol_release(kchar_t *full_path, kbool_t flag)
+{
+    if (full_path && flag)
+        kfree(full_path);
 }
 
 /* end of file */

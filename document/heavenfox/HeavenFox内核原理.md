@@ -140,7 +140,7 @@ __信息 （如有需要可邮件联系）__
     01) 支持各级子目录及子文件自由选择是否参与编译, 由"obj-y"链接各源文件和目录;
     02) 支持程序链接脚本自动生成, 适配多种cpu配置;
     03) 支持"lib/"路径下第三方项目源码单独编译, 生成静态库文件并链接到内核镜像;
-    04) 支持内核配置自由化, 可通过创建和编写"configs/mach/xxxx_defconfig", 自动生成auto.conf and autoconf.h;
+    04) 支持内核配置自由化, 可通过创建和编写"configs/mach/xxxx_defconfig", 自动生成auto.conf和autoconf.h;
     05) 支持隐式初始化, 允许灵活加入或删除组件;
     06) 提供自定义内存池, 可由kmalloc和kfree申请和释放动态内存;
     07) 支持双向链表, 环形队列/缓冲区, 基数树, 红黑树;
@@ -183,6 +183,12 @@ __信息 （如有需要可邮件联系）__
 
 - 线程切换时间
     约12us。
+
+- ping主机耗时（经网卡）
+    约0.293ms
+
+- ping回环耗时
+    约0.296ms
 
 ---------------------------------------------------------
 ### 3. 终端命令
@@ -6113,7 +6119,7 @@ struct fwk_kobject *fwk_kobject_get(struct fwk_kobject *sptr_kobj);
 /* 引用计数 - 1 */
 void fwk_kobject_put(struct fwk_kobject *sptr_kobj);
 /* 判断引用计数是否非0 (表示被引用, 返回true) */
-kbool_t fwk_kobject_is_referrd(struct fwk_kobject *sptr_kobj);
+kbool_t fwk_kobject_is_refered(struct fwk_kobject *sptr_kobj);
 ```
 
 fwk_kset则十分简单，它只有两个成员，sgtc_kobj表示“目录也是一个对象”，并提供节点路径的通用属性；sgtc_list则用于联结本目录下的所有的节点（包括子目录、文件等）。

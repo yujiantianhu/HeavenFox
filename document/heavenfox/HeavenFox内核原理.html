@@ -621,6 +621,14 @@ code {
 <p>线程切换时间
 约12us。</p>
 </li>
+<li>
+<p>ping主机耗时（经网卡）
+约0.293ms</p>
+</li>
+<li>
+<p>ping回环耗时
+约0.296ms</p>
+</li>
 </ul>
 <hr>
 <h3 id="3-%E7%BB%88%E7%AB%AF%E5%91%BD%E4%BB%A4">3. 终端命令</h3>
@@ -6512,7 +6520,7 @@ fwk_kobject的定义为：</p>
 <span class="hljs-comment">/* 引用计数 - 1 */</span>
 <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">fwk_kobject_put</span><span class="hljs-params">(struct fwk_kobject *sptr_kobj)</span></span>;
 <span class="hljs-comment">/* 判断引用计数是否非0 (表示被引用, 返回true) */</span>
-<span class="hljs-function"><span class="hljs-keyword">kbool_t</span> <span class="hljs-title">fwk_kobject_is_referrd</span><span class="hljs-params">(struct fwk_kobject *sptr_kobj)</span></span>;
+<span class="hljs-function"><span class="hljs-keyword">kbool_t</span> <span class="hljs-title">fwk_kobject_is_refered</span><span class="hljs-params">(struct fwk_kobject *sptr_kobj)</span></span>;
 </div></code></pre>
 <p>fwk_kset则十分简单，它只有两个成员，sgtc_kobj表示“目录也是一个对象”，并提供节点路径的通用属性；sgtc_list则用于联结本目录下的所有的节点（包括子目录、文件等）。
 其定义为：</p>
