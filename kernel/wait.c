@@ -42,12 +42,14 @@ void init_waitqueue_head(struct wait_queue_head *sptr_wqh)
  */
 void add_wait_queue(struct wait_queue_head *sptr_wqh, struct wait_queue *sptr_wq)
 {
+    kutype_t flags;
+
     if (!mr_list_empty(&sptr_wq->sgtc_link))
         return;
 
-    spin_lock_irqsave(&sptr_wqh->sgtc_lock);
+    spin_lock_irqsave(&sptr_wqh->sgtc_lock, &flags);
     list_head_add_tail(&sptr_wqh->sgtc_task, &sptr_wq->sgtc_link);
-    spin_unlock_irqrestore(&sptr_wqh->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_wqh->sgtc_lock, flags);
 }
 
 /*!
@@ -58,9 +60,11 @@ void add_wait_queue(struct wait_queue_head *sptr_wqh, struct wait_queue *sptr_wq
  */
 void remove_wait_queue(struct wait_queue_head *sptr_wqh, struct wait_queue *sptr_wq)
 {
-    spin_lock_irqsave(&sptr_wqh->sgtc_lock);
+    kutype_t flags;
+
+    spin_lock_irqsave(&sptr_wqh->sgtc_lock, &flags);
     list_head_del(&sptr_wq->sgtc_link);
-    spin_unlock_irqrestore(&sptr_wqh->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_wqh->sgtc_lock, flags);
 }
 
 /*!
@@ -86,11 +90,12 @@ static void __wake_up_common(struct thread *sptr_thread, kuint32_t state)
 void wake_up_common(struct wait_queue_head *sptr_wqh, kuint32_t state)
 {
     struct wait_queue *sptr_wq, *sptr_temp;
+    kutype_t flags;
 
     if (mr_list_empty(&sptr_wqh->sgtc_task))
         return;
 
-    spin_lock_irqsave(&sptr_wqh->sgtc_lock);
+    spin_lock_irqsave(&sptr_wqh->sgtc_lock, &flags);
 
     foreach_list_next_entry_safe(sptr_wq, sptr_temp, &sptr_wqh->sgtc_task, sgtc_link)
     {
@@ -98,7 +103,7 @@ void wake_up_common(struct wait_queue_head *sptr_wqh, kuint32_t state)
             __wake_up_common(sptr_wq->sptr_task, state);
     }
 
-    spin_unlock_irqrestore(&sptr_wqh->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_wqh->sgtc_lock, flags);
 }
 
 /*!< end of file */

@@ -207,18 +207,19 @@ struct spin_lock *scheduler_lock(void)
 tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count)
 {
     kuint32_t i;
+    kutype_t flags;
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     for (i = i_start; i < (i_start + count); i++)
     {
         if (!SCHED_THREAD_HANDLER(i))
         {
-            spin_unlock_irqrestore(&__SCHED_LOCK);
+            spin_unlock_irqrestore(&__SCHED_LOCK, flags);
             return i;
         }
     }
 
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
 
     return -ER_MORE;
 }
@@ -250,10 +251,11 @@ kuint64_t scheduler_stats_get(void)
 {
     struct scheduler_table *sptr_tab = SCHED_MANAGER();
     kuint64_t sum;
+    kutype_t flags;
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     sum = (__THREAD_MAX_STATS * sptr_tab->sgtc_cnt.cnt_out + sptr_tab->sgtc_cnt.sched_cnt);
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
 
     return sum;
 }
@@ -267,14 +269,15 @@ kuint64_t scheduler_stats_get(void)
 void schedule_self_suspend(void)
 {
     struct thread *sptr_cur = SCHED_RUNNING_THREAD;
+    kutype_t flags;
 
-    spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     
     /*!< Avoid preempting while the function running */
     if (mr_likely(__GET_THREAD_STATE(sptr_cur) == NR_THREAD_RUNNING))
         __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
 
-    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
     schedule_thread();
 }
 
@@ -287,14 +290,15 @@ void schedule_self_suspend(void)
 void schedule_self_sleep(void)
 {
     struct thread *sptr_cur = SCHED_RUNNING_THREAD;
+    kutype_t flags;
 
-    spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     
     /*!< Avoid preempting while the function running */
     if (mr_likely(__GET_THREAD_STATE(sptr_cur) == NR_THREAD_RUNNING))
         __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SLEEP);
 
-    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
     schedule_thread();
 }
 
@@ -307,29 +311,30 @@ void schedule_self_sleep(void)
 kint32_t schedule_thread_suspend(tid_t tid)
 {
     struct thread *sptr_thread;
+    kutype_t flags;
     kint32_t retval;
 
     sptr_thread = SCHED_THREAD_HANDLER(tid);
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SUSPEND);
 
     if (mr_unlikely(__GET_THREAD_STATE(sptr_thread) == NR_THREAD_RUNNING))
     {
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         /*!< Self suspend */
         schedule_thread();
         return ER_NORMAL;
     }
 
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     retval = schedule_thread_switch(sptr_thread);
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
     
     return retval;
 }
@@ -343,29 +348,30 @@ kint32_t schedule_thread_suspend(tid_t tid)
 kint32_t schedule_thread_sleep(tid_t tid)
 {
     struct thread *sptr_thread;
+    kutype_t flags;
     kint32_t retval;
 
     sptr_thread = SCHED_THREAD_HANDLER(tid);
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SLEEP);
 
     if (mr_unlikely(__GET_THREAD_STATE(sptr_thread) == NR_THREAD_RUNNING))
     {
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         /*!< Self suspend */
         schedule_thread();
         return ER_NORMAL;
     }
 
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     retval = schedule_thread_switch(sptr_thread);
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
 
     return retval;
 }
@@ -380,18 +386,19 @@ kint32_t schedule_thread_wakeup(tid_t tid)
 {
     struct thread *sptr_thread;
     kuint32_t state;
+    kutype_t flags;
     kint32_t retval;
 
     sptr_thread = SCHED_THREAD_HANDLER(tid);
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
 
     if (sptr_thread == SCHED_RUNNING_THREAD)
     {
         __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_RUNNING);
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         return -ER_FORBID;
     }
@@ -400,16 +407,16 @@ kint32_t schedule_thread_wakeup(tid_t tid)
     if ((state != NR_THREAD_SUSPEND) &&
         (state != NR_THREAD_SLEEP))
     {
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
         return -ER_INVALID;
     }
 
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_READY);
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     retval = schedule_thread_switch(sptr_thread);
-	spin_unlock_irqrestore(&__SCHED_LOCK);
+	spin_unlock_irqrestore(&__SCHED_LOCK, flags);
 
     return retval;
 }
@@ -1063,6 +1070,7 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     struct thread_attr *sptr_it_attr;
     struct lock_owners *sptr_owners;
     struct lock_waiter *sptr_waiter;
+    kutype_t flags;
     kint32_t retval;
 
     sptr_it_attr = sptr_thread->sptr_attr;
@@ -1092,7 +1100,7 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     /*!< set name */
     sprintk(sptr_thread->name, "thread-%d", tid);
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     /*!< saved to tcb */
     SCHED_THREAD_HANDLER(tid) = sptr_thread;
     
@@ -1101,13 +1109,13 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     if (retval < 0)
     {
         SCHED_THREAD_HANDLER(tid) = mr_nullptr;
-        spin_unlock_irqrestore(&__SCHED_LOCK);
+        spin_unlock_irqrestore(&__SCHED_LOCK, flags);
         return retval;
     }
 
     /*!< set to ready state */
     __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_READY);
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
 
     return ER_NORMAL;
 }
@@ -1121,8 +1129,9 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
 struct thread *unregister_thread(tid_t tid)
 {
     struct thread *sptr_thread;
+    kutype_t flags;
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
 
     if ((tid < 0) || (tid == mr_current->tid))
     {
@@ -1144,7 +1153,7 @@ struct thread *unregister_thread(tid_t tid)
     SCHED_THREAD_HANDLER(tid) = mr_nullptr;
 
 END:
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
     return sptr_thread;
 }
 

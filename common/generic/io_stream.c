@@ -53,22 +53,22 @@ struct pq_buffer *io_stream_logs_ptr(void)
  * @brief   logs buffer lock (spin lock)
  * @param   none
  * @retval  none
- * @note    spin_lock_irqsave(&sgtc_io_stream_logs_lock)
+ * @note    spin_lock_irqsave(&sgtc_io_stream_logs_lock, flags)
  */
-void io_stream_logs_lock(void)
+void io_stream_logs_lock(kutype_t *flags)
 {
-    spin_lock_irqsave(&sgtc_io_stream_logs_lock);
+    spin_lock_irqsave(&sgtc_io_stream_logs_lock, flags);
 }
 
 /*!
  * @brief   logs buffer unlock (spin lock)
  * @param   none
  * @retval  none
- * @note    spin_unlock_irqrestore(&sgtc_io_stream_logs_lock)
+ * @note    spin_unlock_irqrestore(&sgtc_io_stream_logs_lock, flags)
  */
-void io_stream_logs_unlock(void)
+void io_stream_logs_unlock(kutype_t flags)
 {
-    spin_unlock_irqrestore(&sgtc_io_stream_logs_lock);
+    spin_unlock_irqrestore(&sgtc_io_stream_logs_lock, flags);
 }
 
 /*!
@@ -170,6 +170,8 @@ kssize_t io_getstr(kubyte_t *msgs, kusize_t size)
  */
 kint32_t register_io_stream(struct io_stream_dev *sptr_stream)
 {
+    kutype_t flags;
+
     if (!sptr_stream)
         return -ER_NODEV;
 
@@ -177,9 +179,9 @@ kint32_t register_io_stream(struct io_stream_dev *sptr_stream)
         !mr_list_empty(&sptr_stream->sgtc_link))
         return -ER_INVALID;
 
-    spin_lock_irqsave(&sgtc_io_stream_lock);
+    spin_lock_irqsave(&sgtc_io_stream_lock, &flags);
     list_head_add_tail(&sgtc_io_stream_devices, &sptr_stream->sgtc_link);
-    spin_unlock_irqrestore(&sgtc_io_stream_lock);
+    spin_unlock_irqrestore(&sgtc_io_stream_lock, flags);
 
     return ER_NORMAL;
 }
@@ -192,12 +194,14 @@ kint32_t register_io_stream(struct io_stream_dev *sptr_stream)
  */
 void unregister_io_stream(struct io_stream_dev *sptr_stream)
 {
+    kutype_t flags;
+
     if (!sptr_stream)
         return;
 
-    spin_lock_irqsave(&sgtc_io_stream_lock);
+    spin_lock_irqsave(&sgtc_io_stream_lock, &flags);
     list_head_del(&sptr_stream->sgtc_link);
-    spin_unlock_irqrestore(&sgtc_io_stream_lock);
+    spin_unlock_irqrestore(&sgtc_io_stream_lock, flags);
 }
 
 /*!
@@ -268,6 +272,7 @@ struct io_stream_dev *find_io_stream_dev(const kchar_t *name)
 void io_putstr_async(const kubyte_t *msgs, kusize_t size)
 {
     kbool_t is_prohibit;
+    kutype_t flags;
     kssize_t ret = -1;
 
     /*!< In exception ? */
@@ -275,9 +280,9 @@ void io_putstr_async(const kubyte_t *msgs, kusize_t size)
 
     if ((g_io_stream_flags & IO_STREAM_ASYNC) && (!is_prohibit))
     {
-        spin_lock_irqsave(&sgtc_io_stream_logs_lock);
+        spin_lock_irqsave(&sgtc_io_stream_logs_lock, &flags);
         ret = pq_message_write(&sgtc_io_stream_logs, msgs, size);
-        spin_unlock_irqrestore(&sgtc_io_stream_logs_lock);
+        spin_unlock_irqrestore(&sgtc_io_stream_logs_lock, flags);
     }
 
     /*!< Not async, or message write fail, re-send message by hardware directlly */
@@ -293,14 +298,15 @@ void io_putstr_async(const kubyte_t *msgs, kusize_t size)
  */
 kssize_t io_stream_logs_extract(void *buffer, kusize_t size)
 {
+    kutype_t flags;
     kssize_t ret;
 
     if (!(g_io_stream_flags & IO_STREAM_ASYNC))
         return -ER_PERMIT;
 
-    spin_lock_irqsave(&sgtc_io_stream_logs_lock);
+    spin_lock_irqsave(&sgtc_io_stream_logs_lock, &flags);
     ret = pq_message_read(&sgtc_io_stream_logs, buffer, size);
-    spin_unlock_irqrestore(&sgtc_io_stream_logs_lock);
+    spin_unlock_irqrestore(&sgtc_io_stream_logs_lock, flags);
 
     return ret;
 }

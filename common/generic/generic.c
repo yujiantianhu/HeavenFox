@@ -301,13 +301,14 @@ kutype_t random_val(void)
 {
     struct common_random_state *sptr_rand;
     kutype_t value;
+    kutype_t flags;
 
     sptr_rand = &sgtc_com_random_state;
 
-    spin_lock_irqsave(&sptr_rand->sgtc_lock);
+    spin_lock_irqsave(&sptr_rand->sgtc_lock, &flags);
     value = (kutype_t)(((jiffies % 32767) * (sptr_rand->u.value + 345977126UL)) ^ 4298547119UL);
     sptr_rand->u.value = value;
-    spin_unlock_irqrestore(&sptr_rand->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_rand->sgtc_lock, flags);
 
     return value;
 }

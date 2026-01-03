@@ -86,10 +86,11 @@ static struct lwip_udp_data *lwip_udp_raw_poll(struct udp_pcb *sptr_upcb, kusize
     struct lwip_udp_priv *sptr_priv = (struct lwip_udp_priv *)sptr_upcb->recv_arg;
     struct pq_queue *sptr_pq = sptr_priv->sptr_pq;
     struct pq_data *sptr_pqd;
+    kutype_t flags;
 
-    spin_lock_irqsave(&sptr_priv->sgtc_lock);
+    spin_lock_irqsave(&sptr_priv->sgtc_lock, &flags);
     sptr_pqd = pq_dequeue_with_chk(sptr_pq, len);
-    spin_unlock_irqrestore(&sptr_priv->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_priv->sgtc_lock, flags);
 
     if (isValid(sptr_pqd))
         return mr_container_of(sptr_pqd, struct lwip_udp_data, sgtc_pqd);
@@ -109,6 +110,7 @@ static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sptr_upcb, struct pbu
     struct lwip_udp_priv *sptr_priv = (struct lwip_udp_priv *)arg;
     struct pq_queue *sptr_pq;
     struct lwip_udp_data *sptr_data;
+    kutype_t flags;
 
     if (!sptr_buf || !sptr_priv ||
         sptr_priv->is_dead)
@@ -135,12 +137,12 @@ static void __lwip_udp_raw_recv(void *arg, struct udp_pcb *sptr_upcb, struct pbu
     sptr_data->sgtc_pqd.release = lwip_udp_raw_free;
     sptr_data->sgtc_pqd.dequeue_chk = lwip_udp_raw_check;
 
-    spin_lock_irqsave(&sptr_priv->sgtc_lock);
+    spin_lock_irqsave(&sptr_priv->sgtc_lock, &flags);
     sptr_pq = sptr_priv->sptr_pq;
     pq_enqueue(sptr_pq, &sptr_data->sgtc_pqd);
 
     sptr_priv->isComing = true;
-    spin_unlock_irqrestore(&sptr_priv->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_priv->sgtc_lock, flags);
 
     wake_up_interruptible(&sptr_priv->sgtc_wqh);
     atomic_dec(&sptr_priv->sgtc_ref);

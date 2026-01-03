@@ -191,8 +191,8 @@ extern struct io_stream_dev *find_io_stream_dev(const kchar_t *name);
 
 /*!< Logs buffer */
 extern struct pq_buffer *io_stream_logs_ptr(void);
-extern void io_stream_logs_lock(void);
-extern void io_stream_logs_unlock(void);
+extern void io_stream_logs_lock(kutype_t *flags);
+extern void io_stream_logs_unlock(kutype_t flags);
 
 /*!< Hardware transfer */
 extern void io_putc(const kubyte_t ch);

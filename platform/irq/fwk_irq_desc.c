@@ -122,13 +122,14 @@ static kint32_t fwk_irq_domain_alloc_descs(kint32_t irq_base, kuint32_t nr_irqs)
 {
 	struct fwk_irq_desc *sptr_desc;
 	kuint32_t virq;
+	kutype_t flags;
 
-	spin_lock_irqsave(&sgtc_fwk_irqs_lock);
+	spin_lock_irqsave(&sgtc_fwk_irqs_lock, &flags);
 
 	virq = fwk_irq_bitmap_find_areas(g_fwk_allocated_irqs, irq_base, FWK_IRQ_DESC_MAX, nr_irqs);
 	if (virq < 0)
 	{
-		spin_unlock_irqrestore(&sgtc_fwk_irqs_lock);
+		spin_unlock_irqrestore(&sgtc_fwk_irqs_lock, flags);
 		return virq;
 	}
 
@@ -138,7 +139,7 @@ static kint32_t fwk_irq_domain_alloc_descs(kint32_t irq_base, kuint32_t nr_irqs)
 		sptr_desc = fwk_allocate_irq_desc(GFP_KERNEL);
 		if (!isValid(sptr_desc))
 		{
-			spin_unlock_irqrestore(&sgtc_fwk_irqs_lock);
+			spin_unlock_irqrestore(&sgtc_fwk_irqs_lock, flags);
 			return -ER_NOMEM;
 		}
 
@@ -147,7 +148,7 @@ static kint32_t fwk_irq_domain_alloc_descs(kint32_t irq_base, kuint32_t nr_irqs)
 	}
 
 	bitmap_set_nr_bit_valid(g_fwk_allocated_irqs, virq, FWK_IRQ_DESC_MAX, nr_irqs);
-	spin_unlock_irqrestore(&sgtc_fwk_irqs_lock);
+	spin_unlock_irqrestore(&sgtc_fwk_irqs_lock, flags);
 
 	return virq;
 }
@@ -162,13 +163,14 @@ static kint32_t fwk_irq_domain_alloc_descs(kint32_t irq_base, kuint32_t nr_irqs)
 struct fwk_irq_desc *fwk_irq_to_desc(kuint32_t virq)
 {
 	struct fwk_irq_desc *sptr_desc;
+	kutype_t flags;
 
 	if (virq < 0)
 		return mr_nullptr;
 	
-	spin_lock_irqsave(&sgtc_fwk_irqs_lock);
+	spin_lock_irqsave(&sgtc_fwk_irqs_lock, &flags);
 	sptr_desc = radix_tree_next_entry(&sgtc_fwk_irq_radix_tree, struct fwk_irq_desc, sgtc_radix, virq);
-	spin_unlock_irqrestore(&sgtc_fwk_irqs_lock);
+	spin_unlock_irqrestore(&sgtc_fwk_irqs_lock, flags);
 
 	return sptr_desc;
 }
@@ -293,17 +295,18 @@ void fwk_irq_desc_free(kint32_t irq)
 {
 	struct fwk_irq_desc *sptr_desc;
 	struct fwk_irq_data *sptr_data;
+	kutype_t flags;
 
 	sptr_desc = fwk_irq_to_desc(irq);
 	sptr_data = &sptr_desc->sgtc_data;
 
-	spin_lock_irqsave(&sgtc_fwk_irqs_lock);
+	spin_lock_irqsave(&sgtc_fwk_irqs_lock, &flags);
 
 	bitmap_set_nr_bit_zero(g_fwk_allocated_irqs, sptr_data->irq, FWK_IRQ_DESC_MAX, 1);
 	fwk_destroy_irq_action(sptr_data->irq);
 	radix_tree_del(&sgtc_fwk_irq_radix_tree, sptr_data->irq);
 
-	spin_unlock_irqrestore(&sgtc_fwk_irqs_lock);
+	spin_unlock_irqrestore(&sgtc_fwk_irqs_lock, flags);
 	kfree(sptr_desc);
 }
 

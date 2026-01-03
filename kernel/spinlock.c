@@ -45,9 +45,17 @@ void spin_lock(struct spin_lock *sptr_lock)
 {
     kutype_t flags;
 
+start:
     while (spin_is_locked(sptr_lock));
     
     local_irq_save(&flags);
+
+    /*!< Add insurance */
+    if (mr_unlikely(spin_is_locked(sptr_lock)))
+    {
+        local_irq_restore(&flags);
+        goto start;
+    }
 
     mr_preempt_disable();
     atomic_inc(&sptr_lock->sgtc_atc);
@@ -73,6 +81,8 @@ void spin_unlock(struct spin_lock *sptr_lock)
 
     atomic_dec(&sptr_lock->sgtc_atc);
     mr_preempt_enable();
+    mr_barrier();
+
     local_irq_restore(&flags);
 }
 
@@ -95,8 +105,9 @@ kint32_t spin_try_lock(struct spin_lock *sptr_lock)
 
     mr_preempt_disable();
     atomic_inc(&sptr_lock->sgtc_atc);
+    mr_barrier();
+
     local_irq_restore(&flags);
-    
     return ER_NORMAL;
 }
 
@@ -109,13 +120,23 @@ kint32_t spin_try_lock(struct spin_lock *sptr_lock)
  */
 void spin_lock_irq(struct spin_lock *sptr_lock)
 {
+    kutype_t flags;
+
+start:
     while (spin_is_locked(sptr_lock));
     
-    mr_disable_cpu_irq();
-    mr_preempt_disable();
-    mr_barrier();
+    local_irq_save(&flags);
+
+    /*!< Add insurance */
+    if (mr_unlikely(spin_is_locked(sptr_lock)))
+    {
+        local_irq_restore(&flags);
+        goto start;
+    }
 
     atomic_inc(&sptr_lock->sgtc_atc);
+    mr_preempt_disable();
+    mr_barrier();
 }
 
 /*!
@@ -126,14 +147,18 @@ void spin_lock_irq(struct spin_lock *sptr_lock)
  */
 kint32_t spin_try_lock_irq(struct spin_lock *sptr_lock)
 {
-    if (spin_is_locked(sptr_lock))
-        return -ER_LOCKED;
+    kutype_t flags;
 
-    mr_disable_cpu_irq();
-    mr_preempt_disable();
-    mr_barrier();
-    
+    local_irq_save(&flags);
+    if (spin_is_locked(sptr_lock))
+    {
+        local_irq_restore(&flags);
+        return -ER_LOCKED;
+    }
+
+    mr_preempt_disable(); 
     atomic_inc(&sptr_lock->sgtc_atc);
+    mr_barrier();
     
     return ER_NORMAL;
 }
@@ -146,11 +171,19 @@ kint32_t spin_try_lock_irq(struct spin_lock *sptr_lock)
  */
 void spin_unlock_irq(struct spin_lock *sptr_lock)
 {
+    kutype_t temp;
+
+    local_irq_save(&temp);
     if (!spin_is_locked(sptr_lock))
+    {
+        local_irq_restore(&temp);
         return;
+    }
     
-    spin_unlock(sptr_lock);
+    atomic_dec(&sptr_lock->sgtc_atc);
+    mr_preempt_enable();
     mr_barrier();
+
     mr_enable_cpu_irq();
 }
 
@@ -160,12 +193,19 @@ void spin_unlock_irq(struct spin_lock *sptr_lock)
  * @retval  none
  * @note    none
  */
-void spin_lock_irqsave(struct spin_lock *sptr_lock)
+void spin_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags)
 {
+start:
     while (spin_is_locked(sptr_lock));
-    
-    sptr_lock->flag = __get_cpsr();
-    mr_disable_cpu_irq();
+
+    local_irq_save(flags);
+
+    /*!< Add insurance */
+    if (mr_unlikely(spin_is_locked(sptr_lock)))
+    {
+        local_irq_restore(flags);
+        goto start;
+    }
 
     mr_barrier();
     mr_preempt_disable();
@@ -178,13 +218,14 @@ void spin_lock_irqsave(struct spin_lock *sptr_lock)
  * @retval  1: lock success; 0: lock fail
  * @note    none
  */
-kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock)
+kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags)
 {
+    local_irq_save(flags);
     if (spin_is_locked(sptr_lock))
+    {
+        local_irq_restore(flags);
         return -ER_LOCKED;
-
-    sptr_lock->flag = __get_cpsr();
-    mr_disable_cpu_irq();
+    }
 
     mr_barrier();
     mr_preempt_disable();
@@ -199,19 +240,23 @@ kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock)
  * @retval  none
  * @note    none
  */
-void spin_unlock_irqrestore(struct spin_lock *sptr_lock)
+void spin_unlock_irqrestore(struct spin_lock *sptr_lock, kutype_t flags)
 {
+    kutype_t temp;
+
+    local_irq_save(&temp);
     if (!spin_is_locked(sptr_lock))
+    {
+        local_irq_restore(&temp);
         return;
+    }
     
-    spin_unlock(sptr_lock);
+    atomic_dec(&sptr_lock->sgtc_atc);
+    mr_preempt_enable();
     mr_barrier();
 
     /*!< bit4 ~ bit0 is mode bit, which are not equaled to 0 */
-    if (!(sptr_lock->flag & CPSR_BIT_I))
-        mr_enable_cpu_irq();
-
-    sptr_lock->flag = 0;
+    local_irq_restore(&flags);
 }
 
 /*!

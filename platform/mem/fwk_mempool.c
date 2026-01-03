@@ -275,6 +275,7 @@ void *kmalloc(size_t __size, nrt_gfp_t flags)
     kuint8_t area = GFP_GET_AREA(flags);
     struct m_area sgtc_real;
     void *address_end;
+    kutype_t lock_flags;
 
     if (mr_unlikely(!isPower2(area)))
         return mr_nullptr;
@@ -293,12 +294,12 @@ void *kmalloc(size_t __size, nrt_gfp_t flags)
         wait_event(&sptr_pool->sgtc_wqh, !spin_is_locked(&sptr_pool->sgtc_lock));
 
     sptr_record = &sptr_pool->sptr_mn->sgtc_maxrec;
-    spin_lock_irqsave(&sptr_pool->sgtc_lock);
+    spin_lock_irqsave(&sptr_pool->sgtc_lock, &lock_flags);
 
     p = sptr_info->alloc(sptr_info, __size, -1, &sgtc_real);
     if (mr_unlikely(!isValid(p)))
     {
-        spin_unlock_irqrestore(&sptr_pool->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_pool->sgtc_lock, lock_flags);
         return mr_nullptr;
     }
 
@@ -307,7 +308,7 @@ void *kmalloc(size_t __size, nrt_gfp_t flags)
     if ((sgtc_real.base + sgtc_real.size) > address_end)
         memcpy(sptr_record, &sgtc_real, sizeof(sgtc_real));
     
-    spin_unlock_irqrestore(&sptr_pool->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_pool->sgtc_lock, lock_flags);
 
     if (flags & NR_KMEM_ZERO)
         kmemzero(p, __size);
@@ -359,6 +360,7 @@ void kfree(void *__ptr)
     struct fwk_mempool *sptr_pool = mr_nullptr;
     struct mem_info *sptr_info = mr_nullptr;
     kuint32_t index;
+    kutype_t flags;
 
     for (index = 0; index < NR_FWK_MEMPOOL_TYPE_MAX; index++)
     {
@@ -374,10 +376,10 @@ void kfree(void *__ptr)
     if (index == NR_FWK_MEMPOOL_TYPE_MAX)
         return;
 
-    spin_lock_irqsave(&sptr_pool->sgtc_lock);
+    spin_lock_irqsave(&sptr_pool->sgtc_lock, &flags);
     if (sptr_info->free)
         sptr_info->free(sptr_info, __ptr);
-    spin_unlock_irqrestore(&sptr_pool->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_pool->sgtc_lock, flags);
 }
 
 /*!
@@ -393,6 +395,7 @@ static void fwk_memp_release(struct fwk_memp_list *sptr_memp)
     kuaddr_t memp_address;
     kuint32_t index;
     kuint8_t area = GFP_GET_AREA(sptr_memp->gfp_mask);
+    kutype_t flags;
 
     if (mr_unlikely(!isPower2(area)))
         return;
@@ -409,10 +412,10 @@ static void fwk_memp_release(struct fwk_memp_list *sptr_memp)
         (memp_address >= (sptr_info->base + sptr_info->lenth))))
         return;
 
-    spin_lock_irqsave(&sptr_pool->sgtc_lock);
+    spin_lock_irqsave(&sptr_pool->sgtc_lock, &flags);
     if (mr_likely(sptr_info->free))
         sptr_info->free(sptr_info, sptr_memp);
-    spin_unlock_irqrestore(&sptr_pool->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_pool->sgtc_lock, flags);
 }
 
 /*!

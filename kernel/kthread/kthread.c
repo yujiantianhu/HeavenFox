@@ -44,9 +44,10 @@ static void kthread_schedule_timeout(kuint32_t args)
     struct spin_lock *sptr_lock = scheduler_lock();
     struct thread *sptr_work, *sptr_ready;
     kuint32_t work_prio, next_prio;
+    kutype_t flags;
 
     /*!< disable global scheduler */
-    spin_lock_irqsave(sptr_lock);
+    spin_lock_irqsave(sptr_lock, &flags);
     sptr_work = mr_current;
     
     /*!< --------------------------------------------------------- */
@@ -82,7 +83,7 @@ static void kthread_schedule_timeout(kuint32_t args)
 #endif
     
 END:
-    spin_unlock_irqrestore(sptr_lock);
+    spin_unlock_irqrestore(sptr_lock, flags);
     mod_timer(sptr_tim, jiffies + 1);
 }
 

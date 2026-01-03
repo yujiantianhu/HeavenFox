@@ -84,6 +84,8 @@ extern void schedule_work(struct workqueue *sptr_wq);
  */
 static inline void queue_work(struct workqueue_head *sptr_wqh, struct workqueue *sptr_wq)
 {
+    kutype_t flags;
+
     if (!sptr_wqh || !sptr_wq)
         return;
 
@@ -94,9 +96,9 @@ static inline void queue_work(struct workqueue_head *sptr_wqh, struct workqueue 
     if (!mr_list_empty(&sptr_wq->sgtc_link))
         return;
 
-    spin_lock_irqsave(&sptr_wqh->sgtc_lock);
+    spin_lock_irqsave(&sptr_wqh->sgtc_lock, &flags);
     list_head_add_tail(&sptr_wqh->sgtc_work, &sptr_wq->sgtc_link);
-    spin_unlock_irqrestore(&sptr_wqh->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_wqh->sgtc_lock, flags);
 }
 
 /*!
@@ -107,12 +109,14 @@ static inline void queue_work(struct workqueue_head *sptr_wqh, struct workqueue 
  */
 static inline void detach_work(struct workqueue_head *sptr_wqh, struct workqueue *sptr_wq)
 {
+    kutype_t flags;
+
     if (!sptr_wq)
         return;
 
-    spin_lock_irqsave(&sptr_wqh->sgtc_lock);
+    spin_lock_irqsave(&sptr_wqh->sgtc_lock, &flags);
     list_head_del(&sptr_wq->sgtc_link);
-    spin_unlock_irqrestore(&sptr_wqh->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_wqh->sgtc_lock, flags);
 }
 
 /*!
@@ -123,12 +127,14 @@ static inline void detach_work(struct workqueue_head *sptr_wqh, struct workqueue
  */
 static inline void detach_work_safe(struct workqueue_head *sptr_wqh, struct workqueue *sptr_wq)
 {
+//  kutype_t flags;
+
     if (!sptr_wqh || !sptr_wq)
         return;
 
-//  spin_lock_irqsave(&sptr_wqh->sgtc_lock);
+//  spin_lock_irqsave(&sptr_wqh->sgtc_lock, &flags);
     list_head_del(&sptr_wq->sgtc_link);
-//  spin_unlock_irqrestore(&sptr_wqh->sgtc_lock);
+//  spin_unlock_irqrestore(&sptr_wqh->sgtc_lock, flags);
 }
 
 /*!
@@ -139,12 +145,14 @@ static inline void detach_work_safe(struct workqueue_head *sptr_wqh, struct work
  */
 static inline void work_splice_and_init(struct workqueue_head *sptr_src, struct workqueue_head *sptr_dst)
 {
+    kutype_t flags;
+
     if (!sptr_src || !sptr_dst)
         return;
 
-    spin_lock_irqsave(&sptr_src->sgtc_lock);
+    spin_lock_irqsave(&sptr_src->sgtc_lock, &flags);
     list_head_splice_init(&sptr_dst->sgtc_work, &sptr_src->sgtc_work);
-    spin_unlock_irqrestore(&sptr_src->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_src->sgtc_lock, flags);
 }
 
 /*!

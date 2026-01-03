@@ -225,8 +225,9 @@ extern void scheduler_init(void);
 static inline kbool_t thread_state_pending(struct thread *sptr_thread)
 {
     kbool_t is_wakeup, is_killed;
+    kutype_t flags;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
     is_wakeup = mr_thread_is_flags(NR_THREAD_SIG_WAKEUP, sptr_thread);
     is_killed = mr_thread_is_flags(NR_THREAD_SIG_KILL, sptr_thread);
 
@@ -234,7 +235,7 @@ static inline kbool_t thread_state_pending(struct thread *sptr_thread)
 
     mr_thread_clr_flags(NR_THREAD_SIG_WAKEUP, sptr_thread);
     mr_thread_clr_flags(NR_THREAD_SIG_KILL, sptr_thread);
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
     return (is_wakeup || is_killed);
 }
@@ -247,14 +248,16 @@ static inline kbool_t thread_state_pending(struct thread *sptr_thread)
  */
 static inline void thread_state_signal(struct thread *sptr_thread, kuint32_t state, kbool_t mode)
 {
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    kutype_t flags;
+
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
 
     if (mode)
         mr_thread_set_flags(state, sptr_thread);
     else
         mr_thread_clr_flags(state, sptr_thread);
     
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 }
 
 #ifdef __cplusplus

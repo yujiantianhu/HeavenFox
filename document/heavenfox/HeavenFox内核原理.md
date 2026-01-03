@@ -7491,18 +7491,19 @@ HeavenFox的线程都需要从内存池申请，不允许全局定义。新线�
 tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count)
 {
     kuint32_t i;
+    kutype_t flags;
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     for (i = i_start; i < (i_start + count); i++)
     {
         if (!SCHED_THREAD_HANDLER(i))
         {
-            spin_unlock_irqrestore(&__SCHED_LOCK);
+            spin_unlock_irqrestore(&__SCHED_LOCK, flags);
             return i;
         }
     }
 
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
 
     return -ER_MORE;
 }
@@ -7513,6 +7514,7 @@ tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count)
 kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
 {
     struct thread_attr *sptr_it_attr;
+    kutype_t flags;
     kint32_t retval;
 
     sptr_it_attr = sptr_thread->sptr_attr;
@@ -7524,7 +7526,7 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     if (!sptr_it_attr->stack_addr)
         return -ER_NOMEM;
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     /*!< 保存线程指针到数组, 占有该tid */
     SCHED_THREAD_HANDLER(tid) = sptr_thread;
 
@@ -7544,13 +7546,13 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     {
         /*!< 添加失败 */
         SCHED_THREAD_HANDLER(tid) = mr_nullptr;
-        spin_unlock_irqrestore(&__SCHED_LOCK);
+        spin_unlock_irqrestore(&__SCHED_LOCK, flags);
         return retval;
     }
 
     /*!< 同步状态 */
     __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_READY);
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
 
     return ER_NORMAL;
 }
@@ -7710,8 +7712,9 @@ fail:
 struct thread *unregister_thread(tid_t tid)
 {
     struct thread *sptr_thread;
+    kutype_t flags;
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
 
     /*!< 运行中的线程不准注销 */
     if ((tid < 0) || (tid == mr_current->tid))
@@ -7736,7 +7739,7 @@ struct thread *unregister_thread(tid_t tid)
     SCHED_THREAD_HANDLER(tid) = mr_nullptr;
 
 END:
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
     return sptr_thread;
 }
 
@@ -8236,14 +8239,15 @@ ENDPROC(__switch_to)
 void schedule_self_suspend(void)
 {
     struct thread *sptr_cur = SCHED_RUNNING_THREAD;
+    kutype_t flags;
 
-    spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     
     /*!< 防止错误地挂起别人家的线程 */
     if (mr_likely(__GET_THREAD_STATE(sptr_cur) == NR_THREAD_RUNNING))
         __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
 
-    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
     schedule_thread();
 }
 
@@ -8251,6 +8255,7 @@ void schedule_self_suspend(void)
 kint32_t schedule_thread_suspend(tid_t tid)
 {
     struct thread *sptr_thread;
+    kutype_t flags;
     kint32_t retval;
 
     /*!< 根据tid获取线程 */
@@ -8258,7 +8263,7 @@ kint32_t schedule_thread_suspend(tid_t tid)
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
 
     /*!< 设置线程目标态为挂起态 */
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SUSPEND);
@@ -8266,19 +8271,19 @@ kint32_t schedule_thread_suspend(tid_t tid)
     /*!< 竟然就是自己? */
     if (mr_unlikely(__GET_THREAD_STATE(sptr_thread) == NR_THREAD_RUNNING))
     {
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         /*!< Self suspend */
         schedule_thread();
         return ER_NORMAL;
     }
 
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
     /*!< 切换状态 */
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     retval = schedule_thread_switch(sptr_thread);
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
     
     return retval;
 }
@@ -8290,6 +8295,7 @@ kint32_t schedule_thread_wakeup(tid_t tid)
 {
     struct thread *sptr_thread;
     kuint32_t state;
+    kutype_t flags;
     kint32_t retval;
 
     /*!< 根据tid获取线程 */
@@ -8297,13 +8303,13 @@ kint32_t schedule_thread_wakeup(tid_t tid)
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
 
     /*!< 已经在运行, 无需唤醒 */
     if (sptr_thread == SCHED_RUNNING_THREAD)
     {
         __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_RUNNING);
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         return -ER_FORBID;
     }
@@ -8313,18 +8319,18 @@ kint32_t schedule_thread_wakeup(tid_t tid)
     if ((state != NR_THREAD_SUSPEND) &&
         (state != NR_THREAD_SLEEP))
     {
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
         return -ER_INVALID;
     }
 
     /*!< 唤醒, 即线程从挂起/睡眠态转变为就绪态 */
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_READY);
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
     /*!< 切换状态 */
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     retval = schedule_thread_switch(sptr_thread);
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
 
     return retval;
 }
@@ -8339,6 +8345,7 @@ void schedule_timeout(kutime_t count)
     struct ktime_event sgtc_event;
     struct timer_list *sptr_tm = &sgtc_event.u.sgtc_tm;
     struct thread *sptr_cur = mr_current;
+    kutype_t flags;
 
     /*!< count为0, 允许切换到就绪态 */
     if (!count) {
@@ -8353,11 +8360,11 @@ void schedule_timeout(kutime_t count)
     setup_timer(sptr_tm, thread_sleep_timeout, (kuint32_t)&sgtc_event);
 
     /*!< 设置当前线程目标态为挂起态 */
-    spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     sptr_cur->time_event = (void *)&sgtc_event;
     __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
     mr_preempt_disable();
-    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
 
     /*!< 启动定时器, 定时时长为count (单位: jiffies); 中间需关闭抢占, 否则抢占可能在mod_timer之前发生, 从而使线程提前挂起, 而无法被唤醒 */
     mod_timer(sptr_tm, jiffies + count);
@@ -8379,24 +8386,25 @@ static void thread_sleep_timeout(kuint32_t args)
     struct ktime_event *sptr_event = (struct ktime_event *)args;
     struct thread *sptr_thread = sptr_event->sptr_cur;
     kuint32_t status, to_status;
+    kutype_t flags;
 
     if (mr_unlikely(!sptr_thread))
         return;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
     status = __GET_THREAD_STATE(sptr_thread);
     to_status = __GET_THREAD_TARGET_STATE(sptr_thread);
 
     /*!< 确认线程是否在挂起态, 若是, 表明schedule_timeout已经执行完成, 可执行唤醒操作 */
     if (status == NR_THREAD_SUSPEND)
     {
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         /*!< 唤醒, 可能失败; 若返回-ER_NODEV, 说明线程不需要唤醒 */
         if ((-ER_NODEV) == schedule_thread_wakeup(sptr_thread->tid))
             return;
 
-        spin_lock_irqsave(&sptr_thread->sgtc_lock);
+        spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
 
         /*! 再次获取状态 */
         status = __GET_THREAD_STATE(sptr_thread);
@@ -8405,12 +8413,12 @@ static void thread_sleep_timeout(kuint32_t args)
     else if (to_status == NR_THREAD_SUSPEND)
     {
         __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_NONE);
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         return;
     }
 
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
     /*!< state确实曾经在挂起态, 但唤醒失败. 若status还处于挂起/睡眠, 继续定时, 下次再唤醒 */ 
     if ((status != NR_THREAD_READY) &&
@@ -8673,11 +8681,11 @@ kint32_t spin_try_lock_irq(struct spin_lock *sptr_lock);
 /* 解锁, 并暴力开启中断(慎用) */
 void spin_unlock_irq(struct spin_lock *sptr_lock);
 /* 加锁, 成功后先获取当前中断状态, 然后再关闭中断 */
-void spin_lock_irqsave(struct spin_lock *sptr_lock);
+void spin_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags);
 /* 尝试加锁, 成功后先获取当前中断状态, 然后再关闭中断 */
-kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock);
+kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags);
 /* 解锁, 并恢复加锁前的中断状态 */
-void spin_unlock_irqrestore(struct spin_lock *sptr_lock);
+void spin_unlock_irqrestore(struct spin_lock *sptr_lock, kutype_t flags);
 /* 软中断使用. 先禁用软中断, 再加锁(不关闭中断) */
 void spin_lock_bh(struct spin_lock *sptr_lock);
 /* 软中断使用. 先解锁, 再恢复软中断 */

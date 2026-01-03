@@ -48,6 +48,7 @@ void lock_context_save(struct lock_owner *sptr_owner)
     struct thread *sptr_self;
     struct lock_waiter *sptr_waiter;
     struct lock_owners *sptr_owners;
+    kutype_t flags;
 
     sptr_self = mr_current;
 
@@ -58,7 +59,7 @@ void lock_context_save(struct lock_owner *sptr_owner)
     sptr_waiter = &sptr_self->sgtc_wait;
     sptr_owners = &sptr_self->sgtc_owners;
 
-    spin_lock_irqsave(&sptr_owners->sgtc_lock);
+    spin_lock_irqsave(&sptr_owners->sgtc_lock, &flags);
 
     /*!< This lock is exactly what it has been waiting for. No need to wait any longer */
     if (sptr_waiter->sptr_wait == sptr_owner)
@@ -73,7 +74,7 @@ void lock_context_save(struct lock_owner *sptr_owner)
      * the lock acquired first is listed first
      */
     list_head_add_tail(&sptr_owners->sgtc_gets, &sptr_owner->sgtc_link);
-    spin_unlock_irqrestore(&sptr_owners->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_owners->sgtc_lock, flags);
 
     /*!< Mark the lock owner */
     sptr_owner->sptr_self = sptr_self;
@@ -89,6 +90,7 @@ void unlock_context_restore(struct lock_owner *sptr_owner)
 {
     struct thread *sptr_self;
     struct lock_owners *sptr_owners;
+    kutype_t flags;
 
     /*!< The lock is not held by any thread, so it does not need to be released */
     if (mr_unlikely(!sptr_owner->sptr_self))
@@ -98,9 +100,9 @@ void unlock_context_restore(struct lock_owner *sptr_owner)
     sptr_owners = &sptr_self->sgtc_owners;
 
     /*!< Detached from this thread, the lock is no longer held by this thread */
-    spin_lock_irqsave(&sptr_owners->sgtc_lock);
+    spin_lock_irqsave(&sptr_owners->sgtc_lock, &flags);
     list_head_del(&sptr_owner->sgtc_link);
-    spin_unlock_irqrestore(&sptr_owners->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_owners->sgtc_lock, flags);
 
     sptr_owner->sptr_self = mr_nullptr;
 }
@@ -199,10 +201,12 @@ void lock_pending_del(struct lock_owner *sptr_owner, struct thread *sptr_thread)
  */
 static void __unlock_pending_wakeup(struct thread *sptr_pert, struct lock_owners *sptr_owns, struct lock_waiter *sptr_pwait)
 {
-    spin_lock_irqsave(&sptr_owns->sgtc_lock);
+    kutype_t flags;
+
+    spin_lock_irqsave(&sptr_owns->sgtc_lock, &flags);
     sptr_pwait->sptr_wait = mr_nullptr;
     list_head_del(&sptr_pwait->sgtc_link);
-    spin_unlock_irqrestore(&sptr_owns->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_owns->sgtc_lock, flags);
 
     schedule_thread_wakeup(sptr_pert->tid);
 }
@@ -340,6 +344,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
 {
     struct thread *sptr_self, *sptr_rival;
     struct lock_owners *sptr_owns;
+    kutype_t flags;
     
     /*!< Current thread */
     sptr_self = mr_current;
@@ -370,7 +375,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
 
         for (;;) 
         {
-            spin_lock_irqsave(&sptr_owns->sgtc_lock);
+            spin_lock_irqsave(&sptr_owns->sgtc_lock, &flags);
 
             /*!
              * If the list (sptr_self) has already been added, remove it first; 
@@ -382,7 +387,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
             /*!< Insert into the pending list */
             lock_pending_add(sptr_owner, sptr_self);
 
-            spin_unlock_irqrestore(&sptr_owns->sgtc_lock);
+            spin_unlock_irqrestore(&sptr_owns->sgtc_lock, flags);
             spin_unlock(&sptr_owner->sgtc_lock);
 
             /*!< This thread is not the holder of the lock, but a contender */
@@ -397,9 +402,9 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
             /*! @note
              * Find the new maximum priority from the request linked list of all locks
              */
-            spin_lock_irqsave(&sptr_rlowns->sgtc_lock);
+            spin_lock_irqsave(&sptr_rlowns->sgtc_lock, &flags);
             max_prio = lock_find_max_priority(sptr_rlowns);
-            spin_unlock_irqrestore(&sptr_rlowns->sgtc_lock);
+            spin_unlock_irqrestore(&sptr_rlowns->sgtc_lock, flags);
             
             /*!
              * This is the priority that the thread holding the lock will be adjusted to, 
@@ -410,7 +415,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
             /*!< Priority changed */
             if (max_prio != cur_prio)
             {
-                spin_lock_irqsave(&sptr_rival->sgtc_lock);
+                spin_lock_irqsave(&sptr_rival->sgtc_lock, &flags);
 
                 /*!< Set inheritance priority */
                 thread_set_inherit_priority(sptr_rival->sptr_attr, max_prio);
@@ -420,12 +425,12 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
                  */
                 __SET_THREAD_TARGET_STATE(sptr_rival, __GET_THREAD_STATE(sptr_rival));
 
-                spin_unlock_irqrestore(&sptr_rival->sgtc_lock);
+                spin_unlock_irqrestore(&sptr_rival->sgtc_lock, flags);
 
                 /*!< Protect scheduler with scheduler-lock */
-                spin_lock_irqsave(sptr_lock);
+                spin_lock_irqsave(sptr_lock, &flags);
                 schedule_thread_switch(sptr_rival);
-                spin_unlock_irqrestore(sptr_lock);
+                spin_unlock_irqrestore(sptr_lock, flags);
             }
 
 /*!< If support recursive inheritance (frequent retrieval of linked lists may slow down the system, use with caution) */
@@ -448,7 +453,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
     }
     else
     {
-        spin_lock_irqsave(&sptr_owns->sgtc_lock);
+        spin_lock_irqsave(&sptr_owns->sgtc_lock, &flags);
 
         /*!
          * If the sptr_self has already been added to pending list, remove it first; 
@@ -458,7 +463,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
         lock_pending_del(sptr_owner, sptr_self);
         lock_pending_add(sptr_owner, sptr_self);
 
-        spin_unlock_irqrestore(&sptr_owns->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_owns->sgtc_lock, flags);
         spin_unlock(&sptr_owner->sgtc_lock);
     }
 
@@ -477,6 +482,7 @@ kint32_t unlock_release(struct thread *sptr_self, kbool_t inherit_enable)
     {
         struct lock_owners *sptr_rlowns;
         kuint32_t cur_prio, ori_prio, max_prio = 0;
+        kutype_t flags;
 
         /*!< The thread that holds the lock */
         sptr_rlowns = &sptr_self->sgtc_owners;
@@ -492,9 +498,9 @@ kint32_t unlock_release(struct thread *sptr_self, kbool_t inherit_enable)
          * Before that, the "unlock_context_restore" function must be called first to remove this lock, 
          * so that it will no longer participate in priority calculation
          */
-        spin_lock_irqsave(&sptr_rlowns->sgtc_lock);
+        spin_lock_irqsave(&sptr_rlowns->sgtc_lock, &flags);
         max_prio = lock_find_max_priority(sptr_rlowns);
-        spin_unlock_irqrestore(&sptr_rlowns->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_rlowns->sgtc_lock, flags);
 
         /*!
          * This is the priority that this thread will be adjusted to, 
@@ -508,9 +514,9 @@ kint32_t unlock_release(struct thread *sptr_self, kbool_t inherit_enable)
              * Set the priority, but there is no need to initiate a switch, 
              * because the holder of the lock is the current thread 
              */
-            spin_lock_irqsave(&sptr_self->sgtc_lock);
+            spin_lock_irqsave(&sptr_self->sgtc_lock, &flags);
             thread_set_inherit_priority(sptr_self->sptr_attr, max_prio);
-            spin_unlock_irqrestore(&sptr_self->sgtc_lock);
+            spin_unlock_irqrestore(&sptr_self->sgtc_lock, flags);
         }
     }
 

@@ -819,17 +819,18 @@ static void imx_sdma_desc_prepare(struct imx_sdma_desc *sptr_desc)
     struct imx_sdma_channel *sptr_channel;
     srt_imx_sdma_t *sptr_sdma;
     kuint32_t channel;
+    kutype_t flags;
 
     sptr_channel = mr_imx_sdma_to_chan(sptr_desc->sgtc_txdesc.sptr_chan);
 
-    spin_lock_irqsave(&sptr_channel->sgtc_lock);
+    spin_lock_irqsave(&sptr_channel->sgtc_lock, &flags);
     if (imx_sdma_desc_load(sptr_desc)) 
     {
-        spin_unlock_irqrestore(&sptr_channel->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_channel->sgtc_lock, flags);
         return;
     }
 
-    spin_unlock_irqrestore(&sptr_channel->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_channel->sgtc_lock, flags);
 
     sptr_sdma = imx_sdma_handle_get(sptr_desc);
     channel = mr_imx_sdma_handle_to_channel(sptr_channel);
@@ -947,6 +948,7 @@ static irq_return_t imx_sdma_thread_isr(kint32_t irq, void *args)
     struct imx_sdma_drv_data *sptr_data;
     struct imx_sdma_channel *sptr_channel;
     struct imx_sdma_desc *sptr_desc, *sprt_temp;
+    kutype_t flags;
 
     sptr_data = (struct imx_sdma_drv_data *)args;
     for (kint32_t channel = 0; channel < sptr_data->sgtc_domain.n_channels; channel++) 
@@ -956,9 +958,9 @@ static irq_return_t imx_sdma_thread_isr(kint32_t irq, void *args)
         sptr_channel = &sptr_data->sgtc_channels[channel];
 
         /*!< copy sgtc_completed to sgtc_copy, and initialize sgtc_completed */
-        spin_lock_irqsave(&sptr_channel->sgtc_lock);
+        spin_lock_irqsave(&sptr_channel->sgtc_lock, &flags);
         list_head_splice_init(&sgtc_copy, &sptr_channel->sgtc_completed);
-        spin_unlock_irqrestore(&sptr_channel->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_channel->sgtc_lock, flags);
 
         if (mr_list_empty(&sgtc_copy))
             continue;
@@ -987,6 +989,7 @@ static kint32_t imx_sdma_desc_submit(struct fwk_dma_transfer_desc *sptr_txdesc)
 {
     struct imx_sdma_channel *sptr_channel;
     struct imx_sdma_desc *sptr_desc;
+    kutype_t flags;
 
     if (!sptr_txdesc ||
         !sptr_txdesc->sptr_chan)
@@ -996,9 +999,9 @@ static kint32_t imx_sdma_desc_submit(struct fwk_dma_transfer_desc *sptr_txdesc)
     sptr_channel = mr_imx_sdma_to_chan(sptr_txdesc->sptr_chan);
 
     /*!< Add to pending */
-    spin_lock_irqsave(&sptr_channel->sgtc_lock);
+    spin_lock_irqsave(&sptr_channel->sgtc_lock, &flags);
     list_head_add_tail(&sptr_channel->sgtc_pending, &sptr_desc->sgtc_link);
-    spin_unlock_irqrestore(&sptr_channel->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_channel->sgtc_lock, flags);
 
     return ER_NORMAL;
 }
@@ -1269,6 +1272,7 @@ static void imx_sdma_issue_pending(struct fwk_dma_chan *sptr_chan)
 {
     struct imx_sdma_channel *sptr_channel;
     struct imx_sdma_desc *sptr_desc;
+    kutype_t flags;
 
     sptr_channel = mr_imx_sdma_to_chan(sptr_chan);
 
@@ -1276,9 +1280,9 @@ static void imx_sdma_issue_pending(struct fwk_dma_chan *sptr_chan)
     if (sptr_channel->sptr_desc)
         return;
 
-    spin_lock_irqsave(&sptr_channel->sgtc_lock);
+    spin_lock_irqsave(&sptr_channel->sgtc_lock, &flags);
     sptr_desc = mr_list_first_valid_entry(&sptr_channel->sgtc_pending, struct imx_sdma_desc, sgtc_link);
-    spin_unlock_irqrestore(&sptr_channel->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_channel->sgtc_lock, flags);
 
     if (isValid(sptr_desc))
         imx_sdma_desc_start(sptr_desc);

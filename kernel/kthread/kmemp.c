@@ -53,11 +53,12 @@ void kmemp_list_add(struct fwk_memp_list *sptr_memp)
 {
     struct spin_lock *sptr_lock = &sgtc_kmemp_lock;
     struct fwk_memp_list *sptr_head = &sgtc_kmemp_list_head;
+    kutype_t flags;
 
-    spin_lock_irqsave(sptr_lock);
+    spin_lock_irqsave(sptr_lock, &flags);
     sptr_memp->sptr_next = sptr_head->sptr_next;
     sptr_head->sptr_next = sptr_memp;
-    spin_unlock_irqrestore(sptr_lock);
+    spin_unlock_irqrestore(sptr_lock, flags);
 }
 
 /*!
@@ -71,11 +72,12 @@ struct fwk_memp_list *kmemp_list_splice_init(void)
     struct spin_lock *sptr_lock = &sgtc_kmemp_lock;
     struct fwk_memp_list *sptr_head = &sgtc_kmemp_list_head;
     struct fwk_memp_list *sptr_memp;
+    kutype_t flags;
 
-    spin_lock_irqsave(sptr_lock);
+    spin_lock_irqsave(sptr_lock, &flags);
     sptr_memp = sptr_head->sptr_next;
     sptr_head->sptr_next = mr_nullptr;
-    spin_unlock_irqrestore(sptr_lock);
+    spin_unlock_irqrestore(sptr_lock, flags);
 
     return sptr_memp;
 }

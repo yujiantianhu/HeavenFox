@@ -64,6 +64,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
     struct thread *sptr_thread;
     struct thread_attr *sptr_attr;
     struct spin_lock *sptr_lock;
+    kutype_t flags;
 
     switch (argc)
     {
@@ -71,7 +72,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
             term_cmd_ts_title();
 
             sptr_lock = scheduler_lock();
-            spin_lock_irqsave(sptr_lock);
+            spin_lock_irqsave(sptr_lock, &flags);
 
             /*!< 1. running */
             sptr_thread = mr_current;
@@ -106,7 +107,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
                         thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
             }
 
-            spin_unlock_irqrestore(sptr_lock);
+            spin_unlock_irqrestore(sptr_lock, flags);
             break;
 
         case 2:
