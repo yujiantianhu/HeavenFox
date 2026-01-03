@@ -32,7 +32,7 @@
 void spin_lock_init(struct spin_lock *sptr_lock)
 {
     if (isValid(sptr_lock))
-        ATOMIC_SET(&sptr_lock->sgtc_atc, 0);
+        atomic_set_val(&sptr_lock->sgtc_atc, 0);
 }
 
 /*!

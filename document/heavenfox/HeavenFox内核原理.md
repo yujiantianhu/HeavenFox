@@ -7778,31 +7778,44 @@ kint32_t thread_destory(tid_t tid)
     5）处于睡眠态的线程，可以切换为就绪/挂起；
 
 ```c
-kint32_t schedule_thread_switch(tid_t tid)
+kint32_t schedule_thread_switch(struct thread *sptr_thread)
 {
-    struct thread *sptr_thread;
+//  struct thread *sptr_thread;
+    tid_t tid;
     kuint32_t src, dst;
     kint32_t retval;
+    
+    /*!< Protected by caller, do not disable again */
+//  mr_preempt_disable();
 
-    /*!< 根据tid拿到thread */
-    sptr_thread = SCHED_THREAD_HANDLER(tid);
+//  sptr_thread = SCHED_THREAD_HANDLER(tid);
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
+    tid = sptr_thread->tid;
     src = sptr_thread->state;
     dst = sptr_thread->to_state;
 
-    /*!< 当前状态和目标状态一样, 无需切换 */
-    if (mr_unlikely(src == dst) || 
+    /*!<
+     * thread switch:
+     * (At all times, it is necessary to ensure that at least one thread (including idle threads) is running)
+     * running ---> ready/suspend/sleep
+     * ready ---> running/suspend/sleep
+     * suspend ---> ready/sleep
+     * sleep ---> ready/suspend
+     *
+     * (only running and ready state can be switched to any state)
+     */
+    if (mr_unlikely(((src == NR_THREAD_RUNNING) && (dst == NR_THREAD_RUNNING))) || 
         mr_unlikely(dst >= NR_THREAD_STATUS_MAX))
         goto fail;
 
-    /*!< 空闲线程只能切换为运行态或就绪态, 不允许挂起和睡眠 */
+    /*!< for idle thread, only ready and running state can be chosen */
     if ((tid == THREAD_TID_IDLE) && 
         mr_unlikely((dst != NR_THREAD_RUNNING) && (dst != NR_THREAD_READY)))
         goto fail;
 
-    /*!< 禁止在中断回调函数中令其他线程为运行态(这意味着当前线程要被挂起, 而中断返回时会回到该线程, 但该线程已经不在运行态, 引发错误) */
+    /*!< do not suspend self in interrupt */
     if (mr_unlikely(dst == NR_THREAD_RUNNING) && 
         mr_unlikely(IS_IN_INTERRUPT()))
         goto fail;
@@ -7978,7 +7991,7 @@ struct scheduler_context *__schedule_thread(void)
         __SET_THREAD_TARGET_STATE(sptr_prev, NR_THREAD_READY);
 
     /*!< 第一次调度时, 就绪态的线程迁移到运行态; 否则, 当前运行的线程迁移到目标态, 并从就绪列表获取可运行的线程. 该操作有可能失败 */
-    retval = schedule_thread_switch(sptr_prev->tid);
+    retval = schedule_thread_switch(sptr_prev);
     sptr_thread = SCHED_RUNNING_THREAD;
     if (mr_unlikely(retval < 0) || 
         mr_unlikely(!sptr_thread))
@@ -8264,7 +8277,7 @@ kint32_t schedule_thread_suspend(tid_t tid)
 
     /*!< 切换状态 */
     spin_lock_irqsave(&__SCHED_LOCK);
-    retval = schedule_thread_switch(tid);
+    retval = schedule_thread_switch(sptr_thread);
     spin_unlock_irqrestore(&__SCHED_LOCK);
     
     return retval;
@@ -8310,7 +8323,7 @@ kint32_t schedule_thread_wakeup(tid_t tid)
 
     /*!< 切换状态 */
     spin_lock_irqsave(&__SCHED_LOCK);
-    retval = schedule_thread_switch(tid);
+    retval = schedule_thread_switch(sptr_thread);
     spin_unlock_irqrestore(&__SCHED_LOCK);
 
     return retval;

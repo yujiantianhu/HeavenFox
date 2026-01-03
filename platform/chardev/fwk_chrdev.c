@@ -16,7 +16,7 @@
 
 /*!< The globals */
 struct fwk_char_device *sgtc_fwk_chrdevs[DEVICE_MAX_NUM];
-static struct mutex_lock sgtc_fwk_chrdev_lock = MUTEX_LOCK_INIT();
+static struct mutex_lock sgtc_fwk_chrdev_lock;
 
 /*!< The functions */
 static struct fwk_char_device *__fwk_register_chrdev(kuint32_t major, kuint32_t baseminor, kuint32_t count, const kchar_t *name);
@@ -318,5 +318,32 @@ void fwk_unregister_chrdev(kuint32_t devNum, kuint32_t count)
 
     mutex_unlock(&sgtc_fwk_chrdev_lock);
 }
+
+/*!< --------------------------------------------------------------------------- */
+/*!
+ * @brief   chrdev init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+kint32_t __plat_init fwk_chrdev_global_init(void)
+{
+    mutex_init(&sgtc_fwk_chrdev_lock);
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   chrdev exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __plat_exit fwk_chrdev_global_exit(void)
+{
+
+}
+
+IMPORT_LATE_INIT(fwk_chrdev_global_init);
+IMPORT_LATE_EXIT(fwk_chrdev_global_exit);
 
 /*!< end of file */

@@ -375,7 +375,7 @@ void lwip_icmp_raw_exit(struct raw_pcb *sptr_pcb)
     sptr_data = (struct lwip_icmp_data *)sptr_pcb->recv_arg;
     sptr_seq = &sptr_data->sgtc_seq[0];
 
-    while (ATOMIC_READ(&sptr_data->sgtc_ref))
+    while (atomic_get_val(&sptr_data->sgtc_ref))
         schedule_thread();
 
     local_irq_save(&flags);

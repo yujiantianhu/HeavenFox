@@ -76,10 +76,10 @@ static kint32_t __thread_create(tid_t *ptr_id, kint32_t base, struct thread_attr
     if (!isValid(sptr_thread))
         goto fail3;
 
-    sptr_thread->tid 			= tid;
-    sptr_thread->sptr_attr 		= sptr_it_attr;
-    sptr_thread->start_routine 	= pfunc_start_routine;
-    sptr_thread->ptr_args		= ptr_args;
+    sptr_thread->tid            = tid;
+    sptr_thread->sptr_attr      = sptr_it_attr;
+    sptr_thread->start_routine  = pfunc_start_routine;
+    sptr_thread->ptr_args       = ptr_args;
 
     /*!< add to ready list */
     retval = register_new_thread(sptr_thread, tid);
@@ -301,6 +301,7 @@ void *thread_attr_revise(struct thread_attr *sptr_attr)
         thread_set_stack(sptr_attr, ptr_stack, ptr_stack, THREAD_STACK_DEFAULT);
     }
 
+    sptr_attr->sgtc_param.count = 0;
     return (void *)sptr_attr->stack_addr;
 }
 

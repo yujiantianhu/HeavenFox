@@ -52,7 +52,7 @@ struct fwk_sk_buff *fwk_alloc_skb(kuint32_t data_size, nrt_gfp_t flags)
     sptr_skb->network_header = (typeof(sptr_skb->network_header))(~0U);
     sptr_skb->transport_header = (typeof(sptr_skb->transport_header))(~0U);
     
-    ATOMIC_SET(&sptr_skb->users, 1);
+    atomic_set_val(&sptr_skb->users, 1);
     fwk_skb_list_init((struct fwk_sk_buff_head *)sptr_skb);
 
     return sptr_skb;
@@ -68,7 +68,7 @@ void fwk_free_skb(struct fwk_sk_buff *sptr_skb)
 {
     if (!sptr_skb)
         return;
-    if (ATOMIC_READ(&sptr_skb->users) > 1)
+    if (atomic_get_val(&sptr_skb->users) > 1)
         return;
 
     kfree(sptr_skb);

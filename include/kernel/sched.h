@@ -21,10 +21,10 @@
 #include <kernel/kernel.h>
 #include <kernel/context.h>
 #include <kernel/thread.h>
+#include <kernel/lock_common.h>
 #include <kernel/spinlock.h>
 
 /*!< The defines */
-struct spin_lock;
 struct mailbox;
 
 #define THREAD_NAME_SIZE                        (32)
@@ -61,34 +61,47 @@ struct thread
     struct spin_lock sgtc_lock;
     struct mailbox *sptr_mb;
 
+    /*!< Used to indicate which locks are held, as one thread may hold multiple locks */
+    struct lock_owners sgtc_owners;     
+    /*!
+     * Indicating a lock that is being waited for; at any given time, only one lock will be waited for by threads 
+     * (because when the thread cannot acquire a lock, it cannot request another lock) 
+     */
+    struct lock_waiter sgtc_wait;   
+
     void *time_event;
 };
 
 /*!< Set thread state */
+#define __SET_THREAD_STATE(sptr_th, value)	\
+    do {	\
+        (sptr_th)->state = (value);	\
+    } while (0)
+
 #define __SET_THREAD_TARGET_STATE(sptr_th, value)	\
     do {	\
-        sptr_th->to_state = (value);	\
+        (sptr_th)->to_state = (value);	\
     } while (0)
 
 #define __SYNC_THREAD_STATE(sptr_th, value)	\
     do {	\
-        sptr_th->state = (value);	\
-        sptr_th->to_state = NR_THREAD_NONE;    \
+        (sptr_th)->state = (value);	\
+        (sptr_th)->to_state = NR_THREAD_NONE;    \
     } while (0)
 
 /*!< Get thread state */
-#define __GET_THREAD_STATE(sptr_th)	                                (sptr_th->state)
-#define __GET_THREAD_TARGET_STATE(sptr_th)	                        (sptr_th->to_state)
+#define __GET_THREAD_STATE(sptr_th)	                                ((sptr_th)->state)
+#define __GET_THREAD_TARGET_STATE(sptr_th)	                        ((sptr_th)->to_state)
 
 /*!< Signal flags */
 #define mr_thread_set_flags(signal, sptr_tsk)	\
     do {	\
-        sptr_tsk->flags |= mr_bit(signal);	\
+        (sptr_tsk)->flags |= mr_bit(signal);	\
     } while (0)
 
 #define mr_thread_clr_flags(signal, sptr_tsk)	\
     do {	\
-        sptr_tsk->flags &= ~mr_bit(signal);	\
+        (sptr_tsk)->flags &= ~mr_bit(signal);	\
     } while (0)
 
 #define mr_thread_is_flags(signal, sptr_tsk)						(!!((sptr_tsk)->flags & mr_bit(signal)))
@@ -188,7 +201,7 @@ extern struct thread *next_ready_thread(struct thread *sptr_prev);
 extern struct thread *next_suspend_thread(struct thread *sptr_prev);
 extern struct thread *next_sleep_thread(struct thread *sptr_prev);
 
-extern kint32_t schedule_thread_switch(tid_t tid);
+extern kint32_t schedule_thread_switch(struct thread *sptr_thread);
 extern kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid);
 extern struct thread *unregister_thread(tid_t tid);
 extern void thread_tick_update(void);

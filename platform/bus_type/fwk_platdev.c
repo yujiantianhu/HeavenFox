@@ -29,7 +29,7 @@ static struct fwk_device_type sgtc_fwk_platform_dev_type =
 };
 
 static DECLARE_LIST_HEAD(sgtc_fwk_devices);
-static struct rw_lock sgtc_fwk_devices_lock = RW_LOCK_INIT();
+static struct rw_lock sgtc_fwk_devices_lock;
 
 /*!< The functions */
 static kint32_t fwk_device_attach(struct fwk_device *sptr_dev, struct fwk_bus_type *sptr_bus_type);
@@ -360,5 +360,32 @@ kint32_t fwk_device_del(struct fwk_device *sptr_dev)
 fail:
     return -ER_ERROR;
 }
+
+/*!< --------------------------------------------------------------------------- */
+/*!
+ * @brief   platform device init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+kint32_t __plat_init fwk_platdev_init(void)
+{
+    rw_lock_init(&sgtc_fwk_devices_lock);
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   platform device exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __plat_exit fwk_platdev_exit(void)
+{
+
+}
+
+IMPORT_LATE_INIT(fwk_platdev_init);
+IMPORT_LATE_EXIT(fwk_platdev_exit);
 
 /* end of file */

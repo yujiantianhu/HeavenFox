@@ -22,7 +22,7 @@
 #define KERL_THREAD_STACK_SIZE                          THREAD_STACK_PAGE(2)   /*!< 2 page (8 kbytes) */
 
 /*!< The globals */
-kbool_t g_sched_flag = false;
+kuint32_t g_sched_flag = false;
 
 static struct thread_attr sgtc_kthread_attr;
 static THREAD_STACK_DEFINE(g_kthread_stack, KERL_THREAD_STACK_SIZE);
@@ -41,13 +41,13 @@ static kuint8_t g_kthread_log_buffer[4096];
 static void kthread_schedule_timeout(kuint32_t args)
 {
     struct timer_list *sptr_tim = (struct timer_list *)args;
+    struct spin_lock *sptr_lock = scheduler_lock();
     struct thread *sptr_work, *sptr_ready;
     kuint32_t work_prio, next_prio;
 
+    /*!< disable global scheduler */
+    spin_lock_irqsave(sptr_lock);
     sptr_work = mr_current;
-
-    /*!< mr_preempt_cnt() += 1 */
-    spin_lock(&sptr_work->sgtc_lock);
     
     /*!< --------------------------------------------------------- */
     /*!< reduce time-slice */
@@ -64,8 +64,8 @@ static void kthread_schedule_timeout(kuint32_t args)
     if (!sptr_ready)
         goto END;
 
-    work_prio = thread_get_priority(sptr_work->sptr_attr);
-    next_prio = thread_get_priority(sptr_ready->sptr_attr);
+    work_prio = thread_get_rt_priority(sptr_work->sptr_attr);
+    next_prio = thread_get_rt_priority(sptr_ready->sptr_attr);
    
 #if CONFIG_PREEMPT
     /*!< there is a higher priority thread ready, or time slice is zero && the same priority thread ready */
@@ -82,7 +82,7 @@ static void kthread_schedule_timeout(kuint32_t args)
 #endif
     
 END:
-    spin_unlock(&sptr_work->sgtc_lock);
+    spin_unlock_irqrestore(sptr_lock);
     mod_timer(sptr_tim, jiffies + 1);
 }
 

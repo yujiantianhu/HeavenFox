@@ -98,7 +98,7 @@ static void *irq_thread(void *args)
          * even if the upper half irq handler is triggered multiple times, 
          * the bottom half is excuted only once
          */
-        ATOMIC_SET(&sptr_grp->sgtc_rec, 1);
+        atomic_set_val(&sptr_grp->sgtc_rec, 1);
 
         /*!
          * @note
@@ -111,7 +111,7 @@ static void *irq_thread(void *args)
 
             /*!< no additional judgement on whether thread_fn exsits */
             sptr_grp->thread_fn(sptr_grp->irq, sptr_grp->sgtc_action.ptrArgs);
-            if (!ATOMIC_READ(&sptr_grp->sgtc_rec))
+            if (!atomic_get_val(&sptr_grp->sgtc_rec))
                 break;
         }
 
@@ -158,7 +158,7 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
         goto fail;
 
     sptr_grp->tid = -1;
-    ATOMIC_SET(&sptr_grp->sgtc_rec, 0);
+    atomic_set_val(&sptr_grp->sgtc_rec, 0);
     sptr_grp->irq = irq;
     sptr_grp->thread_fn = thread_fn;
 

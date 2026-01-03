@@ -647,6 +647,18 @@ struct fwk_kset *fwk_kset_create(const kchar_t *name, struct fwk_kobject *sptr_p
 }
 
 /*!
+ * @brief   destory kset
+ * @param   sptr_kset
+ * @retval  none
+ * @note    none
+ */
+void fwk_kset_destroy(struct fwk_kset *sptr_kset)
+{
+    fwk_kobject_del_name(&sptr_kset->sgtc_kobj);
+    kfree(sptr_kset);
+}
+
+/*!
  * @brief   register kset
  * @param   sptr_kset
  * @retval  errno

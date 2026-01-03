@@ -17,7 +17,7 @@
 
 /*!< The globals */
 static DECLARE_LIST_HEAD(sgtc_fwk_gpiochip_list);
-static struct rw_lock sgtc_gpiochip_lock = RW_LOCK_INIT();
+static struct rw_lock sgtc_gpiochip_lock;
 
 /*!< API function */
 /*!
@@ -210,5 +210,32 @@ struct fwk_gpio_desc *fwk_gpiochip_and_desc_find(struct fwk_gpio_node_prop *sptr
     rd_unlock(&sgtc_gpiochip_lock);
     return mr_nullptr;
 }
+
+/*!< --------------------------------------------------------------------------- */
+/*!
+ * @brief   gpiochip init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+kint32_t __plat_init fwk_gpiochip_global_init(void)
+{
+    rw_lock_init(&sgtc_gpiochip_lock);
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   gpiochip exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __plat_exit fwk_gpiochip_global_exit(void)
+{
+
+}
+
+IMPORT_LATE_INIT(fwk_gpiochip_global_init);
+IMPORT_LATE_EXIT(fwk_gpiochip_global_exit);
 
 /*!< end of file */

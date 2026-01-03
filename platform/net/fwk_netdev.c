@@ -21,8 +21,8 @@
 #define NETDEV_IF_INS_MAX                   ((kuint32_t)256U)
 
 /*!< The globals */
-static struct mutex_lock sgtc_netdev_ins_mutex = MUTEX_LOCK_INIT();
-static struct mutex_lock sgtc_fwk_netdev_mutex = MUTEX_LOCK_INIT();
+static struct mutex_lock sgtc_netdev_ins_mutex;
+static struct mutex_lock sgtc_fwk_netdev_mutex;
 static DECLARE_LIST_HEAD(sgtc_fwk_net_device_list);
 static kuint32_t g_fwk_allocated_ins[mr_num_align(NETDEV_IF_INS_MAX, RET_BITS_PER_INT) / RET_BITS_PER_INT] = { 0 };
 
@@ -291,5 +291,34 @@ kint32_t fwk_unregister_netdevice(struct fwk_net_device *sptr_ndev)
 
     return ER_NORMAL;
 }
+
+/*!< --------------------------------------------------------------------------- */
+/*!
+ * @brief   netdev init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+kint32_t __plat_init fwk_netdev_global_init(void)
+{
+    mutex_init(&sgtc_fwk_netdev_mutex);
+    mutex_init(&sgtc_netdev_ins_mutex);
+    
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   netdev exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __plat_exit fwk_netdev_global_exit(void)
+{
+
+}
+
+IMPORT_LATE_INIT(fwk_netdev_global_init);
+IMPORT_LATE_EXIT(fwk_netdev_global_exit);
 
 /*!< end of file */

@@ -19,10 +19,14 @@
 
 /*!< The includes */
 #include <common/generic.h>
+#include <common/list_types.h>
 #include <configs/configs.h>
 
 /*!< The defines */
 #define THREAD_USER										(0x1)	/*!< user thread */
+
+/*!< Thread type */
+typedef kint32_t tid_t;
 
 /*!<
  * status move:
@@ -72,13 +76,13 @@ extern struct atomic sgtc_sched_preempt_cnt;
 
 #define mr_preempt_cnt_dec()						atomic_dec(&sgtc_sched_preempt_cnt)
 #define mr_preempt_cnt_inc()						atomic_inc(&sgtc_sched_preempt_cnt)
-#define mr_preempt_cnt()							ATOMIC_READ(&sgtc_sched_preempt_cnt)
+#define mr_preempt_cnt()							atomic_get_val(&sgtc_sched_preempt_cnt)
 #define mr_preempt_is_locked()						(!!mr_preempt_cnt())
 
 #ifdef CONFIG_PREEMPT_NESTING
 #define mr_preempt_enable()							mr_barrier()
 #define mr_preempt_disable()						mr_barrier()
-#define mr_preempt_is_locked()						ATOMIC_READ(&sgtc_sched_preempt_cnt)
+#define mr_preempt_is_locked()						atomic_get_val(&sgtc_sched_preempt_cnt)
 
 #else
 #define mr_preempt_enable()	\
@@ -94,6 +98,8 @@ extern struct atomic sgtc_sched_preempt_cnt;
     } while (0)
 
 #endif
+
+/*!< The functions */
 
 #ifdef __cplusplus
     }

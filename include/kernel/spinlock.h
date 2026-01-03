@@ -58,7 +58,7 @@ extern void spin_unlock_bh(struct spin_lock *sptr_lock);
  */
 static inline kbool_t spin_is_locked(struct spin_lock *sptr_lock)
 {
-    return !!ATOMIC_READ(&sptr_lock->sgtc_atc);
+    return !!atomic_get_val(&sptr_lock->sgtc_atc);
 }
 
 #ifdef __cplusplus

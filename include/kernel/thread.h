@@ -32,8 +32,6 @@
 #include <kernel/sleep.h>
 
 /*!< The defines */
-typedef kint32_t tid_t;
-
 /*!< maximum number of threads that can be created */
 #define THREAD_MAX_NUM						(1024)
 
@@ -78,6 +76,8 @@ typedef kint32_t tid_t;
 #define THREAD_PROTY_START					(99)
 #define THREAD_PROTY_DEFAULT				(80)
 #define THREAD_PROTY_MAX					(1)
+#define THREAD_PROTY_MIN                    (99)
+#define THREAD_PRORY_NONE                   (0)
 
 #define __THREAD_IS_LOW_PRIO(prio, prio2)	((prio2) < (prio))
 #define __THREAD_HIGHER_DEFAULT(val)		(THREAD_PROTY_DEFAULT - (val))	
@@ -142,8 +142,10 @@ enum __ERT_THREAD_POLICY
 
 struct scheduler_param
 {
-    kint32_t priority;
+    kuint32_t count;
+    kint32_t priority;                          /*!< temprory priority */
     kint32_t cur_priority;                      /*!< current priority */
+    kint32_t ori_priority;                      /*!< original priority */    
 
     struct time_spec init_budget;               /*!< time slice */
 };
@@ -216,6 +218,43 @@ static inline kuint32_t thread_get_priority(struct thread_attr *sptr_attr)
 }
 
 /*!
+ * @brief	get original priority
+ * @param  	sptr_attr
+ * @retval 	priority
+ * @note   	none
+ */
+__force_inline 
+static inline kuint32_t thread_get_ori_priority(struct thread_attr *sptr_attr)
+{
+    return sptr_attr->sgtc_param.ori_priority;
+}
+
+/*!
+ * @brief	get dync priority
+ * @param  	sptr_attr
+ * @retval 	priority
+ * @note   	none
+ */
+__force_inline 
+static inline kuint32_t thread_get_rt_priority(struct thread_attr *sptr_attr)
+{
+    return sptr_attr->sgtc_param.priority;
+}
+
+/*!
+ * @brief   set thread priority
+ * @param   sptr_thread
+ * @param   priority
+ * @retval  none
+ * @note    none
+ */
+static inline void thread_set_inherit_priority(struct thread_attr *sptr_attr, kuint32_t priority)
+{
+    struct scheduler_param *sptr_param = &sptr_attr->sgtc_param;
+    sptr_param->priority = __THREAD_IS_LOW_PRIO(priority, THREAD_PROTY_MAX) ? priority : THREAD_PROTY_MAX;
+}
+
+/*!
  * @brief	set priority
  * @param  	sptr_attr, priority
  * @retval 	none
@@ -223,7 +262,13 @@ static inline kuint32_t thread_get_priority(struct thread_attr *sptr_attr)
  */
 static inline void thread_set_priority(struct thread_attr *sptr_attr, kuint32_t priority)
 {
-    sptr_attr->sgtc_param.priority = __THREAD_IS_LOW_PRIO(priority, THREAD_PROTY_MAX) ? priority : THREAD_PROTY_MAX;
+    struct scheduler_param *sptr_param = &sptr_attr->sgtc_param;
+    kint32_t cur_prio = sptr_param->priority;
+
+    sptr_param->ori_priority = __THREAD_IS_LOW_PRIO(priority, THREAD_PROTY_MAX) ? priority : THREAD_PROTY_MAX;
+    
+    if ((cur_prio < sptr_param->ori_priority) || !sptr_param->count)
+        sptr_param->priority = sptr_param->ori_priority;
 }
 
 /*!

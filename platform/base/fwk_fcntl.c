@@ -31,8 +31,6 @@ static struct fwk_file_table sgtc_fwk_file_table =
 
     .fds		= mr_nullptr,
     .fd_array	= { mr_nullptr },
-
-    .sgtc_mutex	= MUTEX_LOCK_INIT(),
 };
 
 static struct fwk_file sgtc_fwk_file_stdio[DEVICE_MAJOR_BASE] =
@@ -65,6 +63,8 @@ kint32_t __plat_init fwk_file_system_init(void)
     kuint32_t fileCnt;
 
     sptr_table = &sgtc_fwk_file_table;
+    mutex_init(&sptr_table->sgtc_mutex);
+
     num_farray = ARRAY_SIZE(sptr_table->fd_array);
 
     if (!sptr_table->max_fds)
@@ -83,8 +83,6 @@ kint32_t __plat_init fwk_file_system_init(void)
     sptr_table->max_fds		= sptr_table->max_fdarr;
     sptr_table->ref_fdarr	= fileCnt;
     sptr_table->max_fdset 	= CMP_GT2(num_farray, 0, num_farray - 1, sptr_table->max_fdset);
-
-    mutex_init(&sptr_table->sgtc_mutex);
 
     return ER_NORMAL;
 }

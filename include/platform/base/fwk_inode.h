@@ -54,8 +54,7 @@ struct fwk_inode
 #define FWK_PATH_CHARDEV								FWK_PATH_DEVICE"char/"
 #define FWK_PATH_BLOCKDEV								FWK_PATH_DEVICE"block/"
 
-// #define FWK_PATH_SYS_DEVICE							FWK_PATH_SYSTEM"/devices/"
-#define FWK_PATH_SYS_DEVICE								FWK_PATH_SYSTEM
+#define FWK_PATH_SYS_DEVICE								FWK_PATH_SYSTEM"devices/"
 #define FWK_PATH_SYS_DRIVER								FWK_PATH_SYSTEM"drivers/"
 
 /*!< The functions */

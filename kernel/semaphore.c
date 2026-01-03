@@ -31,7 +31,7 @@
 void sema_init(struct semaphore *sptr_sem, kuint32_t val)
 {
     if (sptr_sem)
-        ATOMIC_SET(&sptr_sem->sgtc_atc, val);
+        atomic_set_val(&sptr_sem->sgtc_atc, val);
 }
 
 /*!

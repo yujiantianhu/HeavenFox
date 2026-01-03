@@ -26,7 +26,7 @@
 
 /*!< The globals */
 static struct fwk_fb_info *sgtc_fwk_registered_fb[FWK_FB_DEVICE_MAX];
-static struct mutex_lock sgtc_fwk_fbmem_mutex = MUTEX_LOCK_INIT();
+static struct mutex_lock sgtc_fwk_fbmem_mutex;
 
 /*!< The functions */
 
@@ -413,6 +413,8 @@ kint32_t __plat_init fwk_fbmem_init(void)
     struct fwk_cdev *sptr_cdev;
     kuint32_t devNum;
     kint32_t retval;
+
+    mutex_init(&sgtc_fwk_fbmem_mutex);
 
     devNum = MKE_DEV_NUM(FWK_FB_DEVICE_MAJOR, 0);
     retval = fwk_register_chrdev(devNum, FWK_FB_DEVICE_MAX, "fb");

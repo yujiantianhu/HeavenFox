@@ -27,7 +27,7 @@ struct fwk_block_major_name
 
 /*!< The globals */
 struct fwk_block_major_name *sgtc_block_major_name[DEVICE_MAX_NUM];
-static struct mutex_lock sgtc_blkdev_mutex = MUTEX_LOCK_INIT();
+static struct mutex_lock sgtc_blkdev_mutex;
 
 /*!< API function */
 /*!
@@ -146,7 +146,7 @@ kint32_t fwk_register_blkdev(kuint32_t major, const kchar_t *name)
 /*!
  * @brief   unregister block device
  * @param   major, name
- * @retval  errno
+ * @retval  none
  * @note    none
  */
 void fwk_unregister_blkdev(kuint32_t major, const kchar_t *name)
@@ -155,5 +155,32 @@ void fwk_unregister_blkdev(kuint32_t major, const kchar_t *name)
     __fwk_unregister_blkdev(major, name);
     mutex_unlock(&sgtc_blkdev_mutex);
 }
+
+/*!< --------------------------------------------------------------------------- */
+/*!
+ * @brief   blkdev init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+kint32_t __plat_init fwk_blkdev_init(void)
+{
+    mutex_init(&sgtc_blkdev_mutex);
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   blkdev exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __plat_exit fwk_blkdev_exit(void)
+{
+
+}
+
+IMPORT_LATE_INIT(fwk_blkdev_init);
+IMPORT_LATE_EXIT(fwk_blkdev_exit);
 
 /* end of file */

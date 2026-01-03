@@ -16,4 +16,6 @@ obj-y	+=	kworker.o
 obj-y	+=	init_proc.o
 obj-y	+=	kmemp.o
 
+obj-$(CONFIG_TEST) += debug.o
+
 # end of file

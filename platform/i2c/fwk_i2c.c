@@ -145,12 +145,6 @@ static kint32_t fwk_i2c_device_remove(struct fwk_device *sptr_dev)
 static struct fwk_bus_private sgtc_fwk_i2c_device_buspriv =
 {
     .sptr_bus = &sgtc_fwk_i2c_bus_type,
-
-    .sgtc_list_devices	= LIST_HEAD_INIT(&sgtc_fwk_i2c_device_buspriv.sgtc_list_devices),
-    .sgtc_device_lock   = RW_LOCK_INIT(),
-
-    .sgtc_list_drivers	= LIST_HEAD_INIT(&sgtc_fwk_i2c_device_buspriv.sgtc_list_drivers),
-    .sgtc_driver_lock   = RW_LOCK_INIT(),
 };
 
 struct fwk_bus_type sgtc_fwk_i2c_bus_type =
@@ -532,5 +526,41 @@ kint32_t fwk_i2c_read_byte_data(struct fwk_i2c_client *sptr_client, kuint8_t reg
     retval = sptr_algo->master_xfer(sptr_client->sptr_adapter, &sgtc_msgs[0], ARRAY_SIZE(sgtc_msgs));
     return retval ? retval : value;
 }
+
+/*!< --------------------------------------------------------------------------- */
+/*!
+ * @brief   i2c init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+kint32_t __plat_init fwk_i2c_global_init(void)
+{
+    struct fwk_bus_private *sptr_buspriv = &sgtc_fwk_i2c_device_buspriv;
+
+    sptr_buspriv->sptr_bus = &sgtc_fwk_i2c_bus_type,
+
+    init_list_head(&sptr_buspriv->sgtc_list_devices);
+    init_list_head(&sptr_buspriv->sgtc_list_drivers);
+
+    rw_lock_init(&sptr_buspriv->sgtc_device_lock);
+    rw_lock_init(&sptr_buspriv->sgtc_driver_lock);
+
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   i2c exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __plat_exit fwk_i2c_global_exit(void)
+{
+
+}
+
+IMPORT_LATE_INIT(fwk_i2c_global_init);
+IMPORT_LATE_EXIT(fwk_i2c_global_exit);
 
 /*!< end of file */

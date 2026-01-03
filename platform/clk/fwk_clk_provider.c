@@ -29,7 +29,7 @@ typedef struct fwk_of_clk_provider
 
 /*!< The globals */
 static DECLARE_LIST_HEAD(sgtc_fwk_clk_providers);
-static struct rw_lock sgtc_clk_providers_lock = RW_LOCK_INIT();
+static struct rw_lock sgtc_clk_providers_lock;
 
 /*!< API function */
 /*!
@@ -135,5 +135,32 @@ struct fwk_clk *fwk_clk_provider_look_up(struct fwk_of_phandle_args *sptr_args)
     rd_unlock(&sgtc_clk_providers_lock);
     return mr_nullptr;
 }
+
+/*!< --------------------------------------------------------------------------- */
+/*!
+ * @brief   clk_provider init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+kint32_t __plat_init fwk_clk_provider_global_init(void)
+{
+    rw_lock_init(&sgtc_clk_providers_lock);
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   clk_provider exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __plat_exit fwk_clk_provider_global_exit(void)
+{
+
+}
+
+IMPORT_LATE_INIT(fwk_clk_provider_global_init);
+IMPORT_LATE_EXIT(fwk_clk_provider_global_exit);
 
 /*!< end of file */

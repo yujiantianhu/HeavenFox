@@ -100,6 +100,7 @@ extern kbool_t fwk_kobject_is_refered(struct fwk_kobject *sptr_kobj);
 
 extern void fwk_kset_init(struct fwk_kset *sptr_kset);
 extern struct fwk_kset *fwk_kset_create(const kchar_t *name, struct fwk_kobject *sptr_parent);
+extern void fwk_kset_destroy(struct fwk_kset *sptr_kset);
 extern kint32_t fwk_kset_register(struct fwk_kset *sptr_kset);
 extern struct fwk_kset *fwk_kset_create_and_register(const kchar_t *name, struct fwk_kobject *sptr_parent);
 extern void fwk_kset_unregister(struct fwk_kset *sptr_kset);
@@ -124,7 +125,7 @@ extern struct fwk_kobject *fwk_kset_next_child(struct fwk_kset *sptr_kset, struc
  */
 static inline void fwk_kref_init(struct atomic *sptr_kref)
 {
-	ATOMIC_SET(sptr_kref, 0);
+	atomic_set_val(sptr_kref, 0);
 }
 
 /*!
@@ -146,7 +147,7 @@ static inline void fwk_kref_get(struct atomic *sptr_kref)
  */
 static inline void fwk_kref_put(struct atomic *sptr_kref)
 {
-	ATOMIC_READ(sptr_kref) ? atomic_dec(sptr_kref) : (void)0;
+	atomic_get_val(sptr_kref) ? atomic_dec(sptr_kref) : (void)0;
 }
 
 /*!
@@ -157,7 +158,7 @@ static inline void fwk_kref_put(struct atomic *sptr_kref)
  */
 static inline kbool_t fwk_kref_is_zero(struct atomic *sptr_kref)
 {
-	return !!ATOMIC_READ(sptr_kref);
+	return !!atomic_get_val(sptr_kref);
 }
 
 #ifdef __cplusplus

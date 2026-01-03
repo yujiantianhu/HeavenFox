@@ -48,7 +48,7 @@ extern void sema_up(struct semaphore *sptr_sem);
  */
 static inline kbool_t sema_is_locked(struct semaphore *sptr_sem)
 {
-	return (0 == ATOMIC_READ(&sptr_sem->sgtc_atc));
+	return (0 == atomic_get_val(&sptr_sem->sgtc_atc));
 }
 
 #ifdef __cplusplus

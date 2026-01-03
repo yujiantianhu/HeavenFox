@@ -24,8 +24,8 @@
 /*!< The globals */
 struct fwk_network_if_ops *sptr_fwk_network_if_oprts = mr_nullptr;
 
-static struct mutex_lock sgtc_socket_mutex = MUTEX_LOCK_INIT();
-static struct rw_lock sgtc_network_mutex = RW_LOCK_INIT();
+static struct mutex_lock sgtc_socket_mutex;
+static struct rw_lock sgtc_network_mutex;
 static DECLARE_LIST_HEAD(sgtc_fwk_network_nodes);
 static DECLARE_RADIX_TREE(sgtc_sockets_radix_tree, default_malloc, kfree);
 static kuint32_t g_allocated_sockets[mr_align(NET_SOCKETS_MAX, RET_BITS_PER_INT) / RET_BITS_PER_INT] = { 0 };
@@ -441,5 +441,34 @@ kssize_t socket_recvfrom(kint32_t sockfd, void *buf, size_t len,
 {
     return network_recvfrom(sockfd, buf, len, flags, sptr_src, addrlen);
 }
+
+/*!< --------------------------------------------------------------------------- */
+/*!
+ * @brief   socket init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+kint32_t __plat_init fwk_socket_global_init(void)
+{
+    mutex_init(&sgtc_socket_mutex);
+    rw_lock_init(&sgtc_network_mutex);
+    
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   socket exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __plat_exit fwk_socket_global_exit(void)
+{
+
+}
+
+IMPORT_LATE_INIT(fwk_socket_global_init);
+IMPORT_LATE_EXIT(fwk_socket_global_exit);
 
 /*!< end of file */

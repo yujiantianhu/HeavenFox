@@ -130,12 +130,6 @@ static kint32_t fwk_platform_remove(struct fwk_device *sptr_dev)
 static struct fwk_bus_private sgtc_fwk_platform_SysPriv =
 {
     .sptr_bus = &sgtc_fwk_platform_bus_type,
-
-    .sgtc_list_devices	= LIST_HEAD_INIT(&sgtc_fwk_platform_SysPriv.sgtc_list_devices),
-    .sgtc_device_lock   = RW_LOCK_INIT(),
-
-    .sgtc_list_drivers	= LIST_HEAD_INIT(&sgtc_fwk_platform_SysPriv.sgtc_list_drivers),
-    .sgtc_driver_lock   = RW_LOCK_INIT(),
 };
 
 struct fwk_bus_type sgtc_fwk_platform_bus_type =
@@ -333,5 +327,41 @@ kint32_t fwk_device_destroy(struct fwk_device *sptr_dev)
 
     return ER_NORMAL;
 }
+
+/*!< --------------------------------------------------------------------------- */
+/*!
+ * @brief   platform init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+kint32_t __plat_init fwk_platform_init(void)
+{
+    struct fwk_bus_private *sptr_buspriv = &sgtc_fwk_platform_SysPriv;
+
+    sptr_buspriv->sptr_bus = &sgtc_fwk_platform_bus_type,
+
+    init_list_head(&sptr_buspriv->sgtc_list_devices);
+    init_list_head(&sptr_buspriv->sgtc_list_drivers);
+
+    rw_lock_init(&sptr_buspriv->sgtc_device_lock);
+    rw_lock_init(&sptr_buspriv->sgtc_driver_lock);
+
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   platform exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __plat_exit fwk_platform_exit(void)
+{
+
+}
+
+IMPORT_LATE_INIT(fwk_platform_init);
+IMPORT_LATE_EXIT(fwk_platform_exit);
 
 /*!< end of file */

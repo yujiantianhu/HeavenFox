@@ -328,7 +328,7 @@ kint32_t schedule_thread_suspend(tid_t tid)
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
 
     spin_lock_irqsave(&__SCHED_LOCK);
-    retval = schedule_thread_switch(tid);
+    retval = schedule_thread_switch(sptr_thread);
     spin_unlock_irqrestore(&__SCHED_LOCK);
     
     return retval;
@@ -364,7 +364,7 @@ kint32_t schedule_thread_sleep(tid_t tid)
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
 
     spin_lock_irqsave(&__SCHED_LOCK);
-    retval = schedule_thread_switch(tid);
+    retval = schedule_thread_switch(sptr_thread);
     spin_unlock_irqrestore(&__SCHED_LOCK);
 
     return retval;
@@ -408,7 +408,7 @@ kint32_t schedule_thread_wakeup(tid_t tid)
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
 
     spin_lock_irqsave(&__SCHED_LOCK);
-    retval = schedule_thread_switch(tid);
+    retval = schedule_thread_switch(sptr_thread);
 	spin_unlock_irqrestore(&__SCHED_LOCK);
 
     return retval;
@@ -663,19 +663,21 @@ static void __thread_hash_remove(struct thread_list *sptr_list, struct thread *s
  * @retval 	err code
  * @note   	only the running thread need to save context; and only the ready thread maybe need to restore context
  */ 
-kint32_t schedule_thread_switch(tid_t tid)
+kint32_t schedule_thread_switch(struct thread *sptr_thread)
 {
-    struct thread *sptr_thread;
+//  struct thread *sptr_thread;
+    tid_t tid;
     kuint32_t src, dst;
     kint32_t retval;
     
     /*!< Protected by caller, do not disable again */
 //  mr_preempt_disable();
 
-    sptr_thread = SCHED_THREAD_HANDLER(tid);
+//  sptr_thread = SCHED_THREAD_HANDLER(tid);
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
+    tid = sptr_thread->tid;
     src = sptr_thread->state;
     dst = sptr_thread->to_state;
 
@@ -689,7 +691,7 @@ kint32_t schedule_thread_switch(tid_t tid)
      *
      * (only running and ready state can be switched to any state)
      */
-    if (mr_unlikely(src == dst) || 
+    if (mr_unlikely(((src == NR_THREAD_RUNNING) && (dst == NR_THREAD_RUNNING))) || 
         mr_unlikely(dst >= NR_THREAD_STATUS_MAX))
         goto fail;
 
@@ -739,14 +741,20 @@ kint32_t schedule_thread_switch(tid_t tid)
             break;
 
         case NR_THREAD_READY:
+            /*!< clear state */
+            __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
             retval = schedule_add_ready_list(sptr_thread);
             break;
 
         case NR_THREAD_SUSPEND:
+            /*!< clear state */
+            __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
             retval = schedule_add_suspend_list(sptr_thread);
             break;
 
         case NR_THREAD_SLEEP:
+            /*!< clear state */
+            __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
             retval = schedule_add_sleep_list(sptr_thread);
             break;
 
@@ -1053,9 +1061,13 @@ static void __schedule_del_status_list(struct thread *sptr_thread,
 kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
 {
     struct thread_attr *sptr_it_attr;
+    struct lock_owners *sptr_owners;
+    struct lock_waiter *sptr_waiter;
     kint32_t retval;
 
     sptr_it_attr = sptr_thread->sptr_attr;
+    sptr_owners = &sptr_thread->sgtc_owners;
+    sptr_waiter = &sptr_thread->sgtc_wait;
 
     if (SCHED_THREAD_HANDLER(tid))
         return -ER_INVALID;
@@ -1064,10 +1076,6 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     if (!sptr_it_attr->stack_addr)
         return -ER_NOMEM;
 
-    spin_lock_irqsave(&__SCHED_LOCK);
-    /*!< saved to tcb */
-    SCHED_THREAD_HANDLER(tid) = sptr_thread;
-
     /*!< initial link */
     init_list_head(&sptr_thread->sgtc_link);
     init_list_head(&sptr_thread->sgtc_hash);
@@ -1075,9 +1083,19 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     /*!< initial spinlock */
     spin_lock_init(&sptr_thread->sgtc_lock);
 
+    /*!< initial lock struct */
+    init_list_head(&sptr_owners->sgtc_gets);
+    spin_lock_init(&sptr_owners->sgtc_lock);
+    sptr_waiter->sptr_wait = mr_nullptr;
+    init_list_head(&sptr_waiter->sgtc_link);
+
     /*!< set name */
     sprintk(sptr_thread->name, "thread-%d", tid);
 
+    spin_lock_irqsave(&__SCHED_LOCK);
+    /*!< saved to tcb */
+    SCHED_THREAD_HANDLER(tid) = sptr_thread;
+    
     /*!< add and sorted by priority */
     retval = schedule_add_ready_list(sptr_thread);
     if (retval < 0)
@@ -1183,7 +1201,7 @@ struct scheduler_context *__schedule_thread(void)
         __SET_THREAD_TARGET_STATE(sptr_prev, NR_THREAD_READY);
 
     /*!< select next valid thread */
-    retval = schedule_thread_switch(sptr_prev->tid);
+    retval = schedule_thread_switch(sptr_prev);
     sptr_thread = SCHED_RUNNING_THREAD;
     if (mr_unlikely(retval < 0) || 
         mr_unlikely(!sptr_thread))

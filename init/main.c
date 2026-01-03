@@ -140,9 +140,19 @@ void start_kernel(void)
 #if CONFIG_SCHDULE
     scheduler_init();
 
+    /*!< kernel init */
+    if (system_kernel_initcall())
+        goto fail;
+
+#ifdef CONFIG_TEST
+    /*!< create thread */
+    if (debug_init())
+        goto fail;
+#else
     /*!< create thread */
     if (kthread_init())
         goto fail;
+#endif
 
     rest_init();
     print_info("initial system finished, start scheduler now\r\n");

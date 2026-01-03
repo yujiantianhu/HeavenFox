@@ -289,7 +289,7 @@ struct udp_pcb *lwip_udp_raw_bind(const ip_addr_t *sptr_ip, u16_t port)
         init_waitqueue_head(&sptr_priv->sgtc_wqh);
 
         sptr_priv->is_dead = false;
-        ATOMIC_SET(&sptr_priv->sgtc_ref, 0);
+        atomic_set_val(&sptr_priv->sgtc_ref, 0);
 
         udp_recv(sptr_upcb, __lwip_udp_raw_recv, sptr_priv);
         return sptr_upcb;
@@ -319,7 +319,7 @@ void lwip_udp_raw_unbind(struct udp_pcb *sptr_upcb)
     sptr_priv = (struct lwip_udp_priv *)sptr_upcb->recv_arg;
     sptr_pq = sptr_priv->sptr_pq;
 
-    while (ATOMIC_READ(&sptr_priv->sgtc_ref))
+    while (atomic_get_val(&sptr_priv->sgtc_ref))
         schedule_thread();
 
     local_irq_save(&flags);
