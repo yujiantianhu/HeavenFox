@@ -73,7 +73,7 @@ void mutex_lock(struct mutex_lock *sptr_lock)
         mr_barrier();
 
         spin_unlock(&sptr_owner->sgtc_lock);
-        mr_preempt_disable();
+        mr_preempt_enable();
         return;
     }
 
@@ -133,21 +133,65 @@ void mutex_wait(struct mutex_lock *sptr_lock)
  */
 kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
 {
-    kutype_t flags;
-
-    if (!mr_current)
-        return -ER_FORBID;
+    struct thread *sptr_self;
+    struct lock_owner *sptr_owner;
     
-    local_irq_save(&flags);
+    sptr_self = mr_current;
+    if (mr_unlikely(!sptr_self))
+        return -ER_FORBID;
 
+    sptr_owner = &sptr_lock->sgtc_owner;
+
+    /*!< In IRQ_Handler */
+    if (IS_IN_EXCEPTION())
+    {
+        kutype_t flags;
+
+        local_irq_save(&flags);
+        if (mutex_is_locked(sptr_lock))
+        {
+            local_irq_restore(&flags);
+            return -ER_BUSY;
+        }
+
+        atomic_inc(&sptr_lock->sgtc_atc);
+        sptr_owner->sptr_self = mr_nullptr;
+        mr_barrier();
+
+        local_irq_restore(&flags);
+        return ER_NORMAL;
+    }
+
+    mr_preempt_disable();
+    spin_lock(&sptr_owner->sgtc_lock);
+
+    /*!< If the lock is reentrant, increment the counter and return directly */
+    if (sptr_owner->sptr_self == sptr_self)
+    {   
+        atomic_inc(&sptr_lock->sgtc_atc);
+        mr_barrier();
+
+        spin_unlock(&sptr_owner->sgtc_lock);
+        mr_preempt_enable();
+        return ER_NORMAL;
+    }
+
+    /*!< Check lock (essentially: atomic_get_val(&sptr_lock->sgtc_atc)) */
     if (mutex_is_locked(sptr_lock))
     {
-        local_irq_restore(&flags);
+        spin_unlock(&sptr_owner->sgtc_lock);
         return -ER_BUSY;
     }
-    
+
     atomic_inc(&sptr_lock->sgtc_atc);
-    local_irq_restore(&flags);
+    sptr_owner->sptr_self = sptr_self;
+    mr_barrier();
+
+    /*!< Acquire the lock, make a mark, and add the current lock to the "lock holding linked list" of this thread */
+    lock_context_save(sptr_owner);
+
+    spin_unlock(&sptr_owner->sgtc_lock);
+    mr_preempt_enable();
 
     return ER_NORMAL;
 }
@@ -168,6 +212,36 @@ void mutex_unlock(struct mutex_lock *sptr_lock)
         return;
 
     sptr_owner = &sptr_lock->sgtc_owner;
+
+    /*!< In IRQ_Handler */
+    if (IS_IN_EXCEPTION())
+    {
+        kutype_t flags;
+
+        local_irq_save(&flags);
+        if (sptr_owner->sptr_self || 
+            !mutex_is_locked(sptr_lock))
+        {
+            local_irq_restore(&flags);
+            return;
+        }
+
+        atomic_dec(&sptr_lock->sgtc_atc);
+        mr_barrier();
+
+        /*!< After decrementing the count, the lock is still locked, indicating that the lock is still in a reentrant state */
+        if (mutex_is_locked(sptr_lock))
+        {
+            local_irq_restore(&flags);
+            return;
+        }
+
+        /*!< This lock has been released, and the thread with the highest priority on the request list will be woken up */
+        unlock_pending_wakeup_nolock(sptr_owner, CONFIG_MUTEX_WAKEALL);
+        local_irq_restore(&flags);
+        return;
+    }
+
     mr_preempt_disable();
     spin_lock(&sptr_owner->sgtc_lock);
 

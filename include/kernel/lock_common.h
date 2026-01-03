@@ -63,6 +63,7 @@ extern void lock_pending_add(struct lock_owner *sptr_owner, struct thread *sptr_
 extern void lock_pending_del(struct lock_owner *sptr_owner, struct thread *sptr_thread);
 extern void unlock_pending_del_all(struct lock_owner *sptr_owner);
 extern void unlock_pending_wakeup(struct lock_owner *sptr_owner, kbool_t wake_all);
+extern void unlock_pending_wakeup_nolock(struct lock_owner *sptr_owner, kbool_t wake_all);
 extern kuint32_t lock_find_max_priority(struct lock_owners *sptr_owners);
 
 extern void lock_context_init(struct lock_owner *sptr_owner);

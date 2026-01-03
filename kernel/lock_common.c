@@ -303,6 +303,57 @@ void unlock_pending_wakeup(struct lock_owner *sptr_owner, kbool_t wake_all)
 }
 
 /*!
+ * @brief   Wake up threads which are pending, and detach pending lists
+ * @param   sptr_owner
+ * @param   wake_all: true ? wake all threads; false ? wake the thread with highest priority
+ * @retval  none
+ * @note    It should be used by IRQ_Handler
+ */
+void unlock_pending_wakeup_nolock(struct lock_owner *sptr_owner, kbool_t wake_all)
+{
+    struct list_head *sptr_head;
+
+    sptr_head = &sptr_owner->sgtc_pendings;
+
+    /*!
+     * Check whether this lock is held by other threads. 
+     * If it is, this thread has no right to operate someone else's lock 
+     */
+    if (sptr_owner->sptr_self && (sptr_owner->sptr_self != mr_current))
+        return;
+
+    if (!mr_list_empty(sptr_head))
+    {
+        struct lock_waiter *sptr_pwait, *sptr_temp;
+        struct lock_owners *sptr_owns;
+        struct thread *sptr_pert;
+        struct list_head sgtc_lists;
+
+        init_list_head(&sgtc_lists);
+
+        if (wake_all)
+        {
+            /*!< Transfer the waiting list and clear the old list */
+            list_head_splice_init(&sgtc_lists, sptr_head);
+        }
+        else
+        {
+            sptr_pwait = mr_list_first_entry(sptr_head, struct lock_waiter, sgtc_link);
+
+            list_head_del(&sptr_pwait->sgtc_link);
+            list_head_add_tail(&sgtc_lists, &sptr_pwait->sgtc_link);
+        }
+
+        foreach_list_next_entry_safe(sptr_pwait, sptr_temp, &sgtc_lists, sgtc_link) 
+        {
+            sptr_pert = mr_container_of(sptr_pwait, struct thread, sgtc_wait);
+            sptr_owns = &sptr_pert->sgtc_owners;
+            __unlock_pending_wakeup(sptr_pert, sptr_owns, sptr_pwait);
+        }
+    }
+}
+
+/*!
  * @brief   Compare the pending linked lists of all locks to obtain the highest priority
  * @param   sptr_owner
  * @retval  none
@@ -363,7 +414,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
     }
 
     /*!< Support inherit ? */
-    if (inherit_enable)
+    if (inherit_enable && sptr_rival)
     {
         struct lock_owners *sptr_rlowns;
         kuint32_t cur_prio, ori_prio, max_prio;
