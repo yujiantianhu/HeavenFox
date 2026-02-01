@@ -31,6 +31,8 @@ CONFIG_INSTRUCTION = arm
 
 # 0: amp; 1: smp
 CONFIG_CORE = 0
+# cpu core num
+CONFIG_CORE_NUM = 2
 
 # debug or release
 CONFIG_BUILD_TYPE = release
