@@ -256,8 +256,8 @@ struct fwk_inode *fwk_inode_find_disk(const kchar_t *name)
         return mr_nullptr;
 
     lenth = kstrlen(name);
-    if (*(name + lenth - 1) == '/')
-        return mr_nullptr;
+//  if (*(name + lenth - 1) == '/')
+//      return mr_nullptr;
 
     disk_name = (kchar_t *)kmalloc(lenth + 1, GFP_KERNEL);
     if (!isValid(disk_name))

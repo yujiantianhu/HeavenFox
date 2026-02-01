@@ -23,6 +23,7 @@
 /*!< The includes */
 #include <common/atomic_types.h>
 #include <kernel/kernel.h>
+#include <kernel/lock_common.h>
 
 /*!< The defines */
 typedef struct rw_lock
@@ -30,15 +31,13 @@ typedef struct rw_lock
     struct atomic sgtc_read;
     struct atomic sgtc_write;
 
-} srt_rw_lock_t;
+    struct lock_owner sgtc_rds;
+    struct lock_owner sgtc_wrs;
 
-#define RW_LOCK_INIT()					{ .sgtc_read = ATOMIC_INIT(), .sgtc_write = ATOMIC_INIT() }
+} srt_rw_lock_t;
 
 /*!< The functions */
 extern void rw_lock_init(struct rw_lock *sptr_lock);
-extern void rw_lock(struct rw_lock *sptr_lock);
-extern kint32_t rw_try_lock(struct rw_lock *sptr_lock);
-extern void rw_unlock(struct rw_lock *sptr_lock);
 
 extern void rd_lock(struct rw_lock *sptr_lock);
 extern kint32_t rd_try_lock(struct rw_lock *sptr_lock);
@@ -57,7 +56,7 @@ extern void wr_unlock(struct rw_lock *sptr_lock);
  */
 static inline kbool_t rd_is_locked(struct rw_lock *sptr_lock)
 {
-	return !!ATOMIC_READ(&sptr_lock->sgtc_read);
+    return !!atomic_get_val(&sptr_lock->sgtc_read);
 }
 
 /*!
@@ -68,7 +67,7 @@ static inline kbool_t rd_is_locked(struct rw_lock *sptr_lock)
  */
 static inline kbool_t wr_is_locked(struct rw_lock *sptr_lock)
 {
-	return !!ATOMIC_READ(&sptr_lock->sgtc_write);
+    return !!atomic_get_val(&sptr_lock->sgtc_write);
 }
 
 /*!

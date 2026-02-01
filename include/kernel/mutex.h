@@ -20,15 +20,15 @@
 /*!< The includes */
 #include <common/atomic_types.h>
 #include <kernel/kernel.h>
+#include <kernel/lock_common.h>
 
 /*!< The defines */
 typedef struct mutex_lock
 {
     struct atomic sgtc_atc;
+    struct lock_owner sgtc_owner;
 
 } srt_mutex_lock_t;
-
-#define MUTEX_LOCK_INIT()					{ .sgtc_atc = ATOMIC_INIT() }
 
 /*!< The functions */
 extern void mutex_init(struct mutex_lock *sptr_lock);
@@ -36,6 +36,7 @@ extern void mutex_lock(struct mutex_lock *sptr_lock);
 extern void mutex_wait(struct mutex_lock *sptr_lock);
 extern kint32_t mutex_try_lock(struct mutex_lock *sptr_lock);
 extern void mutex_unlock(struct mutex_lock *sptr_lock);
+extern void mutex_destroy(struct mutex_lock *sptr_lock);
 
 /*!< API functions */
 /*!
@@ -46,7 +47,7 @@ extern void mutex_unlock(struct mutex_lock *sptr_lock);
  */
 static inline kbool_t mutex_is_locked(struct mutex_lock *sptr_lock)
 {
-    return !!ATOMIC_READ(&sptr_lock->sgtc_atc);
+    return !!atomic_get_val(&sptr_lock->sgtc_atc);
 }
 
 #ifdef __cplusplus

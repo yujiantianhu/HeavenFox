@@ -35,6 +35,9 @@ CONFIG_BUILD_TYPE = release
 
 # -O0, -O1, -O2
 CONFIG_OPTIMIZE = 2
+
+# Test control
+CONFIG_TEST = y
 # ---------------------------------------------------------------
 
 # System Config

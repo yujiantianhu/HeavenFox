@@ -282,7 +282,7 @@ struct term_variable *term_variable_next(struct term_variable *sptr_var)
  * @retval  sptr_var
  * @note    none
  */
-struct term_variable *term_variable_allocate(const kchar_t *name, kint32_t *var)
+struct term_variable *term_variable_allocate(const kchar_t *name, kint32_t *var, kusize_t num)
 {
     struct term_variable *sptr_var;
 
@@ -295,6 +295,7 @@ struct term_variable *term_variable_allocate(const kchar_t *name, kint32_t *var)
 
     sprintk(sptr_var->name, "%s", name);
     sptr_var->var = var;
+    sptr_var->num = num;
 
     init_list_head(&sptr_var->sgtc_link);
     return sptr_var;
@@ -349,11 +350,11 @@ void term_variable_del(struct term_variable *sptr_var)
  * @retval  errno
  * @note    none
  */
-kint32_t term_variable_add_more(struct term_variable **sptr_var, kusize_t num)
+kint32_t term_variable_add_more(struct term_variable *sptr_var, kusize_t num)
 {
     for (kint32_t i = 0; i < num; i++)
     {
-        if (term_variable_add(sptr_var[i]))
+        if (term_variable_add(sptr_var + i))
             return -(i + 1);
     }
 
@@ -366,10 +367,10 @@ kint32_t term_variable_add_more(struct term_variable **sptr_var, kusize_t num)
  * @retval  none
  * @note    none
  */
-void term_variable_del_more(struct term_variable **sptr_var, kusize_t num)
+void term_variable_del_more(struct term_variable *sptr_var, kusize_t num)
 {
     for (kint32_t i = 0; i < num; i++)
-        term_variable_del(sptr_var[i]);
+        term_variable_del(sptr_var + i);
 }
 
 /*!

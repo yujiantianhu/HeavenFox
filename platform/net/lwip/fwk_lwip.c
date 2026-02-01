@@ -86,6 +86,7 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
     kuint32_t head_len;
     kuint16_t h_proto = 0, pakcet_num = 0;
     kssize_t transport_len = 0;
+    kutype_t flags;
 
     if (!sptr_buf->tot_len)
         return ERR_OK;
@@ -142,9 +143,9 @@ static err_t lwip_lowlevel_output(struct netif *sptr_netif, struct pbuf *sptr_bu
         /*!< copy pbuf to skb */
         memcpy(sptr_skb->data, sptr_per->payload, sptr_skb->len);
 
-        spin_lock_irqsave(&sptr_data->sgtc_lock);
+        spin_lock_irqsave(&sptr_data->sgtc_lock, &flags);
         fwk_skb_add_tail(&sptr_data->sgtc_txq, sptr_skb);
-        spin_unlock_irqrestore(&sptr_data->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_data->sgtc_lock, flags);
 
         pakcet_num++;
         goto END;
@@ -231,6 +232,7 @@ static void *fwk_lwip_tx_entry(void *args)
     struct fwk_lwip_data *sptr_data;
     struct fwk_sk_buff *sptr_skb;
     struct fwk_sk_buff_head sgtc_txq, *sptr_head;
+    kutype_t flags;
 
     sptr_netif = (struct netif *)args;
     sptr_if = (struct fwk_network_if *)sptr_netif->state;
@@ -243,17 +245,17 @@ static void *fwk_lwip_tx_entry(void *args)
     {
         while (true)
         {
-            spin_lock_irqsave(&sptr_data->sgtc_lock);
+            spin_lock_irqsave(&sptr_data->sgtc_lock, &flags);
             if (mr_skbuff_list_empty(sptr_head))
             {
-                spin_unlock_irqrestore(&sptr_data->sgtc_lock);
+                spin_unlock_irqrestore(&sptr_data->sgtc_lock, flags);
                 break;
             }        
 
             fwk_skb_split(&sgtc_txq, sptr_head);
             fwk_skb_list_init(sptr_head);
 
-            spin_unlock_irqrestore(&sptr_data->sgtc_lock);
+            spin_unlock_irqrestore(&sptr_data->sgtc_lock, flags);
 
             while ((sptr_skb = fwk_skb_dequeue(&sgtc_txq)))
                 fwk_dev_queue_xmit(sptr_skb);

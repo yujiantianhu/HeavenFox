@@ -582,6 +582,9 @@ kint32_t term_init(void)
 {
     struct thread_attr *sptr_attr = &sgtc_term_task_attr;
 
+    /*!< Initial notifier chain */
+    fwk_blocking_notifier_chain_init(&sgtc_pause_notifier_chain);
+
     /*!< Open console device */
     g_term_fd = virt_open(CONFIG_CONSOLE_DEVICE, O_RDWR);
     if (g_term_fd < 0)

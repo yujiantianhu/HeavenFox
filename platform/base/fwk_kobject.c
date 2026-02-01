@@ -45,7 +45,8 @@ static kint32_t fwk_kobject_join_to_kset(struct fwk_kobject *sptr_kobj)
             goto fail;
         }
 
-        if (!kstrcmp(sptr_kobj->name, sptr_each->name))
+        if ((sptr_kobj->is_dir == sptr_each->is_dir) &&
+            !kstrcmp(sptr_kobj->name, sptr_each->name))
         {
             retval = -ER_EXISTED;
             goto fail;
@@ -399,7 +400,7 @@ fail:
  * @brief   find kobject by directory path (name)
  * @param   sptr_head, name
  * @retval  kobject found
- * @note    dir: the format of name is "xxx/xxx", such as "dev/"; file: '/' should be moved, such as "dev"
+ * @note    dir: the format of name is "xxx/xxx", such as "dev/"; if is file: '/' should be moved, such as "dev"
  */
 struct fwk_kobject *fwk_find_kobject_by_path(struct fwk_kobject *sptr_head, const kchar_t *name)
 {
@@ -602,7 +603,7 @@ void fwk_kobject_put(struct fwk_kobject *sptr_kobj)
  * @retval  non-zero: using; 0: closed
  * @note    none
  */
-kbool_t fwk_kobject_is_referrd(struct fwk_kobject *sptr_kobj)
+kbool_t fwk_kobject_is_refered(struct fwk_kobject *sptr_kobj)
 {
     return !fwk_kref_is_zero(&sptr_kobj->sgtc_ref);
 }
@@ -643,6 +644,18 @@ struct fwk_kset *fwk_kset_create(const kchar_t *name, struct fwk_kobject *sptr_p
     sptr_kset->sgtc_kobj.sptr_kset = mr_nullptr;
 
     return sptr_kset;
+}
+
+/*!
+ * @brief   destory kset
+ * @param   sptr_kset
+ * @retval  none
+ * @note    none
+ */
+void fwk_kset_destroy(struct fwk_kset *sptr_kset)
+{
+    fwk_kobject_del_name(&sptr_kset->sgtc_kobj);
+    kfree(sptr_kset);
 }
 
 /*!
@@ -739,6 +752,69 @@ void fwk_kset_kobject_remove(struct fwk_kobject *sptr_kobj)
 struct fwk_kset *fwk_kset_get_root(void)
 {
     return &sgtc_fwk_kset_root;
+}
+
+/*!
+ * @brief   get first child object of kset
+ * @param   sptr_kset (if nullptr, sptr_kset = root)
+ * @retval  fwk_kobject
+ * @note    none
+ */
+struct fwk_kobject *fwk_kset_first_child(struct fwk_kset *sptr_kset)
+{
+    if (sptr_kset == mr_nullptr)
+        sptr_kset = fwk_kset_get_root();
+
+    if (mr_list_empty(&sptr_kset->sgtc_list))
+        return mr_nullptr;
+
+    return mr_list_first_entry(&sptr_kset->sgtc_list, struct fwk_kobject, sgtc_link);
+}
+
+/*!
+ * @brief   get next child object of kset, based on sptr_kobj
+ * @param   sptr_kset (if nullptr, return nullptr)
+ * @param   sptr_kobj (if nullptr, return nullptr; if go to end, return nullptr)
+ * @retval  fwk_kobject
+ * @note    none
+ */
+struct fwk_kobject *fwk_kset_next_child(struct fwk_kset *sptr_kset, struct fwk_kobject *sptr_kobj)
+{
+    if (!sptr_kset || !sptr_kobj)
+        return mr_nullptr;
+
+    if (mr_list_head_until(sptr_kobj, &sptr_kset->sgtc_list, sgtc_link))
+        return mr_nullptr;
+
+    return mr_list_next_entry(sptr_kobj, sgtc_link);
+}
+
+/*!
+ * @brief   get kset
+ * @param   sptr_head (default: root)
+ * @name    name: directory
+ * @retval  fwk_kset
+ * @note    none
+ */
+struct fwk_kset *fwk_find_kset_by_path(struct fwk_kobject *sptr_head, const kchar_t *name)
+{
+    struct fwk_kobject *sptr_kobj;
+    kchar_t *full_path;
+    kbool_t flag;
+
+    /*!< Add path symbol '/' to the end of name */
+    full_path = path_symbol_add(name, mr_nullptr, &flag);
+    if (!isValid(full_path))
+        return mr_nullptr;
+
+    /*!< Find path handler */
+    sptr_kobj = fwk_find_kobject_by_path(sptr_head, full_path);
+    path_symbol_release(full_path, flag);
+
+    if (!isValid(sptr_kobj))
+        return mr_nullptr;
+
+    return mr_fwk_kset_get(sptr_kobj);
 }
 
 /*!< ------------------------------------------------------- */

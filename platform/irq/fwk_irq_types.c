@@ -55,13 +55,14 @@ void *fwk_find_irq_action(kint32_t irq, const kchar_t *name, void *ptrDev)
 {
     struct fwk_irq_desc *sptr_desc;
     struct fwk_irq_action *sptr_action;
+    kutype_t flags;
     kint32_t retval = 0;
 
     sptr_desc = fwk_irq_to_desc(irq);
     if (!isValid(sptr_desc))
         return mr_nullptr;
 
-    spin_lock_irqsave(&sptr_desc->sgtc_lock);
+    spin_lock_irqsave(&sptr_desc->sgtc_lock, &flags);
 
     foreach_list_next_entry(sptr_action, &sptr_desc->sgtc_action, sgtc_link)
     {
@@ -70,12 +71,12 @@ void *fwk_find_irq_action(kint32_t irq, const kchar_t *name, void *ptrDev)
 
         if (!retval && (sptr_action->ptrArgs == ptrDev))
         {
-            spin_unlock_irqrestore(&sptr_desc->sgtc_lock);
+            spin_unlock_irqrestore(&sptr_desc->sgtc_lock, flags);
             return sptr_action;
         }
     }
 
-    spin_unlock_irqrestore(&sptr_desc->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_desc->sgtc_lock, flags);
     return mr_nullptr;
 }
 
@@ -98,7 +99,7 @@ static void *irq_thread(void *args)
          * even if the upper half irq handler is triggered multiple times, 
          * the bottom half is excuted only once
          */
-        ATOMIC_SET(&sptr_grp->sgtc_rec, 1);
+        atomic_set_val(&sptr_grp->sgtc_rec, 1);
 
         /*!
          * @note
@@ -111,7 +112,7 @@ static void *irq_thread(void *args)
 
             /*!< no additional judgement on whether thread_fn exsits */
             sptr_grp->thread_fn(sptr_grp->irq, sptr_grp->sgtc_action.ptrArgs);
-            if (!ATOMIC_READ(&sptr_grp->sgtc_rec))
+            if (!atomic_get_val(&sptr_grp->sgtc_rec))
                 break;
         }
 
@@ -134,6 +135,7 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
     struct fwk_irq_desc *sptr_desc;
     struct fwk_irq_action *sptr_action;
     kuint32_t len = kstrlen(name);
+    kutype_t lock_flags;
 
     if ((!name) || (!args))
         return -ER_FAULT;
@@ -158,7 +160,7 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
         goto fail;
 
     sptr_grp->tid = -1;
-    ATOMIC_SET(&sptr_grp->sgtc_rec, 0);
+    atomic_set_val(&sptr_grp->sgtc_rec, 0);
     sptr_grp->irq = irq;
     sptr_grp->thread_fn = thread_fn;
 
@@ -187,9 +189,9 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
     
     fwk_irq_set_type(irq, flags);
 
-    spin_lock_irqsave(&sptr_desc->sgtc_lock);
+    spin_lock_irqsave(&sptr_desc->sgtc_lock, &lock_flags);
     list_head_add_tail(&sptr_desc->sgtc_action, &sptr_action->sgtc_link);
-    spin_unlock_irqrestore(&sptr_desc->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_desc->sgtc_lock, lock_flags);
 
     fwk_enable_irq(irq);
 
@@ -222,6 +224,7 @@ void fwk_free_irq(kint32_t irq, void *args)
     struct fwk_irq_group *sptr_grp;
     struct fwk_irq_desc *sptr_desc;
     struct fwk_irq_action *sptr_action;
+    kutype_t flags;
 
     if ((irq < 0) || (!args))
         return;
@@ -237,9 +240,9 @@ void fwk_free_irq(kint32_t irq, void *args)
     {
         sptr_grp = mr_container_of(sptr_action, struct fwk_irq_group, sgtc_action);
 
-        spin_lock_irqsave(&sptr_desc->sgtc_lock);
+        spin_lock_irqsave(&sptr_desc->sgtc_lock, &flags);
         list_head_del(&sptr_action->sgtc_link);
-        spin_unlock_irqrestore(&sptr_desc->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_desc->sgtc_lock, flags);
 
         /*!< let irq_thread to sleep, and destroy it later (by "kernel_thread") */
         if (sptr_grp->tid >= 0)
@@ -260,12 +263,13 @@ void fwk_destroy_irq_action(kint32_t irq)
     struct fwk_irq_group *sptr_grp;
     struct fwk_irq_desc *sptr_desc;
     struct fwk_irq_action *sptr_action, *sptr_temp;
+    kutype_t flags;
 
     sptr_desc = fwk_irq_to_desc(irq);
     if (!isValid(sptr_desc))
         return;
 
-    spin_lock_irqsave(&sptr_desc->sgtc_lock);
+    spin_lock_irqsave(&sptr_desc->sgtc_lock, &flags);
 
     foreach_list_next_entry_safe(sptr_action, sptr_temp, &sptr_desc->sgtc_action, sgtc_link)
     {
@@ -279,7 +283,7 @@ void fwk_destroy_irq_action(kint32_t irq)
         kfree(sptr_grp);
     }
 
-    spin_unlock_irqrestore(&sptr_desc->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_desc->sgtc_lock, flags);
 }
 
 /*!

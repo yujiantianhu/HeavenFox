@@ -11,6 +11,7 @@
 
 obj-y	+=	fs_intr.o
 
+obj-y	+=	cmd/
 obj-y	+=	fatfs/
 
 # end of file

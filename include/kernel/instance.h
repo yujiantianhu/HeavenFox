@@ -26,6 +26,7 @@
 /*!< The functions */
 /*!< kernel */
 extern kint32_t rest_init(void);
+extern kint32_t debug_init(void);
 extern kint32_t kthread_init(void);
 extern kint32_t ksoftirqd_init(void);
 extern kint32_t kworker_init(void);

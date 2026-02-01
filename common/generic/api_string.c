@@ -864,6 +864,24 @@ kint32_t vasprintk(void *ptr_buf, const kchar_t *ptr_fmt, va_list sptr_list)
 }
 
 /*!
+ * @brief   vasprintk_limit
+ * @param   ptr_buf, ptr_fmt
+ * @retval  none
+ * @note    String format conversion
+ */
+kint32_t vasprintk_limit(void *ptr_buf, kusize_t limit_len, const kchar_t *ptr_fmt, va_list sptr_list)
+{
+    va_list sptr_copy;
+    kusize_t size;
+
+    va_copy(sptr_copy, sptr_list);
+    size = do_fmt_convert(ptr_buf, mr_nullptr, ptr_fmt, sptr_copy, limit_len);
+    va_end(sptr_copy);
+
+    return size;
+}
+
+/*!
  * @brief   sprintk
  * @param   ptr_buf, ptr_fmt
  * @retval  none

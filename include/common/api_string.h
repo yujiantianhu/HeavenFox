@@ -54,6 +54,7 @@ extern kusize_t do_fmt_convert(void *ptr_buf, kubyte_t *ptr_level, const kchar_t
 extern kchar_t *vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, va_list sptr_list);
 extern kchar_t *lv_vasprintk_safe(const kchar_t *ptr_fmt, kusize_t *size, kubyte_t *ptr_lv, va_list sptr_list);
 extern kint32_t vasprintk(void *ptr_buf, const kchar_t *ptr_fmt, va_list sptr_list);
+extern kint32_t vasprintk_limit(void *ptr_buf, kusize_t limit_len, const kchar_t *ptr_fmt, va_list sptr_list);
 extern kint32_t sprintk(void *ptr_buf, const kchar_t *ptr_fmt, ...);
 extern kint32_t sprintk_limit(void *ptr_buf, kusize_t limit_len, const kchar_t *ptr_fmt, ...);
 extern kchar_t *sprintk_safe(const kchar_t *ptr_fmt, ...);

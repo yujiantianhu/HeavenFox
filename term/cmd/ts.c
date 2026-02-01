@@ -63,15 +63,16 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
 {
     struct thread *sptr_thread;
     struct thread_attr *sptr_attr;
-    struct spin_lock *sptr_lock;
+    struct spin_lock *sptr_lock = scheduler_lock();
+    tid_t tid = -1;
+    kint32_t arg = 0;
+    kutype_t flags;
 
     switch (argc)
     {
         case 1:
             term_cmd_ts_title();
-
-            sptr_lock = scheduler_lock();
-            spin_lock_irqsave(sptr_lock);
+            spin_lock_irqsave(sptr_lock, &flags);
 
             /*!< 1. running */
             sptr_thread = mr_current;
@@ -106,12 +107,92 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
                         thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
             }
 
-            spin_unlock_irqrestore(sptr_lock);
+            spin_unlock_irqrestore(sptr_lock, flags);
             break;
 
         case 2:
             if (!kstrcmp(argv[1], "--help"))
                 sptr_cmd->help();
+            else if (!ascii_to_dec(argv[1], &tid))
+            {
+                sptr_thread = mr_tid_handle(tid);
+                if (!sptr_thread)
+                {
+                    printk("tid format is invalid or thread is not exsist\r\n");
+                    goto fail;
+                }
+
+                sptr_attr = sptr_thread->sptr_attr;
+                printk("thread name: %s\r\n"
+                       "tid: %d\r\n"
+                       "thread state ((1)running, (2)ready, (3)suspend, (4)sleep): %d\r\n"
+                       "original priority: %d\r\n"
+                       "real-time priority: %d\r\n"
+                       "time slice: %u(ms)\r\n"
+                       "time slice left: %u(ms)\r\n"
+                       "stack start: %#x\r\n"
+                       "stack size: %u(bytes)\r\n",
+                       sptr_thread->name, sptr_thread->tid, sptr_thread->state, 
+                       thread_get_ori_priority(sptr_attr), thread_get_priority(sptr_attr),
+                       thread_get_sched_msecs(sptr_attr), sptr_thread->expires, sptr_attr->stack_addr, sptr_attr->stacksize);
+            }
+            else
+                goto fail;
+
+            break;
+
+        case 4:
+            if (ascii_to_dec(argv[1], &tid) || ascii_to_dec(argv[3], &arg))
+                goto fail;
+
+            sptr_thread = mr_tid_handle(tid);
+            if (!sptr_thread)
+            {
+                printk("tid format is invalid or thread is not exsist\r\n");
+                goto fail;
+            }
+
+            sptr_attr = sptr_thread->sptr_attr;
+            if (!kstrcmp(argv[2], "-p"))
+            {
+                if (arg != __THREAD_CHECK_PRIO(arg))
+                {
+                    printk("priority is not invalid\r\n");
+                    goto fail;
+                }
+
+                if (arg != thread_get_ori_priority(sptr_attr))
+                {
+                    kuint32_t cur_prio;
+
+                    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
+                    cur_prio = thread_get_rt_priority(sptr_attr);
+                    thread_set_priority(sptr_attr, arg);
+
+                    /*!< Priority changed */
+                    if (cur_prio != thread_get_rt_priority(sptr_attr))
+                    {
+                        __SET_THREAD_TARGET_STATE(sptr_thread, __GET_THREAD_STATE(sptr_thread));
+                        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+
+                        /*!< Protect scheduler with scheduler-lock */
+                        spin_lock_irqsave(sptr_lock, &flags);
+                        schedule_thread_switch(sptr_thread);
+                        spin_unlock_irqrestore(sptr_lock, flags);
+                    }
+                    else
+                    {
+                        /*!< do nothing */
+                        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+                    }
+                }
+            }
+            else if (!kstrcmp(argv[2], "-t"))
+            {
+                spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
+                thread_set_time_slice(sptr_thread->sptr_attr, arg);
+                spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+            }
             else
                 goto fail;
 
@@ -136,7 +217,11 @@ fail:
  */
 static void term_cmd_ts_help(void)
 {
-    printk("usage: ts\r\n");
+    printk("usage: \r\n"
+           "    ts                      | list all threads\r\n"
+           "    ts [tid]                | list thread with the tid\r\n"
+           "    ts [tid] -p [argument]  | set thread's priority\r\n"
+           "    ts [tid] -t [argument]  | set thread's time slice\r\n");
 }
 
 /*!

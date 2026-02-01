@@ -113,8 +113,10 @@ u32_t sys_now(void)
  *---------------------------------------------------------------------------*/
 sys_prot_t sys_arch_protect( void )
 {
-    spin_lock_irqsave(&sgtc_lwip_lock);
-    return sgtc_lwip_lock.flag;
+    kutype_t flags;
+
+    spin_lock_irqsave(&sgtc_lwip_lock, &flags);
+    return flags;
 }
 
 /*---------------------------------------------------------------------------*
@@ -130,7 +132,7 @@ sys_prot_t sys_arch_protect( void )
  *---------------------------------------------------------------------------*/
 void sys_arch_unprotect( sys_prot_t xValue )
 {
-    spin_unlock_irqrestore(&sgtc_lwip_lock);
+    spin_unlock_irqrestore(&sgtc_lwip_lock, xValue);
 }
 
 /*-------------------------------------------------------------------------*

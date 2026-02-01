@@ -238,7 +238,7 @@ static void fwk_tasklet_action(kint32_t nr)
         sptr_list = sptr_list->sptr_next;
 
         /*!< Do tasklet */
-        if (ATOMIC_READ(&sptr_item->count))
+        if (atomic_get_val(&sptr_item->count))
         {
             sptr_item->func(sptr_item->data);
             atomic_dec(&sptr_item->count);
@@ -259,7 +259,7 @@ void fwk_tasklet_init(struct fwk_tasklet *sptr_tsk, void (*func)(kutype_t args),
     sptr_tsk->func = func;
     sptr_tsk->data = data;
     sptr_tsk->state = 0;
-    ATOMIC_SET(&sptr_tsk->count, 0);
+    atomic_set_val(&sptr_tsk->count, 0);
     sptr_tsk->sptr_next = mr_nullptr;
 }
 
@@ -277,7 +277,7 @@ void fwk_tasklet_schedule(struct fwk_tasklet *sptr_tsk)
     mr_local_irq_save(flags);
 
     /*!< Has scheduled and does not excute */
-    if (ATOMIC_READ(&sptr_tsk->count))
+    if (atomic_get_val(&sptr_tsk->count))
     {
         mr_local_irq_restore(flags);
         return;

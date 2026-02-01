@@ -20,7 +20,7 @@
 
 /*!< The globals */
 static DECLARE_LIST_HEAD(sgtc_fwk_dma_devices);
-static struct mutex_lock sgtc_fwk_dma_mutex = MUTEX_LOCK_INIT();
+static struct mutex_lock sgtc_fwk_dma_mutex;
 
 /*!< API functions */
 /*!
@@ -382,5 +382,32 @@ void fwk_dma_issue_pending(struct fwk_dma_chan *sptr_chan)
     if (sptr_chan->sptr_device->issue_pending)
         sptr_chan->sptr_device->issue_pending(sptr_chan);
 }
+
+/*!< --------------------------------------------------------------------------- */
+/*!
+ * @brief   dma init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+kint32_t __plat_init fwk_dma_global_init(void)
+{
+    mutex_init(&sgtc_fwk_dma_mutex);
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   dma exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __plat_exit fwk_dma_global_exit(void)
+{
+
+}
+
+IMPORT_LATE_INIT(fwk_dma_global_init);
+IMPORT_LATE_EXIT(fwk_dma_global_exit);
 
 /* end of file */

@@ -125,13 +125,14 @@ __信息 （如有需要可邮件联系）__
     - [10.8.5. 信号量](#1085-信号量)
   - [10.9. 线程间通信：邮箱](#109-线程间通信邮箱)
   - [10.10. 等待队列](#1010-等待队列)
-  - [10.11. 内核线程](#1011-内核线程)
-    - [10.11.1. idle](#10111-idle)
-    - [10.11.2. kthread](#10112-kthread)
-    - [10.11.3. init\_proc](#10113-init_proc)
-    - [10.11.4. kworker](#10114-kworker)
-    - [10.11.5. kmemp](#10115-kmemp)
-    - [10.11.6. irq\_thread](#10116-irq_thread)
+  - [10.11. 优先级继承](#1011-优先级继承)
+  - [10.12. 内核线程](#1012-内核线程)
+    - [10.12.1. idle](#10121-idle)
+    - [10.12.2. kthread](#10122-kthread)
+    - [10.12.3. init\_proc](#10123-init_proc)
+    - [10.12.4. kworker](#10124-kworker)
+    - [10.12.5. kmemp](#10125-kmemp)
+    - [10.12.6. irq\_thread](#10126-irq_thread)
 
 ---------------------------------------------------------
 ### 2. 前言
@@ -140,7 +141,7 @@ __信息 （如有需要可邮件联系）__
     01) 支持各级子目录及子文件自由选择是否参与编译, 由"obj-y"链接各源文件和目录;
     02) 支持程序链接脚本自动生成, 适配多种cpu配置;
     03) 支持"lib/"路径下第三方项目源码单独编译, 生成静态库文件并链接到内核镜像;
-    04) 支持内核配置自由化, 可通过创建和编写"configs/mach/xxxx_defconfig", 自动生成auto.conf and autoconf.h;
+    04) 支持内核配置自由化, 可通过创建和编写"configs/mach/xxxx_defconfig", 自动生成auto.conf和autoconf.h;
     05) 支持隐式初始化, 允许灵活加入或删除组件;
     06) 提供自定义内存池, 可由kmalloc和kfree申请和释放动态内存;
     07) 支持双向链表, 环形队列/缓冲区, 基数树, 红黑树;
@@ -183,6 +184,12 @@ __信息 （如有需要可邮件联系）__
 
 - 线程切换时间
     约12us。
+
+- ping主机耗时（经网卡）
+    约0.293ms
+
+- ping回环耗时
+    约0.296ms
 
 ---------------------------------------------------------
 ### 3. 终端命令
@@ -6113,7 +6120,7 @@ struct fwk_kobject *fwk_kobject_get(struct fwk_kobject *sptr_kobj);
 /* 引用计数 - 1 */
 void fwk_kobject_put(struct fwk_kobject *sptr_kobj);
 /* 判断引用计数是否非0 (表示被引用, 返回true) */
-kbool_t fwk_kobject_is_referrd(struct fwk_kobject *sptr_kobj);
+kbool_t fwk_kobject_is_refered(struct fwk_kobject *sptr_kobj);
 ```
 
 fwk_kset则十分简单，它只有两个成员，sgtc_kobj表示“目录也是一个对象”，并提供节点路径的通用属性；sgtc_list则用于联结本目录下的所有的节点（包括子目录、文件等）。
@@ -7211,6 +7218,11 @@ struct thread
     /*!< 每个任务的专属邮箱, 非必须 */
     struct mailbox *sptr_mb;
 
+    /*!< 表示哪些锁被本线程持有, 一个线程可能持有多个不同的锁 */
+    struct lock_owners sgtc_owners;     
+    /*!< 线程正在等待哪个锁, 一个线程只能等待一把锁; 当线程被一把锁阻塞时, 是不可能再去请求另一把锁的 */
+    struct lock_waiter sgtc_wait; 
+
     /*!< 私有参数, 一般保存sleep时的定时器事件指针 */
     void *time_event;
 };
@@ -7485,18 +7497,19 @@ HeavenFox的线程都需要从内存池申请，不允许全局定义。新线�
 tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count)
 {
     kuint32_t i;
+    kutype_t flags;
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     for (i = i_start; i < (i_start + count); i++)
     {
         if (!SCHED_THREAD_HANDLER(i))
         {
-            spin_unlock_irqrestore(&__SCHED_LOCK);
+            spin_unlock_irqrestore(&__SCHED_LOCK, flags);
             return i;
         }
     }
 
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
 
     return -ER_MORE;
 }
@@ -7507,6 +7520,7 @@ tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count)
 kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
 {
     struct thread_attr *sptr_it_attr;
+    kutype_t flags;
     kint32_t retval;
 
     sptr_it_attr = sptr_thread->sptr_attr;
@@ -7518,7 +7532,7 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     if (!sptr_it_attr->stack_addr)
         return -ER_NOMEM;
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     /*!< 保存线程指针到数组, 占有该tid */
     SCHED_THREAD_HANDLER(tid) = sptr_thread;
 
@@ -7538,13 +7552,13 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     {
         /*!< 添加失败 */
         SCHED_THREAD_HANDLER(tid) = mr_nullptr;
-        spin_unlock_irqrestore(&__SCHED_LOCK);
+        spin_unlock_irqrestore(&__SCHED_LOCK, flags);
         return retval;
     }
 
     /*!< 同步状态 */
     __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_READY);
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
 
     return ER_NORMAL;
 }
@@ -7704,8 +7718,9 @@ fail:
 struct thread *unregister_thread(tid_t tid)
 {
     struct thread *sptr_thread;
+    kutype_t flags;
 
-    spin_lock_irqsave(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
 
     /*!< 运行中的线程不准注销 */
     if ((tid < 0) || (tid == mr_current->tid))
@@ -7730,7 +7745,7 @@ struct thread *unregister_thread(tid_t tid)
     SCHED_THREAD_HANDLER(tid) = mr_nullptr;
 
 END:
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
     return sptr_thread;
 }
 
@@ -7772,31 +7787,44 @@ kint32_t thread_destory(tid_t tid)
     5）处于睡眠态的线程，可以切换为就绪/挂起；
 
 ```c
-kint32_t schedule_thread_switch(tid_t tid)
+kint32_t schedule_thread_switch(struct thread *sptr_thread)
 {
-    struct thread *sptr_thread;
+//  struct thread *sptr_thread;
+    tid_t tid;
     kuint32_t src, dst;
     kint32_t retval;
+    
+    /*!< Protected by caller, do not disable again */
+//  mr_preempt_disable();
 
-    /*!< 根据tid拿到thread */
-    sptr_thread = SCHED_THREAD_HANDLER(tid);
+//  sptr_thread = SCHED_THREAD_HANDLER(tid);
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
+    tid = sptr_thread->tid;
     src = sptr_thread->state;
     dst = sptr_thread->to_state;
 
-    /*!< 当前状态和目标状态一样, 无需切换 */
-    if (mr_unlikely(src == dst) || 
+    /*!<
+     * thread switch:
+     * (At all times, it is necessary to ensure that at least one thread (including idle threads) is running)
+     * running ---> ready/suspend/sleep
+     * ready ---> running/suspend/sleep
+     * suspend ---> ready/sleep
+     * sleep ---> ready/suspend
+     *
+     * (only running and ready state can be switched to any state)
+     */
+    if (mr_unlikely(((src == NR_THREAD_RUNNING) && (dst == NR_THREAD_RUNNING))) || 
         mr_unlikely(dst >= NR_THREAD_STATUS_MAX))
         goto fail;
 
-    /*!< 空闲线程只能切换为运行态或就绪态, 不允许挂起和睡眠 */
+    /*!< for idle thread, only ready and running state can be chosen */
     if ((tid == THREAD_TID_IDLE) && 
         mr_unlikely((dst != NR_THREAD_RUNNING) && (dst != NR_THREAD_READY)))
         goto fail;
 
-    /*!< 禁止在中断回调函数中令其他线程为运行态(这意味着当前线程要被挂起, 而中断返回时会回到该线程, 但该线程已经不在运行态, 引发错误) */
+    /*!< do not suspend self in interrupt */
     if (mr_unlikely(dst == NR_THREAD_RUNNING) && 
         mr_unlikely(IS_IN_INTERRUPT()))
         goto fail;
@@ -7972,7 +8000,7 @@ struct scheduler_context *__schedule_thread(void)
         __SET_THREAD_TARGET_STATE(sptr_prev, NR_THREAD_READY);
 
     /*!< 第一次调度时, 就绪态的线程迁移到运行态; 否则, 当前运行的线程迁移到目标态, 并从就绪列表获取可运行的线程. 该操作有可能失败 */
-    retval = schedule_thread_switch(sptr_prev->tid);
+    retval = schedule_thread_switch(sptr_prev);
     sptr_thread = SCHED_RUNNING_THREAD;
     if (mr_unlikely(retval < 0) || 
         mr_unlikely(!sptr_thread))
@@ -8217,14 +8245,15 @@ ENDPROC(__switch_to)
 void schedule_self_suspend(void)
 {
     struct thread *sptr_cur = SCHED_RUNNING_THREAD;
+    kutype_t flags;
 
-    spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     
     /*!< 防止错误地挂起别人家的线程 */
     if (mr_likely(__GET_THREAD_STATE(sptr_cur) == NR_THREAD_RUNNING))
         __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
 
-    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
     schedule_thread();
 }
 
@@ -8232,6 +8261,7 @@ void schedule_self_suspend(void)
 kint32_t schedule_thread_suspend(tid_t tid)
 {
     struct thread *sptr_thread;
+    kutype_t flags;
     kint32_t retval;
 
     /*!< 根据tid获取线程 */
@@ -8239,7 +8269,7 @@ kint32_t schedule_thread_suspend(tid_t tid)
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
 
     /*!< 设置线程目标态为挂起态 */
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SUSPEND);
@@ -8247,19 +8277,19 @@ kint32_t schedule_thread_suspend(tid_t tid)
     /*!< 竟然就是自己? */
     if (mr_unlikely(__GET_THREAD_STATE(sptr_thread) == NR_THREAD_RUNNING))
     {
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         /*!< Self suspend */
         schedule_thread();
         return ER_NORMAL;
     }
 
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
     /*!< 切换状态 */
-    spin_lock_irqsave(&__SCHED_LOCK);
-    retval = schedule_thread_switch(tid);
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
+    retval = schedule_thread_switch(sptr_thread);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
     
     return retval;
 }
@@ -8271,6 +8301,7 @@ kint32_t schedule_thread_wakeup(tid_t tid)
 {
     struct thread *sptr_thread;
     kuint32_t state;
+    kutype_t flags;
     kint32_t retval;
 
     /*!< 根据tid获取线程 */
@@ -8278,13 +8309,13 @@ kint32_t schedule_thread_wakeup(tid_t tid)
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
 
     /*!< 已经在运行, 无需唤醒 */
     if (sptr_thread == SCHED_RUNNING_THREAD)
     {
         __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_RUNNING);
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         return -ER_FORBID;
     }
@@ -8294,18 +8325,18 @@ kint32_t schedule_thread_wakeup(tid_t tid)
     if ((state != NR_THREAD_SUSPEND) &&
         (state != NR_THREAD_SLEEP))
     {
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
         return -ER_INVALID;
     }
 
     /*!< 唤醒, 即线程从挂起/睡眠态转变为就绪态 */
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_READY);
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
     /*!< 切换状态 */
-    spin_lock_irqsave(&__SCHED_LOCK);
-    retval = schedule_thread_switch(tid);
-    spin_unlock_irqrestore(&__SCHED_LOCK);
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
+    retval = schedule_thread_switch(sptr_thread);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
 
     return retval;
 }
@@ -8320,6 +8351,7 @@ void schedule_timeout(kutime_t count)
     struct ktime_event sgtc_event;
     struct timer_list *sptr_tm = &sgtc_event.u.sgtc_tm;
     struct thread *sptr_cur = mr_current;
+    kutype_t flags;
 
     /*!< count为0, 允许切换到就绪态 */
     if (!count) {
@@ -8334,11 +8366,11 @@ void schedule_timeout(kutime_t count)
     setup_timer(sptr_tm, thread_sleep_timeout, (kuint32_t)&sgtc_event);
 
     /*!< 设置当前线程目标态为挂起态 */
-    spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     sptr_cur->time_event = (void *)&sgtc_event;
     __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
     mr_preempt_disable();
-    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
 
     /*!< 启动定时器, 定时时长为count (单位: jiffies); 中间需关闭抢占, 否则抢占可能在mod_timer之前发生, 从而使线程提前挂起, 而无法被唤醒 */
     mod_timer(sptr_tm, jiffies + count);
@@ -8360,24 +8392,25 @@ static void thread_sleep_timeout(kuint32_t args)
     struct ktime_event *sptr_event = (struct ktime_event *)args;
     struct thread *sptr_thread = sptr_event->sptr_cur;
     kuint32_t status, to_status;
+    kutype_t flags;
 
     if (mr_unlikely(!sptr_thread))
         return;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
     status = __GET_THREAD_STATE(sptr_thread);
     to_status = __GET_THREAD_TARGET_STATE(sptr_thread);
 
     /*!< 确认线程是否在挂起态, 若是, 表明schedule_timeout已经执行完成, 可执行唤醒操作 */
     if (status == NR_THREAD_SUSPEND)
     {
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         /*!< 唤醒, 可能失败; 若返回-ER_NODEV, 说明线程不需要唤醒 */
         if ((-ER_NODEV) == schedule_thread_wakeup(sptr_thread->tid))
             return;
 
-        spin_lock_irqsave(&sptr_thread->sgtc_lock);
+        spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
 
         /*! 再次获取状态 */
         status = __GET_THREAD_STATE(sptr_thread);
@@ -8386,12 +8419,12 @@ static void thread_sleep_timeout(kuint32_t args)
     else if (to_status == NR_THREAD_SUSPEND)
     {
         __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_NONE);
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         return;
     }
 
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
     /*!< state确实曾经在挂起态, 但唤醒失败. 若status还处于挂起/睡眠, 继续定时, 下次再唤醒 */ 
     if ((status != NR_THREAD_READY) &&
@@ -8624,15 +8657,14 @@ void local_irq_restore(kutype_t *flags);
 typedef struct spin_lock
 {
     struct atomic sgtc_atc;                             /*!< 计数器使用原子变量 */
-    kuint32_t flag;                                     /*!< 用于保存加锁前上下文, 尤其是针对关中断的场景 */
 
 } srt_spin_lock_t;
 
 #define DECLARE_SPIN_LOCK(lock) \
-    struct spin_lock lock = { .sgtc_atc = ATOMIC_INIT(), .flag = 0 }
+    struct spin_lock lock = { .sgtc_atc = ATOMIC_INIT() }
 
 #define SPIN_LOCK_INIT()    \
-    { .sgtc_atc = ATOMIC_INIT(), .flag = 0 }
+    { .sgtc_atc = ATOMIC_INIT() }
 ```
 
 使用如下API就可以调用它：
@@ -8654,11 +8686,11 @@ kint32_t spin_try_lock_irq(struct spin_lock *sptr_lock);
 /* 解锁, 并暴力开启中断(慎用) */
 void spin_unlock_irq(struct spin_lock *sptr_lock);
 /* 加锁, 成功后先获取当前中断状态, 然后再关闭中断 */
-void spin_lock_irqsave(struct spin_lock *sptr_lock);
+void spin_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags);
 /* 尝试加锁, 成功后先获取当前中断状态, 然后再关闭中断 */
-kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock);
+kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags);
 /* 解锁, 并恢复加锁前的中断状态 */
-void spin_unlock_irqrestore(struct spin_lock *sptr_lock);
+void spin_unlock_irqrestore(struct spin_lock *sptr_lock, kutype_t flags);
 /* 软中断使用. 先禁用软中断, 再加锁(不关闭中断) */
 void spin_lock_bh(struct spin_lock *sptr_lock);
 /* 软中断使用. 先解锁, 再恢复软中断 */
@@ -8676,10 +8708,9 @@ void spin_unlock_bh(struct spin_lock *sptr_lock);
 typedef struct mutex_lock
 {
     struct atomic sgtc_atc;                 /* 和自旋锁一样, 互斥锁也是一个计数器, 为0时锁空闲, 大于0时锁被持有 */
+    struct lock_owner sgtc_owner;           /* 标记锁的持有者, 以及被本锁阻塞的线程链表(pending list) */
 
 } srt_mutex_lock_t;
-
-#define MUTEX_LOCK_INIT()           { .sgtc_atc = ATOMIC_INIT() }
 
 /* 判断是否已经上锁 */
 kbool_t mutex_is_locked(struct mutex_lock *sptr_lock);
@@ -8981,8 +9012,128 @@ __wait_event则负责定义一个等待队列项（局部变量），并插入�
     } while (0)
 ```
 
-#### 10.11. 内核线程
-##### 10.11.1. idle
+#### 10.11. 优先级继承
+线程在运行时可能会发生优先级反转：低优先级线程持有锁，且被阻塞，导致高优先级线程无法获得锁，最终高优先级线程也阻塞，只能等待低优先级线程解决阻塞后释放锁。在此情况下，高优先级线程的“优先级被迫拉低”，甚至不如低优先级线程，即“优先级反转”。
+HeavenFox内核针对此现象，引入优先级继承机制，即：高优先级线程无法获得锁时，将调整持有锁的线程优先级，使之与高优先级线程的优先级相同；持有锁的低优先级线程“继承”了高优先级线程的优先级，使其暂时可以优先执行。优先级继承由结构体lock_owner、lock_owners、lock_waiter共同完成，我们在“互斥锁”一章中，互斥锁结构体“mutex_lock”的成员之一，即结构体lock_owner；而另外两个成员，则位于线程控制块“struct thread”结构体中。
+```c
+struct thread
+{
+    /*!< 线程名字: 每个线程都有独一无二的名字 */
+    kchar_t name[32];
+
+    /*!< 线程id: 每个线程都有独一无二的id */
+    kuint32_t tid;
+
+    /*!< state为当前状态(运行, 就绪, 挂起, 睡眠); to_state为目标状态, 当它非0时, 表示即将进行状态迁移 */
+    kuint32_t state;
+    kuint32_t to_state;
+
+    /*!< 省略部分内容 ... */
+
+    /*!< 表示哪些锁被本线程持有, 一个线程可能持有多个不同的锁 */
+    struct lock_owners sgtc_owners;     
+    /*!< 线程正在等待哪个锁, 一个线程只能等待一把锁; 当线程被一把锁阻塞时, 是不可能再去请求另一把锁的 */
+    struct lock_waiter sgtc_wait; 
+
+    /*!< 私有参数, 一般保存sleep时的定时器事件指针 */
+    void *time_event;
+};
+
+typedef struct mutex_lock
+{
+    struct atomic sgtc_atc;                 /* 和自旋锁一样, 互斥锁也是一个计数器, 为0时锁空闲, 大于0时锁被持有 */
+    struct lock_owner sgtc_owner;           /* 标记锁的持有者, 以及被本锁阻塞的线程链表(pending list) */
+
+} srt_mutex_lock_t;
+```
+
+它们的定义为：
+```c
+/*!< 锁的持有者; 一把锁只能被一个线程持有 */
+struct lock_owner 
+{
+    struct thread *sptr_self;
+    /*!<  关联到线程; 1个线程可以持有多个锁, 使用本成员进行连接, 链表头位于: struct lock_owners::sgtc_gets */
+    struct list_head sgtc_link;         
+
+    /*!< 保护sgtc_pendings */
+    struct spin_lock sgtc_lock;         
+    /*!< 1把锁只能被1个线程持有, 其他请求本锁的线程视为等待者, 形成pending链表; 这里是链表头 */
+    struct list_head sgtc_pendings;     
+};
+
+/*!< 线程持有锁的信息 */
+struct lock_owners 
+{
+    /*!< 保护sgtc_gets */
+    struct spin_lock sgtc_lock;         
+    /*!< 1个线程可以持有多个锁, 形成gets链表; 这里是链表头 */
+    struct list_head sgtc_gets;         
+};
+
+/*!< 锁请求和等待; 1把锁可以被多个线程请求, 每个求而不得的线程都视为1个锁等待者 */
+struct lock_waiter 
+{
+    /*!< 正在等待的锁 (线程正在被阻塞的地方) */
+    struct lock_owner *sptr_wait;       
+    /*!< 关联到锁的pending链表 (struct lock_owner::sgtc_pendings) */
+    struct list_head sgtc_link;         
+};
+```
+
+内核的加锁流程为：
+```Mermaid
+graph TD
+    A[线程请求锁：mutex_lock] --> B[锁空闲]
+    B --> |是| C
+    B --> |否| D
+    C[锁计数器自增，并将锁添加到线程的持有锁链表：sgtc_gets] --> E[加锁成功]
+    D[将本线程按优先级高低添加到锁的等待链表：sgtc_pendings] --> F[从等待链表中取出第一个等待者，即优先级最高者]
+    F --> G[持有锁的线程优先级比等待者低]
+    G --> |是| I
+    G --> |否| H
+    H[锁持有者优先级更高，无需调整，直接返回]
+    I[锁持有者优先级更低，需变更持有者线程的优先级，与优先级最高的等待者一致] --> J[重新调整持有者线程在调度链表中的位置，等待下一次调度]
+    H --> K[将本线程（等待者）挂起，等待锁释放后唤醒]
+    J --> K
+```
+
+解锁时需要将等待者唤醒，重新竞争锁。流程为：
+```Mermaid
+graph TD
+    A[锁持有者释放锁：mutex_unlock] --> B[锁空闲，或请求解锁的线程（本线程）并非锁的持有者]
+    B --> |是| C
+    B --> |否| D
+    C[无需解锁，直接返回]
+    D[锁计数器自减，并将锁从本线程的持有锁链表（sgtc_gets）移除] --> E[重新计算本线程的优先级，需考虑本线程是否还持有其他锁，仍然要根据其他锁的等待者链表取最高优先级]
+    E[设置本线程的当前优先级，但无需调整调度链表，因为本线程正在运行] --> F[将本锁的等待者链表（sgtc_pendings）中的第一个线程唤醒（优先级最高者）]
+    F --> G[结束]
+```
+
+锁竞争（添加等待者链表、计算最高优先级）和锁释放（脱离等待者链表、计算解锁后的最高优先级），由以下几个重要函数完成，互斥锁可直接调用，实现优先级继承功能（可选）。
+```c
+/* 将pending链表上的等待者唤醒, 同时从pending链表删除; wake_all可选: true(唤醒全部线程), false(只唤醒第一个, 即优先级最高者) */
+void unlock_pending_wakeup(struct lock_owner *sptr_owner, kbool_t wake_all);
+/* 从线程所有锁的pending链表中选出优先级最高者, 并返回其优先级值 */
+kuint32_t lock_find_max_priority(struct lock_owners *sptr_owners);
+/* 初始化锁 */
+void lock_context_init(struct lock_owner *sptr_owner);
+/* 本线程获得锁, 将锁添加到线程的持有锁链表(sgtc_gets), 并视本线程为锁的持有者 */
+void lock_context_save(struct lock_owner *sptr_owner);
+/* lock_context_save的反操作, 将锁从sgtc_gets链表中剔除 */
+void unlock_context_restore(struct lock_owner *sptr_owner);
+
+/* 锁竞争; 只由求而不得的等待者可以调用, 用于: 将等待者添加到锁的pending链表, 并选出最高优先级, 设置锁持有者线程的优先级, 调整持有者在调度链表中的顺序(按优先级排序) */
+/* sgtc_atc: 用于内部二次判别, 只有锁计数器确实非空闲时, 才需要竞争; inherit_enable: true (允许优先级继承), false (禁用优先级继承, 该选项不会计算最高优先级和调整调度链表) */
+kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sgtc_atc, kbool_t inherit_enable);
+/* 仅在inherit_enable为true时有效, 用于重新挑选并设置本线程优先级 */
+kint32_t unlock_release(struct thread *sptr_self, kbool_t inherit_enable);
+```
+
+详见内核代码“kernel/mutex.c”互斥锁的用法。
+
+#### 10.12. 内核线程
+##### 10.12.1. idle
 idle（空闲）线程是内核的兜底线程，只要调度开启、CPU在运转，空闲线程就会一直在运行态和就绪态之间切换，不会挂起，也无法睡眠，更不可能被杀死。
 这意味着：即使用户线程和除空闲线程以外的所有内核线程都处于挂起或睡眠态，内核也能通过执行空闲线程而不会被终止。
 空闲线程的id为0，但优先级最低，除非其他线程都歇菜，否则不可能轮得到空闲线程运行。而它的功能也很简单，就是努力让自己切换成就绪态：
@@ -9002,7 +9153,7 @@ static void *rest_entry(void *args)
 }
 ```
 
-##### 10.11.2. kthread
+##### 10.12.2. kthread
 空闲线程的id虽然为0，但它却不是内核创建的第一个线程。内核中最重要的线程是kthread，也是第一个被创建的任务，它负责：
 > 1）创建线程定时监视任务，每过一个系统节拍检查一次当前线程的时间片，及是否满足抢占条件；
 > 2）处理平台、设备和驱动程序的隐式初始化，注册平台设备和驱动组件；
@@ -9014,14 +9165,14 @@ static void *rest_entry(void *args)
 这里的线程定时监视任务，即“抢占”一章中提及的kthread_schedule_timeout函数；而几乎所有的驱动程序，都要由kthread调用驱动程序初始化入口，从而完成总线-设备-驱动的probe机制。
 此外，kthread负责销毁无用线程，而在HeavenFox中，线程如果处于睡眠态，将被当成无用线程，将面临被清理的结局。
 
-##### 10.11.3. init_proc
+##### 10.12.3. init_proc
 线程init_proc由kthread创建，但kthread仅管理已知的内核线程，而用户线程交由init_proc负责。
 init_proc的工作目前较为简单：
 1）执行所有C++的全局构造函数；
 2）创建网络回环设备节点；
 3）创建用户线程（自定义，可创建如显示、环境传感器、触摸屏、按键等任务）
 
-##### 10.11.4. kworker
+##### 10.12.4. kworker
 内核中有一个特殊的线程，名为工作者线程，其他线程可以通过注册工作队列，再由工作者线程提取，异步执行。
 工作者线程拥有极高的优先级，当其他线程希望某个任务可以尽快被执行，或者中断回调函数觉得某段代码过于复杂，希望由线程上下文来处理，就可以通过工作队列，安排给工作者线程。
 
@@ -9111,7 +9262,7 @@ void schedule_work(struct workqueue *sptr_wq)
 
 线程将从队列中读出每个工作项，并一一执行其回调函数。
 
-##### 10.11.5. kmemp
+##### 10.12.5. kmemp
 kmemp线程主要负责内存管理工作。内核允许申请的内存可以异步释放，即：线程a从内存池申请内存，用完后调用释放函数，但并不是立即释放，而是进行标记；待kmemp线程恢复运行，再统一释放的这些被标记的内存块。这样线程a无需再耗费时间去归还内存块。
 要使用kmemp线程，要求内存申请和释放使用特定函数接口：
 ```c
@@ -9143,7 +9294,7 @@ struct fwk_memp_list
 要释放的内存块通过sptr_next进行连接，最终链到kmemp定义的全局链表sgtc_kmemp_list_head中，kmemp线程只需不断读取sgtc_kmemp_list_head的sptr_next，便可获得需要释放的内存块，再调用struct fwk_memp_list::release将其真正地释放。
 Heavenfox支持C++创建用户线程，而内存分配接口new和free则分别被重载为fwk_malloc和fwk_free。
 
-##### 10.11.6. irq_thread
+##### 10.12.6. irq_thread
 除工作者线程外，中断中复杂的代码也可以交由中断线程irq_thread来处理。不同于工作者线程，中断线程只为中断回调函数服务，是名副其实的中断下半部。
 申请中断可以使用特定的接口fwk_request_threaded_irq：
 ```c

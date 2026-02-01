@@ -26,7 +26,7 @@
 
 /*!< The globals */
 static DECLARE_LIST_HEAD(sgtc_kernel_mailboxs);
-static struct mutex_lock sgtc_mailbox_mutex = MUTEX_LOCK_INIT();
+static struct mutex_lock sgtc_mailbox_mutex;
 
 /*!< API functions */
 /*!
@@ -265,13 +265,19 @@ kint32_t mail_send(const kchar_t *mb_name, struct mail *sptr_mail)
     kuint8_t *buffer;
     kuint32_t msg_idx;
     kusize_t msg_size, size;
+    kuint32_t thread_state;
 
     if (mr_unlikely(!sptr_mail) || mr_unlikely(!sptr_mail->sptr_msg))
         return -ER_NOMEM;
 
     sptr_mb = mailbox_find(mb_name);
-    if (!isValid(sptr_mb))
+    if (!isValid(sptr_mb) || (sptr_mb->tid < 0))
         return PTR_ERR(sptr_mb);
+
+    /*!< if thread is in sleep or zombie, it will not receive any mail */
+    thread_state = __GET_THREAD_STATE(mr_tid_handle(sptr_mb->tid));
+    if ((thread_state == NR_THREAD_SLEEP) || (thread_state == NR_THREAD_ZOMBIE))
+        return -ER_FORBID;
 
     size = sizeof(*sptr_mail);
     size = mr_align(size, 8);
@@ -379,5 +385,32 @@ void mail_recv_finish(struct mail *sptr_mail)
 
     kfree(sptr_mail);
 }
+
+/*!< ------------------------------------------------------------------------- */
+/*!
+ * @brief   mailbox init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+kint32_t __plat_init mailbox_global_init(void)
+{
+    mutex_init(&sgtc_mailbox_mutex);
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   mailbox exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void __plat_exit mailbox_global_exit(void)
+{
+
+}
+
+IMPORT_KERNEL_INIT(mailbox_global_init);
+IMPORT_KERNEL_EXIT(mailbox_global_exit);
 
 /*!< end of file */

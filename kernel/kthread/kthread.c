@@ -22,7 +22,7 @@
 #define KERL_THREAD_STACK_SIZE                          THREAD_STACK_PAGE(2)   /*!< 2 page (8 kbytes) */
 
 /*!< The globals */
-kbool_t g_sched_flag = false;
+kuint32_t g_sched_flag = false;
 
 static struct thread_attr sgtc_kthread_attr;
 static THREAD_STACK_DEFINE(g_kthread_stack, KERL_THREAD_STACK_SIZE);
@@ -41,13 +41,14 @@ static kuint8_t g_kthread_log_buffer[4096];
 static void kthread_schedule_timeout(kuint32_t args)
 {
     struct timer_list *sptr_tim = (struct timer_list *)args;
+    struct spin_lock *sptr_lock = scheduler_lock();
     struct thread *sptr_work, *sptr_ready;
     kuint32_t work_prio, next_prio;
+    kutype_t flags;
 
+    /*!< disable global scheduler */
+    spin_lock_irqsave(sptr_lock, &flags);
     sptr_work = mr_current;
-
-    /*!< mr_preempt_cnt() += 1 */
-    spin_lock(&sptr_work->sgtc_lock);
     
     /*!< --------------------------------------------------------- */
     /*!< reduce time-slice */
@@ -64,8 +65,8 @@ static void kthread_schedule_timeout(kuint32_t args)
     if (!sptr_ready)
         goto END;
 
-    work_prio = thread_get_priority(sptr_work->sptr_attr);
-    next_prio = thread_get_priority(sptr_ready->sptr_attr);
+    work_prio = thread_get_rt_priority(sptr_work->sptr_attr);
+    next_prio = thread_get_rt_priority(sptr_ready->sptr_attr);
    
 #if CONFIG_PREEMPT
     /*!< there is a higher priority thread ready, or time slice is zero && the same priority thread ready */
@@ -82,7 +83,7 @@ static void kthread_schedule_timeout(kuint32_t args)
 #endif
     
 END:
-    spin_unlock(&sptr_work->sgtc_lock);
+    spin_unlock_irqrestore(sptr_lock, flags);
     mod_timer(sptr_tim, jiffies + 1);
 }
 
@@ -105,6 +106,20 @@ static void kthread_systime_record(void)
 }
 
 /*!
+ * @brief	manage sleep thread
+ * @param  	none
+ * @retval 	none
+ * @note   	none
+ */
+static void kthread_due_sleep(void)
+{
+    struct thread *sptr_thread = mr_nullptr;
+
+    while ((sptr_thread = next_sleep_thread(sptr_thread)))
+        thread_quit(sptr_thread->tid);
+}
+
+/*!
  * @brief	manage zombie thread
  * @param  	none
  * @retval 	none
@@ -112,10 +127,15 @@ static void kthread_systime_record(void)
  */
 static void kthread_kill_zombie(void)
 {
-    struct thread *sptr_thread = mr_nullptr;
+    struct thread *sptr_thread, *sptr_next;
 
-    while ((sptr_thread = next_sleep_thread(sptr_thread)))
+    for (sptr_thread = get_first_zombie_thread(), sptr_next = mr_nullptr;
+         sptr_thread;
+         sptr_thread = sptr_next)
+    {
+        sptr_next = next_zombie_thread(sptr_thread);
         thread_destory(sptr_thread->tid);
+    }
 }
 
 /*!
@@ -156,9 +176,14 @@ static void *kthread_entry(void *args)
     init_proc_init();                       /*!< create init task */
     print_info("kernel thread initial finished\r\n");
 
+#ifdef CONFIG_TEST
+    debug_init();                           /*!< create debug test task */
+#endif
+
     for (;;)
     {
         kthread_systime_record();
+        kthread_due_sleep();                /*!< due sleep thread */
         kthread_kill_zombie();              /*!< kill zombie thread */
         
         /*!< Print logs */

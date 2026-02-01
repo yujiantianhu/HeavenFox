@@ -25,13 +25,15 @@
 typedef struct semaphore
 {
 	struct atomic sgtc_atc;
+	kuint32_t init_val;
+
+	struct lock_owner sgtc_rec;
 
 } srt_semaphore_t;
 
-#define SEMAPHORE_INITIALIZE()	\
-{ 	\
-	.sgtc_atc = ATOMIC_INIT()	\
-}
+#define mr_sem_get(_sptr_sem)			atomic_get_val(&((_sptr_sem)->sgtc_atc))
+#define mr_sem_inc(_sptr_sem)			do { atomic_inc(&((_sptr_sem)->sgtc_atc)); mr_barrier(); } while (0)
+#define mr_sem_dec(_sptr_sem)			do { atomic_dec(&((_sptr_sem)->sgtc_atc)); mr_barrier(); } while (0)
 
 /*!< The functions */
 extern void sema_init(struct semaphore *sptr_sem, kuint32_t val);
@@ -48,7 +50,7 @@ extern void sema_up(struct semaphore *sptr_sem);
  */
 static inline kbool_t sema_is_locked(struct semaphore *sptr_sem)
 {
-	return (0 == ATOMIC_READ(&sptr_sem->sgtc_atc));
+	return (0 == atomic_get_val(&sptr_sem->sgtc_atc));
 }
 
 #ifdef __cplusplus

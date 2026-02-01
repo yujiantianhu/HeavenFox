@@ -30,8 +30,9 @@ static struct spin_lock sgtc_irq_domain_lock = SPIN_LOCK_INIT();
 struct fwk_irq_domain *fwk_of_irq_host(struct fwk_device_node *sptr_node)
 {
     struct fwk_irq_domain *sptr_domain, *found = mr_nullptr;
+    kutype_t flags;
 
-    spin_lock_irqsave(&sgtc_irq_domain_lock);
+    spin_lock_irqsave(&sgtc_irq_domain_lock, &flags);
 
     foreach_list_next_entry(sptr_domain, &sgtc_fwk_irq_domain, sgtc_link)
     {
@@ -42,7 +43,7 @@ struct fwk_irq_domain *fwk_of_irq_host(struct fwk_device_node *sptr_node)
         }
     }
 
-    spin_unlock_irqrestore(&sgtc_irq_domain_lock);
+    spin_unlock_irqrestore(&sgtc_irq_domain_lock, flags);
     return found;
 }
 
@@ -173,6 +174,7 @@ struct fwk_irq_domain *fwk_irq_domain_add_linear(struct fwk_device_node *sptr_no
                                                  const struct fwk_irq_domain_ops *sptr_ops, void *host_data)
 {
     struct fwk_irq_domain *sptr_domain;
+    kutype_t flags;
 
     /*!< extra size, with hard interrupt number as index and soft interrupt number as value */
     sptr_domain = (struct fwk_irq_domain *)kzalloc(sizeof(struct fwk_irq_domain) + sizeof(kint32_t) * size, GFP_KERNEL);
@@ -187,9 +189,9 @@ struct fwk_irq_domain *fwk_irq_domain_add_linear(struct fwk_device_node *sptr_no
     for (kuint32_t i = 0; i < size; i++)
         sptr_domain->revmap[i] = -1;
 
-    spin_lock_irqsave(&sgtc_irq_domain_lock);
+    spin_lock_irqsave(&sgtc_irq_domain_lock, &flags);
     list_head_add_tail(&sgtc_fwk_irq_domain, &sptr_domain->sgtc_link);
-    spin_unlock_irqrestore(&sgtc_irq_domain_lock);
+    spin_unlock_irqrestore(&sgtc_irq_domain_lock, flags);
 
     return sptr_domain;
 }
@@ -223,14 +225,16 @@ struct fwk_irq_domain *fwk_irq_domain_add_hierarchy(struct fwk_irq_domain *sptr_
  */
 void fwk_irq_domain_del_hierarchy(struct fwk_irq_domain *sptr_domain)
 {
+    kutype_t flags;
+
     if (!sptr_domain)
         return;
 
     fwk_irq_domain_free_irqs(sptr_domain);
 
-    spin_lock_irqsave(&sgtc_irq_domain_lock);
+    spin_lock_irqsave(&sgtc_irq_domain_lock, &flags);
     list_head_del(&sptr_domain->sgtc_link);
-    spin_unlock_irqrestore(&sgtc_irq_domain_lock);
+    spin_unlock_irqrestore(&sgtc_irq_domain_lock, flags);
 }
 
 /*!
@@ -242,21 +246,22 @@ void fwk_irq_domain_del_hierarchy(struct fwk_irq_domain *sptr_domain)
 struct fwk_irq_domain *fwk_irq_get_domain_by_name(kchar_t *name, kint32_t hwirq)
 {
     struct fwk_irq_domain *sptr_domain;
+    kutype_t flags;
     kint32_t retval;
 
-    spin_lock_irqsave(&sgtc_irq_domain_lock);
+    spin_lock_irqsave(&sgtc_irq_domain_lock, &flags);
 
     foreach_list_next_entry(sptr_domain, &sgtc_fwk_irq_domain, sgtc_link)
     {
         retval = sptr_domain->name && (!kstrcmp(sptr_domain->name, name));
         if (retval && (hwirq < sptr_domain->hwirq_max))
         {
-            spin_unlock_irqrestore(&sgtc_irq_domain_lock);
+            spin_unlock_irqrestore(&sgtc_irq_domain_lock, flags);
             return sptr_domain;
         }
     }
 
-    spin_unlock_irqrestore(&sgtc_irq_domain_lock);
+    spin_unlock_irqrestore(&sgtc_irq_domain_lock, flags);
     return mr_nullptr;
 }
 

@@ -344,6 +344,7 @@ void add_timer(struct timer_list *sptr_timer)
 {
     struct ktime_tick *sptr_list;
     struct spin_lock *sptr_lock;
+    kutype_t flags;
 
     if ((!isValid(sptr_timer)) || 
         (!sptr_timer->expires))
@@ -352,9 +353,9 @@ void add_timer(struct timer_list *sptr_timer)
     sptr_list = &sgtc_ktime_jiffies;
     sptr_lock = &sptr_list->sgtc_lock;
 
-    spin_lock_irqsave(sptr_lock);
+    spin_lock_irqsave(sptr_lock, &flags);
     list_head_add_tail(&sptr_list->sgtc_list, &sptr_timer->sgtc_link);
-    spin_unlock_irqrestore(sptr_lock);
+    spin_unlock_irqrestore(sptr_lock, flags);
 }
 
 /*!
@@ -367,6 +368,7 @@ void del_timer(struct timer_list *sptr_timer)
 {
     struct ktime_tick *sptr_list;
     struct spin_lock *sptr_lock;
+    kutype_t flags;
 
     if (!isValid(sptr_timer))
         return;
@@ -374,9 +376,9 @@ void del_timer(struct timer_list *sptr_timer)
     sptr_list = &sgtc_ktime_jiffies;
     sptr_lock = &sptr_list->sgtc_lock;
 
-    spin_lock_irqsave(sptr_lock);
+    spin_lock_irqsave(sptr_lock, &flags);
     list_head_del(&sptr_timer->sgtc_link);
-    spin_unlock_irqrestore(sptr_lock);
+    spin_unlock_irqrestore(sptr_lock, flags);
 }
 
 /*!
@@ -515,6 +517,7 @@ void add_hrtimer(struct hrtimer_list *sptr_timer)
 {
     struct ktime_tick *sptr_list;
     struct spin_lock *sptr_lock;
+    kutype_t flags;
 
     if ((!sptr_timer) || 
         (!sptr_timer->expires) ||
@@ -525,10 +528,10 @@ void add_hrtimer(struct hrtimer_list *sptr_timer)
     sptr_list = &sgtc_ktime_htick;
     sptr_lock = &sptr_list->sgtc_lock;
 
-    spin_lock_irqsave(sptr_lock);
+    spin_lock_irqsave(sptr_lock, &flags);
     __load_hrtimer(sptr_timer, (struct hrtimer_list **)&sptr_list->sptr_first);
     list_head_add_tail(&sptr_list->sgtc_list, &sptr_timer->sgtc_link);
-    spin_unlock_irqrestore(sptr_lock);
+    spin_unlock_irqrestore(sptr_lock, flags);
 }
 
 /*!
@@ -543,6 +546,7 @@ void del_hrtimer(struct hrtimer_list *sptr_timer)
     struct spin_lock *sptr_lock;
     struct hrtimer_list *sptr_per;
     struct hrtimer_list *sptr_next = mr_nullptr;
+    kutype_t flags;
 
     if (mr_unlikely(!sptr_timer))
         return;
@@ -550,7 +554,7 @@ void del_hrtimer(struct hrtimer_list *sptr_timer)
     sptr_list = &sgtc_ktime_htick;
     sptr_lock = &(sgtr_ktime_lists[sptr_timer->status]->sgtc_lock);
 
-    spin_lock_irqsave(sptr_lock);
+    spin_lock_irqsave(sptr_lock, &flags);
     list_head_del(&sptr_timer->sgtc_link);
 
     if (sptr_timer->status == NR_KTIMER_COUNTING)
@@ -569,7 +573,7 @@ void del_hrtimer(struct hrtimer_list *sptr_timer)
         }
     }
 
-    spin_unlock_irqrestore(sptr_lock);
+    spin_unlock_irqrestore(sptr_lock, flags);
 }
 
 /*!
@@ -616,11 +620,12 @@ void do_hrtimer_action(kint32_t event)
     DECLARE_LIST_HEAD(sgtc_active);
     DECLARE_LIST_HEAD(sgtc_pending);
     DECLARE_LIST_HEAD(sgtc_inactive);
+    kutype_t flags;
     
     sptr_lock = &sgtc_ktime_pending.sgtc_lock;
-    spin_lock_irqsave(sptr_lock);
+    spin_lock_irqsave(sptr_lock, &flags);
     list_head_splice_init(&sgtc_pending, &sgtc_ktime_pending.sgtc_list);
-    spin_unlock_irqrestore(sptr_lock);
+    spin_unlock_irqrestore(sptr_lock, flags);
 
     foreach_list_next_entry_safe(sptr_timer, sptr_temp, &sgtc_pending, sgtc_link)
     {
@@ -648,10 +653,10 @@ void do_hrtimer_action(kint32_t event)
     {
         struct ktime_tick *sptr_list = &sgtc_ktime_htick;
 
-        spin_lock_irqsave(&sptr_list->sgtc_lock);
+        spin_lock_irqsave(&sptr_list->sgtc_lock, &flags);
         __load_hrtimer(sptr_next, (struct hrtimer_list **)&sptr_list->sptr_first);
         list_head_split_tail(&sptr_list->sgtc_list, &sgtc_active);
-        spin_unlock_irqrestore(&sptr_list->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_list->sgtc_lock, flags);
     }
 
     /*!< Add to global inactive list */
@@ -659,9 +664,9 @@ void do_hrtimer_action(kint32_t event)
     {
         struct ktime_tick *sptr_cast = &sgtc_ktime_inactive;
 
-        spin_lock_irqsave(&sptr_cast->sgtc_lock);
+        spin_lock_irqsave(&sptr_cast->sgtc_lock, &flags);
         list_head_split_tail(&sptr_cast->sgtc_list, &sgtc_inactive);
-        spin_unlock_irqrestore(&sptr_cast->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_cast->sgtc_lock, flags);
     }
 }
 

@@ -29,7 +29,16 @@
  */
 void thread_sleep_quit(struct ktime_event *sptr_event)
 {
-    sptr_event->sptr_cur->time_event = mr_nullptr;
+    struct thread *sptr_th = sptr_event->sptr_cur;
+    kutype_t flags;
+
+    if (mr_unlikely(!sptr_th))
+        return;
+
+    spin_lock_irqsave(&sptr_th->sgtc_lock, &flags);
+    sptr_th->time_event = mr_nullptr;
+    spin_unlock_irqrestore(&sptr_th->sgtc_lock, flags);
+
     sptr_event->sptr_cur = mr_nullptr;
 
     if (sptr_event->type == KTIME_EVENT_JIFFIES)
@@ -49,36 +58,37 @@ static void thread_sleep_timeout(kuint32_t args)
     struct ktime_event *sptr_event = (struct ktime_event *)args;
     struct thread *sptr_thread = sptr_event->sptr_cur;
     kuint32_t status, to_status;
+    kutype_t flags;
 
     if (mr_unlikely(!sptr_thread))
         return;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
     status = __GET_THREAD_STATE(sptr_thread);
     to_status = __GET_THREAD_TARGET_STATE(sptr_thread);
 
     /*!< Only schedule_thread() is finished, state will be NR_THREAD_SUSPEND */
     if (status == NR_THREAD_SUSPEND)
     {
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         /*!< NODEV: thread has been released */
         if ((-ER_NODEV) == schedule_thread_wakeup(sptr_thread->tid))
             return;
 
-        spin_lock_irqsave(&sptr_thread->sgtc_lock);
+        spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
         status = __GET_THREAD_STATE(sptr_thread);
     }
     /*!< Timeout is triggered before scheduling, to_status is not equal to NR_THREAD_NONE */
     else if (to_status == NR_THREAD_SUSPEND)
     {
     	__SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_NONE);
-    	spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    	spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
     	return;
     }
 
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
     /*!< Wake up failed */ 
     if ((status != NR_THREAD_READY) &&
@@ -102,9 +112,11 @@ void khrtime_schedule(khrtime_t tick)
     struct ktime_event sgtc_event;
     struct hrtimer_list *sptr_tm = &sgtc_event.u.sgtc_hrtm;
     struct thread *sptr_cur = mr_current;
+    kutype_t flags;
 
     /*!< schedule but not suspend (just add to ready list) */
-    if (tick < USEC_TO_HRTICK(THREAD_SWITCH_TIME)) {
+    if (tick < USEC_TO_HRTICK(THREAD_SWITCH_TIME)) 
+    {
         schedule_thread();
         return;
     }
@@ -114,11 +126,11 @@ void khrtime_schedule(khrtime_t tick)
     setup_hrtimer(sptr_tm, thread_sleep_timeout, (kuint32_t)&sgtc_event);
 
     /*!< suspend current thread, and schedule others */
-    spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     sptr_cur->time_event = (void *)&sgtc_event;
     __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
     mr_preempt_disable();
-    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
 
     mod_hrtimer(sptr_tm, khrtime_ticks() + tick);
     mr_preempt_enable();
@@ -141,9 +153,11 @@ void schedule_timeout(kutime_t count)
     struct ktime_event sgtc_event;
     struct timer_list *sptr_tm = &sgtc_event.u.sgtc_tm;
     struct thread *sptr_cur = mr_current;
+    kutype_t flags;
 
     /*!< schedule but not suspend (just add to ready list) */
-    if (!count) {
+    if (!count) 
+    {
         schedule_thread();
         return;
     }
@@ -153,11 +167,11 @@ void schedule_timeout(kutime_t count)
     setup_timer(sptr_tm, thread_sleep_timeout, (kuint32_t)&sgtc_event);
 
     /*!< suspend current thread, and schedule others */
-    spin_lock_irqsave(&sptr_cur->sgtc_lock);
+    spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     sptr_cur->time_event = (void *)&sgtc_event;
     __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_SUSPEND);
     mr_preempt_disable();
-    spin_unlock_irqrestore(&sptr_cur->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
 
     mod_timer(sptr_tm, jiffies + count);
     mr_preempt_enable();

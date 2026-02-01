@@ -30,6 +30,7 @@ BLOCKING_NOTIFIER_HEAD(sgtc_fbmem_notifier_chain);
  */
 kint32_t __fwk_init fbmem_init(void)
 {
+	fwk_blocking_notifier_chain_init(&sgtc_fbmem_notifier_chain);
 	return fwk_fbmem_init();
 }
 

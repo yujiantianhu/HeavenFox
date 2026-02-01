@@ -21,10 +21,10 @@
 #include <kernel/kernel.h>
 #include <kernel/context.h>
 #include <kernel/thread.h>
+#include <kernel/lock_common.h>
 #include <kernel/spinlock.h>
 
 /*!< The defines */
-struct spin_lock;
 struct mailbox;
 
 #define THREAD_NAME_SIZE                        (32)
@@ -61,34 +61,47 @@ struct thread
     struct spin_lock sgtc_lock;
     struct mailbox *sptr_mb;
 
+    /*!< Used to indicate which locks are held, as one thread may hold multiple locks */
+    struct lock_owners sgtc_owners;     
+    /*!
+     * Indicating a lock that is being waited for; at any given time, only one lock will be waited for by threads 
+     * (because when the thread cannot acquire a lock, it cannot request another lock) 
+     */
+    struct lock_waiter sgtc_wait;   
+
     void *time_event;
 };
 
 /*!< Set thread state */
+#define __SET_THREAD_STATE(sptr_th, value)	\
+    do {	\
+        (sptr_th)->state = (value);	\
+    } while (0)
+
 #define __SET_THREAD_TARGET_STATE(sptr_th, value)	\
     do {	\
-        sptr_th->to_state = (value);	\
+        (sptr_th)->to_state = (value);	\
     } while (0)
 
 #define __SYNC_THREAD_STATE(sptr_th, value)	\
     do {	\
-        sptr_th->state = (value);	\
-        sptr_th->to_state = NR_THREAD_NONE;    \
+        (sptr_th)->state = (value);	\
+        (sptr_th)->to_state = NR_THREAD_NONE;    \
     } while (0)
 
 /*!< Get thread state */
-#define __GET_THREAD_STATE(sptr_th)	                                (sptr_th->state)
-#define __GET_THREAD_TARGET_STATE(sptr_th)	                        (sptr_th->to_state)
+#define __GET_THREAD_STATE(sptr_th)	                                ((sptr_th)->state)
+#define __GET_THREAD_TARGET_STATE(sptr_th)	                        ((sptr_th)->to_state)
 
 /*!< Signal flags */
 #define mr_thread_set_flags(signal, sptr_tsk)	\
     do {	\
-        sptr_tsk->flags |= mr_bit(signal);	\
+        (sptr_tsk)->flags |= mr_bit(signal);	\
     } while (0)
 
 #define mr_thread_clr_flags(signal, sptr_tsk)	\
     do {	\
-        sptr_tsk->flags &= ~mr_bit(signal);	\
+        (sptr_tsk)->flags &= ~mr_bit(signal);	\
     } while (0)
 
 #define mr_thread_is_flags(signal, sptr_tsk)						(!!((sptr_tsk)->flags & mr_bit(signal)))
@@ -117,6 +130,7 @@ struct scheduler_core
     struct thread_list sgtc_ready;
     struct thread_list sgtc_suspend;
     struct thread_list sgtc_sleep;
+    struct thread_list sgtc_zombie;
 };
 
 /*!< thread manage table */
@@ -137,6 +151,7 @@ struct scheduler_table
     struct list_head sgtc_ready;									/*!< ready list head (manage all ready thread) */
     struct list_head sgtc_suspend;									/*!< suspend list head (manage all suspend thread) */
     struct list_head sgtc_sleep;									/*!< sleep list head (manage all sleepy thread) */
+    struct list_head sgtc_zombie;									/*!< zombie list head (manage all zombie thread) */
 
     struct thread *sptr_work;									    /*!< current thread (status is running) */
 
@@ -151,10 +166,12 @@ struct scheduler_table
 #define __THREAD_READY_LIST(ptr)			(&((ptr)->sgtc_ready))
 #define __THREAD_SUSPEND_LIST(ptr)			(&((ptr)->sgtc_suspend))
 #define __THREAD_SLEEP_LIST(ptr)			(&((ptr)->sgtc_sleep))
+#define __THREAD_ZOMBIE_LIST(ptr)			(&((ptr)->sgtc_zombie))
 
 #define __THREAD_READY_HASH(ptr)            (&((ptr)->sgtc_core.sgtc_ready))
 #define __THREAD_SUSPEND_HASH(ptr)          (&((ptr)->sgtc_core.sgtc_suspend))
 #define __THREAD_SLEEP_HASH(ptr)            (&((ptr)->sgtc_core.sgtc_sleep))
+#define __THREAD_ZOMBIE_HASH(ptr)           (&((ptr)->sgtc_core.sgtc_zombie))
 };
 
 /*!< The globals */
@@ -164,7 +181,9 @@ extern struct thread *get_current_thread(void);
 extern struct list_head *get_ready_thread_table(void);
 extern struct thread *get_thread_handle(tid_t tid);
 extern void thread_set_name(tid_t tid, const kchar_t *name);
+extern void thread_set_name_args(tid_t tid, const kchar_t *name, ...);
 extern void thread_set_self_name(const kchar_t *name);
+extern void thread_set_self_name_args(const kchar_t *name, ...);
 extern kchar_t *thread_get_name(tid_t tid);
 extern kchar_t *thread_get_self_name(void);
 extern void thread_set_state(struct thread *sptr_thread, kuint32_t state);
@@ -175,6 +194,7 @@ extern void schedule_self_suspend(void);
 extern void schedule_self_sleep(void);
 extern kint32_t schedule_thread_suspend(tid_t tid);
 extern kint32_t schedule_thread_sleep(tid_t tid);
+extern kint32_t schedule_thread_zombie(tid_t tid);
 extern kint32_t schedule_thread_wakeup(tid_t tid);
 
 extern kbool_t is_ready_thread_empty(void);
@@ -183,12 +203,14 @@ extern kbool_t is_sleep_thread_empty(void);
 extern struct thread *get_first_ready_thread(void);
 extern struct thread *get_first_suspend_thread(void);
 extern struct thread *get_first_sleep_thread(void);
+extern struct thread *get_first_zombie_thread(void);
 extern kbool_t is_thread_valid(tid_t tid);
 extern struct thread *next_ready_thread(struct thread *sptr_prev);
 extern struct thread *next_suspend_thread(struct thread *sptr_prev);
 extern struct thread *next_sleep_thread(struct thread *sptr_prev);
+extern struct thread *next_zombie_thread(struct thread *sptr_prev);
 
-extern kint32_t schedule_thread_switch(tid_t tid);
+extern kint32_t schedule_thread_switch(struct thread *sptr_thread);
 extern kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid);
 extern struct thread *unregister_thread(tid_t tid);
 extern void thread_tick_update(void);
@@ -212,8 +234,9 @@ extern void scheduler_init(void);
 static inline kbool_t thread_state_pending(struct thread *sptr_thread)
 {
     kbool_t is_wakeup, is_killed;
+    kutype_t flags;
 
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
     is_wakeup = mr_thread_is_flags(NR_THREAD_SIG_WAKEUP, sptr_thread);
     is_killed = mr_thread_is_flags(NR_THREAD_SIG_KILL, sptr_thread);
 
@@ -221,7 +244,7 @@ static inline kbool_t thread_state_pending(struct thread *sptr_thread)
 
     mr_thread_clr_flags(NR_THREAD_SIG_WAKEUP, sptr_thread);
     mr_thread_clr_flags(NR_THREAD_SIG_KILL, sptr_thread);
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
     return (is_wakeup || is_killed);
 }
@@ -234,14 +257,16 @@ static inline kbool_t thread_state_pending(struct thread *sptr_thread)
  */
 static inline void thread_state_signal(struct thread *sptr_thread, kuint32_t state, kbool_t mode)
 {
-    spin_lock_irqsave(&sptr_thread->sgtc_lock);
+    kutype_t flags;
+
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
 
     if (mode)
         mr_thread_set_flags(state, sptr_thread);
     else
         mr_thread_clr_flags(state, sptr_thread);
     
-    spin_unlock_irqrestore(&sptr_thread->sgtc_lock);
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 }
 
 #ifdef __cplusplus

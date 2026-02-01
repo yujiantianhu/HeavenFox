@@ -14,6 +14,7 @@ obj-y	+=	kthread/
 obj-y	+=	sched.o
 obj-y	+=	sleep.o
 obj-y	+=	thread.o
+obj-y	+=	lock_common.o
 obj-y	+=	spinlock.o
 obj-y	+=	mutex.o
 obj-y	+=	semaphore.o

@@ -9,13 +9,9 @@
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 #
 
-obj-y	+=	idle.o
-obj-y	+=	kthread.o
-obj-y	+=	ksoftirqd.o
-obj-y	+=	kworker.o
-obj-y	+=	init_proc.o
-obj-y	+=	kmemp.o
+obj-y	+=	ls.o
+obj-y	+=	pwd.o
 
-obj-$(CONFIG_TEST) += debug.o
+obj-y	+=	fs_cmd.o
 
 # end of file

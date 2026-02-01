@@ -47,6 +47,15 @@
 #define CONFIG_ROLL_POLL                        (0)
 #endif
 
+/*!< for priority inherit */
+#define CONFIG_INHERIT                          (1)
+#if defined(CONFIG_INHERIT) && (CONFIG_INHERIT)
+#define CONFIG_INHERIT_RECURSION                (1)
+#else
+#define CONFIG_INHERIT_RECURSION                (0)
+#endif
+#define CONFIG_LOCK_WAKEALL                     (0)
+
 #define CONFIG_HRTIMER_SOFTIRQ                  (0)
 
 /*!< softirq or threading for network rx/tx */

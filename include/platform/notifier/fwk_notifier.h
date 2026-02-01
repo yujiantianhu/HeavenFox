@@ -29,14 +29,8 @@ struct fwk_notifier_chain
     struct mutex_lock sgtc_lock;
 };
 
-#define __NOTIFIER_CHAIN_INITIALIZE(n)   \
-    {   \
-        .sgtc_nbs = LIST_HEAD_INIT(&(n).sgtc_nbs),  \
-        .sgtc_lock = MUTEX_LOCK_INIT(), \
-    }
-
 #define BLOCKING_NOTIFIER_HEAD(name)    \
-    struct fwk_notifier_chain name = __NOTIFIER_CHAIN_INITIALIZE(name)
+    struct fwk_notifier_chain name
 #define BLOCKING_NOTIFIER_DECLARE(name) \
     extern struct fwk_notifier_chain name
 
@@ -65,6 +59,19 @@ extern kint32_t fwk_blocking_notifier_call_chain(
                         struct fwk_notifier_chain *sptr_chain, kuint32_t event, void *args);
 extern kint32_t fwk_blocking_pengding_call_chain(
                         struct fwk_notifier_chain *sptr_chain, kuint32_t event, void *args);
+
+/*!< API functions */
+/*!
+ * @brief   initial blocking_notifier_chain
+ * @param   sptr_chain
+ * @retval  none
+ * @note    none
+ */
+static inline void fwk_blocking_notifier_chain_init(struct fwk_notifier_chain *sptr_chain)
+{
+    init_list_head(&sptr_chain->sgtc_nbs);
+    mutex_init(&sptr_chain->sgtc_lock);
+}
 
 #ifdef __cplusplus
     }
