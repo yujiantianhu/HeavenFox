@@ -14,6 +14,7 @@
 #include <kernel/kernel.h>
 #include <kernel/mutex.h>
 #include <kernel/sched.h>
+#include <term/term.h>
 
 /*!< The defines */
 #if defined(CONFIG_INHERIT) &&(CONFIG_INHERIT)
@@ -27,6 +28,17 @@
 #else
 #define CONFIG_MUTEX_WAKEALL                0
 #endif
+
+/*!< The globals */
+static kint32_t g_mutex_monitor;
+static kint32_t g_mutex_reentrant_monitor;
+
+static struct term_variable sgtc_mutex_monitor[] = 
+{ 
+    { .name = "g_mutex_monitor", .var = &g_mutex_monitor, .num = 1 },
+    { .name = "g_mutex_reentrant_monitor", .var = &g_mutex_reentrant_monitor, .num = 1 },
+};
+static const kusize_t g_num_mutex_monitor = ARRAY_SIZE(sgtc_mutex_monitor);
 
 /*!< The functions */
 
@@ -45,6 +57,17 @@ void mutex_init(struct mutex_lock *sptr_lock)
         atomic_set_val(&sptr_lock->sgtc_atc, 0);
         lock_context_init(&sptr_lock->sgtc_owner);
     }
+}
+
+/*!
+ * @brief   check if mutex is locked
+ * @param   sptr_lock
+ * @retval  locked(true) / unlocked(false)
+ * @note    none
+ */
+static kbool_t __mutex_is_locked(void *lock)
+{
+    return mutex_is_locked((struct mutex_lock *)lock);
 }
 
 /*!
@@ -72,6 +95,7 @@ void mutex_lock(struct mutex_lock *sptr_lock)
         atomic_inc(&sptr_lock->sgtc_atc);
         mr_barrier();
 
+        g_mutex_reentrant_monitor++;
         spin_unlock(&sptr_owner->sgtc_lock);
         mr_preempt_enable();
         return;
@@ -87,8 +111,10 @@ void mutex_lock(struct mutex_lock *sptr_lock)
          * check for priority inheritance and add the current thread to the lock's "wait chain."
          * Since the spin lock has been released at this point, it is necessary to re-evaluate the lock count value within the function
          */
-        if (mr_unlikely(lock_compete(sptr_owner, &sptr_lock->sgtc_atc, CONFIG_MUTEX_INHERIT)))
+        if (mr_unlikely(lock_compete(sptr_owner, __mutex_is_locked, sptr_lock, CONFIG_MUTEX_INHERIT)))
             goto loop;
+
+        g_mutex_monitor++;
 
         /*!< Suspend self */
         mr_preempt_enable();
@@ -108,21 +134,6 @@ loop:
 
     spin_unlock(&sptr_owner->sgtc_lock);
     mr_preempt_enable();
-}
-
-/*!
- * @brief   mutex wait
- * @param   sptr_lock
- * @retval  none
- * @note    if it has been locked, schedule another thread
- */
-void mutex_wait(struct mutex_lock *sptr_lock)
-{
-    if (!mr_current)
-        return;
-
-    while (mutex_is_locked(sptr_lock))
-        schedule_thread();
 }
 
 /*!
@@ -150,6 +161,7 @@ kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
         local_irq_save(&flags);
         if (mutex_is_locked(sptr_lock))
         {
+            g_mutex_monitor++;
             local_irq_restore(&flags);
             return -ER_BUSY;
         }
@@ -171,6 +183,7 @@ kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
         atomic_inc(&sptr_lock->sgtc_atc);
         mr_barrier();
 
+        g_mutex_reentrant_monitor++;
         spin_unlock(&sptr_owner->sgtc_lock);
         mr_preempt_enable();
         return ER_NORMAL;
@@ -179,7 +192,9 @@ kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
     /*!< Check lock (essentially: atomic_get_val(&sptr_lock->sgtc_atc)) */
     if (mutex_is_locked(sptr_lock))
     {
+        g_mutex_monitor++;
         spin_unlock(&sptr_owner->sgtc_lock);
+        mr_preempt_enable();
         return -ER_BUSY;
     }
 
@@ -288,5 +303,38 @@ void mutex_destroy(struct mutex_lock *sptr_lock)
     unlock_context_restore(&sptr_lock->sgtc_owner);
     unlock_pending_del_all(&sptr_lock->sgtc_owner);
 }
+
+/*!< ------------------------------------------------------------------------- */
+/*!
+ * @brief   mutex kernel init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+static kint32_t __plat_init kernel_mutex_init(void)
+{
+    struct term_variable *sptr_var = &sgtc_mutex_monitor[0];
+    kint32_t index;
+
+    for (index = 0; index < g_num_mutex_monitor; index++)
+        init_list_head(&sptr_var[index].sgtc_link);
+
+    term_variable_add_more(sptr_var, g_num_mutex_monitor);
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   mutex kernel exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+static void __plat_exit kernel_mutex_exit(void)
+{
+    term_variable_del_more(&sgtc_mutex_monitor[0], g_num_mutex_monitor);
+}
+
+IMPORT_KERNEL_INIT(kernel_mutex_init);
+IMPORT_KERNEL_EXIT(kernel_mutex_exit);
 
 /*!< end of file */

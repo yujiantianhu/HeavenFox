@@ -79,6 +79,7 @@
 #define THREAD_PROTY_MIN                    (99)
 #define THREAD_PRORY_NONE                   (0)
 
+#define __THREAD_CHECK_PRIO(prio)           CMP_MAX2(THREAD_PROTY_MAX, CMP_MIN2(prio, THREAD_PROTY_MIN))
 #define __THREAD_IS_LOW_PRIO(prio, prio2)	((prio2) < (prio))
 #define __THREAD_HIGHER_DEFAULT(val)		(THREAD_PROTY_DEFAULT - (val))	
 
@@ -142,7 +143,6 @@ enum __ERT_THREAD_POLICY
 
 struct scheduler_param
 {
-    kuint32_t count;
     kint32_t priority;                          /*!< temprory priority */
     kint32_t cur_priority;                      /*!< current priority */
     kint32_t ori_priority;                      /*!< original priority */    
@@ -189,6 +189,7 @@ extern kint32_t kernel_thread_init_create(struct thread_attr *sptr_attr,
                                 void *(*pfunc_start_routine) (void *), 
                                 void *ptr_args);
 
+extern kint32_t thread_quit(tid_t tid);
 extern kint32_t thread_destory(tid_t tid);
 extern void *thread_attr_init(struct thread_attr *sptr_attr);
 extern void *thread_attr_revise(struct thread_attr *sptr_attr);
@@ -248,10 +249,11 @@ static inline kuint32_t thread_get_rt_priority(struct thread_attr *sptr_attr)
  * @retval  none
  * @note    none
  */
+__force_inline 
 static inline void thread_set_inherit_priority(struct thread_attr *sptr_attr, kuint32_t priority)
 {
     struct scheduler_param *sptr_param = &sptr_attr->sgtc_param;
-    sptr_param->priority = __THREAD_IS_LOW_PRIO(priority, THREAD_PROTY_MAX) ? priority : THREAD_PROTY_MAX;
+    sptr_param->priority = __THREAD_CHECK_PRIO(priority);
 }
 
 /*!
@@ -260,15 +262,14 @@ static inline void thread_set_inherit_priority(struct thread_attr *sptr_attr, ku
  * @retval 	none
  * @note   	none
  */
+__force_inline 
 static inline void thread_set_priority(struct thread_attr *sptr_attr, kuint32_t priority)
 {
     struct scheduler_param *sptr_param = &sptr_attr->sgtc_param;
-    kint32_t cur_prio = sptr_param->priority;
+//  kint32_t ori_prio = sptr_param->ori_priority;
 
-    sptr_param->ori_priority = __THREAD_IS_LOW_PRIO(priority, THREAD_PROTY_MAX) ? priority : THREAD_PROTY_MAX;
-    
-    if ((cur_prio < sptr_param->ori_priority) || !sptr_param->count)
-        sptr_param->priority = sptr_param->ori_priority;
+    sptr_param->ori_priority = __THREAD_CHECK_PRIO(priority);
+    sptr_param->priority = sptr_param->ori_priority;
 }
 
 /*!
@@ -315,6 +316,7 @@ static inline kuint32_t thread_get_sched_msecs(struct thread_attr *sptr_attr)
  * @retval 	none
  * @note   	stack-size of each thread must more than THREAD_STACK_MIN
  */
+__force_inline 
 static inline void thread_attr_setstacksize(struct thread_attr *sptr_attr, kusize_t stacksize)
 {
     sptr_attr->stacksize = stacksize;
@@ -338,6 +340,7 @@ static inline kuint32_t thread_attr_getstacksize(struct thread_attr *sptr_attr)
  * @retval 	context structure
  * @note   	none
  */
+__force_inline 
 static inline struct context_regs *thread_get_context(struct thread_attr *sptr_attr)
 {
     kutype_t base;

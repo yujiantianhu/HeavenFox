@@ -106,6 +106,20 @@ static void kthread_systime_record(void)
 }
 
 /*!
+ * @brief	manage sleep thread
+ * @param  	none
+ * @retval 	none
+ * @note   	none
+ */
+static void kthread_due_sleep(void)
+{
+    struct thread *sptr_thread = mr_nullptr;
+
+    while ((sptr_thread = next_sleep_thread(sptr_thread)))
+        thread_quit(sptr_thread->tid);
+}
+
+/*!
  * @brief	manage zombie thread
  * @param  	none
  * @retval 	none
@@ -113,10 +127,15 @@ static void kthread_systime_record(void)
  */
 static void kthread_kill_zombie(void)
 {
-    struct thread *sptr_thread = mr_nullptr;
+    struct thread *sptr_thread, *sptr_next;
 
-    while ((sptr_thread = next_sleep_thread(sptr_thread)))
+    for (sptr_thread = get_first_zombie_thread(), sptr_next = mr_nullptr;
+         sptr_thread;
+         sptr_thread = sptr_next)
+    {
+        sptr_next = next_zombie_thread(sptr_thread);
         thread_destory(sptr_thread->tid);
+    }
 }
 
 /*!
@@ -157,9 +176,14 @@ static void *kthread_entry(void *args)
     init_proc_init();                       /*!< create init task */
     print_info("kernel thread initial finished\r\n");
 
+#ifdef CONFIG_TEST
+    debug_init();                           /*!< create debug test task */
+#endif
+
     for (;;)
     {
         kthread_systime_record();
+        kthread_due_sleep();                /*!< due sleep thread */
         kthread_kill_zombie();              /*!< kill zombie thread */
         
         /*!< Print logs */

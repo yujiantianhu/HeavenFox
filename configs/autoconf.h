@@ -13,6 +13,7 @@
 #define CONFIG_CORE 0
 #define CONFIG_BUILD_TYPE debug
 #define CONFIG_OPTIMIZE 0
+#define CONFIG_TEST 1
 #define CONFIG_HZ 1000
 #define CONFIG_HRTIMER_ENBALE 1
 #define CONFIG_CONSOLE_DEVICE "/dev/uart0"

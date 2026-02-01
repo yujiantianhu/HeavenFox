@@ -15,9 +15,25 @@
 #include <kernel/kernel.h>
 #include <kernel/spinlock.h>
 #include <kernel/sched.h>
+#include <term/term.h>
 
 /*!< The defines */
+#define SPIN_LOCK_OWNER_IRQ                     (0x01)
+#define SPIN_LOCK_OWNER_TASK                    (0x02)
 
+#define mr_spin_set_owner(_ptr_owner)  \
+    do { \
+        *(_ptr_owner) = ((kutype_t)mr_current) | (IS_IN_EXCEPTION() ? SPIN_LOCK_OWNER_IRQ : SPIN_LOCK_OWNER_TASK);    \
+    } while (0)
+
+#define mr_spin_clr_owner(_ptr_owner)  \
+    do { \
+        *(_ptr_owner) = 0;    \
+    } while (0)
+
+/*!< The globals */
+static kint32_t g_spin_lock_monitor;
+static struct term_variable sgtc_spin_lock_monitor = { .name = "g_spin_lock_monitor", .var = &g_spin_lock_monitor, .num = 1 };
 
 /*!< The functions */
 
@@ -32,7 +48,10 @@
 void spin_lock_init(struct spin_lock *sptr_lock)
 {
     if (isValid(sptr_lock))
+    {
+        sptr_lock->owner = 0;
         atomic_set_val(&sptr_lock->sgtc_atc, 0);
+    }
 }
 
 /*!
@@ -44,6 +63,9 @@ void spin_lock_init(struct spin_lock *sptr_lock)
 void spin_lock(struct spin_lock *sptr_lock)
 {
     kutype_t flags;
+
+    if (spin_is_locked(sptr_lock))
+        g_spin_lock_monitor++;
 
 start:
     while (spin_is_locked(sptr_lock));
@@ -58,7 +80,9 @@ start:
     }
 
     mr_preempt_disable();
+    mr_spin_set_owner(&sptr_lock->owner);
     atomic_inc(&sptr_lock->sgtc_atc);
+
     local_irq_restore(&flags);
 }
 
@@ -80,6 +104,7 @@ void spin_unlock(struct spin_lock *sptr_lock)
     }
 
     atomic_dec(&sptr_lock->sgtc_atc);
+    mr_spin_clr_owner(&sptr_lock->owner);
     mr_preempt_enable();
     mr_barrier();
 
@@ -99,12 +124,14 @@ kint32_t spin_try_lock(struct spin_lock *sptr_lock)
     local_irq_save(&flags);
     if (spin_is_locked(sptr_lock))
     {
+        g_spin_lock_monitor++;
         local_irq_restore(&flags);
         return -ER_LOCKED;
     }
 
     mr_preempt_disable();
     atomic_inc(&sptr_lock->sgtc_atc);
+    mr_spin_set_owner(&sptr_lock->owner);
     mr_barrier();
 
     local_irq_restore(&flags);
@@ -122,6 +149,9 @@ void spin_lock_irq(struct spin_lock *sptr_lock)
 {
     kutype_t flags;
 
+    if (spin_is_locked(sptr_lock))
+        g_spin_lock_monitor++;
+
 start:
     while (spin_is_locked(sptr_lock));
     
@@ -134,8 +164,9 @@ start:
         goto start;
     }
 
-    atomic_inc(&sptr_lock->sgtc_atc);
     mr_preempt_disable();
+    atomic_inc(&sptr_lock->sgtc_atc);
+    mr_spin_set_owner(&sptr_lock->owner);
     mr_barrier();
 }
 
@@ -152,12 +183,14 @@ kint32_t spin_try_lock_irq(struct spin_lock *sptr_lock)
     local_irq_save(&flags);
     if (spin_is_locked(sptr_lock))
     {
+        g_spin_lock_monitor++;
         local_irq_restore(&flags);
         return -ER_LOCKED;
     }
 
     mr_preempt_disable(); 
     atomic_inc(&sptr_lock->sgtc_atc);
+    mr_spin_set_owner(&sptr_lock->owner);
     mr_barrier();
     
     return ER_NORMAL;
@@ -181,6 +214,7 @@ void spin_unlock_irq(struct spin_lock *sptr_lock)
     }
     
     atomic_dec(&sptr_lock->sgtc_atc);
+    mr_spin_clr_owner(&sptr_lock->owner);
     mr_preempt_enable();
     mr_barrier();
 
@@ -195,6 +229,9 @@ void spin_unlock_irq(struct spin_lock *sptr_lock)
  */
 void spin_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags)
 {
+    if (spin_is_locked(sptr_lock))
+        g_spin_lock_monitor++;
+
 start:
     while (spin_is_locked(sptr_lock));
 
@@ -210,6 +247,7 @@ start:
     mr_barrier();
     mr_preempt_disable();
     atomic_inc(&sptr_lock->sgtc_atc);
+    mr_spin_set_owner(&sptr_lock->owner);
 }
 
 /*!
@@ -223,6 +261,7 @@ kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags)
     local_irq_save(flags);
     if (spin_is_locked(sptr_lock))
     {
+        g_spin_lock_monitor++;
         local_irq_restore(flags);
         return -ER_LOCKED;
     }
@@ -230,6 +269,7 @@ kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags)
     mr_barrier();
     mr_preempt_disable();
     atomic_inc(&sptr_lock->sgtc_atc);
+    mr_spin_set_owner(&sptr_lock->owner);
 
     return ER_NORMAL;
 }
@@ -252,6 +292,7 @@ void spin_unlock_irqrestore(struct spin_lock *sptr_lock, kutype_t flags)
     }
     
     atomic_dec(&sptr_lock->sgtc_atc);
+    mr_spin_clr_owner(&sptr_lock->owner);
     mr_preempt_enable();
     mr_barrier();
 
@@ -282,5 +323,36 @@ void spin_unlock_bh(struct spin_lock *sptr_lock)
     spin_unlock(sptr_lock);
     local_bh_enable();
 }
+
+/*!< ------------------------------------------------------------------------- */
+/*!
+ * @brief   spin_lock init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+static kint32_t __plat_init kernel_spin_lock_init(void)
+{
+    struct term_variable *sptr_var = &sgtc_spin_lock_monitor;
+
+    init_list_head(&sptr_var->sgtc_link);
+    term_variable_add(sptr_var);
+
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   spin_lock exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+static void __plat_exit kernel_spin_lock_exit(void)
+{
+    term_variable_del(&sgtc_spin_lock_monitor);
+}
+
+IMPORT_KERNEL_INIT(kernel_spin_lock_init);
+IMPORT_KERNEL_EXIT(kernel_spin_lock_exit);
 
 /*!< end of file */

@@ -29,7 +29,16 @@
  */
 void thread_sleep_quit(struct ktime_event *sptr_event)
 {
-    sptr_event->sptr_cur->time_event = mr_nullptr;
+    struct thread *sptr_th = sptr_event->sptr_cur;
+    kutype_t flags;
+
+    if (mr_unlikely(!sptr_th))
+        return;
+
+    spin_lock_irqsave(&sptr_th->sgtc_lock, &flags);
+    sptr_th->time_event = mr_nullptr;
+    spin_unlock_irqrestore(&sptr_th->sgtc_lock, flags);
+
     sptr_event->sptr_cur = mr_nullptr;
 
     if (sptr_event->type == KTIME_EVENT_JIFFIES)
@@ -106,7 +115,8 @@ void khrtime_schedule(khrtime_t tick)
     kutype_t flags;
 
     /*!< schedule but not suspend (just add to ready list) */
-    if (tick < USEC_TO_HRTICK(THREAD_SWITCH_TIME)) {
+    if (tick < USEC_TO_HRTICK(THREAD_SWITCH_TIME)) 
+    {
         schedule_thread();
         return;
     }
@@ -146,7 +156,8 @@ void schedule_timeout(kutime_t count)
     kutype_t flags;
 
     /*!< schedule but not suspend (just add to ready list) */
-    if (!count) {
+    if (!count) 
+    {
         schedule_thread();
         return;
     }

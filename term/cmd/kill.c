@@ -51,8 +51,16 @@ static kint32_t term_cmd_kill_signal(struct term_cmd *sptr_cmd, kint32_t argc, k
                     if (ascii_to_dec(argv[2], &tid))
                         goto fail;
 
-                    if (!schedule_thread_sleep(tid))
+                    if (!schedule_thread_zombie(tid))
                         print_info("remove thread '%s' (tid: %d)\r\n", thread_get_name(tid), tid);
+                    break;
+
+                case SIGSTOP:
+                    if (ascii_to_dec(argv[2], &tid))
+                        goto fail;
+
+                    if (!schedule_thread_sleep(tid))
+                        print_info("stop thread '%s' (tid: %d)\r\n", thread_get_name(tid), tid);
                     break;
 
                 case SIGWAKE:

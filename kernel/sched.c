@@ -24,10 +24,6 @@ struct scheduler_table sgtc_scheduler_table =
     .ref_tidarr		= 0,
     .sgtc_cnt		= {},
 
-    .sgtc_ready		= LIST_HEAD_INIT(&sgtc_scheduler_table.sgtc_ready),
-    .sgtc_suspend	= LIST_HEAD_INIT(&sgtc_scheduler_table.sgtc_suspend),
-    .sgtc_sleep		= LIST_HEAD_INIT(&sgtc_scheduler_table.sgtc_sleep),
-
     .sptr_work		= mr_nullptr,
     .sptr_tids		= mr_nullptr,
     .sptr_tid_array	= { mr_nullptr },
@@ -43,16 +39,25 @@ struct atomic sgtc_sched_preempt_cnt = ATOMIC_INIT();
 /*!< The defines */
 #define SCHED_MANAGER()                         (&sgtc_scheduler_table)
 
-#define SCHED_THREAD_HANDLER(tid)               __THREAD_HANDLER(&sgtc_scheduler_table, tid)
-#define SCHED_RUNNING_THREAD                    (sgtc_scheduler_table.sptr_work)
-#define SCHED_READY_LIST                        (&sgtc_scheduler_table.sgtc_ready)
-#define SCHED_SUSPEND_LIST                      (&sgtc_scheduler_table.sgtc_suspend)
-#define SCHED_SLEEP_LIST                        (&sgtc_scheduler_table.sgtc_sleep)
-#define __SCHED_LOCK                            (sgtc_scheduler_table.sgtc_lock)
+#define SCHED_THREAD_HANDLER(tid)               __THREAD_HANDLER(SCHED_MANAGER(), tid)
+#define SCHED_RUNNING_THREAD                    __THREAD_RUNNING_LIST(SCHED_MANAGER())
+#define SCHED_READY_LIST                        __THREAD_READY_LIST(SCHED_MANAGER())
+#define SCHED_SUSPEND_LIST                      __THREAD_SUSPEND_LIST(SCHED_MANAGER())
+#define SCHED_SLEEP_LIST                        __THREAD_SLEEP_LIST(SCHED_MANAGER())
+#define SCHED_ZOMBIE_LIST                       __THREAD_ZOMBIE_LIST(SCHED_MANAGER())
+#define __SCHED_LOCK                            (SCHED_MANAGER()->sgtc_lock)
 
-#define SCHED_READY_HASH                        __THREAD_READY_HASH(&sgtc_scheduler_table)
-#define SCHED_SUSPEND_HASH                      __THREAD_SUSPEND_HASH(&sgtc_scheduler_table)
-#define SCHED_SLEEP_HASH                        __THREAD_SLEEP_HASH(&sgtc_scheduler_table)
+#define SCHED_READY_HASH                        __THREAD_READY_HASH(SCHED_MANAGER())
+#define SCHED_SUSPEND_HASH                      __THREAD_SUSPEND_HASH(SCHED_MANAGER())
+#define SCHED_SLEEP_HASH                        __THREAD_SLEEP_HASH(SCHED_MANAGER())
+#define SCHED_ZOMBIE_HASH                       __THREAD_ZOMBIE_HASH(SCHED_MANAGER())
+
+/*!< Scheduler Operations */
+struct scheduler_operation
+{
+    kint32_t (*detach)(struct thread *);
+    kint32_t (*add_new)(struct thread *);
+};
 
 /*!< The functions */
 static kint32_t __find_thread_from_scheduler(tid_t tid, struct list_head *sptr_head);
@@ -63,13 +68,27 @@ static void __schedule_del_status_list(struct thread *sptr_thread,
                                 struct list_head *sptr_head, struct thread_list *sptr_hash);
 
 static kint32_t schedule_despoil_work_role(struct thread *sptr_thread);
-static kint32_t schedule_reinstall_work_role(void);
+static kint32_t schedule_reinstall_work_role(struct thread *sptr_thread);
 static kint32_t schedule_add_ready_list(struct thread *sptr_thread);
 static kint32_t schedule_detach_ready_list(struct thread *sptr_thread);
 static kint32_t schedule_add_suspend_list(struct thread *sptr_thread);
 static kint32_t schedule_detach_suspend_list(struct thread *sptr_thread);
 static kint32_t schedule_add_sleep_list(struct thread *sptr_thread);
 static kint32_t schedule_detach_sleep_list(struct thread *sptr_thread);
+static kint32_t schedule_add_zombie_list(struct thread *sptr_thread);
+static kint32_t schedule_detach_zombie_list(struct thread *sptr_thread);
+
+/*!< The globals */
+/*!< Scheduler Operations */
+//static const struct scheduler_operation sgtc_scheduler_operations[] =
+//{
+//    [NR_THREAD_NONE     ] = { .detach = mr_nullptr,                     .add_new = mr_nullptr                   },
+//    [NR_THREAD_RUNNING  ] = { .detach = schedule_despoil_work_role,     .add_new = schedule_reinstall_work_role },
+//    [NR_THREAD_READY    ] = { .detach = schedule_detach_ready_list,     .add_new = schedule_add_ready_list      },
+//    [NR_THREAD_SUSPEND  ] = { .detach = schedule_detach_suspend_list,   .add_new = schedule_add_suspend_list    },
+//    [NR_THREAD_SLEEP    ] = { .detach = schedule_detach_sleep_list,     .add_new = schedule_add_sleep_list      },
+//    [NR_THREAD_ZOMBIE   ] = { .detach = mr_nullptr,                     .add_new = schedule_add_zombie_list     },
+//};
 
 /* -------------------------------------------------------------------------- */
 /*!< API functions */
@@ -103,7 +122,7 @@ struct list_head *get_ready_thread_table(void)
  */
 struct thread *get_thread_handle(tid_t tid)
 {
-    if (tid >= THREAD_MAX_NUM)
+    if ((tid >= THREAD_MAX_NUM) || (tid < 0))
         return mr_nullptr;
     
     return SCHED_THREAD_HANDLER(tid);
@@ -129,6 +148,28 @@ void thread_set_name(tid_t tid, const kchar_t *name)
 }
 
 /*!
+ * @brief	set name to thread
+ * @param  	name: thread name
+ * @retval 	none
+ * @note   	none
+ */
+void thread_set_name_args(tid_t tid, const kchar_t *name, ...)
+{
+    struct thread *sptr_thread;
+    va_list sptr_list;
+
+    if (!name || !(*name))
+        return;
+
+    sptr_thread = SCHED_THREAD_HANDLER(tid);
+    memset(sptr_thread->name, 0, THREAD_NAME_SIZE);
+
+    va_start(sptr_list, name);
+    vasprintk_limit(sptr_thread->name, THREAD_NAME_SIZE, name, sptr_list);
+    va_end(sptr_list);
+}
+
+/*!
  * @brief	set name to current thread
  * @param  	name: thread name
  * @retval 	none
@@ -145,6 +186,28 @@ void thread_set_self_name(const kchar_t *name)
 
     memset(sptr_work->name, 0, THREAD_NAME_SIZE);
     kstrlcpy(sptr_work->name, name, THREAD_NAME_SIZE);
+}
+
+/*!
+ * @brief	set name to current thread
+ * @param  	name: thread name
+ * @retval 	none
+ * @note   	none
+ */
+void thread_set_self_name_args(const kchar_t *name, ...)
+{
+    struct thread *sptr_work;
+    va_list sptr_list;
+
+    if (!name || !(*name))
+        return;
+
+    sptr_work = SCHED_RUNNING_THREAD;
+    memset(sptr_work->name, 0, THREAD_NAME_SIZE);
+
+    va_start(sptr_list, name);
+    vasprintk_limit(sptr_work->name, THREAD_NAME_SIZE, name, sptr_list);
+    va_end(sptr_list);
 }
 
 /*!
@@ -282,10 +345,10 @@ void schedule_self_suspend(void)
 }
 
 /*!
- * @brief	kill current thread
+ * @brief	sleep current thread
  * @param  	none
  * @retval 	0: fail; 1: succuess
- * @note   	kill current thread, and switch to next
+ * @note   	sleep current thread, and switch to next
  */
 void schedule_self_sleep(void)
 {
@@ -340,7 +403,7 @@ kint32_t schedule_thread_suspend(tid_t tid)
 }
 
 /*!
- * @brief	kill another thread
+ * @brief	sleep another thread
  * @param  	tid: target thread
  * @retval 	err code
  * @note   	none
@@ -357,6 +420,43 @@ kint32_t schedule_thread_sleep(tid_t tid)
 
     spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SLEEP);
+
+    if (mr_unlikely(__GET_THREAD_STATE(sptr_thread) == NR_THREAD_RUNNING))
+    {
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+
+        /*!< Self suspend */
+        schedule_thread();
+        return ER_NORMAL;
+    }
+
+    spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
+    retval = schedule_thread_switch(sptr_thread);
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+
+    return retval;
+}
+
+/*!
+ * @brief	kill another thread
+ * @param  	tid: target thread
+ * @retval 	err code
+ * @note   	none
+ */
+kint32_t schedule_thread_zombie(tid_t tid)
+{
+    struct thread *sptr_thread;
+    kutype_t flags;
+    kint32_t retval;
+
+    sptr_thread = SCHED_THREAD_HANDLER(tid);
+    if (mr_unlikely(!sptr_thread))
+        return -ER_NODEV;
+
+    spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
+    __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_ZOMBIE);
 
     if (mr_unlikely(__GET_THREAD_STATE(sptr_thread) == NR_THREAD_RUNNING))
     {
@@ -403,6 +503,7 @@ kint32_t schedule_thread_wakeup(tid_t tid)
         return -ER_FORBID;
     }
 
+    /*!< exclude NR_THREAD_ZOMBIE */
     state = __GET_THREAD_STATE(sptr_thread);
     if ((state != NR_THREAD_SUSPEND) &&
         (state != NR_THREAD_SLEEP))
@@ -491,6 +592,18 @@ struct thread *get_first_sleep_thread(void)
 }
 
 /*!
+ * @brief	get the highest zombie thread (if zombie list is not empty)
+ * @param  	none
+ * @retval 	first thread
+ * @note   	none
+ */
+struct thread *get_first_zombie_thread(void)
+{
+    kbool_t existed = mr_list_empty(SCHED_ZOMBIE_LIST);
+    return existed ? mr_nullptr : mr_list_first_entry(SCHED_ZOMBIE_LIST, struct thread, sgtc_link);
+}
+
+/*!
  * @brief	check if thread is valid
  * @param  	none
  * @retval 	1: valid; 0: unvalid
@@ -554,6 +667,25 @@ struct thread *next_sleep_thread(struct thread *sptr_prev)
     if (mr_list_empty(SCHED_SLEEP_LIST) ||
         mr_list_empty(&sptr_prev->sgtc_link) ||
         mr_list_head_until(sptr_prev, SCHED_SLEEP_LIST, sgtc_link))
+        return mr_nullptr;
+
+    return mr_list_next_entry(sptr_prev, sgtc_link);
+}
+
+/*!
+ * @brief	get next zombie thread
+ * @param  	sptr_prev
+ * @retval 	next
+ * @note   	none
+ */
+struct thread *next_zombie_thread(struct thread *sptr_prev)
+{
+    if (!sptr_prev)
+        return get_first_zombie_thread();
+
+    if (mr_list_empty(SCHED_ZOMBIE_LIST) ||
+        mr_list_empty(&sptr_prev->sgtc_link) ||
+        mr_list_head_until(sptr_prev, SCHED_ZOMBIE_LIST, sgtc_link))
         return mr_nullptr;
 
     return mr_list_next_entry(sptr_prev, sgtc_link);
@@ -673,9 +805,10 @@ static void __thread_hash_remove(struct thread_list *sptr_list, struct thread *s
 kint32_t schedule_thread_switch(struct thread *sptr_thread)
 {
 //  struct thread *sptr_thread;
+//  const struct scheduler_operation *sptr_oprts = &sgtc_scheduler_operations[0];
     tid_t tid;
     kuint32_t src, dst;
-    kint32_t retval;
+    kint32_t retval = ER_NORMAL;
     
     /*!< Protected by caller, do not disable again */
 //  mr_preempt_disable();
@@ -698,8 +831,7 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
      *
      * (only running and ready state can be switched to any state)
      */
-    if (mr_unlikely(((src == NR_THREAD_RUNNING) && (dst == NR_THREAD_RUNNING))) || 
-        mr_unlikely(dst >= NR_THREAD_STATUS_MAX))
+    if (mr_unlikely((dst == NR_THREAD_NONE) || (dst >= NR_THREAD_STATUS_MAX)))
         goto fail;
 
     /*!< for idle thread, only ready and running state can be chosen */
@@ -716,29 +848,39 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
     switch (src)
     {
         case NR_THREAD_RUNNING:
-            retval = schedule_reinstall_work_role();
-            if (mr_unlikely(retval))
+            if (mr_unlikely(dst == NR_THREAD_RUNNING))
                 goto fail;
-            
+
+            retval = schedule_reinstall_work_role(sptr_thread);          
             break;
 
         case NR_THREAD_READY:
-            schedule_detach_ready_list(sptr_thread);
+            retval = schedule_detach_ready_list(sptr_thread);
             break;
 
         case NR_THREAD_SUSPEND:
-            schedule_detach_suspend_list(sptr_thread);
+            retval = schedule_detach_suspend_list(sptr_thread);
             break;
 
         case NR_THREAD_SLEEP:
-            schedule_detach_sleep_list(sptr_thread);
+            retval = schedule_detach_sleep_list(sptr_thread);
             break;
 
+        case NR_THREAD_ZOMBIE:
+            /*!< zombie thread can not be scheduled */
+            goto fail;
+            
         default:
             break;
     }
 
     mr_barrier();
+    if (mr_unlikely(retval < 0))
+    {
+        print_warn("switch thread (detach old) failed ! current and target state is : %s, %d, %d\r\n", 
+                    sptr_thread->name, src, dst);
+        goto fail;
+    }
 
     /*!< add to new list */
     switch (dst)
@@ -765,6 +907,12 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
             retval = schedule_add_sleep_list(sptr_thread);
             break;
 
+        case NR_THREAD_ZOMBIE:
+            /*!< clear state */
+            __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
+            retval = schedule_add_zombie_list(sptr_thread);
+            break;
+
         default:
             retval = -ER_ERROR;
             break;
@@ -772,13 +920,23 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
 
     if (mr_unlikely(retval < 0))
     {
-        print_warn("switch thread failed ! current and target state is : %d, %d\r\n", src, dst);
+        print_warn("switch thread (add new) failed ! current and target state is : %s, %d, %d, error code: %d\r\n", 
+                    sptr_thread->name, src, dst, retval);
+
+        src = NR_THREAD_SLEEP;
+        retval = schedule_add_sleep_list(sptr_thread);
+        if (retval < 0)
+        {
+            src = NR_THREAD_NONE;
+            print_err("current thread is down and will be about to become kernel garbage! error code: %d\r\n", retval);
+        }
         goto fail;
     }
 
     if (mr_unlikely(!SCHED_RUNNING_THREAD))
     {
         print_err("no thread is running !!! dangerous action !!!\r\n");
+        mr_assert(true);
         goto fail;
     }
 
@@ -838,7 +996,7 @@ static kint32_t schedule_despoil_work_role(struct thread *sptr_thread)
  * @retval 	err code
  * @note   	running ---> xxx
  */
-static kint32_t schedule_reinstall_work_role(void)
+static kint32_t schedule_reinstall_work_role(struct thread *sptr_thread)
 {
     struct thread *sptr_new;
     struct list_head *sptr_ready = SCHED_READY_LIST;
@@ -984,6 +1142,47 @@ static kint32_t schedule_detach_sleep_list(struct thread *sptr_thread)
 
     /*!< delete it */
     __schedule_del_status_list(sptr_thread, SCHED_SLEEP_LIST, SCHED_SLEEP_HASH);
+
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief	change target thread state to zombie
+ * @param  	tid: target thread
+ * @retval 	err code
+ * @note   	add to zombie list
+ */
+static kint32_t schedule_add_zombie_list(struct thread *sptr_thread)
+{
+    if (mr_unlikely(!sptr_thread))
+        return -ER_FAULT;
+
+    /*!< avoid duplicate additions */
+    if (mr_unlikely(NR_THREAD_ZOMBIE == sptr_thread->state))
+        return -ER_INVALID;
+
+    return __schedule_add_status_list(sptr_thread, SCHED_ZOMBIE_LIST, SCHED_ZOMBIE_HASH);
+}
+
+/*!
+ * @brief	change target thread state from zombie
+ * @param  	tid: target thread
+ * @retval 	err code
+ * @note   	del from zombie list. it must be called by schedule_thread_switch, do not use alone !!!
+ * 			(after detaching from the zombie list, the thread will appear in a free state, 
+ * 			so this function prohibits external calls to prevent the thread from leaving management and causing memory leakage)
+ */
+static kint32_t schedule_detach_zombie_list(struct thread *sptr_thread)
+{
+    if (mr_unlikely(!sptr_thread))
+        return -ER_FAULT;
+
+    /*!< check if is in ready state */
+    if (mr_unlikely(NR_THREAD_ZOMBIE != sptr_thread->state))
+        return -ER_INVALID;
+
+    /*!< delete it */
+    __schedule_del_status_list(sptr_thread, SCHED_ZOMBIE_LIST, SCHED_ZOMBIE_HASH);
 
     return ER_NORMAL;
 }
@@ -1141,15 +1340,15 @@ struct thread *unregister_thread(tid_t tid)
 
     sptr_thread = SCHED_THREAD_HANDLER(tid);
     if (!sptr_thread)
-        return mr_nullptr;
+        goto END;
 
-    if (sptr_thread->state != NR_THREAD_SLEEP)
+    if (sptr_thread->state != NR_THREAD_ZOMBIE)
     {
         sptr_thread = ERR_PTR(-ER_BUSY);
         goto END;
     }
 
-    schedule_detach_sleep_list(sptr_thread);
+    schedule_detach_zombie_list(sptr_thread);
     SCHED_THREAD_HANDLER(tid) = mr_nullptr;
 
 END:
@@ -1303,9 +1502,15 @@ static void __scheduler_init(struct thread_list *sptr_list)
  */
 void __init scheduler_init(void)
 {
+    init_list_head(SCHED_READY_LIST);
+    init_list_head(SCHED_SUSPEND_LIST);
+    init_list_head(SCHED_SLEEP_LIST);
+    init_list_head(SCHED_ZOMBIE_LIST);
+
     __scheduler_init(SCHED_READY_HASH);
     __scheduler_init(SCHED_SUSPEND_HASH);
     __scheduler_init(SCHED_SLEEP_HASH);
+    __scheduler_init(SCHED_ZOMBIE_HASH);
 }
 
 /*!< end of file */

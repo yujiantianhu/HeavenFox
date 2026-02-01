@@ -314,7 +314,7 @@ void term_cmd_add_ping(void)
     term_cmd_add(sptr_cmd);
 
     /*!< Add terminal manage */
-    sptr_pctrl = term_variable_allocate("g_ping_cmd_count", &g_ping_cmd_count);
+    sptr_pctrl = term_variable_allocate("g_ping_cmd_count", &g_ping_cmd_count, 1);
     if (isValid(sptr_pctrl))
         term_variable_add(sptr_pctrl);
 }

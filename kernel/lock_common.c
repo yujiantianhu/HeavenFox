@@ -14,9 +14,21 @@
 #include <kernel/kernel.h>
 #include <kernel/lock_common.h>
 #include <kernel/sched.h>
+#include <term/term.h>
 
 /*!< The defines */
 #define INHERIT_RECURSION_DEPTH                         (10)
+
+/*!< The globals */
+static kint32_t g_inherit_monitor;
+static kint32_t g_inherit_recur_monitor;
+
+static struct term_variable sgtc_inherit_monitor[] = 
+{ 
+    { .name = "g_inherit_monitor", .var = &g_inherit_monitor, .num = 1 },
+    { .name = "g_inherit_recur_monitor", .var = &g_inherit_recur_monitor, .num = 1 },
+};
+static const kusize_t g_num_inherit_monitor = ARRAY_SIZE(sgtc_inherit_monitor);
 
 /*!< The functions */
 
@@ -53,8 +65,8 @@ void lock_context_save(struct lock_owner *sptr_owner)
     sptr_self = mr_current;
 
     /*!< It should be assigned before use */
-    if (mr_unlikely(!sptr_owner->sptr_self))
-        print_warn("%s %d: please set owner before using, current tid is: %d\r\n", __FUNCTION__, __LINE__, sptr_self->tid);
+//  if (mr_unlikely(!sptr_owner->sptr_self))
+//      print_warn("%s %d: please set owner before using, current tid is: %d\r\n", __FUNCTION__, __LINE__, sptr_self->tid);
 
     sptr_waiter = &sptr_self->sgtc_wait;
     sptr_owners = &sptr_self->sgtc_owners;
@@ -391,7 +403,7 @@ kuint32_t lock_find_max_priority(struct lock_owners *sptr_owners)
  * @retval  errno
  * @note    When the lock is already held by another thread, it will be called by mutex_lock
  */
-kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kbool_t inherit_enable)
+kint32_t lock_compete(struct lock_owner *sptr_owner, kbool_t (*is_locked)(void *), void *lock, kbool_t inherit_enable)
 {
     struct thread *sptr_self, *sptr_rival;
     struct lock_owners *sptr_owns;
@@ -407,7 +419,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
     sptr_rival = sptr_owner->sptr_self;
 
     /*!< It's me, there's no competitive relationship; or the lock is already idle. Re-entry is prohibited! */
-    if ((sptr_self == sptr_rival) || (atomic_get_val(sptc_atc) == 0))
+    if ((sptr_self == sptr_rival) || (is_locked(lock) == 0))
     {
         spin_unlock(&sptr_owner->sgtc_lock);
         return -ER_FORBID;
@@ -466,6 +478,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
             /*!< Priority changed */
             if (max_prio != cur_prio)
             {
+                g_inherit_monitor++;
                 spin_lock_irqsave(&sptr_rival->sgtc_lock, &flags);
 
                 /*!< Set inheritance priority */
@@ -493,6 +506,8 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sptc_atc, kb
             if (sptr_rival && (depth--))
             {
                 sptr_owns = &sptr_self->sgtc_owners;
+                
+                g_inherit_recur_monitor++;
                 spin_lock(&sptr_owner->sgtc_lock);
 
                 continue;
@@ -573,3 +588,38 @@ kint32_t unlock_release(struct thread *sptr_self, kbool_t inherit_enable)
 
     return ER_NORMAL;
 }
+
+/*!< ------------------------------------------------------------------------- */
+/*!
+ * @brief   inherit kernel init
+ * @param   none
+ * @retval  errno
+ * @note    none
+ */
+static kint32_t __plat_init kernel_inherit_init(void)
+{
+    struct term_variable *sptr_var = &sgtc_inherit_monitor[0];
+    kint32_t index;
+
+    for (index = 0; index < g_num_inherit_monitor; index++)
+        init_list_head(&sptr_var[index].sgtc_link);
+
+    term_variable_add_more(sptr_var, g_num_inherit_monitor);
+    return ER_NORMAL;
+}
+
+/*!
+ * @brief   inherit kernel exit
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+static void __plat_exit kernel_inherit_exit(void)
+{
+    term_variable_del_more(sgtc_inherit_monitor, g_num_inherit_monitor);
+}
+
+IMPORT_KERNEL_INIT(kernel_inherit_init);
+IMPORT_KERNEL_EXIT(kernel_inherit_exit);
+
+/*!< end of file */

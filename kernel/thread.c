@@ -208,6 +208,26 @@ kint32_t kernel_thread_init_create(struct thread_attr *sptr_attr,
 }
 
 /*!
+ * @brief	quit thread
+ * @param  	tid
+ * @retval 	err code
+ * @note   	none
+ */
+kint32_t thread_quit(tid_t tid)
+{
+    struct thread *sptr_thread = mr_tid_handle(tid);
+
+    if (mr_unlikely(mr_nullptr == sptr_thread))
+        return ER_NORMAL;
+
+    if (sptr_thread->time_event)
+        thread_sleep_quit(sptr_thread->time_event);
+
+//  print_debug("\r\nthread \'%s\' (tid: %d) is quit\r\n", sptr_thread->name, tid);
+    return ER_NORMAL;
+}
+
+/*!
  * @brief	destroy thread
  * @param  	tid
  * @retval 	err code
@@ -232,7 +252,7 @@ kint32_t thread_destory(tid_t tid)
     if (sptr_thread->sptr_mb)
         mailbox_destroy(sptr_thread->sptr_mb);
     
-    print_debug("\r\nthread \'%s\' (tid: %d) is be destroyed\r\n", sptr_thread->name, tid);
+    print_debug("\r\nthread \'%s\' (tid: %d) is destroyed\r\n", sptr_thread->name, tid);
 
     kfree(sptr_thread->sptr_attr);
     kfree(sptr_thread);
@@ -301,7 +321,6 @@ void *thread_attr_revise(struct thread_attr *sptr_attr)
         thread_set_stack(sptr_attr, ptr_stack, ptr_stack, THREAD_STACK_DEFAULT);
     }
 
-    sptr_attr->sgtc_param.count = 0;
     return (void *)sptr_attr->stack_addr;
 }
 

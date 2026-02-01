@@ -69,7 +69,7 @@ extern kuint32_t lock_find_max_priority(struct lock_owners *sptr_owners);
 extern void lock_context_init(struct lock_owner *sptr_owner);
 extern void lock_context_save(struct lock_owner *sptr_owner);
 extern void unlock_context_restore(struct lock_owner *sptr_owner);
-extern kint32_t lock_compete(struct lock_owner *sptr_owner, struct atomic *sgtc_atc, kbool_t inherit_enable);
+extern kint32_t lock_compete(struct lock_owner *sptr_owner, kbool_t (*is_locked)(void *), void *lock, kbool_t inherit_enable);
 extern kint32_t unlock_release(struct thread *sptr_self, kbool_t inherit_enable);
 
 /*!< API functions */

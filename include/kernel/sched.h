@@ -130,6 +130,7 @@ struct scheduler_core
     struct thread_list sgtc_ready;
     struct thread_list sgtc_suspend;
     struct thread_list sgtc_sleep;
+    struct thread_list sgtc_zombie;
 };
 
 /*!< thread manage table */
@@ -150,6 +151,7 @@ struct scheduler_table
     struct list_head sgtc_ready;									/*!< ready list head (manage all ready thread) */
     struct list_head sgtc_suspend;									/*!< suspend list head (manage all suspend thread) */
     struct list_head sgtc_sleep;									/*!< sleep list head (manage all sleepy thread) */
+    struct list_head sgtc_zombie;									/*!< zombie list head (manage all zombie thread) */
 
     struct thread *sptr_work;									    /*!< current thread (status is running) */
 
@@ -164,10 +166,12 @@ struct scheduler_table
 #define __THREAD_READY_LIST(ptr)			(&((ptr)->sgtc_ready))
 #define __THREAD_SUSPEND_LIST(ptr)			(&((ptr)->sgtc_suspend))
 #define __THREAD_SLEEP_LIST(ptr)			(&((ptr)->sgtc_sleep))
+#define __THREAD_ZOMBIE_LIST(ptr)			(&((ptr)->sgtc_zombie))
 
 #define __THREAD_READY_HASH(ptr)            (&((ptr)->sgtc_core.sgtc_ready))
 #define __THREAD_SUSPEND_HASH(ptr)          (&((ptr)->sgtc_core.sgtc_suspend))
 #define __THREAD_SLEEP_HASH(ptr)            (&((ptr)->sgtc_core.sgtc_sleep))
+#define __THREAD_ZOMBIE_HASH(ptr)           (&((ptr)->sgtc_core.sgtc_zombie))
 };
 
 /*!< The globals */
@@ -177,7 +181,9 @@ extern struct thread *get_current_thread(void);
 extern struct list_head *get_ready_thread_table(void);
 extern struct thread *get_thread_handle(tid_t tid);
 extern void thread_set_name(tid_t tid, const kchar_t *name);
+extern void thread_set_name_args(tid_t tid, const kchar_t *name, ...);
 extern void thread_set_self_name(const kchar_t *name);
+extern void thread_set_self_name_args(const kchar_t *name, ...);
 extern kchar_t *thread_get_name(tid_t tid);
 extern kchar_t *thread_get_self_name(void);
 extern void thread_set_state(struct thread *sptr_thread, kuint32_t state);
@@ -188,6 +194,7 @@ extern void schedule_self_suspend(void);
 extern void schedule_self_sleep(void);
 extern kint32_t schedule_thread_suspend(tid_t tid);
 extern kint32_t schedule_thread_sleep(tid_t tid);
+extern kint32_t schedule_thread_zombie(tid_t tid);
 extern kint32_t schedule_thread_wakeup(tid_t tid);
 
 extern kbool_t is_ready_thread_empty(void);
@@ -196,10 +203,12 @@ extern kbool_t is_sleep_thread_empty(void);
 extern struct thread *get_first_ready_thread(void);
 extern struct thread *get_first_suspend_thread(void);
 extern struct thread *get_first_sleep_thread(void);
+extern struct thread *get_first_zombie_thread(void);
 extern kbool_t is_thread_valid(tid_t tid);
 extern struct thread *next_ready_thread(struct thread *sptr_prev);
 extern struct thread *next_suspend_thread(struct thread *sptr_prev);
 extern struct thread *next_sleep_thread(struct thread *sptr_prev);
+extern struct thread *next_zombie_thread(struct thread *sptr_prev);
 
 extern kint32_t schedule_thread_switch(struct thread *sptr_thread);
 extern kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid);

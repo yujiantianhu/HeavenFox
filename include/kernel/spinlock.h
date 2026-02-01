@@ -24,15 +24,16 @@
 /*!< The defines */
 typedef struct spin_lock
 {
+    kutype_t owner;
     struct atomic sgtc_atc;
 
 } srt_spin_lock_t;
 
 #define DECLARE_SPIN_LOCK(lock)	\
-    struct spin_lock lock = { .sgtc_atc = ATOMIC_INIT() }
+    struct spin_lock lock = { .owner = 0, .sgtc_atc = ATOMIC_INIT() }
 
 #define SPIN_LOCK_INIT()	\
-    { .sgtc_atc = ATOMIC_INIT() }
+    { .owner = 0, .sgtc_atc = ATOMIC_INIT() }
 
 /*!< The functions */
 extern void spin_lock_init(struct spin_lock *sptr_lock);

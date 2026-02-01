@@ -616,6 +616,7 @@ static kint32_t sil9022x_driver_probe(struct fwk_i2c_client *sptr_client, const 
     /*!< Add terminal manage */
     sprintk(sptr_drv->sgtc_term.name, "g_sil902x_enable");
     sptr_drv->sgtc_term.var = &g_sil902x_enable;
+    sptr_drv->sgtc_term.num = 1;
     init_list_head(&sptr_drv->sgtc_term.sgtc_link);
     term_variable_add(&sptr_drv->sgtc_term);
 

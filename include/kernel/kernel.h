@@ -56,6 +56,9 @@ enum __ERT_THREAD_BASIC_STATUS
      * and even if the ready condition is met, it will not be inserted into the ready list Can be awakened */
     NR_THREAD_SLEEP,
 
+    /*!< zombie list: thread will be destroyed */
+    NR_THREAD_ZOMBIE,
+
     /*!< numbers */
     NR_THREAD_STATUS_MAX
 };

@@ -56,7 +56,8 @@ static kint32_t term_cmd_value(struct term_cmd *sptr_cmd, kint32_t argc, kchar_t
                 break;
             }
 
-            *sptr_var->var = value;
+            for (kuint32_t i = 0; i < sptr_var->num; i++)
+                sptr_var->var[i] = value;
             printk("Write value '%d' to variable '%s' succussfully\r\n", value, argv[3]);
 
             break;
@@ -72,7 +73,14 @@ static kint32_t term_cmd_value(struct term_cmd *sptr_cmd, kint32_t argc, kchar_t
                 break;
             }
 
-            printk("Variable '%s' value = %d\r\n", argv[2], *sptr_var->var);
+            if (sptr_var->num == 1)
+                printk("Variable '%s' value = %d\r\n", argv[2], *sptr_var->var);
+            else
+            {
+                for (kuint32_t i = 0; i < sptr_var->num; i++)
+                    printk("Variable '%s[%u]' value = %d\r\n", argv[2], i, sptr_var->var[i]);
+            }
+
             break;
 
         case 2:
@@ -84,7 +92,12 @@ static kint32_t term_cmd_value(struct term_cmd *sptr_cmd, kint32_t argc, kchar_t
 
                 sptr_var = mr_nullptr;
                 while ((sptr_var = term_variable_next(sptr_var)))
-                    printk("%d. %s\r\n", ++count, sptr_var->name);
+                {
+                    if (sptr_var->num == 1)
+                        printk("%d. %s\r\n", ++count, sptr_var->name, sptr_var->num);
+                    else
+                        printk("%d. %s (num = %u)\r\n", ++count, sptr_var->name, sptr_var->num);
+                }
             }
             else
                 goto fail;
