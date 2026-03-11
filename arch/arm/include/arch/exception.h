@@ -22,9 +22,26 @@
 #include <common/error_types.h>
 #include <common/generic.h>
 #include <common/atomic_types.h>
+#include <boot/core.h>
+
+/*!< The defines */
+struct exception_info
+{
+    kuaddr_t prefecth_abort_addr;                   /*!< offset: 0x00 */
+    kuaddr_t data_abort_addr;                       /*!< offset: 0x04 */
+    kuaddr_t undefined_abort_addr;                  /*!< offset: 0x08 */
+
+    kutype_t abort_cur_sp;                          /*!< offset: 0x0c */
+
+#define EXCEP_PREFECTH_ABT_OFFSET                   (0x00)
+#define EXCEP_DATA_ABT_OFFSET                       (0x04)
+#define EXCEP_UND_ABT_OFFSET                        (0x08)
+#define EXCEP_ABT_CUR_SP_OFFSET                     (0x0c)
+};
 
 /*!< The globals */
-extern kuint32_t g_interrupt_flags;
+extern kuint32_t g_interrupt_flags[];
+extern struct exception_info sgtc_excep_info[];
 
 /*!< The defines */
 #define IRQ_BIT                                     (0x02)
@@ -35,18 +52,25 @@ extern kuint32_t g_interrupt_flags;
 #define DATA_ABORT_BIT                              (0x40)
 #define UNUSED_BIT                                  (0x80)
 
-#define IS_IN_INTERRUPT()                           atomic_is_set(0xff, &g_interrupt_flags)
-#define IS_IN_EXCEPTION()                           atomic_is_set(0xf0, &g_interrupt_flags)
-#define SET_INTERRUPT_FLAG(mask)                    atomic_set_mask(mask, &g_interrupt_flags)
-#define CLR_INTERRUPT_FLAG(mask)                    atomic_clear_mask(mask, &g_interrupt_flags)
-#define SET_EXCEPTION_FLAG(mask)                    SET_INTERRUPT_FLAG(mask)
-#define CLR_EXCEPTION_FLAG(mask)                    CLR_INTERRUPT_FLAG(mask)
+#define __IS_IN_INTERRUPT(cpuid)                    atomic_is_set(0xff, &g_interrupt_flags[cpuid])
+#define __IS_IN_EXCEPTION(cpuid)                    atomic_is_set(0xf0, &g_interrupt_flags[cpuid])
+#define __SET_INTERRUPT_FLAG(cpuid, mask)           atomic_set_mask(mask, &g_interrupt_flags[cpuid])
+#define __CLR_INTERRUPT_FLAG(cpuid, mask)           atomic_clear_mask(mask, &g_interrupt_flags[cpuid])
+#define __SET_EXCEPTION_FLAG(cpuid, mask)           __SET_INTERRUPT_FLAG(cpuid, mask)
+#define __CLR_EXCEPTION_FLAG(cpuid, mask)           __CLR_INTERRUPT_FLAG(cpuid, mask)
+
+#define IS_IN_INTERRUPT()                           __IS_IN_INTERRUPT(get_cpu_id())
+#define IS_IN_EXCEPTION()                           __IS_IN_EXCEPTION(get_cpu_id())
+#define SET_INTERRUPT_FLAG(mask)                    __SET_INTERRUPT_FLAG(get_cpu_id(), mask)
+#define CLR_INTERRUPT_FLAG(mask)                    __CLR_INTERRUPT_FLAG(get_cpu_id(), mask)
+#define SET_EXCEPTION_FLAG(mask)                    __SET_EXCEPTION_FLAG(get_cpu_id(), mask)
+#define CLR_EXCEPTION_FLAG(mask)                    __CLR_EXCEPTION_FLAG(get_cpu_id(), mask)
 
 /*!< The functions */
-extern void exec_undefined_handler(void);
-extern void exec_prefetch_abort_handler(void);
-extern void exec_data_abort_handler(void);
-extern void exec_unused_handler(void);
+extern void exec_undefined_handler(kutype_t _sp, kutype_t _lr);
+extern void exec_prefetch_abort_handler(kutype_t _sp, kutype_t _lr);
+extern void exec_data_abort_handler(kutype_t _sp, kutype_t _lr);
+extern void exec_unused_handler(kutype_t _sp, kutype_t _lr);
 
 #ifdef __cplusplus
     }

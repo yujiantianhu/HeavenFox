@@ -28,6 +28,13 @@ struct boot_images
     struct fatfs_disk *sptr_fdisk;
 };
 
+struct boot_mode_stack
+{
+    kuaddr_t stack_base;
+    kusize_t stack_size;
+    kusize_t percpu_stack_size;
+};
+
 /*!< The globals */
 struct boot_images sgtc_boot_images;
 
@@ -41,21 +48,38 @@ struct boot_images sgtc_boot_images;
 kint32_t system_boot_initial(void)
 {
 #if CONFIG_STACK_WITH_LDS
-    _SVC_MODE_STACK_BASE = SVC_MODE_STACK_BASE;
-    _SYS_MODE_STACK_BASE = SYS_MODE_STACK_BASE;
-    _FIQ_MODE_STACK_BASE = FIQ_MODE_STACK_BASE;
-    _IRQ_MODE_STACK_BASE = IRQ_MODE_STACK_BASE;
-    _ABT_MODE_STACK_BASE = ABT_MODE_STACK_BASE;
-    _UND_MODE_STACK_BASE = UND_MODE_STACK_BASE;
+    struct boot_mode_stack sgtc_svc = { SVC_MODE_STACK_BASE, SVC_MODE_STACK_SIZE, SVC_MODE_STACK_SIZE / CONFIG_CORE_NUM };
+    struct boot_mode_stack sgtc_sys = { SYS_MODE_STACK_BASE, SYS_MODE_STACK_SIZE, SYS_MODE_STACK_SIZE / CONFIG_CORE_NUM };
+    struct boot_mode_stack sgtc_fiq = { FIQ_MODE_STACK_BASE, FIQ_MODE_STACK_SIZE, FIQ_MODE_STACK_SIZE / CONFIG_CORE_NUM };
+    struct boot_mode_stack sgtc_irq = { IRQ_MODE_STACK_BASE, IRQ_MODE_STACK_SIZE, IRQ_MODE_STACK_SIZE / CONFIG_CORE_NUM };
+    struct boot_mode_stack sgtc_abt = { ABT_MODE_STACK_BASE, ABT_MODE_STACK_SIZE, ABT_MODE_STACK_SIZE / CONFIG_CORE_NUM };
+    struct boot_mode_stack sgtc_und = { UND_MODE_STACK_BASE, UND_MODE_STACK_SIZE, UND_MODE_STACK_SIZE / CONFIG_CORE_NUM };
 
 #else
-    _SVC_MODE_STACK_BASE = CONFIG_SVC_STACK_BASE;
-    _SYS_MODE_STACK_BASE = CONFIG_SYS_STACK_BASE;
-    _FIQ_MODE_STACK_BASE = CONFIG_FIQ_STACK_BASE;
-    _IRQ_MODE_STACK_BASE = CONFIG_IRQ_STACK_BASE;
-    _ABT_MODE_STACK_BASE = CONFIG_ABT_STACK_BASE;
-    _UND_MODE_STACK_BASE = CONFIG_UND_STACK_BASE;
+    struct boot_mode_stack sgtc_svc = { CONFIG_SVC_STACK_BASE, CONFIG_SVC_STACK_SIZE, CONFIG_SVC_STACK_SIZE / CONFIG_CORE_NUM };
+    struct boot_mode_stack sgtc_sys = { CONFIG_SYS_STACK_BASE, CONFIG_SYS_STACK_SIZE, CONFIG_SYS_STACK_SIZE / CONFIG_CORE_NUM };
+    struct boot_mode_stack sgtc_fiq = { CONFIG_FIQ_STACK_BASE, CONFIG_FIQ_STACK_SIZE, CONFIG_FIQ_STACK_SIZE / CONFIG_CORE_NUM };
+    struct boot_mode_stack sgtc_irq = { CONFIG_IRQ_STACK_BASE, CONFIG_IRQ_STACK_SIZE, CONFIG_IRQ_STACK_SIZE / CONFIG_CORE_NUM };
+    struct boot_mode_stack sgtc_abt = { CONFIG_ABT_STACK_BASE, CONFIG_ABT_STACK_SIZE, CONFIG_ABT_STACK_SIZE / CONFIG_CORE_NUM };
+    struct boot_mode_stack sgtc_und = { CONFIG_UND_STACK_BASE, CONFIG_UND_STACK_SIZE, CONFIG_UND_STACK_SIZE / CONFIG_CORE_NUM };
 #endif
+
+    _SVC_MODE_STACK_BASE = sgtc_svc.stack_base;
+    _SYS_MODE_STACK_BASE = sgtc_sys.stack_base;
+    _FIQ_MODE_STACK_BASE = sgtc_fiq.stack_base;
+    _IRQ_MODE_STACK_BASE = sgtc_irq.stack_base;
+    _ABT_MODE_STACK_BASE = sgtc_abt.stack_base;
+    _UND_MODE_STACK_BASE = sgtc_und.stack_base;
+
+    for (kint32_t cpuid = 0; cpuid < CONFIG_CORE_NUM; cpuid++)
+    {
+        set_svc_mode_stack(cpuid, sgtc_svc.stack_base - (cpuid * sgtc_svc.percpu_stack_size));
+        set_sys_mode_stack(cpuid, sgtc_sys.stack_base - (cpuid * sgtc_sys.percpu_stack_size));
+        set_fiq_mode_stack(cpuid, sgtc_fiq.stack_base - (cpuid * sgtc_fiq.percpu_stack_size));
+        set_irq_mode_stack(cpuid, sgtc_irq.stack_base - (cpuid * sgtc_irq.percpu_stack_size));
+        set_abt_mode_stack(cpuid, sgtc_abt.stack_base - (cpuid * sgtc_abt.percpu_stack_size));
+        set_und_mode_stack(cpuid, sgtc_und.stack_base - (cpuid * sgtc_und.percpu_stack_size));
+    }
 
     boot_text_print();
     return RET_BOOT_PASS;

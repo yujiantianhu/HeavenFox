@@ -17,6 +17,7 @@
 #include <arch/setup.h>
 #include <platform/irq/fwk_irq_types.h>
 #include <kernel/spinlock.h>
+#include <kernel/sched.h>
 
 /*!< The defines */
 #define DELAY_SIMPLE_COUNTER_PER_MS								(0x7ff)
@@ -54,7 +55,7 @@ struct ktime_manage sgtc_khrtime_manage =
 };
 
 /*!< ---------------------------------------------------------- */
-static struct ktime_tick sgtc_ktime_jiffies;
+static struct ktime_tick sgtc_ktime_jiffies[CONFIG_CORE_NUM];
 
 static struct ktime_tick sgtc_ktime_htick;
 static struct ktime_tick sgtc_ktime_pending;
@@ -350,12 +351,16 @@ void add_timer(struct timer_list *sptr_timer)
         (!sptr_timer->expires))
         return;
 
-    sptr_list = &sgtc_ktime_jiffies;
+    /*!< disable preempt, avoid cpuid changed */
+    mr_preempt_disable();
+    sptr_list = &sgtc_ktime_jiffies[get_cpu_id()];
     sptr_lock = &sptr_list->sgtc_lock;
+    sptr_timer->base = (kuaddr_t)sptr_list;
 
     spin_lock_irqsave(sptr_lock, &flags);
     list_head_add_tail(&sptr_list->sgtc_list, &sptr_timer->sgtc_link);
     spin_unlock_irqrestore(sptr_lock, flags);
+    mr_preempt_enable();
 }
 
 /*!
@@ -370,15 +375,20 @@ void del_timer(struct timer_list *sptr_timer)
     struct spin_lock *sptr_lock;
     kutype_t flags;
 
-    if (!isValid(sptr_timer))
+    if (!isValid(sptr_timer) || (!sptr_timer->base))
         return;
 
-    sptr_list = &sgtc_ktime_jiffies;
+    /*!< disable preempt, avoid cpuid changed */
+    mr_preempt_disable();
+    sptr_list = (struct ktime_tick *)sptr_timer->base;
     sptr_lock = &sptr_list->sgtc_lock;
 
     spin_lock_irqsave(sptr_lock, &flags);
     list_head_del(&sptr_timer->sgtc_link);
     spin_unlock_irqrestore(sptr_lock, flags);
+    mr_preempt_enable();
+
+    sptr_timer->base = 0;
 }
 
 /*!
@@ -392,14 +402,22 @@ kbool_t find_timer(struct timer_list *sptr_timer)
     struct ktime_tick *sptr_list;
     struct timer_list *sptr_any;
 
-    sptr_list = &sgtc_ktime_jiffies;
+    if (!isValid(sptr_timer) || (!sptr_timer->base))
+        return false;
+
+    mr_preempt_disable();
+    sptr_list = (struct ktime_tick *)sptr_timer->base;
 
     foreach_list_next_entry(sptr_any, &sptr_list->sgtc_list, sgtc_link)
     {
         if (sptr_timer == sptr_any)
+        {
+            mr_preempt_enable();
             return true;
+        }
     }
 
+    mr_preempt_enable();
     return false;
 }
 
@@ -411,19 +429,28 @@ kbool_t find_timer(struct timer_list *sptr_timer)
  * @note    if timer has not been added to list, add it right away
  */
 void mod_timer(struct timer_list *sptr_timer, kutime_t expires)
-{
+{   
     if (!isValid(sptr_timer))
         return;
 
-    sptr_timer->expires = get_safe_expires(expires);
-    
-#if 0
-    if (!find_timer(sptr_timer)) {
-#else
-    if (mr_list_empty(&sptr_timer->sgtc_link)) {
-#endif
-        add_timer(sptr_timer);
+    mr_preempt_disable();
+    if (sptr_timer->base)
+    {
+        struct ktime_tick *sptr_list;
+        kuint32_t cpuid;
+
+        sptr_list = (struct ktime_tick *)sptr_timer->base;
+        cpuid = (kuint32_t)(sptr_list - (&sgtc_ktime_jiffies[0]));
+
+        if (get_cpu_id() != cpuid)
+            del_timer(sptr_timer);
     }
+
+    sptr_timer->expires = get_safe_expires(expires);
+    if (mr_list_empty(&sptr_timer->sgtc_link))
+        add_timer(sptr_timer);
+
+    mr_preempt_enable();
 }
 
 /*!
@@ -439,7 +466,7 @@ void do_timer_event(void)
     struct timer_list *sptr_timer, *sptr_temp;
     kutime_t expires_bak;
 
-    sptr_list = &sgtc_ktime_jiffies;
+    sptr_list = &sgtc_ktime_jiffies[get_cpu_id()];
     foreach_list_next_entry_safe(sptr_timer, sptr_temp, &sptr_list->sgtc_list, sgtc_link)
     {
         if (!sptr_timer->expires || 
@@ -732,10 +759,14 @@ void __fwk_init systime_init(void)
     struct ktime_tick *sptr_tick;
     kusize_t list_num = ARRAY_SIZE(sgtr_ktime_lists);
 
-    sptr_tick = &sgtc_ktime_jiffies;
-    sptr_tick->sptr_first = mr_nullptr;
-    init_list_head(&sptr_tick->sgtc_list);
-    spin_lock_init(&sptr_tick->sgtc_lock);
+    for (kint32_t id = 0; id < CONFIG_CORE_NUM; id++)
+    {
+        sptr_tick = &sgtc_ktime_jiffies[id];
+
+        sptr_tick->sptr_first = mr_nullptr;
+        init_list_head(&sptr_tick->sgtc_list);
+        spin_lock_init(&sptr_tick->sgtc_lock);
+    }
 
     while (list_num--)
     {

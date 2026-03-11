@@ -21,8 +21,6 @@
 #define IDLE_THREAD_STACK_SIZE                      THREAD_STACK_PAGE(1)    /*!< 1 page (4kbytes) */
 
 /*!< The globals */
-static struct thread_attr sgtc_idle_attr;
-static THREAD_STACK_DEFINE(g_idle_stack, IDLE_THREAD_STACK_SIZE);
 
 /*!< API functions */
 /*!
@@ -33,13 +31,15 @@ static THREAD_STACK_DEFINE(g_idle_stack, IDLE_THREAD_STACK_SIZE);
  */
 static void *rest_entry(void *args)
 {
-    thread_set_self_name("idle");
+    kuint32_t cpuid = get_cpu_id();
+
+    thread_set_self_name_args("idle/%u", cpuid);
 
     for (;;)
     {   
 #if (!CONFIG_SCHED_SLICE)
         /*!< check priority */
-        struct thread *sptr_ready = get_first_ready_thread();
+        struct thread *sptr_ready = get_first_ready_thread(cpuid);
         if (!sptr_ready || (sptr_ready == mr_current))
             continue;
 #endif
@@ -58,21 +58,24 @@ static void *rest_entry(void *args)
  */
 kint32_t rest_init(void)
 {
-    struct thread_attr *sptr_attr = &sgtc_idle_attr;
+    struct thread_attr sgtc_attr = {};
 
-	sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
-	sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;
-	sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
+	sgtc_attr.detachstate = THREAD_CREATE_JOINABLE;
+	sgtc_attr.inheritsched	= THREAD_INHERIT_SCHED;
+	sgtc_attr.schedpolicy = THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-	thread_set_stack(sptr_attr, mr_nullptr, g_idle_stack, sizeof(g_idle_stack));
+	thread_attr_setstacksize(&sgtc_attr, IDLE_THREAD_STACK_SIZE);
     /*!< lowest priority */
-	thread_set_priority(sptr_attr, THREAD_PROTY_IDLE);
+	thread_set_priority(&sgtc_attr, THREAD_PROTY_IDLE);
     /*!< default time slice */
-    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
+    thread_set_time_slice(&sgtc_attr, THREAD_TIME_DEFAULT);
+
+    /*!< bind cpu affinity */
+    thread_set_cpuaffinity(&sgtc_attr, CPU_AFFINITY_SINGEL(get_cpu_id()));
 
     /*!< register idle thread */
-    return kernel_thread_idle_create(sptr_attr, rest_entry, mr_nullptr);
+    return kernel_thread_idle_create(&sgtc_attr, rest_entry, mr_nullptr);
 }
 
 /*!< end of file */

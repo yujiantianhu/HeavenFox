@@ -54,22 +54,24 @@ static kint32_t __thread_create(tid_t *ptr_id, kint32_t base, struct thread_attr
     if (tid < 0)
         goto fail;
 
-    sptr_it_attr = sptr_attr;
+    sptr_it_attr = (struct thread_attr *)kmalloc(sizeof(struct thread_attr), GFP_KERNEL);
+    if (!isValid(sptr_it_attr))
+        goto fail;
 
-    if (!sptr_attr)
+    if (sptr_attr)
     {
-        sptr_it_attr = (struct thread_attr *)kmalloc(sizeof(struct thread_attr), GFP_KERNEL);
-        if (!isValid(sptr_it_attr))
-            goto fail;
+        memcpy(sptr_it_attr, sptr_attr, sizeof(*sptr_it_attr));
 
+        /*!< check if attr is valid */
+        if (!thread_attr_revise(sptr_it_attr))
+            goto fail2;
+    }
+    else
+    {
         /*!< initialize attr */
         if (!thread_attr_init(sptr_it_attr))
             goto fail2;
     }
-
-    /*!< check if attr valid */
-    if (!thread_attr_revise(sptr_it_attr))
-        goto fail3;
 
     /*!< create new dynamic thread */
     sptr_thread = (struct thread *)kzalloc(sizeof(struct thread), GFP_KERNEL);
@@ -82,7 +84,7 @@ static kint32_t __thread_create(tid_t *ptr_id, kint32_t base, struct thread_attr
     sptr_thread->ptr_args       = ptr_args;
 
     /*!< add to ready list */
-    retval = register_new_thread(sptr_thread, tid);
+    retval = register_new_thread(sptr_thread, &tid);
     if (retval < 0)
         goto fail4;
 
@@ -114,7 +116,7 @@ kint32_t __kernel_thread_create(tid_t *ptr_id, kint32_t base,
                         struct thread_attr *sptr_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {
     return __thread_create(ptr_id, base, 
-                                sptr_attr, pfunc_start_routine, ptr_args, 0);
+                        sptr_attr, pfunc_start_routine, ptr_args, 0);
 }
 
 /*!
@@ -123,11 +125,11 @@ kint32_t __kernel_thread_create(tid_t *ptr_id, kint32_t base,
  * @retval 	err code
  * @note   	none
  */
-kint32_t __real_user_thread_create(tid_t *ptr_id, kint32_t base, 
+kint32_t __user_thread_create(tid_t *ptr_id, kint32_t base, 
                         struct thread_attr *sptr_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {
     return __thread_create(ptr_id, base, 
-                                sptr_attr, pfunc_start_routine, ptr_args, THREAD_USER);
+                        sptr_attr, pfunc_start_routine, ptr_args, THREAD_USER);
 }
 
 /*!
@@ -164,7 +166,7 @@ tid_t kernel_thread_create(tid_t tid, struct thread_attr *sptr_attr,
 kint32_t thread_create(tid_t *ptr_id, struct thread_attr *sptr_attr, 
                         void *(*pfunc_start_routine) (void *), void *ptr_args)
 {
-    return __real_user_thread_create(ptr_id, -1, 
+    return __user_thread_create(ptr_id, -1, 
                                 sptr_attr, pfunc_start_routine, ptr_args);
 }
 
@@ -177,7 +179,7 @@ kint32_t thread_create(tid_t *ptr_id, struct thread_attr *sptr_attr,
 kint32_t kernel_thread_idle_create(struct thread_attr *sptr_attr, 
                                 void *(*pfunc_start_routine) (void *), void *ptr_args)
 {  
-    return __kernel_thread_create(mr_nullptr, THREAD_TID_IDLE, 
+    return __kernel_thread_create(mr_nullptr, THREAD_TID_IDLE + get_cpu_id(), 
                                 sptr_attr, pfunc_start_routine, ptr_args);
 }
 
@@ -190,7 +192,7 @@ kint32_t kernel_thread_idle_create(struct thread_attr *sptr_attr,
 kint32_t kernel_thread_base_create(struct thread_attr *sptr_attr, 
                                 void *(*pfunc_start_routine) (void *), void *ptr_args)
 {  
-    return __kernel_thread_create(mr_nullptr, THREAD_TID_BASE, 
+    return __kernel_thread_create(mr_nullptr, THREAD_TID_BASE + get_cpu_id(), 
                                 sptr_attr, pfunc_start_routine, ptr_args);
 }
 
@@ -233,9 +235,16 @@ kint32_t thread_quit(tid_t tid)
  * @retval 	err code
  * @note   	none
  */
-kint32_t thread_destory(tid_t tid)
+kint32_t thread_destroy(tid_t tid)
 {
     struct thread *sptr_thread;
+
+    sptr_thread = mr_tid_handle(tid);
+    if (is_lock_owner(&sptr_thread->sgtc_owners))
+    {
+//      print_debug("\r\nthread '%s' (tid: %d) is holding locks, destroying will cause some risk\r\n", sptr_thread->name, tid);
+        return -ER_NREADY;
+    }
 
     sptr_thread = unregister_thread(tid);
     if (IS_ERR(sptr_thread))
@@ -251,7 +260,26 @@ kint32_t thread_destory(tid_t tid)
         thread_sleep_quit(sptr_thread->time_event);
     if (sptr_thread->sptr_mb)
         mailbox_destroy(sptr_thread->sptr_mb);
-    
+
+    /*!< detach pending lock list */
+    if (in_lock_pending(&sptr_thread->sgtc_wait))
+    {
+        struct lock_owner *sptr_owner = sptr_thread->sgtc_wait.sptr_wait;
+        kutype_t flags;
+
+        if (mr_likely(sptr_owner))
+        {
+            spin_lock_irqsave(&sptr_owner->sgtc_lock, &flags);
+            lock_pending_del(sptr_thread);
+            spin_unlock_irqrestore(&sptr_owner->sgtc_lock, flags);
+        }
+        else
+        {
+            /*!< unlikey */
+            lock_pending_del(sptr_thread);
+        }
+    }
+
     print_debug("\r\nthread \'%s\' (tid: %d) is destroyed\r\n", sptr_thread->name, tid);
 
     kfree(sptr_thread->sptr_attr);
@@ -280,14 +308,17 @@ void *thread_attr_init(struct thread_attr *sptr_attr)
     /*!< schedule policy: preempt */
     sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
 
+    /*!< default: all cpu cores */
+    sptr_attr->cpu_affinity = CPU_AFFINITY_DEFAULT;
+
     /*!< stack: 2K */
-    ptr_stack = kzalloc(THREAD_STACK_DEFAULT, GFP_KERNEL);
+    ptr_stack = kmalloc(THREAD_STACK_DEFAULT, GFP_KERNEL);
     if (!isValid(ptr_stack))
         return mr_nullptr;
 
     thread_set_stack(sptr_attr, ptr_stack, ptr_stack, THREAD_STACK_DEFAULT);
     thread_set_priority(sptr_attr, THREAD_PROTY_DEFAULT);
-    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
+    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFAULT);
 
     return (void *)sptr_attr->stack_addr;
 }
@@ -309,16 +340,23 @@ void *thread_attr_revise(struct thread_attr *sptr_attr)
         thread_set_priority(sptr_attr, THREAD_PROTY_DEFAULT);
     
     if (mr_is_timespec_empty(&sptr_attr->sgtc_param.init_budget))
-        thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
+        thread_set_time_slice(sptr_attr, THREAD_TIME_DEFAULT);
+
+    if (!sptr_attr->cpu_affinity)
+        thread_set_cpuaffinity(sptr_attr, CPU_AFFINITY_DEFAULT);
 
     if (!sptr_attr->stack_addr)
     {
+        kusize_t size = thread_attr_getstacksize(sptr_attr);
+
+        size = size ? size : THREAD_STACK_DEFAULT;
+
         /*!< stack: 4KB */
-        ptr_stack = kmalloc(THREAD_STACK_DEFAULT, GFP_KERNEL);
+        ptr_stack = kmalloc(size, GFP_KERNEL);
         if (!isValid(ptr_stack))
             return mr_nullptr;		
 
-        thread_set_stack(sptr_attr, ptr_stack, ptr_stack, THREAD_STACK_DEFAULT);
+        thread_set_stack(sptr_attr, ptr_stack, ptr_stack, size);
     }
 
     return (void *)sptr_attr->stack_addr;

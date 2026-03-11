@@ -133,7 +133,7 @@ typedef struct gic_cpu
 #define mr_get_gic_interface(gic)    \
     (((gic) && ((gic)->cpu_base))  ? (srt_gic_cpu_t *)((gic)->cpu_base)  : __mr_get_gic_interface())
 
-/* The functions */
+/*!< The functions */
 extern srt_gic_t *fwk_get_gic_data(kuint32_t gic_nr);
 extern kint32_t fwk_gic_to_actual_irq(kint32_t hwirq);
 extern kint32_t fwk_gpc_to_gic_irq(kint32_t virq);

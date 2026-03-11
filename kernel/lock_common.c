@@ -193,7 +193,7 @@ void lock_pending_add(struct lock_owner *sptr_owner, struct thread *sptr_thread)
  * @retval  none
  * @note    none
  */
-void lock_pending_del(struct lock_owner *sptr_owner, struct thread *sptr_thread)
+void lock_pending_del(struct thread *sptr_thread)
 {
     struct lock_waiter *sptr_waiter = &sptr_thread->sgtc_wait;
 
@@ -430,7 +430,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, kbool_t (*is_locked)(void *
     {
         struct lock_owners *sptr_rlowns;
         kuint32_t cur_prio, ori_prio, max_prio;
-        struct spin_lock *sptr_lock = scheduler_lock();
+        struct spin_lock *sptr_lock;
 
 #if defined(CONFIG_INHERIT_RECURSION) && (CONFIG_INHERIT_RECURSION)
         kuint8_t depth = INHERIT_RECURSION_DEPTH;
@@ -445,7 +445,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, kbool_t (*is_locked)(void *
              * because the lock will be continuously requested by this thread, 
              * this function will be frequently entered to prevent duplicate additions 
              */
-            lock_pending_del(sptr_owner, sptr_self);
+            lock_pending_del(sptr_self);
 
             /*!< Insert into the pending list */
             lock_pending_add(sptr_owner, sptr_self);
@@ -491,10 +491,15 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, kbool_t (*is_locked)(void *
 
                 spin_unlock_irqrestore(&sptr_rival->sgtc_lock, flags);
 
+                mr_preempt_disable();
+                sptr_lock = scheduler_cpu_lock(sptr_rival->cpu);
+
                 /*!< Protect scheduler with scheduler-lock */
                 spin_lock_irqsave(sptr_lock, &flags);
                 schedule_thread_switch(sptr_rival);
                 spin_unlock_irqrestore(sptr_lock, flags);
+
+                mr_preempt_enable();
             }
 
 /*!< If support recursive inheritance (frequent retrieval of linked lists may slow down the system, use with caution) */
@@ -526,7 +531,7 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, kbool_t (*is_locked)(void *
          * because the lock will be continuously requested by this thread, 
          * this function will be frequently entered to prevent duplicate additions 
          */
-        lock_pending_del(sptr_owner, sptr_self);
+        lock_pending_del(sptr_self);
         lock_pending_add(sptr_owner, sptr_self);
 
         spin_unlock_irqrestore(&sptr_owns->sgtc_lock, flags);

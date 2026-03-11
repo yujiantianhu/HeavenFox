@@ -21,7 +21,7 @@
 
 
 /*!< The globals */
-
+extern struct mutex_lock sgtc_migration_mutex;
 
 /*!< The functions */
 
@@ -35,7 +35,7 @@
 static void term_cmd_ts_title(void)
 {
     printk("----------------------------------------------------------\r\n");
-    printk("tid  stack_size(B) priority slice(ms) state   name\r\n");
+    printk("tid  stack_size(B) priority slice(ms) state  cpu    name\r\n");
     printk("----------------------------------------------------------\r\n");
     printk("state: (1)running, (2)ready, (3)suspend, (4)sleep\r\n");
     printk("----------------------------------------------------------\r\n");
@@ -48,9 +48,9 @@ static void term_cmd_ts_title(void)
  * @note    none
  */
 static void term_cmd_ts_format(tid_t tid, kuint32_t stack_size, kuint32_t prio, 
-                        kutime_t expires, kuint32_t status, kchar_t *name)
+                        kutime_t expires, kuint32_t status, kuint32_t cpuid, kchar_t *name)
 {
-    printk("%-10d%-10d%-10d%-10d%-6d%s\r\n", tid, stack_size, prio, expires, status, name);
+    printk("%-10d%-10d%-10d%-10d%-6d%-6d%s\r\n", tid, stack_size, prio, expires, status, cpuid, name);
 }
 
 /*!
@@ -63,7 +63,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
 {
     struct thread *sptr_thread;
     struct thread_attr *sptr_attr;
-    struct spin_lock *sptr_lock = scheduler_lock();
+    struct spin_lock *sptr_lock;
     tid_t tid = -1;
     kint32_t arg = 0;
     kutype_t flags;
@@ -72,42 +72,53 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
     {
         case 1:
             term_cmd_ts_title();
-            spin_lock_irqsave(sptr_lock, &flags);
+            mutex_lock(&sgtc_migration_mutex);
 
-            /*!< 1. running */
-            sptr_thread = mr_current;
-            sptr_attr = sptr_thread->sptr_attr;
-            term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
-                        thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
-            
-            /*!< 2. ready */
-            sptr_thread = mr_nullptr;
-            while ((sptr_thread = next_ready_thread(sptr_thread)))
+            for (kuint32_t cpuid = 0; cpuid < CONFIG_CORE_NUM; cpuid++)
             {
-                sptr_attr = sptr_thread->sptr_attr;
-                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
-                        thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
+                sptr_lock = scheduler_cpu_lock(cpuid);
+                spin_lock_irqsave(sptr_lock, &flags);
+
+                /*!< 1. running */
+                sptr_thread = get_cpu_current_thread(cpuid);
+                if (sptr_thread)
+                {
+                    sptr_attr = sptr_thread->sptr_attr;
+                    term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
+                                thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->cpu, sptr_thread->name);
+                }
+
+                /*!< 2. ready */
+                sptr_thread = mr_nullptr;
+                while ((sptr_thread = next_ready_thread(cpuid, sptr_thread)))
+                {
+                    sptr_attr = sptr_thread->sptr_attr;
+                    term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
+                            thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->cpu, sptr_thread->name);
+                }
+
+                /*!< 3. suspend */
+                sptr_thread = mr_nullptr;
+                while ((sptr_thread = next_suspend_thread(cpuid, sptr_thread)))
+                {
+                    sptr_attr = sptr_thread->sptr_attr;
+                    term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
+                            thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->cpu, sptr_thread->name);
+                }
+
+                /*!< 4. sleep */
+                sptr_thread = mr_nullptr;
+                while ((sptr_thread = next_sleep_thread(cpuid, sptr_thread)))
+                {
+                    sptr_attr = sptr_thread->sptr_attr;
+                    term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
+                            thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->cpu, sptr_thread->name);
+                }
+
+                spin_unlock_irqrestore(sptr_lock, flags);
             }
 
-            /*!< 3. suspend */
-            sptr_thread = mr_nullptr;
-            while ((sptr_thread = next_suspend_thread(sptr_thread)))
-            {
-                sptr_attr = sptr_thread->sptr_attr;
-                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
-                        thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
-            }
-
-            /*!< 4. sleep */
-            sptr_thread = mr_nullptr;
-            while ((sptr_thread = next_sleep_thread(sptr_thread)))
-            {
-                sptr_attr = sptr_thread->sptr_attr;
-                term_cmd_ts_format(sptr_thread->tid, sptr_attr->stacksize, sptr_attr->sgtc_param.cur_priority,
-                        thread_get_sched_msecs(sptr_attr), sptr_thread->state, sptr_thread->name);
-            }
-
-            spin_unlock_irqrestore(sptr_lock, flags);
+            mutex_unlock(&sgtc_migration_mutex);
             break;
 
         case 2:
@@ -126,6 +137,8 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
                 printk("thread name: %s\r\n"
                        "tid: %d\r\n"
                        "thread state ((1)running, (2)ready, (3)suspend, (4)sleep): %d\r\n"
+                       "cpu: %d\r\n"
+                       "cpu affinity: %#x\r\n"
                        "original priority: %d\r\n"
                        "real-time priority: %d\r\n"
                        "time slice: %u(ms)\r\n"
@@ -133,6 +146,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
                        "stack start: %#x\r\n"
                        "stack size: %u(bytes)\r\n",
                        sptr_thread->name, sptr_thread->tid, sptr_thread->state, 
+                       sptr_thread->cpu, thread_get_cpuaffinity(sptr_attr), 
                        thread_get_ori_priority(sptr_attr), thread_get_priority(sptr_attr),
                        thread_get_sched_msecs(sptr_attr), sptr_thread->expires, sptr_attr->stack_addr, sptr_attr->stacksize);
             }
@@ -175,10 +189,15 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
                         __SET_THREAD_TARGET_STATE(sptr_thread, __GET_THREAD_STATE(sptr_thread));
                         spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
+                        mr_preempt_disable();
+                        sptr_lock = scheduler_cpu_lock(sptr_thread->cpu);
+
                         /*!< Protect scheduler with scheduler-lock */
                         spin_lock_irqsave(sptr_lock, &flags);
                         schedule_thread_switch(sptr_thread);
                         spin_unlock_irqrestore(sptr_lock, flags);
+
+                        mr_preempt_enable();
                     }
                     else
                     {

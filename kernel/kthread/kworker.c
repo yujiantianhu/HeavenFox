@@ -21,12 +21,14 @@
 /*!< The defines */
 #define KWORKER_THREAD_STACK_SIZE                       THREAD_STACK_PAGE(1)    /*!< 1 page (4 kbytes) */
 
-/*!< The globals */
-static tid_t g_kworker_tid = -1;
-static struct thread_attr sgtc_kworker_attr;
-static THREAD_STACK_DEFINE(g_kworker_stack, KWORKER_THREAD_STACK_SIZE);
+struct kworker_percpu
+{
+    struct kthread_percpu sgtc_kth;
+    struct workqueue_head sgtc_wqh;
+};
 
-static DECLARE_WORKQUEUE(sgtc_kworker_wqh);
+/*!< The globals */
+static DECLARE_LIST_HEAD(sgtc_kworker_percpus);
 
 /*!< API functions */
 /*!
@@ -37,10 +39,27 @@ static DECLARE_WORKQUEUE(sgtc_kworker_wqh);
  */
 void schedule_work(struct workqueue *sptr_wq)
 {
-    queue_work(&sgtc_kworker_wqh, sptr_wq);
+    kuint32_t cpuid;
+    struct kthread_percpu *sptr_kth; 
+    
+    mr_preempt_disable();
+    cpuid = get_cpu_id();
 
-    if (g_kworker_tid != (-1))
-        schedule_thread_wakeup(g_kworker_tid);
+    foreach_list_next_entry(sptr_kth, &sgtc_kworker_percpus, sgtc_link) 
+    { 
+        if (cpuid == sptr_kth->cpuid) 
+        {
+            struct kworker_percpu *sptr_kworker;
+
+            sptr_kworker = mr_container_of(sptr_kth, struct kworker_percpu, sgtc_kth);
+            queue_work(&sptr_kworker->sgtc_wqh, sptr_wq);
+            schedule_thread_wakeup(sptr_kth->tid); 
+
+            break; 
+        } 
+    }
+
+    mr_preempt_enable();
 }
 
 /*!
@@ -52,17 +71,18 @@ void schedule_work(struct workqueue *sptr_wq)
 static void *kworker_entry(void *args)
 {
     DECLARE_WORKQUEUE(sgtc_copy);
+    struct kworker_percpu *sptr_kworker = (struct kworker_percpu *)args;
     struct workqueue *sptr_wq;
     struct workqueue *sptr_temp;
 
-    print_info("%s is enter, which tid is: %d\r\n", __FUNCTION__, mr_current->tid);
+    print_info("%s (cpuid: %u) is enter, which tid is: %d\r\n", __FUNCTION__, get_cpu_id(), mr_current->tid);
 
     for (;;)
     {
-        if (is_workqueue_empty(&sgtc_kworker_wqh))
+        if (is_workqueue_empty(&sptr_kworker->sgtc_wqh))
             goto END;
 
-        work_splice_and_init(&sgtc_kworker_wqh, &sgtc_copy);
+        work_splice_and_init(&sptr_kworker->sgtc_wqh, &sgtc_copy);
 
         foreach_workqueue_safe(sptr_wq, sptr_temp, &sgtc_copy)
         {
@@ -89,27 +109,45 @@ END:
  */
 kint32_t kworker_init(void)
 {
-    struct thread_attr *sptr_attr = &sgtc_kworker_attr;
+    struct thread_attr sgtc_attr = {};
+    kuint32_t cpuid = get_cpu_id();
+    struct kthread_percpu *sptr_kth;
+    struct kworker_percpu *sptr_kworker;
 
-	sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
-	sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;
-	sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
+    sptr_kworker = kmalloc(sizeof(*sptr_kworker), GFP_KERNEL);
+    if (!isValid(sptr_kworker))
+        return -ER_NOMEM;
+
+    INIT_WORKQUEUE_HEAD(&sptr_kworker->sgtc_wqh);
+    sptr_kth = &sptr_kworker->sgtc_kth;
+    sptr_kth->cpuid = cpuid;
+    init_list_head(&sptr_kth->sgtc_link);
+
+	sgtc_attr.detachstate = THREAD_CREATE_JOINABLE;
+	sgtc_attr.inheritsched	= THREAD_INHERIT_SCHED;
+	sgtc_attr.schedpolicy = THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-	thread_set_stack(sptr_attr, mr_nullptr, g_kworker_stack, sizeof(g_kworker_stack));
+	thread_attr_setstacksize(&sgtc_attr, KWORKER_THREAD_STACK_SIZE);
     /*!< lowest priority */
-	thread_set_priority(sptr_attr, THREAD_PROTY_KWORKER);
+	thread_set_priority(&sgtc_attr, THREAD_PROTY_KWORKER);
     /*!< default time slice */
-    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
+    thread_set_time_slice(&sgtc_attr, THREAD_TIME_DEFAULT);
+
+    /*!< bind cpu affinity */
+    thread_set_cpuaffinity(&sgtc_attr, CPU_AFFINITY_SINGEL(cpuid));
 
     /*!< register thread */
-    g_kworker_tid = kernel_thread_create(-1, sptr_attr, kworker_entry, mr_nullptr);
-    if (g_kworker_tid >= 0)
+    sptr_kth->tid = kernel_thread_create(-1, &sgtc_attr, kworker_entry, sptr_kworker);
+    if (sptr_kth->tid >= 0)
     {
-        thread_set_name(g_kworker_tid, "kworker");
+        thread_set_name_args(sptr_kth->tid, "kworker/%u", cpuid);
+        list_head_add_tail(&sgtc_kworker_percpus, &sptr_kth->sgtc_link);
+
         return ER_NORMAL;
     }
 
+    kfree(sptr_kworker);
     return -ER_FAILD;
 }
 

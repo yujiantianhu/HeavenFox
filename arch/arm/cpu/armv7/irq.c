@@ -27,6 +27,7 @@
 #define CA7_MAX_GPC_NR                  (128)
 
 /*!< The functions */
+static void fwk_gic_initial(srt_gic_t *sptr_gic);
 static kint32_t fwk_gic_of_init(struct fwk_device_node *sptr_node, struct fwk_device_node *sptr_parent);
 static kint32_t fwk_gpc_of_init(struct fwk_device_node *sptr_node, struct fwk_device_node *sptr_parent);
 
@@ -54,15 +55,37 @@ static kbool_t g_isIntcGicDirect = true;
  */
 void __plat_init initIRQ(void)
 {
+    kuint32_t cpuid = get_cpu_id();
+
+    if (cpuid == CONFIG_CORE_MASTER)
+    {
+        struct irq_percpu *sptr_irq = &sgtc_irq_percpus[0];
+
+        /*!< for smp */
+        for (kint32_t cpuid = 0; cpuid < CONFIG_CORE_NUM; cpuid++)
+        {
+            sptr_irq->index = g_iHal_gic_cnts;
+            sptr_irq->irq_init = (void (*)(void *))fwk_gic_initial;
+            sptr_irq->args = &sgtc_gic_global_data[0];
+
+            sptr_irq++;
+        }
+
 #if CONFIG_OF
-    fwk_of_irq_init(sgtc_fwk_irq_intcs_table);
-
+        fwk_of_irq_init(sgtc_fwk_irq_intcs_table);
 #else
-    local_irq_initial(GIC_NULL);
-
+        local_irq_initial(GIC_NULL);
 #endif
+    }
+    else
+    {
+        struct irq_percpu *sptr_irq = &sgtc_irq_percpus[cpuid];
 
-    print_info("initial irq finished\r\n");
+        if (sptr_irq->irq_init)
+            sptr_irq->irq_init(sptr_irq->args);
+    }
+
+    print_info("cpu %u initial irq finished\r\n", cpuid);
 }
 
 /*!
@@ -463,78 +486,69 @@ static const struct fwk_irq_domain_ops sgtc_gic_domain_hierarchy_ops =
  */
 static void fwk_gic_initial(srt_gic_t *sptr_gic)
 {
-    srt_gic_dist_t *sptr_dest;
-    srt_gic_cpu_t *sptr_cpu;
-    kuint32_t i;
-    kuint32_t irqRegs;
-
-    sptr_gic->dest_base = fwk_io_remap(sptr_gic->dest_base, ARCH_PER_SIZE);
-    if (!isValid(sptr_gic->dest_base))
-        return;
-
-    sptr_gic->cpu_base = fwk_io_remap(sptr_gic->cpu_base, ARCH_PER_SIZE);
-    if (!isValid(sptr_gic->cpu_base))
-        return;
-
-    sptr_dest = mr_get_gic_distributor(sptr_gic);
-    sptr_cpu = mr_get_gic_interface(sptr_gic);
-
-    /*!< Disable group0 distribution */
-    mr_writel(0U, &sptr_dest->D_CTLR);
-
-    irqRegs = mr_mask(sptr_dest->D_TYPER, 0x1fU) + 1;
-
-    if (isValid(sptr_gic))
+    kuint32_t cpuid = get_cpu_id();
+    srt_gic_dist_t *sptr_dest = mr_get_gic_distributor(sptr_gic);
+    srt_gic_cpu_t *sptr_cpu = mr_get_gic_interface(sptr_gic);
+    
+    /*!< Just for master core */
+    if (cpuid == CONFIG_CORE_MASTER)
     {
+        kuint32_t i;
+        kuint32_t irqRegs;
+        
+        /*!< Disable group0 distribution */
+        mr_writel(0U, &sptr_dest->D_CTLR);
+
         /*!< irq number = ((sptr_dest->D_TYPER & 0x1fU) + 1) * 32 */
+        irqRegs = mr_mask(sptr_dest->D_TYPER, 0x1fU) + 1;
         sptr_gic->gic_irqs = irqRegs << 5;
         if (sptr_gic->gic_irqs > __GIC_MAX_IRQS)
             sptr_gic->gic_irqs = __GIC_MAX_IRQS;
-    }
 
-    /*!< On POR, all SPI is in group 0, level-sensitive and using 1-N model */
+        /*!< On POR, all SPI is in group 0, level-sensitive and using 1-N model */
 
-    /*!< Disable all PPI, SGI and SPI */
-    for (i = 0; i < irqRegs; i++)
-        mr_writel(0xffffffffU, &sptr_dest->D_ICENABLER[i]);
+        /*!< Disable all PPI, SGI and SPI */
+        for (i = 0; i < irqRegs; i++)
+            mr_writel(0xffffffffU, &sptr_dest->D_ICENABLER[i]);
 
-    /*!< The trigger mode in the int_config register, only write to the SPI interrupts, so start at 32 */
-    for (i = 32U; i < __GIC_MAX_SPI_IRQS; i += 16U)
-    {
-        /*!<
-         * Each INT_ID uses two bits, or 16 INT_ID per register
-         * Set them all to be level sensitive, active HIGH.
-         * 
-         * 00: Reserved
-         * 01: Edge triggered
-         * 10: Reserved
-         * 11: Level triggered
-         * 
-         * D_ICFGR[0]: irq0 ~ irq15
-         * ...
-         * D_ICFGR[2]: irq32 ~ irq47
-         */
-        mr_writel(0U, &sptr_dest->D_ICFGR[i >> 4]);
-    }
+        /*!< The trigger mode in the int_config register, only write to the SPI interrupts, so start at 32 */
+        for (i = 32U; i < __GIC_MAX_SPI_IRQS; i += 16U)
+        {
+            /*!<
+             * Each INT_ID uses two bits, or 16 INT_ID per register
+             * Set them all to be level sensitive, active HIGH.
+             * 
+             * 00: Reserved
+             * 01: Edge triggered
+             * 10: Reserved
+             * 11: Level triggered
+             * 
+             * D_ICFGR[0]: irq0 ~ irq15
+             * ...
+             * D_ICFGR[2]: irq32 ~ irq47
+             */
+            mr_writel(0U, &sptr_dest->D_ICFGR[i >> 4]);
+        }
 
-    for (i = 0; i < 512; i++)
-    {
-        /*!<
-         * The priority using int the priority_level register
-         * The priority_level and spi_target registers use one byte per
-         * INT_ID.
-         * Write a default value that can be changed elsewhere.
-         */
-        mr_writeb(0xa0, &sptr_dest->D_IPRIORITYR[i]);
-    }
+        for (i = 0; i < 512; i++)
+        {
+            /*!<
+             * The priority using int the priority_level register
+             * The priority_level and spi_target registers use one byte per
+             * INT_ID.
+             * Write a default value that can be changed elsewhere.
+             */
+            mr_writeb(0xa0, &sptr_dest->D_IPRIORITYR[i]);
+        }
 
-    for (i = 32U; i < 512; i++)
-    {
-        /*!<
-         * The CPU interface in the spi_target register
-         * Only write to the SPI interrupts, so start at 32
-         */
-        mr_writeb(0x01, &sptr_dest->D_ITARGETSR[i]);
+        for (i = 32U; i < 512; i++)
+        {
+            /*!<
+             * The CPU interface in the spi_target register
+             * Only write to the SPI interrupts, so start at 32
+             */
+            mr_writeb(0x01, &sptr_dest->D_ITARGETSR[i]);
+        }
     }
 
     /*!< Make all interrupts have higher priority */
@@ -544,7 +558,8 @@ static void fwk_gic_initial(srt_gic_t *sptr_gic)
     mr_writel(7 - __GIC_PRIO_BITS, &sptr_cpu->C_BPR);
 
     /*!< Enable group0 distribution */
-    mr_writel(1U, &sptr_dest->D_CTLR);
+    if (cpuid == CONFIG_CORE_MASTER)
+        mr_writel(1U, &sptr_dest->D_CTLR);
 
     /*!< Enable group0 signaling */
     mr_writel(1U, &sptr_cpu->C_CTLR);
@@ -559,34 +574,42 @@ static void fwk_gic_initial(srt_gic_t *sptr_gic)
  * @retval  none
  * @note    none
  */
-static void fwk_gic_init_bases(kuint32_t gic_nr, kuint32_t irq_start,
+static kint32_t fwk_gic_init_bases(kuint32_t gic_nr, kuint32_t irq_start,
                             void *dest_base, void *cpu_base,
                             kuint32_t percpu_offset, struct fwk_device_node *sptr_node)
 {
     srt_gic_t *sptr_gic;
     struct fwk_irq_domain *sptr_domain;
+    struct irq_percpu *sptr_irq = &sgtc_irq_percpus[get_cpu_id()];
 
     sptr_gic = fwk_get_gic_data(gic_nr);
     if (!isValid(sptr_gic))
-        return;
+        return -ER_NODEV;
 
-    sptr_gic->dest_base = dest_base;
-    sptr_gic->cpu_base = cpu_base;
+    sptr_gic->dest_base = fwk_io_remap(dest_base, ARCH_PER_SIZE);
+    if (!isValid(sptr_gic->dest_base))
+        return -ER_NOMEM;
+
+    sptr_gic->cpu_base = fwk_io_remap(cpu_base, ARCH_PER_SIZE);
+    if (!isValid(sptr_gic->cpu_base))
+        return -ER_NOMEM;
 
     /*!< Initial GIC */
-    fwk_gic_initial(sptr_gic);
+    sptr_irq->irq_init(sptr_gic);
 
     /*!< sptr_gic->gic_irqs will be get on local_irq_initial */
     if (!sptr_gic->gic_irqs)
         print_err("Get IRQ Controller Number failed\r\n");
 
     if (!isValid(sptr_node))
-        return;
+        return -ER_NODEV;
     
     sptr_domain = fwk_irq_domain_add_hierarchy(mr_nullptr, sptr_node, 
                             sptr_gic->gic_irqs, &sgtc_gic_domain_hierarchy_ops, sptr_gic);
     sptr_domain->hwirq = 16;
     sptr_gic->sptr_domain = sptr_domain;
+
+    return ER_NORMAL;
 }
 
 /*!
@@ -599,6 +622,7 @@ static void fwk_gic_init_bases(kuint32_t gic_nr, kuint32_t irq_start,
 kint32_t fwk_gic_of_init(struct fwk_device_node *sptr_node, struct fwk_device_node *sptr_parent)
 {
     kuint32_t destributor = 0, cpu_interface = 0;
+    kint32_t retval;
 
     if (isValid(sptr_parent))
         return -ER_INVALID;
@@ -609,9 +633,11 @@ kint32_t fwk_gic_of_init(struct fwk_device_node *sptr_node, struct fwk_device_no
     if ((!destributor) || (!cpu_interface))
         return -ER_NOTFOUND;
 
-    fwk_gic_init_bases(g_iHal_gic_cnts, -1, (void *)destributor, (void *)cpu_interface, 0, sptr_node);
-    g_iHal_gic_cnts++;
+    retval = fwk_gic_init_bases(g_iHal_gic_cnts, -1, (void *)destributor, (void *)cpu_interface, 0, sptr_node);
+    if (retval)
+        return retval;
 
+    g_iHal_gic_cnts++;
     return ER_NORMAL;
 }
 

@@ -18,6 +18,7 @@
 #include <platform/irq/fwk_irq_types.h>
 #include <platform/of/fwk_of.h>
 #include <kernel/spinlock.h>
+#include <kernel/sched.h>
 
 /*!< The defines */
 struct fwk_tasklet_head

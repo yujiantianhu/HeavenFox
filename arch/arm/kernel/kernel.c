@@ -20,8 +20,25 @@
 
 /*!< The functions */
 
+/*!< The globals */
+/*!< it must be initialized to 0 !!! do no rely on .bss */
+kuint32_t g_percpu_slave_wake[CONFIG_CORE_NUM] __section(".data") = {};
 
 /*!< API functions */
+/*!
+ * @brief   wake up another cpu (smp)
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+void smp_slave_init(void)
+{
+    for (kint32_t cpuid = 0; cpuid < CONFIG_CORE_NUM; cpuid++)
+        g_percpu_slave_wake[cpuid] = true;
 
+    mr_dsb();
+    mr_sev();
+    mr_dsb();
+}
 
 /*!< end of file */

@@ -60,7 +60,7 @@ struct lock_waiter
 /*!< The functions */
 extern struct thread *first_request_thread(struct lock_owner *sptr_owner);
 extern void lock_pending_add(struct lock_owner *sptr_owner, struct thread *sptr_thread);
-extern void lock_pending_del(struct lock_owner *sptr_owner, struct thread *sptr_thread);
+extern void lock_pending_del(struct thread *sptr_thread);
 extern void unlock_pending_del_all(struct lock_owner *sptr_owner);
 extern void unlock_pending_wakeup(struct lock_owner *sptr_owner, kbool_t wake_all);
 extern void unlock_pending_wakeup_nolock(struct lock_owner *sptr_owner, kbool_t wake_all);
@@ -82,6 +82,18 @@ extern kint32_t unlock_release(struct thread *sptr_self, kbool_t inherit_enable)
 static inline kbool_t in_lock_pending(struct lock_waiter *sptr_waiter)
 {
     struct list_head *sptr_link = &sptr_waiter->sgtc_link;  
+    return !mr_list_empty(sptr_link);
+}
+
+/*!
+ * @brief   Judge if owns locks
+ * @param   sptr_owns
+ * @retval  true (yes) or false (no)
+ * @note    none
+ */
+static inline kbool_t is_lock_owner(struct lock_owners *sptr_owns)
+{
+    struct list_head *sptr_link = &sptr_owns->sgtc_gets;  
     return !mr_list_empty(sptr_link);
 }
 

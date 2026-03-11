@@ -30,7 +30,7 @@ struct ps7_xtime_data
 };
 
 /*!< The globals */
-static struct ps7_xtime_data sgtc_ps7_xtime_data;
+static struct ps7_xtime_data sgtc_ps7_xtime_data[CONFIG_CORE_NUM];
 
 #ifdef CONFIG_OF
 static const struct fwk_of_device_id sgtc_zynq7_systick_ids[] =
@@ -58,26 +58,31 @@ void zynq7_systick_init(void)
     XScuTimer *sptr_timer;
     XScuTimer_Config *sptr_cfg, sgtc_cfg;
     kuaddr_t irq;
+    struct fwk_resources sgtc_res;
+    kuint32_t cpuid = get_cpu_id();
     kint32_t retval;
 
-    sptr_data = &sgtc_ps7_xtime_data;
+    sptr_data = &sgtc_ps7_xtime_data[cpuid];
     sptr_timer = &sptr_data->sgtc_tick;
 
 #ifdef CONFIG_OF
     sptr_cfg = &sgtc_cfg;
+    sptr_cfg->DeviceId = 0;
 
     sptr_node = fwk_of_find_matching_node_and_match(mr_nullptr, sgtc_zynq7_systick_ids, mr_nullptr);
     if (!isValid(sptr_node))
         return;
 
-    sptr_cfg->DeviceId = 0;
-    sptr_cfg->BaseAddr = (kuaddr_t)fwk_of_iomap(sptr_node, 0);
-    irq = fwk_of_irq_get(sptr_node, 0);
+    if (fwk_of_address_to_resource(sptr_node, 0, &sgtc_res))
+        return;
+        
+    sptr_cfg->BaseAddr = fwk_address_map(&sgtc_res);
 
+    irq = fwk_of_irq_get(sptr_node, 0);
     sptr_data->sptr_ticknd = sptr_node;
 
 #else
-    sptr_cfg = XScuTimer_LookupConfig(XPAR_PS7_SCUTIMER_0_DEVICE_ID);
+    sptr_cfg = XScuTimer_LookupConfig(cpuid ? XPAR_PS7_SCUTIMER_1_DEVICE_ID : XPAR_PS7_SCUTIMER_0_DEVICE_ID);
     if (!isValid(sptr_cfg))
         return;
 
@@ -94,14 +99,17 @@ void zynq7_systick_init(void)
     XScuTimer_DisableInterrupt(sptr_timer);
 
     /*!< enable interrupt */
-    retval = fwk_request_irq(irq, zynq7_systick_isr, 0, "zynq7-systick", sptr_data);
+    retval = fwk_request_percpu_irq(irq, zynq7_systick_isr, 0, cpuid, "zynq7-systick", sptr_data);
     if (!retval)
         XScuTimer_EnableInterrupt(sptr_timer);
 
-    /*!< Period: 3ns */
-    SYSTICK_INIT(ZYNQ7_SCUTIMER0_FREQ_HZ,
-                 IS_TICKCNT_DEC,
-                 sptr_timer->Config.BaseAddr + XSCUTIMER_COUNTER_OFFSET);
+    if (cpuid == CONFIG_CORE_MASTER)
+    {
+        /*!< Period: 3ns */
+        SYSTICK_INIT(ZYNQ7_SCUTIMER0_FREQ_HZ,
+                     IS_TICKCNT_DEC,
+                     sptr_timer->Config.BaseAddr + XSCUTIMER_COUNTER_OFFSET);
+    }
 
     /*!< TICK_HZ = 200, period = 5ms */
     XScuTimer_LoadTimer(sptr_timer, SYSTICK_FREQ / TICK_HZ);
@@ -132,9 +140,10 @@ irq_return_t zynq7_systick_isr(kint32_t irq, void *args)
     if (status)
     {
         /*!< reset jiffies when counter over */
-        get_time_counter();
-        do_timer_event();
+        if (get_cpu_id() == CONFIG_CORE_MASTER)
+            get_time_counter();
 
+        do_timer_event();
         XScuTimer_ClearInterruptStatus(sptr_timer);
     }
 

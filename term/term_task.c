@@ -42,7 +42,6 @@ struct term_kbd_priv
 
 /*!< The globals */
 static tid_t g_term_task_tid;
-static struct thread_attr sgtc_term_task_attr;
 static THREAD_STACK_DEFINE(g_term_task_stack, TERM_TASK_THREAD_STACK_SIZE);
 static struct mailbox sgtc_term_task_mailbox;
 
@@ -580,7 +579,7 @@ static void *term_entry(void *args)
  */
 kint32_t term_init(void)
 {
-    struct thread_attr *sptr_attr = &sgtc_term_task_attr;
+    struct thread_attr sgtc_attr = {};
 
     /*!< Initial notifier chain */
     fwk_blocking_notifier_chain_init(&sgtc_pause_notifier_chain);
@@ -612,19 +611,22 @@ kint32_t term_init(void)
 
     g_io_stream_flags |= IO_STREAM_ASYNC;
 
-    sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
-    sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;
-    sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
+    sgtc_attr.detachstate = THREAD_CREATE_JOINABLE;
+    sgtc_attr.inheritsched	= THREAD_INHERIT_SCHED;
+    sgtc_attr.schedpolicy = THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-    thread_set_stack(sptr_attr, mr_nullptr, g_term_task_stack, sizeof(g_term_task_stack));
+    thread_set_stack(&sgtc_attr, mr_nullptr, g_term_task_stack, sizeof(g_term_task_stack));
     /*!< lowest priority */
-    thread_set_priority(sptr_attr, THREAD_PROTY_TERM);
+    thread_set_priority(&sgtc_attr, THREAD_PROTY_TERM);
     /*!< default time slice */
-    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
+    thread_set_time_slice(&sgtc_attr, THREAD_TIME_DEFAULT);
+
+    /*!< bind cpu affinity */
+    thread_set_cpuaffinity(&sgtc_attr, CPU_AFFINITY_SINGEL(get_cpu_id()));
 
     /*!< register thread */
-    g_term_task_tid = kernel_thread_create(-1, sptr_attr, term_entry, mr_nullptr);
+    g_term_task_tid = kernel_thread_create(-1, &sgtc_attr, term_entry, mr_nullptr);
     if (g_term_task_tid >= 0)
     {
         thread_set_name(g_term_task_tid, "terminal");

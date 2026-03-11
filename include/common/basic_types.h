@@ -194,7 +194,7 @@ typedef __builtin_va_list       va_list;
 
 #define mr_ffs(x)               __builtin_ffs(x)        /*!< find first bit which value is '1' from low to high for uint32 */
 #define mr_ffsll(x)             __builtin_ffsll(x)      /*!< same as mr_ffs, but for unsigned long long */
-#define mr_clz(x)               __builtin_clz(x)        /*!< get the number of zero from high to low; such as 0x00100000, number is 11 */
+#define mr_clz(x)               __builtin_clz(x)        /*!< get the number of zero from high to low; such as 0x00100001, number is 11 */
 #define mr_clzll(x)             __builtin_clzll(x)      /*!< same as mr_clz, but for unsigned long long */
 
 #define mr_fls(x)               ((x) ? (32 - mr_clz(x)) : 0)

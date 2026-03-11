@@ -21,6 +21,8 @@
 #include <common/generic.h>
 #include <common/list_types.h>
 #include <configs/configs.h>
+#include <boot/core.h>
+#include <kernel/asm_text.h>
 
 /*!< The defines */
 #define THREAD_USER										(0x1)	/*!< user thread */
@@ -67,6 +69,8 @@ enum __ERT_THREAD_SIGNALS
 {
     NR_THREAD_SIG_NORMAL = NR_THREAD_STATUS_MAX,
     NR_THREAD_SIG_WAKEUP,
+    NR_THREAD_SIG_SUSPEND,
+    NR_THREAD_SIG_SLEEP,
     NR_THREAD_SIG_KILL,
     NR_THREAD_SIG_INTR,
 
@@ -74,35 +78,32 @@ enum __ERT_THREAD_SIGNALS
     NR_THREAD_SIG_MAX,
 };
 
+/*!< Per-CPUs private thread */
+struct kthread_percpu
+{
+    tid_t tid;
+    kuint32_t cpuid;
+    struct list_head sgtc_link;
+};
+
+#define schedule_cpu_thread_wakeup(_cpuid, _head)   \
+    do { \
+        struct kthread_percpu *_sptr_kth;  \
+        foreach_list_next_entry(_sptr_kth, _head, sgtc_link)   \
+        {   \
+            if ((_cpuid) == (_sptr_kth)->cpuid)   \
+            {   \
+                schedule_thread_wakeup((_sptr_kth)->tid);  \
+                break;  \
+            }   \
+        }   \
+    } while (0)
+
 /*!< The globals */
-extern struct atomic sgtc_sched_preempt_cnt;
-
-#define mr_preempt_cnt_dec()						atomic_dec(&sgtc_sched_preempt_cnt)
-#define mr_preempt_cnt_inc()						atomic_inc(&sgtc_sched_preempt_cnt)
-#define mr_preempt_cnt()							atomic_get_val(&sgtc_sched_preempt_cnt)
-#define mr_preempt_is_locked()						(!!mr_preempt_cnt())
-
-#ifdef CONFIG_PREEMPT_NESTING
-#define mr_preempt_enable()							mr_barrier()
-#define mr_preempt_disable()						mr_barrier()
-#define mr_preempt_is_locked()						atomic_get_val(&sgtc_sched_preempt_cnt)
-
-#else
-#define mr_preempt_enable()	\
-    do {	\
-        mr_barrier();	\
-        mr_preempt_cnt_dec();	\
-    } while (0)
-
-#define mr_preempt_disable()	\
-    do {	\
-        mr_preempt_cnt_inc();	\
-        mr_barrier();	\
-    } while (0)
-
-#endif
+extern kbool_t g_kernel_preempt_enable;
 
 /*!< The functions */
+extern void wake_up_migration(void);
 
 #ifdef __cplusplus
     }

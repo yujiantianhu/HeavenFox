@@ -101,9 +101,12 @@ void imx6ull_systick_init(void)
      */
     mr_setbitl(mr_bit_mask_nr(0U, 0xfffU, 4U), &sptr_tick->CR);
 
-    /*!< Global interface */
-    /*!< 66MHz, period = 15.15ns; and it is a decrease counter */
-    SYSTICK_INIT(66000000U, IS_TICKCNT_DEC, &sptr_tick->CNR);
+    if (get_cpu_id() == CONFIG_CORE_MASTER)
+    {
+        /*!< Global interface */
+        /*!< 66MHz, period = 15.15ns; and it is a decrease counter */
+        SYSTICK_INIT(66000000U, IS_TICKCNT_DEC, &sptr_tick->CNR);
+    }
 
     /*!<
      * Load register and Compare register

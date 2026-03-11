@@ -18,12 +18,8 @@
 #include <kernel/context.h>
 
 /*!< The globals*/
-kuaddr_t prefecth_abort_addr;
-kuaddr_t data_abort_addr;
-kuaddr_t undefined_abort_addr;
-
-kuint32_t g_interrupt_flags = 0;
-kutype_t g_abort_cur_sp = 0;
+kuint32_t g_interrupt_flags[CONFIG_CORE_NUM];
+struct exception_info sgtc_excep_info[CONFIG_CORE_NUM];
 
 /*!< API function */
 /*!
@@ -32,14 +28,21 @@ kutype_t g_abort_cur_sp = 0;
  * @retval  none
  * @note    undefined exception
  */
-void exec_undefined_handler(void)
+void exec_undefined_handler(kutype_t _sp, kutype_t _lr)
 {
-    SET_EXCEPTION_FLAG(UND_ABORT_BIT);
+    kuint32_t cpuid = get_cpu_id();
+    struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
+
+    __SET_EXCEPTION_FLAG(cpuid, UND_ABORT_BIT);
+
+    sptr_excep->undefined_abort_addr = _lr;
+    sptr_excep->abort_cur_sp = _sp;
     
-    printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, undefined_abort_addr);
+    printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, _lr);
     mr_assert(false);
 
-    CLR_EXCEPTION_FLAG(UND_ABORT_BIT);
+    sptr_excep->abort_cur_sp = 0;
+    __CLR_EXCEPTION_FLAG(cpuid, UND_ABORT_BIT);
 }
 
 /*!
@@ -48,14 +51,21 @@ void exec_undefined_handler(void)
  * @retval  none
  * @note    prefetch abort exception
  */
-void exec_prefetch_abort_handler(void)
+void exec_prefetch_abort_handler(kutype_t _sp, kutype_t _lr)
 {
-    SET_EXCEPTION_FLAG(PREFETCH_ABORT_BIT);
+    kuint32_t cpuid = get_cpu_id();
+    struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
 
-    printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, prefecth_abort_addr);
+    __SET_EXCEPTION_FLAG(cpuid, PREFETCH_ABORT_BIT);
+
+    sptr_excep->prefecth_abort_addr = _lr;
+    sptr_excep->abort_cur_sp = _sp;
+
+    printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, _lr);
     mr_assert(false);
     
-    CLR_EXCEPTION_FLAG(PREFETCH_ABORT_BIT);
+    sptr_excep->abort_cur_sp = 0;
+    __CLR_EXCEPTION_FLAG(cpuid, PREFETCH_ABORT_BIT);
 }
 
 /*!
@@ -64,14 +74,21 @@ void exec_prefetch_abort_handler(void)
  * @retval  none
  * @note    data abort exception
  */
-void exec_data_abort_handler(void)
+void exec_data_abort_handler(kutype_t _sp, kutype_t _lr)
 {
-    SET_EXCEPTION_FLAG(DATA_ABORT_BIT);
+    kuint32_t cpuid = get_cpu_id();
+    struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
 
-    printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, data_abort_addr);
+    __SET_EXCEPTION_FLAG(cpuid, DATA_ABORT_BIT);
+
+    sptr_excep->data_abort_addr = _lr;
+    sptr_excep->abort_cur_sp = _sp;
+
+    printk(PRINT_LEVEL_ERR "%s: lr \'0x%x\' cause fault\r\n", __FUNCTION__, _lr);
     mr_assert(false);
     
-    CLR_EXCEPTION_FLAG(DATA_ABORT_BIT);
+    sptr_excep->abort_cur_sp = 0;
+    __CLR_EXCEPTION_FLAG(cpuid, DATA_ABORT_BIT);
 }
 
 /*!
@@ -80,11 +97,18 @@ void exec_data_abort_handler(void)
  * @retval  none
  * @note    unused exception
  */
-void exec_unused_handler(void)
+void exec_unused_handler(kutype_t _sp, kutype_t _lr)
 {
-    SET_EXCEPTION_FLAG(UNUSED_BIT);
+    kuint32_t cpuid = get_cpu_id();
+    struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
+
+    __SET_EXCEPTION_FLAG(cpuid, UNUSED_BIT);
+
+    sptr_excep->abort_cur_sp = _sp;
     mr_assert(false);
-    CLR_EXCEPTION_FLAG(UNUSED_BIT);
+
+    sptr_excep->abort_cur_sp = 0;
+    __CLR_EXCEPTION_FLAG(cpuid, UNUSED_BIT);
 }
 
 /*!< --------------------------------------------------------------- */
@@ -96,7 +120,9 @@ void exec_unused_handler(void)
  */
 kint32_t abort_info_get(struct context_regs *sptr_regs)
 {
-    struct context_regs *sptr_sp = (struct context_regs *)g_abort_cur_sp;
+    kuint32_t cpuid = get_cpu_id();
+    struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
+    struct context_regs *sptr_sp = (struct context_regs *)sptr_excep->abort_cur_sp;
 
     if (!sptr_sp)
         return -ER_EMPTY;

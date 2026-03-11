@@ -24,7 +24,6 @@
 #define INIT_THREAD_STACK_SIZE                          THREAD_STACK_PAGE(1)    /*!< 1 page (4 kbytes) */
 
 /*!< The globals */
-static struct thread_attr sgtc_init_proc_attr;
 static THREAD_STACK_DEFINE(g_init_proc_stack, INIT_THREAD_STACK_SIZE);
 
 /*!< The functions */
@@ -106,21 +105,21 @@ static void *init_proc_entry(void *args)
  */
 kint32_t init_proc_init(void)
 {
-    struct thread_attr *sptr_attr = &sgtc_init_proc_attr;
+    struct thread_attr sgtc_attr = {};
 
-	sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
-	sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;
-	sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
+	sgtc_attr.detachstate = THREAD_CREATE_JOINABLE;
+	sgtc_attr.inheritsched	= THREAD_INHERIT_SCHED;
+	sgtc_attr.schedpolicy = THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-	thread_set_stack(sptr_attr, mr_nullptr, g_init_proc_stack, sizeof(g_init_proc_stack));
+	thread_set_stack(&sgtc_attr, mr_nullptr, g_init_proc_stack, sizeof(g_init_proc_stack));
     /*!< lowest priority */
-	thread_set_priority(sptr_attr, THREAD_PROTY_INIT);
+	thread_set_priority(&sgtc_attr, THREAD_PROTY_INIT);
     /*!< default time slice */
-    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
+    thread_set_time_slice(&sgtc_attr, THREAD_TIME_DEFAULT);
 
     /*!< register thread */
-    return kernel_thread_init_create(sptr_attr, init_proc_entry, mr_nullptr);
+    return kernel_thread_init_create(&sgtc_attr, init_proc_entry, mr_nullptr);
 }
 
 /*!< end of file */

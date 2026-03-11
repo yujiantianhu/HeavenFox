@@ -59,7 +59,7 @@ typedef struct workqueue_head
 
 #define INIT_WORKQUEUE_HEAD(sptr_wqh)   \
     do {    \
-        init_list_head(&(sptr_wqh)->sgtc_link); \
+        init_list_head(&(sptr_wqh)->sgtc_work); \
         spin_lock_init(&(sptr_wqh)->sgtc_lock); \
     } while (0)
 

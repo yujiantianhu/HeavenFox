@@ -117,6 +117,9 @@
                                         mcr p15, opc1, Rn, CRn, CRm, opc2
 
 #define READ_CP15_SCTLR(Rn)             READ_CP15_REGISTER( 0, Rn, c1,  c0,  0)
+#define READ_CP15_MPIDR(Rn)             READ_CP15_REGISTER( 0, Rn, c0,  c0,  5)
+#define READ_CP15_TPIDRPRW(Rn)          READ_CP15_REGISTER( 0, Rn, c13, c0,  4)
+
 #define WRITE_CP15_SCTLR(Rn)            WRITE_CP15_REGISTER(0, Rn, c1,  c0,  0)
 #define WRITE_CP15_VBAR(Rn)             WRITE_CP15_REGISTER(0, Rn, c12, c0,  0)
 #define WRITE_CP15_TLBS(Rn)             WRITE_CP15_REGISTER(0, Rn, c8,  c7,  0)
@@ -125,6 +128,7 @@
 #define WRITE_CP15_DSB(Rn)              WRITE_CP15_REGISTER(0, Rn, c7,  c10, 4)
 #define WRITE_CP15_ISB(Rn)              WRITE_CP15_REGISTER(0, Rn, c7,  c5,  4)
 #define WRITE_CP15_CLR_DCACHE_MVA(Rn)   WRITE_CP15_REGISTER(0, Rn, c7,  c14, 1)
+#define WRITE_CP15_TPIDRPRW(Rn)         WRITE_CP15_REGISTER(0, Rn, c13, c0,  4)
 
 #define CP15_SCTLR_BIT_M	            (1 << 0)	        /*!< MMU enable */
 #define CP15_SCTLR_BIT_A	            (1 << 1)	        /*!< Alignment abort enable */
@@ -153,5 +157,8 @@
 #define CP15_SCTLR_BIT_TRE	            (1 << 28)	        /*!< TEX remap enable */
 #define CP15_SCTLR_BIT_AFE	            (1 << 29)	        /*!< Access flag enable */
 #define CP15_SCTLR_BIT_TE	            (1 << 30)	        /*!< Thumb exception enable */
+
+#define CP15_MPIDR_CPU_ID_MASK          (0x3)               /*!< CPU ID Mask */
+#define CP15_MPIDR_CPU_ID_OFFSET        (0)                 /*!< CPU ID Offset */
 
 #endif /* __ASM_CONFIG_H */

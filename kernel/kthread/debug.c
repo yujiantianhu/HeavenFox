@@ -53,7 +53,6 @@ struct debug_test
 
 /*!< The globals */
 static tid_t g_debug_tid;
-static struct thread_attr sgtc_debug_attr;
 static THREAD_STACK_DEFINE(g_debug_stack, DEBUG_THREAD_STACK_SIZE);
 
 static struct debug_test sgtc_debug_test[DEBUG_TASK_TYPE];
@@ -474,7 +473,13 @@ static void *debug_entry(void *args)
 
     for (g_debug_index = 0; g_debug_index < (DEBUG_TASK_TYPE * DEBUG_TASK_GROUP); g_debug_index++)
     {
-        retval = thread_create(mr_nullptr, mr_nullptr, 
+        struct thread_attr sgtc_attr = {};
+
+        thread_attr_setstacksize(&sgtc_attr, THREAD_STACK_PAGE(1));
+        thread_set_priority(&sgtc_attr, THREAD_PROTY_DEFAULT);
+        thread_set_time_slice(&sgtc_attr, THREAD_TIME_DEFAULT);
+
+        retval = thread_create(mr_nullptr, &sgtc_attr, 
                     debug_test_func[g_debug_index & (DEBUG_TASK_TYPE - 1)], (void *)g_debug_index);
         if (retval)
             print_warn("Create thread which index is %d failed!\r\n", g_debug_index);
@@ -496,21 +501,21 @@ static void *debug_entry(void *args)
  */
 kint32_t debug_init(void)
 {
-    struct thread_attr *sptr_attr = &sgtc_debug_attr;
+    struct thread_attr sgtc_attr = {};
 
-	sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
-	sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;
-	sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
+	sgtc_attr.detachstate = THREAD_CREATE_JOINABLE;
+	sgtc_attr.inheritsched	= THREAD_INHERIT_SCHED;
+	sgtc_attr.schedpolicy = THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-	thread_set_stack(sptr_attr, mr_nullptr, g_debug_stack, sizeof(g_debug_stack));
+	thread_set_stack(&sgtc_attr, mr_nullptr, g_debug_stack, sizeof(g_debug_stack));
     /*!< lowest priority */
-	thread_set_priority(sptr_attr, THREAD_PROTY_DEFAULT);
+	thread_set_priority(&sgtc_attr, THREAD_PROTY_DEFAULT);
     /*!< default time slice */
-    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
+    thread_set_time_slice(&sgtc_attr, THREAD_TIME_DEFAULT);
 
     /*!< register thread */
-    g_debug_tid = kernel_thread_create(-1, sptr_attr, debug_entry, mr_nullptr);
+    g_debug_tid = kernel_thread_create(-1, &sgtc_attr, debug_entry, mr_nullptr);
     if (g_debug_tid >= 0)
     {
         thread_set_name(g_debug_tid, "debug_task");

@@ -48,7 +48,7 @@
 #endif
 
 /*!< for priority inherit */
-#define CONFIG_INHERIT                          (1)
+#define CONFIG_INHERIT                          (0)
 #if defined(CONFIG_INHERIT) && (CONFIG_INHERIT)
 #define CONFIG_INHERIT_RECURSION                (1)
 #else

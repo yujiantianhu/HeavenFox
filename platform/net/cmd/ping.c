@@ -118,7 +118,7 @@ static void *ping_cmd_entry(void *args)
             ping_destroy(sptr_data);
             g_ping_cmd_count = -1;
 
-            schedule_self_sleep();
+            schedule_self_zombie();
         }
         else if (!ping_make_packet(packet, sizeof(packet), ++seq_num))
         {

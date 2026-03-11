@@ -70,6 +70,7 @@ typedef struct fwk_irq_action
     kuint32_t flags;
     void *ptrArgs;
 
+    kuint32_t cpu_affinity;
     struct list_head sgtc_link;
 
 } srt_fwk_irq_action_t;
@@ -80,7 +81,7 @@ typedef struct fwk_irq_desc
 
     kuint32_t flags;
     kchar_t irq_name[FWK_IRQ_DESC_NAME_LENTH];
-    struct list_head sgtc_action;;
+    struct list_head sgtc_action;
 
 //  struct list_head sgtc_link;
     struct radix_link sgtc_radix;
@@ -136,10 +137,9 @@ extern void fwk_irq_domain_free_irqs(struct fwk_irq_domain *sptr_domain);
 extern kint32_t fwk_of_irq_get(struct fwk_device_node *sptr_node, kuint32_t index);
 
 extern void *fwk_find_irq_action(kint32_t irq, const kchar_t *name, void *args);
-extern kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
-                                kuint32_t flags, const kchar_t *name, void *args);
-extern kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, const kchar_t *name, void *ptrDev);
-extern void fwk_free_irq(kint32_t irq, void *args);
+extern kint32_t __fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
+                                kuint32_t flags, kuint32_t cpu_affinity, const kchar_t *name, void *args);
+extern void __fwk_free_irq(kint32_t irq, void *args);
 extern void fwk_destroy_irq_action(kint32_t irq);
 extern void fwk_do_irq_handler(kint32_t softIrq);
 
@@ -155,6 +155,65 @@ extern void fwk_softirq_init(void);
 extern void fwk_tasklet_init(struct fwk_tasklet *sptr_tsk, void (*func)(kutype_t args), kutype_t data);
 extern void fwk_tasklet_schedule(struct fwk_tasklet *sptr_tsk);
 extern void fwk_tasklet_kill(struct fwk_tasklet *sptr_tsk);
+
+/*!< API functions */
+/*!
+ * @brief  request irq action (upper and bottom handler)
+ * @param  none
+ * @retval none
+ * @note   irq register
+ */
+static inline kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
+                                kuint32_t flags, const kchar_t *name, void *args)
+{
+    return __fwk_request_threaded_irq(irq, handler, thread_fn, flags, CPU_AFFINITY_DEFAULT, name, args);
+}
+
+/*!
+ * @brief  request irq action (upper and bottom handler)
+ * @param  none
+ * @retval none
+ * @note   irq register
+ */
+static inline kint32_t fwk_request_percpu_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
+                                kuint32_t flags, kuint32_t cpuid, const kchar_t *name, void *args)
+{
+    return __fwk_request_threaded_irq(irq, handler, thread_fn, flags, CPU_AFFINITY_SINGEL(cpuid), name, args);
+}
+
+/*!
+ * @brief  fwk_request_irq
+ * @param  none
+ * @retval none
+ * @note   irq register
+ */
+static inline kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, const kchar_t *name, void *args)
+{
+    return fwk_request_threaded_irq(irq, handler, mr_nullptr, flags, name, args);
+}
+
+/*!
+ * @brief  fwk_request_irq
+ * @param  none
+ * @retval none
+ * @note   irq register
+ */
+static inline kint32_t fwk_request_percpu_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, 
+                                                kuint32_t cpuid, const kchar_t *name, void *args)
+{
+    return fwk_request_percpu_threaded_irq(irq, handler, mr_nullptr, flags, cpuid, name, args);
+}
+
+/*!
+ * @brief  fwk_free_irq
+ * @param  none
+ * @retval none
+ * @note   irq unregister
+ */
+static inline void fwk_free_irq(kint32_t irq, void *args)
+{
+    __fwk_free_irq(irq, args);
+}
 
 #ifdef __cplusplus
     }
