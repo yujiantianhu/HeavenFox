@@ -478,6 +478,8 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, kbool_t (*is_locked)(void *
             /*!< Priority changed */
             if (max_prio != cur_prio)
             {
+                kuint32_t cpuid;
+
                 g_inherit_monitor++;
                 spin_lock_irqsave(&sptr_rival->sgtc_lock, &flags);
 
@@ -490,15 +492,27 @@ kint32_t lock_compete(struct lock_owner *sptr_owner, kbool_t (*is_locked)(void *
                 __SET_THREAD_TARGET_STATE(sptr_rival, __GET_THREAD_STATE(sptr_rival));
 
                 spin_unlock_irqrestore(&sptr_rival->sgtc_lock, flags);
-
                 mr_preempt_disable();
-                sptr_lock = scheduler_cpu_lock(sptr_rival->cpu);
 
-                /*!< Protect scheduler with scheduler-lock */
+            loop:
+                cpuid = sptr_rival->cpu;
+                sptr_lock = scheduler_cpu_lock(cpuid);
                 spin_lock_irqsave(sptr_lock, &flags);
-                schedule_thread_switch(sptr_rival);
-                spin_unlock_irqrestore(sptr_lock, flags);
 
+                if (__GET_THREAD_STATE(sptr_rival) != NR_THREAD_RUNNING)
+                {
+                    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+                    if (mr_unlikely(cpuid != sptr_rival->cpu))
+                    {
+                        cpuid = sptr_rival->cpu;
+                        spin_unlock_irqrestore(sptr_lock, flags);
+                        goto loop;
+                    }
+
+                    schedule_thread_switch(sptr_rival);
+                }
+
+                spin_unlock_irqrestore(sptr_lock, flags);
                 mr_preempt_enable();
             }
 

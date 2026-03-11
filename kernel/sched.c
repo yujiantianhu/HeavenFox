@@ -353,6 +353,7 @@ void schedule_self_suspend(void)
     struct thread *sptr_cur = current_thread();
     kutype_t flags;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     
     /*!< Avoid preempting while the function running */
@@ -361,6 +362,7 @@ void schedule_self_suspend(void)
 
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
     schedule_thread();
+    mr_preempt_enable();
 }
 
 /*!
@@ -374,6 +376,7 @@ void schedule_self_sleep(void)
     struct thread *sptr_cur = current_thread();
     kutype_t flags;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     
     /*!< Avoid preempting while the function running */
@@ -382,6 +385,7 @@ void schedule_self_sleep(void)
 
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
     schedule_thread();
+    mr_preempt_enable();
 }
 
 /*!
@@ -395,6 +399,7 @@ void schedule_self_zombie(void)
     struct thread *sptr_cur = current_thread();
     kutype_t flags;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     
     /*!< Avoid preempting while the function running */
@@ -403,6 +408,41 @@ void schedule_self_zombie(void)
 
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
     schedule_thread();
+    mr_preempt_enable();
+}
+
+/*!
+ * @brief	send IPI to another thread
+ * @param  	sptr_thread: target thread
+ * @retval 	none
+ * @note   	none
+ */
+void send_state_to_thread(struct thread *sptr_thread, kuint32_t state)
+{
+    kuint32_t cpuid;
+    struct spin_lock *sptr_lock;
+    kutype_t flags;
+
+    mr_preempt_disable();
+
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
+    spin_lock_irqsave(sptr_lock, &flags);
+
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        cpuid = sptr_thread->cpu;
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
+    // send IPI
+    // ...
+
+    spin_unlock_irqrestore(sptr_lock, flags);
+    mr_preempt_enable();
 }
 
 /*!
@@ -423,6 +463,7 @@ kint32_t schedule_thread_suspend(tid_t tid)
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
     cpuid = sptr_thread->cpu;
 
@@ -431,10 +472,12 @@ kint32_t schedule_thread_suspend(tid_t tid)
     {
         if (cpuid != get_cpu_id())
         {
-            /*!< send IPI to cpuid */
-            // .....
-
             spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+
+            /*!< send IPI to cpuid */
+            send_state_to_thread(sptr_thread, NR_THREAD_SUSPEND);
+            mr_preempt_enable();
+
             return -ER_FORBID;
         }
 
@@ -443,16 +486,27 @@ kint32_t schedule_thread_suspend(tid_t tid)
         
         /*!< Self suspend */
         schedule_thread();
+        mr_preempt_enable();
+
         return ER_NORMAL;
     }
 
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SUSPEND);
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    mr_preempt_disable();
-
-    sptr_lock = scheduler_cpu_lock(sptr_thread->cpu);
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
     spin_lock_irqsave(sptr_lock, &flags);
+
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        cpuid = sptr_thread->cpu;
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
     retval = schedule_thread_switch(sptr_thread);
     spin_unlock_irqrestore(sptr_lock, flags);
 
@@ -478,6 +532,7 @@ kint32_t schedule_thread_sleep(tid_t tid)
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
     cpuid = sptr_thread->cpu;
 
@@ -486,10 +541,12 @@ kint32_t schedule_thread_sleep(tid_t tid)
     {
         if (cpuid != get_cpu_id())
         {
-            /*!< send IPI to cpuid */
-            // .....
-
             spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+
+            /*!< send IPI to cpuid */
+            send_state_to_thread(sptr_thread, NR_THREAD_SUSPEND);
+            mr_preempt_enable();
+
             return -ER_FORBID;
         }
 
@@ -498,16 +555,27 @@ kint32_t schedule_thread_sleep(tid_t tid)
 
         /*!< Self suspend */
         schedule_thread();
+        mr_preempt_enable();
+
         return ER_NORMAL;
     }
 
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SLEEP);
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    mr_preempt_disable();
-
-    sptr_lock = scheduler_cpu_lock(sptr_thread->cpu);
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
     spin_lock_irqsave(sptr_lock, &flags);
+
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        cpuid = sptr_thread->cpu;
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
     retval = schedule_thread_switch(sptr_thread);
     spin_unlock_irqrestore(sptr_lock, flags);
 
@@ -533,6 +601,7 @@ kint32_t schedule_thread_zombie(tid_t tid)
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
     cpuid = sptr_thread->cpu;
 
@@ -541,10 +610,12 @@ kint32_t schedule_thread_zombie(tid_t tid)
     {
         if (cpuid != get_cpu_id())
         {
-            /*!< send IPI to cpuid */
-            // .....
-
             spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+
+            /*!< send IPI to cpuid */
+            send_state_to_thread(sptr_thread, NR_THREAD_SUSPEND);
+            mr_preempt_enable();
+
             return -ER_FORBID;
         }
 
@@ -553,16 +624,27 @@ kint32_t schedule_thread_zombie(tid_t tid)
 
         /*!< Self suspend */
         schedule_thread();
+        mr_preempt_enable();
+
         return ER_NORMAL;
     }
 
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_ZOMBIE);
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    mr_preempt_disable();
-
-    sptr_lock = scheduler_cpu_lock(sptr_thread->cpu);
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
     spin_lock_irqsave(sptr_lock, &flags);
+
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        cpuid = sptr_thread->cpu;
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
     retval = schedule_thread_switch(sptr_thread);
     spin_unlock_irqrestore(sptr_lock, flags);
 
@@ -580,7 +662,7 @@ kint32_t schedule_thread_wakeup(tid_t tid)
 {
     struct thread *sptr_thread;
     struct spin_lock *sptr_lock;
-    kuint32_t state;
+    kuint32_t state, cpuid;
     kutype_t flags;
     kint32_t retval;
 
@@ -611,8 +693,19 @@ kint32_t schedule_thread_wakeup(tid_t tid)
 
     mr_preempt_disable();
 
-    sptr_lock = scheduler_cpu_lock(sptr_thread->cpu);
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
     spin_lock_irqsave(sptr_lock, &flags);
+
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        cpuid = sptr_thread->cpu;
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
     retval = schedule_thread_switch(sptr_thread);
 	spin_unlock_irqrestore(sptr_lock, flags);
 
@@ -977,7 +1070,7 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
 {
 //  struct thread *sptr_thread;
 //  const struct scheduler_operation *sptr_oprts = &sgtc_scheduler_operations[0];
-    kuint32_t cpuid = sptr_thread->cpu;
+    kint32_t cpuid = sptr_thread->cpu;
     tid_t tid;
     kuint32_t src, dst;
     kint32_t retval = ER_NORMAL;
@@ -986,7 +1079,7 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
 //  mr_preempt_disable();
 
 //  sptr_thread = SCHED_THREAD_HANDLER(tid);
-    if (mr_unlikely(!sptr_thread))
+    if (mr_unlikely(!sptr_thread) || (cpuid < 0))
         return -ER_NODEV;
 
     tid = sptr_thread->tid;
@@ -1232,11 +1325,6 @@ static kint32_t schedule_add_ready_list(kuint32_t cpuid, struct thread *sptr_thr
     if (!retval)
         sptr_core->ready_num++;
 
-    if (mr_list_empty(__THREAD_READY_LIST(sptr_core)))
-    {
-//    	mr_assert(false);
-    }
-
     return retval;
 }
 
@@ -1262,11 +1350,6 @@ static kint32_t schedule_detach_ready_list(kuint32_t cpuid, struct thread *sptr_
     /*!< delete it */
     __schedule_del_status_list(sptr_thread, __THREAD_READY_LIST(sptr_core), __THREAD_READY_HASH(sptr_core));
     sptr_core->ready_num--;
-
-    if (mr_list_empty(__THREAD_READY_LIST(sptr_core)))
-    {
-//    	mr_warn(false);
-    }
 
     return ER_NORMAL;
 }
@@ -1727,14 +1810,10 @@ void check_and_balance_scheduler(void)
             continue;
         }
 
+        sptr_thread->last_cpu = sptr_thread->cpu;
+        sptr_thread->cpu = -1;
         mr_smp_mb();
         spin_unlock_irqrestore_assert(&sptr_core2->sgtc_lock, flags);
-
-        /*!< sptr_thread is free (not in queue), no cpu will schedule it; therefore, it is safe */
-        sptr_thread->last_cpu = sptr_thread->cpu;
-        sptr_thread->cpu = cpuid;
-        mr_smp_mb();
-        fail_count = 0;
 
         spin_lock_irqsave_assert(&sptr_core->sgtc_lock, &flags, __FILE__, __LINE__, __FUNCTION__);
         retval = schedule_add_ready_list(cpuid, sptr_thread);
@@ -1746,7 +1825,11 @@ void check_and_balance_scheduler(void)
             return;
         }
 
+        /*!< sptr_thread is free (not in queue), no cpu will schedule it; therefore, it is safe */
+        sptr_thread->cpu = cpuid;
         spin_unlock_irqrestore_assert(&sptr_core->sgtc_lock, flags);
+
+        fail_count = 0;
     }
 }
 
