@@ -28,6 +28,8 @@
     #define CPU_INTC_COMPATIBLE                             "arm,cortex-a7-gic"
 #endif
 
+#define PERCPU_CURRENT()                                    __get_cp15_tpidrprw()
+#define SET_PERCPU_CURRENT(x)                               __set_cp15_tpidrprw((kuint32_t)(x))
 #define SOFTIRQ_CALL(x)                                     __asm__ __volatile__ ("svc %0" : : "i"(x))
 
 #if 0
@@ -154,6 +156,40 @@ static inline kuint32_t get_irq_priority(kint32_t irqNumber)
 static inline void set_irq_priority(kint32_t irqNumber, kuint32_t priority)
 {
     mr_set_irq_pri(irqNumber, priority);
+}
+
+/*!
+ * @brief   get cpu core id
+ * @param   none
+ * @retval  cpu ID (0 ~ 3)
+ * @note    none
+ */
+static inline kuint32_t get_cpu_id(void)
+{
+    kuint32_t cpu_id = __get_cp15_mpidr();
+    return ((cpu_id >> CP15_MPIDR_CPU_ID_OFFSET) & CP15_MPIDR_CPU_ID_MASK);
+}
+
+/*!
+ * @brief   set cpu core private data
+ * @param   private data
+ * @retval  none
+ * @note    none
+ */
+static inline void set_cpu_private(kuint32_t data)
+{
+    __set_cp15_tpidrprw(data);
+}
+
+/*!
+ * @brief   get cpu core private data
+ * @param   none
+ * @retval  private data
+ * @note    none
+ */
+static inline kuint32_t get_cpu_private(void)
+{
+    return __get_cp15_tpidrprw();
 }
 
 /*!

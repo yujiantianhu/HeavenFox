@@ -18,5 +18,6 @@ obj-y	+= history.o
 obj-y	+= mem.o
 obj-y	+= runtime.o
 obj-y	+= value.o
+obj-y	+= cpuinfo.o
 
 # end of file

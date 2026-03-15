@@ -23,7 +23,6 @@
 
 /*!< The globals */
 static tid_t g_kmemp_tid;
-static struct thread_attr sgtc_kmemp_attr;
 static THREAD_STACK_DEFINE(g_kmemp_stack, KMEMP_THREAD_STACK_SIZE);
 
 static struct fwk_memp_list sgtc_kmemp_list_head = {};
@@ -123,21 +122,21 @@ static void *kmemp_entry(void *args)
  */
 kint32_t kmemp_init(void)
 {
-    struct thread_attr *sptr_attr = &sgtc_kmemp_attr;
+    struct thread_attr sgtc_attr = {};
 
-	sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
-	sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;
-	sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
+	sgtc_attr.detachstate = THREAD_CREATE_JOINABLE;
+	sgtc_attr.inheritsched	= THREAD_INHERIT_SCHED;
+	sgtc_attr.schedpolicy = THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-	thread_set_stack(sptr_attr, mr_nullptr, g_kmemp_stack, sizeof(g_kmemp_stack));
+	thread_set_stack(&sgtc_attr, mr_nullptr, g_kmemp_stack, sizeof(g_kmemp_stack));
     /*!< lowest priority */
-	thread_set_priority(sptr_attr, THREAD_PROTY_KMEMP);
+	thread_set_priority(&sgtc_attr, THREAD_PROTY_KMEMP);
     /*!< default time slice */
-    thread_set_time_slice(sptr_attr, THREAD_TIME_KMEMP);
+    thread_set_time_slice(&sgtc_attr, THREAD_TIME_KMEMP);
 
     /*!< register thread */
-    g_kmemp_tid = kernel_thread_create(-1, sptr_attr, kmemp_entry, mr_nullptr);
+    g_kmemp_tid = kernel_thread_create(-1, &sgtc_attr, kmemp_entry, mr_nullptr);
     if (g_kmemp_tid >= 0)
     {
         thread_set_name(g_kmemp_tid, "kmemp");

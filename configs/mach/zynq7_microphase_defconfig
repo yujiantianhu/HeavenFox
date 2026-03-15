@@ -5,6 +5,8 @@
 #
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 
+# Usages: 		make CONFIGS=zynq7_microphase_defconfig config
+
 # Generic
 # ---------------------------------------------------------------
 CONFIG_ARCH = "arm"
@@ -30,10 +32,14 @@ CONFIG_VFP = y
 CONFIG_INSTRUCTION = arm
 
 # 0: amp; 1: smp
-CONFIG_CORE = 0
+CONFIG_CORE = 1
+# cpu core num
+CONFIG_CORE_NUM = 2
+# cpu master: core 0
+CONFIG_CORE_MASTER = 0
 
 # debug or release
-CONFIG_BUILD_TYPE = release
+CONFIG_BUILD_TYPE = debug
 
 # -O0, -O1, -O2
 CONFIG_OPTIMIZE = 2

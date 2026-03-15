@@ -25,6 +25,7 @@
 #include <platform/of/fwk_of_device.h>
 #include <platform/base/fwk_fcntl.h>
 #include <platform/irq/fwk_irq.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 #include <kernel/instance.h>
@@ -33,6 +34,7 @@
 
 /*!< The globals */
 static struct tag_params *sptr_tag_params;
+static struct thread sgtc_percpu_default_thread[CONFIG_CORE_NUM] __section(".data") = {};
 
 /*!< The defines */
 #define mr_tag_params_get()    \
@@ -86,6 +88,28 @@ void setup_machine(struct tag_params *sptr_params)
 
     /*!< build device-tree */
     setup_machine_fdt(sptr_fwk_fdt_params);
+}
+
+/*!
+ * @brief  setup thread
+ * @param  none
+ * @retval none
+ * @note   none
+ */
+void setup_thread(void)
+{
+    kuint32_t cpuid = get_cpu_id();
+    struct thread *sptr_thread = &sgtc_percpu_default_thread[cpuid];
+
+    __setup_thread(sptr_thread);
+
+    sptr_thread->tid = -1;
+    sptr_thread->cpu = cpuid;
+    __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_RUNNING);
+    sprintk(sptr_thread->name, "cpu%u_virtual_thread", cpuid);
+
+    SET_PERCPU_CURRENT((kutype_t)sptr_thread | THREAD_VIRTUAL_BIT);
+    g_kernel_preempt_enable = true;
 }
 
 /*!
@@ -167,6 +191,50 @@ void start_kernel(void)
 
 fail:
     print_info("start kernel failed!\r\n");
+    mr_assert(false);
+}
+
+/*!
+ * @brief  secondary_start_kernel
+ * @param  none
+ * @retval none
+ * @note   kernel main for another cpu
+ */
+void secondary_start_kernel(void)
+{
+    kuint32_t cpuid = get_cpu_id();
+
+    /*!< close irq */
+    local_irq_disable();
+
+    /*!< initial irq */
+    initIRQ();
+
+    /*!< systick init */
+    arch_systick_init();
+
+    /*!< enable interrupt */
+    local_irq_enable();
+
+#if CONFIG_SCHDULE
+    /*!< create thread */
+    if (kthread_init())
+        goto fail;
+
+    rest_init();
+    print_info("initial system finished, secondary (cpuid: %u) start scheduler now\r\n", cpuid);
+
+    /*!< start */
+    schedule_thread();
+
+#endif
+
+    for (;;) {
+        /*!< do nothing */
+    }
+
+fail:
+    print_info("secondary (cpuid: %u) start kernel failed!\r\n", cpuid);
     mr_assert(false);
 }
 

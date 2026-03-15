@@ -12,6 +12,7 @@
 
 /*!< The globals */
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 #include <kernel/spinlock.h>
 
@@ -132,13 +133,13 @@ void khrtime_schedule(khrtime_t tick)
     mr_preempt_disable();
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
 
-    mod_hrtimer(sptr_tm, khrtime_ticks() + tick);
-    mr_preempt_enable();
-    
+    mod_hrtimer(sptr_tm, khrtime_ticks() + tick);    
     if (mr_likely(__GET_THREAD_TARGET_STATE(sptr_cur) == NR_THREAD_SUSPEND))
         schedule_thread();
 
     sptr_cur->time_event = mr_nullptr;
+    mr_preempt_enable();
+    
     del_hrtimer(sptr_tm);
 }
 
@@ -174,12 +175,12 @@ void schedule_timeout(kutime_t count)
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
 
     mod_timer(sptr_tm, jiffies + count);
-    mr_preempt_enable();
-
     if (mr_likely(__GET_THREAD_TARGET_STATE(sptr_cur) == NR_THREAD_SUSPEND))
         schedule_thread();
 
     sptr_cur->time_event = mr_nullptr;
+    mr_preempt_enable();
+
     del_timer(sptr_tm);
 }
 

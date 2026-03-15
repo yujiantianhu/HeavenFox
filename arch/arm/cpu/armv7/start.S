@@ -42,7 +42,6 @@ _reset:
     WRITE_CP15_VBAR(r0)                             @ set VBAR
 
     bl cpu_init_cp15                                @ initial cp15
-    bl cpu_init_crit                                @ initial low level configure, like clk, sdram, ...
 
 	mov	r0, r0
 	mrc	p15, 0, r1, c1, c0, 2                       @ read cp access control register (CACR) into r1
@@ -56,6 +55,17 @@ _reset:
 	fmxr fpexc, r1                                  @ write back the exception register
 #endif
 
+    mov r0, #0
+    WRITE_CP15_TPIDRPRW(r0)                         @ reset tpidrprw (it will be used to save thread's context)
+    
+    /*!< master and slave cpu fork here  */
+    READ_CP15_MPIDR(r0)                             @ get cpu id
+    and r0, r0, #CP15_MPIDR_CPU_ID_MASK
+    cmp r0, #CONFIG_CORE_MASTER
+    bne _slave_reset                                @ is slave cpu, wait for signal from master cpu
+
+    /*!< master cpu keep running */
+    bl cpu_init_crit                                @ initial low level configure, like clk, sdram, ...
     b _main                                         @ jump to crt0.S
 
 /*!< ----------------------------------------------------------- */

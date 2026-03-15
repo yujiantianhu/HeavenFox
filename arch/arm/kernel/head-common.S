@@ -20,6 +20,21 @@
     .global _kernel_start
 
 _kernel_start:
+    push { r4 - r6 }
+    ldr r1, =setup_thread
+    blx r1
+
+    pop { r4 - r6 }
+
+    READ_CP15_MPIDR(r0)                             @ get cpu id
+    and r0, r0, #CP15_MPIDR_CPU_ID_MASK
+    cmp r0, #CONFIG_CORE_MASTER
+    beq 1f
+
+    ldr r12, =secondary_start_kernel
+    mov pc, r12
+
+1:
     b _mmu_page_init
 
 /*!< ----------------------------------------------------------- */

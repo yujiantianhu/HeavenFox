@@ -18,12 +18,15 @@
 #include <arch/interrupt.h>
 #include <platform/irq/fwk_irq_types.h>
 #include <kernel/kernel.h>
+#include <kernel/context.h>
+#include <kernel/preempt.h>
+#include <kernel/sched.h>
 
 /*!< The globals */
-extern kbool_t g_sched_flag;
-extern kuint32_t g_asm_sched_flag;
+// extern kbool_t g_sched_flag;
+// extern kuint32_t g_asm_sched_flag;
 
-static kuint32_t g_irq_nested_count = 0;
+// static kuint32_t g_irq_nested_count[CONFIG_CORE_NUM] = { 0 };
 
 /*!< API function */
 /*!
@@ -50,9 +53,11 @@ void exec_fiq_handler(void)
 void exec_irq_handler(void)
 {
     kint32_t hardirq, softIrq;
+    kuint32_t cpuid = get_cpu_id();
+    struct percpu_sched_data *sptr_sched = &sgtc_sched_data[cpuid];
 
     SET_INTERRUPT_FLAG(IRQ_BIT);
-    g_irq_nested_count++;
+    INC_HARDIRQ_NEST_COUNT();
 
     /*!< read IAR, enable IRQ */
     hardirq = hw_irq_acknowledge();
@@ -65,7 +70,7 @@ void exec_irq_handler(void)
     hw_irq_deactivate(hardirq);
 
     /*!< nesting depth */
-    if (fwk_softirq_avaliable() && (g_irq_nested_count < 9))
+    if (fwk_softirq_avaliable() && (IRQ_NEST_COUNT() < 9))
     {
         /*!< check and excute softirq (irq will be open) */
         mr_local_irq_exit();
@@ -76,11 +81,17 @@ void exec_irq_handler(void)
     /*!< preemptetion allowd, update schedule flag */
     if (!mr_preempt_is_locked())
     {
-        g_asm_sched_flag = g_sched_flag;
-        g_sched_flag = false;
+    	kuint32_t thread_info = PERCPU_CURRENT();
+
+//      g_asm_sched_flag = sptr_sched->sched_flag;
+    	thread_info |= ((kuint32_t)(!!sptr_sched->sched_flag) << THREAD_SCHED_OFFSET);
+    	SET_PERCPU_CURRENT(thread_info);
+
+        sptr_sched->sched_flag = false;
     }
 
-    if (!(--g_irq_nested_count))
+    DEC_HARDIRQ_NEST_COUNT();
+    if (!IN_IRQ_NESTD())
         CLR_INTERRUPT_FLAG(IRQ_BIT);
 }
 

@@ -27,7 +27,7 @@ struct atomic
      * atomic structure must have only one member (which is "counter")!!!
      * otherwise, functions such as "atomic_set_bit", "atomic_clear_bit" will generate incorrect calls!!!
      */
-    kuint32_t counter;
+    volatile kuint32_t counter;
 };
 typedef struct atomic srt_atomic_t;
 
@@ -100,6 +100,34 @@ static inline void atomic_set_val(srt_atomic_t *sptr_atomic, kuint32_t val)
 }
 
 /*!
+ * @brief   atomic_test_and_set_val
+ * @param   val, sptr_atomic
+ * @retval  none
+ * @note    if sptr_atomic is 0, then set val; otherwise, return sptr_atomic
+ */
+static inline kbool_t atomic_test_and_set_val(srt_atomic_t *sptr_atomic, kuint32_t val)
+{
+    kutype_t flag;
+    kuint32_t result;
+
+    __asm__ __volatile__ (
+        " 1:	                \n\t"
+        "   ldrex %0, [%3]		\n\t"
+        "   cmp %0, #0          \n\t"
+        "   bne 2f              \n\t"
+        "	strex %1, %2, [%3]	\n\t"
+        "	teq %1, #0x0		\n\t"
+        "	bne 1b				\n\t"
+        " 2:                    \n\t"
+        : "=&r"(result), "=&r"(flag)
+        : "r"(val), "r"(&sptr_atomic->counter)
+        : "cc"
+    );
+
+    return !!result;
+}
+
+/*!
  * @brief   atomic_add
  * @param   i, sptr_atomic
  * @retval  none
@@ -121,6 +149,34 @@ static inline void atomic_add(kint32_t i, srt_atomic_t *sptr_atomic)
         : "r"(i), "r"(&sptr_atomic->counter)
         : "cc"
     );
+}
+
+/*!
+ * @brief   atomic_test_and_add
+ * @param   i, sptr_atomic
+ * @retval  none
+ * @note    if sptr_atomic is 0, then add i; otherwise, return sptr_atomic; the same as atomic_test_and_set_val
+ */
+static inline kbool_t atomic_test_and_add(kint32_t i, srt_atomic_t *sptr_atomic)
+{
+    kutype_t flag;
+    kuint32_t result;
+
+    __asm__ __volatile__ (
+        " 1:	                \n\t"
+        "   ldrex %0, [%3]		\n\t"
+        "   cmp %0, #0          \n\t"
+        "   bne 2f              \n\t"
+        "	strex %1, %2, [%3]	\n\t"
+        "	teq %1, #0x0		\n\t"
+        "	bne 1b				\n\t"
+        " 2:                    \n\t"
+        : "=&r"(result), "=&r"(flag)
+        : "r"(i), "r"(&sptr_atomic->counter)
+        : "cc"
+    );
+
+    return !!result;
 }
 
 /*!

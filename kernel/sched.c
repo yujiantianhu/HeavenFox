@@ -12,51 +12,52 @@
 
 /*!< The includes */
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 
 /*!< The globals */
 /*!< TCB */
 struct scheduler_table sgtc_scheduler_table =
 {
-    .max_tidarr		= 0,
-    .max_tids		= THREAD_MAX_NUM,
-    .max_tidset		= 0,
-    .ref_tidarr		= 0,
-    .sgtc_cnt		= {},
+    .max_tidarr     = 0,
+    .max_tids       = THREAD_MAX_NUM,
+    .max_tidset     = 0,
+    .ref_tidarr     = 0,
 
-    .sptr_work		= mr_nullptr,
-    .sptr_tids		= mr_nullptr,
-    .sptr_tid_array	= { mr_nullptr },
-    .sgtc_lock		= SPIN_LOCK_INIT(),
+    .sptr_tids      = mr_nullptr,
+    .sptr_tid_array = { mr_nullptr },
+    .sgtc_lock      = SPIN_LOCK_INIT(),
 };
 
 /*!< save to (*.data) section, do not defines in stack */
-static struct scheduler_context sgtc_context;
-static kuint32_t thread_schedule_ref = 0;
-
-struct atomic sgtc_sched_preempt_cnt = ATOMIC_INIT();
+struct percpu_sched_data sgtc_sched_data[CONFIG_CORE_NUM];
+kbool_t g_kernel_preempt_enable = false;
 
 /*!< The defines */
 #define SCHED_MANAGER()                         (&sgtc_scheduler_table)
-
-#define SCHED_THREAD_HANDLER(tid)               __THREAD_HANDLER(SCHED_MANAGER(), tid)
-#define SCHED_RUNNING_THREAD                    __THREAD_RUNNING_LIST(SCHED_MANAGER())
-#define SCHED_READY_LIST                        __THREAD_READY_LIST(SCHED_MANAGER())
-#define SCHED_SUSPEND_LIST                      __THREAD_SUSPEND_LIST(SCHED_MANAGER())
-#define SCHED_SLEEP_LIST                        __THREAD_SLEEP_LIST(SCHED_MANAGER())
-#define SCHED_ZOMBIE_LIST                       __THREAD_ZOMBIE_LIST(SCHED_MANAGER())
+#define SCHED_MANAGER_CORE(_cpuid)              (&(sgtc_scheduler_table.sgtc_core[_cpuid]))
+#define SCHED_MANAGER_SHARE()                   (&(sgtc_scheduler_table.sgtc_share))
 #define __SCHED_LOCK                            (SCHED_MANAGER()->sgtc_lock)
 
-#define SCHED_READY_HASH                        __THREAD_READY_HASH(SCHED_MANAGER())
-#define SCHED_SUSPEND_HASH                      __THREAD_SUSPEND_HASH(SCHED_MANAGER())
-#define SCHED_SLEEP_HASH                        __THREAD_SLEEP_HASH(SCHED_MANAGER())
-#define SCHED_ZOMBIE_HASH                       __THREAD_ZOMBIE_HASH(SCHED_MANAGER())
+#define SCHED_THREAD_HANDLER(tid)               __THREAD_HANDLER(SCHED_MANAGER(), tid)
+#define SCHED_CORE_LOCK(_cpuid)                 __THREAD_CORE_LOCK(SCHED_MANAGER_CORE(_cpuid))
+
+#define SCHED_RUNNING_THREAD(_cpuid)            __THREAD_RUNNING(SCHED_MANAGER_CORE(_cpuid))
+#define SCHED_READY_LIST(_cpuid)                __THREAD_READY_LIST(SCHED_MANAGER_CORE(_cpuid))
+#define SCHED_SUSPEND_LIST(_cpuid)              __THREAD_SUSPEND_LIST(SCHED_MANAGER_CORE(_cpuid))
+#define SCHED_SLEEP_LIST(_cpuid)                __THREAD_SLEEP_LIST(SCHED_MANAGER_CORE(_cpuid))
+#define SCHED_ZOMBIE_LIST(_cpuid)               __THREAD_ZOMBIE_LIST(SCHED_MANAGER_CORE(_cpuid))
+
+#define SCHED_READY_HASH(_cpuid)                __THREAD_READY_HASH(SCHED_MANAGER_CORE(_cpuid))
+#define SCHED_SUSPEND_HASH(_cpuid)              __THREAD_SUSPEND_HASH(SCHED_MANAGER_CORE(_cpuid))
+#define SCHED_SLEEP_HASH(_cpuid)                __THREAD_SLEEP_HASH(SCHED_MANAGER_CORE(_cpuid))
+#define SCHED_ZOMBIE_HASH(_cpuid)               __THREAD_ZOMBIE_HASH(SCHED_MANAGER_CORE(_cpuid))
 
 /*!< Scheduler Operations */
 struct scheduler_operation
 {
-    kint32_t (*detach)(struct thread *);
-    kint32_t (*add_new)(struct thread *);
+    kint32_t (*detach)(kuint32_t, struct thread *);
+    kint32_t (*add_new)(kuint32_t, struct thread *);
 };
 
 /*!< The functions */
@@ -67,31 +68,42 @@ static kint32_t __schedule_add_status_list(struct thread *sptr_thread,
 static void __schedule_del_status_list(struct thread *sptr_thread, 
                                 struct list_head *sptr_head, struct thread_list *sptr_hash);
 
-static kint32_t schedule_despoil_work_role(struct thread *sptr_thread);
-static kint32_t schedule_reinstall_work_role(struct thread *sptr_thread);
-static kint32_t schedule_add_ready_list(struct thread *sptr_thread);
-static kint32_t schedule_detach_ready_list(struct thread *sptr_thread);
-static kint32_t schedule_add_suspend_list(struct thread *sptr_thread);
-static kint32_t schedule_detach_suspend_list(struct thread *sptr_thread);
-static kint32_t schedule_add_sleep_list(struct thread *sptr_thread);
-static kint32_t schedule_detach_sleep_list(struct thread *sptr_thread);
-static kint32_t schedule_add_zombie_list(struct thread *sptr_thread);
-static kint32_t schedule_detach_zombie_list(struct thread *sptr_thread);
+static kint32_t schedule_despoil_work_role(kuint32_t cpuid, struct thread *sptr_thread);
+static kint32_t schedule_reinstall_work_role(kuint32_t cpuid, struct thread *sptr_thread);
+static kint32_t schedule_add_ready_list(kuint32_t cpuid, struct thread *sptr_thread);
+static kint32_t schedule_detach_ready_list(kuint32_t cpuid, struct thread *sptr_thread);
+static kint32_t schedule_add_suspend_list(kuint32_t cpuid, struct thread *sptr_thread);
+static kint32_t schedule_detach_suspend_list(kuint32_t cpuid, struct thread *sptr_thread);
+static kint32_t schedule_add_sleep_list(kuint32_t cpuid, struct thread *sptr_thread);
+static kint32_t schedule_detach_sleep_list(kuint32_t cpuid, struct thread *sptr_thread);
+static kint32_t schedule_add_zombie_list(kuint32_t cpuid, struct thread *sptr_thread);
+static kint32_t schedule_detach_zombie_list(kuint32_t cpuid, struct thread *sptr_thread);
 
 /*!< The globals */
 /*!< Scheduler Operations */
-//static const struct scheduler_operation sgtc_scheduler_operations[] =
-//{
-//    [NR_THREAD_NONE     ] = { .detach = mr_nullptr,                     .add_new = mr_nullptr                   },
-//    [NR_THREAD_RUNNING  ] = { .detach = schedule_despoil_work_role,     .add_new = schedule_reinstall_work_role },
-//    [NR_THREAD_READY    ] = { .detach = schedule_detach_ready_list,     .add_new = schedule_add_ready_list      },
-//    [NR_THREAD_SUSPEND  ] = { .detach = schedule_detach_suspend_list,   .add_new = schedule_add_suspend_list    },
-//    [NR_THREAD_SLEEP    ] = { .detach = schedule_detach_sleep_list,     .add_new = schedule_add_sleep_list      },
-//    [NR_THREAD_ZOMBIE   ] = { .detach = mr_nullptr,                     .add_new = schedule_add_zombie_list     },
-//};
+static const struct scheduler_operation sgtc_scheduler_operations[] =
+{
+    [NR_THREAD_NONE     ] = { .detach = mr_nullptr,                     .add_new = mr_nullptr                   },
+    [NR_THREAD_RUNNING  ] = { .detach = schedule_despoil_work_role,     .add_new = schedule_reinstall_work_role },
+    [NR_THREAD_READY    ] = { .detach = schedule_detach_ready_list,     .add_new = schedule_add_ready_list      },
+    [NR_THREAD_SUSPEND  ] = { .detach = schedule_detach_suspend_list,   .add_new = schedule_add_suspend_list    },
+    [NR_THREAD_SLEEP    ] = { .detach = schedule_detach_sleep_list,     .add_new = schedule_add_sleep_list      },
+    [NR_THREAD_ZOMBIE   ] = { .detach = mr_nullptr,                     .add_new = schedule_add_zombie_list     },
+};
 
 /* -------------------------------------------------------------------------- */
 /*!< API functions */
+/*!
+ * @brief	get scheduler manager
+ * @param  	cpuid
+ * @retval 	scheduler manager
+ * @note   	none
+ */
+struct scheduler_core *get_scheduler_core(kuint32_t cpuid)
+{
+    return SCHED_MANAGER_CORE(cpuid);
+}
+
 /*!
  * @brief	get current thread from tcb
  * @param  	tid
@@ -100,7 +112,18 @@ static kint32_t schedule_detach_zombie_list(struct thread *sptr_thread);
  */
 struct thread *get_current_thread(void)
 {
-    return SCHED_RUNNING_THREAD;
+    return SCHED_RUNNING_THREAD(get_cpu_id());
+}
+
+/*!
+ * @brief	get current thread from tcb
+ * @param  	tid
+ * @retval 	running thread
+ * @note   	none
+ */
+struct thread *get_cpu_current_thread(kuint32_t cpuid)
+{
+    return SCHED_RUNNING_THREAD(cpuid);
 }
 
 /*!
@@ -111,7 +134,7 @@ struct thread *get_current_thread(void)
  */
 struct list_head *get_ready_thread_table(void)
 {
-    return SCHED_READY_LIST;
+    return SCHED_READY_LIST(get_cpu_id());
 }
 
 /*!
@@ -121,11 +144,8 @@ struct list_head *get_ready_thread_table(void)
  * @note   	none
  */
 struct thread *get_thread_handle(tid_t tid)
-{
-    if ((tid >= THREAD_MAX_NUM) || (tid < 0))
-        return mr_nullptr;
-    
-    return SCHED_THREAD_HANDLER(tid);
+{   
+    return IS_TID_VALID(tid) ? SCHED_THREAD_HANDLER(tid) : mr_nullptr;
 }
 
 /*!
@@ -182,7 +202,7 @@ void thread_set_self_name(const kchar_t *name)
     if (!name || !(*name))
         return;
 
-    sptr_work = SCHED_RUNNING_THREAD;
+    sptr_work = current_thread();
 
     memset(sptr_work->name, 0, THREAD_NAME_SIZE);
     kstrlcpy(sptr_work->name, name, THREAD_NAME_SIZE);
@@ -202,7 +222,7 @@ void thread_set_self_name_args(const kchar_t *name, ...)
     if (!name || !(*name))
         return;
 
-    sptr_work = SCHED_RUNNING_THREAD;
+    sptr_work = current_thread();
     memset(sptr_work->name, 0, THREAD_NAME_SIZE);
 
     va_start(sptr_list, name);
@@ -234,7 +254,7 @@ kchar_t *thread_get_self_name(void)
 {
     struct thread *sptr_work;
 
-    sptr_work = SCHED_RUNNING_THREAD;
+    sptr_work = current_thread();
     return sptr_work->name;
 }
 
@@ -261,6 +281,17 @@ struct spin_lock *scheduler_lock(void)
 }
 
 /*!
+ * @brief   get the scheduler per-cpu lock
+ * @param   none
+ * @retval  lock
+ * @note    none
+ */
+struct spin_lock *scheduler_cpu_lock(kuint32_t cpuid)
+{
+    return SCHED_CORE_LOCK(cpuid);
+}
+
+/*!
  * @brief	find a free tid
  * @param  	i_start: base
  * @param	count: limit
@@ -283,7 +314,6 @@ tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count)
     }
 
     spin_unlock_irqrestore(&__SCHED_LOCK, flags);
-
     return -ER_MORE;
 }
 
@@ -293,14 +323,15 @@ tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count)
  * @retval 	none
  * @note   	none
  */
-static void scheduler_record(void)
+static __unused 
+void scheduler_record(kuint32_t cpuid)
 {
-    struct scheduler_table *sptr_tab = SCHED_MANAGER();
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
 
-    if ((sptr_tab->sgtc_cnt.sched_cnt++) >= __THREAD_MAX_STATS)
+    if ((sptr_core->sgtc_cnt.sched_cnt++) >= __THREAD_MAX_STATS)
     {
-        sptr_tab->sgtc_cnt.sched_cnt = 0;
-        sptr_tab->sgtc_cnt.cnt_out++;
+        sptr_core->sgtc_cnt.sched_cnt = 0;
+        sptr_core->sgtc_cnt.cnt_out++;
     }
 }
 
@@ -310,15 +341,15 @@ static void scheduler_record(void)
  * @retval 	stats
  * @note   	none
  */
-kuint64_t scheduler_stats_get(void)
+kuint64_t scheduler_stats_get(kuint32_t cpuid)
 {
-    struct scheduler_table *sptr_tab = SCHED_MANAGER();
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
     kuint64_t sum;
     kutype_t flags;
 
-    spin_lock_irqsave(&__SCHED_LOCK, &flags);
-    sum = (__THREAD_MAX_STATS * sptr_tab->sgtc_cnt.cnt_out + sptr_tab->sgtc_cnt.sched_cnt);
-    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+    spin_lock_irqsave(&sptr_core->sgtc_lock, &flags);
+    sum = (__THREAD_MAX_STATS * sptr_core->sgtc_cnt.cnt_out + sptr_core->sgtc_cnt.sched_cnt);
+    spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
 
     return sum;
 }
@@ -331,9 +362,10 @@ kuint64_t scheduler_stats_get(void)
  */
 void schedule_self_suspend(void)
 {
-    struct thread *sptr_cur = SCHED_RUNNING_THREAD;
+    struct thread *sptr_cur = current_thread();
     kutype_t flags;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     
     /*!< Avoid preempting while the function running */
@@ -342,6 +374,7 @@ void schedule_self_suspend(void)
 
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
     schedule_thread();
+    mr_preempt_enable();
 }
 
 /*!
@@ -352,9 +385,10 @@ void schedule_self_suspend(void)
  */
 void schedule_self_sleep(void)
 {
-    struct thread *sptr_cur = SCHED_RUNNING_THREAD;
+    struct thread *sptr_cur = current_thread();
     kutype_t flags;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     
     /*!< Avoid preempting while the function running */
@@ -363,6 +397,64 @@ void schedule_self_sleep(void)
 
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
     schedule_thread();
+    mr_preempt_enable();
+}
+
+/*!
+ * @brief	kill current thread
+ * @param  	none
+ * @retval 	0: fail; 1: succuess
+ * @note   	kill current thread, and switch to next
+ */
+void schedule_self_zombie(void)
+{
+    struct thread *sptr_cur = current_thread();
+    kutype_t flags;
+
+    mr_preempt_disable();
+    spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
+    
+    /*!< Avoid preempting while the function running */
+    if (mr_likely(__GET_THREAD_STATE(sptr_cur) == NR_THREAD_RUNNING))
+        __SET_THREAD_TARGET_STATE(sptr_cur, NR_THREAD_ZOMBIE);
+
+    spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
+    schedule_thread();
+    mr_preempt_enable();
+}
+
+/*!
+ * @brief	send IPI to another thread
+ * @param  	sptr_thread: target thread
+ * @retval 	none
+ * @note   	none
+ */
+void send_state_to_thread(struct thread *sptr_thread, kuint32_t state)
+{
+    kuint32_t cpuid;
+    struct spin_lock *sptr_lock;
+    kutype_t flags;
+
+    mr_preempt_disable();
+
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
+    spin_lock_irqsave(sptr_lock, &flags);
+
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        cpuid = sptr_thread->cpu;
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
+    // send IPI
+    // ...
+
+    spin_unlock_irqrestore(sptr_lock, flags);
+    mr_preempt_enable();
 }
 
 /*!
@@ -374,6 +466,8 @@ void schedule_self_sleep(void)
 kint32_t schedule_thread_suspend(tid_t tid)
 {
     struct thread *sptr_thread;
+    kuint32_t cpuid;
+    struct spin_lock *sptr_lock;
     kutype_t flags;
     kint32_t retval;
 
@@ -381,24 +475,53 @@ kint32_t schedule_thread_suspend(tid_t tid)
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
-    __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SUSPEND);
+    cpuid = sptr_thread->cpu;
 
-    if (mr_unlikely(__GET_THREAD_STATE(sptr_thread) == NR_THREAD_RUNNING))
+    /*!< Only current cpu can schedule */
+    if (__GET_THREAD_STATE(sptr_thread) == NR_THREAD_RUNNING)
     {
-        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+        if (cpuid != get_cpu_id())
+        {
+            spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
+            /*!< send IPI to cpuid */
+            send_state_to_thread(sptr_thread, NR_THREAD_SUSPEND);
+            mr_preempt_enable();
+
+            return -ER_FORBID;
+        }
+
+        __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SUSPEND);
+        spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+        
         /*!< Self suspend */
         schedule_thread();
+        mr_preempt_enable();
+
         return ER_NORMAL;
     }
 
+    __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SUSPEND);
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    spin_lock_irqsave(&__SCHED_LOCK, &flags);
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
+    spin_lock_irqsave(sptr_lock, &flags);
+
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
     retval = schedule_thread_switch(sptr_thread);
-    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
-    
+    spin_unlock_irqrestore(sptr_lock, flags);
+
+    mr_preempt_enable();
     return retval;
 }
 
@@ -411,6 +534,8 @@ kint32_t schedule_thread_suspend(tid_t tid)
 kint32_t schedule_thread_sleep(tid_t tid)
 {
     struct thread *sptr_thread;
+    kuint32_t cpuid;
+    struct spin_lock *sptr_lock;
     kutype_t flags;
     kint32_t retval;
 
@@ -418,24 +543,53 @@ kint32_t schedule_thread_sleep(tid_t tid)
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
-    __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SLEEP);
+    cpuid = sptr_thread->cpu;
 
+    /*!< Only current cpu can schedule */
     if (mr_unlikely(__GET_THREAD_STATE(sptr_thread) == NR_THREAD_RUNNING))
     {
+        if (cpuid != get_cpu_id())
+        {
+            spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+
+            /*!< send IPI to cpuid */
+            send_state_to_thread(sptr_thread, NR_THREAD_SUSPEND);
+            mr_preempt_enable();
+
+            return -ER_FORBID;
+        }
+
+        __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SLEEP);
         spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         /*!< Self suspend */
         schedule_thread();
+        mr_preempt_enable();
+
         return ER_NORMAL;
     }
 
+    __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SLEEP);
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    spin_lock_irqsave(&__SCHED_LOCK, &flags);
-    retval = schedule_thread_switch(sptr_thread);
-    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
+    spin_lock_irqsave(sptr_lock, &flags);
 
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
+    retval = schedule_thread_switch(sptr_thread);
+    spin_unlock_irqrestore(sptr_lock, flags);
+
+    mr_preempt_enable();
     return retval;
 }
 
@@ -448,6 +602,8 @@ kint32_t schedule_thread_sleep(tid_t tid)
 kint32_t schedule_thread_zombie(tid_t tid)
 {
     struct thread *sptr_thread;
+    kuint32_t cpuid;
+    struct spin_lock *sptr_lock;
     kutype_t flags;
     kint32_t retval;
 
@@ -455,24 +611,53 @@ kint32_t schedule_thread_zombie(tid_t tid)
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
-    __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_ZOMBIE);
+    cpuid = sptr_thread->cpu;
 
+    /*!< Only current cpu can schedule */
     if (mr_unlikely(__GET_THREAD_STATE(sptr_thread) == NR_THREAD_RUNNING))
     {
+        if (cpuid != get_cpu_id())
+        {
+            spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+
+            /*!< send IPI to cpuid */
+            send_state_to_thread(sptr_thread, NR_THREAD_SUSPEND);
+            mr_preempt_enable();
+
+            return -ER_FORBID;
+        }
+
+        __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_ZOMBIE);
         spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
         /*!< Self suspend */
         schedule_thread();
+        mr_preempt_enable();
+
         return ER_NORMAL;
     }
 
+    __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_ZOMBIE);
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    spin_lock_irqsave(&__SCHED_LOCK, &flags);
-    retval = schedule_thread_switch(sptr_thread);
-    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
+    spin_lock_irqsave(sptr_lock, &flags);
 
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
+    retval = schedule_thread_switch(sptr_thread);
+    spin_unlock_irqrestore(sptr_lock, flags);
+
+    mr_preempt_enable();
     return retval;
 }
 
@@ -485,7 +670,8 @@ kint32_t schedule_thread_zombie(tid_t tid)
 kint32_t schedule_thread_wakeup(tid_t tid)
 {
     struct thread *sptr_thread;
-    kuint32_t state;
+    struct spin_lock *sptr_lock;
+    kuint32_t state, cpuid;
     kutype_t flags;
     kint32_t retval;
 
@@ -494,8 +680,7 @@ kint32_t schedule_thread_wakeup(tid_t tid)
         return -ER_NODEV;
 
     spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
-
-    if (sptr_thread == SCHED_RUNNING_THREAD)
+    if (mr_unlikely(sptr_thread == current_thread()))
     {
         __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_RUNNING);
         spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
@@ -515,10 +700,24 @@ kint32_t schedule_thread_wakeup(tid_t tid)
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_READY);
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    spin_lock_irqsave(&__SCHED_LOCK, &flags);
-    retval = schedule_thread_switch(sptr_thread);
-	spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+    mr_preempt_disable();
 
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
+    spin_lock_irqsave(sptr_lock, &flags);
+
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
+    retval = schedule_thread_switch(sptr_thread);
+	spin_unlock_irqrestore(sptr_lock, flags);
+
+    mr_preempt_enable();
     return retval;
 }
 
@@ -528,9 +727,10 @@ kint32_t schedule_thread_wakeup(tid_t tid)
  * @retval 	1: empty; 0: not empty
  * @note   	none
  */
-kbool_t is_ready_thread_empty(void)
+kbool_t is_ready_thread_empty(kuint32_t cpuid)
 {
-    return !!mr_list_empty(SCHED_READY_LIST);
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_READY_LIST(cpuid));
+    return !!mr_list_empty(sptr_list);
 }
 
 /*!
@@ -539,9 +739,10 @@ kbool_t is_ready_thread_empty(void)
  * @retval 	1: empty; 0: not empty
  * @note   	none
  */
-kbool_t is_suspend_thread_empty(void)
+kbool_t is_suspend_thread_empty(kuint32_t cpuid)
 {
-    return !!mr_list_empty(SCHED_SUSPEND_LIST);
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_SUSPEND_LIST(cpuid));
+    return !!mr_list_empty(sptr_list);
 }
 
 /*!
@@ -550,9 +751,10 @@ kbool_t is_suspend_thread_empty(void)
  * @retval 	1: empty; 0: not empty
  * @note   	none
  */
-kbool_t is_sleep_thread_empty(void)
+kbool_t is_sleep_thread_empty(kuint32_t cpuid)
 {
-    return !!mr_list_empty(SCHED_SLEEP_LIST);
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_SLEEP_LIST(cpuid));
+    return !!mr_list_empty(sptr_list);
 }
 
 /*!
@@ -561,10 +763,12 @@ kbool_t is_sleep_thread_empty(void)
  * @retval 	first thread
  * @note   	none
  */
-struct thread *get_first_ready_thread(void)
+struct thread *get_first_ready_thread(kuint32_t cpuid)
 {
-    kbool_t existed = mr_list_empty(SCHED_READY_LIST);
-    return existed ? mr_nullptr : mr_list_first_entry(SCHED_READY_LIST, struct thread, sgtc_link);
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_READY_LIST(cpuid));
+    kbool_t existed = mr_list_empty(sptr_list);
+
+    return existed ? mr_nullptr : mr_list_first_entry(sptr_list, struct thread, sgtc_link);
 }
 
 /*!
@@ -573,10 +777,12 @@ struct thread *get_first_ready_thread(void)
  * @retval 	first thread
  * @note   	none
  */
-struct thread *get_first_suspend_thread(void)
+struct thread *get_first_suspend_thread(kuint32_t cpuid)
 {
-    kbool_t existed = mr_list_empty(SCHED_SUSPEND_LIST);
-    return existed ? mr_nullptr : mr_list_first_entry(SCHED_SUSPEND_LIST, struct thread, sgtc_link);
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_SUSPEND_LIST(cpuid));
+    kbool_t existed = mr_list_empty(sptr_list);
+
+    return existed ? mr_nullptr : mr_list_first_entry(sptr_list, struct thread, sgtc_link);
 }
 
 /*!
@@ -585,10 +791,12 @@ struct thread *get_first_suspend_thread(void)
  * @retval 	first thread
  * @note   	none
  */
-struct thread *get_first_sleep_thread(void)
+struct thread *get_first_sleep_thread(kuint32_t cpuid)
 {
-    kbool_t existed = mr_list_empty(SCHED_SLEEP_LIST);
-    return existed ? mr_nullptr : mr_list_first_entry(SCHED_SLEEP_LIST, struct thread, sgtc_link);
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_SLEEP_LIST(cpuid));
+    kbool_t existed = mr_list_empty(sptr_list);
+
+    return existed ? mr_nullptr : mr_list_first_entry(sptr_list, struct thread, sgtc_link);
 }
 
 /*!
@@ -597,10 +805,68 @@ struct thread *get_first_sleep_thread(void)
  * @retval 	first thread
  * @note   	none
  */
-struct thread *get_first_zombie_thread(void)
+struct thread *get_first_zombie_thread(kuint32_t cpuid)
 {
-    kbool_t existed = mr_list_empty(SCHED_ZOMBIE_LIST);
-    return existed ? mr_nullptr : mr_list_first_entry(SCHED_ZOMBIE_LIST, struct thread, sgtc_link);
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_ZOMBIE_LIST(cpuid));
+    kbool_t existed = mr_list_empty(sptr_list);
+
+    return existed ? mr_nullptr : mr_list_first_entry(sptr_list, struct thread, sgtc_link);
+}
+
+/*!
+ * @brief	get the lowest ready thread (if ready list is not empty)
+ * @param  	none
+ * @retval 	last thread
+ * @note   	none
+ */
+struct thread *get_last_ready_thread(kuint32_t cpuid)
+{
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_READY_LIST(cpuid));
+    kbool_t existed = mr_list_empty(sptr_list);
+
+    return existed ? mr_nullptr : mr_list_last_entry(sptr_list, struct thread, sgtc_link);
+}
+
+/*!
+ * @brief	get the lowest suspend thread (if suspend list is not empty)
+ * @param  	none
+ * @retval 	last thread
+ * @note   	none
+ */
+struct thread *get_last_suspend_thread(kuint32_t cpuid)
+{
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_SUSPEND_LIST(cpuid));
+    kbool_t existed = mr_list_empty(sptr_list);
+
+    return existed ? mr_nullptr : mr_list_last_entry(sptr_list, struct thread, sgtc_link);
+}
+
+/*!
+ * @brief	get the lowest sleep thread (if sleep list is not empty)
+ * @param  	none
+ * @retval 	last thread
+ * @note   	none
+ */
+struct thread *get_last_sleep_thread(kuint32_t cpuid)
+{
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_SLEEP_LIST(cpuid));
+    kbool_t existed = mr_list_empty(sptr_list);
+
+    return existed ? mr_nullptr : mr_list_last_entry(sptr_list, struct thread, sgtc_link);
+}
+
+/*!
+ * @brief	get the lowest zombie thread (if zombie list is not empty)
+ * @param  	none
+ * @retval 	last thread
+ * @note   	none
+ */
+struct thread *get_last_zombie_thread(kuint32_t cpuid)
+{
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_ZOMBIE_LIST(cpuid));
+    kbool_t existed = mr_list_empty(sptr_list);
+
+    return existed ? mr_nullptr : mr_list_last_entry(sptr_list, struct thread, sgtc_link);
 }
 
 /*!
@@ -612,7 +878,7 @@ struct thread *get_first_zombie_thread(void)
 kbool_t is_thread_valid(tid_t tid)
 {
     struct thread *sptr_thread = get_thread_handle(tid);
-    return ((sptr_thread->state != NR_THREAD_SLEEP) && (sptr_thread->to_state != NR_THREAD_SLEEP));
+    return ((sptr_thread->state != NR_THREAD_ZOMBIE) && (sptr_thread->to_state != NR_THREAD_ZOMBIE));
 }
 
 /*!
@@ -621,14 +887,16 @@ kbool_t is_thread_valid(tid_t tid)
  * @retval 	next
  * @note   	none
  */
-struct thread *next_ready_thread(struct thread *sptr_prev)
+struct thread *next_ready_thread(kuint32_t cpuid, struct thread *sptr_prev)
 {
-    if (!sptr_prev)
-        return get_first_ready_thread();
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_READY_LIST(cpuid));
 
-    if (mr_list_empty(SCHED_READY_LIST) ||
+    if (!sptr_prev)
+        return get_first_ready_thread(cpuid);
+
+    if (mr_list_empty(sptr_list) ||
         mr_list_empty(&sptr_prev->sgtc_link) ||
-        mr_list_head_until(sptr_prev, SCHED_READY_LIST, sgtc_link))
+        mr_list_head_until(sptr_prev, sptr_list, sgtc_link))
         return mr_nullptr;
 
     return mr_list_next_entry(sptr_prev, sgtc_link);
@@ -640,14 +908,16 @@ struct thread *next_ready_thread(struct thread *sptr_prev)
  * @retval 	next
  * @note   	none
  */
-struct thread *next_suspend_thread(struct thread *sptr_prev)
+struct thread *next_suspend_thread(kuint32_t cpuid, struct thread *sptr_prev)
 {
-    if (!sptr_prev)
-        return get_first_suspend_thread();
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_SUSPEND_LIST(cpuid));
 
-    if (mr_list_empty(SCHED_SUSPEND_LIST) ||
+    if (!sptr_prev)
+        return get_first_suspend_thread(cpuid);
+
+    if (mr_list_empty(sptr_list) ||
         mr_list_empty(&sptr_prev->sgtc_link) ||
-        mr_list_head_until(sptr_prev, SCHED_SUSPEND_LIST, sgtc_link))
+        mr_list_head_until(sptr_prev, sptr_list, sgtc_link))
         return mr_nullptr;
 
     return mr_list_next_entry(sptr_prev, sgtc_link);
@@ -659,14 +929,16 @@ struct thread *next_suspend_thread(struct thread *sptr_prev)
  * @retval 	next
  * @note   	none
  */
-struct thread *next_sleep_thread(struct thread *sptr_prev)
+struct thread *next_sleep_thread(kuint32_t cpuid, struct thread *sptr_prev)
 {
-    if (!sptr_prev)
-        return get_first_sleep_thread();
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_SLEEP_LIST(cpuid));
 
-    if (mr_list_empty(SCHED_SLEEP_LIST) ||
+    if (!sptr_prev)
+        return get_first_sleep_thread(cpuid);
+
+    if (mr_list_empty(sptr_list) ||
         mr_list_empty(&sptr_prev->sgtc_link) ||
-        mr_list_head_until(sptr_prev, SCHED_SLEEP_LIST, sgtc_link))
+        mr_list_head_until(sptr_prev, sptr_list, sgtc_link))
         return mr_nullptr;
 
     return mr_list_next_entry(sptr_prev, sgtc_link);
@@ -678,14 +950,16 @@ struct thread *next_sleep_thread(struct thread *sptr_prev)
  * @retval 	next
  * @note   	none
  */
-struct thread *next_zombie_thread(struct thread *sptr_prev)
+struct thread *next_zombie_thread(kuint32_t cpuid, struct thread *sptr_prev)
 {
-    if (!sptr_prev)
-        return get_first_zombie_thread();
+    DECLARE_LIST_HEAD_PTR_INIT(sptr_list, SCHED_ZOMBIE_LIST(cpuid));
 
-    if (mr_list_empty(SCHED_ZOMBIE_LIST) ||
+    if (!sptr_prev)
+        return get_first_zombie_thread(cpuid);
+
+    if (mr_list_empty(sptr_list) ||
         mr_list_empty(&sptr_prev->sgtc_link) ||
-        mr_list_head_until(sptr_prev, SCHED_ZOMBIE_LIST, sgtc_link))
+        mr_list_head_until(sptr_prev, sptr_list, sgtc_link))
         return mr_nullptr;
 
     return mr_list_next_entry(sptr_prev, sgtc_link);
@@ -796,9 +1070,7 @@ static void __thread_hash_remove(struct thread_list *sptr_list, struct thread *s
 
 /*!
  * @brief	switch thread from one state to another state
- * @param  	tid: target thread
- * @param	src: current state
- * @param	dst: target state
+ * @param  	sptr_thread: target thread
  * @retval 	err code
  * @note   	only the running thread need to save context; and only the ready thread maybe need to restore context
  */ 
@@ -806,6 +1078,7 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
 {
 //  struct thread *sptr_thread;
 //  const struct scheduler_operation *sptr_oprts = &sgtc_scheduler_operations[0];
+    kint32_t cpuid = sptr_thread->cpu;
     tid_t tid;
     kuint32_t src, dst;
     kint32_t retval = ER_NORMAL;
@@ -814,7 +1087,7 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
 //  mr_preempt_disable();
 
 //  sptr_thread = SCHED_THREAD_HANDLER(tid);
-    if (mr_unlikely(!sptr_thread))
+    if (mr_unlikely(!sptr_thread) || (cpuid < 0))
         return -ER_NODEV;
 
     tid = sptr_thread->tid;
@@ -824,10 +1097,11 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
     /*!<
      * thread switch:
      * (At all times, it is necessary to ensure that at least one thread (including idle threads) is running)
-     * running ---> ready/suspend/sleep
-     * ready ---> running/suspend/sleep
-     * suspend ---> ready/sleep
-     * sleep ---> ready/suspend
+     * running ---> ready/suspend/sleep/zombie
+     * ready ---> running/suspend/sleep/zombie
+     * suspend ---> ready/sleep/zombie
+     * sleep ---> ready/suspend/zombie
+     * zombie ---> prohit!!! it will be killed by kthread
      *
      * (only running and ready state can be switched to any state)
      */
@@ -835,35 +1109,40 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
         goto fail;
 
     /*!< for idle thread, only ready and running state can be chosen */
-    if ((tid == THREAD_TID_IDLE) && 
+    if ((tid < THREAD_TID_BASE) && 
         mr_unlikely((dst != NR_THREAD_RUNNING) && (dst != NR_THREAD_READY)))
         goto fail;
 
-    /*!< do not suspend self in interrupt */
+    /*!< do not suspend self in interrupt, and do not allow to switch context of other CPUs */
     if (mr_unlikely(dst == NR_THREAD_RUNNING) && 
-        mr_unlikely(IS_IN_INTERRUPT()))
+        mr_unlikely(__IN_INTERRUPT(__IRQ_COUNT(sptr_thread)) || (cpuid != get_cpu_id())))
         goto fail;
 
     /*!< detached from current list */
     switch (src)
     {
         case NR_THREAD_RUNNING:
+            /*!< no need to schedule */
             if (mr_unlikely(dst == NR_THREAD_RUNNING))
                 goto fail;
+            
+            /*!< do not allow to switch context of other CPUs */
+            if (mr_unlikely(cpuid != get_cpu_id()))
+                goto fail;
 
-            retval = schedule_reinstall_work_role(sptr_thread);          
+            retval = schedule_reinstall_work_role(cpuid, sptr_thread);          
             break;
 
         case NR_THREAD_READY:
-            retval = schedule_detach_ready_list(sptr_thread);
+            retval = schedule_detach_ready_list(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_SUSPEND:
-            retval = schedule_detach_suspend_list(sptr_thread);
+            retval = schedule_detach_suspend_list(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_SLEEP:
-            retval = schedule_detach_sleep_list(sptr_thread);
+            retval = schedule_detach_sleep_list(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_ZOMBIE:
@@ -875,10 +1154,10 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
     }
 
     mr_barrier();
-    if (mr_unlikely(retval < 0))
+    if (mr_unlikely(retval))
     {
-        print_warn("switch thread (detach old) failed ! current and target state is : %s, %d, %d\r\n", 
-                    sptr_thread->name, src, dst);
+        print_warn("switch thread (detach old) failed ! current (cpuid: %u) and target state is : %s, %d, %d\r\n", 
+                    cpuid, sptr_thread->name, src, dst);
         goto fail;
     }
 
@@ -886,31 +1165,31 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
     switch (dst)
     {
         case NR_THREAD_RUNNING:
-            retval = schedule_despoil_work_role(sptr_thread);
+            retval = schedule_despoil_work_role(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_READY:
             /*!< clear state */
             __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
-            retval = schedule_add_ready_list(sptr_thread);
+            retval = schedule_add_ready_list(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_SUSPEND:
             /*!< clear state */
             __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
-            retval = schedule_add_suspend_list(sptr_thread);
+            retval = schedule_add_suspend_list(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_SLEEP:
             /*!< clear state */
             __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
-            retval = schedule_add_sleep_list(sptr_thread);
+            retval = schedule_add_sleep_list(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_ZOMBIE:
             /*!< clear state */
             __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
-            retval = schedule_add_zombie_list(sptr_thread);
+            retval = schedule_add_zombie_list(cpuid, sptr_thread);
             break;
 
         default:
@@ -918,13 +1197,13 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
             break;
     }
 
-    if (mr_unlikely(retval < 0))
+    if (mr_unlikely(retval))
     {
-        print_warn("switch thread (add new) failed ! current and target state is : %s, %d, %d, error code: %d\r\n", 
-                    sptr_thread->name, src, dst, retval);
+        print_warn("switch thread (add new) failed ! current (cpuid: %u) and target state is : %s, %d, %d, error code: %d\r\n", 
+                    cpuid, sptr_thread->name, src, dst, retval);
 
         src = NR_THREAD_SLEEP;
-        retval = schedule_add_sleep_list(sptr_thread);
+        retval = schedule_add_sleep_list(cpuid, sptr_thread);
         if (retval < 0)
         {
             src = NR_THREAD_NONE;
@@ -933,7 +1212,7 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
         goto fail;
     }
 
-    if (mr_unlikely(!SCHED_RUNNING_THREAD))
+    if (mr_unlikely(!SCHED_RUNNING_THREAD(cpuid)))
     {
         print_err("no thread is running !!! dangerous action !!!\r\n");
         mr_assert(true);
@@ -955,16 +1234,112 @@ fail:
 }
 
 /*!
+ * @brief	change thread cpu
+ * @param  	sptr_thread
+ * @retval 	errno
+ * @note   	none
+ */
+kint32_t switch_thread_cpu(struct thread *sptr_thread, kint32_t target_cpu)
+{
+    struct scheduler_core *sptr_core;
+    struct scheduler_core *sptr_core2;
+    struct scheduler_operation *sptr_oprts;
+    kuint32_t cpuid, state, affinity;
+    kutype_t flags;
+    kint32_t retval;
+
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_core = SCHED_MANAGER_CORE(cpuid);
+    spin_lock_irqsave(&sptr_core->sgtc_lock, &flags);
+
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        goto loop;
+    }
+
+    if ((sptr_thread->cpu < 0) || 
+        (target_cpu < 0) || 
+        (sptr_thread->cpu == target_cpu))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        return -ER_CHECKERR;
+    }
+
+    /*!< target cpu is not normal */
+    if (!get_cpu_current_thread(target_cpu))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        return -ER_NODEV;
+    }
+
+    state = __GET_THREAD_STATE(sptr_thread);
+    if (state == NR_THREAD_RUNNING)
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        print_warn("thread \'%s\' is running, not allow change cpu\r\n", sptr_thread->name);
+        return -ER_FORBID;
+    }
+
+    affinity = thread_get_cpuaffinity(sptr_thread->sptr_attr);
+    if (!(affinity & CPU_AFFINITY_SINGEL(target_cpu)))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        print_warn("thread \'%s\' is not allowed change to cpu %u, affinity forbid\r\n", sptr_thread->name, target_cpu);
+        return -ER_FORBID;
+    }
+
+    sptr_oprts = (struct scheduler_operation *)(&sgtc_scheduler_operations[state]);
+    if (mr_unlikely(!sptr_oprts->detach || !sptr_oprts->add_new))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        return -ER_FAULT;
+    }
+
+    retval = sptr_oprts->detach(sptr_thread->cpu, sptr_thread);
+    if (retval || !mr_list_empty(&sptr_thread->sgtc_link))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        return -ER_FAILD;
+    }
+
+    sptr_thread->last_cpu = sptr_thread->cpu;
+    sptr_thread->cpu = -1;
+    mr_smp_mb();
+    spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+
+    /*!< add to new cpu */
+    sptr_core2 = SCHED_MANAGER_CORE(target_cpu);
+    spin_lock_irqsave(&sptr_core2->sgtc_lock, &flags);
+
+    retval = sptr_oprts->add_new(target_cpu, sptr_thread);
+    if (retval || mr_list_empty(&sptr_thread->sgtc_link))
+    {
+        spin_unlock_irqrestore(&sptr_core2->sgtc_lock, flags);
+        mr_warn(false);
+        return -ER_FAILD;
+    }
+
+    /*!< sptr_thread is free (not in queue), no cpu will schedule it; therefore, it is safe */
+    sptr_thread->cpu = target_cpu;
+    spin_unlock_irqrestore(&sptr_core2->sgtc_lock, flags);
+
+    return ER_NORMAL;
+}
+
+/*!
  * @brief	change thread state to running
  * @param  	tid: target thread
  * @retval 	err code
  * @note   	only ready state can be switched to running!!!
  */
-static kint32_t schedule_despoil_work_role(struct thread *sptr_thread)
+static kint32_t schedule_despoil_work_role(kuint32_t cpuid, struct thread *sptr_thread)
 {
     struct thread *sptr_running;
-    kint32_t retval;
-
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
+    
     if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
@@ -973,11 +1348,13 @@ static kint32_t schedule_despoil_work_role(struct thread *sptr_thread)
         return -ER_INVALID;
 
     /*!< get current */
-    sptr_running = SCHED_RUNNING_THREAD;
+    sptr_running = __THREAD_RUNNING(sptr_core);
     if (mr_likely(sptr_running))
     {
+        kint32_t retval;
+
         /*!< current thread add to ready list */
-        retval = schedule_add_ready_list(sptr_running);
+        retval = schedule_add_ready_list(cpuid, sptr_running);
         if (mr_unlikely(retval < 0))
             return retval;
 
@@ -985,7 +1362,7 @@ static kint32_t schedule_despoil_work_role(struct thread *sptr_thread)
     }
 
     /*!< update current */
-    SCHED_RUNNING_THREAD = sptr_thread;
+    __THREAD_RUNNING(sptr_core) = sptr_thread;
 
     return ER_NORMAL;
 }
@@ -996,10 +1373,11 @@ static kint32_t schedule_despoil_work_role(struct thread *sptr_thread)
  * @retval 	err code
  * @note   	running ---> xxx
  */
-static kint32_t schedule_reinstall_work_role(struct thread *sptr_thread)
+static kint32_t schedule_reinstall_work_role(kuint32_t cpuid, struct thread *sptr_thread)
 {
     struct thread *sptr_new;
-    struct list_head *sptr_ready = SCHED_READY_LIST;
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
+    struct list_head *sptr_ready = __THREAD_READY_LIST(sptr_core);
 
     /*!< no thread ready; current should be set to idle thread */
 //  if (mr_list_empty(sptr_ready))
@@ -1009,11 +1387,15 @@ static kint32_t schedule_reinstall_work_role(struct thread *sptr_thread)
     sptr_new = mr_list_first_valid_entry(sptr_ready, struct thread, sgtc_link);
     if (mr_likely(sptr_new))
     {
+        kint32_t retval;
+
         /*!< detached from ready list */
-        schedule_detach_ready_list(sptr_new);
+        retval = schedule_detach_ready_list(cpuid, sptr_new);
+        if (mr_unlikely(retval < 0))
+            return retval;
 
         /*!< ready thread ---> running */
-        SCHED_RUNNING_THREAD = sptr_new;
+        __THREAD_RUNNING(sptr_core) = sptr_new;
         mr_barrier();
         __SYNC_THREAD_STATE(sptr_new, NR_THREAD_RUNNING);
 
@@ -1029,16 +1411,25 @@ static kint32_t schedule_reinstall_work_role(struct thread *sptr_thread)
  * @retval 	err code
  * @note   	add to ready list
  */
-static kint32_t schedule_add_ready_list(struct thread *sptr_thread)
+static kint32_t schedule_add_ready_list(kuint32_t cpuid, struct thread *sptr_thread)
 {
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
+    kint32_t retval;
+
     if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
     /*!< avoid duplicate additions */
-    if (mr_unlikely(NR_THREAD_READY == sptr_thread->state))
+    if (mr_unlikely((NR_THREAD_READY == sptr_thread->state) &&
+        !mr_list_empty(&sptr_thread->sgtc_link)))
         return -ER_INVALID;
 
-    return __schedule_add_status_list(sptr_thread, SCHED_READY_LIST, SCHED_READY_HASH);
+    retval = __schedule_add_status_list(sptr_thread, 
+                        __THREAD_READY_LIST(sptr_core), __THREAD_READY_HASH(sptr_core));
+    if (!retval)
+        sptr_core->ready_num++;
+
+    return retval;
 }
 
 /*!
@@ -1049,8 +1440,10 @@ static kint32_t schedule_add_ready_list(struct thread *sptr_thread)
  * 			(after detaching from the ready list, the thread will appear in a free state, 
  * 			so this function prohibits external calls to prevent the thread from leaving management and causing memory leakage)
  */
-static kint32_t schedule_detach_ready_list(struct thread *sptr_thread)
+static kint32_t schedule_detach_ready_list(kuint32_t cpuid, struct thread *sptr_thread)
 {
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
+
     if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
@@ -1059,7 +1452,8 @@ static kint32_t schedule_detach_ready_list(struct thread *sptr_thread)
         return -ER_INVALID;
 
     /*!< delete it */
-    __schedule_del_status_list(sptr_thread, SCHED_READY_LIST, SCHED_READY_HASH);
+    __schedule_del_status_list(sptr_thread, __THREAD_READY_LIST(sptr_core), __THREAD_READY_HASH(sptr_core));
+    sptr_core->ready_num--;
 
     return ER_NORMAL;
 }
@@ -1070,16 +1464,25 @@ static kint32_t schedule_detach_ready_list(struct thread *sptr_thread)
  * @retval 	err code
  * @note   	add to suspend list
  */
-static kint32_t schedule_add_suspend_list(struct thread *sptr_thread)
+static kint32_t schedule_add_suspend_list(kuint32_t cpuid, struct thread *sptr_thread)
 {
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
+    kint32_t retval;
+
     if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
     /*!< avoid duplicate additions */
-    if (mr_unlikely(NR_THREAD_SUSPEND == sptr_thread->state))
+    if (mr_unlikely((NR_THREAD_SUSPEND == sptr_thread->state) &&
+        !mr_list_empty(&sptr_thread->sgtc_link)))
         return -ER_INVALID;
 
-    return __schedule_add_status_list(sptr_thread, SCHED_SUSPEND_LIST, SCHED_SUSPEND_HASH);
+    retval = __schedule_add_status_list(sptr_thread, 
+                        __THREAD_SUSPEND_LIST(sptr_core), __THREAD_SUSPEND_HASH(sptr_core));
+    if (!retval)
+        sptr_core->suspend_num++;
+
+    return retval;
 }
 
 /*!
@@ -1090,8 +1493,10 @@ static kint32_t schedule_add_suspend_list(struct thread *sptr_thread)
  * 			(after detaching from the suspend list, the thread will appear in a free state, 
  * 			so this function prohibits external calls to prevent the thread from leaving management and causing memory leakage)
  */
-static kint32_t schedule_detach_suspend_list(struct thread *sptr_thread)
+static kint32_t schedule_detach_suspend_list(kuint32_t cpuid, struct thread *sptr_thread)
 {
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
+
     if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
@@ -1100,7 +1505,8 @@ static kint32_t schedule_detach_suspend_list(struct thread *sptr_thread)
         return -ER_INVALID;
 
     /*!< delete it */
-    __schedule_del_status_list(sptr_thread, SCHED_SUSPEND_LIST, SCHED_SUSPEND_HASH);
+    __schedule_del_status_list(sptr_thread, __THREAD_SUSPEND_LIST(sptr_core), __THREAD_SUSPEND_HASH(sptr_core));
+    sptr_core->suspend_num--;
 
     return ER_NORMAL;
 }
@@ -1111,16 +1517,25 @@ static kint32_t schedule_detach_suspend_list(struct thread *sptr_thread)
  * @retval 	err code
  * @note   	add to sleep list
  */
-static kint32_t schedule_add_sleep_list(struct thread *sptr_thread)
+static kint32_t schedule_add_sleep_list(kuint32_t cpuid, struct thread *sptr_thread)
 {
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
+    kint32_t retval;
+
     if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
     /*!< avoid duplicate additions */
-    if (mr_unlikely(NR_THREAD_SLEEP == sptr_thread->state))
+    if (mr_unlikely((NR_THREAD_SLEEP == sptr_thread->state) &&
+        !mr_list_empty(&sptr_thread->sgtc_link)))
         return -ER_INVALID;
 
-    return __schedule_add_status_list(sptr_thread, SCHED_SLEEP_LIST, SCHED_SLEEP_HASH);
+    retval = __schedule_add_status_list(sptr_thread, 
+                        __THREAD_SLEEP_LIST(sptr_core), __THREAD_SLEEP_HASH(sptr_core));
+    if (!retval)
+        sptr_core->sleep_num++;
+
+    return retval;
 }
 
 /*!
@@ -1131,8 +1546,10 @@ static kint32_t schedule_add_sleep_list(struct thread *sptr_thread)
  * 			(after detaching from the sleep list, the thread will appear in a free state, 
  * 			so this function prohibits external calls to prevent the thread from leaving management and causing memory leakage)
  */
-static kint32_t schedule_detach_sleep_list(struct thread *sptr_thread)
+static kint32_t schedule_detach_sleep_list(kuint32_t cpuid, struct thread *sptr_thread)
 {
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
+
     if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
@@ -1141,7 +1558,8 @@ static kint32_t schedule_detach_sleep_list(struct thread *sptr_thread)
         return -ER_INVALID;
 
     /*!< delete it */
-    __schedule_del_status_list(sptr_thread, SCHED_SLEEP_LIST, SCHED_SLEEP_HASH);
+    __schedule_del_status_list(sptr_thread, __THREAD_SLEEP_LIST(sptr_core), __THREAD_SLEEP_HASH(sptr_core));
+    sptr_core->sleep_num--;
 
     return ER_NORMAL;
 }
@@ -1152,16 +1570,20 @@ static kint32_t schedule_detach_sleep_list(struct thread *sptr_thread)
  * @retval 	err code
  * @note   	add to zombie list
  */
-static kint32_t schedule_add_zombie_list(struct thread *sptr_thread)
+static kint32_t schedule_add_zombie_list(kuint32_t cpuid, struct thread *sptr_thread)
 {
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
+
     if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
     /*!< avoid duplicate additions */
-    if (mr_unlikely(NR_THREAD_ZOMBIE == sptr_thread->state))
+    if (mr_unlikely((NR_THREAD_ZOMBIE == sptr_thread->state) &&
+        !mr_list_empty(&sptr_thread->sgtc_link)))
         return -ER_INVALID;
 
-    return __schedule_add_status_list(sptr_thread, SCHED_ZOMBIE_LIST, SCHED_ZOMBIE_HASH);
+    return __schedule_add_status_list(sptr_thread, 
+                    __THREAD_ZOMBIE_LIST(sptr_core), __THREAD_ZOMBIE_HASH(sptr_core));
 }
 
 /*!
@@ -1172,8 +1594,10 @@ static kint32_t schedule_add_zombie_list(struct thread *sptr_thread)
  * 			(after detaching from the zombie list, the thread will appear in a free state, 
  * 			so this function prohibits external calls to prevent the thread from leaving management and causing memory leakage)
  */
-static kint32_t schedule_detach_zombie_list(struct thread *sptr_thread)
+static kint32_t schedule_detach_zombie_list(kuint32_t cpuid, struct thread *sptr_thread)
 {
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
+
     if (mr_unlikely(!sptr_thread))
         return -ER_FAULT;
 
@@ -1182,8 +1606,7 @@ static kint32_t schedule_detach_zombie_list(struct thread *sptr_thread)
         return -ER_INVALID;
 
     /*!< delete it */
-    __schedule_del_status_list(sptr_thread, SCHED_ZOMBIE_LIST, SCHED_ZOMBIE_HASH);
-
+    __schedule_del_status_list(sptr_thread, __THREAD_ZOMBIE_LIST(sptr_core), __THREAD_ZOMBIE_HASH(sptr_core));
     return ER_NORMAL;
 }
 
@@ -1258,30 +1681,18 @@ static void __schedule_del_status_list(struct thread *sptr_thread,
 }
 
 /*!
- * @brief	register a new thread, which will be added to ready list
+ * @brief	initial thread
  * @param  	sptr_thread: target thread
- * @param	tid: global tcb index
- * @retval 	err code
- * @note   	all new threads should be added to ready list at first
+ * @retval 	none
+ * @note   	none
  */
-kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
+void __setup_thread(struct thread *sptr_thread)
 {
-    struct thread_attr *sptr_it_attr;
     struct lock_owners *sptr_owners;
     struct lock_waiter *sptr_waiter;
-    kutype_t flags;
-    kint32_t retval;
 
-    sptr_it_attr = sptr_thread->sptr_attr;
     sptr_owners = &sptr_thread->sgtc_owners;
     sptr_waiter = &sptr_thread->sgtc_wait;
-
-    if (SCHED_THREAD_HANDLER(tid))
-        return -ER_INVALID;
-
-    /*!< stack must be valid */
-    if (!sptr_it_attr->stack_addr)
-        return -ER_NOMEM;
 
     /*!< initial link */
     init_list_head(&sptr_thread->sgtc_link);
@@ -1290,31 +1701,84 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
     /*!< initial spinlock */
     spin_lock_init(&sptr_thread->sgtc_lock);
 
+    /*!< initial preempt count */
+    ATOMIC_SET(&sptr_thread->sgtc_preempt, 0);
+
     /*!< initial lock struct */
     init_list_head(&sptr_owners->sgtc_gets);
     spin_lock_init(&sptr_owners->sgtc_lock);
     sptr_waiter->sptr_wait = mr_nullptr;
     init_list_head(&sptr_waiter->sgtc_link);
+}
+
+/*!
+ * @brief	register a new thread, which will be added to ready list
+ * @param  	sptr_thread: target thread
+ * @param	tid: global tcb index
+ * @retval 	err code
+ * @note   	all new threads should be added to ready list at first
+ */
+kint32_t register_new_thread(struct thread *sptr_thread, tid_t *ptr_tid)
+{
+    kuint32_t cpuid = get_cpu_id();
+    struct scheduler_core *sptr_core;
+    struct thread_attr *sptr_it_attr;
+    tid_t tid = *ptr_tid;
+    kutype_t flags;
+    kint32_t retval;
+
+    sptr_it_attr = sptr_thread->sptr_attr;
+
+    /*!< stack must be valid */
+    if (!sptr_it_attr->stack_addr)
+        return -ER_NOMEM;
+
+    /*!< prohibit schedule */
+    if (!sptr_it_attr->cpu_affinity)
+        sptr_thread->cpu = -1;
+    /*!< current cpu first */
+    else if (sptr_it_attr->cpu_affinity & mr_bit(cpuid))
+        sptr_thread->cpu = cpuid;
+    /*!< select the first cpu */
+    else
+        sptr_thread->cpu = mr_ffs(sptr_it_attr->cpu_affinity) - 1;
+
+    /*!< check again */
+    if ((sptr_thread->cpu >= CONFIG_CORE_NUM) || (sptr_thread->cpu < 0))
+        return -ER_INVALID;
+
+    sptr_thread->last_cpu = sptr_thread->cpu;
+    sptr_core = SCHED_MANAGER_CORE(sptr_thread->cpu);
+
+    /*!< initial thread */
+    __setup_thread(sptr_thread);
 
     /*!< set name */
     sprintk(sptr_thread->name, "thread-%d", tid);
 
-    spin_lock_irqsave(&__SCHED_LOCK, &flags);
     /*!< saved to tcb */
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
+    if (SCHED_THREAD_HANDLER(tid))
+    {
+        spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+        return -ER_INVALID;
+    }
     SCHED_THREAD_HANDLER(tid) = sptr_thread;
-    
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+
     /*!< add and sorted by priority */
-    retval = schedule_add_ready_list(sptr_thread);
+    spin_lock_irqsave(&sptr_core->sgtc_lock, &flags);
+    retval = schedule_add_ready_list(sptr_thread->cpu, sptr_thread);
     if (retval < 0)
     {
         SCHED_THREAD_HANDLER(tid) = mr_nullptr;
-        spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
         return retval;
     }
 
     /*!< set to ready state */
     __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_READY);
-    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+    spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
 
     return ER_NORMAL;
 }
@@ -1328,32 +1792,149 @@ kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
 struct thread *unregister_thread(tid_t tid)
 {
     struct thread *sptr_thread;
+    struct scheduler_core *sptr_core;
     kutype_t flags;
 
     spin_lock_irqsave(&__SCHED_LOCK, &flags);
-
     if ((tid < 0) || (tid == mr_current->tid))
     {
         sptr_thread = ERR_PTR(-ER_LOCKED);
-        goto END;
+        goto fail;
     }
 
     sptr_thread = SCHED_THREAD_HANDLER(tid);
     if (!sptr_thread)
-        goto END;
+        goto fail;
 
     if (sptr_thread->state != NR_THREAD_ZOMBIE)
     {
         sptr_thread = ERR_PTR(-ER_BUSY);
-        goto END;
+        goto fail;
     }
 
-    schedule_detach_zombie_list(sptr_thread);
     SCHED_THREAD_HANDLER(tid) = mr_nullptr;
-
-END:
     spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+
+    sptr_core = SCHED_MANAGER_CORE(sptr_thread->cpu);
+    spin_lock_irqsave(&sptr_core->sgtc_lock, &flags);
+    schedule_detach_zombie_list(sptr_thread->cpu, sptr_thread);
+    spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+
+    goto end;
+
+fail:
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+end:
     return sptr_thread;
+}
+
+/*!
+ * @brief	check if scheduler is overload
+ * @param  	none
+ * @retval 	none
+ * @note   	ajust scheduler, called by migration thread
+ */
+kint32_t check_scheduler_load(void)
+{
+    kuint32_t cpuid = get_cpu_id();
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(0);
+    kuint32_t total_load = 0, max_load = 0, max_load_cpu = 0;
+
+    for (kuint32_t i = 0; i < CONFIG_CORE_NUM; i++, sptr_core++)
+    {
+        total_load += sptr_core->ready_num;
+
+        if (sptr_core->ready_num > max_load)
+        {
+            max_load_cpu = i;
+            max_load = sptr_core->ready_num;
+        }
+    }
+
+    sptr_core = SCHED_MANAGER_CORE(cpuid);
+    if ((cpuid == max_load_cpu) || ((sptr_core->ready_num * CONFIG_CORE_NUM) > total_load))
+        return -ER_FORBID;
+
+    return max_load_cpu;
+}
+
+/*!
+ * @brief	check if scheduler is overload
+ * @param  	none
+ * @retval 	none
+ * @note   	ajust scheduler, called by migration thread
+ */
+void check_and_balance_scheduler(void)
+{
+    kuint32_t cpuid = get_cpu_id();
+    struct scheduler_core *sptr_core;
+    struct scheduler_core *sptr_core2;
+    DECLARE_LIST_HEAD_PTR(sptr_list);
+    struct thread *sptr_thread;
+    kint32_t max_load_cpu = 0;
+    kutype_t flags;
+    kint32_t fail_count = 0, retval;
+
+    /*!< check all the time, until balance */
+    while (fail_count < 2)
+    {
+        kbool_t found = false;
+
+        max_load_cpu = check_scheduler_load();
+        if (max_load_cpu < 0)
+            return;
+
+        sptr_core = SCHED_MANAGER_CORE(cpuid);
+        sptr_core2 = SCHED_MANAGER_CORE(max_load_cpu);
+        sptr_list = __THREAD_READY_LIST(sptr_core2);
+
+        spin_lock_irqsave_assert(&sptr_core2->sgtc_lock, &flags, __FILE__, __LINE__, __FUNCTION__);
+        foreach_list_prev_entry(sptr_thread, sptr_list, sgtc_link)
+        {
+            /*!< support moving to current cpu ? */
+            if (thread_get_cpuaffinity(sptr_thread->sptr_attr) & CPU_AFFINITY_SINGEL(cpuid))
+            {
+                found = true;
+                break;
+            }
+        }
+
+        /*!< no thread can be moved */
+        if (!found)
+        {
+            spin_unlock_irqrestore_assert(&sptr_core2->sgtc_lock, flags);
+            return;
+        }
+
+        retval = schedule_detach_ready_list(max_load_cpu, sptr_thread);
+        if (retval || !mr_list_empty(&sptr_thread->sgtc_link))
+        {
+            spin_unlock_irqrestore_assert(&sptr_core2->sgtc_lock, flags);
+            fail_count++;
+            continue;
+        }
+
+        sptr_thread->last_cpu = sptr_thread->cpu;
+        sptr_thread->cpu = -1;
+        mr_smp_mb();
+        spin_unlock_irqrestore_assert(&sptr_core2->sgtc_lock, flags);
+
+        spin_lock_irqsave_assert(&sptr_core->sgtc_lock, &flags, __FILE__, __LINE__, __FUNCTION__);
+        retval = schedule_add_ready_list(cpuid, sptr_thread);
+        if (retval || mr_list_empty(&sptr_thread->sgtc_link))
+        {
+            spin_unlock_irqrestore_assert(&sptr_core->sgtc_lock, flags);
+            mr_warn(false);
+
+            return;
+        }
+
+        /*!< sptr_thread is free (not in queue), no cpu will schedule it; therefore, it is safe */
+        sptr_thread->cpu = cpuid;
+        spin_unlock_irqrestore_assert(&sptr_core->sgtc_lock, flags);
+
+        fail_count = 0;
+    }
 }
 
 /*!
@@ -1364,7 +1945,7 @@ END:
  */
 void __thread_init_before(void)
 {
-    struct thread *sptr_thread = SCHED_RUNNING_THREAD;
+    struct thread *sptr_thread = SCHED_RUNNING_THREAD(get_cpu_id());
     kuint32_t milseconds = thread_get_sched_msecs(sptr_thread->sptr_attr);
     
     sptr_thread->expires = msecs_to_jiffies(milseconds);
@@ -1382,24 +1963,27 @@ struct scheduler_context *__schedule_thread(void)
     struct thread *sptr_prev;
     struct thread_list *sptr_hash;
     struct scheduler_context *sptr_context;
+    kuint32_t cpuid = get_cpu_id();
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
     kint32_t retval;
 
-    sptr_hash = SCHED_READY_HASH;
+    sptr_hash = __THREAD_READY_HASH(sptr_core);
+    sptr_context = &sgtc_sched_data[cpuid].sgtc_context;
 
     /*!< no ready thread here, unable to start or switch */
     if (__THREAD_HASH_EMPTY(sptr_hash))
         goto fail;
 
     /*!< get the current thread */
-    sptr_prev = SCHED_RUNNING_THREAD;
+    sptr_prev = __THREAD_RUNNING(sptr_core);
     if (mr_unlikely(!sptr_prev))
     {
-        if (mr_unlikely(thread_schedule_ref))
+        if (mr_unlikely(sptr_context->first))
             goto fail;
         else
         {
             /*!< scheduled by "start_kernel" for the first time */
-            sptr_prev = mr_list_first_entry(SCHED_READY_LIST, struct thread, sgtc_link);           
+            sptr_prev = mr_list_first_entry(__THREAD_READY_LIST(sptr_core), struct thread, sgtc_link);           
             __SET_THREAD_TARGET_STATE(sptr_prev, NR_THREAD_RUNNING);
         }
     }
@@ -1410,22 +1994,24 @@ struct scheduler_context *__schedule_thread(void)
 
     /*!< select next valid thread */
     retval = schedule_thread_switch(sptr_prev);
-    sptr_thread = SCHED_RUNNING_THREAD;
+    sptr_thread = __THREAD_RUNNING(sptr_core);
     if (mr_unlikely(retval < 0) || 
         mr_unlikely(!sptr_thread))
         goto fail;
 
-    sptr_context = &sgtc_context;
-    sptr_context->first = (kuaddr_t)&thread_schedule_ref;
     sptr_context->entry = (kuaddr_t)&sptr_thread->start_routine;
     sptr_context->args = (kuaddr_t)&sptr_thread->ptr_args;
     sptr_context->prev_sp = 0;
     sptr_context->next_sp = thread_get_stack(sptr_thread->sptr_attr);
 
-    if (mr_likely(thread_schedule_ref))
+    if (mr_likely(sptr_context->first))
         sptr_context->prev_sp = thread_get_stack(sptr_prev->sptr_attr);
 
-    scheduler_record();
+    /*!< save current thread */
+    SET_PERCPU_CURRENT(sptr_thread);
+
+    /*!< record schedule count */
+//  scheduler_record(cpuid);
 
     /*!< address of sgtc_context ===> r0 */
     return sptr_context;
@@ -1440,36 +2026,104 @@ fail:
  * @retval 	none
  * @note   	select a highest priority thread from ready list, and swicth it to running state
  */
+void schedule_and_switch(void)
+{
+    /*!< pick next ready thread */
+    struct scheduler_context *sptr_context = __schedule_thread();
+    if (sptr_context)
+        context_switch(sptr_context);
+}
+
+/*!
+ * @brief	scheduled by current thread
+ * @param  	none
+ * @retval 	none
+ * @note   	select a highest priority thread from ready list, and swicth it to running state
+ */
 void schedule_thread(void)
 {
-    struct scheduler_context *sptr_context;
+    kuint32_t cpuid;
+    struct scheduler_core *sptr_core;
+    struct thread *sptr_prev, *sptr_new;
 
+    /*!
+     * disable preemptetion, otherwise, preempt (schedule_thread_irq) will pause schedule_thread function; 
+     * if current thread (with ready status) takes the opportunity to migrate to another cpu, 
+     * context will be saved (such as cpuid, sptr_core, ...), but the new cpu does not know, 
+     * it will use the old cpu's data (cpuid is old cpu) to continue to run, but it's error !!!
+     */
     mr_preempt_disable();
 
-    /*!< Save cpsr to spsr */
-    __push_psr();
-    mr_local_irq_disable();
-    mr_preempt_enable();
-
-    /*!< Not allow called by IRQ */
-    if (mr_unlikely(IS_IN_INTERRUPT()))
+    /*!< for first schedule, mr_current is a virtual thread, sptr_prev will be not NULL */
+    /*!< virtual thread ---> schedule_thread() ---> real thread (virtual thread will be not back forever) */
+    sptr_prev = mr_current;
+    
+    /*!< Not allow called by IRQ; because of cpuid (the data of current cpu), the judgement must in behind of preempt_disable */
+    if (mr_unlikely(__IN_INTERRUPT(__IRQ_COUNT(sptr_prev))))
     {
-        __SYNC_THREAD_STATE(mr_current, NR_THREAD_RUNNING);
+        __SYNC_THREAD_STATE(sptr_prev, NR_THREAD_RUNNING);
+        mr_preempt_enable();
+
         mr_warn(false);
-
-        goto END;
+        return;
     }
-   
-    sptr_context = __schedule_thread();
-    if (!sptr_context)
-        goto END;
 
-    /*!< sptr_context ===> r0 */
-    context_switch(sptr_context);
-    return;
+    cpuid = get_cpu_id();
+    sptr_core = SCHED_MANAGER_CORE(cpuid);
+    spin_lock_irqsave_assert(&sptr_core->sgtc_lock, &sptr_prev->lock_flags, __FILE__, __LINE__, __FUNCTION__);
 
-END:
-    __pop_psr();
+    /*!< spin_lock will call mr_preempt_disable() again, we can release the first one, but preempt is still disabled */
+    mr_preempt_enable();
+    schedule_and_switch();
+    mr_barrier();
+
+    /*!< perhaps thread will be migrate, cpu is changed */
+    sptr_core = SCHED_MANAGER_CORE(get_cpu_id());
+    sptr_new = mr_current;
+    spin_unlock_irqrestore_assert(&sptr_core->sgtc_lock, sptr_new->lock_flags);
+}
+
+/*!
+ * @brief	start schedule (ready to running)
+ * @param  	none
+ * @retval 	none
+ * @note   	select a highest priority thread from ready list, and swicth it to running state
+ */
+void schedule_thread_irq(void)
+{
+    struct scheduler_core *sptr_core;
+    struct thread *sptr_prev, *sptr_new;
+
+    sptr_core = SCHED_MANAGER_CORE(get_cpu_id());
+    sptr_prev = mr_current;
+
+    spin_lock_irqsave_assert(&sptr_core->sgtc_lock, &sptr_prev->lock_flags, __FILE__, __LINE__, __FUNCTION__);
+    schedule_and_switch();
+    mr_barrier();
+
+    /*!< perhaps thread will be migrate, cpu is changed */
+    sptr_core = SCHED_MANAGER_CORE(get_cpu_id());
+    sptr_new = mr_current;
+    spin_unlock_irqrestore_assert(&sptr_core->sgtc_lock, sptr_new->lock_flags);
+}
+
+/*!
+ * @brief	first schedule preparation
+ * @param  	_spsr: super register
+ * @retval 	none
+ * @note   	called by the tail of "__switch_to"
+ */
+kutype_t ret_with_first_schedule(kutype_t _spsr)
+{
+    kuint32_t cpuid = get_cpu_id();
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
+
+    /*!< enable interrupt, it will be set to cpsr by the tail of "__switch_to" */
+    _spsr &= ~(CPSR_BIT_I | CPSR_BIT_F | CPSR_BIT_A);
+
+    /*!< delay enable interrupt */
+    spin_unlock_irqrestore_assert(&sptr_core->sgtc_lock, _spsr | CPSR_BIT_I | CPSR_BIT_F);
+    return _spsr;
 }
 
 /*!
@@ -1502,15 +2156,32 @@ static void __scheduler_init(struct thread_list *sptr_list)
  */
 void __init scheduler_init(void)
 {
-    init_list_head(SCHED_READY_LIST);
-    init_list_head(SCHED_SUSPEND_LIST);
-    init_list_head(SCHED_SLEEP_LIST);
-    init_list_head(SCHED_ZOMBIE_LIST);
+    struct scheduler_table *sptr_sch = SCHED_MANAGER();
+    struct scheduler_core *sptr_core;
+    struct scheduler_share *sptr_share;
 
-    __scheduler_init(SCHED_READY_HASH);
-    __scheduler_init(SCHED_SUSPEND_HASH);
-    __scheduler_init(SCHED_SLEEP_HASH);
-    __scheduler_init(SCHED_ZOMBIE_HASH);
+    for (kint32_t id = 0; id < CONFIG_CORE_NUM; id++)
+    {
+        sptr_core = &sptr_sch->sgtc_core[id];
+        
+        /*!< core */
+        memset(sptr_core, 0, sizeof(*sptr_core));
+        spin_lock_init(&sptr_core->sgtc_lock);
+
+        init_list_head(&sptr_core->sgtc_lready);
+        init_list_head(&sptr_core->sgtc_lsuspend);
+        init_list_head(&sptr_core->sgtc_lsleep);
+        init_list_head(&sptr_core->sgtc_lzombie);
+        
+        __scheduler_init(&sptr_core->sgtc_hready);
+        __scheduler_init(&sptr_core->sgtc_hsuspend);
+        __scheduler_init(&sptr_core->sgtc_hsleep);
+        __scheduler_init(&sptr_core->sgtc_hzombie);
+    }
+
+    /*!< share */
+    sptr_share = &sptr_sch->sgtc_share;
+    spin_lock_init(&sptr_share->sgtc_lock);
 }
 
 /*!< end of file */

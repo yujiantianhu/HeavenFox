@@ -12,6 +12,7 @@
 
 /*!< The globals */
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <term/term.h>
@@ -82,7 +83,7 @@ void sema_down(struct semaphore *sptr_sem)
          * because the lock will be continuously requested by this thread, 
          * this function will be frequently entered to prevent duplicate additions 
          */
-        lock_pending_del(sptr_rec, sptr_self);
+        lock_pending_del(sptr_self);
         lock_pending_add(sptr_rec, sptr_self);
 
         spin_unlock_irqrestore(&sptr_owns->sgtc_lock, flags);
@@ -107,7 +108,7 @@ void sema_down(struct semaphore *sptr_sem)
     if (mr_unlikely(in_lock_pending(&sptr_self->sgtc_wait)))
     {
         spin_lock_irqsave(&sptr_owns->sgtc_lock, &flags);
-        lock_pending_del(sptr_rec, sptr_self);
+        lock_pending_del(sptr_self);
         spin_unlock_irqrestore(&sptr_owns->sgtc_lock, flags);
     }
 
@@ -133,7 +134,7 @@ kint32_t sema_down_try_lock(struct semaphore *sptr_sem)
     sptr_rec = &sptr_sem->sgtc_rec;
 
     /*!< In IRQ_Handler */
-    if (mr_unlikely(IS_IN_EXCEPTION()))
+    if (mr_unlikely(IN_INTERRUPT()))
         return -ER_FORBID;
 
     mr_preempt_disable();
@@ -173,7 +174,7 @@ void sema_up(struct semaphore *sptr_sem)
     sptr_rec = &sptr_sem->sgtc_rec;
 
     /*!< In IRQ_Handler */
-    if (mr_unlikely(IS_IN_EXCEPTION()))
+    if (mr_unlikely(IN_INTERRUPT()))
         return;
 
     mr_preempt_disable();

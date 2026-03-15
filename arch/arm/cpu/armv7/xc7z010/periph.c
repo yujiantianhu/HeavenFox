@@ -149,7 +149,7 @@ void Xil_DCacheFlushRange(kuaddr_t adr, kuint32_t len)
     kuint32_t end;
     kuint32_t currmask;
 
-#if (!defined(CONFIG_USE_AMP) || !CONFIG_USE_AMP)
+#if (!defined(CONFIG_AMP) || !CONFIG_AMP)
     volatile kuint32_t *L2CCOffset;
     L2CCOffset = (volatile kuint32_t *)(XPS_L2CC_BASEADDR + XPS_L2CC_CACHE_INV_CLN_PA_OFFSET);
 #endif
@@ -170,7 +170,7 @@ void Xil_DCacheFlushRange(kuaddr_t adr, kuint32_t len)
             /* Flush L1 Data cache line */
             mr_set_cp15(XREG_CP15_CLEAN_INVAL_DC_LINE_MVA_POC, LocalAddr);
 
-        #if (!defined(CONFIG_USE_AMP) || !CONFIG_USE_AMP)
+        #if (!defined(CONFIG_AMP) || !CONFIG_AMP)
             /* Flush L2 cache line */
             *L2CCOffset = LocalAddr;
            
@@ -200,7 +200,7 @@ void Xil_DCacheInvalidateRange(kuaddr_t adr, kuint32_t len)
     kuint32_t currmask;
     kuint32_t cache_val = 0U;
 
-#if (!defined(CONFIG_USE_AMP) || !CONFIG_USE_AMP)
+#if (!defined(CONFIG_AMP) || !CONFIG_AMP)
     volatile kuint32_t *L2CCOffset;
     L2CCOffset = (volatile kuint32_t *)(XPS_L2CC_BASEADDR + XPS_L2CC_CACHE_INVLD_PA_OFFSET);
 #endif
@@ -221,7 +221,7 @@ void Xil_DCacheInvalidateRange(kuaddr_t adr, kuint32_t len)
             tempadr &= (~(cacheline - 1U));
             Xil_L1DCacheFlushLine(tempadr);
 
-        #if (!defined(CONFIG_USE_AMP) || !CONFIG_USE_AMP)
+        #if (!defined(CONFIG_AMP) || !CONFIG_AMP)
             /* Disable Write-back and line fills */
             Xil_L2WriteDebugCtrl(0x3U);
             Xil_L2CacheFlushLine(tempadr);
@@ -237,7 +237,7 @@ void Xil_DCacheInvalidateRange(kuaddr_t adr, kuint32_t len)
             tempend &= (~(cacheline - 1U));
             Xil_L1DCacheFlushLine(tempend);
 
-        #if (!defined(CONFIG_USE_AMP) || !CONFIG_USE_AMP)
+        #if (!defined(CONFIG_AMP) || !CONFIG_AMP)
             /* Disable Write-back and line fills */
             Xil_L2WriteDebugCtrl(0x3U);
             Xil_L2CacheFlushLine(tempend);
@@ -249,7 +249,7 @@ void Xil_DCacheInvalidateRange(kuaddr_t adr, kuint32_t len)
 
         while (tempadr < tempend) 
         {
-        #if (!defined(CONFIG_USE_AMP) || !CONFIG_USE_AMP)
+        #if (!defined(CONFIG_AMP) || !CONFIG_AMP)
             /* Invalidate L2 cache line */
             *L2CCOffset = tempadr;
             Xil_L2CacheSync();
@@ -587,7 +587,7 @@ XScuTimer_Config *XScuTimer_LookupConfig(kuint16_t DeviceId)
     XScuTimer_Config *sptr_cfg = &sgtc_xscutimer_config_table[0];
     kuint32_t idx;
 
-    for (idx = 0U; idx < XPAR_XUARTPS_NUM_INSTANCES; idx++) 
+    for (idx = 0U; idx < XPAR_XSCUTIMER_NUM_INSTANCES; idx++) 
     {
         if (sptr_cfg[idx].DeviceId == DeviceId) 
             return sptr_cfg;

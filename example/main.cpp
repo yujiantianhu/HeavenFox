@@ -73,19 +73,21 @@ crt_task_t::crt_task_t(const kchar_t *name, void *(*task_entry)(void *),
         , stack_size(size)
         , isdync(false)
 {
+    struct thread_attr sgtc_attr;
     kint32_t retval;
     void *stack_top;
 
     if (!name || !(*name) || !task_entry)
         return;
 
-    memset(&this->sgtc_attr, 0, sizeof(this->sgtc_attr));
+    memset(&sgtc_attr, 0, sizeof(sgtc_attr));
 
-    this->sgtc_attr.detachstate = THREAD_CREATE_JOINABLE;
-    this->sgtc_attr.inheritsched = THREAD_INHERIT_SCHED;
-    this->sgtc_attr.schedpolicy = THREAD_SCHED_FIFO;
+    sgtc_attr.detachstate = THREAD_CREATE_JOINABLE;
+    sgtc_attr.inheritsched = THREAD_INHERIT_SCHED;
+    sgtc_attr.schedpolicy = THREAD_SCHED_FIFO;
 
-    if (!stack) {
+    if (!stack)
+    {
         kuint8_t *ptr = new kuint8_t[stack_size];
         if (!ptr)
             return;
@@ -95,14 +97,14 @@ crt_task_t::crt_task_t(const kchar_t *name, void *(*task_entry)(void *),
     }
 
     /*!< thread stack */
-    stack_top = thread_set_stack(&this->sgtc_attr, mr_nullptr, this->stack_base, this->stack_size);
+    stack_top = thread_set_stack(&sgtc_attr, mr_nullptr, this->stack_base, this->stack_size);
     if (!stack_top)
         goto fail;
 
     /*!< lowest priority */
-    thread_set_priority(&this->sgtc_attr, prio);
+    thread_set_priority(&sgtc_attr, prio);
     /*!< default time slice */
-    thread_set_time_slice(&this->sgtc_attr, tslice);
+    thread_set_time_slice(&sgtc_attr, tslice);
 
     /*!< register thread */
     retval = thread_create(&this->tid, &sgtc_attr, task_entry, (void *)this);
@@ -133,9 +135,7 @@ fail:
 crt_task_t::~crt_task_t()
 {
     /*!< unregister thread */
-
-    /*!< clean attr */
-    thread_attr_destroy(&this->sgtc_attr);
+    thread_destroy(this->tid);
 
     if (this->isdync)
         delete[] this->stack_base;

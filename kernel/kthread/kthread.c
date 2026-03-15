@@ -12,6 +12,7 @@
 
 /*!< The globals */
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 #include <kernel/sleep.h>
@@ -22,12 +23,7 @@
 #define KERL_THREAD_STACK_SIZE                          THREAD_STACK_PAGE(2)   /*!< 2 page (8 kbytes) */
 
 /*!< The globals */
-kuint32_t g_sched_flag = false;
-
-static struct thread_attr sgtc_kthread_attr;
-static THREAD_STACK_DEFINE(g_kthread_stack, KERL_THREAD_STACK_SIZE);
-static struct timer_list sgtc_kthread_timer;
-static struct spin_lock sgtc_kthread_spinlock;
+// kuint32_t g_sched_flag = false;
 
 static kuint8_t g_kthread_log_buffer[4096];
 
@@ -36,15 +32,23 @@ static kuint8_t g_kthread_log_buffer[4096];
  * @brief	kernel thread scheduler
  * @param  	args: timer
  * @retval 	none
- * @note   	check priority and time slice, set g_asm_sched_flag to true or false
+ * @note   	check priority and time slice, set sptr_sched->sched_flag to true or false
  */
 static void kthread_schedule_timeout(kuint32_t args)
 {
     struct timer_list *sptr_tim = (struct timer_list *)args;
-    struct spin_lock *sptr_lock = scheduler_lock();
+    kuint32_t cpuid = get_cpu_id();
+    struct spin_lock *sptr_lock = scheduler_cpu_lock(cpuid);
+    struct percpu_sched_data *sptr_sched = &sgtc_sched_data[cpuid];
     struct thread *sptr_work, *sptr_ready;
     kuint32_t work_prio, next_prio;
     kutype_t flags;
+
+#if CONFIG_SMP
+    /*!< balance scheduler */
+    if (check_scheduler_load() >= 0)
+        wake_up_migration();
+#endif
 
     /*!< disable global scheduler */
     spin_lock_irqsave(sptr_lock, &flags);
@@ -61,7 +65,7 @@ static void kthread_schedule_timeout(kuint32_t args)
     
     /*!< --------------------------------------------------------- */
     /*!< check priority */
-    sptr_ready = get_first_ready_thread();
+    sptr_ready = get_first_ready_thread(cpuid);
     if (!sptr_ready)
         goto END;
 
@@ -72,14 +76,14 @@ static void kthread_schedule_timeout(kuint32_t args)
     /*!< there is a higher priority thread ready, or time slice is zero && the same priority thread ready */
     if (__THREAD_IS_LOW_PRIO(work_prio, next_prio) ||
         (!sptr_work->expires && (work_prio == next_prio)))
-        g_sched_flag = true;
+        sptr_sched->sched_flag = true;
 
 #else
     /*!< when the time slice is not exhuasted, current cannot be preempted */
     if (!sptr_work->expires &&
         (__THREAD_IS_LOW_PRIO(work_prio, next_prio) ||
         (work_prio == next_prio)))
-        g_sched_flag = true;
+        sptr_sched->sched_flag = true;
 #endif
     
 END:
@@ -111,11 +115,12 @@ static void kthread_systime_record(void)
  * @retval 	none
  * @note   	none
  */
-static void kthread_due_sleep(void)
+static void kthread_deal_sleep(void)
 {
     struct thread *sptr_thread = mr_nullptr;
+    kuint32_t cpuid = get_cpu_id();
 
-    while ((sptr_thread = next_sleep_thread(sptr_thread)))
+    while ((sptr_thread = next_sleep_thread(cpuid, sptr_thread)))
         thread_quit(sptr_thread->tid);
 }
 
@@ -128,13 +133,14 @@ static void kthread_due_sleep(void)
 static void kthread_kill_zombie(void)
 {
     struct thread *sptr_thread, *sptr_next;
+    kuint32_t cpuid = get_cpu_id();
 
-    for (sptr_thread = get_first_zombie_thread(), sptr_next = mr_nullptr;
+    for (sptr_thread = get_first_zombie_thread(cpuid), sptr_next = mr_nullptr;
          sptr_thread;
          sptr_thread = sptr_next)
     {
-        sptr_next = next_zombie_thread(sptr_thread);
-        thread_destory(sptr_thread->tid);
+        sptr_next = next_zombie_thread(cpuid, sptr_thread);
+        thread_destroy(sptr_thread->tid);
     }
 }
 
@@ -146,48 +152,77 @@ static void kthread_kill_zombie(void)
  */
 static void *kthread_entry(void *args)
 {
-    struct timer_list *sptr_tim = &sgtc_kthread_timer;
+    struct timer_list *sptr_tim;
     tid_t tid = mr_current->tid;
+    kuint32_t cpuid = get_cpu_id();
 
     mr_preempt_disable();
-    
-    thread_set_self_name("kthread");
-    spin_lock_init(&sgtc_kthread_spinlock);
+    thread_set_self_name_args("kthread/%u", cpuid);
 
 #if CONFIG_SCHED_SLICE
+    sptr_tim = kzalloc(sizeof(*sptr_tim), GFP_KERNEL);
+    if (!isValid(sptr_tim))
+    {
+        print_err("kthread: allocate kthread timer error!\r\n");
+        while (1);
+    }
+
     setup_timer(sptr_tim, kthread_schedule_timeout, (kuint32_t)sptr_tim);
     sptr_tim->expires = jiffies + 1;
     add_timer(sptr_tim);
 #endif
 
-    print_info("%s is enter, which tid is: %d\r\n", __FUNCTION__, tid);
+    print_info("%s (cpu: %d) is enter, which tid is: %d\r\n", __FUNCTION__, cpuid, tid);
     mr_preempt_enable();
 
-    /* platform initcall */
-    run_platform_initcall();
-    print_info("platform initialization finished\r\n");
+    /*!< just for master core */
+    if (cpuid == CONFIG_CORE_MASTER)
+    {
+        /* platform initcall */
+        run_platform_initcall();
+        print_info("platform initialization finished\r\n");
 
-    term_init();                            /*!< create term task */
+        term_init();                        /*!< create term task */
+        kmemp_init();                       /*!< create kmemp task */
+    }
+    else
+    {
+    }
+
     ksoftirqd_init();                       /*!< create ksoftirqd task */
     kworker_init();                         /*!< create kworker task */
-    kmemp_init();                           /*!< create kmemp task */
+    migration_init();                       /*!< create migration task */
 
-    /*!< build application */
-    init_proc_init();                       /*!< create init task */
-    print_info("kernel thread initial finished\r\n");
+    if (cpuid == CONFIG_CORE_MASTER)
+    {
+#if CONFIG_SMP
+        /*!< wake up another cpu */
+        smp_slave_init();
+#endif
+
+        /*!< build application */
+        init_proc_init();                   /*!< create init task */
 
 #ifdef CONFIG_TEST
-    debug_init();                           /*!< create debug test task */
+        debug_init();                       /*!< create debug test task */
 #endif
+    }
+
+    print_info("kernel thread initial finished\r\n");
 
     for (;;)
     {
-        kthread_systime_record();
-        kthread_due_sleep();                /*!< due sleep thread */
+        kthread_deal_sleep();               /*!< deal with sleep thread */
         kthread_kill_zombie();              /*!< kill zombie thread */
         
-        /*!< Print logs */
-        io_stream_logs_print(g_kthread_log_buffer, sizeof(g_kthread_log_buffer));
+        /*!< private */
+        if (cpuid == CONFIG_CORE_MASTER)
+        {
+            kthread_systime_record();
+
+            /*!< Print logs */
+            io_stream_logs_print(g_kthread_log_buffer, sizeof(g_kthread_log_buffer));
+        }
 
         /*!< Sleep for a while */
         msleep(103);
@@ -204,21 +239,24 @@ static void *kthread_entry(void *args)
  */
 kint32_t kthread_init(void)
 {
-    struct thread_attr *sptr_attr = &sgtc_kthread_attr;
+    struct thread_attr sgtc_attr = {};
 
-	sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
-	sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;
-	sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
+	sgtc_attr.detachstate = THREAD_CREATE_JOINABLE;
+	sgtc_attr.inheritsched	= THREAD_INHERIT_SCHED;
+	sgtc_attr.schedpolicy = THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-	thread_set_stack(sptr_attr, mr_nullptr, g_kthread_stack, sizeof(g_kthread_stack));
+	thread_attr_setstacksize(&sgtc_attr, KERL_THREAD_STACK_SIZE);
     /*!< lowest priority */
-	thread_set_priority(sptr_attr, THREAD_PROTY_KERNEL);
+	thread_set_priority(&sgtc_attr, THREAD_PROTY_KERNEL);
     /*!< default time slice */
-    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
+    thread_set_time_slice(&sgtc_attr, THREAD_TIME_DEFAULT);
+
+    /*!< bind cpu affinity */
+    thread_set_cpuaffinity(&sgtc_attr, CPU_AFFINITY_SINGEL(get_cpu_id()));
 
     /*!< register thread */
-    return kernel_thread_base_create(sptr_attr, kthread_entry, mr_nullptr);
+    return kernel_thread_base_create(&sgtc_attr, kthread_entry, mr_nullptr);
 }
 
 /*!< end of file */

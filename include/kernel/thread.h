@@ -33,39 +33,50 @@
 
 /*!< The defines */
 /*!< maximum number of threads that can be created */
-#define THREAD_MAX_NUM						(1024)
+#define THREAD_MAX_NUM                      (1024)
+#define IS_TID_VALID(_tid)                  (((_tid) >= 0) && ((_tid) < THREAD_MAX_NUM))
 
 /*!< minimum space for thread stack (unit: byte) */
-#define THREAD_STACK8(byte)				    (mr_align4(byte) >> 0)
-#define THREAD_STACK16(half)				(mr_align4(half) >> 1)
-#define THREAD_STACK32(word)				(mr_align4(word) >> 2)
+#define THREAD_STACK8(byte)                 (mr_align4(byte) >> 0)
+#define THREAD_STACK16(half)                (mr_align4(half) >> 1)
+#define THREAD_STACK32(word)                (mr_align4(word) >> 2)
 
 /*!< 1 page = 4 kbytes; half page = (1 / 2) page; quarter = (1 / 4) page */
-#define THREAD_STACK_PAGE(page)			    ((kutype_t)(page) << 12U)
-#define THREAD_STACK_HALF(page)			    ((kutype_t)(page) << 11U)
-#define THREAD_STACK_QUAR(page)			    ((kutype_t)(page) << 10U)
+#define THREAD_STACK_PAGE(page)             ((kutype_t)(page) << 12U)
+#define THREAD_STACK_HALF(page)             ((kutype_t)(page) << 11U)
+#define THREAD_STACK_QUAR(page)             ((kutype_t)(page) << 10U)
 
-#define THREAD_STACK_MIN					THREAD_STACK_HALF(1)
-#define THREAD_STACK_DEFAULT				THREAD_STACK_PAGE(2)
+#define THREAD_STACK_MIN                    THREAD_STACK_HALF(1)
+#define THREAD_STACK_DEFAULT                THREAD_STACK_PAGE(2)
 #define THREAD_STACK_ALIGN                  THREAD_STACK_PAGE(1)
 
 #define THREAD_STACK_DEFINE(name, size)     kuint8_t name[size]  __align(THREAD_STACK_ALIGN)
 
 /*!<
  * tid base 
- * 0 ~ 31: fixed tid for kernel thread;
- * 32 ~ 127: dynamic tid for kernel thread;
- * 128 ~ THREAD_MAX_NUM: user thread
+ * 0 ~ 63: fixed tid for kernel thread;
+ * 64 ~ 255: dynamic tid for kernel thread;
+ * 256 ~ THREAD_MAX_NUM: user thread
  */
-#define THREAD_TID_IDLE                     (0)                 /*!< idle thread */
-#define THREAD_TID_BASE                     (1)                 /*!< kernel thread (parent) */
-#define THREAD_TID_INIT                     (2)                 /*!< init thread */
+/*!< idle thread */
+#define THREAD_TID_IDLE                     (0)
+#define THREAD_TID_IDLE_END                 (THREAD_TID_IDLE + CONFIG_CORE_NUM - 1)
 
-#define THREAD_TID_SOCKRX                   (19)
-#define THREAD_TID_SOCKTX                   (20)
+/*!< kernel thread (parent) */
+#define THREAD_TID_BASE                     (THREAD_TID_IDLE_END + 1) 
+#define THREAD_TID_BASE_END                 (THREAD_TID_BASE + CONFIG_CORE_NUM - 1)
 
-#define THREAD_TID_DYNC                     (32)                /*!< dynamic kernel thread */
-#define THREAD_TID_USER					    (128)               /*!< user/application thread */
+/*!< init thread */
+#define THREAD_TID_INIT                     (THREAD_TID_BASE_END + 1)               
+
+/*!< socket rx/tx thread */
+#define THREAD_TID_SOCKRX                   (33)
+#define THREAD_TID_SOCKTX                   (34)
+
+/*!< dynamic kernel thread ((THREAD_TID_INIT + 32) < 64) */
+#define THREAD_TID_DYNC                     (64)
+/*!< user/application thread */          
+#define THREAD_TID_USER                     (256)               
 
 /*!<
  * priority
@@ -73,9 +84,9 @@
  * The lower the value, the higher the priority
  */
 #define THREAD_PROTY_NUM                    (100)
-#define THREAD_PROTY_START					(99)
-#define THREAD_PROTY_DEFAULT				(80)
-#define THREAD_PROTY_MAX					(1)
+#define THREAD_PROTY_START                  (99)
+#define THREAD_PROTY_DEFAULT                (80)
+#define THREAD_PROTY_MAX                    (1)
 #define THREAD_PROTY_MIN                    (99)
 #define THREAD_PRORY_NONE                   (0)
 
@@ -83,9 +94,9 @@
 #define __THREAD_IS_LOW_PRIO(prio, prio2)	((prio2) < (prio))
 #define __THREAD_HIGHER_DEFAULT(val)		(THREAD_PROTY_DEFAULT - (val))	
 
-#define THREAD_PROTY_IDLE				    (98)
-#define THREAD_PROTY_KERNEL				    (32)
-#define THREAD_PROTY_INIT					(THREAD_PROTY_KERNEL + 1)
+#define THREAD_PROTY_IDLE                   (98)
+#define THREAD_PROTY_KERNEL                 (32)
+#define THREAD_PROTY_INIT                   (THREAD_PROTY_KERNEL + 1)
 
 #define THREAD_PROTY_TERM                   __THREAD_HIGHER_DEFAULT(0)
 
@@ -94,14 +105,14 @@
 #define THREAD_PROTY_KSOFTIRQD              (THREAD_PROTY_MAX)
 #define THREAD_PROTY_IRQ                    (THREAD_PROTY_MAX + 1)
 #define THREAD_PROTY_KWORKER                (THREAD_PROTY_MAX + 1)
-#define THREAD_PROTY_KMEMP				    (THREAD_PROTY_KERNEL + 2)
+#define THREAD_PROTY_KMEMP                  (THREAD_PROTY_KERNEL + 2)
 
 /*!< preempt period */
 #define THREAD_PREEMPT_PERIOD               (10)                /*!< unit: ms */
 
 /*!< time slice */
-#define THREAD_TIME_DEFUALT                 (40)				/*!< unit: ms */
-#define THREAD_TIME_KMEMP                   (20)				/*!< unit: ms */
+#define THREAD_TIME_DEFAULT                 (40)                /*!< unit: ms */
+#define THREAD_TIME_KMEMP                   (20)                /*!< unit: ms */
 
 #define THREAD_SWITCH_TIME                  (10)                /*!< thread switch interval, maybe 10us */
 
@@ -156,6 +167,7 @@ struct thread_attr
     kint32_t schedpolicy;                       /*!< refer to "__ERT_THREAD_SCHED" */
     kint32_t inheritsched;                      /*!< refer to "__ERT_THREAD_POLICY" */
 
+    kuint32_t cpu_affinity;                     /*!< cpu affinity */
     struct scheduler_param sgtc_param;          /*!< schedule parameters */
 
     void *ptr_stack_start;                      /*!< thread stack address base (from dynamic allocation) */
@@ -190,7 +202,7 @@ extern kint32_t kernel_thread_init_create(struct thread_attr *sptr_attr,
                                 void *ptr_args);
 
 extern kint32_t thread_quit(tid_t tid);
-extern kint32_t thread_destory(tid_t tid);
+extern kint32_t thread_destroy(tid_t tid);
 extern void *thread_attr_init(struct thread_attr *sptr_attr);
 extern void *thread_attr_revise(struct thread_attr *sptr_attr);
 extern void thread_attr_destroy(struct thread_attr *sptr_attr);
@@ -329,7 +341,7 @@ static inline void thread_attr_setstacksize(struct thread_attr *sptr_attr, kusiz
  * @note   	none
  */
 __force_inline 
-static inline kuint32_t thread_attr_getstacksize(struct thread_attr *sptr_attr)
+static inline kusize_t thread_attr_getstacksize(struct thread_attr *sptr_attr)
 {
     return sptr_attr->stacksize;
 }
@@ -470,6 +482,34 @@ static inline void thread_attr_setschedparam(struct thread_attr *sptr_attr, stru
 static inline void thread_attr_getschedparam(struct thread_attr *sptr_attr, struct scheduler_param *sptr_param)
 {
     memcpy(sptr_param, &sptr_attr->sgtc_param, sizeof(struct scheduler_param));
+}
+
+/*!
+ * @brief	set thread cpu affinity
+ * @param  	sptr_attr, cpu affinity
+ * @retval 	none
+ * @note   	none
+ */
+__force_inline 
+static inline void thread_set_cpuaffinity(struct thread_attr *sptr_attr, kuint32_t cpu_affinity)
+{
+    kuint32_t new_affinity = __CPU_CHECK_AFFINITY(cpu_affinity);
+    kuint32_t old_affinity = __CPU_CHECK_AFFINITY(sptr_attr->cpu_affinity);
+    
+    old_affinity = old_affinity ? old_affinity : CPU_AFFINITY_DEFAULT;
+    sptr_attr->cpu_affinity = new_affinity ? new_affinity : old_affinity;
+}
+
+/*!
+ * @brief	get schedule cpu affinity
+ * @param  	sptr_attr
+ * @retval 	cpu affinity
+ * @note   	none
+ */
+__force_inline 
+static inline kuint32_t thread_get_cpuaffinity(struct thread_attr *sptr_attr)
+{
+    return sptr_attr->cpu_affinity;
 }
 
 #ifdef __cplusplus

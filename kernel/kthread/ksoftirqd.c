@@ -13,6 +13,7 @@
 /*!< The globals */
 #include <platform/irq/fwk_irq_types.h>
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 #include <kernel/sleep.h>
@@ -23,9 +24,7 @@
 #define KSOFTIRQD_THREAD_STACK_SIZE                     THREAD_STACK_PAGE(1)    /*!< 1 page (4 kbytes) */
 
 /*!< The globals */
-static tid_t g_ksoftirqd_tid;
-static struct thread_attr sgtc_ksoftirqd_attr;
-static THREAD_STACK_DEFINE(g_ksoftirqd_stack, KSOFTIRQD_THREAD_STACK_SIZE);
+static DECLARE_LIST_HEAD(sgtc_ksoftirqd_percpus);
 
 /*!< API functions */
 /*!
@@ -36,7 +35,12 @@ static THREAD_STACK_DEFINE(g_ksoftirqd_stack, KSOFTIRQD_THREAD_STACK_SIZE);
  */
 void wake_up_ksoftirqd(void)
 {
-    schedule_thread_wakeup(g_ksoftirqd_tid);
+    kuint32_t cpuid;
+    
+    mr_preempt_disable();
+    cpuid = get_cpu_id();
+    schedule_cpu_thread_wakeup(cpuid, &sgtc_ksoftirqd_percpus);
+    mr_preempt_enable();
 }
 
 /*!
@@ -47,7 +51,7 @@ void wake_up_ksoftirqd(void)
  */
 static void *ksoftirqd_entry(void *args)
 {
-    print_info("%s is enter, which tid is: %d\r\n", __FUNCTION__, mr_current->tid);
+    print_info("%s (cpuid: %u) is enter, which tid is: %d\r\n", __FUNCTION__, get_cpu_id(), mr_current->tid);
 
     for (;;)
     {
@@ -66,27 +70,41 @@ static void *ksoftirqd_entry(void *args)
  */
 kint32_t ksoftirqd_init(void)
 {
-    struct thread_attr *sptr_attr = &sgtc_ksoftirqd_attr;
+    struct thread_attr sgtc_attr = {};
+    kuint32_t cpuid = get_cpu_id();
+    struct kthread_percpu *sptr_kth;
 
-	sptr_attr->detachstate = THREAD_CREATE_JOINABLE;
-	sptr_attr->inheritsched	= THREAD_INHERIT_SCHED;
-	sptr_attr->schedpolicy = THREAD_SCHED_FIFO;
+    sptr_kth = kmalloc(sizeof(*sptr_kth), GFP_KERNEL);
+    if (!isValid(sptr_kth))
+        return -ER_NOMEM;
+
+    sptr_kth->cpuid = cpuid;
+    init_list_head(&sptr_kth->sgtc_link);
+
+	sgtc_attr.detachstate = THREAD_CREATE_JOINABLE;
+	sgtc_attr.inheritsched	= THREAD_INHERIT_SCHED;
+	sgtc_attr.schedpolicy = THREAD_SCHED_FIFO;
 
     /*!< thread stack */
-	thread_set_stack(sptr_attr, mr_nullptr, g_ksoftirqd_stack, sizeof(g_ksoftirqd_stack));
+    thread_attr_setstacksize(&sgtc_attr, KSOFTIRQD_THREAD_STACK_SIZE);
     /*!< lowest priority */
-	thread_set_priority(sptr_attr, THREAD_PROTY_KSOFTIRQD);
+	thread_set_priority(&sgtc_attr, THREAD_PROTY_KSOFTIRQD);
     /*!< default time slice */
-    thread_set_time_slice(sptr_attr, THREAD_TIME_DEFUALT);
+    thread_set_time_slice(&sgtc_attr, THREAD_TIME_DEFAULT);
+    /*!< bind cpu affinity */
+    thread_set_cpuaffinity(&sgtc_attr, CPU_AFFINITY_SINGEL(cpuid));
 
     /*!< register thread */
-    g_ksoftirqd_tid = kernel_thread_create(-1, sptr_attr, ksoftirqd_entry, mr_nullptr);
-    if (g_ksoftirqd_tid >= 0)
+    sptr_kth->tid = kernel_thread_create(-1, &sgtc_attr, ksoftirqd_entry, mr_nullptr);
+    if (sptr_kth->tid  >= 0)
     {
-        thread_set_name(g_ksoftirqd_tid, "ksoftirqd");
+        thread_set_name_args(sptr_kth->tid , "ksoftirqd/%u", cpuid);
+        list_head_add_tail(&sgtc_ksoftirqd_percpus, &sptr_kth->sgtc_link);
+
         return ER_NORMAL;
     }
 
+    kfree(sptr_kth);
     return -ER_FAILD;
 }
 

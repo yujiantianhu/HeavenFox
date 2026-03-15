@@ -8109,132 +8109,133 @@ graph TD
     T --> W[返回中断上下文, 回收中断]
 ```
 
+调度需覆盖的几种情况：
+```
+提供返回路径函数: ret_with_first_schedule
+
+情况1: 首次调度, 加锁, 新线程为首次调度, 指定从ret_with_first_schedule返回, 解锁, 然后跳转到新线程入口;
+情况2: 旧线程主动发起调度schedule_thread, 加锁, 新线程为首次调度, 指定从ret_with_first_schedule返回, 解锁, 然后跳转到新线程入口;
+情况3: 旧线程主动发起调度schedule_thread, 加锁, 新线程此前调度过(也是通过schedule_thread), 恢复新线程上下文, 新线程从它之前运行过的schedule_thread返回, 解锁;
+情况4: 旧线程被抢占__schedule_thread_irq, 加锁, 新线程为首次调度, 指定从ret_with_first_schedule返回, 解锁, 然后跳转到新线程入口;
+情况5: 旧线程被抢占__schedule_thread_irq, 加锁, 新线程此前调度过(通过schedule_thread主动发起), 恢复新线程上下文, 新线程从它之前运行过的schedule_thread返回, 解锁;
+情况6: 旧线程被抢占__schedule_thread_irq, 加锁, 新线程此前调度过(也是被抢占的: __schedule_thread_irq), 恢复新线程上下文, 新线程从它之前运行过的__schedule_thread_irq返回, 解锁, 最后由rfeia回到线程上下文(之前被打断的地方);
+情况7: 旧线程主动发起调度schedule_thread, 加锁, 新线程此前调度过(是被抢占的: __schedule_thread_irq), 恢复新线程上下文, 新线程从它之前运行过的__schedule_thread_irq返回, 解锁, 最后由rfeia回到线程上下文(之前被打断的地方);
+```
+
 对应代码如下：
 ```nasm
+#include <common/linkage.h>
+#include <configs/mach_configs.h>
+#include <kernel/asm_text.h>
+
+    .text
+    .arm
+
 ENTRY(__switch_to)
 __switch_to:
-    sub sp, #8                                      @ 减8是为了留出存pc和spsr的位置
-    stmdb sp!, { r0 - r12, lr }                     @ 保存r0 ~ r12和lr (r0 = g_asm_context_info = &sgtc_context)
+    sub sp, #8
+    stmdb sp!, { r0 - r12, lr }                     @ 保存r0 ~ r12、lr (r0 = &sgtc_context, 含旧线程、新线程的信息)
 
-    mrs r12, spsr
+    mrs r12, cpsr
     add r8, sp, #ARCH_OFFSET_LR
-    stmia r8, { r12, lr }                           @ 保存lr和spsr (lr也就是之后的pc, 而spsr就是之后的cpsr)
+    stmia r8, { r12, lr }                           @ 保存lr和cpsr (lr未来会作为pc弹出)
 
-    str r0, g_asm_context_info                      @ 先将&sgtc_context暂存到全局变量, 以便能空出r0
+    /* sp从低到高分别存储: r0, r1, ..., r12, lr, cpsr, lr(未来的pc) */
 
-    ldr r2, [r0, #CONTEXT_FIRST_OFFSET]
-    ldr r1, [r2]
-    cmp r1, #0                                      @ 这里取出sgtc_context.first, 若其为0, 表示是第一次调度, 跳转到_context_save_first, 特殊处理
-    beq _context_save_first
+    add r2, r0, #CONTEXT_FIRST_OFFSET               @ 地址: r2 = &sgtc_context.first
+    ldr r1, [r2]                                    @ 读值: r1 = *(&sgtc_context.first)
+    cmp r1, #0                                      @ 如果first为0, 那就是本核心的整个调度器首次调度
+    beq _context_save_first                         @ 首次调度特别处理
 
-1:                                                  @ 如果不是首次调度, 继续执行
-    ldr r2, [r0, #CONTEXT_PREV_SP]                  @ r2 = prev_sp
-    ldr r1, [r2]                                    @ r1 = *(kuint32_t *)prev_sp, 获取当前线程的栈
-
-    add r2, r1, #ARCH_FRAME_SIZE                    @ 偏移到struct context_regs::flags的位置
-    ldr r3, [r2]                                    @ r2 = &flags, r3 = flags
-    bic r3, #SCHED_FROM_IRQ                         @ 擦除第0位, 表示是因为schedule_thread引起的调度, 本线程下一次调度回来时将根据调度原因恢复到正确的位置
-
-2:
     b _context_save
 
-/* -------------------------------------------------------------------------------
- * 如果是首次调度
- * -----------------------------------------------------------------------------*/
 _context_save_first:
     mov r12, #1
-    str r12, [r2]                                   @ 置thread_schedule_ref = 1
+    str r12, [r2]                                   @ 将1写给*(&sgtc_context.first), first = true, 永久标记
 
-    push { r0 }
-    ldr r1, =__thread_init_before                   @ 获取时间片
-    blx r1
-    pop { r0 }
+    b _context_restore
 
-    b _sched_first_ready                            @ 首次调度前准备
-
-/* -------------------------------------------------------------------------------
- * 保存当前线程的上下文
- * -----------------------------------------------------------------------------*/
 _context_save:
-    add r8, r1, #ARCH_OFFSET_LR
-    str sp, [r8, #-4]                               @ 保存sp到struct context_regs::sp, 存到全局变量
+    ldr r2, [r0, #CONTEXT_PREV_SP]                  @ r2 = &sgtc_context.prev_stack_addr, stack_addr的值是当前线程的栈顶地址
+    ldr r1, [r2]                                    @ r1 = 当前线程的栈顶地址
 
-    push { r0 }
-    ldr r1, =__thread_init_before                   @ 获取时间片, 开始运行前需要更新时间片为初始值
-    blx r1
-    pop { r0 }
+    add r8, r1, #ARCH_OFFSET_LR                     @ 栈顶的上方有一块特别区域, 同样按r0 ~ r15的方式定义, 这里偏移到r14的位置
+    str sp, [r8, #-4]                               @ 将当前线程的sp保存到栈上方偏移r13的位置, 这样sp就可在下次轻易获取: 系统知道它就在栈上方偏移r13的位置
 
-    b _context_restore                              @ 执行恢复上下文, 至此, 当前线程暂时中止
+    b _context_restore                              @ r0 ~ r15已经全都保存完, 当前线程可以终结了; 下面是新线程的恢复
 
-/* -------------------------------------------------------------------------------
- * 恢复新线程的上下文
- * -----------------------------------------------------------------------------*/
 _context_restore:
-    ldr r2, [r0, #CONTEXT_NEXT_SP]                  @ r0: &sgtc_context
-    ldr r1, [r2]                                    @ r1 = next sp
+    ldr r2, [r0, #CONTEXT_NEXT_SP]                  @ r2 = &sgtc_context.next_stack_addr, stack_addr的值是新线程的栈顶地址
+    ldr r1, [r2]                                    @ r1 = 新线程的栈顶地址
 
-    ldr sp, [r1, #ARCH_OFFSET_SP]                   @ sp = struct context_regs::sp, 从全局变量读出
-    cmp sp, #0
-    beq _sched_first_ready                          @ 全局变量没有存栈的信息? 新线程是第一次调度, 跳转到_sched_first_ready, 特殊处理
+    ldr sp, [r1, #ARCH_OFFSET_SP]                   @ 我们知道, 栈顶上方有一块预留区域, 其偏移r13的地址就保存着sp的值; 取出更新为当前sp, 此即新线程的栈
+    cmp sp, #0                                      @ 这个位置为空值 ? 说明新线程此前还没有被调度 (还没有执行过_context_save), 这是首次要运行
+    beq _sched_first                                @ 首次运行的新线程特殊处理, 因为, 它无需恢复上下文   
 
-    ldmia sp!, { r0 - r12, lr }                     @ 恢复r0 ~ r12和lr, 但spsr和pc保留
-    b _sched_init_before
+    ldr r1, =__thread_init_before                   @ 对新线程的时间片进行初始化, 趁现在新线程的上下文还没复原, 寄存器正是随意使用的时期
+    blx r1                                          @ 建议sp更新为新线程后再调用__thread_init_before, 这样用的栈就是新线程的
 
-/* -------------------------------------------------------------------------------
- * 新线程第一次调度, 运行前的准备
- * -----------------------------------------------------------------------------*/
-_sched_first_ready:
-    ldr r1, [r0, #CONTEXT_NEXT_SP]                  @ r1: next sp
-    ldr r8, [r1]
-    mov sp, r8                                      @ sp = *next_sp, 获取栈顶
+    ldmia sp!, { r0 - r12, lr }                     @ 新线程是之前运行过的, 它有上下文要恢复: 复原r0 ~ r12、lr, 但是cpsr和pc先留着, 还没到结束的时候
+    b _sched_init_before                            @ 执行启动前的最后一次准备工作
 
-    ldr r1, [r0, #CONTEXT_ENTRY_OFFSET]             @ 获取线程入口entry
-    ldr r8, [r1]                                    @ lr = entry
-    mrs r7, spsr                                    @ 取当前线程的spsr作为新线程的cpsr, 继承其状态
-    push { r7, r8 }                                 @ 将spsr(r7)和lr(r8)入栈
-
-    ldr r1, [r0, #CONTEXT_ARGS_OFFSET]              @ 线程入口的参数
-    ldr r8, [r1]
-    mov r0, r8                                      @ r0 = args
-
-    b _sched_init_before
-
-/* -------------------------------------------------------------------------------
- * 调度前初始化
- * -----------------------------------------------------------------------------*/
 _sched_init_before:
-    push { r0 - r3, r12 }
+    push { r12 }                                    @ r12准备用来暂存cpsr
+    ldr r12, [sp, #4]                               @ sp现在指向r12, 往上偏4字节, 就是上次存的cpsr
+    msr cpsr, r12                                   @ 更新到cpsr, 注意: 这个cpsr也是处于关中断状态的, 不用担心会立即发生中断, 因为进调度器前都会关中断
+    pop { r12 }                                     @ sp += 4, 弹出r12
+    add sp, #4                                      @ sp += 4, 现在指向lr的位置
 
-1:
-    ldr r0, g_asm_context_info                      @ 之前暂存的全局变量(&sgtc_context), 取出
-    ldr r1, [r0, #CONTEXT_NEXT_SP]                  @ r1: next sp
-    ldr r2, [r1]                                    @ r2 = *next_sp, 即"struct context_regs"的起始地址
+    b _switch_to_next                               @ 一切就绪
 
-    add r3, r2, #ARCH_FRAME_SIZE                    @ r3 = &flags
-    ldr r12, [r3]                                   @ r12 = struct context_regs::flags
-    and r12, #SCHED_FROM_IRQ
-    cmp r12, #0
-    beq 3f                                          @ 判断新线程上一次调度(让出CPU)是否来自"schedule_thread", 从哪来回哪去
-
-2:
-    pop { r0 - r3, r12 }
-    b _switch_to_irq                                @ 从中断来? 回到中断上下文
-
-3:                                                  @ 从schedule_thread来? 正好结束context_switch函数
-    ldr r12, [sp, #20]
-    msr cpsr, r12                                   @ 先恢复cpsr (中断可能也会同时打开)
-    pop { r0 - r3, r12 }
-    add sp, #4                                      @ 指向保存lr的位置, 将作为pc寄存器的值
-
-    b _switch_to_next
-
-/* -------------------------------------------------------------------------------
- * schedule new thread
- * -----------------------------------------------------------------------------*/
 _switch_to_next:
-    pop { pc }                                      @ pc = lr
+    pop { pc }                                      @ 返回到schedule_thread或schedule_thread_irq
+
+/*!< ---------------------------------------------------------------------------------------------------- */
+/*!< ---------------------------------------------------------------------------------------------------- */
+_sched_first:
+    ldr r1, [r0, #CONTEXT_NEXT_SP]                  @ r1 = &sgtc_context.next_stack_addr, stack_addr的值是新线程的栈顶地址
+    ldr r8, [r1]                                    @ r8 = 新线程的栈顶地址
+    mov sp, r8                                      @ 作为首次运行的线程, r8就可以直接当成sp: *((unsigned int *)sgtc_context.next_stack_addr)
+
+    ldr r1, [r0, #CONTEXT_ENTRY_OFFSET]             @ r1 = &sgtc_context.next_entry, next_entry的值是新线程的入口地址
+    ldr r8, [r1]                                    @ r8 = 线程入口的地址
+    push { r8 }                                     @ 等价于: push { lr }, 这是下次作为pc的值
+
+    ldr r1, [r0, #CONTEXT_ARGS_OFFSET]              @ r1 = &sgtc_context.next_args, args的值是新线程的入口参数
+    ldr r8, [r1]                                    @ r8 = 线程入口的参数值, 将作为函数的参数
+    push { r8 }                                     @ r8保存着入口参数args, 需要先暂存
+
+    ldr r1, =__thread_init_before                   @ 对新线程的时间片进行初始化, 新线程是首次调度, 寄存器随意使用
+    blx r1                                          
+
+    mrs r0, cpsr
+    ldr r1, =ret_with_first_schedule                @ 做一些准备工作, 包括自旋锁解锁、cpsr预备
+    blx r1
+    mov r1, r0                                      @ 返回值: cpsr默认值
+    
+    pop { r0 }                                      @ 还原args给r0, 作为线程入口参数
+    msr cpsr, r1                                    @ 更新cpsr
+
+    pop { pc }                                      @ 弹出线程入口的地址作为pc, 新线程运行
 
 ENDPROC(__switch_to)
+
+/*!< ---------------------------------------------------------------------------------------------------- */
+/*!< ---------------------------------------------------------------------------------------------------- */
+/*!< 抢占调度, 从中断触发 >
+ENTRY(__schedule_from_irq)
+__schedule_from_irq:
+    stmdb sp!, { r0 - r12, lr }                     @ 先压栈，这里的lr是svc模式的lr，而irq模式的lr已经保存在栈里
+
+    /*  当前栈区状态(从sp开始, 低到高): r0, r1, ..., r12, lr_svc, spsr, lr_irq(未来的pc) */
+
+    ldr r1, =schedule_thread_irq                    @ 跳到C语言, 旧线程加锁, 切换新线程, 然后由新线程解锁
+    blx r1                                          @ lr_svc会被更新
+
+    ldmia sp!, { r0 - r12, lr }                     @ 还原之前的栈
+    rfeia sp!                                       @ 从这里返回: 将spsr给cpsr, lr_irq赋值给pc
+
+ENDPROC(__schedule_from_irq)
 ```
 
 ##### 10.7.3. 休眠与唤醒

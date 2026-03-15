@@ -36,10 +36,11 @@ BEGIN_NAMESPACE(tsk)
 
 typedef void *(*task_entry)(void *);
 
-class crt_task_t {
+class crt_task_t
+{
 public:
     crt_task_t(const kchar_t *name, void *(*task_entry)(void *), kuint8_t *stack = mr_nullptr, 
-            kuint32_t size = 0, kuint32_t prio = THREAD_PROTY_DEFAULT, kuint32_t tslice = THREAD_TIME_DEFUALT);
+            kuint32_t size = 0, kuint32_t prio = THREAD_PROTY_DEFAULT, kuint32_t tslice = THREAD_TIME_DEFAULT);
     ~crt_task_t();
 
     tid_t self_id(void)
@@ -60,7 +61,6 @@ public:
 private:
     tid_t tid;
     kchar_t *name;
-    struct thread_attr sgtc_attr;
     struct mailbox sgtc_mb;
 
     kuint8_t *stack_base;

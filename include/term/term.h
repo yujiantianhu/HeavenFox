@@ -109,6 +109,7 @@ extern void term_cmd_add_history(void);
 extern void term_cmd_add_mem(void);
 extern void term_cmd_add_runtime(void);
 extern void term_cmd_add_value(void);
+extern void term_cmd_add_cpuinfo(void);
 
 #ifdef __cplusplus
     }

@@ -12,6 +12,7 @@
 
 /*!< The globals */
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/mutex.h>
 #include <kernel/sched.h>
 #include <term/term.h>
@@ -93,7 +94,7 @@ void mutex_lock(struct mutex_lock *sptr_lock)
     if (sptr_owner->sptr_self == sptr_self)
     {   
         atomic_inc(&sptr_lock->sgtc_atc);
-        mr_barrier();
+        mr_smp_mb();
 
         g_mutex_reentrant_monitor++;
         spin_unlock(&sptr_owner->sgtc_lock);
@@ -127,7 +128,7 @@ loop:
 
     atomic_inc(&sptr_lock->sgtc_atc);
     sptr_owner->sptr_self = sptr_self;
-    mr_barrier();
+    mr_smp_mb();
 
     /*!< Acquire the lock, make a mark, and add the current lock to the "lock holding linked list" of this thread */
     lock_context_save(sptr_owner);
@@ -154,7 +155,7 @@ kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
     sptr_owner = &sptr_lock->sgtc_owner;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         kutype_t flags;
 
@@ -168,7 +169,7 @@ kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
 
         atomic_inc(&sptr_lock->sgtc_atc);
         sptr_owner->sptr_self = mr_nullptr;
-        mr_barrier();
+        mr_smp_mb();
 
         local_irq_restore(&flags);
         return ER_NORMAL;
@@ -181,7 +182,7 @@ kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
     if (sptr_owner->sptr_self == sptr_self)
     {   
         atomic_inc(&sptr_lock->sgtc_atc);
-        mr_barrier();
+        mr_smp_mb();
 
         g_mutex_reentrant_monitor++;
         spin_unlock(&sptr_owner->sgtc_lock);
@@ -200,7 +201,7 @@ kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
 
     atomic_inc(&sptr_lock->sgtc_atc);
     sptr_owner->sptr_self = sptr_self;
-    mr_barrier();
+    mr_smp_mb();
 
     /*!< Acquire the lock, make a mark, and add the current lock to the "lock holding linked list" of this thread */
     lock_context_save(sptr_owner);
@@ -229,7 +230,7 @@ void mutex_unlock(struct mutex_lock *sptr_lock)
     sptr_owner = &sptr_lock->sgtc_owner;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         kutype_t flags;
 
@@ -242,7 +243,7 @@ void mutex_unlock(struct mutex_lock *sptr_lock)
         }
 
         atomic_dec(&sptr_lock->sgtc_atc);
-        mr_barrier();
+        mr_smp_mb();
 
         /*!< After decrementing the count, the lock is still locked, indicating that the lock is still in a reentrant state */
         if (mutex_is_locked(sptr_lock))
@@ -270,7 +271,7 @@ void mutex_unlock(struct mutex_lock *sptr_lock)
     }
 
     atomic_dec(&sptr_lock->sgtc_atc);
-    mr_barrier();
+    mr_smp_mb();
 
     /*!< After decrementing the count, the lock is still locked, indicating that the lock is still in a reentrant state */
     if (mutex_is_locked(sptr_lock))

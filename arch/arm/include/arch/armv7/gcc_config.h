@@ -101,7 +101,7 @@
  * @retval 	none
  * @note   	wait for Interrupt
  */
-#define mr_wfi()                                    __asm__ __volatile__ ("wfi")
+#define mr_wfi()                                    do { __asm__ __volatile__ ("wfi"); } while (0)
 
 /*!
  * @brief  	mr_wfe
@@ -109,7 +109,7 @@
  * @retval 	none
  * @note   	wait for Event
  */
-#define mr_wfe()                                    __asm__ __volatile__ ("wfe")
+#define mr_wfe()                                    do { __asm__ __volatile__ ("wfe"); } while (0)
 
 /*!
  * @brief  	mr_sev
@@ -117,7 +117,7 @@
  * @retval 	none
  * @note   	send Event
  */
-#define mr_sev()                                    __asm__ __volatile__ ("sev")
+#define mr_sev()                                    do { __asm__ __volatile__ ("sev"); } while (0)
 
 /*!
  * @brief  	mr_barrier
@@ -150,6 +150,54 @@
  * @note   	Data Memory Synchronization Barrier
  */
 #define mr_dmb()                                    __asm__ __volatile__ ("dmb 0xf" : : : "memory")
+
+/*!
+ * @brief  	mr_mb
+ * @param  	none
+ * @retval 	none
+ * @note   	Data Synchronization Barrier, equals to mr_dsb()
+ */
+#define mr_mb()                                     __asm__ __volatile__ ("dsb sy" : : : "memory")
+
+/*!
+ * @brief  	mr_mb
+ * @param  	none
+ * @retval 	none
+ * @note   	Data Reading Synchronization Barrier
+ */
+#define mr_rmb()                                    __asm__ __volatile__ ("dsb ld" : : : "memory")
+
+/*!
+ * @brief  	mr_mb
+ * @param  	none
+ * @retval 	none
+ * @note   	Data Writting Synchronization Barrier
+ */
+#define mr_wmb()                                    __asm__ __volatile__ ("dsb st" : : : "memory")
+
+/*!
+ * @brief  	mr_smp_mb
+ * @param  	none
+ * @retval 	none
+ * @note   	Data Synchronization Barrier For SMP (MultiCore)
+ */
+#define mr_smp_mb()                                 __asm__ __volatile__ ("dmb ish" : : : "memory")
+
+/*!
+ * @brief  	mr_smp_mb
+ * @param  	none
+ * @retval 	none
+ * @note   	Data Reading Synchronization Barrier For SMP (MultiCore)
+ */
+#define mr_smp_rmb()                                __asm__ __volatile__ ("dmb ishld" : : : "memory")
+
+/*!
+ * @brief  	mr_smp_mb
+ * @param  	none
+ * @retval 	none
+ * @note   	Data Writting Synchronization Barrier For SMP (MultiCore)
+ */
+#define mr_smp_wmb()                                __asm__ __volatile__ ("dmb ishst" : : : "memory")
 
 /*!
  * @brief  	mr_set_cp15
@@ -369,6 +417,62 @@ static inline void __set_cp15_isb(kuint32_t result)
 }
 
 /*!
+ * @brief  	__get_cp15_mpidr
+ * @param  	none
+ * @retval 	mpidr
+ * @note   	get cp15 system control
+ */
+static inline kuint32_t __get_cp15_mpidr(void)
+{
+    kuint32_t result;
+
+    __asm__ __volatile__ (
+        " mrc p15, 0, %0, c0, c0, 5  "
+        : "=&r"(result)
+        : 
+        : "memory"
+    );
+
+    return result;
+}
+
+/*!
+ * @brief  	__set_cp15_tpidrprw
+ * @param  	none
+ * @retval 	none
+ * @note   	set cp15 Private Data
+ */
+static inline void __set_cp15_tpidrprw(kutype_t result)
+{
+    __asm__ __volatile__ (
+        " mcr p15, 0, %0, c13, c0, 4  "
+        :
+        : "r"(result)
+        : "memory"
+    );
+}
+
+/*!
+ * @brief  	__get_cp15_tpidrprw
+ * @param  	none
+ * @retval 	mpidr
+ * @note   	get cp15 Private Data
+ */
+static inline kuint32_t __get_cp15_tpidrprw(void)
+{
+    kuint32_t result;
+
+    __asm__ __volatile__ (
+        " mrc p15, 0, %0, c13, c0, 4  "
+        : "=&r"(result)
+        : 
+        : "memory"
+    );
+
+    return result;
+}
+
+/*!
  * @brief  	__get_cpsr
  * @param  	none
  * @retval 	cpsr
@@ -398,6 +502,22 @@ static inline void __set_cpsr(kuint32_t result)
 {
     __asm__ __volatile__ (
         " msr cpsr, %0  "
+        : 
+        : "r"(result)
+        : "memory"
+    );
+}
+
+/*!
+ * @brief  	__set_spsr
+ * @param  	cpsr
+ * @retval 	none
+ * @note   	set spsr
+ */
+static inline void __set_spsr(kuint32_t result)
+{
+    __asm__ __volatile__ (
+        " msr spsr, %0  "
         : 
         : "r"(result)
         : "memory"

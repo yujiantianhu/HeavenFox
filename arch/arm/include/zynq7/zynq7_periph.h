@@ -1591,6 +1591,29 @@ extern kint32_t DisplayChangeFrameBuffer(DisplayCtrl *sptr_disp, kuint32_t Frame
 extern kint32_t DisplayStart(DisplayCtrl *sptr_disp);
 extern kint32_t DisplayStop(DisplayCtrl *sptr_dispctrl);
 
+/*!< API function */
+/*!
+ * @brief   enable SCU
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+static inline void Xil_ScuEnable(void)
+{
+    mr_setbitl(mr_bit(1), XPAR_PS7_SCUC_0_S_AXI_BASEADDR);
+}
+
+/*!
+ * @brief   disable SCU
+ * @param   none
+ * @retval  none
+ * @note    none
+ */
+static inline void Xil_ScuDisable(void)
+{
+    mr_clrbitl(mr_bit(1), XPAR_PS7_SCUC_0_S_AXI_BASEADDR);
+}
+
 #ifdef __cplusplus
     }
 #endif

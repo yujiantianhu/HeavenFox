@@ -35,7 +35,7 @@ struct thread
     kchar_t name[THREAD_NAME_SIZE];
 
     /*!< thread id */
-    kuint32_t tid;
+    tid_t tid;
 
     /*!< refer to "__ERT_THREAD_BASIC_STATUS" */
     kuint32_t state;
@@ -58,6 +58,17 @@ struct thread
     /*!< refer to "__ERT_THREAD_SIGNALS" */
     kuint32_t flags;
 
+    kint32_t last_cpu;
+    /*!< last cpu that thread is running */
+    kint32_t cpu;
+    /*!< scheudler status */
+    kutype_t lock_flags;
+
+    /*!< preempt count */
+    struct atomic sgtc_preempt;
+    /*!< irq count */
+    kuint32_t irq_count;
+
     struct spin_lock sgtc_lock;
     struct mailbox *sptr_mb;
 
@@ -73,38 +84,38 @@ struct thread
 };
 
 /*!< Set thread state */
-#define __SET_THREAD_STATE(sptr_th, value)	\
-    do {	\
-        (sptr_th)->state = (value);	\
+#define __SET_THREAD_STATE(sptr_th, value)  \
+    do {    \
+        (sptr_th)->state = (value); \
     } while (0)
 
-#define __SET_THREAD_TARGET_STATE(sptr_th, value)	\
-    do {	\
-        (sptr_th)->to_state = (value);	\
+#define __SET_THREAD_TARGET_STATE(sptr_th, value)   \
+    do {    \
+        (sptr_th)->to_state = (value);  \
     } while (0)
 
-#define __SYNC_THREAD_STATE(sptr_th, value)	\
-    do {	\
-        (sptr_th)->state = (value);	\
-        (sptr_th)->to_state = NR_THREAD_NONE;    \
+#define __SYNC_THREAD_STATE(sptr_th, value) \
+    do {    \
+        (sptr_th)->state = (value); \
+        (sptr_th)->to_state = NR_THREAD_NONE;   \
     } while (0)
 
 /*!< Get thread state */
-#define __GET_THREAD_STATE(sptr_th)	                                ((sptr_th)->state)
-#define __GET_THREAD_TARGET_STATE(sptr_th)	                        ((sptr_th)->to_state)
+#define __GET_THREAD_STATE(sptr_th)                 ((sptr_th)->state)
+#define __GET_THREAD_TARGET_STATE(sptr_th)          ((sptr_th)->to_state)
 
 /*!< Signal flags */
-#define mr_thread_set_flags(signal, sptr_tsk)	\
-    do {	\
-        (sptr_tsk)->flags |= mr_bit(signal);	\
+#define mr_thread_set_flags(signal, sptr_tsk)   \
+    do {    \
+        (sptr_tsk)->flags |= mr_bit(signal);    \
     } while (0)
 
-#define mr_thread_clr_flags(signal, sptr_tsk)	\
-    do {	\
-        (sptr_tsk)->flags &= ~mr_bit(signal);	\
+#define mr_thread_clr_flags(signal, sptr_tsk)   \
+    do {    \
+        (sptr_tsk)->flags &= ~mr_bit(signal);   \
     } while (0)
 
-#define mr_thread_is_flags(signal, sptr_tsk)						(!!((sptr_tsk)->flags & mr_bit(signal)))
+#define mr_thread_is_flags(signal, sptr_tsk)        (!!((sptr_tsk)->flags & mr_bit(signal)))
 
 /*!< -------------------------------------------------------------------------- */
 /*!< Scheduler */
@@ -122,62 +133,86 @@ struct thread_list
     struct thread_hash sgtc_hash[THREAD_PROTY_NUM];
     struct spin_lock sgtc_lock;
 
-#define __THREAD_HASH_EMPTY(hash)           (!(hash)->ffs_l && !(hash->ffs_h))           
+#define __THREAD_HASH_EMPTY(hash)                   (!(hash)->ffs_l && !(hash->ffs_h))           
 };
 
+/*!< Per-CPU private */
 struct scheduler_core
 {
-    struct thread_list sgtc_ready;
-    struct thread_list sgtc_suspend;
-    struct thread_list sgtc_sleep;
-    struct thread_list sgtc_zombie;
+    struct thread *sptr_work;                       /*!< current thread (status is running) */
+
+    struct list_head sgtc_lready;                   /*!< ready list head (manage all ready thread) */
+    struct list_head sgtc_lsuspend;                 /*!< suspend list head (manage all suspend thread) */
+    struct list_head sgtc_lsleep;                   /*!< sleep list head (manage all sleepy thread) */
+    struct list_head sgtc_lzombie;                  /*!< zombie list head (manage all zombie thread) */
+
+    kuint32_t ready_num;                            /*!< length of ready lists */
+    kuint32_t suspend_num;                          /*!< length of suspend lists */
+    kuint32_t sleep_num;                            /*!< length of sleep lists */
+    kuint32_t zombie_num;                           /*!< length of zombie lists */
+
+    struct thread_list sgtc_hready;                 /*!< ready hash list */
+    struct thread_list sgtc_hsuspend;               /*!< suspend hash list */
+    struct thread_list sgtc_hsleep;                 /*!< sleep hash list */
+    struct thread_list sgtc_hzombie;                /*!< zombie hash list */
+
+    struct {
+        kutype_t cnt_out;                           /*!< when sched_cnt is over (~0), cnt_out++ */
+        kutype_t sched_cnt;                         /*!< schedule counter, max is ~0 */
+    } sgtc_cnt;
+
+    struct spin_lock sgtc_lock;
+//  kutype_t lock_flags;
+};
+
+/*!< Common lists */
+struct scheduler_share
+{
+    /*!< no members */
+
+    struct spin_lock sgtc_lock;
 };
 
 /*!< thread manage table */
 struct scheduler_table
 {
-    kint32_t max_tidarr;											/*!< = THREAD_MAX_NUM */
-    kint32_t max_tids; 												/*!< = THREAD_MAX_NUM + count of sptr_tids */
-    kint32_t max_tidset;											/*!< the max tid */
-    kint32_t ref_tidarr; 											/*!< number of allocated descriptors in sptr_tid_array */
+    kint32_t max_tidarr;                            /*!< = THREAD_MAX_NUM */
+    kint32_t max_tids;                              /*!< = THREAD_MAX_NUM + count of sptr_tids */
+    kint32_t max_tidset;                            /*!< the max tid */
+    kint32_t ref_tidarr;                            /*!< number of allocated descriptors in sptr_tid_array */
 
-    struct {
-        kutype_t cnt_out;											/*!< when sched_cnt is over (~0), cnt_out++ */
-        kutype_t sched_cnt;											/*!< schedule counter, max is ~0 */
-    } sgtc_cnt;
-
-    struct scheduler_core sgtc_core;                                /*!< hash list */
-
-    struct list_head sgtc_ready;									/*!< ready list head (manage all ready thread) */
-    struct list_head sgtc_suspend;									/*!< suspend list head (manage all suspend thread) */
-    struct list_head sgtc_sleep;									/*!< sleep list head (manage all sleepy thread) */
-    struct list_head sgtc_zombie;									/*!< zombie list head (manage all zombie thread) */
-
-    struct thread *sptr_work;									    /*!< current thread (status is running) */
-
-    struct thread **sptr_tids;									    /*!< if sptr_tid_array is up to max, new thread form mempool */
-    struct thread *sptr_tid_array[THREAD_MAX_NUM];		            /*!< thread maximum, tid = 0 ~ THREAD_MAX_NUM */
-
+    struct thread **sptr_tids;                      /*!< if sptr_tid_array is up to max, new thread form mempool */
+    struct thread *sptr_tid_array[THREAD_MAX_NUM];  /*!< thread maximum, tid = 0 ~ THREAD_MAX_NUM */
+    
+    struct scheduler_share sgtc_share;              /*!< thread lists */
     struct spin_lock sgtc_lock;
 
-#define __THREAD_MAX_STATS					((kutype_t)(~0))
-#define __THREAD_HANDLER(ptr, tid)			((ptr)->sptr_tid_array[(tid)])
-#define __THREAD_RUNNING_LIST(ptr)			((ptr)->sptr_work)
-#define __THREAD_READY_LIST(ptr)			(&((ptr)->sgtc_ready))
-#define __THREAD_SUSPEND_LIST(ptr)			(&((ptr)->sgtc_suspend))
-#define __THREAD_SLEEP_LIST(ptr)			(&((ptr)->sgtc_sleep))
-#define __THREAD_ZOMBIE_LIST(ptr)			(&((ptr)->sgtc_zombie))
+    /*!< per-cpu lists */
+    struct scheduler_core sgtc_core[CONFIG_CORE_NUM];
 
-#define __THREAD_READY_HASH(ptr)            (&((ptr)->sgtc_core.sgtc_ready))
-#define __THREAD_SUSPEND_HASH(ptr)          (&((ptr)->sgtc_core.sgtc_suspend))
-#define __THREAD_SLEEP_HASH(ptr)            (&((ptr)->sgtc_core.sgtc_sleep))
-#define __THREAD_ZOMBIE_HASH(ptr)           (&((ptr)->sgtc_core.sgtc_zombie))
+#define __THREAD_MAX_STATS                          ((kutype_t)(~0))
+#define __THREAD_HANDLER(ptr, tid)                  ((ptr)->sptr_tid_array[(tid)])
+
+#define __THREAD_RUNNING(_sptr_core)                ((_sptr_core)->sptr_work)
+#define __THREAD_READY_LIST(_sptr_core)             (&((_sptr_core)->sgtc_lready))
+#define __THREAD_SUSPEND_LIST(_sptr_core)           (&((_sptr_core)->sgtc_lsuspend))
+#define __THREAD_SLEEP_LIST(_sptr_core)             (&((_sptr_core)->sgtc_lsleep))
+#define __THREAD_ZOMBIE_LIST(_sptr_core)            (&((_sptr_core)->sgtc_lzombie))
+
+#define __THREAD_READY_HASH(_sptr_core)             (&((_sptr_core)->sgtc_hready))
+#define __THREAD_SUSPEND_HASH(_sptr_core)           (&((_sptr_core)->sgtc_hsuspend))
+#define __THREAD_SLEEP_HASH(_sptr_core)             (&((_sptr_core)->sgtc_hsleep))
+#define __THREAD_ZOMBIE_HASH(_sptr_core)            (&((_sptr_core)->sgtc_hzombie))
+
+#define __THREAD_CORE_LOCK(_sptr_core)              (&((_sptr_core)->sgtc_lock))
 };
 
 /*!< The globals */
 
 /*!< The functions */
+extern struct scheduler_core *get_scheduler_core(kuint32_t cpuid);
 extern struct thread *get_current_thread(void);
+extern struct thread *get_cpu_current_thread(kuint32_t cpuid);
 extern struct list_head *get_ready_thread_table(void);
 extern struct thread *get_thread_handle(tid_t tid);
 extern void thread_set_name(tid_t tid, const kchar_t *name);
@@ -188,41 +223,72 @@ extern kchar_t *thread_get_name(tid_t tid);
 extern kchar_t *thread_get_self_name(void);
 extern void thread_set_state(struct thread *sptr_thread, kuint32_t state);
 extern struct spin_lock *scheduler_lock(void);
+extern struct spin_lock *scheduler_cpu_lock(kuint32_t cpuid);
 extern tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count);
-extern kuint64_t scheduler_stats_get(void);
 extern void schedule_self_suspend(void);
 extern void schedule_self_sleep(void);
+extern void schedule_self_zombie(void);
 extern kint32_t schedule_thread_suspend(tid_t tid);
 extern kint32_t schedule_thread_sleep(tid_t tid);
 extern kint32_t schedule_thread_zombie(tid_t tid);
 extern kint32_t schedule_thread_wakeup(tid_t tid);
 
-extern kbool_t is_ready_thread_empty(void);
-extern kbool_t is_suspend_thread_empty(void);
-extern kbool_t is_sleep_thread_empty(void);
-extern struct thread *get_first_ready_thread(void);
-extern struct thread *get_first_suspend_thread(void);
-extern struct thread *get_first_sleep_thread(void);
-extern struct thread *get_first_zombie_thread(void);
+extern kuint64_t scheduler_stats_get(kuint32_t cpuid);
+extern kbool_t is_ready_thread_empty(kuint32_t cpuid);
+extern kbool_t is_suspend_thread_empty(kuint32_t cpuid);
+extern kbool_t is_sleep_thread_empty(kuint32_t cpuid);
+extern struct thread *get_first_ready_thread(kuint32_t cpuid);
+extern struct thread *get_first_suspend_thread(kuint32_t cpuid);
+extern struct thread *get_first_sleep_thread(kuint32_t cpuid);
+extern struct thread *get_first_zombie_thread(kuint32_t cpuid);
+extern struct thread *get_last_ready_thread(kuint32_t cpuid);
+extern struct thread *get_last_suspend_thread(kuint32_t cpuid);
+extern struct thread *get_last_sleep_thread(kuint32_t cpuid);
+extern struct thread *get_last_zombie_thread(kuint32_t cpuid);
 extern kbool_t is_thread_valid(tid_t tid);
-extern struct thread *next_ready_thread(struct thread *sptr_prev);
-extern struct thread *next_suspend_thread(struct thread *sptr_prev);
-extern struct thread *next_sleep_thread(struct thread *sptr_prev);
-extern struct thread *next_zombie_thread(struct thread *sptr_prev);
+extern struct thread *next_ready_thread(kuint32_t cpuid, struct thread *sptr_prev);
+extern struct thread *next_suspend_thread(kuint32_t cpuid, struct thread *sptr_prev);
+extern struct thread *next_sleep_thread(kuint32_t cpuid, struct thread *sptr_prev);
+extern struct thread *next_zombie_thread(kuint32_t cpuid, struct thread *sptr_prev);
 
 extern kint32_t schedule_thread_switch(struct thread *sptr_thread);
-extern kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid);
+extern kint32_t switch_thread_cpu(struct thread *sptr_thread, kint32_t target_cpu);
+extern void __setup_thread(struct thread *sptr_thread);
+extern kint32_t register_new_thread(struct thread *sptr_thread, tid_t *ptr_tid);
 extern struct thread *unregister_thread(tid_t tid);
-extern void thread_tick_update(void);
+extern kint32_t check_scheduler_load(void);
+extern void check_and_balance_scheduler(void);
 extern void __thread_init_before(void);
 extern struct scheduler_context *__schedule_thread(void);
 extern void schedule_thread(void);
 extern void scheduler_init(void);
 
+/*!< API functions */
+/*!
+ * @brief   get current
+ * @param   sptr_thread
+ * @retval  status
+ * @note    none
+ */
+static inline struct thread *current_thread(void)
+{
+#ifdef PERCPU_CURRENT
+    return (struct thread *)(PERCPU_CURRENT() & (~THREAD_MASK));
+#else
+    return get_current_thread();
+#endif
+}
+
 /*!< The defines */
-#define mr_current                             get_current_thread()
-#define mr_tid_handle(tid)                     get_thread_handle(tid)
-#define mr_tid_attr(tid)                       thread_attr_get(tid)
+#define mr_current                              current_thread()
+
+#ifndef SET_PERCPU_CURRENT
+#define SET_PERCPU_CURRENT(x)                   do { } while (0)
+#endif
+
+/*!< The defines */
+#define mr_tid_handle(tid)                      get_thread_handle(tid)
+#define mr_tid_attr(tid)                        thread_attr_get(tid)
 
 /*!< API functions */
 /*!

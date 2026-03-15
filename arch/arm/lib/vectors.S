@@ -13,6 +13,7 @@
 
 #include <common/linkage.h>
 #include <configs/mach_configs.h>
+#include <kernel/asm_text.h>
 
     .arch armv7-a
     .text
@@ -72,9 +73,9 @@ _start:
 /* -------------------------------------------------------------------------------
  * Global Variables Defines 
  * -----------------------------------------------------------------------------*/
-.global g_asm_sched_flag
-g_asm_sched_flag:
-    .word 0x00000000
+@ .global g_asm_sched_flag
+@ g_asm_sched_flag:
+@     .word 0x00000000
 
 /* -------------------------------------------------------------------------------
  * Exception Handler
@@ -82,18 +83,9 @@ g_asm_sched_flag:
 _undefined_handler:
     _exception_save_params                          @ save current context
 
-    ldr r0, =g_abort_cur_sp                         @ save context base stack
-    str sp, [r0]
-
-    ldr r0, =undefined_abort_addr                   @ it is defined in "exception.c"
+    mov r0, sp                                      @ save context base stack
     sub r1, lr, #4                                  @ get instrcution causing undefined abort
-    str r1, [r0]                                    @ save to global var
-
     bl exec_undefined_handler                       @ exception handlers, please jump to exception.c
-
-    ldr r0, =g_abort_cur_sp
-    mov r1, #0
-    str r1, [r0]                                    @ clear
 
     _exception_restore_params                       @ restore previous context
 
@@ -118,18 +110,9 @@ _software_irq_handler:
 _prefetch_abort_handler:
     _exception_save_params                          @ save current context
 
-    ldr r0, =g_abort_cur_sp                         @ save context base stack
-    str sp, [r0]
-
-    ldr r0, =prefecth_abort_addr                    @ it is defined in "exception.c"
+    mov r0, sp                                      @ save context base stack
     sub r1, lr, #4                                  @ get instrcution causing prefetch abort
-    str r1, [r0]                                    @ save to global var
-
     bl exec_prefetch_abort_handler                  @ exception handlers, please jump to exception.c
-
-    ldr r0, =g_abort_cur_sp
-    mov r1, #0
-    str r1, [r0]                                    @ clear
 
     _exception_restore_params                       @ restore previous context
 
@@ -139,18 +122,9 @@ _prefetch_abort_handler:
 _data_abort_handler:
     _exception_save_params                          @ save current context
 
-    ldr r0, =g_abort_cur_sp                         @ save context base stack
-    str sp, [r0]
-
-    ldr r0, =data_abort_addr                        @ it is defined in "exception.c"
+    mov r0, sp                                      @ save context base stack
     sub r1, lr, #8                                  @ get instrcution causing data abort
-    str r1, [r0]                                    @ save to global var
-
     bl exec_data_abort_handler                      @ exception handlers, please jump to exception.c
-
-    ldr r0, =g_abort_cur_sp
-    mov r1, #0
-    str r1, [r0]                                    @ clear
 
     _exception_restore_params                       @ restore previous context
 
@@ -164,14 +138,9 @@ _data_abort_handler:
 _unused_handler:
     _exception_save_params                          @ save current context
 
-    ldr r0, =g_abort_cur_sp                         @ save context base stack
-    str sp, [r0]
-
+    mov r0, sp                                      @ save context base stack
+    mov r1, #0                                      @ not used
     bl exec_unused_handler                          @ exception handlers, please jump to exception.c
-
-    ldr r0, =g_abort_cur_sp
-    mov r1, #0
-    str r1, [r0]                                    @ clear
 
 _irq_handler:
     /*!< PC will pointer next instruction before calling IRQ; So it must retrun "lr - 4" */
@@ -181,23 +150,30 @@ _irq_handler:
     bl exec_irq_handler                             @ exception handlers, please jump to interrupt.c
     _exception_restore_params                       @ restore previous context
 
-    push { r0 }
-    ldr r0, g_asm_sched_flag
-    cmp r0, #0                                      @ check if preemption is occurring
-    bne 1f
+    push { r0, r1 }
 
-    pop { r0 }
+    READ_CP15_TPIDRPRW(r0)                          @ get tpidrprw
+    cmp r0, #0                                      @ no data (no thread is running)
+    beq 1f
+
+    and r1, r0, #THREAD_MASK
+    cmp r1, #THREAD_SCHED_BIT                       @ 0b01: invalid; 0b10: schedule enable (preemption is occurring)
+    beq 2f
+
+1:
+    pop { r0, r1 }
     movs pc, lr
 
-1:                                                  @ deal with preemption
-    mov r0, #0
-    str r0, g_asm_sched_flag
-    pop { r0 }
+2:                                                  @ deal with preemption
+    bic r1, r0, #THREAD_MASK
+    WRITE_CP15_TPIDRPRW(r1)                         @ set tpidrprw
+
+    pop { r0, r1 }
 
     srsdb sp!, #ARCH_SVC_MODE                       @ save lr_irq and spsr to sp_svc
     cpsid i, #ARCH_SVC_MODE                         @ atomic: switch svc mode and disable irq
     
-    b __schedule_before                             @ jump to "context.S"
+    b __schedule_from_irq                           @ jump to "context.S"
 
 _fiq_handler:
     _exception_save_params                          @ save current context

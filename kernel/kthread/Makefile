@@ -15,6 +15,7 @@ obj-y	+=	ksoftirqd.o
 obj-y	+=	kworker.o
 obj-y	+=	init_proc.o
 obj-y	+=	kmemp.o
+obj-y	+=	migration.o
 
 obj-$(CONFIG_TEST) += debug.o
 

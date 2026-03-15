@@ -155,6 +155,8 @@ struct timer_list
 
     void (*entry)(kuint32_t args);
     kuint32_t data;
+
+    kuaddr_t base;
 };
 
 #define TIMER_INITIALIZER(_entry, _expires, _data)		\
@@ -162,6 +164,7 @@ struct timer_list
     .expires = _expires,    \
     .entry = _entry,    \
     .data = _data,  \
+    .base = 0,    \
 }
 
 #define DEFINE_TIMER(_name, _entry, _expires, _data)		\
@@ -172,6 +175,7 @@ struct timer_list
         init_list_head(&(timer)->sgtc_link);  \
         (timer)->entry = (fn); \
         (timer)->data = (data);   \
+        (timer)->base = 0;    \
     } while (0)
 
 #define mr_time_check_type(a, b)   \

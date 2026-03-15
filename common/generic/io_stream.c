@@ -19,6 +19,7 @@
 #include <common/buffer.h>
 #include <common/time.h>
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/spinlock.h>
 #include <platform/base/fwk_mempool.h>
 
@@ -276,7 +277,7 @@ void io_putstr_async(const kubyte_t *msgs, kusize_t size)
     kssize_t ret = -1;
 
     /*!< In exception ? */
-    is_prohibit = IS_IN_EXCEPTION();
+    is_prohibit = IN_IRQ_EXCEPTION();
 
     if ((g_io_stream_flags & IO_STREAM_ASYNC) && (!is_prohibit))
     {

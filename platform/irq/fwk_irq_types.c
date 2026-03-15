@@ -16,6 +16,7 @@
 #include <platform/irq/fwk_irq_chip.h>
 #include <platform/irq/fwk_irq_domain.h>
 #include <platform/of/fwk_of.h>
+#include <kernel/preempt.h>
 #include <kernel/thread.h>
 #include <kernel/sched.h>
 #include <kernel/spinlock.h>
@@ -128,8 +129,8 @@ static void *irq_thread(void *args)
  * @retval none
  * @note   irq register
  */
-kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
-                                kuint32_t flags, const kchar_t *name, void *args)
+kint32_t __fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
+                                kuint32_t flags, kuint32_t cpu_affinity, const kchar_t *name, void *args)
 {
     struct fwk_irq_group *sptr_grp;
     struct fwk_irq_desc *sptr_desc;
@@ -140,6 +141,7 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
     if ((!name) || (!args))
         return -ER_FAULT;
 
+    /*!< same name && same args */
     if (fwk_find_irq_action(irq, name, args))
         return -ER_EXISTED;
 
@@ -154,6 +156,7 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
     sptr_action = &sptr_grp->sgtc_action;
     sptr_action->handler = handler ? handler : fwk_default_irq_isr;
     sptr_action->flags = flags;
+    sptr_action->cpu_affinity = cpu_affinity ? cpu_affinity : CPU_AFFINITY_DEFAULT;
     sptr_action->ptrArgs = args;
 
     if (len >= sizeof(sptr_action->name))
@@ -167,10 +170,14 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
     if (thread_fn)
     {
         kchar_t name[24];
+        struct thread_attr sgtc_attr;
+
+        memset(&sgtc_attr, 0, sizeof(sgtc_attr));
+        thread_set_cpuaffinity(&sgtc_attr, sptr_action->cpu_affinity);
 
         mr_preempt_disable();
 
-        sptr_grp->tid = kernel_thread_create(-1, mr_nullptr, irq_thread, sptr_grp);
+        sptr_grp->tid = kernel_thread_create(-1, &sgtc_attr, irq_thread, sptr_grp);
         if (sptr_grp->tid < 0)
         {
             mr_preempt_enable();
@@ -186,7 +193,6 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
     }
     
     kstrcpy(sptr_action->name, name);
-    
     fwk_irq_set_type(irq, flags);
 
     spin_lock_irqsave(&sptr_desc->sgtc_lock, &lock_flags);
@@ -203,23 +209,12 @@ fail:
 }
 
 /*!
- * @brief  fwk_request_irq
- * @param  none
- * @retval none
- * @note   irq register
- */
-kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, const kchar_t *name, void *args)
-{
-    return fwk_request_threaded_irq(irq, handler, mr_nullptr, flags, name, args);
-}
-
-/*!
  * @brief  fwk_free_irq
  * @param  none
  * @retval none
  * @note   irq unregister
  */
-void fwk_free_irq(kint32_t irq, void *args)
+void __fwk_free_irq(kint32_t irq, void *args)
 {
     struct fwk_irq_group *sptr_grp;
     struct fwk_irq_desc *sptr_desc;
@@ -297,6 +292,7 @@ void fwk_do_irq_handler(kint32_t softIrq)
     struct fwk_irq_group *sptr_grp;
     struct fwk_irq_desc *sptr_desc;
     struct fwk_irq_action *sptr_action;
+    kuint32_t cpuid = get_cpu_id();
     kint32_t retval;
 
     if (softIrq < 0)
@@ -308,6 +304,10 @@ void fwk_do_irq_handler(kint32_t softIrq)
         
     foreach_list_next_entry(sptr_action, &sptr_desc->sgtc_action, sgtc_link)
     {
+        /*!< cpu_affinity is used for PPI usually, do not recommend to use it for SPI */
+        if (0 == (sptr_action->cpu_affinity & CPU_AFFINITY_SINGEL(cpuid)))
+            continue;
+
         retval = sptr_action->handler ? sptr_action->handler(softIrq, sptr_action->ptrArgs) : NR_IRQ_WAKE_THREAD;
         switch (retval)
         {

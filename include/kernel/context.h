@@ -19,6 +19,7 @@
 
 /*!< The globals */
 #include <kernel/kernel.h>
+#include <kernel/asm_text.h>
 
 /*!< The defines */
 struct context_regs
@@ -53,6 +54,17 @@ struct scheduler_context
     kuaddr_t next_sp;
     kuaddr_t prev_sp;
 };
+
+struct percpu_sched_data
+{
+    struct scheduler_context sgtc_context;  /*!< do not move the position! sgtc_context must on the bottom of "struct per_cpu_data" */
+
+    kuint32_t sched_flag;
+    kuint32_t asm_sched_flag;
+};
+
+/*!< The globals */
+extern struct percpu_sched_data sgtc_sched_data[];
 
 /*!< The functions */
 extern void __switch_to(kuaddr_t info);

@@ -12,6 +12,7 @@
 
 /*!< The globals */
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/rw_lock.h>
 #include <kernel/sched.h>
 #include <term/term.h>
@@ -219,7 +220,7 @@ void rd_lock(struct rw_lock *sptr_lock)
          * because the lock will be continuously requested by this thread, 
          * this function will be frequently entered to prevent duplicate additions 
          */
-        lock_pending_del(sptr_rds, sptr_self);
+        lock_pending_del(sptr_self);
         lock_pending_add(sptr_rds, sptr_self);
 
         spin_unlock_irqrestore(&sptr_owns->sgtc_lock, flags);
@@ -236,7 +237,7 @@ void rd_lock(struct rw_lock *sptr_lock)
     }
 
     atomic_inc(&sptr_lock->sgtc_read);
-    mr_barrier();
+    mr_smp_mb();
 
     /*! @warning
      * We don't care which read-locks are held by current thread, 
@@ -245,7 +246,7 @@ void rd_lock(struct rw_lock *sptr_lock)
     if (mr_unlikely(in_lock_pending(&sptr_self->sgtc_wait)))
     {
         spin_lock_irqsave(&sptr_owns->sgtc_lock, &flags);
-        lock_pending_del(sptr_rds, sptr_self);
+        lock_pending_del(sptr_self);
         spin_unlock_irqrestore(&sptr_owns->sgtc_lock, flags);
     }
 
@@ -272,7 +273,7 @@ kint32_t rd_try_lock(struct rw_lock *sptr_lock)
     sptr_wrs = &sptr_lock->sgtc_wrs;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         local_irq_save(&flags);
         if (wr_is_locked(sptr_lock))
@@ -282,7 +283,7 @@ kint32_t rd_try_lock(struct rw_lock *sptr_lock)
         }
 
         atomic_inc(&sptr_lock->sgtc_read);
-        mr_barrier();
+        mr_smp_mb();
 
         local_irq_restore(&flags);
         return ER_NORMAL;
@@ -301,7 +302,7 @@ kint32_t rd_try_lock(struct rw_lock *sptr_lock)
     }
 
     atomic_inc(&sptr_lock->sgtc_read);
-    mr_barrier();
+    mr_smp_mb();
 
     spin_unlock(&sptr_wrs->sgtc_lock);
     mr_preempt_enable();
@@ -329,7 +330,7 @@ void rd_unlock(struct rw_lock *sptr_lock)
     sptr_wrs = &sptr_lock->sgtc_wrs;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         kutype_t flags;
 
@@ -341,7 +342,7 @@ void rd_unlock(struct rw_lock *sptr_lock)
         }
 
         atomic_dec(&sptr_lock->sgtc_read);
-        mr_barrier();
+        mr_smp_mb();
 
         /*!< After decrementing the count, the lock is still locked, indicating that the lock is still in a reentrant state */
         if (rd_is_locked(sptr_lock))
@@ -370,7 +371,7 @@ void rd_unlock(struct rw_lock *sptr_lock)
     }
 
     atomic_dec(&sptr_lock->sgtc_read);
-    mr_barrier();
+    mr_smp_mb();
 
     /*!< After decrementing the count, the lock is still locked, indicating that the lock is still in a locked state */
     if (rd_is_locked(sptr_lock))
@@ -414,7 +415,7 @@ void wr_lock(struct rw_lock *sptr_lock)
     if (sptr_wrs->sptr_self == sptr_self)
     {   
         atomic_inc(&sptr_lock->sgtc_write);
-        mr_barrier();
+        mr_smp_mb();
 
         spin_unlock(&sptr_wrs->sgtc_lock);
         mr_preempt_enable();
@@ -447,7 +448,7 @@ loop:
 
     atomic_inc(&sptr_lock->sgtc_write);
     sptr_wrs->sptr_self = sptr_self;
-    mr_barrier();
+    mr_smp_mb();
 
     /*!< Acquire the lock, make a mark, and add the current lock to the "lock holding linked list" of this thread */
     lock_context_save(sptr_wrs);
@@ -474,7 +475,7 @@ kint32_t wr_try_lock(struct rw_lock *sptr_lock)
     sptr_wrs = &sptr_lock->sgtc_wrs;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         kutype_t flags;
 
@@ -487,7 +488,7 @@ kint32_t wr_try_lock(struct rw_lock *sptr_lock)
 
         atomic_inc(&sptr_lock->sgtc_write);
         sptr_wrs->sptr_self = mr_nullptr;
-        mr_barrier();
+        mr_smp_mb();
 
         local_irq_restore(&flags);
         return ER_NORMAL;
@@ -500,7 +501,7 @@ kint32_t wr_try_lock(struct rw_lock *sptr_lock)
     if (sptr_wrs->sptr_self == sptr_self)
     {   
         atomic_inc(&sptr_lock->sgtc_write);
-        mr_barrier();
+        mr_smp_mb();
 
         spin_unlock(&sptr_wrs->sgtc_lock);
         mr_preempt_enable();
@@ -518,7 +519,7 @@ kint32_t wr_try_lock(struct rw_lock *sptr_lock)
 
     atomic_inc(&sptr_lock->sgtc_write);
     sptr_wrs->sptr_self = sptr_self;
-    mr_barrier();
+    mr_smp_mb();
 
     /*!< Acquire the lock, make a mark, and add the current lock to the "lock holding linked list" of this thread */
     lock_context_save(sptr_wrs);
@@ -549,7 +550,7 @@ void wr_unlock(struct rw_lock *sptr_lock)
     sptr_wrs = &sptr_lock->sgtc_wrs;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         kutype_t flags;
 
@@ -562,7 +563,7 @@ void wr_unlock(struct rw_lock *sptr_lock)
         }
 
         atomic_dec(&sptr_lock->sgtc_write);
-        mr_barrier();
+        mr_smp_mb();
 
         /*!< After decrementing the count, the lock is still locked, indicating that the lock is still in a reentrant state */
         if (wr_is_locked(sptr_lock))
@@ -592,7 +593,7 @@ void wr_unlock(struct rw_lock *sptr_lock)
     }
 
     atomic_dec(&sptr_lock->sgtc_write);
-    mr_barrier();
+    mr_smp_mb();
 
     /*!< After decrementing the count, the lock is still locked, indicating that the lock is still in a reentrant state */
     if (wr_is_locked(sptr_lock))

@@ -24,13 +24,13 @@ lowlevel_init:
     bic r12, r12, #0x07                         @ 8 bits alignment
     mov sp, r12
 
-    push {lr}                                   @ save current pc
+    push { lr }                                 @ save current pc
 
     /*!< s_init: initial clock */
     /*!< only initial basic cpu configuration, it's not related to specfic board. */
     bl s_init                                   @ jump to arch/cpu/$(ARCH)/$(VENDOR)/board.c
 
-    pop {lr}                                    @ restore previous pc
+    pop { lr }                                  @ restore previous pc
     mov pc, lr                                  @ retrun start.S
 
 /*!< ----------------------------------------------------------- */
