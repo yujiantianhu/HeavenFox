@@ -198,6 +198,7 @@ kssize_t lwip_udp_raw_recvfrom(struct udp_pcb *sptr_upcb, void *buf,
         if (len)
             fwk_copy_to_user(buf, payload, len);
 
+        mr_smp_mb();
         lwip_udp_raw_free(&sptr_data->sgtc_pqd);
         break;
 

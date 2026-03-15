@@ -231,6 +231,7 @@ kssize_t lwip_icmp_raw_recvfrom(struct raw_pcb *sptr_pcb, void *buf,
     /*!< Copy ICMP header and data, real_len is the size of ICMP */
     memcpy(buf, (void *)sptr_iphdr + iphdr_len, real_len);
     memcpy(sptr_src, &sptr_seq->sgtc_ipsrc, sizeof(*sptr_src));
+    mr_smp_mb();
 
     kfree(sptr_seq->buf);
     memset(sptr_seq, 0, sizeof(*sptr_seq));
