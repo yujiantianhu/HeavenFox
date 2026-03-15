@@ -22,7 +22,7 @@
 
 
 /*!< The globals */
-extern struct mutex_lock sgtc_migration_mutex;
+// extern struct mutex_lock sgtc_migration_mutex;
 
 /*!< The functions */
 
@@ -209,9 +209,15 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
             }
             else if (!kstrcmp(argv[2], "-t"))
             {
+                /*!< set time slice */
                 spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
                 thread_set_time_slice(sptr_thread->sptr_attr, arg);
                 spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+            }
+            else if (!kstrcmp(argv[2], "-c"))
+            {
+                /*!< set running cpu */
+                switch_thread_cpu(sptr_thread, arg);
             }
             else
                 goto fail;
@@ -241,7 +247,8 @@ static void term_cmd_ts_help(void)
            "    ts                      | list all threads\r\n"
            "    ts [tid]                | list thread with the tid\r\n"
            "    ts [tid] -p [argument]  | set thread's priority\r\n"
-           "    ts [tid] -t [argument]  | set thread's time slice\r\n");
+           "    ts [tid] -t [argument]  | set thread's time slice\r\n"
+           "    ts [tid] -c [argument]  | set thread's cpu\r\n");
 }
 
 /*!

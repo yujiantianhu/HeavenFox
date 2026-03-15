@@ -444,6 +444,7 @@ static const term_cmd_fn_t g_term_cmd_fn[] =
     term_cmd_add_mem,
     term_cmd_add_runtime,
     term_cmd_add_value,
+    term_cmd_add_cpuinfo,
 
     mr_nullptr,
 };

@@ -24,6 +24,8 @@
 #include <kernel/sched.h>
 
 /*!< The defines */
+struct mutex_lock;
+
 #define __IRQ_COUNT(_sptr_thr)                  ((_sptr_thr)->irq_count)
 #define __PREEMPT_COUNT(_sptr_thr)              ((_sptr_thr)->sgtc_preempt)
 
@@ -32,6 +34,7 @@
 
 /*!< The globals */
 extern kbool_t g_kernel_preempt_enable;
+extern struct mutex_lock sgtc_migration_mutex;
 
 /*!< The defines */
 #define mr_preempt_cnt_dec()                    atomic_dec(&PREEMPT_COUNT())

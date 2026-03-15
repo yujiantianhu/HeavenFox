@@ -81,18 +81,29 @@ static kint32_t schedule_detach_zombie_list(kuint32_t cpuid, struct thread *sptr
 
 /*!< The globals */
 /*!< Scheduler Operations */
-//static const struct scheduler_operation sgtc_scheduler_operations[] =
-//{
-//    [NR_THREAD_NONE     ] = { .detach = mr_nullptr,                     .add_new = mr_nullptr                   },
-//    [NR_THREAD_RUNNING  ] = { .detach = schedule_despoil_work_role,     .add_new = schedule_reinstall_work_role },
-//    [NR_THREAD_READY    ] = { .detach = schedule_detach_ready_list,     .add_new = schedule_add_ready_list      },
-//    [NR_THREAD_SUSPEND  ] = { .detach = schedule_detach_suspend_list,   .add_new = schedule_add_suspend_list    },
-//    [NR_THREAD_SLEEP    ] = { .detach = schedule_detach_sleep_list,     .add_new = schedule_add_sleep_list      },
-//    [NR_THREAD_ZOMBIE   ] = { .detach = mr_nullptr,                     .add_new = schedule_add_zombie_list     },
-//};
+static const struct scheduler_operation sgtc_scheduler_operations[] =
+{
+    [NR_THREAD_NONE     ] = { .detach = mr_nullptr,                     .add_new = mr_nullptr                   },
+    [NR_THREAD_RUNNING  ] = { .detach = schedule_despoil_work_role,     .add_new = schedule_reinstall_work_role },
+    [NR_THREAD_READY    ] = { .detach = schedule_detach_ready_list,     .add_new = schedule_add_ready_list      },
+    [NR_THREAD_SUSPEND  ] = { .detach = schedule_detach_suspend_list,   .add_new = schedule_add_suspend_list    },
+    [NR_THREAD_SLEEP    ] = { .detach = schedule_detach_sleep_list,     .add_new = schedule_add_sleep_list      },
+    [NR_THREAD_ZOMBIE   ] = { .detach = mr_nullptr,                     .add_new = schedule_add_zombie_list     },
+};
 
 /* -------------------------------------------------------------------------- */
 /*!< API functions */
+/*!
+ * @brief	get scheduler manager
+ * @param  	cpuid
+ * @retval 	scheduler manager
+ * @note   	none
+ */
+struct scheduler_core *get_scheduler_core(kuint32_t cpuid)
+{
+    return SCHED_MANAGER_CORE(cpuid);
+}
+
 /*!
  * @brief	get current thread from tcb
  * @param  	tid
@@ -503,7 +514,6 @@ loop:
     /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
     if (mr_unlikely(cpuid != sptr_thread->cpu))
     {
-        cpuid = sptr_thread->cpu;
         spin_unlock_irqrestore(sptr_lock, flags);
         goto loop;
     }
@@ -572,7 +582,6 @@ loop:
     /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
     if (mr_unlikely(cpuid != sptr_thread->cpu))
     {
-        cpuid = sptr_thread->cpu;
         spin_unlock_irqrestore(sptr_lock, flags);
         goto loop;
     }
@@ -641,7 +650,6 @@ loop:
     /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
     if (mr_unlikely(cpuid != sptr_thread->cpu))
     {
-        cpuid = sptr_thread->cpu;
         spin_unlock_irqrestore(sptr_lock, flags);
         goto loop;
     }
@@ -702,7 +710,6 @@ loop:
     /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
     if (mr_unlikely(cpuid != sptr_thread->cpu))
     {
-        cpuid = sptr_thread->cpu;
         spin_unlock_irqrestore(sptr_lock, flags);
         goto loop;
     }
@@ -1224,6 +1231,102 @@ fail:
 //  mr_preempt_enable();
 
     return -ER_INVALID;
+}
+
+/*!
+ * @brief	change thread cpu
+ * @param  	sptr_thread
+ * @retval 	errno
+ * @note   	none
+ */
+kint32_t switch_thread_cpu(struct thread *sptr_thread, kint32_t target_cpu)
+{
+    struct scheduler_core *sptr_core;
+    struct scheduler_core *sptr_core2;
+    struct scheduler_operation *sptr_oprts;
+    kuint32_t cpuid, state, affinity;
+    kutype_t flags;
+    kint32_t retval;
+
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_core = SCHED_MANAGER_CORE(cpuid);
+    spin_lock_irqsave(&sptr_core->sgtc_lock, &flags);
+
+    /*!< if cpu has more than 2 cores, sptr_thread may migrate between other cores that are not the current core */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        goto loop;
+    }
+
+    if ((sptr_thread->cpu < 0) || 
+        (target_cpu < 0) || 
+        (sptr_thread->cpu == target_cpu))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        return -ER_CHECKERR;
+    }
+
+    /*!< target cpu is not normal */
+    if (!get_cpu_current_thread(target_cpu))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        return -ER_NODEV;
+    }
+
+    state = __GET_THREAD_STATE(sptr_thread);
+    if (state == NR_THREAD_RUNNING)
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        print_warn("thread \'%s\' is running, not allow change cpu\r\n", sptr_thread->name);
+        return -ER_FORBID;
+    }
+
+    affinity = thread_get_cpuaffinity(sptr_thread->sptr_attr);
+    if (!(affinity & CPU_AFFINITY_SINGEL(target_cpu)))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        print_warn("thread \'%s\' is not allowed change to cpu %u, affinity forbid\r\n", sptr_thread->name, target_cpu);
+        return -ER_FORBID;
+    }
+
+    sptr_oprts = (struct scheduler_operation *)(&sgtc_scheduler_operations[state]);
+    if (mr_unlikely(!sptr_oprts->detach || !sptr_oprts->add_new))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        return -ER_FAULT;
+    }
+
+    retval = sptr_oprts->detach(sptr_thread->cpu, sptr_thread);
+    if (retval || !mr_list_empty(&sptr_thread->sgtc_link))
+    {
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+        return -ER_FAILD;
+    }
+
+    sptr_thread->last_cpu = sptr_thread->cpu;
+    sptr_thread->cpu = -1;
+    mr_smp_mb();
+    spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+
+    /*!< add to new cpu */
+    sptr_core2 = SCHED_MANAGER_CORE(target_cpu);
+    spin_lock_irqsave(&sptr_core2->sgtc_lock, &flags);
+
+    retval = sptr_oprts->add_new(target_cpu, sptr_thread);
+    if (retval || mr_list_empty(&sptr_thread->sgtc_link))
+    {
+        spin_unlock_irqrestore(&sptr_core2->sgtc_lock, flags);
+        mr_warn(false);
+        return -ER_FAILD;
+    }
+
+    /*!< sptr_thread is free (not in queue), no cpu will schedule it; therefore, it is safe */
+    sptr_thread->cpu = target_cpu;
+    spin_unlock_irqrestore(&sptr_core2->sgtc_lock, flags);
+
+    return ER_NORMAL;
 }
 
 /*!

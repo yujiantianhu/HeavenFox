@@ -210,6 +210,7 @@ struct scheduler_table
 /*!< The globals */
 
 /*!< The functions */
+extern struct scheduler_core *get_scheduler_core(kuint32_t cpuid);
 extern struct thread *get_current_thread(void);
 extern struct thread *get_cpu_current_thread(kuint32_t cpuid);
 extern struct list_head *get_ready_thread_table(void);
@@ -251,6 +252,7 @@ extern struct thread *next_sleep_thread(kuint32_t cpuid, struct thread *sptr_pre
 extern struct thread *next_zombie_thread(kuint32_t cpuid, struct thread *sptr_prev);
 
 extern kint32_t schedule_thread_switch(struct thread *sptr_thread);
+extern kint32_t switch_thread_cpu(struct thread *sptr_thread, kint32_t target_cpu);
 extern void __setup_thread(struct thread *sptr_thread);
 extern kint32_t register_new_thread(struct thread *sptr_thread, tid_t *ptr_tid);
 extern struct thread *unregister_thread(tid_t tid);
