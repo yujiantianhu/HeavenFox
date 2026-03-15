@@ -12,6 +12,7 @@
 
 /*!< The globals */
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/lock_common.h>
 #include <kernel/sched.h>
 #include <term/term.h>

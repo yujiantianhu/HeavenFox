@@ -5,6 +5,8 @@
 #
 # Copyright (c) 2024   Yang Yujun <yujiantianhu@163.com>
 
+# Usages: 		make CONFIGS=imx6ull_toppet_defconfig config
+
 # Generic
 # ---------------------------------------------------------------
 CONFIG_ARCH = "arm"

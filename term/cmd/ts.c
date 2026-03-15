@@ -13,6 +13,7 @@
 /*!< The includes */
 #include <platform/base/fwk_basic.h>
 #include <kernel/signal.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 #include <kernel/spinlock.h>
 #include <term/term.h>

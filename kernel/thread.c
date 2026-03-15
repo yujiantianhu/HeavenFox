@@ -12,6 +12,7 @@
 
 /*!< The includes */
 #include <kernel/thread.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 #include <kernel/sleep.h>
 #include <kernel/mailbox.h>

@@ -17,6 +17,7 @@
 #include <platform/irq/fwk_irq.h>
 #include <platform/irq/fwk_irq_types.h>
 #include <platform/of/fwk_of.h>
+#include <kernel/preempt.h>
 #include <kernel/spinlock.h>
 #include <kernel/sched.h>
 
@@ -38,8 +39,12 @@ static const kchar_t *sgtc_fwk_softirq_name[NR_SOFTIRQ_NUM] __unused =
     [NR_SOFTIRQ_SCHEDULE] = "SCHEDULE"
 };
 
-static kuint32_t g_fwk_softirq_event = 0, g_fwk_softirq_count = 0;
+static kuint32_t g_fwk_softirq_event[CONFIG_CORE_NUM] = {};
 static struct fwk_tasklet_head sgtc_fwk_tasklet_head;
+
+#define mr_this_cpu_softirq_events()                g_fwk_softirq_event[get_cpu_id()]
+#define mr_or_this_cpu_softirq_events(nr)           do { g_fwk_softirq_event[get_cpu_id()] |= (1UL << (nr)); } while (0)
+#define mr_clr_this_cpu_softirq_events()            do { g_fwk_softirq_event[get_cpu_id()] = 0; } while (0)
 
 /*!< The functions */
 extern void wake_up_ksoftirqd(void);
@@ -48,47 +53,12 @@ extern void wake_up_ksoftirqd(void);
 /*!
  * @brief   check if allow re-enter
  * @param   none
- * @retval  g_fwk_softirq_count
+ * @retval  1: avaliable; 0: not avaliable
  * @note    none
  */
-kuint32_t fwk_softirq_avaliable(void)
+kbool_t fwk_softirq_avaliable(void)
 {
-    return ((0 == g_fwk_softirq_count) && g_fwk_softirq_event);
-}
-
-/*!
- * @brief   close local softirq
- * @param   g_fwk_softirq_count++
- * @retval  none
- * @note    none
- */
-void local_bh_disable(void)
-{
-    kutype_t flags;
-
-    mr_local_irq_save(flags);
-    g_fwk_softirq_count++;
-    mr_barrier();
-    mr_local_irq_restore(flags);
-}
-
-/*!
- * @brief   open local softirq
- * @param   g_fwk_softirq_count--
- * @retval  none
- * @note    none
- */
-void local_bh_enable(void)
-{
-    kutype_t flags;
-
-    mr_local_irq_save(flags);
-
-    if (g_fwk_softirq_count)
-        g_fwk_softirq_count--;
-
-    mr_barrier();
-    mr_local_irq_restore(flags);
+    return (!IS_SOFTIRQ_LOCKED() && mr_this_cpu_softirq_events());
 }
 
 /*!
@@ -105,22 +75,22 @@ void fwk_handle_softirq(void)
     kutype_t flags;
 
     mr_local_irq_save(flags);
-    if (!g_fwk_softirq_event || g_fwk_softirq_count)
+    pending = mr_this_cpu_softirq_events();
+
+    if (!pending || IS_SOFTIRQ_LOCKED())
         goto ret;
 
     /*!< Local irq is opened, but not allow preempting (disable scheduler) */
-    if (IS_IN_INTERRUPT())
+    if (IN_INTERRUPT())
         mr_preempt_disable();
 
     /*!< Avoid enter again */
-    g_fwk_softirq_count++;
-
+    local_bh_disable();
     end = jiffies + msecs_to_jiffies(2);
-    pending = g_fwk_softirq_event;
 
 restart:
     mr_barrier();
-    g_fwk_softirq_event = 0;
+    mr_clr_this_cpu_softirq_events();
 
     mr_local_irq_enable();
 
@@ -140,10 +110,10 @@ restart:
 
     mr_local_irq_disable();
 
-    if (IS_IN_INTERRUPT())
+    if (IN_INTERRUPT())
     {
         /*!< new event occur */
-        pending = g_fwk_softirq_event;
+        pending = mr_this_cpu_softirq_events();
         if (pending && (jiffies < end))
             goto restart;
 
@@ -154,7 +124,7 @@ restart:
             wake_up_ksoftirqd();
     }
 
-    g_fwk_softirq_count--;
+    local_bh_enable();
 
 ret:
     mr_local_irq_restore(flags);
@@ -192,25 +162,7 @@ void fwk_raise_softirq(kint32_t nr)
     mr_local_irq_save(flags);
 
 //  SOFTIRQ_CALL(nr);
-    g_fwk_softirq_event |= mr_bit(nr);
-
-    mr_local_irq_restore(flags);
-}
-
-/*!
- * @brief   cancel softirq action
- * @param   nr: irq number (__ERT_SOFTIRQ_EVENT)
- * @retval  none
- * @note    none
- */
-void fwk_cancel_softirq(kint32_t nr)
-{
-    kutype_t flags;
-
-    mr_local_irq_save(flags);
-
-//  SOFTIRQ_CALL(nr);
-    g_fwk_softirq_event &= ~mr_bit(nr);
+    mr_or_this_cpu_softirq_events(nr);
 
     mr_local_irq_restore(flags);
 }
@@ -290,8 +242,8 @@ void fwk_tasklet_schedule(struct fwk_tasklet *sptr_tsk)
     sptr_list->sptr_tail = &sptr_tsk->sptr_next;
     atomic_inc(&sptr_tsk->count);
 
-    mr_local_irq_restore(flags);
     fwk_raise_softirq(NR_SOFTIRQ_TASKLET);
+    mr_local_irq_restore(flags);
 }
 
 /*!

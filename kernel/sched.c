@@ -12,6 +12,7 @@
 
 /*!< The includes */
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 
 /*!< The globals */
@@ -1107,7 +1108,7 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
 
     /*!< do not suspend self in interrupt, and do not allow to switch context of other CPUs */
     if (mr_unlikely(dst == NR_THREAD_RUNNING) && 
-        mr_unlikely(__IS_IN_INTERRUPT(cpuid) || (cpuid != get_cpu_id())))
+        mr_unlikely(__IN_INTERRUPT(__IRQ_COUNT(sptr_thread)) || (cpuid != get_cpu_id())))
         goto fail;
 
     /*!< detached from current list */
@@ -1953,10 +1954,9 @@ void schedule_thread(void)
     /*!< for first schedule, mr_current is a virtual thread, sptr_prev will be not NULL */
     /*!< virtual thread ---> schedule_thread() ---> real thread (virtual thread will be not back forever) */
     sptr_prev = mr_current;
-    cpuid = get_cpu_id();
     
     /*!< Not allow called by IRQ; because of cpuid (the data of current cpu), the judgement must in behind of preempt_disable */
-    if (mr_unlikely(__IS_IN_INTERRUPT(cpuid)))
+    if (mr_unlikely(__IN_INTERRUPT(__IRQ_COUNT(sptr_prev))))
     {
         __SYNC_THREAD_STATE(sptr_prev, NR_THREAD_RUNNING);
         mr_preempt_enable();
@@ -1965,6 +1965,7 @@ void schedule_thread(void)
         return;
     }
 
+    cpuid = get_cpu_id();
     sptr_core = SCHED_MANAGER_CORE(cpuid);
     spin_lock_irqsave_assert(&sptr_core->sgtc_lock, &sptr_prev->lock_flags, __FILE__, __LINE__, __FUNCTION__);
 

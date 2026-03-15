@@ -24,6 +24,7 @@
 #include <platform/base/fwk_fcntl.h>
 #include <kernel/spinlock.h>
 #include <kernel/wait.h>
+#include <kernel/preempt.h>
 
 #include <imx6/imx6ull_uart.h>
 
@@ -273,7 +274,7 @@ static kssize_t imx_uart_driver_write(struct fwk_file *sptr_file, const kbuffer_
             fwk_copy_from_user(msgs, ptrBuffer + sentbyte, real_size);
 
             /*!< Wait for last fifo send finished */
-            if (mr_unlikely(IS_IN_INTERRUPT()))
+            if (mr_unlikely(IN_INTERRUPT()))
                 while (!mr_imx_uart_tx_empty(sptr_uart));
             else
                 wait_event(&sptr_data->sgtc_txwqh, mr_imx_uart_tx_empty(sptr_uart));

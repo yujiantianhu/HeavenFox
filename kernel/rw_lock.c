@@ -12,6 +12,7 @@
 
 /*!< The globals */
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/rw_lock.h>
 #include <kernel/sched.h>
 #include <term/term.h>
@@ -272,7 +273,7 @@ kint32_t rd_try_lock(struct rw_lock *sptr_lock)
     sptr_wrs = &sptr_lock->sgtc_wrs;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         local_irq_save(&flags);
         if (wr_is_locked(sptr_lock))
@@ -329,7 +330,7 @@ void rd_unlock(struct rw_lock *sptr_lock)
     sptr_wrs = &sptr_lock->sgtc_wrs;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         kutype_t flags;
 
@@ -474,7 +475,7 @@ kint32_t wr_try_lock(struct rw_lock *sptr_lock)
     sptr_wrs = &sptr_lock->sgtc_wrs;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         kutype_t flags;
 
@@ -549,7 +550,7 @@ void wr_unlock(struct rw_lock *sptr_lock)
     sptr_wrs = &sptr_lock->sgtc_wrs;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         kutype_t flags;
 

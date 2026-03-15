@@ -40,7 +40,7 @@ struct exception_info
 };
 
 /*!< The globals */
-extern kuint32_t g_interrupt_flags[];
+// extern kuint32_t g_interrupt_flags[];
 extern struct exception_info sgtc_excep_info[];
 
 /*!< The defines */
@@ -51,20 +51,6 @@ extern struct exception_info sgtc_excep_info[];
 #define PREFETCH_ABORT_BIT                          (0x20)
 #define DATA_ABORT_BIT                              (0x40)
 #define UNUSED_BIT                                  (0x80)
-
-#define __IS_IN_INTERRUPT(cpuid)                    atomic_is_set(0xff, &g_interrupt_flags[cpuid])
-#define __IS_IN_EXCEPTION(cpuid)                    atomic_is_set(0xf0, &g_interrupt_flags[cpuid])
-#define __SET_INTERRUPT_FLAG(cpuid, mask)           atomic_set_mask(mask, &g_interrupt_flags[cpuid])
-#define __CLR_INTERRUPT_FLAG(cpuid, mask)           atomic_clear_mask(mask, &g_interrupt_flags[cpuid])
-#define __SET_EXCEPTION_FLAG(cpuid, mask)           __SET_INTERRUPT_FLAG(cpuid, mask)
-#define __CLR_EXCEPTION_FLAG(cpuid, mask)           __CLR_INTERRUPT_FLAG(cpuid, mask)
-
-#define IS_IN_INTERRUPT()                           __IS_IN_INTERRUPT(get_cpu_id())
-#define IS_IN_EXCEPTION()                           __IS_IN_EXCEPTION(get_cpu_id())
-#define SET_INTERRUPT_FLAG(mask)                    __SET_INTERRUPT_FLAG(get_cpu_id(), mask)
-#define CLR_INTERRUPT_FLAG(mask)                    __CLR_INTERRUPT_FLAG(get_cpu_id(), mask)
-#define SET_EXCEPTION_FLAG(mask)                    __SET_EXCEPTION_FLAG(get_cpu_id(), mask)
-#define CLR_EXCEPTION_FLAG(mask)                    __CLR_EXCEPTION_FLAG(get_cpu_id(), mask)
 
 /*!< The functions */
 extern void exec_undefined_handler(kutype_t _sp, kutype_t _lr);

@@ -66,6 +66,8 @@ struct thread
 
     /*!< preempt count */
     struct atomic sgtc_preempt;
+    /*!< irq count */
+    kuint32_t irq_count;
 
     struct spin_lock sgtc_lock;
     struct mailbox *sptr_mb;
@@ -285,32 +287,6 @@ static inline struct thread *current_thread(void)
 /*!< The defines */
 #define mr_tid_handle(tid)                      get_thread_handle(tid)
 #define mr_tid_attr(tid)                        thread_attr_get(tid)
-
-#define mr_preempt_cnt_dec()                    atomic_dec(&(mr_current->sgtc_preempt))
-#define mr_preempt_cnt_inc()                    atomic_inc(&(mr_current->sgtc_preempt))
-#define mr_preempt_cnt()                        atomic_get_val(&(mr_current->sgtc_preempt))
-#define mr_preempt_is_locked()                  (!!mr_preempt_cnt())
-
-#ifdef CONFIG_PREEMPT_NESTING
-#define mr_preempt_enable()                     mr_barrier()
-#define mr_preempt_disable()                    mr_barrier()
-#define mr_preempt_is_locked()                  atomic_get_val(&(mr_current->sgtc_preempt))
-
-#else
-#define mr_preempt_enable()	\
-    do {	\
-        mr_barrier();	\
-        if (g_kernel_preempt_enable && mr_preempt_is_locked())  \
-            mr_preempt_cnt_dec();   \
-    } while (0)
-
-#define mr_preempt_disable()	\
-    do {	\
-        g_kernel_preempt_enable ? mr_preempt_cnt_inc() : (void)0;	\
-        mr_barrier();	\
-    } while (0)
-
-#endif
 
 /*!< API functions */
 /*!

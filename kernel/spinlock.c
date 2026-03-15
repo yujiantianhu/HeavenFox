@@ -13,6 +13,7 @@
 /*!< The globals */
 #include <platform/irq/fwk_irq_types.h>
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/spinlock.h>
 #include <kernel/sched.h>
 #include <term/term.h>
@@ -23,7 +24,7 @@
 
 #define mr_spin_set_owner(_ptr_owner)  \
     do { \
-        *(_ptr_owner) = ((kutype_t)mr_current) | (IS_IN_EXCEPTION() ? SPIN_LOCK_OWNER_IRQ : SPIN_LOCK_OWNER_TASK);    \
+        *(_ptr_owner) = ((kutype_t)mr_current) | (IN_INTERRUPT() ? SPIN_LOCK_OWNER_IRQ : SPIN_LOCK_OWNER_TASK);    \
         mr_smp_mb();    \
     } while (0)
 
@@ -400,8 +401,21 @@ void spin_unlock_irqrestore_assert(struct spin_lock *sptr_lock, kutype_t flags)
  */
 void spin_lock_bh(struct spin_lock *sptr_lock)
 {
-    local_bh_disable();
-    spin_lock(sptr_lock);
+    kutype_t flags;
+
+    if (spin_is_locked(sptr_lock))
+        g_spin_lock_monitor++;
+
+    local_irq_save(&flags);
+    while (atomic_test_and_set_val(&sptr_lock->sgtc_atc, 1));
+
+    mr_smp_mb();
+    mr_preempt_disable();
+    mr_local_bh_disable();
+    mr_spin_set_owner(&sptr_lock->owner);
+    mr_smp_mb();
+
+    local_irq_restore(&flags);
 }
 
 /*!
@@ -412,8 +426,23 @@ void spin_lock_bh(struct spin_lock *sptr_lock)
  */
 void spin_unlock_bh(struct spin_lock *sptr_lock)
 {
-    spin_unlock(sptr_lock);
-    local_bh_enable();
+    kutype_t flags;
+
+    local_irq_save(&flags);
+    if (!atomic_get_val(&sptr_lock->sgtc_atc))
+    {
+        local_irq_restore(&flags);
+        return;
+    }
+
+    mr_spin_clr_owner(&sptr_lock->owner);
+    mr_local_bh_enable();
+    mr_preempt_enable();
+    mr_barrier();
+    atomic_set_val(&sptr_lock->sgtc_atc, 0);
+    mr_smp_mb();
+
+    local_irq_restore(&flags);
 }
 
 /*!< ------------------------------------------------------------------------- */

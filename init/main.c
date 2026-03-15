@@ -25,6 +25,7 @@
 #include <platform/of/fwk_of_device.h>
 #include <platform/base/fwk_fcntl.h>
 #include <platform/irq/fwk_irq.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 #include <kernel/instance.h>
@@ -107,7 +108,7 @@ void setup_thread(void)
     __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_RUNNING);
     sprintk(sptr_thread->name, "cpu%u_virtual_thread", cpuid);
 
-    SET_PERCPU_CURRENT((kutype_t)sptr_thread | 0x01);
+    SET_PERCPU_CURRENT((kutype_t)sptr_thread | THREAD_VIRTUAL_BIT);
     g_kernel_preempt_enable = true;
 }
 

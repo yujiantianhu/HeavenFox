@@ -16,6 +16,7 @@
 #include <common/mem_manage.h>
 #include <arch/setup.h>
 #include <platform/irq/fwk_irq_types.h>
+#include <kernel/preempt.h>
 #include <kernel/spinlock.h>
 #include <kernel/sched.h>
 

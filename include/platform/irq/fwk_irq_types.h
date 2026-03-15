@@ -143,13 +143,10 @@ extern void __fwk_free_irq(kint32_t irq, void *args);
 extern void fwk_destroy_irq_action(kint32_t irq);
 extern void fwk_do_irq_handler(kint32_t softIrq);
 
-extern kuint32_t fwk_softirq_avaliable(void);
-extern void local_bh_disable(void);
-extern void local_bh_enable(void);
+extern kbool_t fwk_softirq_avaliable(void);
 extern void fwk_handle_softirq(void);
 extern void fwk_open_softirq(kint32_t nr, void (*action)(kint32_t event));
 extern void fwk_raise_softirq(kint32_t nr);
-extern void fwk_cancel_softirq(kint32_t nr);
 extern void fwk_softirq_init(void);
 
 extern void fwk_tasklet_init(struct fwk_tasklet *sptr_tsk, void (*func)(kutype_t args), kutype_t data);

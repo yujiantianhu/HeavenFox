@@ -12,6 +12,7 @@
 
 /*!< The globals */
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/mutex.h>
 #include <kernel/sched.h>
 #include <term/term.h>
@@ -154,7 +155,7 @@ kint32_t mutex_try_lock(struct mutex_lock *sptr_lock)
     sptr_owner = &sptr_lock->sgtc_owner;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         kutype_t flags;
 
@@ -229,7 +230,7 @@ void mutex_unlock(struct mutex_lock *sptr_lock)
     sptr_owner = &sptr_lock->sgtc_owner;
 
     /*!< In IRQ_Handler */
-    if (IS_IN_EXCEPTION())
+    if (IN_INTERRUPT())
     {
         kutype_t flags;
 

@@ -41,6 +41,9 @@
 #define mr_bit_mask(val, mask, nr)						(mr_bit_nr(val, nr) & (mask))
 #define mr_bit_mask_nr(val, mask, nr)					mr_bit_mask(val, mr_bit_nr(mask, nr), nr)
 
+#define mr_mk_mask(bits, nr)                            (((1 << (bits)) - 1) << (nr))
+#define mr_get_mask(val, mask, nr)                      (((val) & mask) >> (nr))
+
 #define mr_setbit(val, nr)								((val) |=  mr_bit(nr))
 #define mr_clrbit(val, nr)								((val) &= ~mr_bit(nr))
 #define mr_is_bitequal(val, mask)						((mask) == ((val) & (mask)))

@@ -16,6 +16,7 @@
 #include <platform/irq/fwk_irq_chip.h>
 #include <platform/irq/fwk_irq_domain.h>
 #include <platform/of/fwk_of.h>
+#include <kernel/preempt.h>
 #include <kernel/thread.h>
 #include <kernel/sched.h>
 #include <kernel/spinlock.h>

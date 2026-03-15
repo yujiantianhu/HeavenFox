@@ -12,6 +12,7 @@
 
 /*!< The globals */
 #include <kernel/kernel.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <term/term.h>
@@ -133,7 +134,7 @@ kint32_t sema_down_try_lock(struct semaphore *sptr_sem)
     sptr_rec = &sptr_sem->sgtc_rec;
 
     /*!< In IRQ_Handler */
-    if (mr_unlikely(IS_IN_EXCEPTION()))
+    if (mr_unlikely(IN_INTERRUPT()))
         return -ER_FORBID;
 
     mr_preempt_disable();
@@ -173,7 +174,7 @@ void sema_up(struct semaphore *sptr_sem)
     sptr_rec = &sptr_sem->sgtc_rec;
 
     /*!< In IRQ_Handler */
-    if (mr_unlikely(IS_IN_EXCEPTION()))
+    if (mr_unlikely(IN_INTERRUPT()))
         return;
 
     mr_preempt_disable();

@@ -16,9 +16,10 @@
 #include <common/io_stream.h>
 #include <common/mem_manage.h>
 #include <kernel/context.h>
+#include <kernel/preempt.h>
 
 /*!< The globals*/
-kuint32_t g_interrupt_flags[CONFIG_CORE_NUM];
+// kuint32_t g_interrupt_flags[CONFIG_CORE_NUM];
 struct exception_info sgtc_excep_info[CONFIG_CORE_NUM];
 
 /*!< API function */
@@ -33,7 +34,7 @@ void exec_undefined_handler(kutype_t _sp, kutype_t _lr)
     kuint32_t cpuid = get_cpu_id();
     struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
 
-    __SET_EXCEPTION_FLAG(cpuid, UND_ABORT_BIT);
+    SET_EXCEPTION_FLAG(UND_ABORT_BIT);
 
     sptr_excep->undefined_abort_addr = _lr;
     sptr_excep->abort_cur_sp = _sp;
@@ -42,7 +43,7 @@ void exec_undefined_handler(kutype_t _sp, kutype_t _lr)
     mr_assert(false);
 
     sptr_excep->abort_cur_sp = 0;
-    __CLR_EXCEPTION_FLAG(cpuid, UND_ABORT_BIT);
+    CLR_EXCEPTION_FLAG(UND_ABORT_BIT);
 }
 
 /*!
@@ -56,7 +57,7 @@ void exec_prefetch_abort_handler(kutype_t _sp, kutype_t _lr)
     kuint32_t cpuid = get_cpu_id();
     struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
 
-    __SET_EXCEPTION_FLAG(cpuid, PREFETCH_ABORT_BIT);
+    SET_EXCEPTION_FLAG(PREFETCH_ABORT_BIT);
 
     sptr_excep->prefecth_abort_addr = _lr;
     sptr_excep->abort_cur_sp = _sp;
@@ -65,7 +66,7 @@ void exec_prefetch_abort_handler(kutype_t _sp, kutype_t _lr)
     mr_assert(false);
     
     sptr_excep->abort_cur_sp = 0;
-    __CLR_EXCEPTION_FLAG(cpuid, PREFETCH_ABORT_BIT);
+    CLR_EXCEPTION_FLAG(PREFETCH_ABORT_BIT);
 }
 
 /*!
@@ -79,7 +80,7 @@ void exec_data_abort_handler(kutype_t _sp, kutype_t _lr)
     kuint32_t cpuid = get_cpu_id();
     struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
 
-    __SET_EXCEPTION_FLAG(cpuid, DATA_ABORT_BIT);
+    SET_EXCEPTION_FLAG(DATA_ABORT_BIT);
 
     sptr_excep->data_abort_addr = _lr;
     sptr_excep->abort_cur_sp = _sp;
@@ -88,7 +89,7 @@ void exec_data_abort_handler(kutype_t _sp, kutype_t _lr)
     mr_assert(false);
     
     sptr_excep->abort_cur_sp = 0;
-    __CLR_EXCEPTION_FLAG(cpuid, DATA_ABORT_BIT);
+    CLR_EXCEPTION_FLAG(DATA_ABORT_BIT);
 }
 
 /*!
@@ -102,13 +103,13 @@ void exec_unused_handler(kutype_t _sp, kutype_t _lr)
     kuint32_t cpuid = get_cpu_id();
     struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
 
-    __SET_EXCEPTION_FLAG(cpuid, UNUSED_BIT);
+    SET_EXCEPTION_FLAG(UNUSED_BIT);
 
     sptr_excep->abort_cur_sp = _sp;
     mr_assert(false);
 
     sptr_excep->abort_cur_sp = 0;
-    __CLR_EXCEPTION_FLAG(cpuid, UNUSED_BIT);
+    CLR_EXCEPTION_FLAG(UNUSED_BIT);
 }
 
 /*!< --------------------------------------------------------------- */

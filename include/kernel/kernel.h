@@ -100,7 +100,6 @@ struct kthread_percpu
     } while (0)
 
 /*!< The globals */
-extern kbool_t g_kernel_preempt_enable;
 
 /*!< The functions */
 extern void wake_up_migration(void);

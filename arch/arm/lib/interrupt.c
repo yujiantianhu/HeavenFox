@@ -19,13 +19,14 @@
 #include <platform/irq/fwk_irq_types.h>
 #include <kernel/kernel.h>
 #include <kernel/context.h>
+#include <kernel/preempt.h>
 #include <kernel/sched.h>
 
 /*!< The globals */
 // extern kbool_t g_sched_flag;
 // extern kuint32_t g_asm_sched_flag;
 
-static kuint32_t g_irq_nested_count[CONFIG_CORE_NUM] = { 0 };
+// static kuint32_t g_irq_nested_count[CONFIG_CORE_NUM] = { 0 };
 
 /*!< API function */
 /*!
@@ -55,8 +56,8 @@ void exec_irq_handler(void)
     kuint32_t cpuid = get_cpu_id();
     struct percpu_sched_data *sptr_sched = &sgtc_sched_data[cpuid];
 
-    __SET_INTERRUPT_FLAG(cpuid, IRQ_BIT);
-    g_irq_nested_count[cpuid]++;
+    SET_INTERRUPT_FLAG(IRQ_BIT);
+    INC_HARDIRQ_NEST_COUNT();
 
     /*!< read IAR, enable IRQ */
     hardirq = hw_irq_acknowledge();
@@ -69,7 +70,7 @@ void exec_irq_handler(void)
     hw_irq_deactivate(hardirq);
 
     /*!< nesting depth */
-    if (fwk_softirq_avaliable() && (g_irq_nested_count[cpuid] < 9))
+    if (fwk_softirq_avaliable() && (IRQ_NEST_COUNT() < 9))
     {
         /*!< check and excute softirq (irq will be open) */
         mr_local_irq_exit();
@@ -89,8 +90,9 @@ void exec_irq_handler(void)
         sptr_sched->sched_flag = false;
     }
 
-    if (!(--g_irq_nested_count[cpuid]))
-        __CLR_INTERRUPT_FLAG(cpuid, IRQ_BIT);
+    DEC_HARDIRQ_NEST_COUNT();
+    if (!IN_IRQ_NESTD())
+        CLR_INTERRUPT_FLAG(IRQ_BIT);
 }
 
 /*!
