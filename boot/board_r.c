@@ -71,7 +71,7 @@ kint32_t system_boot_initial(void)
     _ABT_MODE_STACK_BASE = sgtc_abt.stack_base;
     _UND_MODE_STACK_BASE = sgtc_und.stack_base;
 
-    for (kint32_t cpuid = 0; cpuid < CONFIG_CORE_NUM; cpuid++)
+    foreach_percpu(kuint32_t, cpuid)
     {
         set_svc_mode_stack(cpuid, sgtc_svc.stack_base - (cpuid * sgtc_svc.percpu_stack_size));
         set_sys_mode_stack(cpuid, sgtc_sys.stack_base - (cpuid * sgtc_sys.percpu_stack_size));

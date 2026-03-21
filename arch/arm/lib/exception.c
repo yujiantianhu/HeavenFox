@@ -19,8 +19,7 @@
 #include <kernel/preempt.h>
 
 /*!< The globals*/
-// kuint32_t g_interrupt_flags[CONFIG_CORE_NUM];
-struct exception_info sgtc_excep_info[CONFIG_CORE_NUM];
+DEFINE_PER_CPU(struct exception_info, sgtc_excep_info);
 
 /*!< API function */
 /*!
@@ -32,7 +31,7 @@ struct exception_info sgtc_excep_info[CONFIG_CORE_NUM];
 void exec_undefined_handler(kutype_t _sp, kutype_t _lr)
 {
     kuint32_t cpuid = get_cpu_id();
-    struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
+    struct exception_info *sptr_excep = SPEC_CPU_READ(sgtc_excep_info, cpuid);
 
     SET_EXCEPTION_FLAG(UND_ABORT_BIT);
 
@@ -55,7 +54,7 @@ void exec_undefined_handler(kutype_t _sp, kutype_t _lr)
 void exec_prefetch_abort_handler(kutype_t _sp, kutype_t _lr)
 {
     kuint32_t cpuid = get_cpu_id();
-    struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
+    struct exception_info *sptr_excep = SPEC_CPU_READ(sgtc_excep_info, cpuid);
 
     SET_EXCEPTION_FLAG(PREFETCH_ABORT_BIT);
 
@@ -78,7 +77,7 @@ void exec_prefetch_abort_handler(kutype_t _sp, kutype_t _lr)
 void exec_data_abort_handler(kutype_t _sp, kutype_t _lr)
 {
     kuint32_t cpuid = get_cpu_id();
-    struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
+    struct exception_info *sptr_excep = SPEC_CPU_READ(sgtc_excep_info, cpuid);
 
     SET_EXCEPTION_FLAG(DATA_ABORT_BIT);
 
@@ -101,7 +100,7 @@ void exec_data_abort_handler(kutype_t _sp, kutype_t _lr)
 void exec_unused_handler(kutype_t _sp, kutype_t _lr)
 {
     kuint32_t cpuid = get_cpu_id();
-    struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
+    struct exception_info *sptr_excep = SPEC_CPU_READ(sgtc_excep_info, cpuid);
 
     SET_EXCEPTION_FLAG(UNUSED_BIT);
 
@@ -122,7 +121,7 @@ void exec_unused_handler(kutype_t _sp, kutype_t _lr)
 kint32_t abort_info_get(struct context_regs *sptr_regs)
 {
     kuint32_t cpuid = get_cpu_id();
-    struct exception_info *sptr_excep = &sgtc_excep_info[cpuid];
+    struct exception_info *sptr_excep = SPEC_CPU_READ(sgtc_excep_info, cpuid);
     struct context_regs *sptr_sp = (struct context_regs *)sptr_excep->abort_cur_sp;
 
     if (!sptr_sp)

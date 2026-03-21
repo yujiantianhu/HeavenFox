@@ -65,9 +65,18 @@ _start:
  * Restore The Current Filed Context 
  * -----------------------------------------------------------------------------*/
 .macro _exception_restore_params
-    ldmia sp, {r0 - r12}^                           @ pop r0 ~ r12, and resume cpsr (cpsr = spsr)
+    /*! @warning: 
+     * Do not use the "^" syntax; it does not restore spsr from the stack !!!
+     * This syntax is left commented out as a caution.
+     */
+@   ldmia sp, {r0 - r12}^                           @ pop r0 ~ r12, and restore cpsr (cpsr = spsr)
+
+    ldr r0, [sp, #ARCH_OFFSET_PSR]                  @ restore spsr (cpsr will be updated automatically after calling "mov pc, lr")
+    msr spsr, r0
+
+    ldmia sp, {r0 - r12}
     ldr lr, [sp, #ARCH_OFFSET_PC]                   @ reload lr, lr = lr(pc - 4)
-    add sp, sp, #ARCH_FRAME_SIZE                    @ resume top of stack
+    add sp, sp, #ARCH_FRAME_SIZE                    @ restore top of stack
 .endm
 
 /* -------------------------------------------------------------------------------
@@ -147,6 +156,8 @@ _irq_handler:
     sub lr, lr, #0x04
     _exception_save_params                          @ save current context
 
+    mov r0, sp                                      @ save context base stack
+    mov r1, lr                                      @ get instrcution causing irq
     bl exec_irq_handler                             @ exception handlers, please jump to interrupt.c
     _exception_restore_params                       @ restore previous context
 

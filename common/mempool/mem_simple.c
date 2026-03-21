@@ -54,6 +54,8 @@ kint32_t memory_simple_block_create(struct mem_info *sptr_info, kuaddr_t mem_add
     sptr_block->sptr_prev = mr_nullptr;
     sptr_block->sptr_next = mr_nullptr;
     sptr_block->magic = MEMORY_POOL_MAGIC;
+    sptr_block->usesize = 0;
+
     init_list_head(&sptr_block->sgtc_link);
 
     sptr_info->sptr_mem	= sptr_block;
@@ -98,7 +100,7 @@ static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size
     struct mem_block *sptr_start;
     struct mem_block *sptr_block;
     struct mem_block *sptr_new = mr_nullptr;
-    kusize_t header_size, lenth, offset;
+    kusize_t header_size, lenth, data_size, offset;
     void *ptr_mem = mr_nullptr;
 
     if (!isValid(sptr_info) ||
@@ -109,9 +111,11 @@ static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size
     header_size	= MEM_BLOCK_HEADER_SIZE;
 
     /*!< 8 bytes alignment for memory block lenth */
+    data_size = mr_num_align8(size);
+
     /*!< Build complete space: lenth + header size, adapted to sptr_block->lenth */
-    lenth  = mr_num_align8(size);
-    lenth += header_size;
+    lenth = (header_size + data_size + MEM_BLOCK_TAIL_SIZE);
+    lenth = mr_num_align8(lenth);
 
     /*!< Several methods for dividing memory:
      * 1. After allocating memory, the original memory is not divided, and the original lenth is retained; --->
@@ -142,6 +146,8 @@ static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size
                 sptr_new->sptr_prev = sptr_block;
                 sptr_new->sptr_next = sptr_block->sptr_next;
                 sptr_new->magic = MEMORY_POOL_MAGIC;
+                sptr_new->usesize = data_size;
+                SET_MEM_BLOCK_TAIL(sptr_new);
 
                 sptr_block->lenth = offset;
                 sptr_block->remain -= sptr_new->lenth;
@@ -154,6 +160,9 @@ static void *alloc_spare_simple_memory(struct mem_info *sptr_info, kusize_t size
             }
             else
             {
+                sptr_block->usesize = data_size;
+                SET_MEM_BLOCK_TAIL(sptr_block);
+
                 /*!< Update the lenth of memory that is avaliable */
                 sptr_block->remain -= lenth;
             }
@@ -228,6 +237,9 @@ static void free_employ_simple_memory(struct mem_info *sptr_info, void *ptr_mem)
     sptr_block = check_employ_simple_memory(sptr_info->sptr_mem, ptr_mem);
     if (!sptr_block)
         return;
+    
+    CLR_MEM_BLOCK_TAIL(sptr_block);
+    sptr_block->usesize = 0;
 
     sptr_prev = sptr_block->sptr_prev;
     sptr_next = sptr_block->sptr_next;

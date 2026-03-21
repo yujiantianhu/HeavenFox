@@ -40,7 +40,7 @@ static kint32_t term_cmd_show_cpuinfo(struct term_cmd *sptr_cmd, kint32_t argc, 
     switch (argc)
     {
         case 1:
-            for (kint32_t cpuid = 0; cpuid < CONFIG_CORE_NUM; cpuid++)
+            foreach_percpu(kuint32_t, cpuid)
             {
                 if (!get_cpu_current_thread(cpuid))
                     continue;

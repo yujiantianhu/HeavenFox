@@ -48,17 +48,17 @@ extern struct mutex_lock sgtc_migration_mutex;
 #define mr_preempt_is_locked()                  atomic_get_val(&PREEMPT_COUNT())
 
 #else
+#define mr_preempt_disable()	\
+    do {	\
+        g_kernel_preempt_enable ? mr_preempt_cnt_inc() : (void)0;	\
+        mr_barrier();	\
+    } while (0)
+    
 #define mr_preempt_enable()	\
     do {	\
         mr_barrier();	\
         if (g_kernel_preempt_enable && mr_preempt_is_locked())  \
             mr_preempt_cnt_dec();   \
-    } while (0)
-
-#define mr_preempt_disable()	\
-    do {	\
-        g_kernel_preempt_enable ? mr_preempt_cnt_inc() : (void)0;	\
-        mr_barrier();	\
     } while (0)
 
 #endif
@@ -108,8 +108,8 @@ extern struct mutex_lock sgtc_migration_mutex;
 #define __IN_IRQ_INTERRUPT(count)               (__INTERRUPT_MODE(count) & IRQ_INTERRUPT_MASK)
 #define __IN_IRQ_EXCEPTION(count)               (__INTERRUPT_MODE(count) & IRQ_EXCEPTION_MASK)
 
-#define __SET_INTERRUPT_FLAG(count, mask)       do { (count) |=  ((mask) << INTERRUPT_OFFSET); mr_smp_mb(); } while (0)
-#define __CLR_INTERRUPT_FLAG(count, mask)       do { (count) &= ~((mask) << INTERRUPT_OFFSET); mr_smp_mb(); } while (0)
+#define __SET_INTERRUPT_FLAG(count, mask)       do { (count) |= ((mask) << INTERRUPT_OFFSET); mr_barrier(); } while (0)
+#define __CLR_INTERRUPT_FLAG(count, mask)       do { mr_barrier(); (count) &= ~((mask) << INTERRUPT_OFFSET); } while (0)
 #define __SET_EXCEPTION_FLAG(mask)              __SET_INTERRUPT_FLAG(mask)
 #define __CLR_EXCEPTION_FLAG(mask)              __CLR_INTERRUPT_FLAG(mask)
 
@@ -124,22 +124,22 @@ extern struct mutex_lock sgtc_migration_mutex;
 #define SET_EXCEPTION_FLAG(mask)                SET_INTERRUPT_FLAG(mask)
 #define CLR_EXCEPTION_FLAG(mask)                CLR_INTERRUPT_FLAG(mask)
 
-#define INC_HARDIRQ_NEST_COUNT()                do { IRQ_COUNT() += (1 << HARDIRQ_OFFSET); mr_smp_mb(); } while (0)
+#define INC_HARDIRQ_NEST_COUNT()                do { IRQ_COUNT() += (1 << HARDIRQ_OFFSET); mr_barrier(); } while (0)
 #define DEC_HARDIRQ_NEST_COUNT()    \
     do {    \
+        mr_barrier();    \
         if (IN_IRQ_NESTD()) {   \
             IRQ_COUNT() -= (1 << HARDIRQ_OFFSET);   \
-            mr_smp_mb();    \
         }   \
     } while (0)
 
 #define mr_local_bh_is_locked()                 IS_SOFTIRQ_LOCKED()
-#define mr_local_bh_disable()                   do { IRQ_COUNT() += (1 << SOFTIRQ_OFFSET); mr_smp_mb(); } while (0)
+#define mr_local_bh_disable()                   do { IRQ_COUNT() += (1 << SOFTIRQ_OFFSET); mr_barrier(); } while (0)
 #define mr_local_bh_enable()    \
     do {    \
+        mr_barrier();    \
         if (mr_likely(mr_local_bh_is_locked())) {   \
             IRQ_COUNT() -= (1 << SOFTIRQ_OFFSET);   \
-            mr_smp_mb();    \
         }   \
     } while (0)
 

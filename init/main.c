@@ -34,7 +34,7 @@
 
 /*!< The globals */
 static struct tag_params *sptr_tag_params;
-static struct thread sgtc_percpu_default_thread[CONFIG_CORE_NUM] __section(".data") = {};
+static DEFINE_PER_CPU(struct thread, sgtc_percpu_default_thread) __section(".data") = {};
 
 /*!< The defines */
 #define mr_tag_params_get()    \

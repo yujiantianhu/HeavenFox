@@ -75,7 +75,7 @@ static kint32_t term_cmd_task_show(struct term_cmd *sptr_cmd, kint32_t argc, kch
             term_cmd_ts_title();
             mutex_lock(&sgtc_migration_mutex);
 
-            for (kuint32_t cpuid = 0; cpuid < CONFIG_CORE_NUM; cpuid++)
+            foreach_percpu(kuint32_t, cpuid)
             {
                 sptr_lock = scheduler_cpu_lock(cpuid);
                 spin_lock_irqsave(sptr_lock, &flags);

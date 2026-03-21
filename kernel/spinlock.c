@@ -222,16 +222,20 @@ void spin_unlock_irq(struct spin_lock *sptr_lock)
  */
 void spin_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags)
 {
+    kutype_t lock_flags;
+
     /*!< record */
     if (spin_is_locked(sptr_lock))
         g_spin_lock_monitor++;
 
-    local_irq_save(flags);
+    /*!< do not use flags directly, flags maybe a global variable */
+    local_irq_save(&lock_flags);
     while (atomic_test_and_set_val(&sptr_lock->sgtc_atc, 1));
 
     mr_smp_mb();
     mr_preempt_disable();
     mr_spin_set_owner(&sptr_lock->owner);
+    *flags = lock_flags;
     mr_smp_mb();
 }
 
@@ -243,17 +247,21 @@ void spin_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags)
  */
 kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags)
 {
-    local_irq_save(flags);
+    kutype_t lock_flags;
+
+    /*!< do not use flags directly, flags maybe a global variable */
+    local_irq_save(&lock_flags);
     if (atomic_test_and_set_val(&sptr_lock->sgtc_atc, 1))
     {
         g_spin_lock_monitor++;
-        local_irq_restore(flags);
+        local_irq_restore(&lock_flags);
         return -ER_LOCKED;
     }
 
     mr_smp_mb();
     mr_preempt_disable();
     mr_spin_set_owner(&sptr_lock->owner);
+    *flags = lock_flags;
     mr_smp_mb();
 
     return ER_NORMAL;
