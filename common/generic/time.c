@@ -56,7 +56,7 @@ struct ktime_manage sgtc_khrtime_manage =
 };
 
 /*!< ---------------------------------------------------------- */
-static struct ktime_tick sgtc_ktime_jiffies[CONFIG_CORE_NUM];
+static DEFINE_PER_CPU(struct ktime_tick, sgtc_ktime_jiffies);
 
 static struct ktime_tick sgtc_ktime_htick;
 static struct ktime_tick sgtc_ktime_pending;
@@ -354,7 +354,7 @@ void add_timer(struct timer_list *sptr_timer)
 
     /*!< disable preempt, avoid cpuid changed */
     mr_preempt_disable();
-    sptr_list = &sgtc_ktime_jiffies[get_cpu_id()];
+    sptr_list = THIS_CPU_READ(sgtc_ktime_jiffies);
     sptr_lock = &sptr_list->sgtc_lock;
     sptr_timer->base = (kuaddr_t)sptr_list;
 
@@ -467,7 +467,7 @@ void do_timer_event(void)
     struct timer_list *sptr_timer, *sptr_temp;
     kutime_t expires_bak;
 
-    sptr_list = &sgtc_ktime_jiffies[get_cpu_id()];
+    sptr_list = THIS_CPU_READ(sgtc_ktime_jiffies);
     foreach_list_next_entry_safe(sptr_timer, sptr_temp, &sptr_list->sgtc_list, sgtc_link)
     {
         if (!sptr_timer->expires || 
@@ -760,9 +760,9 @@ void __fwk_init systime_init(void)
     struct ktime_tick *sptr_tick;
     kusize_t list_num = ARRAY_SIZE(sgtr_ktime_lists);
 
-    for (kint32_t id = 0; id < CONFIG_CORE_NUM; id++)
+    foreach_percpu(kuint32_t, id)
     {
-        sptr_tick = &sgtc_ktime_jiffies[id];
+        sptr_tick = SPEC_CPU_READ(sgtc_ktime_jiffies, id);
 
         sptr_tick->sptr_first = mr_nullptr;
         init_list_head(&sptr_tick->sgtc_list);

@@ -543,12 +543,15 @@ static void fwk_netif_rx_action(kint32_t nr)
     struct fwk_netif_tcb *sptr_tcb;
     struct fwk_sk_buff_head *sptr_head;
     struct spin_lock *sptr_sklock, *sptr_cpulock;
+    struct fwk_sk_buff_head sgtc_rxq;
     kutype_t flags;
 
     sptr_head = fwk_netif_rxq_get();
     sptr_tcb = sptr_fwk_netif_rx_tcb;
     sptr_sklock = &sgtc_fwk_netif_rx_lock;
     sptr_cpulock = &sgtc_cpu_netif_rx_lock;
+
+    fwk_skb_list_init(&sgtc_rxq);
 
     spin_lock_irqsave(sptr_sklock, &flags);
     if (mr_skbuff_list_empty(sptr_head))
@@ -557,14 +560,15 @@ static void fwk_netif_rx_action(kint32_t nr)
         return;
     }
 
-    fwk_skb_split(&sptr_tcb->sgtc_head, sptr_head);
+//  fwk_skb_split(&sptr_tcb->sgtc_head, sptr_head);
+    fwk_skb_split(&sgtc_rxq, sptr_head);
     fwk_skb_list_init(sptr_head);
 
     spin_unlock_irqrestore(sptr_sklock, flags);
 
     spin_lock_bh(sptr_cpulock);
     if (mr_likely(sptr_tcb->pfunc_rx))
-        sptr_tcb->pfunc_rx(&sptr_tcb->sgtc_head, sptr_tcb->args);
+        sptr_tcb->pfunc_rx(&sgtc_rxq, sptr_tcb->args);
 
     spin_unlock_bh(sptr_cpulock);
 }

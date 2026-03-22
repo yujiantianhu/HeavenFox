@@ -28,8 +28,6 @@
     #define CPU_INTC_COMPATIBLE                             "arm,cortex-a7-gic"
 #endif
 
-#define PERCPU_CURRENT()                                    __get_cp15_tpidrprw()
-#define SET_PERCPU_CURRENT(x)                               __set_cp15_tpidrprw((kuint32_t)(x))
 #define SOFTIRQ_CALL(x)                                     __asm__ __volatile__ ("svc %0" : : "i"(x))
 
 #if 0
@@ -54,8 +52,9 @@
 
 #define mr_local_irq_save(flags)   \
     do {    \
-        flags = __get_cpsr();   \
+        kutype_t _flags = __get_cpsr();   \
         mr_disable_cpu_irq();   \
+        flags = _flags; \
     } while (0)
 
 #define mr_local_irq_restore(flags)   \
@@ -120,8 +119,10 @@ __force_inline static inline void local_irq_disable(void)
  */
 __force_inline static inline void local_irq_save(kutype_t *flags)
 {
-    *flags = __get_cpsr();
+    kutype_t irq_flags = __get_cpsr();
+
     mr_disable_cpu_irq();
+    *flags = irq_flags;
 }
 
 /*!
@@ -176,7 +177,7 @@ static inline kuint32_t get_cpu_id(void)
  * @retval  none
  * @note    none
  */
-static inline void set_cpu_private(kuint32_t data)
+__force_inline static inline void set_cpu_private(kuint32_t data)
 {
     __set_cp15_tpidrprw(data);
 }
@@ -187,10 +188,14 @@ static inline void set_cpu_private(kuint32_t data)
  * @retval  private data
  * @note    none
  */
-static inline kuint32_t get_cpu_private(void)
+__force_inline static inline kuint32_t get_cpu_private(void)
 {
     return __get_cp15_tpidrprw();
 }
+
+/*!< The defines */
+#define PERCPU_CURRENT()                                    get_cpu_private()
+#define SET_PERCPU_CURRENT(x)                               set_cpu_private((kuint32_t)(x))
 
 /*!
  * @brief   switch mode

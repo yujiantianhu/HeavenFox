@@ -509,6 +509,26 @@ static inline void __set_cpsr(kuint32_t result)
 }
 
 /*!
+ * @brief  	__get_spsr
+ * @param  	none
+ * @retval 	spsr
+ * @note   	get spsr
+ */
+static inline kuint32_t __get_spsr(void)
+{
+    kuint32_t result = 0;
+
+    __asm__ __volatile__ (
+        " mrs %0, spsr  "
+        : "=&r"(result)
+        :
+        : "memory"
+    );
+
+    return result;
+}
+
+/*!
  * @brief  	__set_spsr
  * @param  	cpsr
  * @retval 	none

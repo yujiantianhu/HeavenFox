@@ -33,6 +33,8 @@
 #include <zynq7/xemac/xemac_ieee_reg.h>
 
 /*!< The defines */
+#define ZYNQ7_GEM_WITH_TASKLET                  (1)
+
 typedef enum {
     NR_ETH_LINK_UNDEFINED = 0,
     NR_ETH_LINK_UP,
@@ -83,6 +85,8 @@ struct xsdk_gem_drv_data {
 
     kuint8_t hwaddr[NET_MAC_ETH_ALEN];
     struct fwk_net_device *sptr_ndev;
+
+    struct fwk_tasklet sgtc_tasklet;
 
     xemacpsif_s sgtc_xemacif;
     XEmacPs_Config sgtc_config;
@@ -822,7 +826,7 @@ fail:
  * @retval  none
  * @note    none
  */
-static void xsdk_gem_send_bd(struct xsdk_gem_drv_data *sptr_data, struct fwk_sk_buff *sptr_skb)
+static kint32_t xsdk_gem_send_bd(struct xsdk_gem_drv_data *sptr_data, struct fwk_sk_buff *sptr_skb)
 {
     struct fwk_net_device *sptr_ndev = sptr_data->sptr_ndev;
     xemacpsif_s *sptr_xemacif = &sptr_data->sgtc_xemacif;
@@ -860,7 +864,6 @@ static void xsdk_gem_send_bd(struct xsdk_gem_drv_data *sptr_data, struct fwk_sk_
     else
         XEmacPs_BdSetLength(sptr_txbd, sptr_skb->len & 0x3fff);
 
-    sptr_data->sptr_txskbs[bdindex] = sptr_skb;
     XEmacPs_BdSetLast(sptr_txbd);
     XEmacPs_BdClearTxUsed(sptr_txbd);
     mr_dsb();
@@ -871,12 +874,16 @@ static void xsdk_gem_send_bd(struct xsdk_gem_drv_data *sptr_data, struct fwk_sk_
         goto fail;
     }
 
+    sptr_data->sptr_txskbs[bdindex] = sptr_skb;
+    mr_dsb();
+
     /*!< Start transmit */
     xsdk_gem_xmit_trigger(sptr_xemacif);
-    return;
+    return ER_NORMAL;
 
 fail:
-    return;
+    fwk_free_skb(sptr_skb);
+    return -ER_FAILD;
 }
 
 /*!
@@ -1334,10 +1341,12 @@ static netdev_tx_t xsdk_gem_ndo_start_xmit(struct fwk_sk_buff *sptr_skb, struct 
         size = sptr_skb->len;
         xsdk_gem_send_bd(sptr_data, sptr_skb);
     }
+    else {
+        /*!< nothing will be sent */
+        fwk_free_skb(sptr_skb);
+    }
 
-    fwk_free_skb(sptr_skb);
     fwk_netif_wake_queue(sptr_ndev);
-
     return size;
 }
 
@@ -1496,7 +1505,13 @@ static irq_return_t xsdk_gem_driver_isr(kint32_t irq, void *args)
     if (sptr_data->status & NR_GEM_IRQ_ERR_BIT)
         fwk_disable_irq(sptr_data->irq);
 
+#if ZYNQ7_GEM_WITH_TASKLET
+    fwk_tasklet_schedule(&sptr_data->sgtc_tasklet);
+    return NR_IRQ_HANDLED;
+
+#else
     return NR_IRQ_WAKE_THREAD;
+#endif
 }
 
 /*!
@@ -1505,7 +1520,7 @@ static irq_return_t xsdk_gem_driver_isr(kint32_t irq, void *args)
  * @retval  irq enum
  * @note    none
  */
-static irq_return_t xsdk_gem_driver_bottom_isr(kint32_t irq, void *args)
+static void __xsdk_gem_driver_bottom_isr(kuaddr_t args)
 {
     struct xsdk_gem_drv_data *sptr_data;
     nrt_gem_irq_stat_t status;
@@ -1528,9 +1543,21 @@ static irq_return_t xsdk_gem_driver_bottom_isr(kint32_t irq, void *args)
         memset(sptr_data->reg_value, 0, sizeof(sptr_data->reg_value));
         fwk_enable_irq(sptr_data->irq);
     }
+}
 
+#if !ZYNQ7_GEM_WITH_TASKLET
+/*!
+ * @brief   net device irq handler (bottom irq)
+ * @param   args: sptr_data
+ * @retval  irq enum
+ * @note    none
+ */
+static irq_return_t xsdk_gem_driver_bottom_isr(kint32_t irq, void *args)
+{
+    __xsdk_gem_driver_bottom_isr((kuaddr_t)args);
     return NR_IRQ_HANDLED;
 }
+#endif
 
 /*!
  * @brief   get and set property
@@ -1585,10 +1612,19 @@ static kint32_t xsdk_gem_driver_probe(struct fwk_platdev *sptr_pdev)
         goto fail1;
 
     fwk_platform_set_drvdata(sptr_pdev, sptr_data);
+    fwk_tasklet_init(&sptr_data->sgtc_tasklet, __xsdk_gem_driver_bottom_isr, (kutype_t)sptr_data);
+
+#if ZYNQ7_GEM_WITH_TASKLET
+    retval = fwk_request_irq(sptr_data->irq, xsdk_gem_driver_isr, 0, XSDK_GEM_DRIVER_NAME, sptr_data);
+    if (retval)
+        goto fail2;
+
+#else
     retval = fwk_request_threaded_irq(sptr_data->irq, xsdk_gem_driver_isr, 
                             xsdk_gem_driver_bottom_isr, 0, XSDK_GEM_DRIVER_NAME, sptr_data);
     if (retval)
         goto fail2;
+#endif
 
     fwk_disable_irq(sptr_data->irq);
     retval = fwk_register_netdevice(sptr_ndev);

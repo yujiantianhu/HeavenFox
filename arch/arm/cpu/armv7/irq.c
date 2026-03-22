@@ -62,7 +62,7 @@ void __plat_init initIRQ(void)
         struct irq_percpu *sptr_irq = &sgtc_irq_percpus[0];
 
         /*!< for smp */
-        for (kint32_t cpuid = 0; cpuid < CONFIG_CORE_NUM; cpuid++)
+        foreach_percpu(kuint32_t, id)
         {
             sptr_irq->index = g_iHal_gic_cnts;
             sptr_irq->irq_init = (void (*)(void *))fwk_gic_initial;
@@ -79,7 +79,7 @@ void __plat_init initIRQ(void)
     }
     else
     {
-        struct irq_percpu *sptr_irq = &sgtc_irq_percpus[cpuid];
+        struct irq_percpu *sptr_irq = SPEC_CPU_READ(sgtc_irq_percpus, cpuid);
 
         if (sptr_irq->irq_init)
             sptr_irq->irq_init(sptr_irq->args);
@@ -580,7 +580,7 @@ static kint32_t fwk_gic_init_bases(kuint32_t gic_nr, kuint32_t irq_start,
 {
     srt_gic_t *sptr_gic;
     struct fwk_irq_domain *sptr_domain;
-    struct irq_percpu *sptr_irq = &sgtc_irq_percpus[get_cpu_id()];
+    struct irq_percpu *sptr_irq = THIS_CPU_READ(sgtc_irq_percpus);
 
     sptr_gic = fwk_get_gic_data(gic_nr);
     if (!isValid(sptr_gic))

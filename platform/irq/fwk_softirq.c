@@ -39,12 +39,12 @@ static const kchar_t *sgtc_fwk_softirq_name[NR_SOFTIRQ_NUM] __unused =
     [NR_SOFTIRQ_SCHEDULE] = "SCHEDULE"
 };
 
-static kuint32_t g_fwk_softirq_event[CONFIG_CORE_NUM] = {};
-static struct fwk_tasklet_head sgtc_fwk_tasklet_head;
+static DEFINE_PER_CPU_INIT(kuint32_t, g_fwk_softirq_event);
+static DEFINE_PER_CPU(struct fwk_tasklet_head, sgtc_fwk_tasklet_head);
 
-#define mr_this_cpu_softirq_events()                g_fwk_softirq_event[get_cpu_id()]
-#define mr_or_this_cpu_softirq_events(nr)           do { g_fwk_softirq_event[get_cpu_id()] |= (1UL << (nr)); } while (0)
-#define mr_clr_this_cpu_softirq_events()            do { g_fwk_softirq_event[get_cpu_id()] = 0; } while (0)
+#define mr_this_cpu_softirq_events()                (*THIS_CPU_READ(g_fwk_softirq_event))
+#define mr_or_this_cpu_softirq_events(nr)           do { (*THIS_CPU_READ(g_fwk_softirq_event)) |= (1UL << (nr)); } while (0)
+#define mr_clr_this_cpu_softirq_events()            do { (*THIS_CPU_READ(g_fwk_softirq_event)) = 0; } while (0)
 
 /*!< The functions */
 extern void wake_up_ksoftirqd(void);
@@ -80,10 +80,6 @@ void fwk_handle_softirq(void)
     if (!pending || IS_SOFTIRQ_LOCKED())
         goto ret;
 
-    /*!< Local irq is opened, but not allow preempting (disable scheduler) */
-    if (IN_INTERRUPT())
-        mr_preempt_disable();
-
     /*!< Avoid enter again */
     local_bh_disable();
     end = jiffies + msecs_to_jiffies(2);
@@ -116,8 +112,6 @@ restart:
         pending = mr_this_cpu_softirq_events();
         if (pending && (jiffies < end))
             goto restart;
-
-        mr_preempt_enable();
 
         /*!< wake up "ksoftirqd" */
         if (pending)
@@ -176,13 +170,14 @@ void fwk_raise_softirq(kint32_t nr)
  */
 static void fwk_tasklet_action(kint32_t nr)
 {
+    struct fwk_tasklet_head *sptr_tasklet = THIS_CPU_READ(sgtc_fwk_tasklet_head);
     struct fwk_tasklet *sptr_list;
     struct fwk_tasklet *sptr_item;
 
     mr_local_irq_disable();
-    sptr_list = sgtc_fwk_tasklet_head.sptr_head;
-    sgtc_fwk_tasklet_head.sptr_head = mr_nullptr;
-    sgtc_fwk_tasklet_head.sptr_tail = &sgtc_fwk_tasklet_head.sptr_head;
+    sptr_list = sptr_tasklet->sptr_head;
+    sptr_tasklet->sptr_head = mr_nullptr;
+    sptr_tasklet->sptr_tail = &sptr_tasklet->sptr_head;
     mr_local_irq_enable();
 
     while (sptr_list)
@@ -193,8 +188,8 @@ static void fwk_tasklet_action(kint32_t nr)
         /*!< Do tasklet */
         if (atomic_get_val(&sptr_item->count))
         {
-            sptr_item->func(sptr_item->data);
             atomic_dec(&sptr_item->count);
+            sptr_item->func(sptr_item->data);
         }
     }
 }
@@ -236,7 +231,7 @@ void fwk_tasklet_schedule(struct fwk_tasklet *sptr_tsk)
         return;
     }
 
-    sptr_list = &sgtc_fwk_tasklet_head;
+    sptr_list = THIS_CPU_READ(sgtc_fwk_tasklet_head);
     sptr_tsk->sptr_next = mr_nullptr;
     *sptr_list->sptr_tail = sptr_tsk;
     sptr_list->sptr_tail = &sptr_tsk->sptr_next;
@@ -265,10 +260,15 @@ void fwk_tasklet_kill(struct fwk_tasklet *sptr_tsk)
  */
 void __fwk_init fwk_softirq_init(void)
 {
-    struct fwk_tasklet_head *sptr_list = &sgtc_fwk_tasklet_head;
+    struct fwk_tasklet_head *sptr_list = &sgtc_fwk_tasklet_head[0];
 
-    sptr_list->sptr_head = mr_nullptr;
-    sptr_list->sptr_tail = &sptr_list->sptr_head;
+    foreach_percpu(kuint32_t, cpuid)
+    {
+        sptr_list->sptr_head = mr_nullptr;
+        sptr_list->sptr_tail = &sptr_list->sptr_head;
+
+        sptr_list++;
+    }
 
     fwk_open_softirq(NR_SOFTIRQ_TASKLET, fwk_tasklet_action);
 }

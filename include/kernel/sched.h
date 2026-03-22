@@ -58,8 +58,9 @@ struct thread
     /*!< refer to "__ERT_THREAD_SIGNALS" */
     kuint32_t flags;
 
-    kint32_t last_cpu;
     /*!< last cpu that thread is running */
+    kint32_t last_cpu;
+    /*!< current cpu that thread is running */
     kint32_t cpu;
     /*!< scheudler status */
     kutype_t lock_flags;

@@ -146,30 +146,33 @@ __信息 （如有需要可邮件联系）__
     06) 提供自定义内存池, 可由kmalloc和kfree申请和释放动态内存;
     07) 支持双向链表, 环形队列/缓冲区, 基数树, 红黑树;
     08) 支持多线程调度机制, 包括线程切换、时间片轮转、优先级抢占、睡眠与唤醒;
-    09) 为多线程提供临界资源互斥机制: 等待队列、互斥锁、自旋锁、信号量、读写锁;
-    10) 支持线程间通信机制: 邮箱消息;
-    11) 默认提供内核线程: 工作队列, 支持自由增删工作事件, 由内核线程轮询调用;
-    12) 提供printk打印接口, 允许内核异步打印(由kthread线程统一读取环形缓冲区输出);
-    13) 支持串口终端, 提供系统命令"help", "ts", "ttc"等;
-    14) 支持高精度定时器延时, 系统定时器中断链表, 允许定时事件自由注册和脱离;
-    15) 支持SD卡 (移植Fatfs), 并提供通用文件函数接口, 如: file_open/file_close, ...;
-    16) 内嵌dtc编译器, 可通过"make dtbs"或"make all"直接编译设备树文件 (生成.dtb);
-    17) 支持设备树, 可从SD卡读取dtb文件并解析为fwk_device_node结构体;
-    18) 支持字符设备驱动架构, 如fwk_cdev结构体和fwk_file_oprts操作函数集;
-    19) 支持notifier通知链机制, 驱动程序可通过注册通知链访问其他驱动;
-    20) 支持总线-设备-驱动匹配机制, 设备可人为注册, 或来自于设备树(转化为fwk_platdev结构体); 通过平台总线与驱动程序匹配;
-    21) 支持中断号虚拟化, 即所有硬件中断号均转换为唯一的虚拟中断号; 提供中断服务申请和释放操作, 支持线程化中断下半部;
-    22) 支持时钟平台架构, 可通过fwk_clk操作时钟开关;
-    23) 支持gpio平台架构, 可通过fwk_gpio_desc读写gpio, 支持gpio中断入口;
-    24) 支持cpu引脚在设备树中以pinctrl形式定义, 内核提供pinctrl和gpio通用接口进行解析;
-    25) 支持i2c总线架构: fwk_i2c_adapter - fwk_i2c_client - fwk_i2c_driver;
-    26) 支持framebuffer驱动架构及显示相关API (支持描点、字库读取、图片解析等);
-    27) 支持虚拟文件操作 (用于字符设备驱动), "打开"设备文件后将返回文件描述符fd, 由virt_open/virt_read/...等API操作字符设备;
-    28) 支持网络设备驱动架构, 内嵌lwip开源ip协议栈, 并二次封装: 可直接通过sk_buff与net_device结构体传递数据与设备信息, 无需关注lwip实现;
-    29) 提供网络回环驱动(loopback)和"ping"命令;
-    30) 提供驱动程序: 触摸屏tsc2007驱动、环境传感器ap3216c、eeprom芯片at24c02等; 
-    31) 支持lvgl开源图形库, 可直接调取lvgl函数接口设计图形化界面;
-    32) 支持C++常规应用接口(如new/delete, cout/endl, string等)
+    09) 支持多核SMP模式，各核均含独立调度器，且允许不同核心之间负载迁移；
+    10) 为多线程提供临界资源互斥机制: 等待队列、互斥锁、自旋锁、信号量、读写锁;
+    11) 支持优先级继承, 主要针对互斥锁、写锁;
+    12) 支持线程间通信机制: 邮箱消息;
+    13) 默认提供内核线程: 工作队列, 支持自由增删工作事件, 由内核线程轮询调用;
+    14) 提供printk打印接口, 允许内核异步打印(由kthread线程统一读取环形缓冲区输出);
+    15) 支持串口终端, 提供系统命令"help", "ts", "ttc"等;
+    16) 支持高精度定时器延时, 系统定时器中断链表, 允许定时事件自由注册和脱离;
+    17) 支持SD卡 (移植Fatfs), 并提供通用文件函数接口, 如: file_open/file_close, ...;
+    18) 内嵌dtc编译器, 可通过"make dtbs"或"make all"直接编译设备树文件 (生成.dtb);
+    19) 支持设备树, 可从SD卡读取dtb文件并解析为fwk_device_node结构体;
+    20) 支持字符设备驱动架构, 如fwk_cdev结构体和fwk_file_oprts操作函数集;
+    21) 支持notifier通知链机制, 驱动程序可通过注册通知链访问其他驱动;
+    22) 支持总线-设备-驱动匹配机制, 设备可人为注册, 或来自于设备树(转化为fwk_platdev结构体); 通过平台总线与驱动程序匹配;
+    23) 支持中断号虚拟化, 即所有硬件中断号均转换为唯一的虚拟中断号; 提供中断服务申请和释放操作, 支持线程化中断下半部;
+    24) 支持软中断（softirq）和tasklet作为中断下半部；
+    25) 支持时钟平台架构, 可通过fwk_clk操作时钟开关;
+    26) 支持gpio平台架构, 可通过fwk_gpio_desc读写gpio, 支持gpio中断入口;
+    27) 支持cpu引脚在设备树中以pinctrl形式定义, 内核提供pinctrl和gpio通用接口进行解析;
+    28) 支持i2c总线架构: fwk_i2c_adapter - fwk_i2c_client - fwk_i2c_driver;
+    29) 支持framebuffer驱动架构及显示相关API (支持描点、字库读取、图片解析等);
+    30) 支持虚拟文件操作 (用于字符设备驱动), "打开"设备文件后将返回文件描述符fd, 由virt_open/virt_read/...等API操作字符设备;
+    31) 支持网络设备驱动架构, 内嵌lwip开源ip协议栈, 并二次封装: 可直接通过sk_buff与net_device结构体传递数据与设备信息, 无需关注lwip实现;
+    32) 提供网络回环驱动(loopback)和"ping"命令;
+    33) 提供驱动程序: 触摸屏tsc2007驱动、环境传感器ap3216c、eeprom芯片at24c02等; 
+    34) 支持lvgl开源图形库, 可直接调取lvgl函数接口设计图形化界面;
+    35) 支持C++常规应用接口(如new/delete, cout/endl, string等)
 ```
 
 内核支持嵌入BSP、HAL底层程序，但应仅供于驱动程序使用，切勿随意拷贝处理器SDK库，以免内核臃肿。目前已支持的CPU型号：
@@ -239,6 +242,12 @@ __信息 （如有需要可邮件联系）__
         mem info: 查看当前内存分布(起始地址和大小), 及已分配内存中最接近边界的起始地址;
     2.12, runtime
         查看从系统启动迄今所经过的时间(格式: 年-月-日 时:分:秒:毫秒), 即系统运行时间
+    2.13, cpuinfo
+        查看cpu信息(若有多核, 则显示各核信息)
+    2.14，pwd
+        显示当时路径
+    2.15, ls
+        显示当前路径下的文件和文件夹列表
 
 ---------------------------------------------------------
 ### 4. 源码文件说明
@@ -323,6 +332,10 @@ CONFIG_INSTRUCTION = arm
 
 # 0: amp; 1: smp
 CONFIG_CORE = 0
+# cpu core num
+CONFIG_CORE_NUM = 1
+# cpu master: core 0
+CONFIG_CORE_MASTER = 0
 
 # debug or release
 CONFIG_BUILD_TYPE = release
@@ -534,6 +547,8 @@ obj-xxx由scripts/Makefile.build统一处理
 #define CONFIG_VFP 1
 #define CONFIG_INSTRUCTION arm
 #define CONFIG_CORE 0
+#define CONFIG_CORE_NUM 1
+#define CONFIG_CORE_MASTER 0
 #define CONFIG_BUILD_TYPE release
 #define CONFIG_OPTIMIZE 2
 #define CONFIG_HZ 1000
@@ -672,6 +687,10 @@ typedef __builtin_va_list       va_list;
 #define mr_mask(val, mask)                  /* val & mask */
 #define mr_bit_mask(val, mask, nr)          /* (val << nr) & mask */
 #define mr_bit_mask_nr(val, mask, nr)       /* (val << nr) & (mask << nr) */
+
+/* 掩码移位 */
+#define mr_mk_mask(bits, nr)                /* (((1 << (bits)) - 1) << (nr)) */
+#define mr_get_mask(val, mask, nr)          /* (((val) & mask) >> (nr)) */
 
 /* 32位地址读写(addr须保证32位对齐) */
 #define mr_writel(data, addr)               /* *addr = data */
@@ -1476,34 +1495,39 @@ struct fwk_mempool
     struct spin_lock sgtc_lock;
 };
 
+/* 内核定义的内存池 */
 static struct fwk_mem_info sgtc_mempool_info[NR_FWK_MEMPOOL_TYPE_MAX] = {};
-
 static struct fwk_mempool sgtc_kernel_mempool[NR_FWK_MEMPOOL_TYPE_MAX] =
 {
+    /* 内核通用内存池 */
     [NR_FWK_MEMPOOL_KERNEL] = {
         .name = "kernel heap",
         .mask = NR_KMEM_NORMAL,
         .sptr_mn = &sgtc_mempool_info[NR_FWK_MEMPOOL_KERNEL],
     },
 
+    /* dma缓冲 */
     [NR_FWK_MEMPOOL_DMA] = {
         .name = "dma",
         .mask = NR_KMEM_DMA_AREA,
         .sptr_mn = &sgtc_mempool_info[NR_FWK_MEMPOOL_DMA],
     },
 
+    /* socket报文缓冲 */
     [NR_FWK_MEMPOOL_SK_BUFF] = {
         .name = "network",
         .mask = NR_KMEM_SK_BUFF,
         .sptr_mn = &sgtc_mempool_info[NR_FWK_MEMPOOL_SK_BUFF],
     },
 
+    /* 专门用于显示(帧缓冲), 即显存 */
     [NR_FWK_MEMPOOL_FB_DRAM] = {
         .name = "framebuffer",
         .mask = NR_KMEM_FBUFFER,
         .sptr_mn = &sgtc_mempool_info[NR_FWK_MEMPOOL_FB_DRAM],
     },
 
+    /* 存储: boot传递给kernel的固有数据 */
     [NR_FWK_MEMPOOL_FIXDATA] = {
         .name = "fixed data",
         .mask = NR_KMEM_FIXDATA,
@@ -1514,6 +1538,7 @@ static struct fwk_mempool sgtc_kernel_mempool[NR_FWK_MEMPOOL_TYPE_MAX] =
 
 除“kernel heap”大小不固定外，其他几个都是固定空间，用来特定的场合（如网络报文、帧缓冲等），它们分配内存都使用统一的接口：
 ```c
+/* flags: 如GFP_KERNEL, GFP_DMA, 用来表示从哪个内存池分配 */
 void *kmalloc(size_t __size, nrt_gfp_t flags);
 void *kcalloc(size_t __size, size_t __n, nrt_gfp_t flags);
 void *kzalloc(size_t __size, nrt_gfp_t flags);
@@ -2191,9 +2216,10 @@ head.S需要：
 > 1）设置CPU各模式下的栈顶指针，之前boot_init_f和boot_init_r均运行在SVC模式下，中断处于关闭状态，故仅设置了SVC模式的栈。而内核需要在SVC、IRQ、ABT等模式下切换。
 > 2）使能D-cache和I-cache；
 > 3）使能abort异常；
-> 4）跳转到head-common.S
+> 4）跳转到head-common.S；
+> 5) 构建虚拟线程virtual_thread
 
-head-common.S将直接跳转到“start_kernel”函数，内核开始运行。
+head-common.S将直接跳转到“start_kernel”（主cpu）或“secondary_start_kernel”（次cpu）函数，内核开始运行。
 
 #### 7.6. start_kernel
 首先将tag_params的地址从寄存器r2中读出（jump_to_kernel函数将tag_params保存到了r2寄存器）：
@@ -3599,6 +3625,7 @@ struct fwk_irq_action
     kuint32_t flags;                        /* 标志, 可表示中断触发类型 */
     void *ptrArgs;                          /* 参数指针 */
 
+    kuint32_t cpu_affinity;                 /* cpu亲和力, 决定本cpu是否会执行handler */
     struct list_head sgtc_link;             /* 当前中断挂接的所有回调函数, 组成链表; 链表头位于struct fwk_irq_desc::sgtc_action */
 };
 ```
@@ -3647,6 +3674,8 @@ struct timer_list
 
     void (*entry)(kuint32_t args);                  /* 事件. 时间到则执行此函数 */
     kuint32_t data;                                 /* 事件函数entry的参数 */
+
+    kuaddr_t base;                                  /* 关联本cpu的定时器全局链表地址 */
 };
 
 /* 定义timer_list时初始化使用 */
@@ -3655,6 +3684,7 @@ struct timer_list
     .expires = _expires,    \
     .entry = _entry,    \
     .data = _data,  \
+    .base = 0,    \
 }
 
 /* 定义1个定时器事件 */
@@ -3667,6 +3697,7 @@ struct timer_list
         init_list_head(&(timer)->sgtc_link);  \
         (timer)->entry = (fn); \
         (timer)->data = (data);   \
+        (timer)->base = 0;    \
     } while (0)
 
 /* 初始化定时器事件, 同mr_setup_timer */
@@ -7212,6 +7243,18 @@ struct thread
     /*!< 线程信号 */
     kuint32_t flags;
 
+    /*!< 本线程上次运行的cpu */
+    kint32_t last_cpu;
+    /*!< 本线程当前运行的cpu */
+    kint32_t cpu;
+    /*!< 调度锁上下文 (用于自旋锁保存加锁前的状态) */
+    kutype_t lock_flags;
+
+    /*!< 抢占计数器 */
+    struct atomic sgtc_preempt;
+    /*!< 中断计数器 */
+    kuint32_t irq_count;
+
     /*!< 内置自旋锁 */
     struct spin_lock sgtc_lock;
 
@@ -7232,8 +7275,9 @@ sptr_attr表示线程的属性：
 ```c
 struct scheduler_param
 {
-    kint32_t priority;                          /*!< 初始优先级; 如果希望更改一个线程的优先级, 修改该成员即可 */
+    kint32_t priority;                          /*!< 实时优先级; 如果希望更改一个线程的优先级, 修改该成员即可 */
     kint32_t cur_priority;                      /*!< 当前优先级; 线程在更换状态时会读取priority的值作为当前优先级 */
+    kint32_t ori_priority;                      /*!< 原始优先级; 不受优先级继承影响 *
 
     struct time_spec init_budget;               /*!< 初始时间片; 线程在迁移到运行态前会读取init_budget作为时间片 */
 };
@@ -7278,9 +7322,22 @@ struct thread_list
 
 struct scheduler_core
 {
-    struct thread_list sgtc_ready;              /*!< 就绪哈希散列表 */
-    struct thread_list sgtc_suspend;            /*!< 挂起哈希散列表 */
-    struct thread_list sgtc_sleep;              /*!< 睡眠哈希散列表 */
+    struct thread *sptr_work;                   /*!< 处于运行态的线程, 即当前正在运行的线程 */
+
+    struct thread_list sgtc_lready;             /*!< 就绪哈希散列表, 链表排序太慢, 借助数组快速排序(依据: 优先级) */
+    struct thread_list sgtc_lsuspend;           /*!< 挂起哈希散列表, 链表排序太慢, 借助数组快速排序(依据: 优先级) */
+    struct thread_list sgtc_lsleep;             /*!< 睡眠哈希散列表, 链表排序太慢, 借助数组快速排序(依据: 优先级) */
+
+    struct list_head sgtc_hready;               /*!< 就绪列表, 按优先级从高到低排序 */
+    struct list_head sgtc_hsuspend;             /*!< 挂起列表, 按优先级从高到低排序 */
+    struct list_head sgtc_hsleep;               /*!< 睡眠列表, 按优先级从高到低排序 */
+
+    struct {
+        kutype_t cnt_out;                       /*!< sched_cnt每溢出一次, cnt_out++ */
+        kutype_t sched_cnt;                     /*!< 调度次数, 每发生一次调度, sched_cnt++ */
+    } sgtc_cnt;
+
+    struct spin_lock sgtc_lock;                 /*!< 调度锁 */
 };
 
 /*!< 线程管理器 */
@@ -7291,23 +7348,13 @@ struct scheduler_table
     kint32_t max_tidset;                        /*!< 保留功能. tid最大值(包括sptr_tid_array和sptr_tids) */
     kint32_t ref_tidarr;                        /*!< 保留功能. 实时表示sptr_tid_array分配掉的tid数量 */
 
-    struct {
-        kutype_t cnt_out;                       /*!< sched_cnt每溢出一次, cnt_out++ */
-        kutype_t sched_cnt;                     /*!< 调度次数, 每发生一次调度, sched_cnt++ */
-    } sgtc_cnt;
-
-    struct scheduler_core sgtc_core;            /*!< 哈希列表, 链表排序太慢, 借助数组快速排序(依据: 优先级) */
-
-    struct list_head sgtc_ready;                /*!< 就绪列表, 按优先级从高到低排序 */
-    struct list_head sgtc_suspend;              /*!< 挂起列表, 按优先级从高到低排序 */
-    struct list_head sgtc_sleep;                /*!< 睡眠列表, 按优先级从高到低排序 */
-
-    struct thread *sptr_work;                   /*!< 处于运行态的线程, 即当前正在运行的线程 */
-
     struct thread **sptr_tids;                  /*!< 保留功能 (当sptr_tid_array满时, 从内存池开辟) */
     struct thread *sptr_tid_array[1024];        /*!< 线程tid即数组sptr_tid_array的下标, 可表示tid: 0 ~ 1023 */
 
+    struct scheduler_share sgtc_share;          /*!< 共享数据 */
     struct spin_lock sgtc_lock;                 /*!< 调度锁 */
+
+    struct scheduler_core sgtc_core[CONFIG_CORE_NUM]; /*!<  */
 }
 ```
 

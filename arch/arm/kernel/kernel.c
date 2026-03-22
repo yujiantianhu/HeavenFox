@@ -22,7 +22,7 @@
 
 /*!< The globals */
 /*!< it must be initialized to 0 !!! do no rely on .bss */
-kuint32_t g_percpu_slave_wake[CONFIG_CORE_NUM] __section(".data") = {};
+DEFINE_PER_CPU(kuint32_t, g_percpu_slave_wake) __section(".data") = {};
 
 /*!< API functions */
 /*!
@@ -33,8 +33,8 @@ kuint32_t g_percpu_slave_wake[CONFIG_CORE_NUM] __section(".data") = {};
  */
 void smp_slave_init(void)
 {
-    for (kint32_t cpuid = 0; cpuid < CONFIG_CORE_NUM; cpuid++)
-        g_percpu_slave_wake[cpuid] = true;
+    foreach_percpu(kuint32_t, cpuid)
+        *SPEC_CPU_READ(g_percpu_slave_wake, cpuid) = true;
 
     mr_dsb();
     mr_sev();

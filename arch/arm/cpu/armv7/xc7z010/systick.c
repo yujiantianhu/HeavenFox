@@ -13,6 +13,7 @@
 /*!< The includes */
 #include <common/time.h>
 #include <arch/setup.h>
+#include <boot/core.h>
 #include <platform/of/fwk_of.h>
 #include <platform/of/fwk_of_device.h>
 #include <platform/irq/fwk_irq_types.h>
@@ -30,7 +31,7 @@ struct ps7_xtime_data
 };
 
 /*!< The globals */
-static struct ps7_xtime_data sgtc_ps7_xtime_data[CONFIG_CORE_NUM];
+static DEFINE_PER_CPU(struct ps7_xtime_data, sgtc_ps7_xtime_data);
 
 #ifdef CONFIG_OF
 static const struct fwk_of_device_id sgtc_zynq7_systick_ids[] =
@@ -62,7 +63,7 @@ void zynq7_systick_init(void)
     kuint32_t cpuid = get_cpu_id();
     kint32_t retval;
 
-    sptr_data = &sgtc_ps7_xtime_data[cpuid];
+    sptr_data = SPEC_CPU_READ(sgtc_ps7_xtime_data, cpuid);
     sptr_timer = &sptr_data->sgtc_tick;
 
 #ifdef CONFIG_OF

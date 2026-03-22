@@ -231,6 +231,7 @@ kssize_t lwip_icmp_raw_recvfrom(struct raw_pcb *sptr_pcb, void *buf,
     /*!< Copy ICMP header and data, real_len is the size of ICMP */
     memcpy(buf, (void *)sptr_iphdr + iphdr_len, real_len);
     memcpy(sptr_src, &sptr_seq->sgtc_ipsrc, sizeof(*sptr_src));
+    mr_smp_mb();
 
     kfree(sptr_seq->buf);
     memset(sptr_seq, 0, sizeof(*sptr_seq));
@@ -292,12 +293,14 @@ kssize_t lwip_icmp_raw_send(struct raw_pcb *sptr_pcb,
     sptr_data->type = sptr_hdr->type;
     sptr_data->seq_num = mr_htons(seq_no);
 
+    /*!< Save current time */
+    sptr_seq->tx_time = khrtime_ticks();   
+
     ret = raw_sendto(sptr_pcb, sptr_buf, sptr_dest);
     if (ret < 0)
         goto fail;
-
-    /*!< Save current time and start timer */
-    sptr_seq->tx_time = khrtime_ticks();
+ 
+    /*!< start timer */
     mod_timer(&sptr_seq->sgtc_tm, jiffies + msecs_to_jiffies(1000U));
 
     if ((sptr_data->type == NET_PROTO_ICMP_ECHO) && 

@@ -39,7 +39,7 @@ static void kthread_schedule_timeout(kuint32_t args)
     struct timer_list *sptr_tim = (struct timer_list *)args;
     kuint32_t cpuid = get_cpu_id();
     struct spin_lock *sptr_lock = scheduler_cpu_lock(cpuid);
-    struct percpu_sched_data *sptr_sched = &sgtc_sched_data[cpuid];
+    struct percpu_sched_data *sptr_sched = SPEC_CPU_READ(sgtc_sched_data, cpuid);
     struct thread *sptr_work, *sptr_ready;
     kuint32_t work_prio, next_prio;
     kutype_t flags;
@@ -191,7 +191,10 @@ static void *kthread_entry(void *args)
 
     ksoftirqd_init();                       /*!< create ksoftirqd task */
     kworker_init();                         /*!< create kworker task */
+
+#if CONFIG_SMP
     migration_init();                       /*!< create migration task */
+#endif
 
     if (cpuid == CONFIG_CORE_MASTER)
     {

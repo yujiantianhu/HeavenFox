@@ -30,7 +30,7 @@ struct scheduler_table sgtc_scheduler_table =
 };
 
 /*!< save to (*.data) section, do not defines in stack */
-struct percpu_sched_data sgtc_sched_data[CONFIG_CORE_NUM];
+DEFINE_PER_CPU(struct percpu_sched_data, sgtc_sched_data);
 kbool_t g_kernel_preempt_enable = false;
 
 /*!< The defines */
@@ -39,19 +39,19 @@ kbool_t g_kernel_preempt_enable = false;
 #define SCHED_MANAGER_SHARE()                   (&(sgtc_scheduler_table.sgtc_share))
 #define __SCHED_LOCK                            (SCHED_MANAGER()->sgtc_lock)
 
-#define SCHED_THREAD_HANDLER(tid)               __THREAD_HANDLER(SCHED_MANAGER(), tid)
-#define SCHED_CORE_LOCK(_cpuid)                 __THREAD_CORE_LOCK(SCHED_MANAGER_CORE(_cpuid))
+#define SCHED_THREAD_HANDLER(tid)               __THREAD_HANDLER( SCHED_MANAGER(), tid )
+#define SCHED_CORE_LOCK(_cpuid)                 __THREAD_CORE_LOCK( SCHED_MANAGER_CORE(_cpuid) )
 
-#define SCHED_RUNNING_THREAD(_cpuid)            __THREAD_RUNNING(SCHED_MANAGER_CORE(_cpuid))
-#define SCHED_READY_LIST(_cpuid)                __THREAD_READY_LIST(SCHED_MANAGER_CORE(_cpuid))
-#define SCHED_SUSPEND_LIST(_cpuid)              __THREAD_SUSPEND_LIST(SCHED_MANAGER_CORE(_cpuid))
-#define SCHED_SLEEP_LIST(_cpuid)                __THREAD_SLEEP_LIST(SCHED_MANAGER_CORE(_cpuid))
-#define SCHED_ZOMBIE_LIST(_cpuid)               __THREAD_ZOMBIE_LIST(SCHED_MANAGER_CORE(_cpuid))
+#define SCHED_RUNNING_THREAD(_cpuid)            __THREAD_RUNNING( SCHED_MANAGER_CORE(_cpuid) )
+#define SCHED_READY_LIST(_cpuid)                __THREAD_READY_LIST( SCHED_MANAGER_CORE(_cpuid) )
+#define SCHED_SUSPEND_LIST(_cpuid)              __THREAD_SUSPEND_LIST( SCHED_MANAGER_CORE(_cpuid) )
+#define SCHED_SLEEP_LIST(_cpuid)                __THREAD_SLEEP_LIST( SCHED_MANAGER_CORE(_cpuid) )
+#define SCHED_ZOMBIE_LIST(_cpuid)               __THREAD_ZOMBIE_LIST( SCHED_MANAGER_CORE(_cpuid) )
 
-#define SCHED_READY_HASH(_cpuid)                __THREAD_READY_HASH(SCHED_MANAGER_CORE(_cpuid))
-#define SCHED_SUSPEND_HASH(_cpuid)              __THREAD_SUSPEND_HASH(SCHED_MANAGER_CORE(_cpuid))
-#define SCHED_SLEEP_HASH(_cpuid)                __THREAD_SLEEP_HASH(SCHED_MANAGER_CORE(_cpuid))
-#define SCHED_ZOMBIE_HASH(_cpuid)               __THREAD_ZOMBIE_HASH(SCHED_MANAGER_CORE(_cpuid))
+#define SCHED_READY_HASH(_cpuid)                __THREAD_READY_HASH( SCHED_MANAGER_CORE(_cpuid) )
+#define SCHED_SUSPEND_HASH(_cpuid)              __THREAD_SUSPEND_HASH( SCHED_MANAGER_CORE(_cpuid) )
+#define SCHED_SLEEP_HASH(_cpuid)                __THREAD_SLEEP_HASH( SCHED_MANAGER_CORE(_cpuid) )
+#define SCHED_ZOMBIE_HASH(_cpuid)               __THREAD_ZOMBIE_HASH( SCHED_MANAGER_CORE(_cpuid) )
 
 /*!< Scheduler Operations */
 struct scheduler_operation
@@ -1840,7 +1840,7 @@ kint32_t check_scheduler_load(void)
     struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(0);
     kuint32_t total_load = 0, max_load = 0, max_load_cpu = 0;
 
-    for (kuint32_t i = 0; i < CONFIG_CORE_NUM; i++, sptr_core++)
+    foreach_percpu(kuint32_t, i)
     {
         total_load += sptr_core->ready_num;
 
@@ -1849,6 +1849,8 @@ kint32_t check_scheduler_load(void)
             max_load_cpu = i;
             max_load = sptr_core->ready_num;
         }
+
+        sptr_core++;
     }
 
     sptr_core = SCHED_MANAGER_CORE(cpuid);
@@ -2160,9 +2162,9 @@ void __init scheduler_init(void)
     struct scheduler_core *sptr_core;
     struct scheduler_share *sptr_share;
 
-    for (kint32_t id = 0; id < CONFIG_CORE_NUM; id++)
+    foreach_percpu(kuint32_t, id)
     {
-        sptr_core = &sptr_sch->sgtc_core[id];
+        sptr_core = SPEC_CPU_READ(sptr_sch->sgtc_core, id);
         
         /*!< core */
         memset(sptr_core, 0, sizeof(*sptr_core));

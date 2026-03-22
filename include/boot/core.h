@@ -45,13 +45,23 @@
     #error "Multi core configurations error!"
 #endif
 
-/*!
- * cpu affinity
- */
+/*!< cpu affinity */
 #define CPU_AFFINITY_MASK                       ((1 << CONFIG_CORE_NUM) - 1)
 #define __CPU_CHECK_AFFINITY(affinity)          ((affinity) & CPU_AFFINITY_MASK)
 #define CPU_AFFINITY_SINGEL(cpuid)              (1 << (cpuid))
 #define CPU_AFFINITY_DEFAULT                    __CPU_CHECK_AFFINITY((kuint32_t)(~0))
+
+#define foreach_percpu(_type, _cpuid)  \
+    for (_type _cpuid = 0; _cpuid < CONFIG_CORE_NUM; _cpuid++)
+
+#define DEFINE_PER_CPU(_type, _name)    \
+    _type _name[CONFIG_CORE_NUM]
+
+#define DEFINE_PER_CPU_INIT(_type, _name)    \
+    _type _name[CONFIG_CORE_NUM] = {}
+
+#define SPEC_CPU_READ(_name, _cpuid)            (&((_name)[_cpuid]))
+#define THIS_CPU_READ(_name)                    SPEC_CPU_READ(_name, get_cpu_id())
 
 /*!< IRQ hook */
 struct irq_percpu

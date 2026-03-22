@@ -23,7 +23,10 @@
 #include <kernel/kernel.h>
 
 /*!< The defines */
-#define MEMORY_POOL_MAGIC                      (0xdfa69fe3)
+#define MEMORY_POOL_TAIL                        (1)
+
+#define MEMORY_POOL_MAGIC                       (0xdfa69fe3)
+#define MEMORY_POOL_CANARY                      (~MEMORY_POOL_MAGIC)
 
 typedef struct m_area
 {
@@ -40,6 +43,7 @@ typedef struct mem_block
     kuaddr_t base;								/*!< current start address */
     kusize_t lenth;								/*!< current block total lenth(unit: byte), including header of memory info */
     kusize_t remain;							/*!< the lenth of remaining usable memoty(unit: byte) */
+    kusize_t usesize;                           /*!< real size which is requested */
 
     struct mem_block *sptr_prev;				/*!< the first address of last memory block */
     struct mem_block *sptr_next;				/*!< the first address of next memory block */
@@ -48,8 +52,29 @@ typedef struct mem_block
 
 } srt_mem_block_t;
 
+#define MEM_BLOCK_HEADER_SIZE                   (mr_align(sizeof(struct mem_block), 8))  /*!< 32bytes */
+
+#if MEMORY_POOL_TAIL
+#define MEM_BLOCK_TAIL_SIZE                     8   /*!< sizeof(MEMORY_POOL_CANARY) */
+#define SET_MEM_BLOCK_TAIL(this)                do { *((kuint32_t *)((this)->base + (this)->usesize)) = MEMORY_POOL_CANARY; } while (0)
+#define CLR_MEM_BLOCK_TAIL(this)                do { *((kuint32_t *)((this)->base + (this)->usesize)) = 0; } while (0)
+#define READ_MEM_BLOCK_TAIL(this)   \
+({  \
+    kuaddr_t _tail_addr = (this)->base + (this)->usesize;  \
+    kuint32_t _canary_val = 0;  \
+    if (mr_is_aligned(_tail_addr, ARCH_PER_SIZE))  \
+        _canary_val = *((kuint32_t *)_tail_addr);   \
+    _canary_val;    \
+})
+#define IS_MEMORYPOOL_VALID(this)               (((this)->magic == MEMORY_POOL_MAGIC) && (READ_MEM_BLOCK_TAIL(this) == MEMORY_POOL_CANARY))
+
+#else
+#define MEM_BLOCK_TAIL_SIZE                     0   /*!< sizeof(MEMORY_POOL_CANARY) */
+#define SET_MEM_BLOCK_TAIL(this)                do { } while (0)
+#define CLR_MEM_BLOCK_TAIL(this)                do { } while (0)
+#define READ_MEM_BLOCK_TAIL(this)               0
 #define IS_MEMORYPOOL_VALID(this)               ((this)->magic == MEMORY_POOL_MAGIC)
-#define MEM_BLOCK_HEADER_SIZE                   (mr_align(sizeof(struct mem_block), ARCH_PER_SIZE))  /*!< 32bytes */
+#endif
 
 enum __ERT_MEM_TYPE
 {

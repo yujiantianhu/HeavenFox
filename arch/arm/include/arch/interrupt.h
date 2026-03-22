@@ -24,9 +24,9 @@
 #include "exception.h"
 
 /*!< The functions */
-extern void exec_fiq_handler(void);
-extern void exec_irq_handler(void);
-extern void exec_software_irq_handler(void);
+extern void exec_fiq_handler(kutype_t _sp, kutype_t _lr);
+extern void exec_irq_handler(kutype_t _sp, kutype_t _lr);
+extern void exec_software_irq_handler(kutype_t _sp, kutype_t _lr);
 
 #ifdef __cplusplus
     }

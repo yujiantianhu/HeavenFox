@@ -48,6 +48,22 @@ static void xc7z010_sram_initial(void)
 }
 
 /*!
+ * @brief  	xc7z010_core_initial
+ * @param  	none
+ * @retval 	none
+ * @note   	void function
+ */
+static void xc7z010_core_initial(void)
+{
+    *((volatile kuint32_t *)0xfffffff0) = PROGRAM_RAM_START;
+    mr_dmb();
+
+    mr_dsb();
+    mr_sev();
+    mr_dsb();
+}
+
+/*!
  * @brief  	delay_config
  * @param  	none
  * @retval 	none
@@ -78,6 +94,11 @@ void s_init(void)
 
     /*!< sram init */
     xc7z010_sram_initial();
+
+#if CONFIG_SMP
+    /*!< smp init */
+    xc7z010_core_initial();
+#endif
 }
 
 /* end of file */

@@ -538,6 +538,7 @@ static kssize_t fwk_lwip_recvfrom(struct fwk_network_com *sptr_socket, void *buf
 
     *addrlen = sizeof(sgtc_saddr);
     memcpy(sptr_src, &sgtc_saddr, *addrlen);
+    mr_smp_mb();
 
     return size;
 }

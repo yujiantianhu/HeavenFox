@@ -10,5 +10,6 @@
 #
 
 obj-$(CONFIG_INPUT_IMX_KEY)	+=	extkey.o
+obj-$(CONFIG_SDK_KEY_ZYNQ) += zynq7sdk_key.o
 
 # end of file
