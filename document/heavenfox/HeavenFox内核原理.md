@@ -58,6 +58,8 @@ __信息 （如有需要可邮件联系）__
     - [8.4.1. 中断控制器](#841-中断控制器)
     - [8.4.2. 虚拟中断号](#842-虚拟中断号)
     - [8.4.3. 中断申请与执行](#843-中断申请与执行)
+    - [8.4.4. 软中断](#844-软中断)
+    - [8.4.5. tasklet](#845-tasklet)
   - [8.5. 定时器](#85-定时器)
     - [8.5.1. 系统定时器](#851-系统定时器)
     - [8.5.2. 高精度定时器](#852-高精度定时器)
@@ -119,10 +121,11 @@ __信息 （如有需要可邮件联系）__
     - [10.7.4. 抢占](#1074-抢占)
   - [10.8. 同步与互斥](#108-同步与互斥)
     - [10.8.1. 关中断](#1081-关中断)
-    - [10.8.2. 自旋锁](#1082-自旋锁)
-    - [10.8.3. 互斥锁](#1083-互斥锁)
-    - [10.8.4. 读写锁](#1084-读写锁)
-    - [10.8.5. 信号量](#1085-信号量)
+    - [10.8.2. 关中断下半部](#1082-关中断下半部)
+    - [10.8.3. 自旋锁](#1083-自旋锁)
+    - [10.8.4. 互斥锁](#1084-互斥锁)
+    - [10.8.5. 读写锁](#1085-读写锁)
+    - [10.8.6. 信号量](#1086-信号量)
   - [10.9. 线程间通信：邮箱](#109-线程间通信邮箱)
   - [10.10. 等待队列](#1010-等待队列)
   - [10.11. 优先级继承](#1011-优先级继承)
@@ -133,6 +136,8 @@ __信息 （如有需要可邮件联系）__
     - [10.12.4. kworker](#10124-kworker)
     - [10.12.5. kmemp](#10125-kmemp)
     - [10.12.6. irq\_thread](#10126-irq_thread)
+    - [10.12.7. migration](#10127-migration)
+    - [10.12.8. ksoftirqd](#10128-ksoftirqd)
 
 ---------------------------------------------------------
 ### 2. 前言
@@ -689,7 +694,7 @@ typedef __builtin_va_list       va_list;
 #define mr_bit_mask_nr(val, mask, nr)       /* (val << nr) & (mask << nr) */
 
 /* 掩码移位 */
-#define mr_mk_mask(bits, nr)                /* (((1 << (bits)) - 1) << (nr)) */
+#define mr_mk_mask(bits, nr)                /* (((1 << (bits)) - 1) << (nr)), bits表示位数, 如0xc0, bits为2, nr为5 */
 #define mr_get_mask(val, mask, nr)          /* (((val) & mask) >> (nr)) */
 
 /* 32位地址读写(addr须保证32位对齐) */
@@ -1312,7 +1317,11 @@ Heavenfox的内存池并不会事先切割成指定大小的内存块，而是�
 直接定义成内存块容易造成资源浪费，如事先定义32字节、128字节、256字节大小的块，当申请129字节的内存时，可能要直接分掉一个256字节的块。
 Heavenfox的内存池起初是一块空白区域，内核启动时在空白区的首端添加一段信息头，结构如下：
 ```c
-#define MEMORY_POOL_MAGIC                      (0xdfa69fe3)
+/*!< 是否需要尾部 */
+#define MEMORY_POOL_TAIL                        (1)
+
+#define MEMORY_POOL_MAGIC                       (0xdfa69fe3)
+#define MEMORY_POOL_CANARY                      (~MEMORY_POOL_MAGIC)
 
 typedef struct mem_block
 {
@@ -1320,6 +1329,7 @@ typedef struct mem_block
     kuaddr_t base;                              /*!< 内存块的起始地址 = 内存区起始地址 + MEM_BLOCK_HEADER_SIZE */
     kusize_t lenth;                             /*!< 内存块的大小, 包括MEM_BLOCK_HEADER_SIZE */
     kusize_t remain;                            /*!< 内存块的剩余空间 (可分配空间). 未分配时等于lenth */
+    kusize_t usesize;                           /*!< 用户要使用的内存块大小(不含头部和尾部, 即用户的数据区) */
 
     struct mem_block *sptr_prev;                /*!< 上一个内存块的地址 */
     struct mem_block *sptr_next;                /*!< 下一个内存块的地址 */
@@ -1328,8 +1338,36 @@ typedef struct mem_block
 
 } srt_mem_block_t;
 
+#define MEM_BLOCK_HEADER_SIZE                   (mr_align(sizeof(struct mem_block), 8))  /*!< 32bytes */
+
+#if MEMORY_POOL_TAIL
+#define MEM_BLOCK_TAIL_SIZE                     8   /*!< 尾部大小 */
+
+/*!< 在内存块尾部加上MEMORY_POOL_CANARY */
+#define SET_MEM_BLOCK_TAIL(this)                do { *((kuint32_t *)((this)->base + (this)->usesize)) = MEMORY_POOL_CANARY; } while (0)
+/*!< 擦除内存块尾部 */
+#define CLR_MEM_BLOCK_TAIL(this)                do { *((kuint32_t *)((this)->base + (this)->usesize)) = 0; } while (0)
+/*!< 将尾部读出(若内存访问未越界, 尾部仍是MEMORY_POOL_CANARY) */
+#define READ_MEM_BLOCK_TAIL(this)   \
+({  \
+    kuaddr_t _tail_addr = (this)->base + (this)->usesize;  \
+    kuint32_t _canary_val = 0;  \
+    if (mr_is_aligned(_tail_addr, ARCH_PER_SIZE))  \
+        _canary_val = *((kuint32_t *)_tail_addr);   \
+    _canary_val;    \
+})
+/*!< 检测头部和尾部, 是否是一个内存块, 是否完好 */
+#define IS_MEMORYPOOL_VALID(this)               (((this)->magic == MEMORY_POOL_MAGIC) && (READ_MEM_BLOCK_TAIL(this) == MEMORY_POOL_CANARY))
+
+#else
+#define MEM_BLOCK_TAIL_SIZE                     0   /*!< 尾部大小 */
+#define SET_MEM_BLOCK_TAIL(this)                do { } while (0)
+#define CLR_MEM_BLOCK_TAIL(this)                do { } while (0)
+#define READ_MEM_BLOCK_TAIL(this)               0
+
+/*!< 未使能尾部, 只需读取头部的魔数来判断即可 */
 #define IS_MEMORYPOOL_VALID(this)               ((this)->magic == MEMORY_POOL_MAGIC)
-#define MEM_BLOCK_HEADER_SIZE                   (mr_align(sizeof(struct mem_block), ARCH_PER_SIZE))  /*!< 32bytes */
+#endif
 ```
 
 首次申请内存后，lenth保持不变，remain减去申请的内存大小，表示可用于下一次分配的空间；此时内存区域与未分配前基本无变化；
@@ -1342,9 +1380,12 @@ void *ptr_mem;
 /* 信息头的大小 */
 header_size = MEM_BLOCK_HEADER_SIZE;
 
-/* 本次要分配的内存大小, 8字节对齐 */
-lenth  = mr_num_align8(size);
-lenth += header_size;
+/* 用户需求的内存大小(数据区), 8字节对齐 */
+data_size = mr_num_align8(size);
+
+/* 本次要分配的内存大小(头部 + 数据区 + 尾部), 8字节对齐 */
+lenth = (header_size + data_size + MEM_BLOCK_TAIL_SIZE);
+lenth = mr_num_align8(lenth);
 
 /* sptr_block为上一个内存块的信息头 */
 offset  = (sptr_block->lenth - header_size - sptr_block->remain) + header_size;
@@ -1360,7 +1401,11 @@ sptr_new->remain = sptr_block->remain - lenth;
 sptr_new->sptr_prev = sptr_block;
 /* 连接下一个内存块 */
 sptr_new->sptr_next = sptr_block->sptr_next;
+/* 设置魔数 */
 sptr_new->magic = MEMORY_POOL_MAGIC;
+/* 设置尾部 */
+sptr_new->usesize = data_size;
+SET_MEM_BLOCK_TAIL(sptr_new);
 ```
 
 两个内存块由插入的信息头进行分割，sptr_new此时表示除第一个内存块外，内存池剩余的总空间；而第一个内存块自我缩减，将其remain成员减为0：
@@ -1548,7 +1593,7 @@ void kfree(void *__ptr);
 而使用哪个内存池，由参数“nrt_gfp_t flags”决定，见枚举结构“enum nrt_gfp”。
 
 #### 6.2. C++
-HeavenFox支持使用C++开发应用程序，且不依赖C++标准库。new、delate、cout、cin等常用接口均由内核重载实现。
+HeavenFox支持使用C++开发应用程序，且不依赖C++标准库。new、delate、cout、cin等常用接口均由和HeavenFox内核重载实现。
 
 ---------------------------------------------------------
 ### 7. 内核启动
@@ -2217,7 +2262,7 @@ head.S需要：
 > 2）使能D-cache和I-cache；
 > 3）使能abort异常；
 > 4）跳转到head-common.S；
-> 5) 构建虚拟线程virtual_thread
+> 5) 构建虚拟线程virtual_thread (在调度器启动前，start_kernel被当成一个虚拟线程，具有线程的基本特征，如抢占计数器；但无法被调度，也不会注册到调度列表，一旦启动调度器，将永远无法回来)
 
 head-common.S将直接跳转到“start_kernel”（主cpu）或“secondary_start_kernel”（次cpu）函数，内核开始运行。
 
@@ -3152,6 +3197,7 @@ struct fwk_of_phandle_args
     kuint32_t args_count;
     kuint32_t args[16];
 };
+
 /*!
  * 如节点属性为: xxx = <&aaa 1 6>, 且节点aaa的phandle为88, 则:
  *  struct fwk_of_phandle_args::sptr_node = fwk_of_find_node_by_phandle(NULL, 88);
@@ -3625,7 +3671,7 @@ struct fwk_irq_action
     kuint32_t flags;                        /* 标志, 可表示中断触发类型 */
     void *ptrArgs;                          /* 参数指针 */
 
-    kuint32_t cpu_affinity;                 /* cpu亲和力, 决定本cpu是否会执行handler */
+    kuint32_t cpu_affinity;                 /* cpu亲和力, 决定本cpu是否会执行此fwk_irq_action */
     struct list_head sgtc_link;             /* 当前中断挂接的所有回调函数, 组成链表; 链表头位于struct fwk_irq_desc::sgtc_action */
 };
 ```
@@ -3635,24 +3681,143 @@ HeavenFox提供以下函数，用于回调函数注册和释放：
 ```c
 /* 根据irq找到fwk_irq_desc, 找到name和ptrArgs都匹配的fwk_irq_action */
 void *fwk_find_irq_action(kint32_t irq, const kchar_t *name, void *args);
+
 /*!
- * 申请(注册)一个中断线程
+ * 申请(注册)一个带cpu亲和力的中断线程
  * irq: 中断号
  * handler: 中断回调函数 (上半部), 赋值给fwk_irq_action::handler
  * thread_fn: 创建中断线程后, 作为中断线程的回调函数 (下半部)
  * flags: 中断标志, 赋值给fwk_irq_action::flags, 一般表示中断触发方式 (如电平触发, 边沿触发)
+ * cpu_affinity: cpu亲和力(按位表示cpu), 表示本中断发生后, 只有具亲和力的cpu可以执行handler和thread_fn
  * name: 中断回调的名称, 赋值给fwk_irq_action::name
  * ptrDev: 私有参数指针, 赋值给fwk_irq_action::ptrArgs, 上半部和下半部(中断线程)均将获取它
  */
+kint32_t __fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
+                        kuint32_t flags, kuint32_t cpu_affinity, const kchar_t *name, void *args);
+
+/*!
+ * 申请(注册)一个仅某个cpu有效的中断线程
+ * 本质是: __fwk_request_threaded_irq(irq, handler, thread_fn, flags, CPU_AFFINITY_SINGEL(cpuid), name, args);
+ * cpuid: cpu核心号, 表示本中断发生后, 只有该cpu可以执行handler和thread_fn; 
+ * 由于中断会由处理器自动分发, 建议只对私有中断(PPI)使用此接口(PPI是每个cpu均独立), 保证cpu一致
+ */
+kint32_t fwk_request_percpu_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
+                                kuint32_t flags, kuint32_t cpuid, const kchar_t *name, void *args);
+
+/*!
+ * 申请(注册)一个中断线程
+ * 本质是: __fwk_request_threaded_irq(irq, handler, thread_fn, flags, CPU_AFFINITY_DEFAULT, name, args);
+ * 不局限cpu, 谁(指cpu)触发谁执行
+ */
 kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handler_t thread_fn, 
                                 kuint32_t flags, const kchar_t *name, void *args);
-/* 即: fwk_request_threaded_irq(irq, handler, mr_nullptr, flags, name, args); */
+
+/* 本质是: fwk_request_threaded_irq(irq, handler, mr_nullptr, flags, name, args); */
 kint32_t fwk_request_irq(kint32_t irq, irq_handler_t handler, kuint32_t flags, const kchar_t *name, void *ptrDev);
 /* 注销指定的回调函数 (遍历, 找到"ptrArgs == args"的fwk_irq_action, 将它从链表中脱离) */
 void fwk_free_irq(kint32_t irq, void *args);
 /* 销毁整个中断fwk_irq_desc::sgtc_action */
 void fwk_destroy_irq_action(kint32_t irq);
 ```
+
+##### 8.4.4. 软中断
+实际上，硬件中断服务程序执行时，中断是全程关闭的，不支持中断嵌套。
+如果我们有一个应用场景，它处理的事务说急也不急，那它不太适合放在硬件中断服务程序里运行；但它说不急也急，似乎也不能放在线程上下文，毕竟调度器存在抢占机制，如果有多个优先级相同的线程也在排队，它恐怕难占优势。
+HeavenFox支持软中断，即：在硬件中断服务程序执行这个事务，但同时又把中断打开，即允许中断发生。这个事务并没有运行在线程上下文，同时又没有禁止其他硬件中断，故为软中断。
+软中断是在SVC模式下运行的，需在硬件中断服务程序切换模式（IRQ模式转到SVC模式），它将使用当前线程的线程栈，而非IRQ模式的栈。
+内核组织一个全局的软中断事件链表，可以遍历，以执行所有的软中断事件，为此区分了几种软中断类型：
+```c
+enum __ERT_SOFTIRQ_EVENT
+{
+    NR_SOFTIRQ_TIMER = 0,
+    NR_SOFTIRQ_NET_TX,
+    NR_SOFTIRQ_NET_RX,
+    NR_SOFTIRQ_TASKLET,
+    NR_SOFTIRQ_SCHEDULE,
+
+    NR_SOFTIRQ_NUM,
+};
+
+static const kchar_t *sgtc_fwk_softirq_name[NR_SOFTIRQ_NUM] __unused =
+{
+    [NR_SOFTIRQ_TIMER   ] = "TIMER",    /* 高精度时间定时器, 常见于khrtime, 目前未作使用 */
+    [NR_SOFTIRQ_NET_TX  ] = "NET_TX",   /* 网络报文发送, 目前未作使用 */
+    [NR_SOFTIRQ_NET_RX  ] = "NET_RX",   /* 网络报文接收, 目前正常使用, 用于处理报文缓冲区的拷贝工作 */
+    [NR_SOFTIRQ_TASKLET ] = "TASKLET",  /* tasklet, 任务队列, 常见于中断下半部, 目前正常使用 */
+    [NR_SOFTIRQ_SCHEDULE] = "SCHEDULE"  /* 调度相关, 目前未作使用 */
+};
+```
+
+可见，软中断的数量是固定的（NR_SOFTIRQ_NUM），将每个软中断用统一的结构封装，通过枚举即可访问。
+```c
+struct fwk_softirq_action
+{
+    void (*action)(kint32_t event);     /* 函数入口, 每个事件的处理方法. 多核也使用相同入口, 需注意内部实现包含多核并发时的保护机制 */
+};
+
+/* 全局软中断事件数组, 每个事件对应一个位置 */
+struct fwk_softirq_action sgtc_fwk_softirq_actions[NR_SOFTIRQ_NUM];
+
+/* kuint32_t g_fwk_softirq_event[CONFIG_CORE_NUM] */
+/* 每个核心都有独立的软中断事件, 按位设置, 比如bit2表示"NET_RX" */
+DEFINE_PER_CPU_INIT(kuint32_t, g_fwk_softirq_event);
+
+/* 读取当前cpu的g_fwk_softirq_event[cpuid] */
+#define mr_this_cpu_softirq_events()                (*THIS_CPU_READ(g_fwk_softirq_event))
+/* 设置当前cpu的软中断事件: g_fwk_softirq_event[cpuid] |= (1 << nr) */
+#define mr_or_this_cpu_softirq_events(nr)           do { (*THIS_CPU_READ(g_fwk_softirq_event)) |= (1UL << (nr)); } while (0)
+/* 清除: g_fwk_softirq_event[cpuid] = 0 */
+#define mr_clr_this_cpu_softirq_events()            do { (*THIS_CPU_READ(g_fwk_softirq_event)) = 0; } while (0)
+
+/* 判断是否有软中断事件, 且中断下半部未加锁(即: 是否满足软中断执行条件, 满足则返回true) */
+kbool_t fwk_softirq_avaliable(void);
+/* 软中断处理函数, 将根据g_fwk_softirq_event[cpuid]设置的位来执行对应的sgtc_fwk_softirq_actions */
+void fwk_handle_softirq(void);
+/* 注册软中断, 即: sgtc_fwk_softirq_actions[nr].action = action */
+void fwk_open_softirq(kint32_t nr, void (*action)(kint32_t event));
+/* 设置一个软中断事件, 即: mr_or_this_cpu_softirq_events(nr) */
+void fwk_raise_softirq(kint32_t nr);
+```
+
+不但硬件中断服务程序可以执行软中断（调用fwk_handle_softirq函数），内核还有软中断线程（ksoftirqd），如果fwk_handle_softirq函数过于耗时（事件处理太久），允许将剩下的事件交给软中断线程处理（依然是调用fwk_handle_softirq函数，接口相同）。
+
+##### 8.4.5. tasklet
+tasklet是软中断事件之一，它不同于“NET_RX”这种专用于网络数据报文接收的事件，而是用于杂项事件。任何事务它都能接，比如按键后，需要保存按键值（如读取矩阵键盘）；或有AD采集事件中断触发，也可以交给tasklet处理AD转化工作。
+故，tasklet是一个开放式的软中断事件，不用局限于全局软中断事件的数量（NR_SOFTIRQ_NUM）。
+使用以下结构来描述一个tasklet：
+```c
+struct fwk_tasklet
+{
+    struct fwk_tasklet *sptr_next;                  /* tasklet采用单向链表, 可以注册多起tasklet事件 */
+
+    kuint32_t state;                                /* 目前没什么意义 */
+    srt_atomic_t count;                             /* 标记当前tasklet是否还未执行, 同一个来源不需要发起多个tasklet, 因为func函数会一次性处理 (比如连续触发按键中断100次, 硬中断函数将数据存到环形缓冲区, 之后只需一次tasklet就可以将缓冲区读完) */
+
+    void (*func)(kutype_t args);                    /* 本tasklet事件的处理函数 */
+    kutype_t data;                                  /* 提供给func函数的参数(args) */
+};
+```
+
+所有的tasklet结成链表，故理论上没有上限。链表头定义为：
+```c
+/* tasklet链表头 */
+struct fwk_tasklet_head
+{
+    struct fwk_tasklet *sptr_head;                  /* 标记第一个tasklet */
+    struct fwk_tasklet **sptr_tail;                 /* 标记最后一个tasklet */
+};
+
+/* struct fwk_tasklet_head sgtc_fwk_tasklet_head[2] */
+/* 每个cpu都有独立的tasklet链表头, 各cpu单独处理自己的事件 */
+DEFINE_PER_CPU(struct fwk_tasklet_head, sgtc_fwk_tasklet_head);
+
+/* 初始化一个tasklet, 填充func和data */
+void fwk_tasklet_init(struct fwk_tasklet *sptr_tsk, void (*func)(kutype_t args), kutype_t data);
+/* 启动一个tasklet, 本质是更新fwk_tasklet_head::sptr_tail, 即添加新tasklet到全局链表尾部; 之后发起软中断事件 */
+void fwk_tasklet_schedule(struct fwk_tasklet *sptr_tsk);
+```
+
+tasklet对应的软中断事件函数为fwk_tasklet_action，内核初始化时会注册到sgtc_fwk_softirq_actions[NR_SOFTIRQ_TASKLET]，由fwk_handle_softirq函数调用。
 
 #### 8.5. 定时器
 HeavenFox需要两个时钟，一个周期性循环，作为系统时钟心跳，周期可以是10ms、5ms、或者1ms；另一个是长久性计时器，用于系统时间统计，精度一般为ns级。
@@ -7206,8 +7371,25 @@ graph LR
 ### 10. 线程管理
 
 #### 10.1. 线程状态与迁移（一）：状态定义
-在HeavenFox中，线程就是一个任务，当任务在执行时，称它处于运行态（running）；当它准备执行时，称它处于就绪态（ready）；一个无法被执行的任务，称它处于睡眠态（sleep），这种状态的任务，如果不能及时唤醒，将会被系统回收（被杀死）；一个暂时不能执行的任务，但是有机会变成就绪态，称它处于挂起态（suspend），处于该状态的任务，系统不会回收。
-在单核CPU中，任何时刻只有一个任务处于运行态，当它结束时，会自动从处于就绪态的各个任务中取一个来运行。内核始终至少保留一个任务处于就绪态，如空闲线程。一个运行中的任务结束时，可能变为就绪、挂起、睡眠中的任一个状态；当变为就绪态时，可以在其他任务执行结束后重新恢复运行；当变为挂起态时，需要由中断或其他任务“唤醒”，并置为就绪态。挂起态不能直接恢复为运行态，必须经由就绪态，以便调度器裁决。
+在HeavenFox中，线程就是一个任务，当任务在执行时，称它处于运行态（running）；当它准备执行时，称它处于就绪态（ready）；一个暂时休息的任务，称它处于睡眠态（sleep），这种状态的任务，只能主动唤醒，无法参与调度; 如果一个线程被杀死, 那它将会先变为僵死态(zombie), 等待系统统一回收（彻底杀死）；一个暂时不能执行的任务，但是有机会变成就绪态，称它处于挂起态（suspend）。
+不论是哪个核，任何时刻, 该核心上都只有一个任务处于运行态，当它结束时，会自动从处于就绪态的各个任务中取一个来运行。内核始终至少保留一个任务处于就绪态，如空闲线程。一个运行中的任务结束时，可能变为就绪、挂起、睡眠、僵死中的任一个状态；当变为就绪态时，可以在其他任务执行结束后重新恢复运行；当变为挂起态时，需要由中断或其他任务“唤醒”，并置为就绪态。挂起态不能直接恢复为运行态，必须经由就绪态，以便调度器裁决。
+
+定义如下：
+```c
+enum __ERT_THREAD_BASIC_STATUS
+{
+    NR_THREAD_NONE = 0,                             /*!< 无意义状态 */
+    
+    NR_THREAD_RUNNING,                              /*!< 运行态  */
+    NR_THREAD_READY,                                /*!< 就绪态 */
+    NR_THREAD_SUSPEND,                              /*!< 挂起态 */
+    NR_THREAD_SLEEP,                                /*!< 睡眠态 */
+    NR_THREAD_ZOMBIE,                               /*!< 僵死态 */
+
+    /*!< 状态数目 */
+    NR_THREAD_STATUS_MAX
+};
+```
 
 #### 10.2. 线程控制块
 每个任务（线程）都使用结构体“struct thread”来描述：
@@ -7220,7 +7402,7 @@ struct thread
     /*!< 线程id: 每个线程都有独一无二的id */
     kuint32_t tid;
 
-    /*!< state为当前状态(运行, 就绪, 挂起, 睡眠); to_state为目标状态, 当它非0时, 表示即将进行状态迁移 */
+    /*!< state为当前状态(运行, 就绪, 挂起, 睡眠, 僵死); to_state为目标状态, 当它非0时, 表示即将进行状态迁移 */
     kuint32_t state;
     kuint32_t to_state;
 
@@ -7277,7 +7459,7 @@ struct scheduler_param
 {
     kint32_t priority;                          /*!< 实时优先级; 如果希望更改一个线程的优先级, 修改该成员即可 */
     kint32_t cur_priority;                      /*!< 当前优先级; 线程在更换状态时会读取priority的值作为当前优先级 */
-    kint32_t ori_priority;                      /*!< 原始优先级; 不受优先级继承影响 *
+    kint32_t ori_priority;                      /*!< 原始优先级; 不受优先级继承影响 */
 
     struct time_spec init_budget;               /*!< 初始时间片; 线程在迁移到运行态前会读取init_budget作为时间片 */
 };
@@ -7288,6 +7470,7 @@ struct thread_attr
     kint32_t schedpolicy;                       /*!< 调度策略(抢占/轮转), 源自于pthread的设定, HeavenFox默认全都支持, 该成员暂无作用 */
     kint32_t inheritsched;                      /*!< 继承策略(是否继承父进程), 源自于pthread的设定, HeavenFox默认不继承, 该成员暂无作用 */
 
+    kuint32_t cpu_affinity;                     /*!< cpu亲和力, 决定当前线程可在哪些cpu上运行. 按位表示 */
     struct scheduler_param sgtc_param;          /*!< 调度参数: 优先级, 时间片 */
 
     void *ptr_stack_start;                      /*!< 线程栈起始地址 (只有线程栈来自于内存池才会置该成员) */
@@ -7308,6 +7491,7 @@ struct thread_hash
     struct thread *sptr_tail;                   /*!< 链表的最后一项, 为NULL时表示hash为空 */
 };
 
+/*!< 哈希散列表管理结构 */
 struct thread_list
 {
     kuint64_t ffs_l;                            /*!< 每一位表示一个优先级, 可表示0 ~ 63 */
@@ -7320,24 +7504,38 @@ struct thread_list
 #define __THREAD_HASH_EMPTY(hash)               (!(hash)->ffs_l && !(hash->ffs_h))           
 };
 
+/*!< 每个cpu核心单独维护一个调度列表 */
 struct scheduler_core
 {
     struct thread *sptr_work;                   /*!< 处于运行态的线程, 即当前正在运行的线程 */
 
-    struct thread_list sgtc_lready;             /*!< 就绪哈希散列表, 链表排序太慢, 借助数组快速排序(依据: 优先级) */
-    struct thread_list sgtc_lsuspend;           /*!< 挂起哈希散列表, 链表排序太慢, 借助数组快速排序(依据: 优先级) */
-    struct thread_list sgtc_lsleep;             /*!< 睡眠哈希散列表, 链表排序太慢, 借助数组快速排序(依据: 优先级) */
+    struct thread_list sgtc_lready;             /*!< 就绪哈希散列表, 链表排序太慢, 借助数组快速排序(数据下标: 优先级) */
+    struct thread_list sgtc_lsuspend;           /*!< 挂起哈希散列表, 链表排序太慢, 借助数组快速排序(数据下标: 优先级) */
+    struct thread_list sgtc_lsleep;             /*!< 睡眠哈希散列表, 链表排序太慢, 借助数组快速排序(数据下标: 优先级) */
 
-    struct list_head sgtc_hready;               /*!< 就绪列表, 按优先级从高到低排序 */
-    struct list_head sgtc_hsuspend;             /*!< 挂起列表, 按优先级从高到低排序 */
-    struct list_head sgtc_hsleep;               /*!< 睡眠列表, 按优先级从高到低排序 */
+    kuint32_t ready_num;                        /*!< 就绪列表的项数: 就绪线程的个数 */
+    kuint32_t suspend_num;                      /*!< 挂起列表的项数: 挂起线程的个数 */
+    kuint32_t sleep_num;                        /*!< 睡眠列表的项数: 睡眠线程的个数 */
+    kuint32_t zombie_num;                       /*!< 僵死列表的项数: 僵死线程的个数 */
+
+    struct list_head sgtc_hready;               /*!< 就绪列表, 按优先级从高到低排序, 便于找到最高优先级线程 */
+    struct list_head sgtc_hsuspend;             /*!< 挂起列表, 按优先级从高到低排序, 便于找到最高优先级线程 */
+    struct list_head sgtc_hsleep;               /*!< 睡眠列表, 按优先级从高到低排序, 便于找到最高优先级线程 */
 
     struct {
         kutype_t cnt_out;                       /*!< sched_cnt每溢出一次, cnt_out++ */
         kutype_t sched_cnt;                     /*!< 调度次数, 每发生一次调度, sched_cnt++ */
     } sgtc_cnt;
 
-    struct spin_lock sgtc_lock;                 /*!< 调度锁 */
+    struct spin_lock sgtc_lock;                 /*!< 本cpu的调度锁 */
+};
+
+/*!< 公共列表, 不区分cpu */
+struct scheduler_share
+{
+    /*!< 暂无用处 */
+
+    struct spin_lock sgtc_lock;
 };
 
 /*!< 线程管理器 */
@@ -7352,9 +7550,9 @@ struct scheduler_table
     struct thread *sptr_tid_array[1024];        /*!< 线程tid即数组sptr_tid_array的下标, 可表示tid: 0 ~ 1023 */
 
     struct scheduler_share sgtc_share;          /*!< 共享数据 */
-    struct spin_lock sgtc_lock;                 /*!< 调度锁 */
+    struct spin_lock sgtc_lock;                 /*!< 总调度锁, 用于保护sptr_tid_array[] */
 
-    struct scheduler_core sgtc_core[CONFIG_CORE_NUM]; /*!<  */
+    struct scheduler_core sgtc_core[CONFIG_CORE_NUM]; /*!< 每cpu的调度列表 */
 }
 ```
 
@@ -7368,19 +7566,60 @@ struct scheduler_table sgtc_scheduler_table =
     .max_tids       = THREAD_MAX_NUM,
     .max_tidset     = 0,
     .ref_tidarr     = 0,
-    .sgtc_cnt       = {},
 
-    /*!< 初始化自环 */
-    .sgtc_ready     = LIST_HEAD_INIT(&sgtc_scheduler_table.sgtc_ready),
-    .sgtc_suspend   = LIST_HEAD_INIT(&sgtc_scheduler_table.sgtc_suspend),
-    .sgtc_sleep     = LIST_HEAD_INIT(&sgtc_scheduler_table.sgtc_sleep),
-
-    .sptr_work      = mr_nullptr,
     .sptr_tids      = mr_nullptr,
     /*!< 初始化无任何线程 */
     .sptr_tid_array = { mr_nullptr },
     .sgtc_lock      = SPIN_LOCK_INIT(),
 };
+
+void __scheduler_init(struct thread_list *sptr_list)
+{
+    struct thread_hash *sptr_hash;
+
+    sptr_list->ffs_h = sptr_list->ffs_l = 0;
+    spin_lock_init(&sptr_list->sgtc_lock);
+
+    for (kint32_t i = 0; i < THREAD_PROTY_NUM; i++)
+    {
+        sptr_hash = sptr_list->sgtc_hash + i;
+
+        sptr_hash->sptr_tail = mr_nullptr;
+        init_list_head(&sptr_hash->sgtc_list);
+    }
+}
+
+/*!< 内核启动时调用, 初始化调度管理器 */
+void __init scheduler_init(void)
+{
+    struct scheduler_table *sptr_sch = SCHED_MANAGER();
+    struct scheduler_core *sptr_core;
+    struct scheduler_share *sptr_share;
+
+    /*!< 初始化每cpu调度列表 */
+    foreach_percpu(kuint32_t, id)
+    {
+        sptr_core = SPEC_CPU_READ(sptr_sch->sgtc_core, id);
+        
+        /*!< core */
+        memset(sptr_core, 0, sizeof(*sptr_core));
+        spin_lock_init(&sptr_core->sgtc_lock);
+
+        init_list_head(&sptr_core->sgtc_lready);
+        init_list_head(&sptr_core->sgtc_lsuspend);
+        init_list_head(&sptr_core->sgtc_lsleep);
+        init_list_head(&sptr_core->sgtc_lzombie);
+        
+        __scheduler_init(&sptr_core->sgtc_hready);
+        __scheduler_init(&sptr_core->sgtc_hsuspend);
+        __scheduler_init(&sptr_core->sgtc_hsleep);
+        __scheduler_init(&sptr_core->sgtc_hzombie);
+    }
+
+    /*!< share */
+    sptr_share = &sptr_sch->sgtc_share;
+    spin_lock_init(&sptr_share->sgtc_lock);
+}
 ```
 
 #### 10.4. 线程状态与迁移（二）：优先级排序
@@ -7564,48 +7803,101 @@ tid_t get_unused_tid_from_scheduler(kuint32_t i_start, kuint32_t count)
 
 新创建的线程指针最终需要保存到sgtc_scheduler_table.sptr_tid_array[tid]中，首次注册默认为就绪态，即插入到就绪链表中。
 ```c
-kint32_t register_new_thread(struct thread *sptr_thread, tid_t tid)
+/* 通用初始化 */
+void __setup_thread(struct thread *sptr_thread)
 {
-    struct thread_attr *sptr_it_attr;
-    kutype_t flags;
-    kint32_t retval;
+    struct lock_owners *sptr_owners;
+    struct lock_waiter *sptr_waiter;
 
-    sptr_it_attr = sptr_thread->sptr_attr;
-
-    if (SCHED_THREAD_HANDLER(tid))
-        return -ER_INVALID;
-
-    /*!< 检查线程栈是否存在 */
-    if (!sptr_it_attr->stack_addr)
-        return -ER_NOMEM;
-
-    spin_lock_irqsave(&__SCHED_LOCK, &flags);
-    /*!< 保存线程指针到数组, 占有该tid */
-    SCHED_THREAD_HANDLER(tid) = sptr_thread;
+    sptr_owners = &sptr_thread->sgtc_owners;
+    sptr_waiter = &sptr_thread->sgtc_wait;
 
     /*!< 初始化线程链表和优先级链表 */
     init_list_head(&sptr_thread->sgtc_link);
     init_list_head(&sptr_thread->sgtc_hash);
 
-    /*!< initial spinlock */
+    /*!< 线程锁初始化 */
     spin_lock_init(&sptr_thread->sgtc_lock);
+
+    /*!< 初始化抢占计数器 */
+    ATOMIC_SET(&sptr_thread->sgtc_preempt, 0);
+
+    /*!< 初始化锁管理器(用于优先级继承) */
+    init_list_head(&sptr_owners->sgtc_gets);
+    spin_lock_init(&sptr_owners->sgtc_lock);
+    sptr_waiter->sptr_wait = mr_nullptr;
+    init_list_head(&sptr_waiter->sgtc_link);
+}
+
+/*!< 注册新线程 */
+kint32_t register_new_thread(struct thread *sptr_thread, tid_t *ptr_tid)
+{
+    kuint32_t cpuid = get_cpu_id();
+    struct scheduler_core *sptr_core;
+    struct thread_attr *sptr_it_attr;
+    tid_t tid = *ptr_tid;
+    kutype_t flags;
+    kint32_t retval;
+
+    sptr_it_attr = sptr_thread->sptr_attr;
+
+    /*!< 检查线程栈是否存在 */
+    if (!sptr_it_attr->stack_addr)
+        return -ER_NOMEM;
+
+    /*!< 亲和力为0 ? 错误行为 */
+    if (!sptr_it_attr->cpu_affinity)
+        sptr_thread->cpu = -1;
+    /*!< 亲和力含本cpu (创建本线程所在的cpu), 优先在本线程运行, 访问本地调度锁更轻松 */
+    else if (sptr_it_attr->cpu_affinity & mr_bit(cpuid))
+        sptr_thread->cpu = cpuid;
+    /*!< 亲和力不含本cpu, 那就选择cpuid最小(亲和力中最低位)的作为运行cpu */
+    else
+        sptr_thread->cpu = mr_ffs(sptr_it_attr->cpu_affinity) - 1;
+
+    /*!< 统一检查, 不合法的不创建 */
+    if ((sptr_thread->cpu >= CONFIG_CORE_NUM) || (sptr_thread->cpu < 0))
+        return -ER_INVALID;
+
+    /*!< 首次创建, last_cpu与cpu相同; 获取对应cpu的调度列表 */
+    sptr_thread->last_cpu = sptr_thread->cpu;
+    sptr_core = SCHED_MANAGER_CORE(sptr_thread->cpu);
+
+    /*!< 初始化线程 */
+    __setup_thread(sptr_thread);
 
     /*!< 默认名字: thread-[tid] */
     sprintk(sptr_thread->name, "thread-%d", tid);
 
-    /*!< 默认为就绪态, 添加到就绪链表 */
-    retval = schedule_add_ready_list(sptr_thread);
+    /*!< __SCHED_LOCK: sgtc_scheduler_table.sgtc_lock */
+    spin_lock_irqsave(&__SCHED_LOCK, &flags);
+
+    /*!< 保存线程指针到数组, 占有该tid */
+    if (SCHED_THREAD_HANDLER(tid))
+    {
+        /*!< 被人捷足先登 ? 本线程无法创建 */
+        spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+        return -ER_INVALID;
+    }
+    SCHED_THREAD_HANDLER(tid) = sptr_thread;
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+
+    /*!< 使用对应cpu的调度锁 */
+    spin_lock_irqsave(&sptr_core->sgtc_lock, &flags);
+
+    /*!< 默认为就绪态, 添加到对应cpu的就绪列表 */
+    retval = schedule_add_ready_list(sptr_thread->cpu, sptr_thread);
     if (retval < 0)
     {
         /*!< 添加失败 */
         SCHED_THREAD_HANDLER(tid) = mr_nullptr;
-        spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+        spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
         return retval;
     }
 
     /*!< 同步状态 */
     __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_READY);
-    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+    spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
 
     return ER_NORMAL;
 }
@@ -7630,7 +7922,7 @@ kint32_t __kernel_thread_create(tid_t *ptr_id, kint32_t base,
                         struct thread_attr *sptr_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {
     return __thread_create(ptr_id, base, 
-                                sptr_attr, pfunc_start_routine, ptr_args, 0);
+                        sptr_attr, pfunc_start_routine, ptr_args, 0);
 }
 
 tid_t kernel_thread_create(tid_t tid, struct thread_attr *sptr_attr, 
@@ -7658,20 +7950,20 @@ tid_t kernel_thread_create(tid_t tid, struct thread_attr *sptr_attr,
 用户线程
 ```c
 /*!< 参数同__kernel_thread_create */
-kint32_t __real_user_thread_create(tid_t *ptr_id, kint32_t base, 
+kint32_t __user_thread_create(tid_t *ptr_id, kint32_t base, 
                         struct thread_attr *sptr_attr, void *(*pfunc_start_routine) (void *), void *ptr_args)
 {
     /*!< 与内核线程创建不同, __thread_create最后一个参数为THREAD_USER, 表示这是用户线程 */
     return __thread_create(ptr_id, base, 
-                                sptr_attr, pfunc_start_routine, ptr_args, THREAD_USER);
+                        sptr_attr, pfunc_start_routine, ptr_args, THREAD_USER);
 }
 
 kint32_t thread_create(tid_t *ptr_id, struct thread_attr *sptr_attr, 
                         void *(*pfunc_start_routine) (void *), void *ptr_args)
 {
     /*!< 用户线程的tid都是由内核自动分配 */
-    return __real_user_thread_create(ptr_id, -1, 
-                                sptr_attr, pfunc_start_routine, ptr_args);
+    return __user_thread_create(ptr_id, -1, 
+                        sptr_attr, pfunc_start_routine, ptr_args);
 }
 ```
 
@@ -7688,6 +7980,7 @@ static kint32_t __thread_create(tid_t *ptr_id, kint32_t base, struct thread_attr
     kint32_t retval;
 
     /*!< 关闭抢占, 防止此时发生调度 */
+    /*!< 抢占计数器即当前线程的sgtc_preempt成员, 内核的第一个线程是start_kernel, 它是虚拟线程, 不通过本函数创建 */
     mr_preempt_disable();
 
     /*!< 如果是用户线程, tid从THREAD_TID_USER(128)开始分配; count表示可能要查找的最大次数, 顾名思义, 当其为0时, 禁止查找; 为1时, 只允许tid为128 */
@@ -7709,24 +8002,28 @@ static kint32_t __thread_create(tid_t *ptr_id, kint32_t base, struct thread_attr
     if (tid < 0)
         goto fail;
 
-    /*!< 若外部未提供属性结构, 自己创建一个 */
-    sptr_it_attr = sptr_attr;
-    if (!sptr_it_attr)
-    {
-        sptr_it_attr = (struct thread_attr *)kmalloc(sizeof(struct thread_attr), GFP_KERNEL);
-        if (!isValid(sptr_it_attr))
-            goto fail;
+    /*!< 创建属性 */
+    sptr_it_attr = (struct thread_attr *)kmalloc(sizeof(struct thread_attr), GFP_KERNEL);
+    if (!isValid(sptr_it_attr))
+        goto fail;
 
+    /*!< 若有外部属性给入, 拷贝该属性 */
+    if (sptr_attr)
+    {
+        memcpy(sptr_it_attr, sptr_attr, sizeof(*sptr_it_attr));
+
+        /*!< 校验当前属性的完整性, 查漏补缺 (如sptr_attr未配置线程栈, 此处将从内存池分配一个) */
+        if (!thread_attr_revise(sptr_it_attr))
+            goto fail2;
+    }
+    else
+    {
         /*!< 自动创建的属性, 使用默认参数 */
         if (!thread_attr_init(sptr_it_attr))
             goto fail2;
     }
 
-    /*!< 再度检查 */
-    if (!thread_attr_revise(sptr_it_attr))
-        goto fail3;
-
-    /*!< 创建线程 */
+    /*!< 创建线程, 应使用kzalloc, 而非kmalloc */
     sptr_thread = (struct thread *)kzalloc(sizeof(struct thread), GFP_KERNEL);
     if (!isValid(sptr_thread))
         goto fail3;
@@ -7737,7 +8034,7 @@ static kint32_t __thread_create(tid_t *ptr_id, kint32_t base, struct thread_attr
     sptr_thread->ptr_args       = ptr_args;
 
     /*!< 注册, 添加到就绪列表 */
-    retval = register_new_thread(sptr_thread, tid);
+    retval = register_new_thread(sptr_thread, &tid);
     if (retval < 0)
         goto fail4;
 
@@ -7760,11 +8057,12 @@ fail:
 }
 ```
 
-注销操作相对简单，使用thread_destory函数即可。但需注意，只有处于睡眠态的线程才允许注销，故注销线程前应切换线程为睡眠态。
+注销操作相对简单，使用thread_destory函数即可。但需注意，只有处于僵死态的线程才允许注销，故注销线程前应切换线程为僵死态。
 ```c
 struct thread *unregister_thread(tid_t tid)
 {
     struct thread *sptr_thread;
+    struct scheduler_core *sptr_core;
     kutype_t flags;
 
     spin_lock_irqsave(&__SCHED_LOCK, &flags);
@@ -7780,25 +8078,43 @@ struct thread *unregister_thread(tid_t tid)
     if (!sptr_thread)
         goto END;
 
-    /*!< 只有处于睡眠态的线程才能注销 */
-    if (sptr_thread->state != NR_THREAD_SLEEP)
+    /*!< 只有处于僵死态的线程才能注销 */
+    if (sptr_thread->state != NR_THREAD_ZOMBIE)
     {
         sptr_thread = ERR_PTR(-ER_BUSY);
         goto END;
     }
 
-    /*!< 从睡眠链表中分离 */
-    schedule_detach_sleep_list(sptr_thread);
+    /*!< 解除其存在 */
     SCHED_THREAD_HANDLER(tid) = mr_nullptr;
-
-END:
     spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+
+    /*!< 获取对应调度器 */
+    sptr_core = SCHED_MANAGER_CORE(sptr_thread->cpu);
+
+    /*!< 从僵死列表中分离 */
+    spin_lock_irqsave(&sptr_core->sgtc_lock, &flags);
+    schedule_detach_sleep_list(sptr_thread);
+    spin_unlock_irqrestore(&sptr_core->sgtc_lock, flags);
+
+    goto end;
+
+fail:
+    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+end:
     return sptr_thread;
 }
 
-kint32_t thread_destory(tid_t tid)
+/*!< 线程销毁 */
+kint32_t thread_destroy(tid_t tid)
 {
     struct thread *sptr_thread;
+
+    sptr_thread = mr_tid_handle(tid);
+
+    /*!< 正持有锁的线程禁止销毁, 将引发死锁问题(很少出现此情况) */
+    if (is_lock_owner(&sptr_thread->sgtc_owners))
+        return -ER_NREADY;
 
     /*!< 从当前链表中注销, 并退还占用的tid */
     sptr_thread = unregister_thread(tid);
@@ -7811,8 +8127,31 @@ kint32_t thread_destory(tid_t tid)
     /*!< 若当前线程是因为调用了sleep引发的睡眠, 在它注销前需要销毁定时事件 */
     if (sptr_thread->time_event)
         thread_sleep_quit(sptr_thread->time_event);
+
+    /*!< 如有邮箱, 也一并销毁 */
+    if (sptr_thread->sptr_mb)
+        mailbox_destroy(sptr_thread->sptr_mb);
     
-    sptr_thread->time_event = mr_nullptr;
+    /*!< 如当前线程曾经在阻塞等锁, 应退出等待 */
+    if (in_lock_pending(&sptr_thread->sgtc_wait))
+    {
+        struct lock_owner *sptr_owner = sptr_thread->sgtc_wait.sptr_wait;
+        kutype_t flags;
+
+        /*!< 常见于互斥锁, 写锁 */
+        if (mr_likely(sptr_owner))
+        {
+            spin_lock_irqsave(&sptr_owner->sgtc_lock, &flags);
+            lock_pending_del(sptr_thread);
+            spin_unlock_irqrestore(&sptr_owner->sgtc_lock, flags);
+        }
+        /*!< 常见于读锁, 信号量(多owner) */
+        else
+        {
+            /*!< unlikey */
+            lock_pending_del(sptr_thread);
+        }
+    }
 
     /*!< 释放内存 */
     kfree(sptr_thread->sptr_attr);
@@ -7828,23 +8167,20 @@ kint32_t thread_destory(tid_t tid)
 
 线程切换规则：
     1）不论何时，都必须有一个线程处于运行态；
-    2）处于运行态的线程，可以切换为就绪/挂起/睡眠；
-    3）处于就绪态的线程，可以切换为运行/挂起/睡眠；
-    4）处于挂起态的线程，可以切换为就绪/睡眠；
-    5）处于睡眠态的线程，可以切换为就绪/挂起；
+    2）处于运行态的线程，可以切换为就绪/挂起/睡眠/僵死；
+    3）处于就绪态的线程，可以切换为运行/挂起/睡眠/僵死；
+    4）处于挂起态的线程，可以切换为就绪/睡眠/僵死；
+    5）处于睡眠态的线程，可以切换为就绪/挂起/僵死；
+    6）处于僵死态的线程，无法被切换为任何状态, 只能等待内核回收.
 
 ```c
 kint32_t schedule_thread_switch(struct thread *sptr_thread)
 {
-//  struct thread *sptr_thread;
+    kint32_t cpuid = sptr_thread->cpu;
     tid_t tid;
     kuint32_t src, dst;
-    kint32_t retval;
-    
-    /*!< Protected by caller, do not disable again */
-//  mr_preempt_disable();
+    kint32_t retval = ER_NORMAL;
 
-//  sptr_thread = SCHED_THREAD_HANDLER(tid);
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
@@ -7855,49 +8191,58 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
     /*!<
      * thread switch:
      * (At all times, it is necessary to ensure that at least one thread (including idle threads) is running)
-     * running ---> ready/suspend/sleep
-     * ready ---> running/suspend/sleep
-     * suspend ---> ready/sleep
-     * sleep ---> ready/suspend
+     * running ---> ready/suspend/sleep/zombie
+     * ready ---> running/suspend/sleep/zombie
+     * suspend ---> ready/sleep/zombie
+     * sleep ---> ready/suspend/zombie
+     * zombie ---> prohit!!! it will be killed by kthread
      *
      * (only running and ready state can be switched to any state)
      */
-    if (mr_unlikely(((src == NR_THREAD_RUNNING) && (dst == NR_THREAD_RUNNING))) || 
-        mr_unlikely(dst >= NR_THREAD_STATUS_MAX))
+    if (mr_unlikely((dst == NR_THREAD_NONE) || (dst >= NR_THREAD_STATUS_MAX)))
         goto fail;
 
-    /*!< for idle thread, only ready and running state can be chosen */
-    if ((tid == THREAD_TID_IDLE) && 
+    /*!< 空闲线程仅能在运行态和就绪态之间切换 */
+    if ((tid < THREAD_TID_BASE) && 
         mr_unlikely((dst != NR_THREAD_RUNNING) && (dst != NR_THREAD_READY)))
         goto fail;
 
-    /*!< do not suspend self in interrupt */
+    /*!< 中断期间禁止将运行中的线程切换出去, 否则将面临中断上下文与线程上下文混合问题; 也禁止操作其他cpu的线程为运行态 */
     if (mr_unlikely(dst == NR_THREAD_RUNNING) && 
-        mr_unlikely(IS_IN_INTERRUPT()))
+        mr_unlikely(__IN_INTERRUPT(__IRQ_COUNT(sptr_thread)) || (cpuid != get_cpu_id())))
         goto fail;
 
     /*!< 先从旧的状态分离 */
     switch (src)
     {
         case NR_THREAD_RUNNING:
-            /*!< 对于运行线程, 需要从就绪列表找出一个接替者; 如果没有接替成为运行态的线程, 则分离失败, 禁止切换 */
-            retval = schedule_reinstall_work_role();
-            if (mr_unlikely(retval))
+            /*!< 运行态切运行态, 多此一举 */
+            if (mr_unlikely(dst == NR_THREAD_RUNNING))
                 goto fail;
             
+            /*!< 禁止将其他cpu的运行线程切出去, 上下文无法管理 */
+            if (mr_unlikely(cpuid != get_cpu_id()))
+                goto fail;
+
+            /*!< 对于运行线程, 需要从就绪列表找出一个接替者; 如果没有接替成为运行态的线程, 则分离失败, 禁止切换 */
+            retval = schedule_reinstall_work_role(cpuid, sptr_thread);           
             break;
 
         case NR_THREAD_READY:
-            schedule_detach_ready_list(sptr_thread);
+            retval = schedule_detach_ready_list(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_SUSPEND:
-            schedule_detach_suspend_list(sptr_thread);
+            retval = schedule_detach_suspend_list(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_SLEEP:
-            schedule_detach_sleep_list(sptr_thread);
+            retval = schedule_detach_sleep_list(cpuid, sptr_thread);
             break;
+
+        case NR_THREAD_ZOMBIE:
+            /*!< 僵死态禁止切换为任何状态 */
+            goto fail;
 
         default:
             break;
@@ -7906,24 +8251,44 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
     /*!< 先分离后加入 */
     mr_barrier();
 
+    /*!< 分离失败 */
+    if (mr_unlikely(retval))
+    {
+        print_warn("switch thread (detach old) failed ! current (cpuid: %u) and target state is : %s, %d, %d\r\n", 
+                    cpuid, sptr_thread->name, src, dst);
+        goto fail;
+    }
+
     /*!< 切换为目标状态 */
     switch (dst)
     {
         case NR_THREAD_RUNNING:
             /*!< 其他线程希望成为运行态, 需要剥夺当前运行线程的CPU */
-            retval = schedule_despoil_work_role(sptr_thread);
+            retval = schedule_despoil_work_role(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_READY:
-            retval = schedule_add_ready_list(sptr_thread);
+            /*!< 清除状态, 以便允许: 就绪态切换为就绪态 (可因为优先级而更改列表顺序, 常见于优先级继承) */
+            __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
+            retval = schedule_add_ready_list(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_SUSPEND:
-            retval = schedule_add_suspend_list(sptr_thread);
+            /*!< 清除状态, 以便允许: 挂起态切换为挂起态 (可因为优先级而更改列表顺序, 常见于优先级继承) */
+            __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
+            retval = schedule_add_suspend_list(cpuid, sptr_thread);
             break;
 
         case NR_THREAD_SLEEP:
-            retval = schedule_add_sleep_list(sptr_thread);
+            /*!< 清除状态, 以便允许: 睡眠态切换为睡眠态 (可因为优先级而更改列表顺序, 常见于优先级继承) */
+            __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
+            retval = schedule_add_sleep_list(cpuid, sptr_thread);
+            break;
+
+        case NR_THREAD_ZOMBIE:
+            /*!< 对于睡眠态而言, 是否清除状态, 没什么意义 */
+            __SET_THREAD_STATE(sptr_thread, NR_THREAD_NONE);
+            retval = schedule_add_zombie_list(cpuid, sptr_thread);
             break;
 
         default:
@@ -7931,11 +8296,25 @@ kint32_t schedule_thread_switch(struct thread *sptr_thread)
             break;
     }
 
-    /*!< 操作失败 */
-    if (mr_unlikely(retval < 0))
+    /*!< 加入新状态列表失败, 索性睡眠 */
+    if (mr_unlikely(retval))
+    {
+        print_warn("switch thread (add new) failed ! current (cpuid: %u) and target state is : %s, %d, %d, error code: %d\r\n", 
+                    cpuid, sptr_thread->name, src, dst, retval);
+
+        src = NR_THREAD_SLEEP;
+        retval = schedule_add_sleep_list(cpuid, sptr_thread);
+        if (retval < 0)
+        {
+            /*!< 还是失败 */
+            src = NR_THREAD_NONE;
+            print_err("current thread is down and will be about to become kernel garbage! error code: %d\r\n", retval);
+        }
         goto fail;
+    }
+
     /*!< 运行线程丢失 */
-    if (mr_unlikely(!SCHED_RUNNING_THREAD))
+    if (mr_unlikely(!SCHED_RUNNING_THREAD(cpuid)))
         goto fail;
 
     /*!< 同步状态: sptr_thread->state = dst; sptr_thread->to_state = 0 */
@@ -7972,41 +8351,65 @@ struct scheduler_context
 
 1）start_kernel函数初始化完毕后，开启首次调度；主动调度（主动让出CPU）可使用schedule_thread函数：
 ```c
+void schedule_and_switch(void)
+{
+    /*!< 选择新线程, 并返回新旧线程的数据 */
+    struct scheduler_context *sptr_context = __schedule_thread();
+
+    /*!< 确实有新线程可用, 发起切换(汇编) */
+    if (sptr_context)
+        context_switch(sptr_context);
+}
+
 void schedule_thread(void)
 {
-    struct scheduler_context *sptr_context;
+    kuint32_t cpuid;
+    struct scheduler_core *sptr_core;
+    struct thread *sptr_prev, *sptr_new;
 
-    /*!< 关闭抢占 */
+    /*! @note
+     * 关闭抢占, 避免再此期间发生抢占, 导致不必要的抢占调度; 另外, 若本线程突然被抢占, 可能会因为负载迁移而把本线程
+     * 挪到其他cpu, 导致cpuid和sptr_core前后不一致.
+     * 比如在cpu0先读取了cpuid, 然后抢占发生, 打断此处, 好巧不巧又迁移到cpu1, 本线程恢复运行, 
+     * 但栈上的cpuid其实是0, 剩下的代码都将错误处理
+     */
     mr_preempt_disable();
 
-    /*!< 保存cpsr寄存器到spsr寄存器, 即存储当前状态; 并关闭中断, 线程调度在中断关闭状态下执行 */
-    __push_psr();
-    mr_local_irq_disable();
-    mr_preempt_enable();
-
-    /*!< 禁止在中断回调函数中调用schedule_thread, 否则将使中断终止, 引发不可预料的错误 */
-    if (mr_unlikely(IS_IN_INTERRUPT()))
+    /*!
+     * sptr_prev永远不可能为NULL, 即使schedule_thread是第一次调用; 
+     * 因为schedule_thread之前, 是虚拟线程(start_kernel)在运行
+     * 虚拟线程start_kernel ---> schedule_thread() ---> 真实线程 (虚拟线程从此不再返回)
+     */
+    sptr_prev = mr_current;
+    
+    /*!< 禁止在中断中调用本函数, 中断禁止睡眠, 中断上下文禁止意外切换 */
+    if (mr_unlikely(__IN_INTERRUPT(__IRQ_COUNT(sptr_prev))))
     {
-        /*!< 立即还原为运行态, 并清除to_state的值 */
-        __SYNC_THREAD_STATE(mr_current, NR_THREAD_RUNNING);
+        __SYNC_THREAD_STATE(sptr_prev, NR_THREAD_RUNNING);
+        mr_preempt_enable();
+
         mr_warn(false);
-
-        goto END;
+        return;
     }
-   
-    /*!< 核心1: 挑选下一个可运行的线程 */
-    sptr_context = __schedule_thread();
-    if (!sptr_context)
-        goto END;
 
-    /*!< 核心2: 线程上下文切换; 期间spsr寄存器会重新赋值给cpsr, 还原schedule_thread调用前的状态 */
-    context_switch(sptr_context);
-    return;
+    /*!< 本cpu的调度器 */
+    cpuid = get_cpu_id();
+    sptr_core = SCHED_MANAGER_CORE(cpuid);
+    spin_lock_irqsave_assert(&sptr_core->sgtc_lock, &sptr_prev->lock_flags, __FILE__, __LINE__, __FUNCTION__);
 
-END:
-    /*!< 出师未捷, 直接还原cpsr寄存器并返回(中断会被重新打开) */
-    __pop_psr();
+    /*!< spin_lock会对抢占计数器进行增加, 所以, 之前的抢占计数器可以先释放一个 */
+    mr_preempt_enable();
+    /*!< 核心代码, 选择新线程, 并发起切换 */
+    schedule_and_switch();
+    mr_barrier();
+
+    /*!< 等线程下一次被切换回来后, 接着往下运行 */
+    /*!< 本线程有可能会被弄到其他cpu去(负载迁移), 需重新获取cpuid, 不能用之前旧的 */
+    sptr_core = SCHED_MANAGER_CORE(get_cpu_id());
+    sptr_new = mr_current;
+    spin_unlock_irqrestore_assert(&sptr_core->sgtc_lock, sptr_new->lock_flags);
 }
+
 ```
 
 2）主要核心代码在于__schedule_thread和context_switch，前者负责从就绪列表中挑选一个优先级最高的线程，作为下一个运行线程；后者将保存当前线程的上下文，并恢复接替线程的上下文，从而切换到新线程运行。
@@ -8018,26 +8421,29 @@ struct scheduler_context *__schedule_thread(void)
     struct thread *sptr_prev;
     struct thread_list *sptr_hash;
     struct scheduler_context *sptr_context;
+    kuint32_t cpuid = get_cpu_id();
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
     kint32_t retval;
 
     /*!< 暂存就绪hash */
-    sptr_hash = SCHED_READY_HASH;
+    sptr_hash = __THREAD_READY_HASH(sptr_core);
+    sptr_context = &sgtc_sched_data[cpuid].sgtc_context;
 
     /*!< 通过判断ffs_l和ffs_h是否为0, 可获知hash是否为空; 为空时, 没有任何线程处于就绪, 无法调度, 直接返回 */
     if (__THREAD_HASH_EMPTY(sptr_hash))
         goto fail;
 
     /*!< 获取当前运行线程; 若sptr_prev为NULL, 说明可能是第一次调度 */
-    sptr_prev = SCHED_RUNNING_THREAD;
+    sptr_prev = __THREAD_RUNNING(sptr_core);
     if (mr_unlikely(!sptr_prev))
     {
         /*!< 全局标志, 为1时表示之前已经调度过; 若为1, 则与prev == NULL矛盾 */
-        if (mr_unlikely(thread_schedule_ref))
+        if (mr_unlikely(sptr_context->first))
             goto fail;
         else
         {
             /*!< 由start_kernel函数发起的首次调度, 此时没有任何线程处于运行态, 需要从就绪列表中获取 */
-            sptr_prev = mr_list_first_entry(SCHED_READY_LIST, struct thread, sgtc_link);           
+            sptr_prev = mr_list_first_entry(__THREAD_READY_LIST(sptr_core), struct thread, sgtc_link);           
             __SET_THREAD_TARGET_STATE(sptr_prev, NR_THREAD_RUNNING);
         }
     }
@@ -8048,16 +8454,12 @@ struct scheduler_context *__schedule_thread(void)
 
     /*!< 第一次调度时, 就绪态的线程迁移到运行态; 否则, 当前运行的线程迁移到目标态, 并从就绪列表获取可运行的线程. 该操作有可能失败 */
     retval = schedule_thread_switch(sptr_prev);
-    sptr_thread = SCHED_RUNNING_THREAD;
+    sptr_thread = __THREAD_RUNNING(sptr_core);
     if (mr_unlikely(retval < 0) || 
         mr_unlikely(!sptr_thread))
         goto fail;
-    
-    sptr_context = &sgtc_context;
 
     /*!< 线程上下文准备 */
-    /*!< 首次调度标志, 仅在第一次调度时thread_schedule_ref才会为0 */
-    sptr_context->first = (kuaddr_t)&thread_schedule_ref;
     /*!< 线程入口, 如果新线程是第一次准备运行, 调度后直接从此入口进入; 否则entry不会被使用 */
     sptr_context->entry = (kuaddr_t)&sptr_thread->start_routine;
     /*!< 提供给entry的参数, 同样只有在线程第一次准备运行时有用 */
@@ -8068,11 +8470,14 @@ struct scheduler_context *__schedule_thread(void)
     sptr_context->next_sp = thread_get_stack(sptr_thread->sptr_attr);
 
     /*!< 第一次调度时不存在正在运行的线程, 自然也就没有线程栈 */
-    if (mr_likely(thread_schedule_ref))
+    if (mr_likely(sptr_context->first))
         sptr_context->prev_sp = thread_get_stack(sptr_prev->sptr_attr);
 
+    /*!< 更新新线程 (对于armv7, 将存到每cpu的私有寄存器tpidrprw) */
+    SET_PERCPU_CURRENT(sptr_thread);
+
     /*!< 用于记录调度次数 */
-    scheduler_record();
+//  scheduler_record();
 
     /*!< address of sgtc_context ===> r0 */
     return sptr_context;
@@ -8120,41 +8525,6 @@ struct context_regs
 ```
 
 next_sp就是栈顶，故得到了next_sp，自然也就得到了context_regs。
-
-__switch_to的大致流程为：
-```Mermaid
-graph TD
-    A[__switch_to] --> B[保存寄存器状态]
-    B --> C{首次调度?}
-    C -->|是| D[_context_save_first]
-    C -->|否| E[非首次调度处理]
-    
-    D --> F[设置首次调度标志]
-    F --> G[调用 __thread_init_before]
-    G --> H[_sched_first_ready]
-    
-    E --> I[设置调度来源]
-    I --> J[_context_save]
-    
-    J --> K[保存SP到当前线程栈顶的特定位置]
-    K --> L[调用 __thread_init_before]
-    L --> M[_context_restore]
-    
-    H --> N[设置新线程栈]
-    N --> O[准备线程入口和参数]
-    O --> P[_sched_init_before]
-    
-    M --> Q{新线程是第一次被调度?}
-    Q -->|否| R[恢复线程上下文]
-    Q -->|是| H
-    R --> P
-    
-    P --> S{调度来源是中断?}
-    S -->|是| T[_switch_to_irq]
-    S -->|否| U[_switch_to_next]
-    U --> V[弹出PC完成切换]
-    T --> W[返回中断上下文, 回收中断]
-```
 
 调度需覆盖的几种情况：
 ```
@@ -8266,23 +8636,22 @@ _sched_first:
     pop { pc }                                      @ 弹出线程入口的地址作为pc, 新线程运行
 
 ENDPROC(__switch_to)
+```
 
-/*!< ---------------------------------------------------------------------------------------------------- */
-/*!< ---------------------------------------------------------------------------------------------------- */
-/*!< 抢占调度, 从中断触发 >
-ENTRY(__schedule_from_irq)
-__schedule_from_irq:
-    stmdb sp!, { r0 - r12, lr }                     @ 先压栈，这里的lr是svc模式的lr，而irq模式的lr已经保存在栈里
+其中，如果一个线程是首次即将运行，它没有上下文需要恢复，它的cpsr寄存器需要全新配置。即：
+```c
+kutype_t ret_with_first_schedule(kutype_t _spsr)
+{
+    kuint32_t cpuid = get_cpu_id();
+    struct scheduler_core *sptr_core = SCHED_MANAGER_CORE(cpuid);
 
-    /*  当前栈区状态(从sp开始, 低到高): r0, r1, ..., r12, lr_svc, spsr, lr_irq(未来的pc) */
+    /*!< 使能中断, 但不需要立即设置, 函数返回后由汇编处理 */
+    _spsr &= ~(CPSR_BIT_I | CPSR_BIT_F | CPSR_BIT_A);
 
-    ldr r1, =schedule_thread_irq                    @ 跳到C语言, 旧线程加锁, 切换新线程, 然后由新线程解锁
-    blx r1                                          @ lr_svc会被更新
-
-    ldmia sp!, { r0 - r12, lr }                     @ 还原之前的栈
-    rfeia sp!                                       @ 从这里返回: 将spsr给cpsr, lr_irq赋值给pc
-
-ENDPROC(__schedule_from_irq)
+    /*!< 旧线程在调用schedule_thread的时候加了锁, 新线程需要把锁解开, 否则调度锁就没人管了 */
+    spin_unlock_irqrestore_assert(&sptr_core->sgtc_lock, _spsr | CPSR_BIT_I | CPSR_BIT_F);
+    return _spsr;
+}
 ```
 
 ##### 10.7.3. 休眠与唤醒
@@ -8295,6 +8664,7 @@ void schedule_self_suspend(void)
     struct thread *sptr_cur = SCHED_RUNNING_THREAD;
     kutype_t flags;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_cur->sgtc_lock, &flags);
     
     /*!< 防止错误地挂起别人家的线程 */
@@ -8303,12 +8673,15 @@ void schedule_self_suspend(void)
 
     spin_unlock_irqrestore(&sptr_cur->sgtc_lock, flags);
     schedule_thread();
+    mr_preempt_enable();
 }
 
 /*!< 挂起其他线程 */
 kint32_t schedule_thread_suspend(tid_t tid)
 {
     struct thread *sptr_thread;
+    kuint32_t cpuid;
+    struct spin_lock *sptr_lock;
     kutype_t flags;
     kint32_t retval;
 
@@ -8317,30 +8690,57 @@ kint32_t schedule_thread_suspend(tid_t tid)
     if (mr_unlikely(!sptr_thread))
         return -ER_NODEV;
 
+    mr_preempt_disable();
     spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
-
-    /*!< 设置线程目标态为挂起态 */
-    __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SUSPEND);
+    cpuid = sptr_thread->cpu;
 
     /*!< 竟然就是自己? */
     if (mr_unlikely(__GET_THREAD_STATE(sptr_thread) == NR_THREAD_RUNNING))
     {
+        /*!< 该线程非本cpu上的, 无权挂起 */
+        if (cpuid != get_cpu_id())
+        {
+            spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
+
+            /*!< 发送核间信息给对方cpu */
+            send_state_to_thread(sptr_thread, NR_THREAD_SUSPEND);
+            mr_preempt_enable();
+
+            return -ER_FORBID;
+        }
+
+        /*!< 设置线程目标态为挂起态 */
+        __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SUSPEND);
         spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-        /*!< Self suspend */
+        /*!< 执行线程切换 */
         schedule_thread();
+        mr_preempt_enable();
+
         return ER_NORMAL;
     }
 
+    __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_SUSPEND);
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    /*!< 切换状态 */
-    spin_lock_irqsave(&__SCHED_LOCK, &flags);
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
+    spin_lock_irqsave(sptr_lock, &flags);
+
+    /*!< 本线程很有可能在等自旋锁的时候被迁移到其他线程, 但sptr_lock是旧cpu的, 需重新获取, 直到一致 */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
+    /*!< 线程切换 */
     retval = schedule_thread_switch(sptr_thread);
-    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
-    
+    spin_unlock_irqrestore(sptr_lock, flags);
+
+    mr_preempt_enable();
     return retval;
-}
 ```
 
 要让线程变成睡眠态，也形同此法。有挂起、睡眠，自然就有唤醒：
@@ -8348,7 +8748,8 @@ kint32_t schedule_thread_suspend(tid_t tid)
 kint32_t schedule_thread_wakeup(tid_t tid)
 {
     struct thread *sptr_thread;
-    kuint32_t state;
+    struct spin_lock *sptr_lock;
+    kuint32_t state, cpuid;
     kutype_t flags;
     kint32_t retval;
 
@@ -8360,7 +8761,7 @@ kint32_t schedule_thread_wakeup(tid_t tid)
     spin_lock_irqsave(&sptr_thread->sgtc_lock, &flags);
 
     /*!< 已经在运行, 无需唤醒 */
-    if (sptr_thread == SCHED_RUNNING_THREAD)
+    if (sptr_thread == current_thread())
     {
         __SYNC_THREAD_STATE(sptr_thread, NR_THREAD_RUNNING);
         spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
@@ -8381,11 +8782,25 @@ kint32_t schedule_thread_wakeup(tid_t tid)
     __SET_THREAD_TARGET_STATE(sptr_thread, NR_THREAD_READY);
     spin_unlock_irqrestore(&sptr_thread->sgtc_lock, flags);
 
-    /*!< 切换状态 */
-    spin_lock_irqsave(&__SCHED_LOCK, &flags);
-    retval = schedule_thread_switch(sptr_thread);
-    spin_unlock_irqrestore(&__SCHED_LOCK, flags);
+    mr_preempt_disable();
 
+loop:
+    cpuid = sptr_thread->cpu;
+    sptr_lock = scheduler_cpu_lock(cpuid);
+    spin_lock_irqsave(sptr_lock, &flags);
+
+    /*!< 本线程很有可能在等自旋锁的时候被迁移到其他线程, 但sptr_lock是旧cpu的, 需重新获取, 直到一致 */
+    if (mr_unlikely(cpuid != sptr_thread->cpu))
+    {
+        spin_unlock_irqrestore(sptr_lock, flags);
+        goto loop;
+    }
+
+    /*!< 线程切换 */
+    retval = schedule_thread_switch(sptr_thread);
+	spin_unlock_irqrestore(sptr_lock, flags);
+
+    mr_preempt_enable();
     return retval;
 }
 ```
@@ -8422,13 +8837,14 @@ void schedule_timeout(kutime_t count)
 
     /*!< 启动定时器, 定时时长为count (单位: jiffies); 中间需关闭抢占, 否则抢占可能在mod_timer之前发生, 从而使线程提前挂起, 而无法被唤醒 */
     mod_timer(sptr_tm, jiffies + count);
-    mr_preempt_enable();
 
     /*!< 再次判断, 若抢占真的发生过, to_state肯定会因为调度成功而清0 */
     if (mr_likely(__GET_THREAD_TARGET_STATE(sptr_cur) == NR_THREAD_SUSPEND))
         schedule_thread();
 
     sptr_cur->time_event = mr_nullptr;
+    mr_preempt_enable();
+
     del_timer(sptr_tm);
 }
 ```
@@ -8494,28 +8910,32 @@ sleep的本质就是秒转为jiffies，然后调用schedule_timeout；msleep、u
 1）就绪列表是否存在比当前运行线程优先级更高的线程，若有，立即切换到该线程；
 2）如果没有更高的优先级，则检查当前线程的时间片，如已耗尽，则检查就绪列表是否有优先级相同的线程，若有，立即切换到该线程。
 
-内核中定义了一个抢占计数器，当它为0时，允许抢占；非0时，表示禁止抢占。
+内核为每个线程都定义了单独的抢占计数器（见struct thread结构体定义，为原子变量），当它为0时，允许抢占；非0时，表示禁止抢占。
 有一组接口可以使用它：
 ```c
-/*!< 定义为原子变量 */
-struct atomic sgtc_sched_preempt_cnt;
+#define __PREEMPT_COUNT(_sptr_thr)                  ((_sptr_thr)->sgtc_preempt)
+#define PREEMPT_COUNT()                             __PREEMPT_COUNT(mr_current)
 
-#define mr_preempt_cnt_dec()                        atomic_dec(&sgtc_sched_preempt_cnt)
-#define mr_preempt_cnt_inc()                        atomic_inc(&sgtc_sched_preempt_cnt)
-#define mr_preempt_cnt()                            ATOMIC_READ(&sgtc_sched_preempt_cnt)
+#define mr_preempt_cnt_dec()                        atomic_dec(&PREEMPT_COUNT())
+#define mr_preempt_cnt_inc()                        atomic_inc(&PREEMPT_COUNT())
+#define mr_preempt_cnt()                            atomic_get_val(&PREEMPT_COUNT())
 #define mr_preempt_is_locked()                      (!!mr_preempt_cnt())
+
+/*!< 内核未启动前是boot阶段, 为配合代码通用性, 规定: boot阶段该变量为false, 内核启动后该变量为true */
+kbool_t g_kernel_preempt_enable;
 
 /*!< 使能抢占: 减计数, 减为0时才真正开启抢占 */
 #define mr_preempt_enable() \
     do {    \
         mr_barrier();   \
-        mr_preempt_cnt_dec();   \
+        if (g_kernel_preempt_enable && mr_preempt_is_locked())  \
+            mr_preempt_cnt_dec();   \
     } while (0)
 
 /*!< 失能抢占: 加计数, 大于0时抢占被禁止 */
 #define mr_preempt_disable()    \
     do {    \
-        mr_preempt_cnt_inc();   \
+        g_kernel_preempt_enable ? mr_preempt_cnt_inc() : (void)0;	\
         mr_barrier();   \
     } while (0)
 ```
@@ -8526,15 +8946,25 @@ struct atomic sgtc_sched_preempt_cnt;
 static void kthread_schedule_timeout(kuint32_t args)
 {
     struct timer_list *sptr_tim = (struct timer_list *)args;
+    kuint32_t cpuid = get_cpu_id();
+    struct spin_lock *sptr_lock = scheduler_cpu_lock(cpuid);
+    struct percpu_sched_data *sptr_sched = SPEC_CPU_READ(sgtc_sched_data, cpuid);
     struct thread *sptr_work, *sptr_ready;
     kuint32_t work_prio, next_prio;
+    kutype_t flags;
+
+#if CONFIG_SMP
+    /*!< 定时检查当前cpu的负载, 必要时唤醒负载均衡线程 */
+    if (check_scheduler_load() >= 0)
+        wake_up_migration();
+#endif
+
+    /*!< 自旋锁, 内部有抢占计数器加1操作 */
+    spin_lock_irqsave(sptr_lock, &flags);
 
     /*!< 获取当前线程 */
     sptr_work = mr_current;
 
-    /*!< 自旋锁, 内部有抢占计数器加1操作 */
-    spin_lock(&sptr_work->sgtc_lock);
-    
     /*!< --------------------------------------------------------- */
     /*!< 时间片减1 (expires的单位是jiffies) */
     if (sptr_work->expires)
@@ -8552,16 +8982,16 @@ static void kthread_schedule_timeout(kuint32_t args)
     if (!sptr_ready)
         goto END;
 
-    /*!< 获取两个线程的优先级 */
-    work_prio = thread_get_priority(sptr_work->sptr_attr);
-    next_prio = thread_get_priority(sptr_ready->sptr_attr);
+    /*!< 获取两个线程的实时优先级 */
+    work_prio = thread_get_rt_priority(sptr_work->sptr_attr);
+    next_prio = thread_get_rt_priority(sptr_ready->sptr_attr);
    
 /*!< 激进的抢占方式, 默认开启 */
 #if CONFIG_PREEMPT
     /*!< "就绪线程优先级更高", 或者"时间片已耗尽, 且优先级相等" */
     if (__THREAD_IS_LOW_PRIO(work_prio, next_prio) ||
         (!sptr_work->expires && (work_prio == next_prio)))
-        g_sched_flag = true;
+        sptr_sched->sched_flag = true;
 
 /*!< 低调的抢占方式 */
 #else
@@ -8569,18 +8999,18 @@ static void kthread_schedule_timeout(kuint32_t args)
     if (!sptr_work->expires &&
         (__THREAD_IS_LOW_PRIO(work_prio, next_prio) ||
         (work_prio == next_prio)))
-        g_sched_flag = true;
+        sptr_sched->sched_flag = true;
 #endif
     
 END:
-    spin_unlock(&sptr_work->sgtc_lock);
+    spin_unlock_irqrestore(sptr_lock, flags);
 
     /*!< 每一个jiffies检查一次 */
     mod_timer(sptr_tim, jiffies + 1);
 }
 ```
 
-kthread_schedule_timeout对应的定时器链表由内核线程kthread定义和激活, 它并未直接执行线程切换，而是将抢占标志保存到全局变量g_sched_flag。在中断回调函数退出后，会再次检查是否允许抢占，若是，则将全局变量g_sched_flag传递给另一个全局变量g_asm_sched_flag；当返回到irq_handler时，将根据g_asm_sched_flag的值决定是否发起线程切换：
+kthread_schedule_timeout对应的定时器链表由内核线程kthread定义和激活, 它并未直接执行线程切换，而是将抢占标志保存到全局变量sptr_sched->sched_flag。在中断回调函数退出后，会再次检查是否允许抢占，若是，则将全局变量sptr_sched->sched_flag传递给当前cpu的私有寄存器的bit1；当返回到irq_handler时，将根据私有寄存器的bit1是否为1决定是否发起线程切换：
 ```nasm
 .global g_asm_sched_flag
 g_asm_sched_flag:
@@ -8590,72 +9020,76 @@ _irq_handler:
     sub lr, lr, #0x04
     _exception_save_params                          @ 保存中断上下文
 
+    mov r0, sp                                      @ 保存sp, exec_irq_handler函数需要
+    mov r1, lr                                      @ 保存lr, exec_irq_handler函数需要
     bl exec_irq_handler                             @ 执行中断回调函数, 并执行"g_asm_sched_flag = g_sched_flag"
     _exception_restore_params                       @ 恢复中断上下文
 
-    push { r0 }
-    ldr r0, g_asm_sched_flag
-    cmp r0, #0                                      @ 检查g_asm_sched_flag是否为0
+    push { r0, r1 }
+    READ_CP15_TPIDRPRW(r0)                          @ 读私有寄存器
+    cmp r0, #0                                      @ 无数据, 说明没有线程在运行
     bne 1f                                          @ 不为0, 需要进行线程切换
 
-    pop { r0 }                                      @ 为0, 中断结束, 返回线程上下文
+    and r1, r0, #THREAD_MASK
+    cmp r1, #THREAD_SCHED_BIT                       @ 0b01: boot阶段; 0b10: 抢占调度使能 (来自于sptr_sched->sched_flag)
+    beq 2f
+
+1:
+    pop { r0, r1 }                                  @ 为0, 中断结束, 返回线程上下文
     movs pc, lr
 
-1:                                                  @ 处理抢占
-    mov r0, #0
-    str r0, g_asm_sched_flag                        @ g_asm_sched_flag清0
-    pop { r0 }
+2:                                                  @ 处理抢占
+    bic r1, r0, #THREAD_MASK
+    WRITE_CP15_TPIDRPRW(r1)                         @ 擦掉bit1 (抢占调度使能位置0)
+
+    pop { r0, r1 }
 
     srsdb sp!, #ARCH_SVC_MODE                       @ 保存lr_irq和spsr到sp_svc
     cpsid i, #ARCH_SVC_MODE                         @ 切换到svc模式的同时关闭中断 (spsr已经保存, 此时关闭中断不会影响上下文)
     
-    b __schedule_before                             @ 跳转到"context.S"
+    b __schedule_from_irq                           @ 跳转到"context.S"
 ```
 
-context.S是我们的老朋友，之前仅介绍了__switch_to，其实它还有另一部分代码（即调度来源为：SCHED_FROM_IRQ），包括了之前出现过的“_switch_to_irq”：
+context.S是我们的老朋友，之前仅介绍了__switch_to，其实它还有另一部分代码（即调度来源为中断，抢占调度）：
 ```nasm
-ENTRY(__schedule_before)
-__schedule_before:
-    stmdb sp!, { r0 - r12, lr }                     @ 保存r0 ~ r12和当前线程上下文的lr(中断发生时, 线程上下文的lr, 并非中断上下文的lr)
+/*!< 抢占调度, 从中断触发 */
+ENTRY(__schedule_from_irq)
+__schedule_from_irq:
+    stmdb sp!, { r0 - r12, lr }                     @ 先压栈，这里的lr是svc模式的lr，而irq模式的lr已经保存在栈里
 
-    ldr r1, =__schedule_thread
-    blx r1                                          @ 核心依然是执行__schedule_thread, 并返回r0 = &sgtc_context
+    /*  当前栈区状态(从sp开始, 低到高): r0, r1, ..., r12, lr_svc, spsr, lr_irq(未来的pc) */
 
-    cmp r0, #0                                      @ __schedule_thread返回NULL, 无法切换新线程
-    beq _switch_fail                                @ 应原路返回
+    ldr r1, =schedule_thread_irq                    @ 跳到C语言, 旧线程加锁, 切换新线程, 然后由新线程解锁
+    blx r1                                          @ lr_svc会被更新
 
-    add r8, sp, #ARCH_OFFSET_PC                     @ 取出spsr (在irq_handler中使用srsdb保存的)
-    ldr r12, [r8]                                   @ r12 = spsr_irq                    
-    cmp r12, #0
-    orreq r12, #ARCH_SVC_MODE
-    str r12, [r8]                                   @ 如果spsr为0, 首先设置为svc模式
+    ldmia sp!, { r0 - r12, lr }                     @ 还原之前的栈
+    rfeia sp!                                       @ 从这里返回: 将spsr给cpsr, lr_irq赋值给pc
 
-    str r0, g_asm_context_info                      @ 暂存&sgtc_context到全局变量, 以便空出r0
+ENDPROC(__schedule_from_irq)
+```
 
-1:
-    ldr r2, [r0, #CONTEXT_PREV_SP]                  @ r1 = prev_sp
-    ldr r1, [r2]                                    @ r1 = *prev_sp, 取得当前线程的栈顶
+schedule_thread_irq是跟schedule_thread类似的函数：
+```c
+void schedule_thread_irq(void)
+{
+    struct scheduler_core *sptr_core;
+    struct thread *sptr_prev, *sptr_new;
 
-    add r2, r1, #ARCH_FRAME_SIZE                    @ 偏移到struct context_regs::flags的位置
-    ldr r3, [r2]                                    @ r2 = &flags, r3 = flags
-    orr r3, #SCHED_FROM_IRQ                         @ 标记调度来源: 中断
+    /*!< 调度器 */
+    sptr_core = SCHED_MANAGER_CORE(get_cpu_id());
+    sptr_prev = mr_current;
 
-2:
-    b _context_save                                 @ 跳转到_context_save, 之后的操作与__switch_to相同
+    spin_lock_irqsave_assert(&sptr_core->sgtc_lock, &sptr_prev->lock_flags, __FILE__, __LINE__, __FUNCTION__);
+    /*!< 核心代码, 和schedule_thread()用的是同一个, 最终都会走向__switch_to汇编代码切换上下文 */
+    schedule_and_switch();
+    mr_barrier();
 
-/* -------------------------------------------------------------------------------
- * 调度失败
- * -----------------------------------------------------------------------------*/
-_switch_fail:
-    stmia sp!, { r0 - r12, lr }                     @ 恢复当前线程的上下文, 原路返回
-
-/* -------------------------------------------------------------------------------
- * schedule new thread (by IRQ)
- * -----------------------------------------------------------------------------*/
-_switch_to_irq:
-    rfeia sp!                                       @ 如果调度来源是中断, 则返回到中断上下文, 结束之前的中断, 经中断上下文回到线程上下文
-
-ENDPROC(__schedule_before)
+    /*!< 等线程下一次被切换回来后, 接着往下运行 */
+    /*!< 本线程有可能会被弄到其他cpu去(负载迁移), 需重新获取cpuid, 不能用之前旧的 */
+    sptr_core = SCHED_MANAGER_CORE(get_cpu_id());
+    sptr_new = mr_current;
+    spin_unlock_irqrestore_assert(&sptr_core->sgtc_lock, sptr_new->lock_flags);
+}
 ```
 
 #### 10.8. 同步与互斥
@@ -8673,8 +9107,9 @@ ENDPROC(__schedule_before)
 /*!< 关中断前先保存中断状态 */
 #define mr_local_irq_save(flags)   \
     do {    \
-        flags = __get_cpsr();   \
+        kutype_t _flags = __get_cpsr();   \
         mr_disable_cpu_irq();   \
+        flags = _flags; \
     } while (0)
 
 /*!< 如果关中断前是开中断的状态, 才允许重新打开中断 */
@@ -8696,7 +9131,103 @@ void local_irq_restore(kutype_t *flags);
 
 在多核CPU且SMP模式中，关中断仅对某个核生效，无法禁止其他核读写全局变量，故关中断只能用于单核CPU。
 
-##### 10.8.2. 自旋锁
+##### 10.8.2. 关中断下半部
+之前已介绍过软中断，它可以通过每个线程的irq_count成员进行关闭，方法类似于抢占计数器。关闭软中断后，即使有软中断事件发生（包括tasklet），都将不会执行。
+```c
+#define __IRQ_COUNT(_sptr_thr)                      ((_sptr_thr)->irq_count)
+#define IRQ_COUNT()                                 __IRQ_COUNT(mr_current)
+
+/*!< bit[9:0]: 软中断计数, 占10位 */
+#define SOFTIRQ_BITS                            (10)
+/*!< bit[19:10]: 硬中断嵌套计数, 占10位 */
+#define HARDIRQ_BITS                            (10)
+/*!< bit[31:20]: 中断模式位 (bit[27:20]: 异常模式位), 占12位 */
+#define INTERRUPT_BITS                          (12)
+
+/*!< 0 */
+#define SOFTIRQ_OFFSET                          (0)
+/*!< 8 */
+#define HARDIRQ_OFFSET                          (SOFTIRQ_OFFSET + SOFTIRQ_BITS)
+/*!< 16 */
+#define INTERRUPT_OFFSET                        (HARDIRQ_OFFSET + HARDIRQ_BITS)
+
+/*!< 0x000003ff */
+#define SOFTIRQ_MASK                            mr_mk_mask(SOFTIRQ_BITS, SOFTIRQ_OFFSET)
+/*!< 0x000ffc00 */
+#define HARDIRQ_MASK                            mr_mk_mask(HARDIRQ_BITS, HARDIRQ_OFFSET)
+/*!< 0xfff00000 */
+#define INTERRUPT_MASK                          mr_mk_mask(INTERRUPT_BITS, INTERRUPT_OFFSET)
+
+#define __SOFTIRQ_COUNT(count)                  mr_get_mask(count, SOFTIRQ_MASK, SOFTIRQ_OFFSET)
+#define __IRQ_NEST_COUNT(count)                 mr_get_mask(count, HARDIRQ_MASK, HARDIRQ_OFFSET)
+#define __INTERRUPT_MODE(count)                 mr_get_mask(count, INTERRUPT_MASK, INTERRUPT_OFFSET)
+#define SOFTIRQ_COUNT()                         __SOFTIRQ_COUNT(IRQ_COUNT())
+#define IRQ_NEST_COUNT()                        __IRQ_NEST_COUNT(IRQ_COUNT())
+#define INTERRUPT_MODE()                        __INTERRUPT_MODE(IRQ_COUNT())
+
+/*!< for INTERRUPT_BITS: */
+#define IRQ_INTERRUPT_BITS                      (4)     /*!< for irq, fiq, swi */
+#define IRQ_EXCEPTION_BITS                      (8)     /*!< for und, abt, unuse */
+#define IRQ_INTERRUPT_OFFSET                    (0)
+#define IRQ_EXCEPTION_OFFSET                    (IRQ_INTERRUPT_OFFSET + IRQ_INTERRUPT_BITS)
+#define IRQ_INTERRUPT_MASK                      mr_mk_mask(IRQ_INTERRUPT_BITS, IRQ_INTERRUPT_OFFSET)
+#define IRQ_EXCEPTION_MASK                      mr_mk_mask(IRQ_EXCEPTION_BITS, IRQ_EXCEPTION_OFFSET)
+#define IRQ_INTERRUPT_MODE()                    mr_get_mask(INTERRUPT_MODE(), IRQ_INTERRUPT_MASK, IRQ_INTERRUPT_OFFSET)
+#define IRQ_EXCEPTION_MODE()                    mr_get_mask(INTERRUPT_MODE(), IRQ_EXCEPTION_MASK, IRQ_EXCEPTION_OFFSET)
+
+/*!< -------------------------------------------------------------------------------- */
+#define __IS_SOFTIRQ_LOCKED(count)              ((count) & SOFTIRQ_MASK)
+#define __IN_IRQ_NESTD(count)                   ((count) & HARDIRQ_MASK)
+#define __IN_INTERRUPT(count)                   ((count) & INTERRUPT_MASK)
+#define __IN_IRQ_INTERRUPT(count)               (__INTERRUPT_MODE(count) & IRQ_INTERRUPT_MASK)
+#define __IN_IRQ_EXCEPTION(count)               (__INTERRUPT_MODE(count) & IRQ_EXCEPTION_MASK)
+
+#define __SET_INTERRUPT_FLAG(count, mask)       do { (count) |= ((mask) << INTERRUPT_OFFSET); mr_barrier(); } while (0)
+#define __CLR_INTERRUPT_FLAG(count, mask)       do { mr_barrier(); (count) &= ~((mask) << INTERRUPT_OFFSET); } while (0)
+#define __SET_EXCEPTION_FLAG(mask)              __SET_INTERRUPT_FLAG(mask)
+#define __CLR_EXCEPTION_FLAG(mask)              __CLR_INTERRUPT_FLAG(mask)
+
+#define IS_SOFTIRQ_LOCKED()                     __IS_SOFTIRQ_LOCKED(IRQ_COUNT())
+#define IN_IRQ_NESTD()                          __IN_IRQ_NESTD(IRQ_COUNT())
+#define IN_INTERRUPT()                          __IN_INTERRUPT(IRQ_COUNT())
+#define IN_IRQ_INTERRUPT()                      __IN_IRQ_INTERRUPT(IRQ_COUNT())
+#define IN_IRQ_EXCEPTION()                      __IN_IRQ_EXCEPTION(IRQ_COUNT())
+
+#define SET_INTERRUPT_FLAG(mask)                __SET_INTERRUPT_FLAG(IRQ_COUNT(), mask)
+#define CLR_INTERRUPT_FLAG(mask)                __CLR_INTERRUPT_FLAG(IRQ_COUNT(), mask)
+#define SET_EXCEPTION_FLAG(mask)                SET_INTERRUPT_FLAG(mask)
+#define CLR_EXCEPTION_FLAG(mask)                CLR_INTERRUPT_FLAG(mask)
+
+/*!< exec_irq_handler函数入口处增计数, 出口处减计数, 若计数值大于1, 则说明发生了中断嵌套 */
+#define INC_HARDIRQ_NEST_COUNT()                do { IRQ_COUNT() += (1 << HARDIRQ_OFFSET); mr_barrier(); } while (0)
+#define DEC_HARDIRQ_NEST_COUNT()    \
+    do {    \
+        mr_barrier();    \
+        if (IN_IRQ_NESTD()) {   \
+            IRQ_COUNT() -= (1 << HARDIRQ_OFFSET);   \
+        }   \
+    } while (0)
+
+/*!< 软中断相关; 计数值大于0时关闭软中断 */
+#define mr_local_bh_is_locked()                 IS_SOFTIRQ_LOCKED()
+#define mr_local_bh_disable()                   do { IRQ_COUNT() += (1 << SOFTIRQ_OFFSET); mr_barrier(); } while (0)
+#define mr_local_bh_enable()    \
+    do {    \
+        mr_barrier();    \
+        if (mr_likely(mr_local_bh_is_locked())) {   \
+            IRQ_COUNT() -= (1 << SOFTIRQ_OFFSET);   \
+        }   \
+    } while (0)
+
+/*!< 本质是mr_local_bh_is_locked */
+kbool_t local_bh_is_locked(void);
+/*!< 本质是mr_local_bh_disable, 增加软中断计数 */
+void local_bh_disable(void);
+/*!< 本质是mr_local_bh_enable, 减少软中断计数 */
+void local_bh_enable(void);
+```
+
+##### 10.8.3. 自旋锁
 为解决多核SMP的问题，引入自旋锁。使用全局计数器（各个核可见），当计数器为0时，允许访问临界资源；当计数器大于0时，表示已有其他线程正在访问，当前线程将原地等待计数器变为0（自旋）。等待期间，线程将空耗CPU，直到更高优先级或时间片耗尽，才有可能让出CPU，待其他线程访问临界资源结束，计数器减为0。
 当前核也需要处理线程和中断的关系，因为中断是无条件打断线程，二者对临界资源同样存在竞争关系；此时线程就可以采用关中断的方式。
 
@@ -8704,15 +9235,16 @@ void local_irq_restore(kutype_t *flags);
 ```c
 typedef struct spin_lock
 {
+    kutype_t owner;                                     /*!< 标记锁被哪些线程持有 */
     struct atomic sgtc_atc;                             /*!< 计数器使用原子变量 */
 
 } srt_spin_lock_t;
 
 #define DECLARE_SPIN_LOCK(lock) \
-    struct spin_lock lock = { .sgtc_atc = ATOMIC_INIT() }
+    struct spin_lock lock = { .owner = 0, .sgtc_atc = ATOMIC_INIT() }
 
 #define SPIN_LOCK_INIT()    \
-    { .sgtc_atc = ATOMIC_INIT() }
+    { .owner = 0, .sgtc_atc = ATOMIC_INIT() }
 ```
 
 使用如下API就可以调用它：
@@ -8733,21 +9265,21 @@ void spin_lock_irq(struct spin_lock *sptr_lock);
 kint32_t spin_try_lock_irq(struct spin_lock *sptr_lock);
 /* 解锁, 并暴力开启中断(慎用) */
 void spin_unlock_irq(struct spin_lock *sptr_lock);
-/* 加锁, 成功后先获取当前中断状态, 然后再关闭中断 */
+/* 加锁, 成功后保持中断关闭, 并保存当前中断状态 */
 void spin_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags);
-/* 尝试加锁, 成功后先获取当前中断状态, 然后再关闭中断 */
+/* 尝试加锁, 成功后保持中断关闭, 并保存当前中断状态 */
 kint32_t spin_try_lock_irqsave(struct spin_lock *sptr_lock, kutype_t *flags);
 /* 解锁, 并恢复加锁前的中断状态 */
 void spin_unlock_irqrestore(struct spin_lock *sptr_lock, kutype_t flags);
-/* 软中断使用. 先禁用软中断, 再加锁(不关闭中断) */
+/* 软中断使用. 加锁, 并禁用软中断 (不关闭中断) */
 void spin_lock_bh(struct spin_lock *sptr_lock);
-/* 软中断使用. 先解锁, 再恢复软中断 */
+/* 软中断使用. 解锁, 并恢复软中断 */
 void spin_unlock_bh(struct spin_lock *sptr_lock);
 ```
 
 注：不论使用哪一种API进行加锁，加锁时都会同时使抢占计数器自增，即抢占被关闭；解锁时抢占计数器自减。
 
-##### 10.8.3. 互斥锁
+##### 10.8.4. 互斥锁
 自旋锁要么关中断，要么就是原地等待，很容易就拖慢内核的运行速度。互斥锁不需要等待，当加锁失败时，直接调用schedule_thread切换到其他线程，直到锁可用时，才为当前线程加锁。
 加锁和解锁期间，临界资源不需要强制在关中断状态下运行，抢占也能处于开启状态。只有一点，如果在中断中加互斥锁，schedule_thread会检测到当前处于中断回调函数，将原路返回，不会发生切换（在中断回调函数中切换线程是危险操作，中断不应该随意跳出）；但中断的优先级最高，如果中断获取不到锁，又无法让持有锁的线程释放，则内核将陷入死锁，只能一直空耗在加锁失败和schedule_thread失败之间。故，中断禁止使用互斥锁。
 
@@ -8772,7 +9304,7 @@ kint32_t mutex_try_lock(struct mutex_lock *sptr_lock);
 void mutex_unlock(struct mutex_lock *sptr_lock);
 ```
 
-##### 10.8.4. 读写锁
+##### 10.8.5. 读写锁
 读写锁也是互斥锁。有时候写操作应该互斥，但读操作却可以同时，就可以借助读写锁。它的规则为：
 1）一个线程在读临界资源时，另一个线程也可以读，但不可以写。
 2）一个线程在写临界资源时，另一个线程不可以读，也不可以写。
@@ -8807,7 +9339,7 @@ kint32_t wr_try_lock(struct rw_lock *sptr_lock);
 void wr_unlock(struct rw_lock *sptr_lock);
 ```
 
-##### 10.8.5. 信号量
+##### 10.8.6. 信号量
 信号量是一个扩展版的互斥锁，它允许多次加锁，当加锁次数达到指定的上限时，再加锁则失败，切换其他线程运行。
 结构也比较简单，如下：
 ```c
@@ -9201,6 +9733,8 @@ static void *rest_entry(void *args)
 }
 ```
 
+每个核心都有独立的idle线程，亲和力仅为该cpu, 禁止迁移到其他核心。
+
 ##### 10.12.2. kthread
 空闲线程的id虽然为0，但它却不是内核创建的第一个线程。内核中最重要的线程是kthread，也是第一个被创建的任务，它负责：
 > 1）创建线程定时监视任务，每过一个系统节拍检查一次当前线程的时间片，及是否满足抢占条件；
@@ -9208,10 +9742,11 @@ static void *rest_entry(void *args)
 > 3）创建其他内核线程，如终端、工作队列等；
 > 4）记录系统运行时间；
 > 5）管理打印缓冲区，统一打印输出；
-> 6）对处于睡眠态的线程，将作为僵死线程进行清理
+> 6）对处于僵死态的线程，将进行回收和销毁。
 
 这里的线程定时监视任务，即“抢占”一章中提及的kthread_schedule_timeout函数；而几乎所有的驱动程序，都要由kthread调用驱动程序初始化入口，从而完成总线-设备-驱动的probe机制。
-此外，kthread负责销毁无用线程，而在HeavenFox中，线程如果处于睡眠态，将被当成无用线程，将面临被清理的结局。
+此外，kthread负责销毁无用线程，而在HeavenFox中，线程如果处于僵死态，将被当成无用线程，将面临被清理的结局。
+每个核心都有独立的kthread线程，亲和力仅为该cpu, 禁止迁移到其他核心。
 
 ##### 10.12.3. init_proc
 线程init_proc由kthread创建，但kthread仅管理已知的内核线程，而用户线程交由init_proc负责。
@@ -9223,6 +9758,7 @@ init_proc的工作目前较为简单：
 ##### 10.12.4. kworker
 内核中有一个特殊的线程，名为工作者线程，其他线程可以通过注册工作队列，再由工作者线程提取，异步执行。
 工作者线程拥有极高的优先级，当其他线程希望某个任务可以尽快被执行，或者中断回调函数觉得某段代码过于复杂，希望由线程上下文来处理，就可以通过工作队列，安排给工作者线程。
+每个核心都有独立的kworker线程，亲和力仅为该cpu, 禁止迁移到其他核心。
 
 - 工作队列
 工作队列本身是一个链表（类似定时器链表），其他线程可以定义工作项，再插入到工作队列链表头，之后再遍历链表处理其中的回调函数即可。
@@ -9359,3 +9895,24 @@ kint32_t fwk_request_threaded_irq(kint32_t irq, irq_handler_t handler, irq_handl
 中断回调函数handler返回值如果为NR_IRQ_WAKE_THREAD，将在中断回调函数的退出路径唤醒中断线程irq_thread；这里的irq_thread并非只有一个，当fwk_request_threaded_irq被调用时，也会同时创建一个irq_thread，线程名为“threadirq-中断号”，若内核中有多个驱动使用该接口申请中断，则将存在多个irq_thread中断线程，只是线程号和线程名不同。
 irq_thread根据传入的args参数（struct fwk_irq_action::ptrArgs）处理对应的中断事件（调用thread_fn回调函数），完成后若没有新的唤醒信息，则将自身挂起，等待下一次唤醒。
 中断线程的优先级极高（与工作者线程相同），故具有优先执行的特权。
+
+##### 10.12.7. migration
+对于多核SMP模式，还将创建一个migration线程，用于多核之间负载迁移。当一个核的就绪线程较多时，会引发该cpu的资源拥堵，应分一些线程给稍微空闲的其他核心，实现负载的均衡。
+每个核都有独立的migration线程，其核心主要是两个函数：
+```c
+/*!< 检查当前cpu是否相对空闲(与其他cpu比较, 若其他cpu较忙, 可能返回最忙cpu的id, 准备从最忙cpu上分一些负载过来) */
+kint32_t check_scheduler_load(void);
+/*!< 包含check_scheduler_load函数, 并真正完成负载迁移: 从最忙cpu的就绪列表尾部取出亲和力含本cpu的线程, 转移到本线程的就绪列表 */
+void check_and_balance_scheduler(void);
+```
+
+migration平时处于挂起态，需要kthread_schedule_timeout定时函数进行唤醒（前文已述）。
+每个核心都有独立的migration线程，亲和力仅为该cpu, 禁止迁移到其他核心。
+
+##### 10.12.8. ksoftirqd
+软中断一般在硬件中断服务程序中执行（期间中断开启），但也有可能软中断事件太多，一时无法处理完，导致调度器“空闲”，所有线程都没有机会运行。
+故容忍中止掉硬中断中的软中断行为，剩下未处理的软中断事件交由ksoftirqd线程处理；fwk_softirq_handler函数会唤醒ksoftirqd线程。
+ksoftirqd同样调用fwk_softirq_handler，过程与软中断别无二致。
+每个核心都有独立的ksoftirqd线程，亲和力仅为该cpu, 禁止迁移到其他核心。
+
+ksoftirqd和kworker、irq_thread是内核中优先级最高的三个线程，因为它们都充当了中断下半部这个角色，应保证它们优先执行。
