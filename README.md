@@ -3,7 +3,6 @@
 
 **English** | [中文](./README_zh.md)
 
-[instruction](document/heavenfox/HeavenFox内核原理.md)
 ![heavenfox](lib/rootfs/boot/windows/fox1080p.jpg)
 
 -------------------------------------------------------------------------
