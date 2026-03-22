@@ -3,6 +3,7 @@
 
 **English** | [中文](./README_zh.md)
 
+[instruction](document/heavenfox/HeavenFox内核原理.md)
 ![heavenfox](lib/rootfs/boot/windows/fox1080p.jpg)
 
 -------------------------------------------------------------------------
@@ -20,6 +21,8 @@
     HeavenFox OS aims to simplify the Linux kernel by refering to the kernel mechanism,
     which is convenient for the developers to research and apply, and the project follows
     the GPL license and is open source for life.
+
+- [To view the instruction document of heavenfox os, click on me.](document/heavenfox/HeavenFox内核原理.md)
 
 ## Information
     author:     Yang Yujun (杨雨俊)

@@ -19,6 +19,7 @@
 - HeavenFox OS意在使用一种简化的方式来重写linux, 在整体框架上接近于linux内核, 而核心偏向于rtos. 
 - 本项目多处重要代码的实现方式参考自linux内核, 但又不尽相同; 适合爱好者开发和探索. 
 - HeavenFox始终遵循GPL协议, 不论用于哪一种场合, 都是开源且自由的.
+- [点击此处可查看HeavenFox内核详细说明文档.](document/heavenfox/HeavenFox内核原理.md)
 
 ## 信息 (如有需要可邮件联系)
     作者:       杨雨俊 (Yang Yujun)
