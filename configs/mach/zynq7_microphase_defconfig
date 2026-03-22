@@ -39,7 +39,7 @@ CONFIG_CORE_NUM = 2
 CONFIG_CORE_MASTER = 0
 
 # debug or release
-CONFIG_BUILD_TYPE = debug
+CONFIG_BUILD_TYPE = release
 
 # -O0, -O1, -O2
 CONFIG_OPTIMIZE = 2

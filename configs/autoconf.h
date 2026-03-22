@@ -13,7 +13,7 @@
 #define CONFIG_CORE 1
 #define CONFIG_CORE_NUM 2
 #define CONFIG_CORE_MASTER 0
-#define CONFIG_BUILD_TYPE debug
+#define CONFIG_BUILD_TYPE release
 #define CONFIG_OPTIMIZE 2
 #define CONFIG_TEST 1
 #define CONFIG_HZ 1000
