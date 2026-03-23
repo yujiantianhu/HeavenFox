@@ -9134,8 +9134,8 @@ void local_irq_restore(kutype_t *flags);
 ##### 10.8.2. 关中断下半部
 之前已介绍过软中断，它可以通过每个线程的irq_count成员进行关闭，方法类似于抢占计数器。关闭软中断后，即使有软中断事件发生（包括tasklet），都将不会执行。
 ```c
-#define __IRQ_COUNT(_sptr_thr)                      ((_sptr_thr)->irq_count)
-#define IRQ_COUNT()                                 __IRQ_COUNT(mr_current)
+#define __IRQ_COUNT(_sptr_thr)                  ((_sptr_thr)->irq_count)
+#define IRQ_COUNT()                             __IRQ_COUNT(mr_current)
 
 /*!< bit[9:0]: 软中断计数, 占10位 */
 #define SOFTIRQ_BITS                            (10)
