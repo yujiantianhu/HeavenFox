@@ -3,7 +3,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       
-      <link rel="stylesheet" href="file:////home/heavenfox/.vscode/extensions/shd101wyy.markdown-preview-enhanced-0.8.21/crossnote/dependencies/katex/katex.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.38/dist/katex.min.css">
       
       
       
@@ -616,21 +616,14 @@ CONFIG_ENV_MONITOR_APP <span class="token operator">=</span> y
 CONFIG_LIGHT_APP <span class="token operator">=</span> y
 CONFIG_TSC_APP <span class="token operator">=</span> n
 </code></pre><p>对于auto.conf：</p>
-<blockquote>
-<ol>
-<li>配置文件中值为"y"和"m"的参数, 如"CONFIG_XXX = y", 可在Makefile中通过obj-$(CONFIG_XXX) = aaa.o来指定编译aaa.c到内核中;</li>
-<li>配置文件中值为"n"的参数, 如"CONFIG_XXX = n", 可在Makefile中通过obj-$(CONFIG_XXX) = aaa.o来指定不编译aaa.c到内核中, 即aaa.c将不会参与编译<br>
-obj-xxx由scripts/Makefile.build统一处理</li>
-</ol>
-</blockquote>
-<p>对于autoconf.h：</p>
-<blockquote>
-<ol>
-<li>配置文件中值为"y"和"m"的参数, 如"CONFIG_XXX = y", 最终转化为宏: #define CONFIG_XXX 1</li>
-<li>配置文件中值为"n"的参数, 如"CONFIG_XXX = n", 最终不会转化为宏, 内核代码可通过"#ifdef CONFIG_XXX"或"#if defined(CONFIG_XXX)"来处理它</li>
-</ol>
-</blockquote>
-<p>如imx6ull_toppet_defconfig可转化为：</p>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>1) 配置文件中值为"y"和"m"的参数, 如"CONFIG_XXX = y", 可在Makefile中通过obj-$(CONFIG_XXX) = aaa.o来指定编译aaa.c到内核中;
+2) 配置文件中值为"n"的参数, 如"CONFIG_XXX = n", 可在Makefile中通过obj-$(CONFIG_XXX) = aaa.o来指定不编译aaa.c到内核中, 即aaa.c将不会参与编译
+
+obj-xxx由scripts/Makefile.build统一处理
+</code></pre><p>对于autoconf.h：</p>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>1) 配置文件中值为"y"和"m"的参数, 如"CONFIG_XXX = y", 最终转化为宏: #define CONFIG_XXX 1
+2) 配置文件中值为"n"的参数, 如"CONFIG_XXX = n", 最终不会转化为宏, 内核代码可通过"#ifdef CONFIG_XXX"或"#if defined(CONFIG_XXX)"来处理它
+</code></pre><p>如imx6ull_toppet_defconfig可转化为：</p>
 <pre data-role="codeBlock" data-info="c" class="language-c c"><code><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">CONFIG_ARCH</span> <span class="token string">"arm"</span></span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">CONFIG_TYPE</span> <span class="token string">"armv7"</span></span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">CONFIG_CLASS</span> <span class="token string">"cortex-a7"</span></span>
@@ -1106,16 +1099,13 @@ obj-xxx由scripts/Makefile.build统一处理</li>
 <pre data-role="codeBlock" data-info="c" class="language-c c"><code><span class="token keyword keyword-static">static</span> <span class="token keyword keyword-struct">struct</span> <span class="token class-name">xxx</span> <span class="token operator">*</span>array<span class="token punctuation">[</span><span class="token number">1024</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 </code></pre><p>但实际我们仅需要前10个位置，那剩下的1014个位置将造成浪费。基数树可根据实际使用动态扩展，它起初不存在任何节点，当需要注册一个数字时，将为该数字建立一个节点。<br>
 一个节点的直接子节点数量通常固定，以确定分支的数量。通常用数字的二进制后缀标记分支，如果仅用最低位标记, 则0b0和0b1分别可作为一个分支，每个节点的最大分支数即为2；如果用最低两位标记，则0b00、0b01、0b10、0b11就有4种组合，最大分支数即为4。</p>
-<blockquote>
-<pre>            根节点(悬空, 无实际作用)
+<pre data-role="codeBlock" data-info="" class="language-text"><code>            根节点(悬空, 无实际作用)
                 |
     -------------------------
     |       |       |       |   
    0b00    0b01    0b10    0b11
    (分支1) (分支2) (分支3) (分支4)
-</pre>
-</blockquote>
-<p>如数字12（0x0c）最低两位为0b00，插入基数树后将挂接到分支1，而数字13会挂接到分支2。当新数字16（0x10）要插入时，就会插入到数字12的子节点分支1中，不断动态增长。<br>
+</code></pre><p>如数字12（0x0c）最低两位为0b00，插入基数树后将挂接到分支1，而数字13会挂接到分支2。当新数字16（0x10）要插入时，就会插入到数字12的子节点分支1中，不断动态增长。<br>
 HeavenFox内核分支数量定义为8，即取低3位作为标记：0b000、0b001、0b010、0b011、0b100、0b101、0b110、0b111</p>
 <pre data-role="codeBlock" data-info="c" class="language-c c"><code><span class="token comment">/* 分支数: 2 ^ 3 */</span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">MAX_BRANCH</span>                                      <span class="token expression"><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span></span></span>
@@ -2023,17 +2013,14 @@ _main位于“arch/$(ARCH)/lib/crt0.S”，它负责完成CPU的早期、后期�
 </code></pre><h4 id="73-早期初始化">7.3. 早期初始化 </h4>
 <p>board_init_f_alloc_reserve、board_init_f_init_reserve和board_init_f为早期初始化代码，由C语言编写。<br>
 前两个已在代码注释中说明了其功能，以CONFIG_BOARD_SP_ADDR为起始，向下移动CONFIG_BOOT_MALLOC_LEN，作为早期内存池；再向下移动sizeof(srt_gd_t)，留出全局变量“srt_gd_t global_data”的空间；并将此时global_data起始地址作为新的栈顶：</p>
-<blockquote>
-<pre>            --------------------    ---&gt; CONFIG_BOARD_SP_ADDR
+<pre data-role="codeBlock" data-info="" class="language-text"><code>            --------------------    ---&gt; CONFIG_BOARD_SP_ADDR
             |   早期内存池      |
             --------------------    ---&gt; malloc_addr = CONFIG_BOARD_SP_ADDR - CONFIG_BOOT_MALLOC_LEN
             |   global_data    |
             --------------------    ---&gt; iboot_sp = sp = malloc_addr - sizeof(srt_gd_t)
             |       栈         |
             --------------------
-</pre>
-</blockquote>
-<p>global_data是一个类型为srt_gd_t的结构体：</p>
+</code></pre><p>global_data是一个类型为srt_gd_t的结构体：</p>
 <pre data-role="codeBlock" data-info="c" class="language-c c"><code><span class="token keyword keyword-struct">struct</span> <span class="token class-name">global_data</span>
 <span class="token punctuation">{</span>
     <span class="token class-name">kuaddr_t</span> iboot_sp<span class="token punctuation">;</span>                          <span class="token comment">/* 栈顶 */</span>
@@ -2219,13 +2206,13 @@ exit<span class="token operator">:</span>
     <span class="token function">kernel_entry</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> r2<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
 </code></pre><p>head.S需要：</p>
-<blockquote>
-<p>1）设置CPU各模式下的栈顶指针，之前boot_init_f和boot_init_r均运行在SVC模式下，中断处于关闭状态，故仅设置了SVC模式的栈。而内核需要在SVC、IRQ、ABT等模式下切换。<br>
-2）使能D-cache和I-cache；<br>
-3）使能abort异常；<br>
-4）跳转到head-common.S；<br>
-5) 构建虚拟线程virtual_thread (在调度器启动前，start_kernel被当成一个虚拟线程，具有线程的基本特征，如抢占计数器；但无法被调度，也不会注册到调度列表，一旦启动调度器，将永远无法回来)</p>
-</blockquote>
+<ul>
+<li>1）设置CPU各模式下的栈顶指针，之前boot_init_f和boot_init_r均运行在SVC模式下，中断处于关闭状态，故仅设置了SVC模式的栈。而内核需要在SVC、IRQ、ABT等模式下切换。</li>
+<li>2）使能D-cache和I-cache；</li>
+<li>3）使能abort异常；</li>
+<li>4）跳转到head-common.S；</li>
+<li>5）构建虚拟线程virtual_thread (在调度器启动前，start_kernel被当成一个虚拟线程，具有线程的基本特征，如抢占计数器；但无法被调度，也不会注册到调度列表，一旦启动调度器，将永远无法回来)</li>
+</ul>
 <p>head-common.S将直接跳转到“start_kernel”（主cpu）或“secondary_start_kernel”（次cpu）函数，内核开始运行。</p>
 <h4 id="76-start_kernel">7.6. start_kernel </h4>
 <p>首先将tag_params的地址从寄存器r2中读出（jump_to_kernel函数将tag_params保存到了r2寄存器）：</p>
@@ -3892,10 +3879,10 @@ HeavenFox支持软中断，即：在硬件中断服务程序执行这个事务�
 两个定时器都必须使能中断，系统定时器只需要周期中断（比较中断），而高精度定时器需要溢出中断，有时也可以使能比较中断。</p>
 <h5 id="851-系统定时器">8.5.1. 系统定时器 </h5>
 <p>对于系统定时器，中断回调函数需要：</p>
-<blockquote>
-<p>1）更新jiffies和jiffies_all，即自增；<br>
-2）处理定时事件。</p>
-</blockquote>
+<ul>
+<li>1）更新jiffies和jiffies_all，即自增；</li>
+<li>2）处理定时事件。</li>
+</ul>
 <p>如果希望每隔一段时间处理一个相同事件，可以将事件放在系统定时器的中断处理程序中。定时器支持挂接多个事件，通过“struct timer_list”，即定时器链表来管理：</p>
 <pre data-role="codeBlock" data-info="c" class="language-c c"><code><span class="token keyword keyword-struct">struct</span> <span class="token class-name">timer_list</span> 
 <span class="token punctuation">{</span>
@@ -7352,10 +7339,10 @@ sd卡默认挂载到虚拟文件路径“/media/FAT32_2”，如需要访问“h
 内核规定数值越低，优先级越高，故优先级为0的线程，优先级最高，而99最低。<br>
 当已知一个线程的优先级为88时，可直接找到数组的第88个位置，插入到该处的链表末尾，即完成一次插入；不过，这里使用的是“struct thread”结构体的sgtc_hash成员（插入到“struct scheduler_table”结构体的sgtc_core），并不是sgtc_link，我们还需找到当前数组的上一个非空位置。<br>
 假设即将插入的线程优先级为88，要插入的哈希数组为xxx_hash[100]， 则：</p>
-<blockquote>
-<p>1）若xxx_hash[88]非空（即sptr_tail非NULL），直接使sgtc_hash插入到链表尾部，sgtc_link可直接链接sptr_tail-&gt;sgtc_link，并更新sptr_tail为新的thread；</p>
-<p>2）若xxx_hash[88]为空（即sptr_tail为NULL），直接使sgtc_hash插入到链表尾部，此时新线程为xxx_hash[88]的唯一链表项，使sptr_tail直接等于新线程；之后需要向后查找，xxx_hash[0] ~ xxx_hash[87]，获取离xxx_hash[88]最近的一个散列表。需要借助“struct thread_list”结构体的ffs_l和ffs_h成员，它们的每一个bit表示一个优先级，前者可表示0 ~ 63，后者表示64 ~ 99；当新线程插入xxx_hash[88]后，需同步置ffs_h的第24位（88 - 64）为1，然后检查ffs_h的第0 ~ 23位是否存在置位，若有（假设为第a位），获取该位（优先级为“a + 64”，是比新线程优先级高且最近的位置）对应的xxx_hash[a + 64]，将新线程的sgtc_link成员链接到xxx_hash[a + 64].sptr_tail-&gt;sgtc_link即可；若在ffs_h没有找到，则退到ffs_l查找，若也没有，则表示新线程的优先级为最高。</p>
-</blockquote>
+<ul>
+<li>1）若xxx_hash[88]非空（即sptr_tail非NULL），直接使sgtc_hash插入到链表尾部，sgtc_link可直接链接sptr_tail-&gt;sgtc_link，并更新sptr_tail为新的thread；</li>
+<li>2）若xxx_hash[88]为空（即sptr_tail为NULL），直接使sgtc_hash插入到链表尾部，此时新线程为xxx_hash[88]的唯一链表项，使sptr_tail直接等于新线程；之后需要向后查找，xxx_hash[0] ~ xxx_hash[87]，获取离xxx_hash[88]最近的一个散列表。需要借助“struct thread_list”结构体的ffs_l和ffs_h成员，它们的每一个bit表示一个优先级，前者可表示0 ~ 63，后者表示64 ~ 99；当新线程插入xxx_hash[88]后，需同步置ffs_h的第24位（88 - 64）为1，然后检查ffs_h的第0 ~ 23位是否存在置位，若有（假设为第a位），获取该位（优先级为“a + 64”，是比新线程优先级高且最近的位置）对应的xxx_hash[a + 64]，将新线程的sgtc_link成员链接到xxx_hash[a + 64].sptr_tail-&gt;sgtc_link即可；若在ffs_h没有找到，则退到ffs_l查找，若也没有，则表示新线程的优先级为最高。</li>
+</ul>
 <p>内核由函数__thread_hash_add负责该过程：</p>
 <pre data-role="codeBlock" data-info="c" class="language-c c"><code><span class="token keyword keyword-static">static</span> <span class="token keyword keyword-struct">struct</span> <span class="token class-name">list_head</span> <span class="token operator">*</span><span class="token function">__thread_hash_add</span><span class="token punctuation">(</span><span class="token keyword keyword-struct">struct</span> <span class="token class-name">thread_list</span> <span class="token operator">*</span>sptr_list<span class="token punctuation">,</span> <span class="token keyword keyword-struct">struct</span> <span class="token class-name">thread</span> <span class="token operator">*</span>sptr_thread<span class="token punctuation">)</span>
 <span class="token punctuation">{</span>
@@ -8769,8 +8756,8 @@ ENDPROC(__schedule_from_irq)
 </code></pre><p>在多核CPU且SMP模式中，关中断仅对某个核生效，无法禁止其他核读写全局变量，故关中断只能用于单核CPU。</p>
 <h5 id="1082-关中断下半部">10.8.2. 关中断下半部 </h5>
 <p>之前已介绍过软中断，它可以通过每个线程的irq_count成员进行关闭，方法类似于抢占计数器。关闭软中断后，即使有软中断事件发生（包括tasklet），都将不会执行。</p>
-<pre data-role="codeBlock" data-info="c" class="language-c c"><code><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">__IRQ_COUNT</span><span class="token expression"><span class="token punctuation">(</span>_sptr_thr<span class="token punctuation">)</span>                      <span class="token punctuation">(</span><span class="token punctuation">(</span>_sptr_thr<span class="token punctuation">)</span><span class="token operator">-&gt;</span>irq_count<span class="token punctuation">)</span></span></span>
-<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">IRQ_COUNT</span><span class="token expression"><span class="token punctuation">(</span><span class="token punctuation">)</span>                                 <span class="token function">__IRQ_COUNT</span><span class="token punctuation">(</span>mr_current<span class="token punctuation">)</span></span></span>
+<pre data-role="codeBlock" data-info="c" class="language-c c"><code><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">__IRQ_COUNT</span><span class="token expression"><span class="token punctuation">(</span>_sptr_thr<span class="token punctuation">)</span>                  <span class="token punctuation">(</span><span class="token punctuation">(</span>_sptr_thr<span class="token punctuation">)</span><span class="token operator">-&gt;</span>irq_count<span class="token punctuation">)</span></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">IRQ_COUNT</span><span class="token expression"><span class="token punctuation">(</span><span class="token punctuation">)</span>                             <span class="token function">__IRQ_COUNT</span><span class="token punctuation">(</span>mr_current<span class="token punctuation">)</span></span></span>
 
 <span class="token comment">/*!&lt; bit[9:0]: 软中断计数, 占10位 */</span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">SOFTIRQ_BITS</span>                            <span class="token expression"><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span></span></span>
@@ -9310,14 +9297,14 @@ HeavenFox内核针对此现象，引入优先级继承机制，即：高优先�
 </code></pre><p>每个核心都有独立的idle线程，亲和力仅为该cpu, 禁止迁移到其他核心。</p>
 <h5 id="10122-kthread">10.12.2. kthread </h5>
 <p>空闲线程的id虽然为0，但它却不是内核创建的第一个线程。内核中最重要的线程是kthread，也是第一个被创建的任务，它负责：</p>
-<blockquote>
-<p>1）创建线程定时监视任务，每过一个系统节拍检查一次当前线程的时间片，及是否满足抢占条件；<br>
-2）处理平台、设备和驱动程序的隐式初始化，注册平台设备和驱动组件；<br>
-3）创建其他内核线程，如终端、工作队列等；<br>
-4）记录系统运行时间；<br>
-5）管理打印缓冲区，统一打印输出；<br>
-6）对处于僵死态的线程，将进行回收和销毁。</p>
-</blockquote>
+<ul>
+<li>1）创建线程定时监视任务，每过一个系统节拍检查一次当前线程的时间片，及是否满足抢占条件；</li>
+<li>2）处理平台、设备和驱动程序的隐式初始化，注册平台设备和驱动组件；</li>
+<li>3）创建其他内核线程，如终端、工作队列等；</li>
+<li>4）记录系统运行时间；</li>
+<li>5）管理打印缓冲区，统一打印输出；</li>
+<li>6）对处于僵死态的线程，将进行回收和销毁。</li>
+</ul>
 <p>这里的线程定时监视任务，即“抢占”一章中提及的kthread_schedule_timeout函数；而几乎所有的驱动程序，都要由kthread调用驱动程序初始化入口，从而完成总线-设备-驱动的probe机制。<br>
 此外，kthread负责销毁无用线程，而在HeavenFox中，线程如果处于僵死态，将被当成无用线程，将面临被清理的结局。<br>
 每个核心都有独立的kthread线程，亲和力仅为该cpu, 禁止迁移到其他核心。</p>

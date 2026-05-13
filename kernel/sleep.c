@@ -235,7 +235,7 @@ kuint32_t sleep_tick(kutime_t tick)
  */
 kuint32_t sleep(kuint32_t seconds)
 {
-    if (mr_likely(mr_current))
+    if (mr_likely(THREAD_VALID()))
     {
     /*!< TICK_HZ >= 100, jiffies can satisfy */
 // #if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
@@ -259,7 +259,7 @@ kuint32_t sleep(kuint32_t seconds)
  */
 kuint32_t msleep(kuint32_t milseconds)
 {
-    if (mr_likely(mr_current))
+    if (mr_likely(THREAD_VALID()))
     {
     #if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
         kuint32_t period_ms = 1000U / TICK_HZ;
@@ -290,7 +290,7 @@ kuint32_t msleep(kuint32_t milseconds)
  */
 kint32_t usleep(kuint32_t useconds)
 {
-    if (mr_likely(mr_current))
+    if (mr_likely(THREAD_VALID()))
     {
     #if defined(CONFIG_HRTIMER_ENBALE) && (CONFIG_HRTIMER_ENBALE)
         kuint32_t period_us = 1000000U / TICK_HZ;
