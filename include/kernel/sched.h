@@ -267,8 +267,8 @@ extern void scheduler_init(void);
 /*!< API functions */
 /*!
  * @brief   get current
- * @param   sptr_thread
- * @retval  status
+ * @param   none
+ * @retval  sptr_thread
  * @note    none
  */
 static inline struct thread *current_thread(void)
@@ -280,8 +280,25 @@ static inline struct thread *current_thread(void)
 #endif
 }
 
+/*!
+ * @brief   check if thread is valid
+ * @param   none
+ * @retval  status
+ * @note    none
+ */
+static inline kbool_t current_valid(void)
+{
+#ifdef PERCPU_CURRENT
+    kutype_t cur = PERCPU_CURRENT();
+    return !!(cur & (~THREAD_MASK)) && (!(cur & THREAD_VIRTUAL_BIT));
+#else
+    return !!((kutype_t)get_current_thread());
+#endif
+}
+
 /*!< The defines */
 #define mr_current                              current_thread()
+#define THREAD_VALID()                          (mr_current && (mr_current->tid >= 0))
 
 #ifndef SET_PERCPU_CURRENT
 #define SET_PERCPU_CURRENT(x)                   do { } while (0)

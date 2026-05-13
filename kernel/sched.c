@@ -28,6 +28,7 @@ struct scheduler_table sgtc_scheduler_table =
     .sptr_tid_array = { mr_nullptr },
     .sgtc_lock      = SPIN_LOCK_INIT(),
 };
+static struct scheduler_core *sptr_scheduler_core = &sgtc_scheduler_table.sgtc_core[0];
 
 /*!< save to (*.data) section, do not defines in stack */
 DEFINE_PER_CPU(struct percpu_sched_data, sgtc_sched_data);
@@ -35,7 +36,7 @@ kbool_t g_kernel_preempt_enable = false;
 
 /*!< The defines */
 #define SCHED_MANAGER()                         (&sgtc_scheduler_table)
-#define SCHED_MANAGER_CORE(_cpuid)              (&(sgtc_scheduler_table.sgtc_core[_cpuid]))
+#define SCHED_MANAGER_CORE(_cpuid)              (&(sptr_scheduler_core[_cpuid]))
 #define SCHED_MANAGER_SHARE()                   (&(sgtc_scheduler_table.sgtc_share))
 #define __SCHED_LOCK                            (SCHED_MANAGER()->sgtc_lock)
 

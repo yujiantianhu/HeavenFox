@@ -529,13 +529,18 @@ CONFIG_TSC_APP = n
 ```
 
 对于auto.conf：
-> 1) 配置文件中值为"y"和"m"的参数, 如"CONFIG_XXX = y", 可在Makefile中通过obj-$(CONFIG_XXX) = aaa.o来指定编译aaa.c到内核中;
-> 2) 配置文件中值为"n"的参数, 如"CONFIG_XXX = n", 可在Makefile中通过obj-$(CONFIG_XXX) = aaa.o来指定不编译aaa.c到内核中, 即aaa.c将不会参与编译
+```
+1) 配置文件中值为"y"和"m"的参数, 如"CONFIG_XXX = y", 可在Makefile中通过obj-$(CONFIG_XXX) = aaa.o来指定编译aaa.c到内核中;
+2) 配置文件中值为"n"的参数, 如"CONFIG_XXX = n", 可在Makefile中通过obj-$(CONFIG_XXX) = aaa.o来指定不编译aaa.c到内核中, 即aaa.c将不会参与编译
+
 obj-xxx由scripts/Makefile.build统一处理
+```
 
 对于autoconf.h：
-> 1) 配置文件中值为"y"和"m"的参数, 如"CONFIG_XXX = y", 最终转化为宏: #define CONFIG_XXX 1
-> 2) 配置文件中值为"n"的参数, 如"CONFIG_XXX = n", 最终不会转化为宏, 内核代码可通过"#ifdef CONFIG_XXX"或"#if defined(CONFIG_XXX)"来处理它
+```
+1) 配置文件中值为"y"和"m"的参数, 如"CONFIG_XXX = y", 最终转化为宏: #define CONFIG_XXX 1
+2) 配置文件中值为"n"的参数, 如"CONFIG_XXX = n", 最终不会转化为宏, 内核代码可通过"#ifdef CONFIG_XXX"或"#if defined(CONFIG_XXX)"来处理它
+```
 
 如imx6ull_toppet_defconfig可转化为：
 ``` c
@@ -1052,16 +1057,14 @@ static struct xxx *array[1024];
 ```
 但实际我们仅需要前10个位置，那剩下的1014个位置将造成浪费。基数树可根据实际使用动态扩展，它起初不存在任何节点，当需要注册一个数字时，将为该数字建立一个节点。
 一个节点的直接子节点数量通常固定，以确定分支的数量。通常用数字的二进制后缀标记分支，如果仅用最低位标记, 则0b0和0b1分别可作为一个分支，每个节点的最大分支数即为2；如果用最低两位标记，则0b00、0b01、0b10、0b11就有4种组合，最大分支数即为4。
-<blockquote>
-<pre>
+```
             根节点(悬空, 无实际作用)
                 |
     -------------------------
     |       |       |       |   
    0b00    0b01    0b10    0b11
    (分支1) (分支2) (分支3) (分支4)
-</pre>
-</blockquote>
+```
 
 如数字12（0x0c）最低两位为0b00，插入基数树后将挂接到分支1，而数字13会挂接到分支2。当新数字16（0x10）要插入时，就会插入到数字12的子节点分支1中，不断动态增长。
 HeavenFox内核分支数量定义为8，即取低3位作为标记：0b000、0b001、0b010、0b011、0b100、0b101、0b110、0b111
@@ -2040,8 +2043,7 @@ _main:
 #### 7.3. 早期初始化
 board_init_f_alloc_reserve、board_init_f_init_reserve和board_init_f为早期初始化代码，由C语言编写。
 前两个已在代码注释中说明了其功能，以CONFIG_BOARD_SP_ADDR为起始，向下移动CONFIG_BOOT_MALLOC_LEN，作为早期内存池；再向下移动sizeof(srt_gd_t)，留出全局变量“srt_gd_t global_data”的空间；并将此时global_data起始地址作为新的栈顶：
-<blockquote>
-<pre>
+```
             --------------------    ---> CONFIG_BOARD_SP_ADDR
             |   早期内存池      |
             --------------------    ---> malloc_addr = CONFIG_BOARD_SP_ADDR - CONFIG_BOOT_MALLOC_LEN
@@ -2049,8 +2051,7 @@ board_init_f_alloc_reserve、board_init_f_init_reserve和board_init_f为早期�
             --------------------    ---> iboot_sp = sp = malloc_addr - sizeof(srt_gd_t)
             |       栈         |
             --------------------
-</pre>
-</blockquote>
+```
 
 global_data是一个类型为srt_gd_t的结构体：
 ```c
@@ -2258,11 +2259,11 @@ void jump_to_kernel(struct boot_images *sptr_image)
 ```
 
 head.S需要：
-> 1）设置CPU各模式下的栈顶指针，之前boot_init_f和boot_init_r均运行在SVC模式下，中断处于关闭状态，故仅设置了SVC模式的栈。而内核需要在SVC、IRQ、ABT等模式下切换。
-> 2）使能D-cache和I-cache；
-> 3）使能abort异常；
-> 4）跳转到head-common.S；
-> 5) 构建虚拟线程virtual_thread (在调度器启动前，start_kernel被当成一个虚拟线程，具有线程的基本特征，如抢占计数器；但无法被调度，也不会注册到调度列表，一旦启动调度器，将永远无法回来)
+- 1）设置CPU各模式下的栈顶指针，之前boot_init_f和boot_init_r均运行在SVC模式下，中断处于关闭状态，故仅设置了SVC模式的栈。而内核需要在SVC、IRQ、ABT等模式下切换。
+- 2）使能D-cache和I-cache；
+- 3）使能abort异常；
+- 4）跳转到head-common.S；
+- 5）构建虚拟线程virtual_thread (在调度器启动前，start_kernel被当成一个虚拟线程，具有线程的基本特征，如抢占计数器；但无法被调度，也不会注册到调度列表，一旦启动调度器，将永远无法回来)
 
 head-common.S将直接跳转到“start_kernel”（主cpu）或“secondary_start_kernel”（次cpu）函数，内核开始运行。
 
@@ -3827,8 +3828,8 @@ HeavenFox需要两个时钟，一个周期性循环，作为系统时钟心跳�
 
 ##### 8.5.1. 系统定时器
 对于系统定时器，中断回调函数需要：
-> 1）更新jiffies和jiffies_all，即自增；
-> 2）处理定时事件。
+- 1）更新jiffies和jiffies_all，即自增；
+- 2）处理定时事件。
 
 如果希望每隔一段时间处理一个相同事件，可以将事件放在系统定时器的中断处理程序中。定时器支持挂接多个事件，通过“struct timer_list”，即定时器链表来管理：
 ```c
@@ -7627,9 +7628,8 @@ void __init scheduler_init(void)
 内核规定数值越低，优先级越高，故优先级为0的线程，优先级最高，而99最低。
 当已知一个线程的优先级为88时，可直接找到数组的第88个位置，插入到该处的链表末尾，即完成一次插入；不过，这里使用的是“struct thread”结构体的sgtc_hash成员（插入到“struct scheduler_table”结构体的sgtc_core），并不是sgtc_link，我们还需找到当前数组的上一个非空位置。
 假设即将插入的线程优先级为88，要插入的哈希数组为xxx_hash[100]， 则：
-> 1）若xxx_hash[88]非空（即sptr_tail非NULL），直接使sgtc_hash插入到链表尾部，sgtc_link可直接链接sptr_tail->sgtc_link，并更新sptr_tail为新的thread；
->
-> 2）若xxx_hash[88]为空（即sptr_tail为NULL），直接使sgtc_hash插入到链表尾部，此时新线程为xxx_hash[88]的唯一链表项，使sptr_tail直接等于新线程；之后需要向后查找，xxx_hash[0] ~ xxx_hash[87]，获取离xxx_hash[88]最近的一个散列表。需要借助“struct thread_list”结构体的ffs_l和ffs_h成员，它们的每一个bit表示一个优先级，前者可表示0 ~ 63，后者表示64 ~ 99；当新线程插入xxx_hash[88]后，需同步置ffs_h的第24位（88 - 64）为1，然后检查ffs_h的第0 ~ 23位是否存在置位，若有（假设为第a位），获取该位（优先级为“a + 64”，是比新线程优先级高且最近的位置）对应的xxx_hash[a + 64]，将新线程的sgtc_link成员链接到xxx_hash[a + 64].sptr_tail->sgtc_link即可；若在ffs_h没有找到，则退到ffs_l查找，若也没有，则表示新线程的优先级为最高。
+- 1）若xxx_hash[88]非空（即sptr_tail非NULL），直接使sgtc_hash插入到链表尾部，sgtc_link可直接链接sptr_tail->sgtc_link，并更新sptr_tail为新的thread；
+- 2）若xxx_hash[88]为空（即sptr_tail为NULL），直接使sgtc_hash插入到链表尾部，此时新线程为xxx_hash[88]的唯一链表项，使sptr_tail直接等于新线程；之后需要向后查找，xxx_hash[0] ~ xxx_hash[87]，获取离xxx_hash[88]最近的一个散列表。需要借助“struct thread_list”结构体的ffs_l和ffs_h成员，它们的每一个bit表示一个优先级，前者可表示0 ~ 63，后者表示64 ~ 99；当新线程插入xxx_hash[88]后，需同步置ffs_h的第24位（88 - 64）为1，然后检查ffs_h的第0 ~ 23位是否存在置位，若有（假设为第a位），获取该位（优先级为“a + 64”，是比新线程优先级高且最近的位置）对应的xxx_hash[a + 64]，将新线程的sgtc_link成员链接到xxx_hash[a + 64].sptr_tail->sgtc_link即可；若在ffs_h没有找到，则退到ffs_l查找，若也没有，则表示新线程的优先级为最高。
 
 内核由函数__thread_hash_add负责该过程：
 ```c
@@ -9134,8 +9134,8 @@ void local_irq_restore(kutype_t *flags);
 ##### 10.8.2. 关中断下半部
 之前已介绍过软中断，它可以通过每个线程的irq_count成员进行关闭，方法类似于抢占计数器。关闭软中断后，即使有软中断事件发生（包括tasklet），都将不会执行。
 ```c
-#define __IRQ_COUNT(_sptr_thr)                      ((_sptr_thr)->irq_count)
-#define IRQ_COUNT()                                 __IRQ_COUNT(mr_current)
+#define __IRQ_COUNT(_sptr_thr)                  ((_sptr_thr)->irq_count)
+#define IRQ_COUNT()                             __IRQ_COUNT(mr_current)
 
 /*!< bit[9:0]: 软中断计数, 占10位 */
 #define SOFTIRQ_BITS                            (10)
@@ -9737,12 +9737,12 @@ static void *rest_entry(void *args)
 
 ##### 10.12.2. kthread
 空闲线程的id虽然为0，但它却不是内核创建的第一个线程。内核中最重要的线程是kthread，也是第一个被创建的任务，它负责：
-> 1）创建线程定时监视任务，每过一个系统节拍检查一次当前线程的时间片，及是否满足抢占条件；
-> 2）处理平台、设备和驱动程序的隐式初始化，注册平台设备和驱动组件；
-> 3）创建其他内核线程，如终端、工作队列等；
-> 4）记录系统运行时间；
-> 5）管理打印缓冲区，统一打印输出；
-> 6）对处于僵死态的线程，将进行回收和销毁。
+- 1）创建线程定时监视任务，每过一个系统节拍检查一次当前线程的时间片，及是否满足抢占条件；
+- 2）处理平台、设备和驱动程序的隐式初始化，注册平台设备和驱动组件；
+- 3）创建其他内核线程，如终端、工作队列等；
+- 4）记录系统运行时间；
+- 5）管理打印缓冲区，统一打印输出；
+- 6）对处于僵死态的线程，将进行回收和销毁。
 
 这里的线程定时监视任务，即“抢占”一章中提及的kthread_schedule_timeout函数；而几乎所有的驱动程序，都要由kthread调用驱动程序初始化入口，从而完成总线-设备-驱动的probe机制。
 此外，kthread负责销毁无用线程，而在HeavenFox中，线程如果处于僵死态，将被当成无用线程，将面临被清理的结局。

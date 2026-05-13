@@ -85,7 +85,7 @@ void deal_assert_fail(const kchar_t *__assertion, kbool_t is_down,
         print_sync(PRINT_LEVEL_ERR"spsr before abort: 0x%08x\r\n", sgtc_regs.psr);
     }
 
-    if (mr_current)
+    if (THREAD_VALID())
     {
         struct thread *sptr_thread = mr_current;
 
